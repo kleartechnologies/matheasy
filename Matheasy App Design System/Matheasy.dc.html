@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-25..0&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+  body{margin:0;background:#e7ecf6;}
+  .ic{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;font-feature-settings:'liga';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .ic.fill{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;}
+  a{color:#4F7CFF;text-decoration:none;} a:hover{color:#3A67E6;}
+  ::-webkit-scrollbar{display:none;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+  @keyframes rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  @keyframes shimmer{100%{background-position:180% 0}}
+  @keyframes spinp{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  @keyframes sparkle{0%,100%{transform:scale(.7) rotate(0);opacity:.5}50%{transform:scale(1.15) rotate(20deg);opacity:1}}
+  @keyframes scanline{0%{transform:translateY(2px);opacity:.15}18%{opacity:1}82%{opacity:1}100%{transform:translateY(188px);opacity:.15}}
+  @keyframes pulseRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+  @keyframes dotFlash{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;font-family:'Plus Jakarta Sans',-apple-system,'SF Pro Display',system-ui,sans-serif;background:radial-gradient(120% 90% at 20% 0%, #eef1fb 0%, #e6ebf6 45%, #e9e6f5 100%);">
+
+  <!-- ===================== DEVICE BEZEL ===================== -->
+  <div style="width:411px;height:870px;border-radius:62px;padding:9px;background:linear-gradient(150deg,#464c60,#23262f 55%,#15171e);box-shadow:0 60px 120px rgba(28,40,90,0.35), 0 12px 30px rgba(0,0,0,0.28), inset 0 0 2px rgba(255,255,255,0.4);position:relative;">
+    <div style="position:absolute;top:150px;left:-2px;width:3px;height:56px;border-radius:3px;background:linear-gradient(#2a2e3a,#181b22);"></div>
+    <div style="position:absolute;top:230px;left:-2px;width:3px;height:86px;border-radius:3px;background:linear-gradient(#2a2e3a,#181b22);"></div>
+    <div style="position:absolute;top:200px;right:-2px;width:3px;height:100px;border-radius:3px;background:linear-gradient(#2a2e3a,#181b22);"></div>
+
+    <!-- ===================== SCREEN ===================== -->
+    <div style="width:393px;height:852px;border-radius:53px;overflow:hidden;position:relative;background:#F8FAFF;">
+
+      <!-- ---------- SCREENS LAYER ---------- -->
+      <div style="position:absolute;inset:0;">
+
+        <!-- ============ ONBOARDING ============ -->
+        <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;background:radial-gradient(130% 70% at 50% -5%, #E9F0FF 0%, #F8FAFF 55%);display:flex;flex-direction:column;padding:64px 26px 30px;">
+
+            <!-- skip -->
+            <div style="display:flex;justify-content:flex-end;height:24px;">
+              <sc-if value="{{ onbNotLast }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ startApp }}" style="font-size:15px;font-weight:600;color:#98A2BE;cursor:pointer;padding:2px 6px;">Skip</div>
+              </sc-if>
+            </div>
+
+            <!-- illustration stage -->
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0;">
+
+              <!-- P0 scan -->
+              <sc-if value="{{ onb0 }}" hint-placeholder-val="{{ true }}">
+                <div style="position:relative;width:274px;height:330px;animation:rise .5s ease both;">
+                  <!-- paper -->
+                  <div style="position:absolute;top:16px;left:24px;width:226px;height:200px;background:#fff;border-radius:26px;box-shadow:0 26px 50px rgba(79,124,255,0.18);transform:rotate(-4deg);padding:24px 24px;">
+                    <div style="font-size:11px;color:#B4BDD2;font-weight:700;letter-spacing:1.2px;">MY NOTEBOOK</div>
+                    <div style="margin-top:22px;font-size:33px;font-weight:700;color:#2A3550;white-space:nowrap;letter-spacing:-0.5px;">2x + 5 = 13</div>
+                    <div style="margin-top:26px;display:flex;gap:8px;"><div style="width:74px;height:8px;border-radius:4px;background:#EEF2FB;"></div><div style="width:40px;height:8px;border-radius:4px;background:#EEF2FB;"></div></div>
+                    <div style="margin-top:11px;width:52px;height:8px;border-radius:4px;background:#EEF2FB;"></div>
+                  </div>
+                  <!-- scan corner brackets aligned to paper -->
+                  <div style="position:absolute;top:16px;left:24px;width:226px;height:200px;transform:rotate(-4deg);">
+                    <div style="position:absolute;top:-7px;left:-7px;width:30px;height:30px;border-top:3px solid #4F7CFF;border-left:3px solid #4F7CFF;border-radius:11px 0 0 0;"></div>
+                    <div style="position:absolute;top:-7px;right:-7px;width:30px;height:30px;border-top:3px solid #4F7CFF;border-right:3px solid #4F7CFF;border-radius:0 11px 0 0;"></div>
+                    <div style="position:absolute;bottom:-7px;left:-7px;width:30px;height:30px;border-bottom:3px solid #4F7CFF;border-left:3px solid #4F7CFF;border-radius:0 0 0 11px;"></div>
+                    <div style="position:absolute;bottom:-7px;right:-7px;width:30px;height:30px;border-bottom:3px solid #4F7CFF;border-right:3px solid #4F7CFF;border-radius:0 0 11px 0;"></div>
+                  </div>
+                  <!-- answer chip -->
+                  <div style="position:absolute;top:150px;right:-4px;background:linear-gradient(135deg,#34C759,#28B14C);color:#fff;padding:11px 18px;border-radius:16px;font-weight:800;font-size:19px;box-shadow:0 14px 26px rgba(52,199,89,0.4);animation:pop .5s .4s ease both;">x = 4</div>
+                  <!-- numi -->
+                  <div style="position:absolute;bottom:-6px;left:-10px;animation:floaty 4s ease-in-out infinite;">
+                    <dc-import name="Numi" expression="happy" size="128" hint-size="128px,128px"></dc-import>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- P1 chat -->
+              <sc-if value="{{ onb1 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;width:280px;height:330px;animation:rise .5s ease both;display:flex;flex-direction:column;justify-content:center;gap:14px;">
+                  <div style="align-self:flex-end;max-width:200px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);color:#fff;padding:13px 17px;border-radius:22px 22px 6px 22px;font-size:15px;font-weight:600;box-shadow:0 12px 22px rgba(79,124,255,0.28);animation:pop .4s .1s both;">Why do we subtract 5?</div>
+                  <div style="align-self:flex-start;display:flex;align-items:flex-end;gap:8px;animation:pop .4s .35s both;">
+                    <dc-import name="Numi" expression="happy" size="46" hint-size="46px,46px"></dc-import>
+                    <div style="max-width:198px;background:#fff;color:#2A3550;padding:13px 17px;border-radius:22px 22px 22px 6px;font-size:15px;font-weight:500;box-shadow:0 12px 24px rgba(79,124,255,0.12);line-height:1.4;">To get <b>2x</b> alone we undo the <b>+5</b> first. 👍</div>
+                  </div>
+                  <div style="align-self:flex-end;max-width:210px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);color:#fff;padding:13px 17px;border-radius:22px 22px 6px 22px;font-size:15px;font-weight:600;box-shadow:0 12px 22px rgba(79,124,255,0.28);animation:pop .4s .6s both;">Can you explain differently?</div>
+                </div>
+              </sc-if>
+
+              <!-- P2 practice -->
+              <sc-if value="{{ onb2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;width:280px;height:330px;animation:rise .5s ease both;">
+                  <div style="position:absolute;top:40px;left:30px;width:210px;height:150px;background:#fff;border-radius:24px;box-shadow:0 20px 40px rgba(79,124,255,0.14);transform:rotate(-5deg);"></div>
+                  <div style="position:absolute;top:24px;left:44px;width:210px;height:170px;background:#fff;border-radius:24px;box-shadow:0 24px 46px rgba(79,124,255,0.18);padding:22px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <div style="font-size:12px;font-weight:700;color:#98A2BE;letter-spacing:.4px;">QUESTION 3 / 5</div>
+                      <div style="display:flex;align-items:center;gap:4px;background:#FFF6DC;color:#C79200;padding:5px 10px;border-radius:12px;font-size:13px;font-weight:800;"><span class="ic fill" style="font-size:15px;">bolt</span>+20</div>
+                    </div>
+                    <div style="margin-top:16px;font-size:26px;font-weight:800;color:#2A3550;">7 × 8 = ?</div>
+                    <div style="margin-top:16px;display:flex;gap:10px;">
+                      <div style="flex:1;text-align:center;background:#EAF0FF;color:#4F7CFF;font-weight:800;padding:12px 0;border-radius:14px;">54</div>
+                      <div style="flex:1;text-align:center;background:linear-gradient(135deg,#34C759,#28B14C);color:#fff;font-weight:800;padding:12px 0;border-radius:14px;box-shadow:0 10px 18px rgba(52,199,89,0.35);">56</div>
+                    </div>
+                  </div>
+                  <div style="position:absolute;bottom:2px;right:-4px;animation:floaty 4s ease-in-out infinite;">
+                    <dc-import name="Numi" expression="celebrate" size="110" hint-size="110px,110px"></dc-import>
+                  </div>
+                  <div style="position:absolute;top:2px;left:0;width:16px;height:16px;background:#FFD54A;border-radius:4px;transform:rotate(45deg);animation:sparkle 2.4s ease-in-out infinite;"></div>
+                  <div style="position:absolute;top:70px;right:6px;width:11px;height:11px;background:#7BA5FF;border-radius:3px;transform:rotate(45deg);animation:sparkle 2.4s .6s ease-in-out infinite;"></div>
+                </div>
+              </sc-if>
+
+              <!-- P3 exams -->
+              <sc-if value="{{ onb3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;width:290px;height:330px;animation:rise .5s ease both;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:250px;">
+                    <div style="background:#fff;border-radius:20px;padding:18px;box-shadow:0 16px 30px rgba(79,124,255,0.12);animation:pop .4s .05s both;"><div style="font-size:22px;font-weight:800;color:#4F7CFF;">SPM</div><div style="font-size:12px;color:#98A2BE;font-weight:600;margin-top:2px;">Malaysia</div></div>
+                    <div style="background:#fff;border-radius:20px;padding:18px;box-shadow:0 16px 30px rgba(79,124,255,0.12);animation:pop .4s .15s both;"><div style="font-size:22px;font-weight:800;color:#7C4DFF;">IGCSE</div><div style="font-size:12px;color:#98A2BE;font-weight:600;margin-top:2px;">Cambridge</div></div>
+                    <div style="background:#fff;border-radius:20px;padding:18px;box-shadow:0 16px 30px rgba(79,124,255,0.12);animation:pop .4s .25s both;"><div style="font-size:22px;font-weight:800;color:#34C759;">GCSE</div><div style="font-size:12px;color:#98A2BE;font-weight:600;margin-top:2px;">UK</div></div>
+                    <div style="background:#fff;border-radius:20px;padding:18px;box-shadow:0 16px 30px rgba(79,124,255,0.12);animation:pop .4s .35s both;"><div style="font-size:22px;font-weight:800;color:#FF8C42;">SAT</div><div style="font-size:12px;color:#98A2BE;font-weight:600;margin-top:2px;">College</div></div>
+                  </div>
+                  <div style="position:absolute;bottom:-10px;animation:floaty 4s ease-in-out infinite;">
+                    <dc-import name="Numi" expression="wink" size="96" hint-size="96px,96px"></dc-import>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- P4 meet numi -->
+              <sc-if value="{{ onb4 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;width:290px;height:330px;display:flex;align-items:center;justify-content:center;animation:rise .5s ease both;">
+                  <div style="position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle, rgba(123,165,255,0.28), rgba(123,165,255,0) 70%);"></div>
+                  <div style="animation:floaty 4.5s ease-in-out infinite;">
+                    <dc-import name="Numi" expression="wave" size="210" hint-size="210px,210px"></dc-import>
+                  </div>
+                  <div style="position:absolute;top:22px;left:34px;width:20px;height:20px;background:#FFD54A;border-radius:5px;transform:rotate(45deg);animation:sparkle 2.6s ease-in-out infinite;"></div>
+                  <div style="position:absolute;top:80px;right:26px;width:14px;height:14px;background:#7BA5FF;border-radius:4px;transform:rotate(45deg);animation:sparkle 2.6s .8s ease-in-out infinite;"></div>
+                  <div style="position:absolute;bottom:60px;left:20px;width:12px;height:12px;background:#34C759;border-radius:4px;transform:rotate(45deg);animation:sparkle 2.6s 1.3s ease-in-out infinite;"></div>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- text -->
+            <div style="text-align:center;padding:0 6px;min-height:118px;">
+              <div style="font-size:29px;font-weight:800;color:#1A1A1A;letter-spacing:-0.5px;line-height:1.15;">{{ onbTitle }}</div>
+              <div style="margin-top:12px;font-size:16px;line-height:1.5;color:#7C89A6;font-weight:500;">{{ onbSub }}</div>
+            </div>
+
+            <!-- dots -->
+            <div style="display:flex;justify-content:center;gap:7px;margin:22px 0;">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="5">
+                <div style="height:7px;border-radius:4px;transition:all .3s;width:{{ d.w }};background:{{ d.bg }};"></div>
+              </sc-for>
+            </div>
+
+            <!-- cta -->
+            <div onClick="{{ nextOnb }}" style="height:58px;border-radius:999px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 16px 30px rgba(79,124,255,0.4);transition:transform .15s;" style-active="transform:scale(.97)">
+              {{ onbCta }}<span class="ic" style="font-size:20px;">arrow_forward</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ HOME ============ -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
+
+            <!-- header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:#98A2BE;">Good afternoon,</div>
+                <div style="font-size:27px;font-weight:800;color:#1A1A1A;letter-spacing:-0.5px;margin-top:1px;">Sarah</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:5px;background:#fff;padding:9px 13px;border-radius:16px;box-shadow:0 6px 16px rgba(79,124,255,0.1);">
+                  <span class="ic fill" style="font-size:20px;color:#FF7A45;">local_fire_department</span>
+                  <span style="font-weight:800;color:#1A1A1A;font-size:16px;">12</span>
+                </div>
+                <div style="width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#EAF0FF,#DCE7FF);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(79,124,255,0.14);overflow:hidden;">
+                  <div style="margin-top:6px;"><dc-import name="Numi" expression="happy" size="42" hint-size="42px,42px"></dc-import></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- daily goal coach card -->
+            <div style="margin-top:20px;border-radius:26px;padding:22px;background:linear-gradient(140deg,#5A86FF 0%,#4F7CFF 60%,#4A75F5 100%);position:relative;overflow:hidden;box-shadow:0 22px 40px rgba(79,124,255,0.4);">
+              <div style="position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+              <div style="position:absolute;right:16px;bottom:-18px;animation:floaty 5s ease-in-out infinite;"><dc-import name="Numi" expression="encourage" size="112" hint-size="112px,112px"></dc-import></div>
+              <div style="position:relative;max-width:210px;">
+                <div style="display:inline-block;background:rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:700;padding:5px 11px;border-radius:10px;backdrop-filter:blur(4px);">TODAY'S GOAL</div>
+                <div style="margin-top:12px;color:#fff;font-size:20px;font-weight:800;line-height:1.25;">2 of 3 lessons<br>done — nearly there!</div>
+                <div style="margin-top:14px;height:9px;border-radius:6px;background:rgba(255,255,255,0.28);overflow:hidden;width:180px;"><div style="height:100%;width:66%;border-radius:6px;background:linear-gradient(90deg,#FFE79A,#FFD54A);"></div></div>
+                <div onClick="{{ goPractice }}" style="margin-top:16px;display:inline-flex;align-items:center;gap:6px;background:#fff;color:#4F7CFF;font-weight:800;font-size:15px;padding:11px 20px;border-radius:999px;cursor:pointer;box-shadow:0 10px 20px rgba(20,40,90,0.2);" style-active="transform:scale(.97)">Continue learning<span class="ic" style="font-size:18px;">arrow_forward</span></div>
+              </div>
+            </div>
+
+            <!-- quick actions -->
+            <div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div onClick="{{ goScan }}" style="background:#fff;border-radius:22px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px rgba(79,124,255,0.08);cursor:pointer;" style-active="transform:scale(.97)">
+                <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#EAF0FF,#DBE6FF);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:24px;color:#4F7CFF;">center_focus_strong</span></div>
+                <div style="font-weight:700;color:#1A1A1A;font-size:15px;">Scan</div>
+              </div>
+              <div onClick="{{ goTutor }}" style="background:#fff;border-radius:22px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px rgba(79,124,255,0.08);cursor:pointer;" style-active="transform:scale(.97)">
+                <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#EDE7FF,#E0D6FF);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:24px;color:#7C4DFF;">forum</span></div>
+                <div style="font-weight:700;color:#1A1A1A;font-size:15px;">Ask Numi</div>
+              </div>
+              <div onClick="{{ goPractice }}" style="background:#fff;border-radius:22px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px rgba(79,124,255,0.08);cursor:pointer;" style-active="transform:scale(.97)">
+                <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#E4F8EA,#D2F2DC);display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:24px;color:#34C759;">fitness_center</span></div>
+                <div style="font-weight:700;color:#1A1A1A;font-size:15px;">Practice</div>
+              </div>
+              <div style="background:#fff;border-radius:22px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px rgba(79,124,255,0.08);cursor:pointer;" style-active="transform:scale(.97)">
+                <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#FFF3D6,#FFE9B0);display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:24px;color:#E8A400;">functions</span></div>
+                <div style="font-weight:700;color:#1A1A1A;font-size:15px;">Formulas</div>
+              </div>
+            </div>
+
+            <!-- continue learning -->
+            <div style="margin-top:26px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:18px;font-weight:800;color:#1A1A1A;">Continue learning</div>
+              <div style="font-size:14px;font-weight:700;color:#4F7CFF;cursor:pointer;">See all</div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:14px;overflow-x:auto;padding:2px 2px 6px;margin-right:-20px;">
+              <div style="flex-shrink:0;width:172px;background:#fff;border-radius:22px;padding:16px;box-shadow:0 12px 26px rgba(79,124,255,0.09);">
+                <div style="width:100%;height:78px;border-radius:16px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:34px;color:#fff;">calculate</span></div>
+                <div style="margin-top:12px;font-weight:800;color:#1A1A1A;font-size:15px;">Linear Equations</div>
+                <div style="margin-top:9px;height:7px;border-radius:5px;background:#EEF2FB;overflow:hidden;"><div style="height:100%;width:72%;background:#4F7CFF;border-radius:5px;"></div></div>
+                <div style="margin-top:7px;font-size:12px;font-weight:600;color:#98A2BE;">72% · 8 of 11</div>
+              </div>
+              <div style="flex-shrink:0;width:172px;background:#fff;border-radius:22px;padding:16px;box-shadow:0 12px 26px rgba(79,124,255,0.09);">
+                <div style="width:100%;height:78px;border-radius:16px;background:linear-gradient(135deg,#34C759,#28B14C);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:34px;color:#fff;">change_history</span></div>
+                <div style="margin-top:12px;font-weight:800;color:#1A1A1A;font-size:15px;">Triangles</div>
+                <div style="margin-top:9px;height:7px;border-radius:5px;background:#EEF2FB;overflow:hidden;"><div style="height:100%;width:40%;background:#34C759;border-radius:5px;"></div></div>
+                <div style="margin-top:7px;font-size:12px;font-weight:600;color:#98A2BE;">40% · 4 of 10</div>
+              </div>
+              <div style="flex-shrink:0;width:172px;background:#fff;border-radius:22px;padding:16px;box-shadow:0 12px 26px rgba(79,124,255,0.09);">
+                <div style="width:100%;height:78px;border-radius:16px;background:linear-gradient(135deg,#7C4DFF,#9B6BFF);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:34px;color:#fff;">percent</span></div>
+                <div style="margin-top:12px;font-weight:800;color:#1A1A1A;font-size:15px;">Fractions</div>
+                <div style="margin-top:9px;height:7px;border-radius:5px;background:#EEF2FB;overflow:hidden;"><div style="height:100%;width:88%;background:#7C4DFF;border-radius:5px;"></div></div>
+                <div style="margin-top:7px;font-size:12px;font-weight:600;color:#98A2BE;">88% · almost done</div>
+              </div>
+            </div>
+
+            <!-- weak topics -->
+            <div style="margin-top:26px;display:flex;align-items:center;gap:8px;">
+              <div style="font-size:18px;font-weight:800;color:#1A1A1A;">Let's strengthen these</div>
+            </div>
+            <div style="margin-top:14px;background:#fff;border-radius:22px;padding:8px;box-shadow:0 12px 26px rgba(79,124,255,0.08);">
+              <div onClick="{{ goPractice }}" style="display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:44px;height:44px;border-radius:13px;background:#FFEEE6;display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:23px;color:#FF7A45;">function</span></div>
+                <div style="flex:1;"><div style="font-weight:700;color:#1A1A1A;font-size:15px;">Word Problems</div><div style="font-size:12.5px;color:#98A2BE;font-weight:600;margin-top:2px;">54% accuracy · needs work</div></div>
+                <div style="width:34px;height:34px;border-radius:50%;background:#EAF0FF;display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:19px;color:#4F7CFF;">arrow_forward</span></div>
+              </div>
+              <div style="height:1px;background:#F0F3FA;margin:0 12px;"></div>
+              <div onClick="{{ goPractice }}" style="display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:44px;height:44px;border-radius:13px;background:#FDE9F1;display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:23px;color:#E8467F;">architecture</span></div>
+                <div style="flex:1;"><div style="font-weight:700;color:#1A1A1A;font-size:15px;">Trigonometry</div><div style="font-size:12.5px;color:#98A2BE;font-weight:600;margin-top:2px;">61% accuracy · improving</div></div>
+                <div style="width:34px;height:34px;border-radius:50%;background:#EAF0FF;display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:19px;color:#4F7CFF;">arrow_forward</span></div>
+              </div>
+            </div>
+
+            <!-- premium banner -->
+            <div onClick="{{ goPaywall }}" style="margin-top:20px;border-radius:22px;padding:18px 20px;background:linear-gradient(120deg,#1E2440,#33306B);display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 18px 34px rgba(30,36,64,0.32);" style-active="transform:scale(.99)">
+              <span class="ic fill" style="font-size:30px;color:#FFD54A;">workspace_premium</span>
+              <div style="flex:1;"><div style="color:#fff;font-weight:800;font-size:16px;">Unlock Matheasy Premium</div><div style="color:#B9BEE0;font-size:13px;font-weight:500;margin-top:2px;">Unlimited scans, tutor & practice</div></div>
+              <span class="ic" style="font-size:22px;color:#FFD54A;">chevron_right</span>
+            </div>
+
+          </div>
+        </sc-if>
+
+        <!-- ============ SCAN ============ -->
+        <sc-if value="{{ isScan }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:#0B0F1E;overflow:hidden;">
+            <!-- simulated camera view -->
+            <div style="position:absolute;inset:0;background:radial-gradient(120% 75% at 50% 42%, #262d49 0%, #141930 55%, #0B0F1E 100%);"></div>
+            <div style="position:absolute;top:250px;left:50%;transform:translateX(-50%) rotate(-3deg);width:296px;height:200px;background:rgba(233,239,255,0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;filter:blur(0.6px);">
+              <div style="font-size:30px;color:rgba(233,239,255,0.32);font-weight:700;letter-spacing:1px;">3x − 7 = 8</div>
+            </div>
+            <!-- vignette -->
+            <div style="position:absolute;inset:0;box-shadow:inset 0 0 120px rgba(0,0,0,0.55);pointer-events:none;"></div>
+
+            <!-- top bar -->
+            <div style="position:absolute;top:54px;left:0;right:0;padding:0 20px;display:flex;align-items:center;justify-content:space-between;z-index:12;">
+              <div onClick="{{ goHome }}" style="width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.14);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.94)"><span class="ic" style="font-size:22px;color:#fff;">close</span></div>
+              <div style="color:#fff;font-weight:800;font-size:16px;">Scan a problem</div>
+              <div style="width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.14);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.94)"><span class="ic" style="font-size:21px;color:#fff;">bolt</span></div>
+            </div>
+
+            <!-- hint -->
+            <div style="position:absolute;top:206px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.72);font-size:13.5px;font-weight:600;z-index:11;">Line up the whole question inside the frame</div>
+
+            <!-- scan frame -->
+            <div style="position:absolute;top:238px;left:34px;right:34px;height:196px;z-index:11;">
+              <div style="position:absolute;top:-2px;left:-2px;width:34px;height:34px;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:14px 0 0 0;"></div>
+              <div style="position:absolute;top:-2px;right:-2px;width:34px;height:34px;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 14px 0 0;"></div>
+              <div style="position:absolute;bottom:-2px;left:-2px;width:34px;height:34px;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 14px;"></div>
+              <div style="position:absolute;bottom:-2px;right:-2px;width:34px;height:34px;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 14px 0;"></div>
+              <!-- scanline -->
+              <div style="position:absolute;top:0;left:8px;right:8px;height:3px;border-radius:3px;background:linear-gradient(90deg,rgba(123,165,255,0),#7BA5FF,rgba(123,165,255,0));box-shadow:0 0 16px 3px rgba(123,165,255,0.7);animation:scanline 2.6s ease-in-out infinite alternate;"></div>
+            </div>
+
+            <!-- floating numi helper -->
+            <div onClick="{{ goTutor }}" style="position:absolute;top:452px;right:20px;display:flex;align-items:center;gap:9px;z-index:12;cursor:pointer;">
+              <div style="background:#fff;border-radius:14px 14px 4px 14px;padding:9px 12px;box-shadow:0 10px 24px rgba(0,0,0,0.3);font-size:12.5px;font-weight:700;color:#1A1A1A;max-width:130px;">Stuck? Tap me for a hint</div>
+              <div style="filter:drop-shadow(0 8px 16px rgba(0,0,0,0.35));animation:floaty 4s ease-in-out infinite;"><dc-import name="Numi" expression="happy" size="56" hint-size="56px,56px"></dc-import></div>
+            </div>
+
+            <!-- recent scans -->
+            <div style="position:absolute;bottom:178px;left:0;right:0;padding:0 22px;z-index:11;">
+              <div style="color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:800;letter-spacing:.6px;margin-bottom:9px;">RECENT</div>
+              <div style="display:flex;gap:10px;">
+                <div onClick="{{ goResult }}" style="width:78px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#1A1A1A;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.25);" style-active="transform:scale(.95)">2x+5=13</div>
+                <div onClick="{{ goResult }}" style="width:78px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#1A1A1A;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.25);" style-active="transform:scale(.95)">x²−9</div>
+                <div onClick="{{ goResult }}" style="width:78px;height:56px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#1A1A1A;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.25);" style-active="transform:scale(.95)">sin 30°</div>
+              </div>
+            </div>
+
+            <!-- controls -->
+            <div style="position:absolute;bottom:52px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 44px;z-index:12;">
+              <div onClick="{{ goResult }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;" style-active="transform:scale(.94)">
+                <div style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.14);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:25px;color:#fff;">photo_library</span></div>
+                <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">Gallery</span>
+              </div>
+              <div onClick="{{ goResult }}" style="position:relative;width:80px;height:80px;cursor:pointer;" style-active="transform:scale(.93)">
+                <div style="position:absolute;inset:0;border-radius:50%;border:5px solid rgba(255,255,255,0.4);"></div>
+                <div style="position:absolute;inset:7px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.3);"></div>
+              </div>
+              <div onClick="{{ goTutor }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;" style-active="transform:scale(.94)">
+                <div style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.14);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;"><span class="ic" style="font-size:25px;color:#fff;">keyboard</span></div>
+                <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">Type it</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ RESULT ============ -->
+        <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:#F8FAFF;display:flex;flex-direction:column;">
+
+            <!-- header -->
+            <div style="padding:56px 16px 8px;display:flex;align-items:center;gap:10px;">
+              <div onClick="{{ goScan }}" style="width:40px;height:40px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(79,124,255,0.1);" style-active="transform:scale(.94)"><span class="ic" style="font-size:22px;color:#1A1A1A;">chevron_left</span></div>
+              <div style="flex:1;text-align:center;font-size:17px;font-weight:800;color:#1A1A1A;">Solution</div>
+              <div onClick="{{ toggleSave }}" style="width:40px;height:40px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(79,124,255,0.1);" style-active="transform:scale(.94)"><span class="ic {{ saveFill }}" style="font-size:21px;color:{{ saveColor }};">{{ saveIcon }}</span></div>
+              <div style="width:40px;height:40px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(79,124,255,0.1);" style-active="transform:scale(.94)"><span class="ic" style="font-size:20px;color:#8A93AC;">ios_share</span></div>
+            </div>
+
+            <!-- scroll -->
+            <div style="flex:1;overflow-y:auto;padding:6px 18px 124px;">
+
+              <!-- detected equation -->
+              <div style="background:#fff;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(79,124,255,0.08);animation:rise .4s ease both;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:5px;color:#1E9E4A;font-size:11.5px;font-weight:800;letter-spacing:.4px;"><span class="ic fill" style="font-size:15px;">check_circle</span>DETECTED · 99%</div>
+                  <div onClick="{{ goScan }}" style="display:flex;align-items:center;gap:4px;color:#8A93AC;font-size:12px;font-weight:700;cursor:pointer;"><span class="ic" style="font-size:15px;">crop_free</span>Rescan</div>
+                </div>
+                <div style="margin-top:12px;font-size:34px;font-weight:800;color:#1A1A1A;letter-spacing:-0.5px;">2x + 5 = 13</div>
+                <div style="margin-top:3px;font-size:13px;color:#98A2BE;font-weight:600;">Linear equation · one unknown</div>
+              </div>
+
+              <!-- answer + walkthrough -->
+              <div style="margin-top:13px;border-radius:24px;padding:17px 20px;background:linear-gradient(135deg,#E9FBEF,#DCF5E5);animation:rise .4s .05s ease both;">
+                <div style="font-size:11.5px;font-weight:800;color:#1E9E4A;letter-spacing:.6px;">FINAL ANSWER</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+                  <div style="font-size:40px;font-weight:800;color:#158A3F;letter-spacing:-1px;">x = 4</div>
+                  <div onClick="{{ startWalk }}" style="display:flex;align-items:center;gap:7px;background:#fff;color:#4F7CFF;font-weight:800;font-size:14px;padding:11px 15px;border-radius:999px;cursor:pointer;box-shadow:0 8px 18px rgba(52,199,89,0.16);" style-active="transform:scale(.95)"><span class="ic fill" style="font-size:19px;">play_circle</span>Watch it solve</div>
+                </div>
+              </div>
+
+              <!-- tabs -->
+              <div style="margin-top:16px;display:flex;gap:4px;background:#EBF0FA;border-radius:16px;padding:5px;">
+                <sc-for list="{{ tabsData }}" as="t" hint-placeholder-count="4">
+                  <div onClick="{{ t.onClick }}" style="flex:1;text-align:center;padding:9px 0;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;background:{{ t.bg }};color:{{ t.color }};box-shadow:{{ t.sh }};">{{ t.label }}</div>
+                </sc-for>
+              </div>
+
+              <!-- ===== SOLUTION TAB ===== -->
+              <sc-if value="{{ solTab }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:18px;animation:rise .35s ease both;">
+                  <!-- step 1 -->
+                  <div style="display:flex;gap:13px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                      <div style="width:30px;height:30px;border-radius:50%;background:#EAF0FF;color:#4F7CFF;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+                      <div style="flex:1;width:2px;background:#E4EAF5;margin:4px 0;"></div>
+                    </div>
+                    <div style="flex:1;background:#fff;border-radius:18px;padding:13px 16px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-bottom:12px;">
+                      <div style="font-size:12.5px;font-weight:700;color:#8A93AC;">Start with the equation</div>
+                      <div style="margin-top:7px;font-size:23px;font-weight:800;color:#1A1A1A;">2x + 5 = 13</div>
+                    </div>
+                  </div>
+                  <!-- step 2 -->
+                  <div style="display:flex;gap:13px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                      <div style="width:30px;height:30px;border-radius:50%;background:#EAF0FF;color:#4F7CFF;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+                      <div style="flex:1;width:2px;background:#E4EAF5;margin:4px 0;"></div>
+                    </div>
+                    <div style="flex:1;background:#fff;border-radius:18px;padding:13px 16px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-bottom:12px;">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <div style="font-size:12.5px;font-weight:700;color:#8A93AC;">Subtract 5 from both sides</div>
+                        <div style="background:#FFF1E9;color:#F1740B;font-weight:800;font-size:12px;padding:4px 9px;border-radius:9px;white-space:nowrap;">− 5</div>
+                      </div>
+                      <div style="margin-top:7px;font-size:23px;font-weight:800;color:#1A1A1A;">2x = 8</div>
+                    </div>
+                  </div>
+                  <!-- step 3 -->
+                  <div style="display:flex;gap:13px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#5A86FF,#4F7CFF);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 12px rgba(79,124,255,0.3);">3</div>
+                    </div>
+                    <div style="flex:1;background:#fff;border-radius:18px;padding:13px 16px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-bottom:14px;">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <div style="font-size:12.5px;font-weight:700;color:#8A93AC;">Divide both sides by 2</div>
+                        <div style="background:#FFF1E9;color:#F1740B;font-weight:800;font-size:12px;padding:4px 9px;border-radius:9px;white-space:nowrap;">÷ 2</div>
+                      </div>
+                      <div style="margin-top:7px;font-size:23px;font-weight:800;color:#158A3F;">x = 4</div>
+                    </div>
+                  </div>
+                  <!-- verify by numi -->
+                  <div style="display:flex;gap:11px;align-items:center;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-left:43px;">
+                    <div style="flex-shrink:0;"><dc-import name="Numi" expression="happy" size="42" hint-size="42px,42px"></dc-import></div>
+                    <div style="font-size:13.5px;font-weight:600;color:#5B678C;line-height:1.45;">Check: 2(4) + 5 = <b style="color:#158A3F;">13</b> ✓ — it matches, so we're correct!</div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- ===== EXPLAIN TAB ===== -->
+              <sc-if value="{{ explTab }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:18px;animation:rise .35s ease both;">
+                  <div style="display:flex;gap:11px;align-items:center;margin-bottom:14px;">
+                    <div style="flex-shrink:0;"><dc-import name="Numi" expression="encourage" size="52" hint-size="52px,52px"></dc-import></div>
+                    <div style="font-size:14.5px;font-weight:600;color:#5B678C;line-height:1.45;">Let's understand <b style="color:#1A1A1A;">why</b> each step works — tap a question.</div>
+                  </div>
+                  <sc-for list="{{ explainData }}" as="e" hint-placeholder-count="3">
+                    <div style="background:#fff;border-radius:18px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-bottom:11px;overflow:hidden;">
+                      <div onClick="{{ e.onClick }}" style="display:flex;align-items:center;gap:11px;padding:15px 16px;cursor:pointer;">
+                        <div style="flex:1;font-size:15px;font-weight:700;color:{{ e.qcolor }};">{{ e.q }}</div>
+                        <div style="width:26px;height:26px;border-radius:50%;background:#EEF3FD;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ic" style="font-size:18px;color:#4F7CFF;">{{ e.sign }}</span></div>
+                      </div>
+                      <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:0 16px 16px;font-size:14px;line-height:1.55;color:#5B678C;font-weight:500;animation:rise .28s ease both;">{{ e.a }}</div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                  <div onClick="{{ goTutor }}" style="margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;background:#EEF3FD;color:#4F7CFF;font-weight:800;font-size:14.5px;cursor:pointer;" style-active="transform:scale(.98)"><span class="ic fill" style="font-size:19px;">smart_toy</span>Still stuck? Ask Numi</div>
+                </div>
+              </sc-if>
+
+              <!-- ===== METHODS TAB ===== -->
+              <sc-if value="{{ methTab }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:18px;animation:rise .35s ease both;">
+                  <div style="font-size:13.5px;font-weight:600;color:#8A93AC;margin-bottom:13px;">Three ways to reach the same answer. Tap to compare.</div>
+                  <sc-for list="{{ methodsData }}" as="m" hint-placeholder-count="3">
+                    <div onClick="{{ m.onClick }}" style="border-radius:20px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .2s;background:{{ m.bg }};border:{{ m.ring }};box-shadow:0 8px 20px rgba(79,124,255,0.05);">
+                      <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="font-size:16px;font-weight:800;color:#1A1A1A;">{{ m.t }}</div>
+                        <sc-if value="{{ m.badge }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:flex;align-items:center;gap:3px;background:#FFF6DC;color:#B07E00;font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:8px;"><span class="ic fill" style="font-size:13px;">star</span>EXAM PICK</div>
+                        </sc-if>
+                      </div>
+                      <div style="margin-top:4px;font-size:13.5px;font-weight:500;color:#7C89A6;">{{ m.d }}</div>
+                      <sc-if value="{{ m.sel }}" hint-placeholder-val="{{ false }}">
+                        <div style="margin-top:13px;display:flex;flex-direction:column;gap:9px;animation:rise .28s ease both;">
+                          <sc-for list="{{ m.steps }}" as="s" hint-placeholder-count="2">
+                            <div style="display:flex;gap:9px;align-items:flex-start;">
+                              <span class="ic fill" style="font-size:19px;color:#4F7CFF;flex-shrink:0;">chevron_right</span>
+                              <div style="font-size:14px;font-weight:600;color:#46506B;line-height:1.4;">{{ s }}</div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <!-- ===== PRACTICE TAB ===== -->
+              <sc-if value="{{ pracTab }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:18px;animation:rise .35s ease both;">
+                  <div style="display:flex;gap:11px;align-items:center;margin-bottom:15px;">
+                    <div style="flex-shrink:0;"><dc-import name="Numi" expression="celebrate" size="52" hint-size="52px,52px"></dc-import></div>
+                    <div style="font-size:14.5px;font-weight:600;color:#5B678C;line-height:1.45;">Master it! Here are similar questions tuned to your level.</div>
+                  </div>
+                  <sc-for list="{{ simData }}" as="s" hint-placeholder-count="3">
+                    <div onClick="{{ goPractice }}" style="display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 8px 20px rgba(79,124,255,0.05);margin-bottom:11px;cursor:pointer;" style-active="transform:scale(.98)">
+                      <div style="flex:1;font-size:19px;font-weight:800;color:#1A1A1A;">{{ s.q }}</div>
+                      <div style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;color:{{ s.c }};background:{{ s.bg }};">{{ s.diff }}</div>
+                      <span class="ic" style="font-size:22px;color:#C6CFE0;">chevron_right</span>
+                    </div>
+                  </sc-for>
+                  <div onClick="{{ goPractice }}" style="margin-top:6px;height:52px;border-radius:16px;background:#EEF3FD;color:#4F7CFF;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;cursor:pointer;" style-active="transform:scale(.98)"><span class="ic fill" style="font-size:20px;">auto_awesome</span>Generate more like this</div>
+                </div>
+              </sc-if>
+
+            </div>
+
+            <!-- bottom action bar -->
+            <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 18px 26px;background:linear-gradient(180deg,rgba(248,250,255,0),#F8FAFF 34%);display:flex;gap:12px;">
+              <div onClick="{{ goTutor }}" style="flex:1;height:54px;border-radius:999px;background:#fff;border:1.5px solid #E1E8F5;display:flex;align-items:center;justify-content:center;gap:8px;color:#4F7CFF;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 16px rgba(79,124,255,0.08);" style-active="transform:scale(.97)"><span class="ic fill" style="font-size:20px;">smart_toy</span>Ask Numi</div>
+              <div onClick="{{ goSimilar }}" style="flex:1.25;height:54px;border-radius:999px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 12px 24px rgba(79,124,255,0.35);" style-active="transform:scale(.97)"><span class="ic fill" style="font-size:20px;">auto_awesome</span>Practice similar</div>
+            </div>
+
+            <!-- ===== WALKTHROUGH OVERLAY ===== -->
+            <sc-if value="{{ walkActive }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;z-index:80;background:rgba(15,22,50,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;animation:pop .3s ease both;">
+                <div style="width:100%;background:#fff;border-radius:30px;padding:20px 20px 22px;box-shadow:0 30px 70px rgba(0,0,0,0.35);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:11.5px;font-weight:800;letter-spacing:1.2px;color:#4F7CFF;">{{ wkN }}</div>
+                    <div onClick="{{ walkStop }}" style="width:32px;height:32px;border-radius:50%;background:#F0F3FA;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="ic" style="font-size:19px;color:#8A93AC;">close</span></div>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start;margin-top:12px;">
+                    <div style="flex-shrink:0;animation:floaty 3.5s ease-in-out infinite;"><dc-import name="Numi" expression="{{ wkExpr }}" size="70" hint-size="70px,70px"></dc-import></div>
+                    <div style="flex:1;background:#F4F7FF;border-radius:18px 18px 18px 6px;padding:13px 15px;">
+                      <div style="font-size:16px;font-weight:800;color:#1A1A1A;">{{ wkTitle }}</div>
+                      <div style="margin-top:5px;font-size:13.5px;line-height:1.5;color:#5B678C;font-weight:500;">{{ wkSay }}</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:16px;background:linear-gradient(135deg,#EEF3FF,#E6EEFF);border-radius:20px;padding:22px;text-align:center;position:relative;">
+                    <sc-if value="{{ wkChipShow }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;top:11px;right:11px;background:#FFF1E9;color:#F1740B;font-weight:800;font-size:11px;padding:5px 10px;border-radius:9px;">{{ wkChip }}</div>
+                    </sc-if>
+                    <div style="font-size:38px;font-weight:800;color:#1A1A1A;letter-spacing:-1px;">{{ wkMath }}</div>
+                  </div>
+                  <div style="display:flex;justify-content:center;gap:7px;margin-top:16px;">
+                    <sc-for list="{{ walkDots }}" as="d" hint-placeholder-count="4"><div style="height:7px;border-radius:4px;transition:all .3s;width:{{ d.w }};background:{{ d.bg }};"></div></sc-for>
+                  </div>
+                  <div style="display:flex;gap:10px;margin-top:16px;">
+                    <sc-if value="{{ walkHasPrev }}" hint-placeholder-val="{{ false }}">
+                      <div onClick="{{ walkPrev }}" style="width:54px;height:52px;border-radius:16px;background:#F0F3FA;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.95)"><span class="ic" style="font-size:22px;color:#5B678C;">arrow_back</span></div>
+                    </sc-if>
+                    <div onClick="{{ walkBtn }}" style="flex:1;height:52px;border-radius:16px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;gap:7px;color:#fff;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 12px 22px rgba(79,124,255,0.35);" style-active="transform:scale(.97)">{{ walkNextLabel }}<span class="ic fill" style="font-size:20px;">{{ walkNextIcon }}</span></div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </sc-if>
+
+        <!-- ============ TUTOR ============ -->
+        <sc-if value="{{ isTutor }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:#F8FAFF;display:flex;flex-direction:column;">
+
+            <!-- header -->
+            <div style="padding:52px 16px 11px;display:flex;align-items:center;gap:11px;background:rgba(248,250,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(79,124,255,0.07);z-index:5;">
+              <div onClick="{{ goHome }}" style="width:38px;height:38px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(79,124,255,0.08);" style-active="transform:scale(.94)"><span class="ic" style="font-size:21px;color:#1A1A1A;">chevron_left</span></div>
+              <div style="position:relative;width:44px;height:44px;flex-shrink:0;">
+                <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#EAF0FF,#DCE7FF);display:flex;align-items:center;justify-content:center;overflow:hidden;"><div style="margin-top:5px;"><dc-import name="Numi" expression="happy" size="40" hint-size="40px,40px"></dc-import></div></div>
+                <div style="position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;background:#34C759;border:2.5px solid #F8FAFF;"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:16.5px;font-weight:800;color:#1A1A1A;">Numi</div>
+                <div style="font-size:12px;font-weight:600;color:#34C759;">AI Math Coach · online</div>
+              </div>
+              <div onClick="{{ resetChat }}" style="width:38px;height:38px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(79,124,255,0.08);" style-active="transform:scale(.94)"><span class="ic" style="font-size:20px;color:#8A93AC;">edit_square</span></div>
+            </div>
+
+            <!-- messages -->
+            <div ref="{{ msgRef }}" style="flex:1;overflow-y:auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ chatData }}" as="c" hint-placeholder-count="1">
+                <sc-if value="{{ c.numi }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;justify-content:flex-start;">
+                    <div style="display:flex;gap:9px;align-items:flex-end;max-width:88%;">
+                      <div style="flex-shrink:0;margin-bottom:1px;"><dc-import name="Numi" expression="happy" size="34" hint-size="34px,34px"></dc-import></div>
+                      <div style="background:#fff;color:#2A3550;padding:12px 15px;border-radius:20px 20px 20px 6px;font-size:14.5px;line-height:1.5;font-weight:500;box-shadow:0 6px 16px rgba(79,124,255,0.08);animation:pop .3s ease both;">{{ c.text }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.user }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;justify-content:flex-end;">
+                    <div style="max-width:82%;background:linear-gradient(135deg,#5A86FF,#4F7CFF);color:#fff;padding:12px 15px;border-radius:20px 20px 6px 20px;font-size:14.5px;line-height:1.5;font-weight:600;box-shadow:0 10px 20px rgba(79,124,255,0.28);animation:pop .3s ease both;">{{ c.text }}</div>
+                  </div>
+                </sc-if>
+              </sc-for>
+              <sc-if value="{{ chatTyping }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:flex-start;">
+                  <div style="display:flex;gap:9px;align-items:flex-end;">
+                    <div style="flex-shrink:0;"><dc-import name="Numi" expression="thinking" size="34" hint-size="34px,34px"></dc-import></div>
+                    <div style="background:#fff;padding:15px 17px;border-radius:20px 20px 20px 6px;box-shadow:0 6px 16px rgba(79,124,255,0.08);display:flex;gap:5px;align-items:center;">
+                      <span style="width:7px;height:7px;border-radius:50%;background:#B7C1DA;animation:dotFlash 1.2s infinite;animation-delay:0s;"></span>
+                      <span style="width:7px;height:7px;border-radius:50%;background:#B7C1DA;animation:dotFlash 1.2s infinite;animation-delay:.18s;"></span>
+                      <span style="width:7px;height:7px;border-radius:50%;background:#B7C1DA;animation:dotFlash 1.2s infinite;animation-delay:.36s;"></span>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- suggested prompts -->
+            <div style="padding:6px 14px 8px;display:flex;gap:8px;overflow-x:auto;">
+              <sc-for list="{{ promptChips }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.onClick }}" style="flex-shrink:0;background:#fff;border:1px solid #E3E9F5;color:#4F7CFF;font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 10px rgba(79,124,255,0.06);" style-active="transform:scale(.96)">{{ p.label }}</div>
+              </sc-for>
+            </div>
+
+            <!-- input bar -->
+            <div style="padding:4px 14px 26px;display:flex;align-items:center;gap:9px;background:#F8FAFF;">
+              <div style="flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E3E9F5;border-radius:999px;padding:7px 14px;box-shadow:0 4px 12px rgba(79,124,255,0.07);">
+                <span onClick="{{ goScan }}" class="ic" style="font-size:22px;color:#8A93AC;cursor:pointer;">add_photo_alternate</span>
+                <input value="{{ draft }}" onChange="{{ setDraft }}" onKeyDown="{{ keyDown }}" placeholder="Message Numi…" style="flex:1;border:none;outline:none;background:transparent;font-size:15px;font-family:inherit;color:#1A1A1A;padding:6px 0;min-width:0;" />
+                <span class="ic" style="font-size:22px;color:#8A93AC;cursor:pointer;">mic</span>
+              </div>
+              <div onClick="{{ sendMsg }}" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 10px 20px rgba(79,124,255,0.35);" style-active="transform:scale(.93)"><span class="ic" style="font-size:22px;color:#fff;">arrow_upward</span></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ PAYWALL ============ -->
+        <sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;background:radial-gradient(125% 55% at 50% 0%, #2C3466 0%, #1B2140 46%, #11152A 100%);">
+
+            <!-- glows -->
+            <div style="position:absolute;top:40px;left:50%;transform:translateX(-50%);width:280px;height:280px;border-radius:50%;background:radial-gradient(circle, rgba(255,213,74,0.22), rgba(255,213,74,0) 70%);pointer-events:none;"></div>
+
+            <!-- close -->
+            <div onClick="{{ goHome }}" style="position:absolute;top:56px;right:20px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;" style-active="transform:scale(.92)"><span class="ic" style="font-size:20px;color:rgba(255,255,255,0.8);">close</span></div>
+
+            <div style="position:relative;padding:70px 22px 40px;">
+
+              <!-- hero -->
+              <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+                <div style="position:relative;animation:floaty 4.5s ease-in-out infinite;">
+                  <dc-import name="Numi" expression="celebrate" size="118" hint-size="118px,118px"></dc-import>
+                  <div style="position:absolute;top:-4px;right:-10px;width:16px;height:16px;background:#FFD54A;border-radius:4px;transform:rotate(45deg);animation:sparkle 2.4s ease-in-out infinite;"></div>
+                  <div style="position:absolute;bottom:14px;left:-12px;width:11px;height:11px;background:#7BA5FF;border-radius:3px;transform:rotate(45deg);animation:sparkle 2.4s .7s ease-in-out infinite;"></div>
+                </div>
+                <div style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,213,74,0.16);border:1px solid rgba(255,213,74,0.3);color:#FFD54A;font-size:11.5px;font-weight:800;letter-spacing:1px;padding:6px 13px;border-radius:999px;"><span class="ic fill" style="font-size:14px;">workspace_premium</span>MATHEASY PREMIUM</div>
+                <div style="margin-top:14px;font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;line-height:1.15;">Unlock unlimited<br>learning</div>
+                <div style="margin-top:9px;font-size:15px;color:#AEB6D8;font-weight:500;line-height:1.45;max-width:290px;">Everything Sarah needs to understand math and ace every exam.</div>
+              </div>
+
+              <!-- benefits -->
+              <div style="margin-top:26px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:22px;padding:8px 16px;">
+                <sc-for list="{{ benefits }}" as="b" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid {{ b.line }};">
+                    <div style="width:36px;height:36px;border-radius:11px;background:rgba(255,213,74,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ic fill" style="font-size:20px;color:#FFD54A;">{{ b.icon }}</span></div>
+                    <div style="font-size:14.5px;font-weight:600;color:#EAEEFF;">{{ b.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <!-- plans -->
+              <div style="margin-top:22px;display:flex;flex-direction:column;gap:11px;">
+                <sc-for list="{{ plansData }}" as="p" hint-placeholder-count="3">
+                  <div onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:13px;border-radius:18px;padding:15px 16px;cursor:pointer;position:relative;transition:all .18s;border:{{ p.border }};background:{{ p.bg }};">
+                    <div style="width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                      <sc-if value="{{ p.sel }}" hint-placeholder-val="{{ false }}">
+                        <div style="width:24px;height:24px;border-radius:50%;background:#4F7CFF;display:flex;align-items:center;justify-content:center;margin:-2px;"><span class="ic" style="font-size:16px;color:#fff;">check</span></div>
+                      </sc-if>
+                    </div>
+                    <div style="flex:1;">
+                      <div style="font-size:16px;font-weight:800;color:#fff;">{{ p.name }}</div>
+                      <div style="font-size:12.5px;font-weight:500;color:#AEB6D8;margin-top:1px;">{{ p.note }}</div>
+                    </div>
+                    <div style="text-align:right;"><span style="font-size:19px;font-weight:800;color:#fff;">{{ p.price }}</span><span style="font-size:12px;font-weight:600;color:#AEB6D8;">{{ p.per }}</span></div>
+                    <sc-if value="{{ p.hasBadge }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;top:-9px;right:16px;background:linear-gradient(135deg,#FFE38A,#FFD54A);color:#1A1A1A;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 10px;border-radius:8px;box-shadow:0 6px 12px rgba(255,213,74,0.35);">{{ p.badge }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+
+              <!-- CTA -->
+              <div onClick="{{ goHome }}" style="margin-top:22px;height:58px;border-radius:999px;background:linear-gradient(135deg,#FFE38A,#FFD54A);display:flex;align-items:center;justify-content:center;gap:8px;color:#1A1A1A;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 16px 36px rgba(255,213,74,0.4);" style-active="transform:scale(.98)"><span class="ic fill" style="font-size:21px;">bolt</span>Start 7-day free trial</div>
+              <div style="margin-top:11px;text-align:center;font-size:12.5px;color:#9AA3C8;font-weight:500;">{{ ctaSub }}</div>
+
+              <!-- trust -->
+              <div style="margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:11px;">
+                <div style="display:flex;align-items:center;gap:7px;color:#C7CDEA;font-size:13px;font-weight:600;">
+                  <div style="display:flex;gap:1px;color:#FFD54A;"><span class="ic fill" style="font-size:15px;">star</span><span class="ic fill" style="font-size:15px;">star</span><span class="ic fill" style="font-size:15px;">star</span><span class="ic fill" style="font-size:15px;">star</span><span class="ic fill" style="font-size:15px;">star</span></div>
+                  4.9 · loved by 2M+ students
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;color:#7E88B0;font-size:12.5px;font-weight:600;">
+                  <div style="cursor:pointer;">Restore</div><div style="width:3px;height:3px;border-radius:50%;background:#5A628A;"></div>
+                  <div style="cursor:pointer;">Terms</div><div style="width:3px;height:3px;border-radius:50%;background:#5A628A;"></div>
+                  <div style="cursor:pointer;">Privacy</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ PRACTICE SESSION ============ -->
+        <sc-if value="{{ isPractice }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:#F8FAFF;display:flex;flex-direction:column;">
+
+            <!-- top bar -->
+            <div style="padding:56px 18px 10px;display:flex;align-items:center;gap:14px;">
+              <div onClick="{{ goHome }}" style="width:38px;height:38px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(79,124,255,0.08);" style-active="transform:scale(.94)"><span class="ic" style="font-size:20px;color:#8A93AC;">close</span></div>
+              <div style="flex:1;height:11px;border-radius:6px;background:#E4EAF5;overflow:hidden;"><div style="height:100%;width:44%;border-radius:6px;background:linear-gradient(90deg,#7BA5FF,#4F7CFF);"></div></div>
+              <div style="display:flex;align-items:center;gap:4px;"><span class="ic fill" style="font-size:20px;color:#FFC61A;">bolt</span><span style="font-weight:800;color:#1A1A1A;font-size:15px;">40</span></div>
+            </div>
+
+            <!-- content -->
+            <div style="flex:1;overflow-y:auto;padding:10px 20px 14px;">
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div style="flex-shrink:0;"><dc-import name="Numi" expression="happy" size="46" hint-size="46px,46px"></dc-import></div>
+                <div>
+                  <div style="font-size:11.5px;font-weight:800;color:#98A2BE;letter-spacing:.5px;">QUESTION 3 OF 5 · LINEAR EQUATIONS</div>
+                  <div style="font-size:16px;font-weight:800;color:#1A1A1A;margin-top:1px;">Solve for x</div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;background:#fff;border-radius:24px;padding:32px 22px;text-align:center;box-shadow:0 14px 34px rgba(79,124,255,0.09);">
+                <div style="font-size:38px;font-weight:800;color:#1A1A1A;letter-spacing:-0.5px;">3x + 4 = 19</div>
+              </div>
+
+              <sc-if value="{{ pHint }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;display:flex;gap:10px;align-items:flex-start;background:#FFF9E8;border:1px solid #FBE7A6;border-radius:16px;padding:12px 14px;animation:rise .3s ease both;">
+                  <div style="flex-shrink:0;"><dc-import name="Numi" expression="thinking" size="34" hint-size="34px,34px"></dc-import></div>
+                  <div style="font-size:13.5px;font-weight:600;color:#8A6D1F;line-height:1.45;">Undo the <b>+4</b> first — subtract 4 from both sides, then divide by 3.</div>
+                </div>
+              </sc-if>
+
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:12px;">
+                <sc-for list="{{ optData }}" as="o" hint-placeholder-count="4">
+                  <div onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;padding:17px 20px;border-radius:18px;cursor:pointer;transition:all .15s;background:{{ o.bg }};border:{{ o.border }};box-shadow:0 6px 16px rgba(79,124,255,0.05);" style-active="transform:scale(.99)">
+                    <span style="font-size:19px;font-weight:800;color:{{ o.color }};">{{ o.label }}</span>
+                    <sc-if value="{{ o.hasIcon }}" hint-placeholder-val="{{ false }}"><span class="ic fill" style="font-size:24px;color:{{ o.color }};">{{ o.icon }}</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- bottom: question stage -->
+            <sc-if value="{{ pStageQ }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:12px 20px 28px;display:flex;gap:12px;align-items:center;background:#F8FAFF;">
+                <div onClick="{{ toggleHint }}" style="width:56px;height:56px;border-radius:18px;background:#fff;border:1.5px solid #E7ECF6;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" style-active="transform:scale(.95)"><span class="ic fill" style="font-size:24px;color:#E8A400;">lightbulb</span></div>
+                <div onClick="{{ checkAnswer }}" style="flex:1;height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;cursor:pointer;background:{{ checkBg }};color:{{ checkColor }};box-shadow:{{ checkShadow }};" style-active="transform:scale(.98)">Check</div>
+              </div>
+            </sc-if>
+
+            <!-- bottom: correct -->
+            <sc-if value="{{ pCorrect }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:18px 20px 28px;background:linear-gradient(180deg,rgba(230,248,236,0),#E4F7EA 26%);position:relative;animation:rise .3s ease both;">
+                <div style="position:absolute;top:6px;left:40px;width:13px;height:13px;background:#FFD54A;border-radius:4px;transform:rotate(45deg);animation:sparkle 1.8s ease-in-out infinite;"></div>
+                <div style="position:absolute;top:2px;right:60px;width:10px;height:10px;background:#34C759;border-radius:3px;transform:rotate(45deg);animation:sparkle 1.8s .5s ease-in-out infinite;"></div>
+                <div style="position:absolute;top:22px;right:28px;width:8px;height:8px;background:#7BA5FF;border-radius:3px;transform:rotate(45deg);animation:sparkle 1.8s .9s ease-in-out infinite;"></div>
+                <div style="display:flex;align-items:center;gap:13px;">
+                  <div style="flex-shrink:0;animation:pop .4s ease both;"><dc-import name="Numi" expression="celebrate" size="66" hint-size="66px,66px"></dc-import></div>
+                  <div style="flex:1;">
+                    <div style="font-size:21px;font-weight:800;color:#158A3F;">Correct! 🎉</div>
+                    <div style="font-size:13.5px;font-weight:600;color:#1E9E4A;margin-top:1px;">+20 XP · your streak is safe</div>
+                  </div>
+                  <div style="background:#fff;color:#158A3F;font-weight:800;font-size:15px;padding:8px 13px;border-radius:14px;box-shadow:0 6px 14px rgba(52,199,89,0.2);">+20</div>
+                </div>
+                <div onClick="{{ practiceReset }}" style="margin-top:15px;height:56px;border-radius:999px;background:linear-gradient(135deg,#34C759,#28B14C);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 14px 26px rgba(52,199,89,0.35);" style-active="transform:scale(.98)">Continue<span class="ic" style="font-size:20px;">arrow_forward</span></div>
+              </div>
+            </sc-if>
+
+            <!-- bottom: wrong -->
+            <sc-if value="{{ pWrong }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:18px 20px 28px;background:linear-gradient(180deg,rgba(253,236,236,0),#FCEAEA 26%);animation:rise .3s ease both;">
+                <div style="display:flex;align-items:center;gap:13px;">
+                  <div style="flex-shrink:0;"><dc-import name="Numi" expression="encourage" size="62" hint-size="62px,62px"></dc-import></div>
+                  <div style="flex:1;">
+                    <div style="font-size:19px;font-weight:800;color:#D22A20;">Not quite — you've got this</div>
+                    <div style="font-size:13.5px;font-weight:600;color:#9A5A54;margin-top:2px;">Answer: <b>x = 5</b>. Check: 3(5) + 4 = 19 ✓</div>
+                  </div>
+                </div>
+                <div onClick="{{ practiceReset }}" style="margin-top:15px;height:56px;border-radius:999px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 14px 26px rgba(79,124,255,0.35);" style-active="transform:scale(.98)">Try the next one<span class="ic" style="font-size:20px;">arrow_forward</span></div>
+              </div>
+            </sc-if>
+
+          </div>
+        </sc-if>
+
+        <!-- ============ PROFILE ============ -->
+        <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
+            <div style="font-size:27px;font-weight:800;color:#1A1A1A;letter-spacing:-0.5px;">Profile</div>
+
+            <!-- identity -->
+            <div style="margin-top:16px;background:linear-gradient(140deg,#5A86FF 0%,#4F7CFF 60%,#4A75F5 100%);border-radius:26px;padding:20px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;box-shadow:0 20px 38px rgba(79,124,255,0.38);">
+              <div style="position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+              <div style="width:74px;height:74px;border-radius:22px;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 8px 18px rgba(20,40,90,0.2);"><div style="margin-top:9px;"><dc-import name="Numi" expression="happy" size="64" hint-size="64px,64px"></dc-import></div></div>
+              <div style="flex:1;position:relative;">
+                <div style="font-size:21px;font-weight:800;color:#fff;">Sarah Tan</div>
+                <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">Level 7 · Rising Star</div>
+                <div style="margin-top:9px;height:7px;border-radius:5px;background:rgba(255,255,255,0.28);overflow:hidden;width:150px;"><div style="height:100%;width:64%;background:linear-gradient(90deg,#FFE79A,#FFD54A);border-radius:5px;"></div></div>
+                <div style="margin-top:5px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.8);">360 XP to Level 8</div>
+              </div>
+            </div>
+
+            <!-- stats -->
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div style="background:#fff;border-radius:18px;padding:15px 8px;text-align:center;box-shadow:0 8px 20px rgba(79,124,255,0.06);">
+                <span class="ic fill" style="font-size:23px;color:#FF7A45;">local_fire_department</span>
+                <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-top:3px;">12</div>
+                <div style="font-size:10.5px;font-weight:700;color:#98A2BE;">Day streak</div>
+              </div>
+              <div style="background:#fff;border-radius:18px;padding:15px 8px;text-align:center;box-shadow:0 8px 20px rgba(79,124,255,0.06);">
+                <span class="ic fill" style="font-size:23px;color:#FFC61A;">bolt</span>
+                <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-top:3px;">1,240</div>
+                <div style="font-size:10.5px;font-weight:700;color:#98A2BE;">Total XP</div>
+              </div>
+              <div style="background:#fff;border-radius:18px;padding:15px 8px;text-align:center;box-shadow:0 8px 20px rgba(79,124,255,0.06);">
+                <span class="ic fill" style="font-size:23px;color:#34C759;">target</span>
+                <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-top:3px;">87%</div>
+                <div style="font-size:10.5px;font-weight:700;color:#98A2BE;">Accuracy</div>
+              </div>
+            </div>
+
+            <!-- premium banner -->
+            <div onClick="{{ goPaywall }}" style="margin-top:16px;border-radius:22px;padding:18px 20px;background:linear-gradient(120deg,#1E2440,#33306B);display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 18px 34px rgba(30,36,64,0.32);" style-active="transform:scale(.99)">
+              <span class="ic fill" style="font-size:30px;color:#FFD54A;">workspace_premium</span>
+              <div style="flex:1;"><div style="color:#fff;font-weight:800;font-size:16px;">Go Premium</div><div style="color:#B9BEE0;font-size:13px;font-weight:500;margin-top:2px;">Unlimited everything · 7-day free trial</div></div>
+              <span class="ic" style="font-size:22px;color:#FFD54A;">chevron_right</span>
+            </div>
+
+            <!-- settings -->
+            <div style="margin-top:18px;background:#fff;border-radius:22px;padding:6px;box-shadow:0 12px 26px rgba(79,124,255,0.07);">
+              <div onClick="{{ goPaywall }}" style="display:flex;align-items:center;gap:14px;padding:13px 12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:40px;height:40px;border-radius:12px;background:#FFF3D6;display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:21px;color:#E8A400;">workspace_premium</span></div>
+                <div style="flex:1;font-weight:700;color:#1A1A1A;font-size:15px;">Subscription</div>
+                <div style="background:#FFF3D6;color:#B07E00;font-size:11px;font-weight:800;padding:4px 9px;border-radius:8px;">FREE</div>
+                <span class="ic" style="font-size:20px;color:#C6CFE0;">chevron_right</span>
+              </div>
+              <div style="height:1px;background:#F0F3FA;margin:0 12px;"></div>
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:40px;height:40px;border-radius:12px;background:#EAF0FF;display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:21px;color:#4F7CFF;">notifications</span></div>
+                <div style="flex:1;font-weight:700;color:#1A1A1A;font-size:15px;">Notifications</div>
+                <span class="ic" style="font-size:20px;color:#C6CFE0;">chevron_right</span>
+              </div>
+              <div style="height:1px;background:#F0F3FA;margin:0 12px;"></div>
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:40px;height:40px;border-radius:12px;background:#E4F8EA;display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:21px;color:#34C759;">schedule</span></div>
+                <div style="flex:1;font-weight:700;color:#1A1A1A;font-size:15px;">Daily reminder</div>
+                <div style="font-size:13px;font-weight:700;color:#98A2BE;">6:00 PM</div>
+                <span class="ic" style="font-size:20px;color:#C6CFE0;">chevron_right</span>
+              </div>
+              <div style="height:1px;background:#F0F3FA;margin:0 12px;"></div>
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 12px;border-radius:16px;cursor:pointer;" style-active="background:#F5F8FF">
+                <div style="width:40px;height:40px;border-radius:12px;background:#EDE7FF;display:flex;align-items:center;justify-content:center;"><span class="ic fill" style="font-size:21px;color:#7C4DFF;">help</span></div>
+                <div style="flex:1;font-weight:700;color:#1A1A1A;font-size:15px;">Help Center</div>
+                <span class="ic" style="font-size:20px;color:#C6CFE0;">chevron_right</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+
+      <!-- ---------- STATUS BAR ---------- -->
+      <div style="position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 34px 0 32px;z-index:40;pointer-events:none;color:{{ statusColor }};">
+        <div style="font-size:16px;font-weight:700;letter-spacing:.3px;">9:41</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="ic fill" style="font-size:17px;">signal_cellular_alt</span>
+          <span class="ic fill" style="font-size:17px;">wifi</span>
+          <span class="ic fill" style="font-size:19px;">battery_full</span>
+        </div>
+      </div>
+
+      <!-- ---------- DYNAMIC ISLAND ---------- -->
+      <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:122px;height:36px;background:#05070f;border-radius:20px;z-index:60;"></div>
+
+      <!-- ---------- TAB BAR ---------- -->
+      <sc-if value="{{ showTab }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:0;left:0;right:0;height:92px;z-index:50;background:rgba(255,255,255,0.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(79,124,255,0.1);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-around;padding:12px 14px 0;">
+            <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:56px;cursor:pointer;">
+              <span class="ic {{ homeFill }}" style="font-size:26px;color:{{ homeColor }};">home</span>
+              <span style="font-size:10.5px;font-weight:700;color:{{ homeColor }};">Home</span>
+            </div>
+            <div onClick="{{ goPractice }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:56px;cursor:pointer;">
+              <span class="ic {{ pracFill }}" style="font-size:26px;color:{{ pracColor }};">fitness_center</span>
+              <span style="font-size:10.5px;font-weight:700;color:{{ pracColor }};">Practice</span>
+            </div>
+            <div onClick="{{ goScan }}" style="display:flex;flex-direction:column;align-items:center;width:56px;cursor:pointer;margin-top:-20px;">
+              <div style="width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,#5A86FF,#4F7CFF);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(79,124,255,0.45);" style-active="transform:scale(.94)"><span class="ic" style="font-size:30px;color:#fff;">center_focus_strong</span></div>
+            </div>
+            <div onClick="{{ goTutor }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:56px;cursor:pointer;">
+              <span class="ic {{ tutorFill }}" style="font-size:26px;color:{{ tutorColor }};">forum</span>
+              <span style="font-size:10.5px;font-weight:700;color:{{ tutorColor }};">Tutor</span>
+            </div>
+            <div onClick="{{ goProfile }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:56px;cursor:pointer;">
+              <span class="ic {{ profFill }}" style="font-size:26px;color:{{ profColor }};">person</span>
+              <span style="font-size:10.5px;font-weight:700;color:{{ profColor }};">Profile</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ---------- HOME INDICATOR ---------- -->
+      <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;z-index:70;background:{{ homeIndicator }};"></div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:491,&quot;height&quot;:950}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'onboarding', onb: 0, tab: 'home',
+    resultTab: 'solution', openStep: 1, walk: -1, saved: false, methodSel: 0,
+    chat: [{ role: 'numi', text: "Hi Sarah! I'm Numi. Ask me anything about math — or snap a photo of a problem and I'll walk you through it." }],
+    draft: '', typing: false,
+    pStage: 'q', pSel: null, pHint: false,
+    plan: 'yearly',
+  };
+
+  go(screen) {
+    const tabScreens = ['home', 'practice', 'tutor', 'profile'];
+    this.setState({ screen, tab: tabScreens.includes(screen) ? screen : this.state.tab });
+  }
+  nextOnb = () => { this.state.onb < 4 ? this.setState({ onb: this.state.onb + 1 }) : this.go('home'); };
+  startApp = () => this.go('home');
+  goHome = () => this.go('home');
+  goScan = () => this.go('scan');
+  goResult = () => this.go('result');
+  goTutor = () => this.go('tutor');
+  goPractice = () => this.go('practice');
+  goProfile = () => this.go('profile');
+  goPaywall = () => this.go('paywall');
+
+  setResultTab = (t) => this.setState({ resultTab: t });
+  toggleStep = (i) => this.setState({ openStep: this.state.openStep === i ? -1 : i });
+  selectMethod = (i) => this.setState({ methodSel: i });
+  toggleSave = () => this.setState({ saved: !this.state.saved });
+  startWalk = () => this.setState({ walk: 0, resultTab: 'solution' });
+  walkNext = () => this.setState({ walk: Math.min(this.state.walk + 1, 3) });
+  walkPrev = () => this.setState({ walk: Math.max(this.state.walk - 1, 0) });
+  walkStop = () => this.setState({ walk: -1 });
+
+  setDraft = (e) => this.setState({ draft: e.target.value });
+  keyDown = (e) => { if (e.key === 'Enter') this.send(); };
+  setMsg = (el) => { this._msg = el; };
+  resetChat = () => this.setState({ chat: [{ role: 'numi', text: "Fresh start! What would you like to work on, Sarah?" }], draft: '', typing: false });
+  componentDidUpdate() { if (this._msg) this._msg.scrollTop = this._msg.scrollHeight; }
+  quick = (t) => this.send(t);
+  send = (text) => {
+    const t = (typeof text === 'string' ? text : this.state.draft).trim();
+    if (!t) return;
+    this.setState(s => ({ chat: [...s.chat, { role: 'user', text: t }], draft: '', typing: true }));
+    clearTimeout(this._t);
+    this._t = setTimeout(() => {
+      this.setState(s => ({ typing: false, chat: [...s.chat, { role: 'numi', text: this.reply(t) }] }));
+    }, 1200);
+  };
+  reply(q) {
+    const s = q.toLowerCase();
+    if (s.includes('subtract') || s.includes('why')) return "Good question! We subtract 5 from both sides to undo the +5, so the x-term ends up alone. Whatever we do to one side, we do to the other to keep it balanced. ⚖️";
+    if (s.includes('another') || s.includes('method') || s.includes('different')) return "Sure! Another way is transposition: move +5 across the = sign and it becomes −5, giving 2x = 13 − 5 = 8. Same answer, fewer lines — handy in exams.";
+    if (s.includes('practice') || s.includes('similar')) return "Let's practice! Try this one: 3x + 4 = 19. Take your time — tap if you'd like a hint.";
+    if (s.includes('teach') || s.includes('topic')) return "Linear equations are about keeping both sides balanced. We isolate x step by step. Want me to start with a quick 2-minute walkthrough?";
+    return "Let's break it down together. Can you tell me which step feels tricky, or send me a photo of the full question?";
+  }
+
+  pickOption = (i) => { if (this.state.pStage === 'q') this.setState({ pSel: i }); };
+  checkAnswer = () => { if (this.state.pSel == null || this.state.pStage !== 'q') return; this.setState({ pStage: this.state.pSel === 1 ? 'correct' : 'wrong' }); };
+  toggleHint = () => this.setState({ pHint: !this.state.pHint });
+  practiceReset = () => this.setState({ pStage: 'q', pSel: null, pHint: false });
+  setPlan = (p) => this.setState({ plan: p });
+
+  renderVals() {
+    const { screen, onb } = this.state;
+    const OB = [
+      { t: 'Make Math Easy', s: 'Snap any math question and get instant, step-by-step explanations.' },
+      { t: "Learn, Don't Just Copy", s: 'Understand every step with explanations built for your level.' },
+      { t: 'Practice Until You Master It', s: 'Generate unlimited similar questions and build real confidence.' },
+      { t: 'Built For Your Exams', s: 'Personalized help for SPM, IGCSE, GCSE, SAT and more.' },
+      { t: 'Meet Numi', s: 'Your AI math coach is ready to help you actually enjoy learning.' },
+    ];
+    const active = '#4F7CFF', idle = '#AEB7CE';
+    const tabCol = (name) => this.state.tab === name ? active : idle;
+    const tabFill = (name) => this.state.tab === name ? 'fill' : '';
+
+    const rt = this.state.resultTab;
+    const openStep = this.state.openStep;
+    const w = this.state.walk;
+    const EX = [
+      { q: 'Why subtract 5 first?', a: 'The + 5 is blocking x. Subtracting 5 from BOTH sides cancels it while keeping the equation balanced — whatever we do to one side, we must do to the other.' },
+      { q: 'Why divide by 2?', a: '2x means 2 × x. Division undoes multiplication, so dividing both sides by 2 leaves x completely on its own.' },
+      { q: 'How do I know it\u2019s right?', a: 'Substitute x = 4 back in: 2(4) + 5 = 8 + 5 = 13. It matches the original equation, so the answer is correct.' },
+    ];
+    const M = [
+      { t: 'Balance Method', d: 'Do the same operation to both sides.', badge: true, steps: ['Subtract 5 from both sides  →  2x = 8', 'Divide both sides by 2  →  x = 4'] },
+      { t: 'Transposition', d: 'Move a term across the = sign and flip its sign.', badge: false, steps: ['Move + 5 across  →  2x = 13 − 5 = 8', 'Move × 2 across  →  x = 8 ÷ 2 = 4'] },
+      { t: 'Work Backwards', d: 'Undo each operation in reverse order.', badge: false, steps: ['x was × 2 then + 5 to make 13', 'Reverse it: 13 − 5 = 8, then 8 ÷ 2 = 4'] },
+    ];
+    const SIM = [
+      { q: '3x + 4 = 19', diff: 'Easy', c: '#1E9E4A', bg: '#E6F8EC' },
+      { q: '5x − 7 = 18', diff: 'Medium', c: '#C77B0A', bg: '#FFF4E0' },
+      { q: '2(x + 3) = 16', diff: 'Medium', c: '#C77B0A', bg: '#FFF4E0' },
+    ];
+    const WK = [
+      { n: 'STEP 1 OF 4', title: "Here's our puzzle", say: "We want x all by itself. Right now it's stuck with a + 5 and a × 2.", math: '2x + 5 = 13', expr: 'happy', chip: null },
+      { n: 'STEP 2 OF 4', title: 'Undo the + 5', say: 'Subtract 5 from BOTH sides so the equation stays perfectly balanced.', math: '2x = 8', expr: 'thinking', chip: '− 5 both sides' },
+      { n: 'STEP 3 OF 4', title: 'Undo the × 2', say: 'Now divide both sides by 2 to set x completely free.', math: 'x = 4', expr: 'happy', chip: '÷ 2 both sides' },
+      { n: 'SOLVED', title: 'You did it!', say: 'Check: 2 × 4 + 5 = 13. It matches — you\u2019ve mastered this one!', math: 'x = 4', expr: 'celebrate', chip: null },
+    ];
+    const cw = w < 0 ? WK[0] : WK[w];
+
+    const ps = this.state.pStage, psel = this.state.pSel;
+    const optData = ['x = 6', 'x = 5', 'x = 4', 'x = 3'].map((label, i) => {
+      let bg = '#fff', border = '1.5px solid #E7ECF6', color = '#1A1A1A', icon = '', hasIcon = false;
+      if (ps === 'q') { if (psel === i) { bg = '#EEF3FF'; border = '2px solid #4F7CFF'; color = '#3564E0'; } }
+      else if (i === 1) { bg = '#E6F8EC'; border = '2px solid #34C759'; color = '#158A3F'; icon = 'check_circle'; hasIcon = true; }
+      else if (psel === i) { bg = '#FDECEC'; border = '2px solid #FF3B30'; color = '#D22A20'; icon = 'cancel'; hasIcon = true; }
+      else { color = '#AEB8CE'; }
+      return { label, onClick: () => this.pickOption(i), bg, border, color, icon, hasIcon };
+    });
+    const canCheck = psel != null && ps === 'q';
+    return {
+      isOnboarding: screen === 'onboarding',
+      isHome: screen === 'home',
+      isScan: screen === 'scan',
+      isResult: screen === 'result',
+      isTutor: screen === 'tutor',
+      isPaywall: screen === 'paywall',
+      isPractice: screen === 'practice',
+      isProfile: screen === 'profile',
+      onb0: onb === 0, onb1: onb === 1, onb2: onb === 2, onb3: onb === 3, onb4: onb === 4,
+      onbNotLast: onb < 4,
+      onbTitle: OB[onb].t, onbSub: OB[onb].s,
+      onbCta: onb === 4 ? 'Get Started' : 'Continue',
+      dots: OB.map((_, i) => ({ w: i === onb ? '22px' : '7px', bg: i === onb ? '#4F7CFF' : '#D5DEF5' })),
+      statusColor: (screen === 'scan' || screen === 'paywall') ? '#FFFFFF' : '#1A1A1A',
+      homeIndicator: (screen === 'scan' || screen === 'paywall') ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.28)',
+      showTab: ['home', 'profile'].includes(screen),
+
+      solTab: rt === 'solution', explTab: rt === 'explain', methTab: rt === 'methods', pracTab: rt === 'practice',
+      tabsData: [['solution', 'Solution'], ['explain', 'Explain'], ['methods', 'Methods'], ['practice', 'Practice']].map(([k, l]) => ({ label: l, onClick: () => this.setResultTab(k), bg: rt === k ? '#FFFFFF' : 'transparent', color: rt === k ? '#4F7CFF' : '#8A93AC', sh: rt === k ? '0 4px 12px rgba(79,124,255,0.16)' : 'none' })),
+      explainData: EX.map((e, i) => ({ q: e.q, a: e.a, open: openStep === i, onClick: () => this.toggleStep(i), sign: openStep === i ? 'remove' : 'add', qcolor: openStep === i ? '#4F7CFF' : '#1A1A1A' })),
+      methodsData: M.map((m, i) => ({ t: m.t, d: m.d, badge: m.badge, steps: m.steps, sel: this.state.methodSel === i, onClick: () => this.selectMethod(i), ring: this.state.methodSel === i ? '2px solid #4F7CFF' : '1px solid #E7ECF6', bg: this.state.methodSel === i ? '#F4F8FF' : '#FFFFFF' })),
+      simData: SIM,
+      goSimilar: () => this.setResultTab('practice'),
+      startWalk: this.startWalk, walkPrev: this.walkPrev, walkStop: this.walkStop,
+      walkBtn: () => (w === 3 ? this.walkStop() : this.walkNext()),
+      walkNextLabel: w === 3 ? 'Got it!' : 'Next step', walkNextIcon: w === 3 ? 'check_circle' : 'arrow_forward',
+      toggleSave: this.toggleSave, saveIcon: this.state.saved ? 'bookmark' : 'bookmark_border', saveFill: this.state.saved ? 'fill' : '', saveColor: this.state.saved ? '#4F7CFF' : '#8A93AC',
+      walkActive: w >= 0, wkN: cw.n, wkTitle: cw.title, wkSay: cw.say, wkMath: cw.math, wkExpr: cw.expr, wkChip: cw.chip, wkChipShow: !!cw.chip,
+      walkHasPrev: w > 0,
+      walkDots: WK.map((_, i) => ({ bg: i <= w ? '#4F7CFF' : '#D5DEF5', w: i === w ? '20px' : '7px' })),
+
+      chatData: this.state.chat.map(m => ({ numi: m.role === 'numi', user: m.role !== 'numi', text: m.text })),
+      chatTyping: this.state.typing, draft: this.state.draft,
+      setDraft: this.setDraft, keyDown: this.keyDown, sendMsg: () => this.send(), msgRef: this.setMsg, resetChat: this.resetChat,
+      promptChips: ['Explain this simply', 'Show another method', 'Create practice questions', 'Teach me this topic'].map(l => ({ label: l, onClick: () => this.quick(l) })),
+
+      plansData: [
+        { key: 'monthly', name: 'Monthly', price: '$9.99', per: '/mo', note: 'Billed monthly', badge: null },
+        { key: 'yearly', name: 'Yearly', price: '$4.17', per: '/mo', note: '$49.99/year · save 58%', badge: 'BEST VALUE' },
+        { key: 'family', name: 'Family', price: '$6.67', per: '/mo', note: '$79.99/year · up to 6 members', badge: null },
+      ].map(p => ({ name: p.name, price: p.price, per: p.per, note: p.note, badge: p.badge, hasBadge: !!p.badge, sel: this.state.plan === p.key, onClick: () => this.setPlan(p.key), border: this.state.plan === p.key ? '2px solid #7BA5FF' : '1.5px solid rgba(255,255,255,0.12)', bg: this.state.plan === p.key ? 'rgba(123,165,255,0.16)' : 'rgba(255,255,255,0.05)' })),
+      ctaSub: this.state.plan === 'monthly' ? '7 days free, then $9.99/month. Cancel anytime.' : this.state.plan === 'family' ? '7 days free, then $79.99/year for up to 6. Cancel anytime.' : '7 days free, then $49.99/year. Cancel anytime.',
+      setPlan: this.setPlan,
+      benefits: [
+        { icon: 'all_inclusive', label: 'Unlimited scans & solutions' },
+        { icon: 'smart_toy', label: 'Unlimited AI tutor — text & voice' },
+        { icon: 'alt_route', label: 'Multiple solving methods' },
+        { icon: 'play_circle', label: 'Animated step-by-step walkthroughs' },
+        { icon: 'fitness_center', label: 'Unlimited practice generator' },
+        { icon: 'school', label: 'Exam prep · SPM · IGCSE · GCSE · SAT' },
+      ].map((b, i, a) => ({ icon: b.icon, label: b.label, line: i === a.length - 1 ? 'transparent' : 'rgba(255,255,255,0.08)' })),
+
+      optData,
+      pStageQ: ps === 'q', pCorrect: ps === 'correct', pWrong: ps === 'wrong',
+      pHint: this.state.pHint, toggleHint: this.toggleHint, checkAnswer: this.checkAnswer, practiceReset: this.practiceReset,
+      pickOption: this.pickOption,
+      checkBg: canCheck ? 'linear-gradient(135deg,#5A86FF,#4F7CFF)' : '#DDE3F0',
+      checkColor: canCheck ? '#fff' : '#9AA6C0',
+      checkShadow: canCheck ? '0 12px 24px rgba(79,124,255,0.35)' : 'none',
+      nextOnb: this.nextOnb, startApp: this.startApp,
+      goHome: this.goHome, goScan: this.goScan, goResult: this.goResult,
+      goTutor: this.goTutor, goPractice: this.goPractice, goProfile: this.goProfile, goPaywall: this.goPaywall,
+      homeColor: tabCol('home'), homeFill: tabFill('home'),
+      pracColor: tabCol('practice'), pracFill: tabFill('practice'),
+      tutorColor: tabCol('tutor'), tutorFill: tabFill('tutor'),
+      profColor: tabCol('profile'), profFill: tabFill('profile'),
+    };
+  }
+}
+</script>
+</body>
+</html>

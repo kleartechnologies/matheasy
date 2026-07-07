@@ -1,0 +1,288 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/animations/app_transitions.dart';
+import '../../../core/animations/floaty.dart';
+import '../../../core/extensions/context_extensions.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_durations.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/mascot/numi_mascot.dart';
+import '../application/auth_controller.dart';
+import 'widgets/auth_benefit_row.dart';
+import 'widgets/auth_provider_button.dart';
+
+/// The premium sign-in experience: Numi, the value proposition, and the three
+/// ways in — Apple, Google, or Guest.
+///
+/// Navigation is handled by the router guard, not here: the moment the session
+/// becomes authenticated (real or guest), the guard redirects away from `/auth`.
+/// This screen only triggers actions and reflects their loading/error state.
+class AuthScreen extends ConsumerStatefulWidget {
+  const AuthScreen({super.key});
+
+  @override
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  AuthButtonProvider? _pending;
+
+  void _signIn(AuthButtonProvider provider) {
+    setState(() => _pending = provider);
+    final notifier = ref.read(authControllerProvider.notifier);
+    unawaited(
+      provider == AuthButtonProvider.apple
+          ? notifier.signInWithApple()
+          : notifier.signInWithGoogle(),
+    );
+  }
+
+  void _continueAsGuest() =>
+      ref.read(authControllerProvider.notifier).continueAsGuest();
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // Surface failures (non-cancellations) and stop the spinner when a sign-in
+    // attempt settles.
+    ref.listen(authControllerProvider, (prev, next) {
+      final failure = next.failure;
+      if (failure != null &&
+          !failure.isSilent &&
+          failure != prev?.failure) {
+        _showError(failure.message);
+      }
+      if ((prev?.busy ?? false) && !next.busy && _pending != null) {
+        setState(() => _pending = null);
+      }
+    });
+
+    final busy = ref.watch(authControllerProvider.select((s) => s.busy));
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenH,
+                AppSpacing.xl,
+                AppSpacing.screenH,
+                AppSpacing.xl,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AppTransitions.scaleIn(
+                    child: const Floaty(
+                      child: NumiMascot(
+                        expression: NumiExpression.wave,
+                        size: 128,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    'Learn math with AI',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.displaySmall
+                        .copyWith(color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    "Welcome to Matheasy! Let's start learning together.",
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyLarge
+                        .copyWith(color: colors.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.xxxl),
+                  const _Benefits(),
+                  const SizedBox(height: AppSpacing.xxxl),
+                  _Actions(
+                    busy: busy,
+                    pending: _pending,
+                    onApple: () => _signIn(AuthButtonProvider.apple),
+                    onGoogle: () => _signIn(AuthButtonProvider.google),
+                    onGuest: _continueAsGuest,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const _LegalFootnote(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Benefits extends StatelessWidget {
+  const _Benefits();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        AuthBenefitRow(
+          icon: Icons.center_focus_strong_rounded,
+          color: AppColors.primary,
+          title: 'Scan questions',
+          subtitle: 'Snap any problem and get a clear, worked solution.',
+        ),
+        SizedBox(height: AppSpacing.lg),
+        AuthBenefitRow(
+          icon: Icons.auto_awesome_rounded,
+          color: AppColors.secondary,
+          title: 'Learn faster',
+          subtitle: 'Numi explains the why, at your level, step by step.',
+        ),
+        SizedBox(height: AppSpacing.lg),
+        AuthBenefitRow(
+          icon: Icons.fitness_center_rounded,
+          color: AppColors.success,
+          title: 'Practice smarter',
+          subtitle: 'Targeted practice that adapts as you improve.',
+        ),
+      ],
+    );
+  }
+}
+
+class _Actions extends StatelessWidget {
+  const _Actions({
+    required this.busy,
+    required this.pending,
+    required this.onApple,
+    required this.onGoogle,
+    required this.onGuest,
+  });
+
+  final bool busy;
+  final AuthButtonProvider? pending;
+  final VoidCallback onApple;
+  final VoidCallback onGoogle;
+  final VoidCallback onGuest;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AuthProviderButton(
+          provider: AuthButtonProvider.apple,
+          isLoading: pending == AuthButtonProvider.apple,
+          onPressed: busy ? null : onApple,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AuthProviderButton(
+          provider: AuthButtonProvider.google,
+          isLoading: pending == AuthButtonProvider.google,
+          onPressed: busy ? null : onGoogle,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _GuestButton(onPressed: busy ? null : onGuest),
+      ],
+    );
+  }
+}
+
+class _GuestButton extends StatelessWidget {
+  const _GuestButton({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final enabled = onPressed != null;
+    // TextButton already exposes button + label ('Continue as Guest') + tap
+    // semantics, so no extra Semantics wrapper is needed (it would double the
+    // announcement).
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        foregroundColor: colors.textSecondary,
+      ),
+      child: AnimatedDefaultTextStyle(
+        duration: AppDurations.fast,
+        style: AppTypography.button.copyWith(
+          color: enabled ? colors.textSecondary : colors.textTertiary,
+          fontSize: 16,
+        ),
+        child: const Text('Continue as Guest'),
+      ),
+    );
+  }
+}
+
+class _LegalFootnote extends StatelessWidget {
+  const _LegalFootnote();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final linkStyle = AppTypography.caption.copyWith(
+      color: AppColors.primary,
+      fontWeight: FontWeight.w700,
+    );
+    return Column(
+      children: [
+        Text(
+          'By continuing you agree to our',
+          textAlign: TextAlign.center,
+          style: AppTypography.caption.copyWith(color: colors.textTertiary),
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _LegalLink(label: 'Terms', style: linkStyle),
+            Text(
+              '  ·  ',
+              style: AppTypography.caption.copyWith(color: colors.textTertiary),
+            ),
+            _LegalLink(label: 'Privacy Policy', style: linkStyle),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _LegalLink extends StatelessWidget {
+  const _LegalLink({required this.label, required this.style});
+
+  final String label;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text('$label opens in your browser soon.')),
+          ),
+        // Label already carried by the Semantics above — don't announce twice.
+        child: ExcludeSemantics(child: Text(label, style: style)),
+      ),
+    );
+  }
+}

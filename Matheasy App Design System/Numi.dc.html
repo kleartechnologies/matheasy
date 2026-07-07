@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:{{ boxPx }};height:{{ boxPx }};position:relative;flex-shrink:0;">
+  <div style="position:absolute;top:0;left:0;width:200px;height:200px;transform:scale({{ scale }});transform-origin:top left;">
+
+    <!-- antenna -->
+    <div style="position:absolute;top:6px;left:89px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #FFE79A, #FFD54A 70%);box-shadow:0 0 18px rgba(255,213,74,0.75), 0 0 6px rgba(255,213,74,0.9);z-index:1;"></div>
+    <div style="position:absolute;top:24px;left:97px;width:6px;height:26px;border-radius:4px;background:linear-gradient(#8FB0FF,#5F8BFF);"></div>
+
+    <!-- ears -->
+    <div style="position:absolute;top:99px;left:8px;width:16px;height:44px;border-radius:8px;background:linear-gradient(#8FB0FF,#6C93FF);box-shadow:inset 0 4px 4px rgba(255,255,255,0.4);"></div>
+    <div style="position:absolute;top:99px;left:176px;width:16px;height:44px;border-radius:8px;background:linear-gradient(#8FB0FF,#6C93FF);box-shadow:inset 0 4px 4px rgba(255,255,255,0.4);"></div>
+
+    <!-- head -->
+    <div style="position:absolute;left:16px;top:46px;width:168px;height:150px;border-radius:56px;background:linear-gradient(158deg,#6C93FF 0%,#4F7CFF 62%,#4573F5 100%);box-shadow:0 18px 34px rgba(79,124,255,0.4), inset 0 6px 10px rgba(255,255,255,0.4), inset 0 -10px 18px rgba(47,80,190,0.35);">
+      <!-- gloss -->
+      <div style="position:absolute;top:12px;left:30px;width:100px;height:38px;border-radius:50%;background:linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));"></div>
+
+      <!-- face plate -->
+      <div style="position:absolute;top:30px;left:28px;right:28px;bottom:24px;border-radius:40px;background:linear-gradient(160deg,#F4F8FF,#E4EDFF);box-shadow:inset 0 4px 9px rgba(43,58,103,0.14), inset 0 -2px 5px rgba(255,255,255,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow:hidden;">
+
+        <!-- eyes -->
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:22px;height:30px;">
+          <sc-if value="{{ leftRound }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;width:24px;height:28px;border-radius:50%;background:#243562;">
+              <div style="position:absolute;top:4px;left:5px;width:8px;height:8px;border-radius:50%;background:#fff;opacity:0.92;"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ leftArc }}" hint-placeholder-val="{{ false }}">
+            <div style="width:28px;height:16px;border-top:7px solid #243562;border-left:7px solid #243562;border-right:7px solid #243562;border-radius:18px 18px 0 0;box-sizing:border-box;"></div>
+          </sc-if>
+
+          <sc-if value="{{ rightRound }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;width:24px;height:28px;border-radius:50%;background:#243562;">
+              <div style="position:absolute;top:4px;left:5px;width:8px;height:8px;border-radius:50%;background:#fff;opacity:0.92;"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ rightArc }}" hint-placeholder-val="{{ false }}">
+            <div style="width:28px;height:16px;border-top:7px solid #243562;border-left:7px solid #243562;border-right:7px solid #243562;border-radius:18px 18px 0 0;box-sizing:border-box;"></div>
+          </sc-if>
+          <sc-if value="{{ rightLine }}" hint-placeholder-val="{{ false }}">
+            <div style="width:26px;height:7px;border-radius:4px;background:#243562;margin-bottom:7px;"></div>
+          </sc-if>
+        </div>
+
+        <!-- cheeks -->
+        <div style="display:flex;justify-content:center;gap:50px;">
+          <div style="width:15px;height:9px;border-radius:50%;background:rgba(255,142,118,0.42);"></div>
+          <div style="width:15px;height:9px;border-radius:50%;background:rgba(255,142,118,0.42);"></div>
+        </div>
+
+        <!-- mouth -->
+        <div style="height:24px;display:flex;align-items:center;justify-content:center;">
+          <sc-if value="{{ mouthSmile }}" hint-placeholder-val="{{ true }}">
+            <div style="width:40px;height:18px;border:5.5px solid #243562;border-top:none;border-radius:0 0 24px 24px;box-sizing:border-box;"></div>
+          </sc-if>
+          <sc-if value="{{ mouthOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;width:36px;height:23px;background:#243562;border-radius:7px 7px 22px 22px;overflow:hidden;">
+              <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:18px;height:11px;background:#FF8C7A;border-radius:12px 12px 6px 6px;"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ mouthSmall }}" hint-placeholder-val="{{ false }}">
+            <div style="width:16px;height:16px;border-radius:50%;border:5px solid #243562;box-sizing:border-box;"></div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <!-- waving hand -->
+    <sc-if value="{{ showHand }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;right:0px;top:70px;width:34px;height:34px;border-radius:50% 50% 50% 22%;background:linear-gradient(150deg,#8FB0FF,#5F8BFF);box-shadow:0 6px 14px rgba(79,124,255,0.35);transform:rotate(20deg);"></div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:150,&quot;height&quot;:150},&quot;expression&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;happy&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;celebrate&quot;,&quot;thinking&quot;,&quot;wink&quot;,&quot;wave&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:120,&quot;min&quot;:32,&quot;max&quot;:220,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const size = Number(this.props.size ?? 120);
+    const e = this.props.expression ?? 'happy';
+    const arc = e === 'celebrate';
+    const wink = e === 'wink' || e === 'encourage';
+    const thinking = e === 'thinking';
+    const open = e === 'celebrate' || e === 'wave';
+    return {
+      boxPx: size + 'px',
+      scale: size / 200,
+      leftRound: !arc,
+      leftArc: arc,
+      rightRound: !arc && !wink,
+      rightArc: arc && !wink,
+      rightLine: wink,
+      mouthSmile: !open && !thinking,
+      mouthOpen: open,
+      mouthSmall: thinking,
+      showHand: e === 'wave',
+    };
+  }
+}
+</script>
+</body>
+</html>
