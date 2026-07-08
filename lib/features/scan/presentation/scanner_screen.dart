@@ -12,6 +12,7 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../progress/application/stats_controller.dart';
 import '../application/scanner_controller.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
@@ -37,9 +38,11 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final state = ref.watch(scannerControllerProvider);
     final controller = ref.read(scannerControllerProvider.notifier);
 
-    // Hand off to the result screen when analysis completes.
+    // Hand off to the result screen when analysis completes, and record the
+    // scan for progress/achievements.
     ref.listen(scannerControllerProvider, (previous, next) {
       if (next is ScanComplete) {
+        ref.read(statsControllerProvider.notifier).recordScan();
         context.pushReplacement(AppRoutes.scanResult, extra: next.equation);
       }
     });

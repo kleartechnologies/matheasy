@@ -45,6 +45,8 @@ class PracticeProgress {
     this.totalXp = 0,
     this.streakCurrent = 0,
     this.streakBest = 0,
+    this.sessionsCompleted = 0,
+    this.dailyChallengesCompleted = 0,
     this.lastPracticedEpochDay,
     this.lastDailyChallengeEpochDay,
     this.topics = const {},
@@ -56,6 +58,12 @@ class PracticeProgress {
   final int totalXp;
   final int streakCurrent;
   final int streakBest;
+
+  /// Total practice sessions finished (for achievements + stats).
+  final int sessionsCompleted;
+
+  /// Total daily challenges finished.
+  final int dailyChallengesCompleted;
 
   /// Day of the last practice (days since the Unix epoch), for streak math.
   final int? lastPracticedEpochDay;
@@ -81,6 +89,8 @@ class PracticeProgress {
     int? totalXp,
     int? streakCurrent,
     int? streakBest,
+    int? sessionsCompleted,
+    int? dailyChallengesCompleted,
     int? lastPracticedEpochDay,
     int? lastDailyChallengeEpochDay,
     Map<PracticeTopic, TopicProgress>? topics,
@@ -90,6 +100,9 @@ class PracticeProgress {
       totalXp: totalXp ?? this.totalXp,
       streakCurrent: streakCurrent ?? this.streakCurrent,
       streakBest: streakBest ?? this.streakBest,
+      sessionsCompleted: sessionsCompleted ?? this.sessionsCompleted,
+      dailyChallengesCompleted:
+          dailyChallengesCompleted ?? this.dailyChallengesCompleted,
       lastPracticedEpochDay:
           lastPracticedEpochDay ?? this.lastPracticedEpochDay,
       lastDailyChallengeEpochDay:

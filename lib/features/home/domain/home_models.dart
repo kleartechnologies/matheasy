@@ -83,26 +83,6 @@ class StreakInfo {
   bool get isActive => current > 0;
 }
 
-/// An achievement badge (locked or unlocked, with optional progress).
-@immutable
-class AchievementBadge {
-  const AchievementBadge({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-    this.unlocked = false,
-    this.progress,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color accent;
-  final bool unlocked;
-  final double? progress;
-}
-
 /// A topic the learner is weak in.
 @immutable
 class WeakTopic {
@@ -155,7 +135,6 @@ class HomeData {
     required this.dailyGoal,
     required this.continueCourses,
     required this.todayChallenge,
-    required this.achievements,
     required this.weakTopics,
     required this.recommendations,
     required this.numiMessage,
@@ -167,7 +146,6 @@ class HomeData {
   final DailyGoalInfo dailyGoal;
   final List<CourseProgress> continueCourses;
   final TodayChallenge? todayChallenge;
-  final List<AchievementBadge> achievements;
   final List<WeakTopic> weakTopics;
   final List<PracticeRecommendation> recommendations;
   final String numiMessage;

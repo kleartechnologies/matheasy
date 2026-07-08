@@ -27,8 +27,8 @@ class AppTabItem {
 /// The app's premium glassmorphic bottom navigation with a raised, primary
 /// "Scan" action in the center.
 ///
-/// The four side tabs map to the navigation shell's branches ([currentIndex]
-/// 0–3; [onTap] switches branch). The center Scan button is a distinct action
+/// The five side tabs map to the navigation shell's branches ([currentIndex];
+/// [onTap] switches branch). The center Scan button is a distinct action
 /// ([onScan]) that pushes the full-screen scanner over the shell — so it reads
 /// as the app's primary verb and the tab bar disappears while scanning.
 ///
@@ -61,6 +61,7 @@ class AppTabBar extends StatelessWidget {
   ];
 
   static const List<AppTabItem> defaultRightItems = [
+    AppTabItem(index: 4, icon: Icons.insights_rounded, label: 'Progress'),
     AppTabItem(index: 2, icon: Icons.forum_rounded, label: 'Tutor'),
     AppTabItem(index: 3, icon: Icons.person_rounded, label: 'Profile'),
   ];
@@ -95,23 +96,26 @@ class AppTabBar extends StatelessWidget {
             8 + context.viewPadding.bottom,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final item in leftItems)
-                _SideTab(
-                  item: item,
-                  selected: currentIndex == item.index,
-                  badge: badges[item.index],
-                  onTap: () => _handleTap(item.index),
+                Expanded(
+                  child: _SideTab(
+                    item: item,
+                    selected: currentIndex == item.index,
+                    badge: badges[item.index],
+                    onTap: () => _handleTap(item.index),
+                  ),
                 ),
               _ScanButton(onTap: _handleScan),
               for (final item in rightItems)
-                _SideTab(
-                  item: item,
-                  selected: currentIndex == item.index,
-                  badge: badges[item.index],
-                  onTap: () => _handleTap(item.index),
+                Expanded(
+                  child: _SideTab(
+                    item: item,
+                    selected: currentIndex == item.index,
+                    badge: badges[item.index],
+                    onTap: () => _handleTap(item.index),
+                  ),
                 ),
             ],
           ),
@@ -137,34 +141,48 @@ class _SideTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected ? AppColors.primary : context.colors.textTertiary;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        width: 56,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Badged(
-              count: badge,
-              child: AnimatedScale(
-                scale: selected ? 1.12 : 1.0,
-                duration: AppDurations.fast,
-                curve: AppCurves.emphasized,
-                child: Icon(item.icon, size: 26, color: color),
-              ),
+    final count = badge;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: count != null && count > 0
+          ? '${item.label}, $count new'
+          : item.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ExcludeSemantics(
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Badged(
+                  count: badge,
+                  child: AnimatedScale(
+                    scale: selected ? 1.12 : 1.0,
+                    duration: AppDurations.fast,
+                    curve: AppCurves.emphasized,
+                    child: Icon(item.icon, size: 25, color: color),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                AnimatedDefaultTextStyle(
+                  duration: AppDurations.fast,
+                  style: AppTypography.caption.copyWith(
+                    fontSize: 10,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  child: Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 3),
-            AnimatedDefaultTextStyle(
-              duration: AppDurations.fast,
-              style: AppTypography.caption.copyWith(
-                fontSize: 10.5,
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-              child: Text(item.label),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -178,31 +196,35 @@ class _ScanButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: const Offset(0, -20),
-      child: Pressable(
-        onTap: onTap,
-        scale: 0.94,
-        haptic: false, // handled by the tab bar
-        borderRadius: AppRadius.lgRadius,
-        child: Container(
-          width: 58,
-          height: 58,
-          decoration: const BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: AppRadius.lgRadius,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryGlowStrong,
-                blurRadius: 24,
-                offset: Offset(0, 12),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.center_focus_strong_rounded,
-            size: 30,
-            color: AppColors.white,
+    return Semantics(
+      button: true,
+      label: 'Scan a problem',
+      child: Transform.translate(
+        offset: const Offset(0, -20),
+        child: Pressable(
+          onTap: onTap,
+          scale: 0.94,
+          haptic: false, // handled by the tab bar
+          borderRadius: AppRadius.lgRadius,
+          child: Container(
+            width: 58,
+            height: 58,
+            decoration: const BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: AppRadius.lgRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryGlowStrong,
+                  blurRadius: 24,
+                  offset: Offset(0, 12),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.center_focus_strong_rounded,
+              size: 30,
+              color: AppColors.white,
+            ),
           ),
         ),
       ),

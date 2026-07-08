@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/features/tutor/application/tutor_controller.dart';
 import 'package:matheasy/features/tutor/application/tutor_reply_engine.dart';
@@ -18,6 +19,7 @@ import 'package:matheasy/features/tutor/presentation/tutor_chat_screen.dart';
 import 'package:matheasy/features/tutor/presentation/tutor_screen.dart';
 import 'package:matheasy/features/tutor/presentation/widgets/tutor_quiz_card.dart';
 import 'package:matheasy/shared/mascot/numi_expression.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A zero-delay [TutorService] so controller/widget tests don't wait on the
 /// mock "thinking" pause. Uses the real engine, so replies stay realistic.
@@ -280,9 +282,13 @@ void main() {
     });
 
     testWidgets('chat greets, then answers a sent message', (tester) async {
+      // Sending a message records tutor usage for progress, which needs prefs.
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
             tutorServiceProvider
                 .overrideWithValue(const _InstantTutorService()),
           ],

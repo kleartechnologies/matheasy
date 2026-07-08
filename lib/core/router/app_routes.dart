@@ -15,12 +15,14 @@ class AppRoutes {
   static const String scan = '/scan';
   static const String tutor = '/tutor';
   static const String profile = '/profile';
+  static const String progress = '/progress';
 
   static const String homeName = 'home';
   static const String practiceName = 'practice';
   static const String scanName = 'scan';
   static const String tutorName = 'tutor';
   static const String profileName = 'profile';
+  static const String progressName = 'progress';
 
   // ---- Sub-routes (relative segment + absolute location + name) ----
   static const String scanResultSegment = 'result';
@@ -42,6 +44,10 @@ class AppRoutes {
   static const String profileSubscriptionSegment = 'subscription';
   static const String profileSubscription = '/profile/subscription';
   static const String profileSubscriptionName = 'profileSubscription';
+
+  static const String progressAchievementsSegment = 'achievements';
+  static const String progressAchievements = '/progress/achievements';
+  static const String progressAchievementsName = 'progressAchievements';
 
   // ---- Top-level flows (over the shell) ----
   static const String splash = '/splash';
@@ -66,4 +72,5 @@ class AppRoutes {
   static const int practiceBranch = 1;
   static const int tutorBranch = 2;
   static const int profileBranch = 3;
+  static const int progressBranch = 4;
 }

@@ -52,6 +52,8 @@ class LocalPracticeRepository implements PracticeRepository {
         'totalXp': p.totalXp,
         'streakCurrent': p.streakCurrent,
         'streakBest': p.streakBest,
+        'sessionsCompleted': p.sessionsCompleted,
+        'dailyChallengesCompleted': p.dailyChallengesCompleted,
         'lastPracticedEpochDay': p.lastPracticedEpochDay,
         'lastDailyChallengeEpochDay': p.lastDailyChallengeEpochDay,
         'topics': {
@@ -86,6 +88,8 @@ class LocalPracticeRepository implements PracticeRepository {
       totalXp: _int(m['totalXp']),
       streakCurrent: _int(m['streakCurrent']),
       streakBest: _int(m['streakBest']),
+      sessionsCompleted: _int(m['sessionsCompleted']),
+      dailyChallengesCompleted: _int(m['dailyChallengesCompleted']),
       lastPracticedEpochDay: m['lastPracticedEpochDay'] is int
           ? m['lastPracticedEpochDay'] as int
           : null,

@@ -8,10 +8,10 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../application/home_controller.dart';
-import 'sections/achievements_section.dart';
 import 'sections/continue_learning.dart';
 import 'sections/daily_goal_card.dart';
 import 'sections/home_header.dart';
+import 'sections/home_progress_card.dart';
 import 'sections/numi_motivation_card.dart';
 import 'sections/quick_actions.dart';
 import 'sections/recommended_practice.dart';
@@ -42,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
       StreakSection(streak: data.streak),
       WeakTopicsSection(topics: data.weakTopics),
       RecommendedPractice(items: data.recommendations),
-      AchievementsSection(achievements: data.achievements),
+      const HomeProgressCard(),
       NumiMotivationCard(message: data.numiMessage),
       PremiumFeatureTile(onTap: () => context.push(AppRoutes.paywall)),
     ];

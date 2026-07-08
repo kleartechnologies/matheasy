@@ -14,6 +14,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../../shared/mascot/numi_mascot.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
+import '../../progress/application/stats_controller.dart';
 import '../application/tutor_controller.dart';
 import '../domain/tutor_models.dart';
 import 'widgets/tutor_chat_input.dart';
@@ -71,12 +72,18 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     });
   }
 
-  void _send(String text) =>
-      unawaited(ref.read(tutorChatControllerProvider.notifier).send(text));
+  void _recordTutorUse() =>
+      ref.read(statsControllerProvider.notifier).recordTutorUsed();
 
-  void _sendAction(SuggestionAction action) => unawaited(
-        ref.read(tutorChatControllerProvider.notifier).sendAction(action),
-      );
+  void _send(String text) {
+    _recordTutorUse();
+    unawaited(ref.read(tutorChatControllerProvider.notifier).send(text));
+  }
+
+  void _sendAction(SuggestionAction action) {
+    _recordTutorUse();
+    unawaited(ref.read(tutorChatControllerProvider.notifier).sendAction(action));
+  }
 
   void _newChat() {
     ref.read(tutorChatControllerProvider.notifier).reset();

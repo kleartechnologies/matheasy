@@ -215,14 +215,21 @@ void main() {
     });
 
     testWidgets('first-day dashboard shows starter content', (tester) async {
+      // Home now reads real progress providers (HomeProgressCard), so it needs
+      // seeded prefs + a fake auth backend.
+      final container = await sessionContainer();
+      addTearDown(container.dispose);
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            homeControllerProvider.overrideWith(_FirstDayHomeController.new),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            home: const HomeScreen(),
+        UncontrolledProviderScope(
+          container: container,
+          child: ProviderScope(
+            overrides: [
+              homeControllerProvider.overrideWith(_FirstDayHomeController.new),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              home: const HomeScreen(),
+            ),
           ),
         ),
       );

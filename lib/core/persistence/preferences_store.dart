@@ -31,6 +31,8 @@ class PreferencesStore {
   static const String _kOnboardingComplete = 'session.onboarding_complete';
   static const String _kGuestMode = 'session.guest_mode';
   static const String _kPracticeProgress = 'practice.progress';
+  static const String _kAchievements = 'progress.achievements';
+  static const String _kProgressStats = 'progress.stats';
 
   /// Whether the user has finished onboarding (so returning users skip it).
   bool get onboardingComplete =>
@@ -54,4 +56,16 @@ class PreferencesStore {
 
   Future<void> setPracticeProgressJson(String json) =>
       _prefs.setString(_kPracticeProgress, json);
+
+  /// The serialized achievement unlocks (JSON).
+  String? get achievementsJson => _prefs.getString(_kAchievements);
+
+  Future<void> setAchievementsJson(String json) =>
+      _prefs.setString(_kAchievements, json);
+
+  /// The serialized progress analytics (JSON).
+  String? get progressStatsJson => _prefs.getString(_kProgressStats);
+
+  Future<void> setProgressStatsJson(String json) =>
+      _prefs.setString(_kProgressStats, json);
 }

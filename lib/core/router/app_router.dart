@@ -14,6 +14,8 @@ import '../../features/practice/presentation/practice_session_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/profile_settings_screen.dart';
 import '../../features/profile/presentation/profile_subscription_screen.dart';
+import '../../features/progress/presentation/achievements_screen.dart';
+import '../../features/progress/presentation/progress_screen.dart';
 import '../../features/result/presentation/result_screen.dart';
 import '../../features/scan/domain/detected_equation.dart';
 import '../../features/scan/presentation/scanner_screen.dart';
@@ -186,6 +188,24 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) =>
                         const ProfileSubscriptionScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 4 — Progress
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.progress,
+                name: AppRoutes.progressName,
+                builder: (context, state) => const ProgressScreen(),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.progressAchievementsSegment,
+                    name: AppRoutes.progressAchievementsName,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) => const AchievementsScreen(),
                   ),
                 ],
               ),

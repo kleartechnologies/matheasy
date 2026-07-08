@@ -99,29 +99,6 @@ class HomeMock {
         target: 5,
         xpReward: 50,
       ),
-      achievements: const [
-        AchievementBadge(
-          icon: Icons.local_fire_department_rounded,
-          title: '7 Day Streak',
-          subtitle: 'A full week of learning',
-          accent: AppColors.gold,
-          unlocked: true,
-        ),
-        AchievementBadge(
-          icon: Icons.workspace_premium_rounded,
-          title: '100 Questions Solved',
-          subtitle: 'Century of solutions',
-          accent: AppColors.success,
-          unlocked: true,
-        ),
-        AchievementBadge(
-          icon: Icons.functions_rounded,
-          title: 'Algebra Master',
-          subtitle: 'Master every algebra topic',
-          accent: AppColors.primary,
-          progress: 0.6,
-        ),
-      ],
       weakTopics: weakTopics,
       recommendations: const [
         PracticeRecommendation(question: r'3x + 4 = 19', difficulty: Difficulty.easy),
@@ -152,22 +129,6 @@ class HomeMock {
         target: 1,
         xpReward: 20,
       ),
-      achievements: [
-        AchievementBadge(
-          icon: Icons.rocket_launch_rounded,
-          title: 'First Steps',
-          subtitle: 'Complete your first lesson',
-          accent: AppColors.primary,
-          progress: 0,
-        ),
-        AchievementBadge(
-          icon: Icons.local_fire_department_rounded,
-          title: '3 Day Streak',
-          subtitle: 'Learn 3 days in a row',
-          accent: AppColors.gold,
-          progress: 0,
-        ),
-      ],
       weakTopics: [],
       recommendations: [
         PracticeRecommendation(question: r'2 + 3 \times 4', difficulty: Difficulty.easy),

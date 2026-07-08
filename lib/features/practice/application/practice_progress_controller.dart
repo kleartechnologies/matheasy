@@ -59,6 +59,9 @@ class PracticeProgressController extends _$PracticeProgressController {
       totalXp: state.totalXp + sessionXp,
       streakCurrent: streakCurrent,
       streakBest: streakBest,
+      sessionsCompleted: state.sessionsCompleted + 1,
+      dailyChallengesCompleted: state.dailyChallengesCompleted +
+          (session.request.isDailyChallenge ? 1 : 0),
       lastPracticedEpochDay: today,
       lastDailyChallengeEpochDay:
           awardDaily ? today : state.lastDailyChallengeEpochDay,
@@ -78,6 +81,15 @@ class PracticeProgressController extends _$PracticeProgressController {
       masteryAfter: afterTopic.level,
       masteryPointsAfter: afterTopic.masteryPoints,
     );
+  }
+
+  /// Adds bonus XP outside a session (e.g. achievement rewards). This is the
+  /// single XP ledger, so achievement XP flows into the same level/total.
+  void awardXp(int amount) {
+    if (amount <= 0) return;
+    final updated = state.copyWith(totalXp: state.totalXp + amount);
+    state = updated;
+    unawaited(ref.read(practiceRepositoryProvider).save(updated));
   }
 
   /// Clears all local progress (used by tests / a future "reset progress").
