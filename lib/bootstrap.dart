@@ -10,6 +10,9 @@ import 'app.dart';
 import 'core/persistence/preferences_store.dart';
 import 'core/utils/app_logger.dart';
 import 'features/auth/application/auth_service.dart';
+import 'features/subscription/application/revenuecat_bootstrap.dart';
+import 'features/subscription/application/subscription_service.dart';
+import 'features/sync/application/cloud_store.dart';
 import 'firebase_options.dart';
 
 /// Boots the app inside a guarded zone with centralized error handling.
@@ -39,12 +42,14 @@ Future<void> bootstrap() async {
 
       final preferences = await SharedPreferences.getInstance();
       final firebaseReady = await _initializeFirebase();
+      final revenueCatReady = await initializeRevenueCat();
 
       runApp(
         ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(preferences),
             firebaseReadyProvider.overrideWithValue(firebaseReady),
+            revenueCatReadyProvider.overrideWithValue(revenueCatReady),
           ],
           child: const MatheasyApp(),
         ),
@@ -72,6 +77,9 @@ Future<bool> _initializeFirebase() async {
   }
   try {
     await Firebase.initializeApp(options: options);
+    // Cloud data layer uses the local store as source of truth, so disable
+    // Firestore's own offline cache for explicit sync control.
+    configureFirestore();
     return true;
   } catch (error, stack) {
     AppLogger.error(

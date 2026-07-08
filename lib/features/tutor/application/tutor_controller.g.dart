@@ -118,7 +118,7 @@ final class TutorChatControllerProvider
 }
 
 String _$tutorChatControllerHash() =>
-    r'f0ae1870d3f173da9f9e6d27968272366acdead1';
+    r'ec5eb9f24afc1f04229b973ecee666225f365c80';
 
 /// Drives the live chat conversation with Numi.
 ///

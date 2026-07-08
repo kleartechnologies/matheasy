@@ -9,6 +9,10 @@ import '../../progress/application/achievement_controller.dart';
 import '../../progress/application/progress_controller.dart';
 import '../../progress/application/stats_controller.dart';
 import '../../settings/application/settings_controller.dart';
+import '../../subscription/application/subscription_controller.dart';
+import '../../subscription/application/subscription_service.dart';
+import '../../subscription/application/usage_controller.dart';
+import '../../sync/application/sync_service.dart';
 import '../domain/editable_profile.dart';
 import '../domain/profile_avatar.dart';
 import '../domain/profile_view.dart';
@@ -53,13 +57,24 @@ class ProfileController extends _$ProfileController {
   }
 
   /// Ends the session (keeps the account). The router redirects to `/auth`.
-  Future<void> signOut() =>
-      ref.read(authControllerProvider.notifier).signOut();
+  Future<void> signOut() => ref.read(authControllerProvider.notifier).signOut();
 
   /// Permanently deletes the account (or ends the guest session) AND wipes every
   /// on-device learning artifact, then rebuilds the local controllers so nothing
   /// stale survives. Integrates with the Stage 7 auth services.
   Future<void> deleteAccount() async {
+    // Wipe cloud data first, while still authenticated (Firestore rules require
+    // the matching uid). Uses the sync *service* directly — not the sync
+    // controller, which observes this controller — to avoid a provider cycle.
+    // Best-effort: local deletion proceeds even if the cloud wipe fails.
+    final user = ref.read(currentUserProvider);
+    if (user != null && !user.isGuest) {
+      try {
+        await ref.read(syncServiceProvider).wipe(user.id);
+      } catch (_) {
+        // Offline / already-signed-out — local deletion still proceeds.
+      }
+    }
     await ref.read(authControllerProvider.notifier).deleteSession();
     await ref.read(preferencesStoreProvider).clearLearningData();
     ref
@@ -67,6 +82,13 @@ class ProfileController extends _$ProfileController {
       ..invalidate(statsControllerProvider)
       ..invalidate(achievementControllerProvider)
       ..invalidate(settingsControllerProvider)
+      ..invalidate(usageControllerProvider)
+      // Rebuild the subscription service + controller from the now-wiped cache
+      // so the in-memory entitlement matches disk (the offline fallback would
+      // otherwise leak a locally-granted Pro to the next in-session guest; a
+      // real RevenueCat entitlement simply re-syncs from the store).
+      ..invalidate(subscriptionServiceProvider)
+      ..invalidate(subscriptionControllerProvider)
       ..invalidateSelf();
   }
 }

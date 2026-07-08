@@ -15,6 +15,8 @@ import '../../../shared/mascot/numi_mascot.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../progress/application/stats_controller.dart';
+import '../../subscription/application/usage_controller.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../application/tutor_controller.dart';
 import '../domain/tutor_models.dart';
 import 'widgets/tutor_chat_input.dart';
@@ -47,11 +49,18 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _started) return;
       _started = true;
-      unawaited(
-        ref
-            .read(tutorChatControllerProvider.notifier)
-            .start(widget.launchContext),
-      );
+      final launch = widget.launchContext;
+      final seeded = launch?.seedMessage?.trim().isNotEmpty ?? false;
+      // A prompt-seeded open auto-sends a message; if the user is out of free
+      // Numi messages, replace the chat with the paywall rather than spend one.
+      if (seeded && !ref.read(usageSnapshotProvider).canSendNumiMessage) {
+        context.pushReplacement(
+          AppRoutes.paywall,
+          extra: PaywallTrigger.numiLimit,
+        );
+        return;
+      }
+      unawaited(ref.read(tutorChatControllerProvider.notifier).start(launch));
     });
   }
 
@@ -75,12 +84,22 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   void _recordTutorUse() =>
       ref.read(statsControllerProvider.notifier).recordTutorUsed();
 
+  /// Returns true if a Numi message may be sent; otherwise opens the paywall
+  /// over the conversation so dismissing it returns the user to the thread.
+  bool _ensureNumiQuota() {
+    if (ref.read(usageSnapshotProvider).canSendNumiMessage) return true;
+    context.push(AppRoutes.paywall, extra: PaywallTrigger.numiLimit);
+    return false;
+  }
+
   void _send(String text) {
+    if (!_ensureNumiQuota()) return;
     _recordTutorUse();
     unawaited(ref.read(tutorChatControllerProvider.notifier).send(text));
   }
 
   void _sendAction(SuggestionAction action) {
+    if (!_ensureNumiQuota()) return;
     _recordTutorUse();
     unawaited(ref.read(tutorChatControllerProvider.notifier).sendAction(action));
   }

@@ -13,6 +13,8 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../progress/application/stats_controller.dart';
+import '../../subscription/application/usage_controller.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../application/scanner_controller.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
@@ -33,16 +35,31 @@ class ScannerScreen extends ConsumerStatefulWidget {
 class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   bool _flashOn = false;
 
+  /// The "Continue → solve" commit point. Checks the scan quota first: a free
+  /// user out of scans is sent to the paywall (the scanner is replaced, so
+  /// dismissing it returns to the app) instead of consuming a solve.
+  void _onContinue() {
+    if (ref.read(usageSnapshotProvider).canScan) {
+      ref.read(scannerControllerProvider.notifier).confirm();
+      return;
+    }
+    context.pushReplacement(
+      AppRoutes.paywall,
+      extra: PaywallTrigger.scanLimit,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(scannerControllerProvider);
     final controller = ref.read(scannerControllerProvider.notifier);
 
-    // Hand off to the result screen when analysis completes, and record the
-    // scan for progress/achievements.
+    // Hand off to the result screen when analysis completes, recording the scan
+    // for progress/achievements and consuming one from the free-tier quota.
     ref.listen(scannerControllerProvider, (previous, next) {
       if (next is ScanComplete) {
         ref.read(statsControllerProvider.notifier).recordScan();
+        ref.read(usageControllerProvider.notifier).recordScan();
         context.pushReplacement(AppRoutes.scanResult, extra: next.equation);
       }
     });
@@ -92,7 +109,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           equation: equation,
           onClose: () => context.pop(),
           onRetake: controller.retake,
-          onContinue: controller.confirm,
+          onContinue: _onContinue,
         ),
       ScanProcessing() =>
         const ProcessingOverlay(key: ValueKey('processing')),

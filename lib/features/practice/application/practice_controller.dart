@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/services/haptics_service.dart';
+import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
 import 'practice_progress_controller.dart';
@@ -28,6 +29,10 @@ enum PracticePhase {
 
   /// The session couldn't be built.
   error,
+
+  /// The free-tier practice-generation limit is reached — the screen surfaces
+  /// the paywall instead of building a session.
+  locked,
 }
 
 /// Immutable snapshot of the active session, exposed by [PracticeController].
@@ -67,17 +72,31 @@ class PracticeController extends _$PracticeController {
   PracticeSessionState build() => const PracticeSessionState();
 
   /// Builds and begins a session for [request].
+  ///
+  /// Gates before generating: a free user out of practice questions is moved to
+  /// [PracticePhase.locked] (the screen surfaces the paywall) rather than being
+  /// interrupted mid-session. On success, the freshly generated questions are
+  /// counted against the free-tier quota.
   Future<void> start(PracticeRequest request) async {
+    if (!ref.read(usageSnapshotProvider).canGeneratePractice) {
+      state = const PracticeSessionState(phase: PracticePhase.locked);
+      return;
+    }
     state = const PracticeSessionState(phase: PracticePhase.loading);
     try {
       final session =
           await ref.read(practiceServiceProvider).createSession(request);
-      state = session.questions.isEmpty
-          ? const PracticeSessionState(phase: PracticePhase.error)
-          : PracticeSessionState(
-              phase: PracticePhase.answering,
-              session: session,
-            );
+      if (session.questions.isEmpty) {
+        state = const PracticeSessionState(phase: PracticePhase.error);
+        return;
+      }
+      ref
+          .read(usageControllerProvider.notifier)
+          .recordPracticeGenerated(session.questions.length);
+      state = PracticeSessionState(
+        phase: PracticePhase.answering,
+        session: session,
+      );
     } catch (_) {
       state = const PracticeSessionState(phase: PracticePhase.error);
     }

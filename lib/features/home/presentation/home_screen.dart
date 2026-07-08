@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
-import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/widgets.dart';
+import '../../subscription/application/subscription_controller.dart';
 import '../application/home_controller.dart';
 import 'sections/continue_learning.dart';
 import 'sections/daily_goal_card.dart';
 import 'sections/home_header.dart';
 import 'sections/home_progress_card.dart';
+import 'sections/home_usage_card.dart';
 import 'sections/numi_motivation_card.dart';
 import 'sections/quick_actions.dart';
 import 'sections/recommended_practice.dart';
@@ -31,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(homeControllerProvider);
+    final isPro = ref.watch(isProProvider);
 
     final sections = <Widget>[
       HomeHeader(userName: data.userName, streak: data.streak),
@@ -44,7 +44,9 @@ class HomeScreen extends ConsumerWidget {
       RecommendedPractice(items: data.recommendations),
       const HomeProgressCard(),
       NumiMotivationCard(message: data.numiMessage),
-      PremiumFeatureTile(onTap: () => context.push(AppRoutes.paywall)),
+      // Subtle upgrade entry point — free users see live usage; Pro users don't
+      // see any upsell at all.
+      if (!isPro) const HomeUsageCard(),
     ];
 
     return Scaffold(

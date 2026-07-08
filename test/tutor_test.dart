@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
+import 'package:matheasy/features/subscription/application/usage_tracker.dart';
+import 'package:matheasy/features/subscription/domain/usage_counts.dart';
 import 'package:matheasy/features/tutor/application/tutor_controller.dart';
 import 'package:matheasy/features/tutor/application/tutor_reply_engine.dart';
 import 'package:matheasy/features/tutor/application/tutor_service.dart';
@@ -41,10 +43,24 @@ class _InstantTutorService implements TutorService {
       _engine.reply(userText, history: history, context: context);
 }
 
+/// In-memory usage tracker so tutor controller tests need no SharedPreferences —
+/// sending a message now records against the free-tier Numi quota via the
+/// controller.
+class _MemoryUsageTracker implements UsageTracker {
+  UsageCounts _counts = UsageCounts.empty;
+
+  @override
+  UsageCounts load() => _counts;
+
+  @override
+  Future<void> save(UsageCounts counts) async => _counts = counts;
+}
+
 ProviderContainer _instantContainer() {
   final container = ProviderContainer(
     overrides: [
       tutorServiceProvider.overrideWithValue(const _InstantTutorService()),
+      usageTrackerProvider.overrideWithValue(_MemoryUsageTracker()),
     ],
   );
   addTearDown(container.dispose);

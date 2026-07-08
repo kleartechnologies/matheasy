@@ -2,12 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../../shared/mascot/numi_mascot.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../application/practice_controller.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
@@ -95,6 +100,14 @@ class _PracticeSessionScreenState
     Navigator.of(context).maybePop();
   }
 
+  void _openPaywall() {
+    ref.read(practiceControllerProvider.notifier).reset();
+    context.pushReplacement(
+      AppRoutes.paywall,
+      extra: PaywallTrigger.practiceLimit,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Reset the local answer whenever the session moves to a new question.
@@ -132,6 +145,10 @@ class _PracticeSessionScreenState
               result: state.result!,
               onContinue: _continue,
               onDone: _exit,
+            ),
+          PracticePhase.locked => _PracticeLockedView(
+              onSeePlans: _openPaywall,
+              onNotNow: _exit,
             ),
           PracticePhase.answering ||
           PracticePhase.revealed =>
@@ -196,6 +213,59 @@ class _PracticeSessionScreenState
           onNext: _next,
         ),
       ],
+    );
+  }
+}
+
+/// Shown when a free user has generated all their practice questions. A warm,
+/// non-blocking upsell — Numi frames the limit and the primary action opens the
+/// paywall; "Maybe later" backs out without pressure.
+class _PracticeLockedView extends StatelessWidget {
+  const _PracticeLockedView({required this.onSeePlans, required this.onNotNow});
+
+  final VoidCallback onSeePlans;
+  final VoidCallback onNotNow;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const NumiMascot(expression: NumiExpression.wink, size: 120),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              "You're on a roll!",
+              textAlign: TextAlign.center,
+              style: AppTypography.headingMedium
+                  .copyWith(color: colors.textPrimary),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              "You've used all your free practice questions. Go Pro for "
+              'unlimited practice tailored to you.',
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium
+                  .copyWith(color: colors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            PrimaryButton(
+              label: 'See Pro plans',
+              icon: Icons.workspace_premium_rounded,
+              onPressed: onSeePlans,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            GhostButton(
+              label: 'Maybe later',
+              expand: true,
+              onPressed: onNotNow,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

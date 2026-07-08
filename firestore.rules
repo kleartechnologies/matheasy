@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Matheasy Firestore security rules — Stage 12 (Firebase Data Layer).
+//
+// Offline-first, client-owned model: the app's local store is the source of
+// truth and mirrors each user's data to `users/{uid}/state/{domain}`. There is
+// no server code (no Cloud Functions this stage), so the owner is the only
+// reader/writer of their own tree. No public access; no cross-user access.
+//
+// A future production-hardening stage can reintroduce server-side validation
+// (e.g. entitlement written only by the Admin SDK) — intentionally out of scope
+// here.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // A user may read and write only their own document tree, including the
+    // per-domain sync documents under `state/`.
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+  }
+}

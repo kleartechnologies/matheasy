@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/app_lifecycle.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../sync/application/sync_controller.dart';
 
 /// Hosts the [StatefulNavigationShell] (the indexed-stack of the 5 tab
 /// branches) and the app's custom bottom navigation.
@@ -29,6 +30,9 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Keep the app-lifecycle observer alive for the whole session.
     ref.watch(appLifecycleProvider);
+    // Keep the sync engine alive whenever the app shell is shown, so background
+    // cloud sync runs for signed-in users (a no-op for guests).
+    ref.watch(syncControllerProvider);
 
     return Scaffold(
       extendBody: true,

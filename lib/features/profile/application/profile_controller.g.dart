@@ -62,7 +62,7 @@ final class ProfileControllerProvider
   }
 }
 
-String _$profileControllerHash() => r'e413cf70202e19fe60015e47d9a23a065a33967e';
+String _$profileControllerHash() => r'344b642f2a6a72ec2a6903940cf42eae9e275d2c';
 
 /// Assembles the [ProfileView] the Profile screen renders — identity (auth),
 /// editable fields (name + avatar) and headline stats (progress) — and owns the

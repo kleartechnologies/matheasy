@@ -37,15 +37,3 @@ class OnboardingController extends _$OnboardingController {
     state = false;
   }
 }
-
-/// Whether the user holds the `premium` entitlement.
-///
-/// STAGE 1 PLACEHOLDER: defaults to `false`. Stage 11 sources this from
-/// RevenueCat entitlements.
-@riverpod
-class PremiumController extends _$PremiumController {
-  @override
-  bool build() => false;
-
-  void setPremium({required bool value}) => state = value;
-}

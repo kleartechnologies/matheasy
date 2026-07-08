@@ -35,6 +35,11 @@ class PreferencesStore {
   static const String _kProgressStats = 'progress.stats';
   static const String _kSettings = 'settings.preferences';
   static const String _kProfile = 'profile.editable';
+  static const String _kUsageCounts = 'subscription.usage';
+  static const String _kSubscriptionCache = 'subscription.cache';
+  static const String _kLastPaywallImpression = 'subscription.last_paywall';
+  static const String _kSyncMetadata = 'sync.metadata';
+  static const String _kLastSynced = 'sync.last_synced';
 
   /// Whether the user has finished onboarding (so returning users skip it).
   bool get onboardingComplete =>
@@ -63,6 +68,11 @@ class PreferencesStore {
     await _prefs.remove(_kProgressStats);
     await _prefs.remove(_kSettings);
     await _prefs.remove(_kProfile);
+    await _prefs.remove(_kUsageCounts);
+    await _prefs.remove(_kSubscriptionCache);
+    await _prefs.remove(_kLastPaywallImpression);
+    await _prefs.remove(_kSyncMetadata);
+    await _prefs.remove(_kLastSynced);
   }
 
   /// The serialized practice progress (JSON), or `null` when none saved yet.
@@ -94,4 +104,40 @@ class PreferencesStore {
   String? get profileJson => _prefs.getString(_kProfile);
 
   Future<void> setProfileJson(String json) => _prefs.setString(_kProfile, json);
+
+  /// The serialized lifetime usage counters — scans, Numi messages and
+  /// generated practice questions (JSON).
+  String? get usageCountsJson => _prefs.getString(_kUsageCounts);
+
+  Future<void> setUsageCountsJson(String json) =>
+      _prefs.setString(_kUsageCounts, json);
+
+  /// The cached [SubscriptionStatus] (JSON). RevenueCat is the source of truth;
+  /// this is only a warm-start snapshot so the app opens with the last-known
+  /// entitlement before the first refresh resolves.
+  String? get subscriptionCacheJson => _prefs.getString(_kSubscriptionCache);
+
+  Future<void> setSubscriptionCacheJson(String json) =>
+      _prefs.setString(_kSubscriptionCache, json);
+
+  /// Epoch millis of the last time the paywall was shown, or `null` if never.
+  /// Used to avoid re-showing the paywall too eagerly within a session.
+  int? get lastPaywallImpressionMillis =>
+      _prefs.getInt(_kLastPaywallImpression);
+
+  Future<void> setLastPaywallImpressionMillis(int millis) =>
+      _prefs.setInt(_kLastPaywallImpression, millis);
+
+  /// The serialized per-domain sync metadata (versions + timestamps) used for
+  /// cloud conflict resolution (JSON).
+  String? get syncMetadataJson => _prefs.getString(_kSyncMetadata);
+
+  Future<void> setSyncMetadataJson(String json) =>
+      _prefs.setString(_kSyncMetadata, json);
+
+  /// Epoch millis of the last successful cloud sync, or `null` if never.
+  int? get lastSyncedMillis => _prefs.getInt(_kLastSynced);
+
+  Future<void> setLastSyncedMillis(int millis) =>
+      _prefs.setInt(_kLastSynced, millis);
 }

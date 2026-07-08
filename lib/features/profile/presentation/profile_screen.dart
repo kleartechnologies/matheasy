@@ -13,11 +13,13 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../settings/presentation/widgets/settings_section.dart';
 import '../../settings/presentation/widgets/settings_tile.dart';
+import '../../sync/presentation/profile_sync_tile.dart';
 import '../application/profile_controller.dart';
 import 'sections/profile_account_section.dart';
 import 'sections/profile_guest_card.dart';
 import 'sections/profile_header.dart';
 import 'sections/profile_stats.dart';
+import 'sections/profile_subscription_section.dart';
 import 'widgets/guest_upgrade_sheet.dart';
 
 /// The Profile tab — identity, headline stats, guest upsell (or account details)
@@ -102,6 +104,8 @@ class ProfileScreen extends ConsumerWidget {
         )
       else
         ProfileAccountSection(profile: profile),
+      const ProfileSubscriptionSection(),
+      if (!isGuest) const ProfileSyncTile(),
       SettingsSection(
         children: [
           SettingsTile(

@@ -22,6 +22,8 @@ import '../../features/scan/presentation/scanner_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/shell/presentation/app_shell.dart';
 import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/subscription/application/subscription_controller.dart';
+import '../../features/subscription/domain/paywall_trigger.dart';
 import '../../features/tutor/domain/tutor_models.dart';
 import '../../features/tutor/presentation/tutor_chat_screen.dart';
 import '../../features/tutor/presentation/tutor_screen.dart';
@@ -57,7 +59,7 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
     ..onDispose(refresh.dispose)
     ..listen(authStatusProvider, (_, _) => refresh.value++)
     ..listen(onboardingControllerProvider, (_, _) => refresh.value++)
-    ..listen(premiumControllerProvider, (_, _) => refresh.value++);
+    ..listen(isProProvider, (_, _) => refresh.value++);
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -68,7 +70,7 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
       uri: state.uri,
       authStatus: ref.read(authStatusProvider),
       onboardingComplete: ref.read(onboardingControllerProvider),
-      isPremium: ref.read(premiumControllerProvider),
+      isPremium: ref.read(isProProvider),
     ),
     routes: [
       GoRoute(
@@ -90,7 +92,11 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.paywall,
         name: AppRoutes.paywallName,
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const PaywallScreen(),
+        builder: (context, state) => PaywallScreen(
+          trigger: state.extra is PaywallTrigger
+              ? state.extra as PaywallTrigger
+              : PaywallTrigger.manual,
+        ),
       ),
       GoRoute(
         path: AppRoutes.gallery,

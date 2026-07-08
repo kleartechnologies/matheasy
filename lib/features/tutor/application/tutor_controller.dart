@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../subscription/application/usage_controller.dart';
 import '../domain/tutor_models.dart';
 import 'tutor_service.dart';
 
@@ -93,6 +94,10 @@ class TutorChatController extends _$TutorChatController {
   Future<void> send(String rawText) async {
     final text = rawText.trim();
     if (text.isEmpty || state.isTyping) return;
+
+    // Count every user message against the free-tier Numi quota — the single
+    // choke point, so seeded prompts and quick replies are all captured.
+    ref.read(usageControllerProvider.notifier).recordNumiMessage();
 
     state = state.copyWith(
       messages: [

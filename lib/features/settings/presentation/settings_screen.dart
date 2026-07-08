@@ -5,6 +5,7 @@ import '../../../core/animations/app_transitions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../sync/presentation/sync_settings_section.dart';
 import '../application/settings_controller.dart';
 import '../domain/appearance_settings.dart';
 import '../domain/learning_preferences.dart';
@@ -72,6 +73,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
+      const SyncSettingsSection(),
       SettingsSection(
         title: 'About',
         children: [
