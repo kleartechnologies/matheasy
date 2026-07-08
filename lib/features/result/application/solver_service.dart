@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/backend/functions_client.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../domain/result_models.dart';
+import 'functions_solver_service.dart';
 
 /// Turns a [DetectedEquation] into a full [ResultData] (answer + steps +
 /// explanations + methods + practice).
@@ -444,7 +446,14 @@ class MockSolverService implements SolverService {
       );
 }
 
-/// Provides the active [SolverService]. A later stage overrides this with the
-/// AI-backed solver.
+/// Provides the active [SolverService]: the real Cloud-Function solver for
+/// signed-in users with Firebase configured, else the offline mock (so guests
+/// and the unconfigured checkout keep working).
 final Provider<SolverService> solverServiceProvider =
-    Provider<SolverService>((ref) => const MockSolverService());
+    Provider<SolverService>((ref) {
+  if (!ref.watch(aiBackendReadyProvider)) return const MockSolverService();
+  final functions = ref.watch(firebaseFunctionsProvider);
+  return FunctionsSolverService(
+    (name, data) => callFunction(functions, name, data),
+  );
+});

@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/backend/functions_client.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
+import 'functions_scanner_service.dart';
 
 /// Recognizes math problems from the camera / gallery / manual input.
 ///
@@ -14,9 +18,16 @@ abstract interface class ScannerService {
   /// `null` while nothing is recognized, then the best current candidate.
   Stream<DetectedEquation?> liveDetections();
 
-  /// Recognizes a single problem from the given [source] (shutter, gallery pick
-  /// or manual entry).
-  Future<DetectedEquation> recognize(ScanSource source);
+  /// Recognizes a single problem from the given [source].
+  ///
+  /// [imageBytes] carries a captured/picked photo for OCR (camera + gallery);
+  /// [manualLatex] carries a typed problem (manual entry, no OCR). The mock
+  /// ignores both and returns a sample.
+  Future<DetectedEquation> recognize(
+    ScanSource source, {
+    Uint8List? imageBytes,
+    String? manualLatex,
+  });
 }
 
 /// Timings for the mock experience — also referenced by the UI/tests so the
@@ -56,7 +67,11 @@ class MockScannerService implements ScannerService {
   }
 
   @override
-  Future<DetectedEquation> recognize(ScanSource source) async {
+  Future<DetectedEquation> recognize(
+    ScanSource source, {
+    Uint8List? imageBytes,
+    String? manualLatex,
+  }) async {
     await Future<void>.delayed(ScannerTimings.recognizeDelay);
     final index = switch (source) {
       ScanSource.camera => 0,
@@ -67,7 +82,14 @@ class MockScannerService implements ScannerService {
   }
 }
 
-/// Provides the active [ScannerService]. Stage 5 overrides this with the real
-/// recognizer; no consumer needs to change.
+/// Provides the active [ScannerService]: the real Mathpix-backed recognizer
+/// (`recognizeEquation` Cloud Function) for signed-in users with Firebase
+/// configured, else the offline mock.
 final Provider<ScannerService> scannerServiceProvider =
-    Provider<ScannerService>((ref) => const MockScannerService());
+    Provider<ScannerService>((ref) {
+  if (!ref.watch(aiBackendReadyProvider)) return const MockScannerService();
+  final functions = ref.watch(firebaseFunctionsProvider);
+  return FunctionsScannerService(
+    (name, data) => callFunction(functions, name, data),
+  );
+});

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/backend/functions_client.dart';
 import '../../../core/monitoring/logging_service.dart';
 import '../../../core/security/rate_limit_result.dart';
 import '../../../core/security/rate_limit_service.dart';
@@ -48,7 +50,11 @@ class ScannerController extends _$ScannerController {
 
   /// Shutter / gallery / manual entry. If a live candidate already exists and
   /// this is a camera capture, it's used directly for an instant response.
-  Future<void> capture(ScanSource source) async {
+  Future<void> capture(
+    ScanSource source, {
+    Uint8List? imageBytes,
+    String? manualLatex,
+  }) async {
     unawaited(ref
         .read(analyticsServiceProvider)
         .logEvent(AnalyticsEvent.scanStarted(source: source.name)));
@@ -60,11 +66,32 @@ class ScannerController extends _$ScannerController {
     if (subscription != null) unawaited(subscription.cancel());
 
     final current = state;
-    final equation = (current is ScanDetecting && source == ScanSource.camera)
-        ? current.candidate
-        : await _service.recognize(source);
-    if (_disposed) return;
-    state = ScanCaptured(equation);
+    // Use a live mock candidate only when no real photo was supplied.
+    if (current is ScanDetecting &&
+        source == ScanSource.camera &&
+        imageBytes == null &&
+        manualLatex == null) {
+      state = ScanCaptured(current.candidate);
+      return;
+    }
+
+    try {
+      final equation = await _service.recognize(
+        source,
+        imageBytes: imageBytes,
+        manualLatex: manualLatex,
+      );
+      if (_disposed) return;
+      state = ScanCaptured(equation);
+    } on BackendException catch (error) {
+      if (_disposed) return;
+      LoggingService.warning('Recognition failed: ${error.code}');
+      state = ScanError(error.message);
+    } catch (error, stack) {
+      if (_disposed) return;
+      LoggingService.error('Recognition error', error: error, stackTrace: stack);
+      state = const ScanError('Something went wrong. Please try again.');
+    }
   }
 
   /// Discards the capture and resumes live detection.

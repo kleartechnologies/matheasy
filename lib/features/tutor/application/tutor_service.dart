@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/backend/functions_client.dart';
 import '../domain/tutor_models.dart';
+import 'functions_tutor_service.dart';
 import 'tutor_reply_engine.dart';
 
 /// The AI tutor provider — turns a student's message into an educational
@@ -62,7 +64,13 @@ class MockTutorService implements TutorService {
   }
 }
 
-/// Provides the active [TutorService]. A later stage overrides this with the
-/// AI-backed tutor; no consumer needs to change.
+/// Provides the active [TutorService]: the real Cloud-Function tutor for
+/// signed-in users with Firebase configured, else the offline mock.
 final Provider<TutorService> tutorServiceProvider =
-    Provider<TutorService>((ref) => const MockTutorService());
+    Provider<TutorService>((ref) {
+  if (!ref.watch(aiBackendReadyProvider)) return const MockTutorService();
+  final functions = ref.watch(firebaseFunctionsProvider);
+  return FunctionsTutorService(
+    (name, data) => callFunction(functions, name, data),
+  );
+});

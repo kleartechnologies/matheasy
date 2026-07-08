@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
+import '../../../core/backend/functions_client.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
@@ -33,7 +37,98 @@ class ScannerScreen extends ConsumerStatefulWidget {
 }
 
 class _ScannerScreenState extends ConsumerState<ScannerScreen> {
+  final ImagePicker _picker = ImagePicker();
   bool _flashOn = false;
+
+  /// True while a photo is being captured/recognized (real backend) — shows the
+  /// processing overlay so the network round-trip isn't a dead tap.
+  bool _busy = false;
+
+  ScannerController get _controller =>
+      ref.read(scannerControllerProvider.notifier);
+
+  /// Shutter: real device camera when the AI backend is live, else the mock
+  /// sample (guest / unconfigured build).
+  Future<void> _shutter() => _capturePhoto(ScanSource.camera, ImageSource.camera);
+
+  Future<void> _gallery() =>
+      _capturePhoto(ScanSource.gallery, ImageSource.gallery);
+
+  Future<void> _capturePhoto(ScanSource source, ImageSource imageSource) async {
+    if (_busy) return;
+    if (!ref.read(aiBackendReadyProvider)) {
+      await _controller.capture(source); // mock returns a sample photo-free
+      return;
+    }
+    Uint8List bytes;
+    try {
+      final file = await _picker.pickImage(
+        source: imageSource,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+      if (file == null) return; // user cancelled
+      bytes = await file.readAsBytes();
+    } catch (_) {
+      _toast(imageSource == ImageSource.camera
+          ? "Couldn't open the camera."
+          : "Couldn't open your photos.");
+      return;
+    }
+    setState(() => _busy = true);
+    await _controller.capture(source, imageBytes: bytes);
+    if (mounted) setState(() => _busy = false);
+  }
+
+  /// Manual entry: type the problem (real backend), else the mock sample.
+  Future<void> _type() async {
+    if (_busy) return;
+    if (!ref.read(aiBackendReadyProvider)) {
+      await _controller.capture(ScanSource.manual);
+      return;
+    }
+    final latex = await _promptManualEntry();
+    if (latex == null || latex.trim().isEmpty) return;
+    setState(() => _busy = true);
+    await _controller.capture(ScanSource.manual, manualLatex: latex.trim());
+    if (mounted) setState(() => _busy = false);
+  }
+
+  Future<String?> _promptManualEntry() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Type a problem'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            hintText: 'e.g. 2x + 5 = 13',
+          ),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Solve'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toast(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
 
   /// The "Continue → solve" commit point. Checks the scan quota first: a free
   /// user out of scans is sent to the paywall (the scanner is replaced, so
@@ -76,6 +171,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
               duration: AppDurations.medium,
               child: _content(state, controller),
             ),
+            if (_busy)
+              const ProcessingOverlay(key: ValueKey('recognizing')),
           ],
         ),
       ),
@@ -90,9 +187,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           flashOn: _flashOn,
           onFlash: () => setState(() => _flashOn = !_flashOn),
           onClose: () => context.pop(),
-          onGallery: () => controller.capture(ScanSource.gallery),
-          onShutter: () => controller.capture(ScanSource.camera),
-          onType: () => controller.capture(ScanSource.manual),
+          onGallery: () => unawaited(_gallery()),
+          onShutter: () => unawaited(_shutter()),
+          onType: () => unawaited(_type()),
         ),
       ScanDetecting() => _ScanningChrome(
           key: const ValueKey('scanning'),
@@ -100,9 +197,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           flashOn: _flashOn,
           onFlash: () => setState(() => _flashOn = !_flashOn),
           onClose: () => context.pop(),
-          onGallery: () => controller.capture(ScanSource.gallery),
-          onShutter: () => controller.capture(ScanSource.camera),
-          onType: () => controller.capture(ScanSource.manual),
+          onGallery: () => unawaited(_gallery()),
+          onShutter: () => unawaited(_shutter()),
+          onType: () => unawaited(_type()),
         ),
       ScanCaptured(:final equation) => _CapturedView(
           key: const ValueKey('captured'),

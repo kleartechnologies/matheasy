@@ -6,6 +6,11 @@
 	     avoids the export-compliance prompt on every App Store upload. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Scanner: capture / pick a photo of a math problem to solve. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Matheasy uses the camera to scan and solve math problems.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Matheasy uses your photos to scan and solve math problems.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>FlutterDeepLinkingEnabled</key>
