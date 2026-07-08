@@ -69,6 +69,10 @@ class AppRoutes {
   static const String gallery = '/gallery';
   static const String galleryName = 'gallery';
 
+  /// Developer diagnostics (non-production tooling; entry point is debug-gated).
+  static const String diagnostics = '/diagnostics';
+  static const String diagnosticsName = 'diagnostics';
+
   /// Branch index for each tab root (must match the order of branches in the
   /// [StatefulShellRoute]). Scan is NOT a branch — it's a full-screen route
   /// pushed over the shell from the center Scan button.

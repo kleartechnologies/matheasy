@@ -2,6 +2,11 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/monitoring/logging_service.dart';
+import '../../../core/security/rate_limit_result.dart';
+import '../../../core/security/rate_limit_service.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
@@ -44,6 +49,9 @@ class ScannerController extends _$ScannerController {
   /// Shutter / gallery / manual entry. If a live candidate already exists and
   /// this is a camera capture, it's used directly for an instant response.
   Future<void> capture(ScanSource source) async {
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.scanStarted(source: source.name)));
     // Cancel live detection fire-and-forget: awaiting it would block until the
     // mock stream's delay resolves. Stale emissions are ignored by _listen's
     // `state is ScanIdle` guard.
@@ -71,11 +79,23 @@ class ScannerController extends _$ScannerController {
   void confirm() {
     final current = state;
     if (current is! ScanCaptured) return;
+
+    // Client-side abuse guard (server enforcement is authoritative). Generous
+    // limits mean a human never hits this; a stuck/automated loop is throttled.
+    final limit = ref.read(rateLimitServiceProvider).check(RateLimitedAction.scan);
+    if (limit.isLimited) {
+      LoggingService.warning('Scan rate-limited: ${limit.reason}');
+      return;
+    }
+
     state = ScanProcessing(current.equation);
     _processTimer?.cancel();
     _processTimer = Timer(ScannerTimings.processing, () {
       if (state is ScanProcessing) {
         state = ScanComplete(current.equation);
+        unawaited(ref
+            .read(analyticsServiceProvider)
+            .logEvent(AnalyticsEvent.scanCompleted()));
       }
     });
   }

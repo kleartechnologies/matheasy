@@ -30,22 +30,6 @@ class _FloatyState extends State<Floaty>
   );
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.enabled) _controller.repeat(reverse: true);
-  }
-
-  @override
-  void didUpdateWidget(covariant Floaty oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.enabled && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    } else if (!widget.enabled && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -53,6 +37,17 @@ class _FloatyState extends State<Floaty>
 
   @override
   Widget build(BuildContext context) {
+    // Honour reduced-motion (accessibility setting or OS): hold the mascot still
+    // rather than looping the bob.
+    final active = widget.enabled && !MediaQuery.disableAnimationsOf(context);
+    if (active && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!active && _controller.isAnimating) {
+      _controller
+        ..stop()
+        ..value = 0;
+    }
+
     final curved = CurvedAnimation(parent: _controller, curve: AppCurves.ambient);
     return AnimatedBuilder(
       animation: curved,

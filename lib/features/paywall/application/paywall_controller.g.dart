@@ -56,7 +56,7 @@ final class PaywallControllerProvider
   }
 }
 
-String _$paywallControllerHash() => r'3e5b976878c1d1bcbd8088e1087a1e1254ae762f';
+String _$paywallControllerHash() => r'423ae94b4a2a06d72fe4ed51324173fd02a00ba6';
 
 /// Drives the paywall: loads live products, tracks the selected plan and runs
 /// the purchase/restore flow through [SubscriptionController].

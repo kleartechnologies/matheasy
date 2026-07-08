@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/session/app_session.dart' show AuthStatus;
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../domain/app_user.dart';
 import '../domain/auth_failure.dart';
@@ -66,6 +68,10 @@ class AuthController extends _$AuthController {
     try {
       final user = await action();
       state = AuthState.authenticated(user);
+      // Interactive sign-in only — a silent session restore comes through the
+      // stream, not here, so it isn't counted as a new account.
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.accountCreated(provider: user.provider.name)));
     } on AuthFailure catch (failure) {
       // Keep the prior status; just surface the failure and stop the spinner.
       state = state.copyWith(busy: false, failure: failure);

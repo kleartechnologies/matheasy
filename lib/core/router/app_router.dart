@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/gallery/presentation/gallery_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
@@ -102,6 +103,12 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.gallery,
         name: AppRoutes.galleryName,
         builder: (context, state) => const GalleryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.diagnostics,
+        name: AppRoutes.diagnosticsName,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const DiagnosticsScreen(),
       ),
       // Scan is a full-screen route over the shell (the tab bar disappears),
       // launched from the center Scan button — not a tab branch.

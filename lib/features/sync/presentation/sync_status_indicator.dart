@@ -117,24 +117,6 @@ class _SyncIconState extends State<_SyncIcon>
   );
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.spinning) _controller.repeat();
-  }
-
-  @override
-  void didUpdateWidget(_SyncIcon old) {
-    super.didUpdateWidget(old);
-    if (widget.spinning && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (!widget.spinning && _controller.isAnimating) {
-      _controller
-        ..stop()
-        ..reset();
-    }
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -143,7 +125,16 @@ class _SyncIconState extends State<_SyncIcon>
   @override
   Widget build(BuildContext context) {
     final icon = Icon(widget.icon, size: 18, color: widget.color);
-    if (!widget.spinning) return icon;
+    // Respect reduced-motion: show a static icon instead of spinning.
+    final spin = widget.spinning && !MediaQuery.disableAnimationsOf(context);
+    if (spin && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!spin && _controller.isAnimating) {
+      _controller
+        ..stop()
+        ..reset();
+    }
+    if (!spin) return icon;
     // Sync icon spins counter-clockwise to read as "refreshing".
     return RotationTransition(
       turns: Tween<double>(begin: 1, end: 0).animate(_controller),

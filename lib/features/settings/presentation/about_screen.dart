@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -121,6 +124,21 @@ class AboutScreen extends StatelessWidget {
               ),
             ],
           ),
+          // Developer tooling — hidden in release builds.
+          if (!kReleaseMode) ...[
+            const SizedBox(height: AppSpacing.section),
+            SettingsSection(
+              title: 'Developer',
+              children: [
+                SettingsTile(
+                  icon: Icons.monitor_heart_outlined,
+                  title: 'Diagnostics',
+                  subtitle: 'Backend & app health',
+                  onTap: () => context.push(AppRoutes.diagnostics),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.xl),
           Center(
             child: Text(

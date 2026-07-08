@@ -20,7 +20,7 @@ class _ScanFrameState extends State<ScanFrame>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: AppDurations.sparkle,
-  )..repeat(reverse: true);
+  );
 
   @override
   void dispose() {
@@ -31,6 +31,13 @@ class _ScanFrameState extends State<ScanFrame>
   @override
   Widget build(BuildContext context) {
     final color = widget.locked ? AppColors.primary : AppColors.white;
+    // Respect reduced-motion: drop the sweeping scan line, keep the guides.
+    final animate = !widget.locked && !MediaQuery.disableAnimationsOf(context);
+    if (animate && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!animate && _controller.isAnimating) {
+      _controller.stop();
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
@@ -39,7 +46,7 @@ class _ScanFrameState extends State<ScanFrame>
             _corner(Alignment.topRight, color),
             _corner(Alignment.bottomLeft, color),
             _corner(Alignment.bottomRight, color),
-            if (!widget.locked)
+            if (animate)
               AnimatedBuilder(
                 animation: _controller,
                 builder: (context, _) {

@@ -117,6 +117,11 @@ class FirestoreSyncService implements SyncService {
       if (error.isOffline) return SyncResult.offline();
       AppLogger.error('Cloud sync failed', error: error);
       return SyncResult.failure('Sync failed. Your data is safe on this device.');
+    } catch (error, stack) {
+      // Never let an unexpected error escape (it would wedge the UI in
+      // "syncing" and be mis-reported as a fatal crash). Local data is intact.
+      AppLogger.error('Unexpected sync error', error: error, stackTrace: stack);
+      return SyncResult.failure('Sync failed. Your data is safe on this device.');
     }
   }
 
@@ -131,6 +136,9 @@ class FirestoreSyncService implements SyncService {
     } on CloudException catch (error) {
       if (error.isOffline) return SyncResult.offline();
       AppLogger.error('Cloud push failed', error: error);
+      return SyncResult.failure('Sync failed. Your data is safe on this device.');
+    } catch (error, stack) {
+      AppLogger.error('Unexpected push error', error: error, stackTrace: stack);
       return SyncResult.failure('Sync failed. Your data is safe on this device.');
     }
   }

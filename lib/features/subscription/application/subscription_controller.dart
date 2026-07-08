@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../domain/purchase_result.dart';
 import '../domain/subscription_plan.dart';
 import '../domain/subscription_status.dart';
@@ -32,14 +34,23 @@ class SubscriptionController extends _$SubscriptionController {
   /// also set it directly so the UI reacts without waiting for the round-trip.
   Future<PurchaseResult> purchase(SubscriptionPlan plan) async {
     final result = await ref.read(subscriptionServiceProvider).purchase(plan);
-    if (result is PurchaseSuccess) state = result.status;
+    if (result is PurchaseSuccess) {
+      state = result.status;
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.subscriptionPurchased(plan: plan.name)));
+    }
     return result;
   }
 
   /// Restores previously-purchased entitlements.
   Future<PurchaseResult> restore() async {
     final result = await ref.read(subscriptionServiceProvider).restore();
-    if (result is PurchaseSuccess) state = result.status;
+    if (result is PurchaseSuccess) {
+      state = result.status;
+      unawaited(ref
+          .read(analyticsServiceProvider)
+          .logEvent(AnalyticsEvent.subscriptionRestored()));
+    }
     return result;
   }
 

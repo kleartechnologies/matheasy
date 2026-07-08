@@ -40,6 +40,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   bool _celebrating = false;
   String _celebrationPlanName = 'Matheasy Pro';
 
+  @override
+  void initState() {
+    super.initState();
+    // Log the impression via the controller (analytics stays out of the widget).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref
+            .read(paywallControllerProvider.notifier)
+            .markViewed(widget.trigger);
+      }
+    });
+  }
+
   static String _planLabel(SubscriptionPlan? plan) => switch (plan) {
     SubscriptionPlan.proAnnual => 'Annual Pro',
     SubscriptionPlan.proMonthly => 'Monthly Pro',

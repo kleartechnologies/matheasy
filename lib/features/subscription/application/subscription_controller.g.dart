@@ -63,7 +63,7 @@ final class SubscriptionControllerProvider
 }
 
 String _$subscriptionControllerHash() =>
-    r'e5eab8135c68b5d55034885416c87076bc4b9081';
+    r'371c1671f2738227accf1c198447a4978af2c470';
 
 /// The single source of truth for the user's subscription entitlement.
 ///

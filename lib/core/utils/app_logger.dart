@@ -1,33 +1,25 @@
-import 'dart:developer' as developer;
+import '../monitoring/logging_service.dart';
 
-import 'package:flutter/foundation.dart';
-
-/// Minimal structured logger. In later stages this can forward to Crashlytics;
-/// for now it routes through `dart:developer` and is silent in release builds.
+/// Thin facade over [LoggingService].
+///
+/// Existing call sites (`AppLogger.info/.error/...`) keep working while gaining
+/// redaction + automatic Crashlytics forwarding. New code should prefer
+/// [LoggingService] directly (it also exposes `warning`/`fatal`/`log`).
 class AppLogger {
   const AppLogger._();
 
-  static void debug(String message, {String name = 'matheasy'}) {
-    if (kReleaseMode) return;
-    developer.log(message, name: name, level: 500);
-  }
+  static void debug(String message, {String name = 'matheasy'}) =>
+      LoggingService.debug(message, name: name);
 
-  static void info(String message, {String name = 'matheasy'}) {
-    developer.log(message, name: name, level: 800);
-  }
+  static void info(String message, {String name = 'matheasy'}) =>
+      LoggingService.info(message, name: name);
 
   static void error(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String name = 'matheasy',
-  }) {
-    developer.log(
-      message,
-      name: name,
-      level: 1000,
-      error: error,
-      stackTrace: stackTrace,
-    );
-  }
+  }) =>
+      LoggingService.error(message,
+          error: error, stackTrace: stackTrace, name: name);
 }

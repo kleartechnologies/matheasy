@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/analytics/application/analytics_controller.dart';
 import 'features/progress/presentation/widgets/achievement_celebration_host.dart';
 import 'features/settings/application/settings_controller.dart';
 import 'features/settings/domain/accessibility_settings.dart';
@@ -18,6 +19,9 @@ class MatheasyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsControllerProvider);
     final router = ref.watch(goRouterProvider);
+    // Keep the analytics engine alive from the root — before onboarding/auth —
+    // so state-derived events (onboarding completed, achievements) are captured.
+    ref.watch(analyticsControllerProvider);
 
     return MaterialApp.router(
       title: AppConstants.appName,

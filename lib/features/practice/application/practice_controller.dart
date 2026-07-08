@@ -1,7 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/monitoring/logging_service.dart';
+import '../../../core/security/rate_limit_result.dart';
+import '../../../core/security/rate_limit_service.dart';
 import '../../../core/services/haptics_service.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
@@ -82,6 +89,15 @@ class PracticeController extends _$PracticeController {
       state = const PracticeSessionState(phase: PracticePhase.locked);
       return;
     }
+    // Client-side abuse guard (server enforcement is authoritative).
+    final limit = ref
+        .read(rateLimitServiceProvider)
+        .check(RateLimitedAction.practiceGeneration);
+    if (limit.isLimited) {
+      LoggingService.warning('Practice generation rate-limited: ${limit.reason}');
+      state = const PracticeSessionState(phase: PracticePhase.error);
+      return;
+    }
     state = const PracticeSessionState(phase: PracticePhase.loading);
     try {
       final session =
@@ -93,6 +109,8 @@ class PracticeController extends _$PracticeController {
       ref
           .read(usageControllerProvider.notifier)
           .recordPracticeGenerated(session.questions.length);
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.practiceStarted(topic: request.topic.name)));
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: session,
@@ -135,6 +153,9 @@ class PracticeController extends _$PracticeController {
       final result = ref
           .read(practiceProgressControllerProvider.notifier)
           .recordSession(session, now: DateTime.now());
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.practiceCompleted(
+              correct: result.correct, total: result.total)));
       state = PracticeSessionState(
         phase: PracticePhase.complete,
         session: session,

@@ -206,7 +206,11 @@ class _TopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _GlassButton(icon: Icons.close_rounded, onTap: onClose),
+          _GlassButton(
+            icon: Icons.close_rounded,
+            onTap: onClose,
+            label: 'Close scanner',
+          ),
           const Spacer(),
           Text(
             'Scan a problem',
@@ -216,6 +220,7 @@ class _TopBar extends StatelessWidget {
           _GlassButton(
             icon: flashOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
             onTap: onFlash,
+            label: flashOn ? 'Turn flash off' : 'Turn flash on',
           ),
         ],
       ),
@@ -308,30 +313,35 @@ class _ShutterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Pressable(
-      onTap: onTap,
-      scale: 0.92,
-      borderRadius: AppRadius.pillRadius,
-      child: AnimatedContainer(
-        duration: AppDurations.fast,
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: locked
-                ? AppColors.primaryTint
-                : Colors.white.withValues(alpha: 0.4),
-            width: 5,
+    return Semantics(
+      button: true,
+      label: locked ? 'Scan problem' : 'Take photo',
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.92,
+        borderRadius: AppRadius.pillRadius,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: locked
+                  ? AppColors.primaryTint
+                  : Colors.white.withValues(alpha: 0.4),
+              width: 5,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(7),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: locked ? AppColors.primaryGradient : null,
-              color: locked ? null : AppColors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(7),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: locked ? AppColors.primaryGradient : null,
+                color: locked ? null : AppColors.white,
+              ),
             ),
           ),
         ),
@@ -356,12 +366,15 @@ class _LabeledControl extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _GlassButton(icon: icon, onTap: onTap, size: 52),
+        _GlassButton(icon: icon, onTap: onTap, label: label, size: 52),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTypography.caption
-              .copyWith(color: Colors.white.withValues(alpha: 0.7)),
+        // Decorative caption — the button already carries the accessible name.
+        ExcludeSemantics(
+          child: Text(
+            label,
+            style: AppTypography.caption
+                .copyWith(color: Colors.white.withValues(alpha: 0.7)),
+          ),
         ),
       ],
     );
@@ -369,27 +382,49 @@ class _LabeledControl extends StatelessWidget {
 }
 
 class _GlassButton extends StatelessWidget {
-  const _GlassButton({required this.icon, required this.onTap, this.size = 42});
+  const _GlassButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+    this.size = 42,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+
+  /// Accessible name announced by screen readers.
+  final String label;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Pressable(
-      onTap: onTap,
-      scale: 0.94,
-      borderRadius: AppRadius.mdRadius,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.14),
-          borderRadius: AppRadius.mdRadius,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+    // Ensure at least a 48x48 hit target even when the visual glass is smaller.
+    final hit = size < 48 ? 48.0 : size;
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.94,
+        borderRadius: AppRadius.mdRadius,
+        child: SizedBox(
+          width: hit,
+          height: hit,
+          child: Center(
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.14),
+                borderRadius: AppRadius.mdRadius,
+                border:
+                    Border.all(color: Colors.white.withValues(alpha: 0.18)),
+              ),
+              child: Icon(icon, color: AppColors.white, size: size * 0.5),
+            ),
+          ),
         ),
-        child: Icon(icon, color: AppColors.white, size: size * 0.5),
       ),
     );
   }
@@ -423,7 +458,11 @@ class _CapturedView extends StatelessWidget {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.xl),
-              child: _GlassButton(icon: Icons.close_rounded, onTap: onClose),
+              child: _GlassButton(
+                icon: Icons.close_rounded,
+                onTap: onClose,
+                label: 'Close',
+              ),
             ),
           ),
         ),
@@ -472,7 +511,12 @@ class _ErrorView extends StatelessWidget {
                 style: AppTypography.title.copyWith(color: AppColors.white),
               ),
               const SizedBox(height: AppSpacing.xl),
-              _GlassButton(icon: Icons.refresh_rounded, onTap: onRetry, size: 56),
+              _GlassButton(
+                icon: Icons.refresh_rounded,
+                onTap: onRetry,
+                label: 'Try again',
+                size: 56,
+              ),
             ],
           ),
         ),

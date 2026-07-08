@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/persistence/preferences_store.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/app_user.dart';
 import '../../practice/application/practice_progress_controller.dart';
@@ -249,6 +251,10 @@ class SyncController extends _$SyncController {
         lastSyncedAt: store.lastSyncedAt ?? ref.read(clockProvider)(),
         clearMessage: true,
       );
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.syncCompleted(
+              downloaded: result.downloaded.length,
+              uploaded: result.uploaded.length)));
       if (result.changedLocal) _refreshControllers(result.downloaded);
     } else if (result.offline) {
       state = state.copyWith(

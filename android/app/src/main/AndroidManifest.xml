@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required in the main manifest so networking (Firebase, Firestore,
+         Analytics, RevenueCat) works in RELEASE builds — Flutter only adds
+         INTERNET to the debug/profile manifests. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="matheasy"
         android:name="${applicationName}"

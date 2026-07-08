@@ -1,7 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/monitoring/logging_service.dart';
+import '../../../core/security/rate_limit_result.dart';
+import '../../../core/security/rate_limit_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../domain/tutor_models.dart';
 import 'tutor_service.dart';
@@ -45,6 +52,8 @@ class TutorChatController extends _$TutorChatController {
   /// persisted conversation. A plain "Ask Numi" open (no seed) continues the
   /// existing thread.
   Future<void> start(TutorLaunchContext? context) async {
+    unawaited(
+        ref.read(analyticsServiceProvider).logEvent(AnalyticsEvent.tutorOpened()));
     final seed = context?.seedMessage?.trim();
     final hasSeed = seed != null && seed.isNotEmpty;
 
@@ -95,9 +104,21 @@ class TutorChatController extends _$TutorChatController {
     final text = rawText.trim();
     if (text.isEmpty || state.isTyping) return;
 
+    // Client-side abuse guard (server enforcement is authoritative).
+    final limit = ref
+        .read(rateLimitServiceProvider)
+        .check(RateLimitedAction.tutorMessage);
+    if (limit.isLimited) {
+      LoggingService.warning('Tutor message rate-limited: ${limit.reason}');
+      return;
+    }
+
     // Count every user message against the free-tier Numi quota — the single
     // choke point, so seeded prompts and quick replies are all captured.
     ref.read(usageControllerProvider.notifier).recordNumiMessage();
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.tutorMessageSent()));
 
     state = state.copyWith(
       messages: [

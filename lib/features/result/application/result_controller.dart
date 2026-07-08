@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../domain/result_models.dart';
 import 'solver_service.dart';
@@ -14,8 +18,13 @@ part 'result_controller.g.dart';
 @riverpod
 class ResultController extends _$ResultController {
   @override
-  Future<ResultData> build(DetectedEquation equation) {
-    return ref.watch(solverServiceProvider).solve(equation);
+  Future<ResultData> build(DetectedEquation equation) async {
+    final solver = ref.watch(solverServiceProvider);
+    final analytics = ref.read(analyticsServiceProvider);
+    final data = await solver.solve(equation);
+    unawaited(analytics
+        .logEvent(AnalyticsEvent.resultViewed(problemType: data.type.name)));
+    return data;
   }
 }
 

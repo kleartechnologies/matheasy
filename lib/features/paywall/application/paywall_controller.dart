@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/subscription_service.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../../subscription/domain/purchase_result.dart';
 import '../../subscription/domain/subscription_plan.dart';
 import '../../subscription/domain/subscription_product.dart';
@@ -108,6 +111,18 @@ class PaywallController extends _$PaywallController {
       return;
     }
     state = state.copyWith(products: products, loadingProducts: false);
+  }
+
+  bool _viewLogged = false;
+
+  /// Logs the paywall impression (with its [trigger]) exactly once per open.
+  /// Called by the screen so the analytics logic stays out of the widget.
+  void markViewed(PaywallTrigger trigger) {
+    if (_viewLogged) return;
+    _viewLogged = true;
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.paywallViewed(trigger: trigger.name)));
   }
 
   /// Highlights [plan] (the tapped pricing card).

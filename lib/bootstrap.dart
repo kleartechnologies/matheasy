@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/monitoring/crash_reporting_service.dart';
+import 'core/monitoring/logging_service.dart';
 import 'core/persistence/preferences_store.dart';
-import 'core/utils/app_logger.dart';
+import 'features/analytics/application/analytics_service.dart';
 import 'features/auth/application/auth_service.dart';
 import 'features/subscription/application/revenuecat_bootstrap.dart';
 import 'features/subscription/application/subscription_service.dart';
@@ -26,17 +28,17 @@ Future<void> bootstrap() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
+      // Route every uncaught error to crash reporting. These read the global
+      // CrashReporting.instance at call time, so they pick up the real reporter
+      // once Firebase is initialized below (a no-op before that / in debug).
       FlutterError.onError = (details) {
         FlutterError.presentError(details);
-        AppLogger.error(
-          'FlutterError',
-          error: details.exception,
-          stackTrace: details.stack,
-        );
+        // Framework errors are recorded as non-fatal (they rarely crash).
+        CrashReporting.instance.recordFlutterError(details);
       };
 
       PlatformDispatcher.instance.onError = (error, stack) {
-        AppLogger.error('PlatformDispatcher', error: error, stackTrace: stack);
+        CrashReporting.instance.recordError(error, stack, fatal: true);
         return true;
       };
 
@@ -56,7 +58,7 @@ Future<void> bootstrap() async {
       );
     },
     (error, stack) =>
-        AppLogger.error('Uncaught zone error', error: error, stackTrace: stack),
+        CrashReporting.instance.recordError(error, stack, fatal: true),
   );
 }
 
@@ -69,7 +71,7 @@ Future<void> bootstrap() async {
 Future<bool> _initializeFirebase() async {
   final options = DefaultFirebaseOptions.currentPlatform;
   if (options.apiKey.startsWith('REPLACE_')) {
-    AppLogger.info(
+    LoggingService.info(
       'Firebase not configured (placeholder config) — cloud sign-in disabled, '
       'guest mode only. Run: flutterfire configure --project=matheasy-873e2',
     );
@@ -80,9 +82,12 @@ Future<bool> _initializeFirebase() async {
     // Cloud data layer uses the local store as source of truth, so disable
     // Firestore's own offline cache for explicit sync control.
     configureFirestore();
+    // Wire crash reporting + analytics (collection enabled only in release).
+    CrashReporting.instance = await FirebaseCrashReportingService.initialize();
+    Analytics.instance = await FirebaseAnalyticsService.initialize();
     return true;
   } catch (error, stack) {
-    AppLogger.error(
+    LoggingService.error(
       'Firebase initialization failed — falling back to guest-only mode',
       error: error,
       stackTrace: stack,

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/persistence/preferences_store.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../practice/application/practice_progress_controller.dart';
 import '../../progress/application/achievement_controller.dart';
@@ -44,6 +46,9 @@ class ProfileController extends _$ProfileController {
   void _updateEditable(EditableProfile next) {
     state = state.copyWith(editable: next);
     unawaited(ref.read(profileServiceProvider).save(next));
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.profileEdited()));
   }
 
   /// Saves the editable profile from the edit form (name override + avatar).
