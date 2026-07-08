@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_durations.dart';
+import '../../theme/app_durations.dart';
 
 /// Animates an integer counting up to [value] on first build — for XP totals and
 /// reward reveals.

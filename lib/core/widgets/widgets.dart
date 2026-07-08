@@ -28,6 +28,7 @@ export 'chat/numi_bubble.dart';
 export 'chips/feature_chip.dart';
 
 // Controls
+export 'controls/app_switch.dart';
 export 'controls/segmented_control.dart';
 
 // Feedback
@@ -37,6 +38,7 @@ export 'feedback/loading_state.dart';
 
 // Indicators
 export 'indicators/progress_ring.dart';
+export 'indicators/xp_count_up.dart';
 export 'indicators/xp_progress_bar.dart';
 
 // Layout

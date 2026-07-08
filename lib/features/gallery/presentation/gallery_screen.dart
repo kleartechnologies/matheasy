@@ -7,8 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../settings/application/settings_controller.dart';
 import 'widgets/gallery_section.dart';
 
 /// The living design-QA surface. Every design token and shared component is
@@ -39,8 +39,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   ? Icons.light_mode_rounded
                   : Icons.dark_mode_rounded,
             ),
-            onPressed: () =>
-                ref.read(themeModeControllerProvider.notifier).toggle(context),
+            onPressed: () => ref
+                .read(settingsControllerProvider.notifier)
+                .toggleTheme(context),
           ),
         ],
       ),

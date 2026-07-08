@@ -33,6 +33,8 @@ class PreferencesStore {
   static const String _kPracticeProgress = 'practice.progress';
   static const String _kAchievements = 'progress.achievements';
   static const String _kProgressStats = 'progress.stats';
+  static const String _kSettings = 'settings.preferences';
+  static const String _kProfile = 'profile.editable';
 
   /// Whether the user has finished onboarding (so returning users skip it).
   bool get onboardingComplete =>
@@ -51,6 +53,18 @@ class PreferencesStore {
   /// completion is intentionally preserved.
   Future<void> clearSession() => _prefs.remove(_kGuestMode);
 
+  /// Wipes every on-device learning artifact — practice progress, achievements,
+  /// analytics, settings and the editable profile. Used by "Delete Account" so a
+  /// removed account leaves nothing behind. Session/onboarding flags are handled
+  /// separately by the auth layer.
+  Future<void> clearLearningData() async {
+    await _prefs.remove(_kPracticeProgress);
+    await _prefs.remove(_kAchievements);
+    await _prefs.remove(_kProgressStats);
+    await _prefs.remove(_kSettings);
+    await _prefs.remove(_kProfile);
+  }
+
   /// The serialized practice progress (JSON), or `null` when none saved yet.
   String? get practiceProgressJson => _prefs.getString(_kPracticeProgress);
 
@@ -68,4 +82,16 @@ class PreferencesStore {
 
   Future<void> setProgressStatsJson(String json) =>
       _prefs.setString(_kProgressStats, json);
+
+  /// The serialized app settings — learning preferences, notifications,
+  /// appearance and accessibility (JSON).
+  String? get settingsJson => _prefs.getString(_kSettings);
+
+  Future<void> setSettingsJson(String json) =>
+      _prefs.setString(_kSettings, json);
+
+  /// The serialized editable profile — display-name override and avatar (JSON).
+  String? get profileJson => _prefs.getString(_kProfile);
+
+  Future<void> setProfileJson(String json) => _prefs.setString(_kProfile, json);
 }

@@ -60,7 +60,7 @@ final class AchievementControllerProvider
 }
 
 String _$achievementControllerHash() =>
-    r'486e3f806198db0cf0096927d7a814b6a2310e94';
+    r'a82b4ff6b4efb32ead1165b0093256baf9c9ff57';
 
 /// The achievement engine — the single orchestrator.
 ///

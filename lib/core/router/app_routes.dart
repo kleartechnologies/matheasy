@@ -41,6 +41,10 @@ class AppRoutes {
   static const String profileSettings = '/profile/settings';
   static const String profileSettingsName = 'profileSettings';
 
+  static const String profileEditSegment = 'edit';
+  static const String profileEdit = '/profile/edit';
+  static const String profileEditName = 'profileEdit';
+
   static const String profileSubscriptionSegment = 'subscription';
   static const String profileSubscription = '/profile/subscription';
   static const String profileSubscriptionName = 'profileSubscription';

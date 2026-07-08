@@ -11,7 +11,6 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../../shared/mascot/numi_mascot.dart';
 import '../../domain/achievement.dart';
 import 'badge_card.dart';
-import 'xp_count_up.dart';
 
 /// The full-screen celebration shown when an achievement unlocks: a Numi cheer,
 /// the badge revealed with a pop, its name/description, the XP reward counting

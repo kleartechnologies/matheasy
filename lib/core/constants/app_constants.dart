@@ -9,6 +9,12 @@ class AppConstants {
   static const String appName = 'Matheasy';
   static const String appTagline = 'Make Math Easy';
 
+  // Version — mirrors `version:` in pubspec.yaml (1.0.0+1). Kept here so the
+  // About screen can display it without a platform plugin; update alongside the
+  // pubspec on each release.
+  static const String appVersion = '1.0.0';
+  static const String appBuildNumber = '1';
+
   // Support & legal
   static const String supportEmail = 'support@matheasy.app';
   static const String privacyUrl = 'https://matheasy.app/privacy';

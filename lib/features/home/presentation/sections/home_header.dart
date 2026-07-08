@@ -1,24 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../profile/application/profile_controller.dart';
+import '../../../profile/presentation/widgets/profile_avatar_view.dart';
 import '../../domain/home_models.dart';
 
-/// Greeting + streak + Numi avatar row at the top of Home.
-class HomeHeader extends StatelessWidget {
+/// Greeting + streak + the learner's avatar and a quick settings shortcut at the
+/// top of Home. Tapping the avatar opens the Profile tab; the gear opens
+/// Settings.
+class HomeHeader extends ConsumerWidget {
   const HomeHeader({super.key, required this.userName, required this.streak});
 
   final String userName;
   final StreakInfo streak;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final greeting = greetingForHour(DateTime.now().hour);
+    final profile = ref.watch(profileControllerProvider);
+
     return Row(
       children: [
         Expanded(
@@ -32,6 +41,8 @@ class HomeHeader extends StatelessWidget {
               ),
               Text(
                 userName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.headingLarge
                     .copyWith(color: colors.textPrimary),
               ),
@@ -40,19 +51,24 @@ class HomeHeader extends StatelessWidget {
         ),
         _StreakPill(count: streak.current),
         const SizedBox(width: AppSpacing.sm),
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: colors.primaryContainer,
-            borderRadius: AppRadius.mdRadius,
+        Pressable(
+          onTap: () => context.go(AppRoutes.profile),
+          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          child: Semantics(
+            button: true,
+            label: 'Open profile',
+            child: ProfileAvatarView(
+              avatar: profile.editable.avatar,
+              initial: profile.initial,
+              photoUrl: profile.photoUrl,
+              size: 46,
+            ),
           ),
-          clipBehavior: Clip.antiAlias,
-          alignment: Alignment.topCenter,
-          child: const Padding(
-            padding: EdgeInsets.only(top: 6),
-            child: NumiMascot(size: 42),
-          ),
+        ),
+        IconButton(
+          tooltip: 'Settings',
+          onPressed: () => context.push(AppRoutes.profileSettings),
+          icon: Icon(Icons.settings_outlined, color: colors.textSecondary),
         ),
       ],
     );
@@ -84,7 +100,8 @@ class _StreakPill extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             '$count',
-            style: AppTypography.title.copyWith(color: context.colors.textPrimary),
+            style:
+                AppTypography.title.copyWith(color: context.colors.textPrimary),
           ),
         ],
       ),

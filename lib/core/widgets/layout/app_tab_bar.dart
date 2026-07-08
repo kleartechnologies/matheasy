@@ -61,8 +61,8 @@ class AppTabBar extends StatelessWidget {
   ];
 
   static const List<AppTabItem> defaultRightItems = [
-    AppTabItem(index: 4, icon: Icons.insights_rounded, label: 'Progress'),
     AppTabItem(index: 2, icon: Icons.forum_rounded, label: 'Tutor'),
+    AppTabItem(index: 4, icon: Icons.insights_rounded, label: 'Progress'),
     AppTabItem(index: 3, icon: Icons.person_rounded, label: 'Profile'),
   ];
 

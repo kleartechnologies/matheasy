@@ -11,14 +11,15 @@ import '../../features/paywall/presentation/paywall_screen.dart';
 import '../../features/practice/domain/practice_session.dart';
 import '../../features/practice/presentation/practice_screen.dart';
 import '../../features/practice/presentation/practice_session_screen.dart';
+import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
-import '../../features/profile/presentation/profile_settings_screen.dart';
 import '../../features/profile/presentation/profile_subscription_screen.dart';
 import '../../features/progress/presentation/achievements_screen.dart';
 import '../../features/progress/presentation/progress_screen.dart';
 import '../../features/result/presentation/result_screen.dart';
 import '../../features/scan/domain/detected_equation.dart';
 import '../../features/scan/presentation/scanner_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/shell/presentation/app_shell.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/tutor/domain/tutor_models.dart';
@@ -180,7 +181,13 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
                     path: AppRoutes.profileSettingsSegment,
                     name: AppRoutes.profileSettingsName,
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => const ProfileSettingsScreen(),
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.profileEditSegment,
+                    name: AppRoutes.profileEditName,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) => const ProfileEditScreen(),
                   ),
                   GoRoute(
                     path: AppRoutes.profileSubscriptionSegment,
