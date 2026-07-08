@@ -1,0 +1,112 @@
+import 'package:flutter/foundation.dart';
+
+import 'practice_difficulty.dart';
+import 'practice_topic.dart';
+
+/// How a practice question is answered. New types slot in without touching the
+/// session flow (the UI switches on this).
+enum PracticeQuestionType {
+  /// Pick one of several choices.
+  multipleChoice,
+
+  /// Pick true or false.
+  trueFalse,
+
+  /// Type a short answer (number / word).
+  input,
+
+  /// Solve for a variable and type the value.
+  equation,
+}
+
+/// One selectable choice in a multiple-choice / true-false question.
+@immutable
+class PracticeOption {
+  const PracticeOption(this.text, {this.isCorrect = false});
+
+  final String text;
+  final bool isCorrect;
+}
+
+/// A single interactive practice question.
+///
+/// Choice questions ([multipleChoice] / [trueFalse]) use [options]; typed
+/// questions ([input] / [equation]) validate against [acceptedAnswers].
+@immutable
+class PracticeQuestion {
+  const PracticeQuestion({
+    required this.id,
+    required this.topic,
+    required this.difficulty,
+    required this.type,
+    required this.prompt,
+    required this.explanation,
+    this.promptLatex,
+    this.spokenPrompt,
+    this.options = const [],
+    this.acceptedAnswers = const [],
+  });
+
+  final String id;
+  final PracticeTopic topic;
+  final PracticeDifficulty difficulty;
+  final PracticeQuestionType type;
+
+  /// Plain-language instruction, e.g. "Solve for x".
+  final String prompt;
+
+  /// Optional LaTeX shown large under the prompt (e.g. `2x + 5 = 13`).
+  final String? promptLatex;
+
+  /// Optional plain-text reading of [promptLatex] for screen readers, used when
+  /// the LaTeX contains commands (e.g. \frac) that would otherwise be announced
+  /// as raw markup.
+  final String? spokenPrompt;
+
+  /// Choices for [multipleChoice] / [trueFalse].
+  final List<PracticeOption> options;
+
+  /// Accepted normalized answers for [input] / [equation].
+  final List<String> acceptedAnswers;
+
+  /// Shown after the student answers — the "why".
+  final String explanation;
+
+  int get xpReward => difficulty.baseXp;
+
+  int get correctOptionIndex => options.indexWhere((o) => o.isCorrect);
+
+  /// The canonical correct answer as display text (for the feedback panel).
+  String get correctAnswerText {
+    if (options.isNotEmpty) {
+      final index = correctOptionIndex;
+      return index >= 0 ? options[index].text : '';
+    }
+    return acceptedAnswers.isNotEmpty ? acceptedAnswers.first : '';
+  }
+
+  /// Evaluates a submitted answer (an option's text, or typed input).
+  bool evaluate(String submitted) {
+    if (options.isNotEmpty) {
+      final index = correctOptionIndex;
+      if (index < 0) return false;
+      return _normalize(submitted) == _normalize(options[index].text);
+    }
+    final normalized = _normalizeMath(submitted);
+    if (normalized.isEmpty) return false;
+    return acceptedAnswers.any((a) => _normalizeMath(a) == normalized);
+  }
+
+  static String _normalize(String s) => s.trim().toLowerCase();
+
+  /// Normalizes a math answer: lowercases, strips whitespace + currency/grouping
+  /// symbols, and drops a leading assignment so "x = 4", "$4" and "4" all
+  /// compare as "4".
+  static String _normalizeMath(String s) {
+    var value =
+        s.trim().toLowerCase().replaceAll(RegExp(r'[\s$,£€]'), '');
+    final eq = value.indexOf('=');
+    if (eq >= 0) value = value.substring(eq + 1);
+    return value;
+  }
+}

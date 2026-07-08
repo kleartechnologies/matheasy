@@ -8,6 +8,7 @@ import '../../features/gallery/presentation/gallery_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/paywall/presentation/paywall_screen.dart';
+import '../../features/practice/domain/practice_session.dart';
 import '../../features/practice/presentation/practice_screen.dart';
 import '../../features/practice/presentation/practice_session_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -137,7 +138,9 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
                     path: AppRoutes.practiceSessionSegment,
                     name: AppRoutes.practiceSessionName,
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => const PracticeSessionScreen(),
+                    builder: (context, state) => PracticeSessionScreen(
+                      request: state.extra as PracticeRequest?,
+                    ),
                   ),
                 ],
               ),

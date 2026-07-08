@@ -87,19 +87,22 @@ abstract class _$AuthController extends $Notifier<AuthState> {
 }
 
 /// The coarse session gate the router reads. Guest counts as authenticated so
-/// guests can browse the whole app.
+/// guests can browse the whole app. Only notifies when the [AuthStatus] value
+/// actually changes (busy/failure churn on [AuthState] is filtered out).
 
 @ProviderFor(authStatus)
 final authStatusProvider = AuthStatusProvider._();
 
 /// The coarse session gate the router reads. Guest counts as authenticated so
-/// guests can browse the whole app.
+/// guests can browse the whole app. Only notifies when the [AuthStatus] value
+/// actually changes (busy/failure churn on [AuthState] is filtered out).
 
 final class AuthStatusProvider
     extends $FunctionalProvider<AuthStatus, AuthStatus, AuthStatus>
     with $Provider<AuthStatus> {
   /// The coarse session gate the router reads. Guest counts as authenticated so
-  /// guests can browse the whole app.
+  /// guests can browse the whole app. Only notifies when the [AuthStatus] value
+  /// actually changes (busy/failure churn on [AuthState] is filtered out).
   AuthStatusProvider._()
     : super(
         from: null,
@@ -133,7 +136,7 @@ final class AuthStatusProvider
   }
 }
 
-String _$authStatusHash() => r'6e7dc7af1376f790bee14c91179edd41a4551f46';
+String _$authStatusHash() => r'14390aa155bfe1afbc0349ea276cbdcb9f140378';
 
 /// The current [AppUser] (real or guest), or `null` when signed out.
 
@@ -179,7 +182,7 @@ final class CurrentUserProvider
   }
 }
 
-String _$currentUserHash() => r'41378a81d2d4225406a8499f0bd080128d790d0f';
+String _$currentUserHash() => r'dff158becf63375a0d2eb064bf256e09b5c3166f';
 
 /// The assembled [UserProfile] (identity + onboarding-derived preferences), or
 /// `null` when signed out.

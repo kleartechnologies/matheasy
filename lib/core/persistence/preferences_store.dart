@@ -30,6 +30,7 @@ class PreferencesStore {
 
   static const String _kOnboardingComplete = 'session.onboarding_complete';
   static const String _kGuestMode = 'session.guest_mode';
+  static const String _kPracticeProgress = 'practice.progress';
 
   /// Whether the user has finished onboarding (so returning users skip it).
   bool get onboardingComplete =>
@@ -47,4 +48,10 @@ class PreferencesStore {
   /// Clears session-scoped flags (guest mode) on sign-out. Onboarding
   /// completion is intentionally preserved.
   Future<void> clearSession() => _prefs.remove(_kGuestMode);
+
+  /// The serialized practice progress (JSON), or `null` when none saved yet.
+  String? get practiceProgressJson => _prefs.getString(_kPracticeProgress);
+
+  Future<void> setPracticeProgressJson(String json) =>
+      _prefs.setString(_kPracticeProgress, json);
 }

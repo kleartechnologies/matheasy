@@ -7,6 +7,8 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../practice/domain/practice_session.dart';
+import '../../practice/domain/practice_topic.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/result_controller.dart';
@@ -67,6 +69,23 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _selectTab(int index) =>
       ref.read(resultTabProvider.notifier).select(index);
+
+  /// Launches a practice session on the topic of the solved problem.
+  void _practice(ResultData result) {
+    context.push(
+      AppRoutes.practiceSession,
+      extra: PracticeRequest(topic: _practiceTopicFor(result.type)),
+    );
+  }
+
+  PracticeTopic _practiceTopicFor(ResultType type) => switch (type) {
+        ResultType.linear ||
+        ResultType.quadratic ||
+        ResultType.expression =>
+          PracticeTopic.algebra,
+        ResultType.fraction => PracticeTopic.fractions,
+        ResultType.trigonometry => PracticeTopic.trigonometry,
+      };
 
   /// Opens the tutor chat aware of this solved problem, so Numi can pick up the
   /// conversation with full context (mock today).
@@ -198,8 +217,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       case 3:
         return PracticeTab(
           questions: result.practice,
-          onGenerateMore: () => _toast('Generating more practice…'),
-          onOpenQuestion: () => _toast('Practice sessions arrive in Stage 8.'),
+          onGenerateMore: () => _practice(result),
+          onOpenQuestion: () => _practice(result),
         );
       case 0:
       default:

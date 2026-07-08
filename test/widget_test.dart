@@ -178,10 +178,8 @@ void main() {
       await tester.tap(practiceTab);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
-      expect(
-        find.text('Adaptive practice and topic mastery arrive in Stage 8.'),
-        findsOneWidget,
-      );
+      // The real Practice dashboard (Stage 8) renders its XP level header.
+      expect(find.text('Level 1'), findsOneWidget);
     });
   });
 

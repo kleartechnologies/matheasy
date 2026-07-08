@@ -9,6 +9,8 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../practice/domain/practice_session.dart';
+import '../../../practice/domain/practice_topic.dart';
 import '../../domain/home_models.dart';
 
 /// "Let's strengthen these" — topics needing improvement, or a friendly
@@ -63,7 +65,10 @@ class _TopicRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return InkWell(
-      onTap: () => context.go(AppRoutes.practice),
+      onTap: () => context.push(
+        AppRoutes.practiceSession,
+        extra: PracticeRequest(topic: PracticeTopic.fromLabel(topic.label)),
+      ),
       borderRadius: AppRadius.mdRadius,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),

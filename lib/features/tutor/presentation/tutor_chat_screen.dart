@@ -2,14 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../shared/mascot/numi_mascot.dart';
+import '../../practice/domain/practice_session.dart';
+import '../../practice/domain/practice_topic.dart';
 import '../application/tutor_controller.dart';
 import '../domain/tutor_models.dart';
 import 'widgets/tutor_chat_input.dart';
@@ -83,6 +87,15 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Opens a practice session from a practice card Numi offered. Numi's practice
+  /// prompts are algebra-focused, so we launch an algebra session.
+  void _startPractice() {
+    context.push(
+      AppRoutes.practiceSession,
+      extra: const PracticeRequest(topic: PracticeTopic.algebra),
+    );
   }
 
   @override
@@ -174,8 +187,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
               message: message,
               showSuggestions: showSuggestions,
               onSuggestion: _sendAction,
-              onPracticeStart: () =>
-                  _toast('Full practice sessions arrive soon.'),
+              onPracticeStart: _startPractice,
             ),
           ),
         );
