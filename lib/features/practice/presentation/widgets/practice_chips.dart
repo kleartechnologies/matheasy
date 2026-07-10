@@ -65,6 +65,10 @@ class PracticeDifficultyPill extends StatelessWidget {
           colors.errorContainer,
           colors.onErrorContainer,
         ),
+      PracticeDifficulty.expert => (
+          colors.primaryContainer,
+          colors.onPrimaryContainer,
+        ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(

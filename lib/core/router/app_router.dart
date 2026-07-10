@@ -12,6 +12,7 @@ import '../../features/paywall/presentation/paywall_screen.dart';
 import '../../features/practice/domain/practice_session.dart';
 import '../../features/practice/presentation/practice_screen.dart';
 import '../../features/practice/presentation/practice_session_screen.dart';
+import '../../features/practice/presentation/practice_visual_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/profile_subscription_screen.dart';
@@ -156,6 +157,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => PracticeSessionScreen(
                       request: state.extra as PracticeRequest?,
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.practiceVisualSegment,
+                    name: AppRoutes.practiceVisualName,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) => PracticeVisualScreen(
+                      args: state.extra as PracticeVisualArgs?,
                     ),
                   ),
                 ],

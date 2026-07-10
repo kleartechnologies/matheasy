@@ -12,12 +12,18 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../shared/mascot/numi_mascot.dart';
+import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../../tutor/domain/tutor_models.dart';
 import '../application/practice_controller.dart';
+import '../domain/practice_mistake.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
+import '../domain/practice_topic.dart';
+import 'practice_visual_screen.dart';
 import 'widgets/practice_answer_area.dart';
 import 'widgets/practice_feedback.dart';
+import 'widgets/practice_mistake_actions.dart';
 import 'widgets/practice_question_view.dart';
 import 'widgets/practice_results_view.dart';
 import 'widgets/practice_session_header.dart';
@@ -107,6 +113,48 @@ class _PracticeSessionScreenState
       extra: PaywallTrigger.practiceLimit,
     );
   }
+
+  /// Opens Numi to explain a wrong answer, seeded with the full mistake context
+  /// (question + the learner's answer + the correct answer + topic/difficulty).
+  void _askNumiAboutMistake(PracticeMistake mistake) {
+    context.push(
+      AppRoutes.tutorChat,
+      extra: TutorLaunchContext(
+        questionLatex: mistake.question.promptLatex,
+        answerLatex: mistake.correctAnswer,
+        equationType: mistake.difficulty.label,
+        topicLabel: mistake.topic.label,
+        seedMessage: mistake.numiSeedMessage,
+      ),
+    );
+  }
+
+  /// Launches the Visual Learning walkthrough for a wrong answer. Pro-gated:
+  /// free users are routed to the paywall (Visual Learning is a Pro feature).
+  void _showVisualForMistake(PracticeMistake mistake) {
+    if (!ref.read(isProProvider)) {
+      context.push(AppRoutes.paywall, extra: PaywallTrigger.visualLearning);
+      return;
+    }
+    context.push(
+      AppRoutes.practiceVisual,
+      extra: PracticeVisualArgs(
+        latex: mistake.problemLatex,
+        answerLatex: mistake.correctAnswer,
+        typeHint: _visualTypeHint(mistake.topic),
+        topicLabel: mistake.topic.label,
+      ),
+    );
+  }
+
+  /// Maps a practice topic onto the Visual Learning type hint the renderer/mock
+  /// keys off (best-effort; the backend treats it as a loose hint).
+  String? _visualTypeHint(PracticeTopic topic) => switch (topic) {
+        PracticeTopic.algebra => 'linear',
+        PracticeTopic.fractions => 'fraction',
+        PracticeTopic.trigonometry => 'trigonometry',
+        _ => null,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +248,15 @@ class _PracticeSessionScreenState
                       reactionSeed: session.currentIndex,
                     ),
                   ),
+                  if (state.mistake case final mistake?) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AppTransitions.slideUp(
+                      child: PracticeMistakeActions(
+                        onAskNumi: () => _askNumiAboutMistake(mistake),
+                        onShowVisual: () => _showVisualForMistake(mistake),
+                      ),
+                    ),
+                  ],
                 ],
               ],
             ),

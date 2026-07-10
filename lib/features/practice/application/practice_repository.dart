@@ -7,6 +7,7 @@ import '../domain/practice_difficulty.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_session.dart';
 import '../domain/practice_topic.dart';
+import '../domain/skill_mastery.dart';
 
 /// Persists [PracticeProgress] — the seam a cloud (Firestore) implementation
 /// later replaces.
@@ -64,6 +65,15 @@ class LocalPracticeRepository implements PracticeRepository {
               'correct': entry.value.correct,
             },
         },
+        'skills': {
+          for (final entry in p.skills.entries)
+            entry.key: {
+              'masteryPoints': entry.value.masteryPoints,
+              'attempts': entry.value.attempts,
+              'correct': entry.value.correct,
+              'lastSeenEpochDay': entry.value.lastSeenEpochDay,
+            },
+        },
         'lastRequest':
             p.lastRequest == null ? null : _requestToJson(p.lastRequest!),
       };
@@ -84,6 +94,24 @@ class LocalPracticeRepository implements PracticeRepository {
         }
       });
     }
+    final skills = <String, SkillMastery>{};
+    final rawSkills = m['skills'];
+    if (rawSkills is Map) {
+      rawSkills.forEach((key, value) {
+        if (key is String && value is Map) {
+          skills[key] = SkillMastery(
+            skillId: key,
+            masteryPoints: _int(value['masteryPoints']),
+            attempts: _int(value['attempts']),
+            correct: _int(value['correct']),
+            lastSeenEpochDay:
+                value['lastSeenEpochDay'] is int
+                    ? value['lastSeenEpochDay'] as int
+                    : null,
+          );
+        }
+      });
+    }
     return PracticeProgress(
       totalXp: _int(m['totalXp']),
       streakCurrent: _int(m['streakCurrent']),
@@ -97,6 +125,7 @@ class LocalPracticeRepository implements PracticeRepository {
           ? m['lastDailyChallengeEpochDay'] as int
           : null,
       topics: topics,
+      skills: skills,
       lastRequest: _requestFromJson(m['lastRequest']),
     );
   }
@@ -107,6 +136,8 @@ class LocalPracticeRepository implements PracticeRepository {
         'questionCount': r.questionCount,
         'isDailyChallenge': r.isDailyChallenge,
         'title': r.title,
+        'skillId': r.skillId,
+        'adaptive': r.adaptive,
       };
 
   PracticeRequest? _requestFromJson(Object? raw) {
@@ -119,6 +150,8 @@ class LocalPracticeRepository implements PracticeRepository {
       questionCount: _int(raw['questionCount'], fallback: 5),
       isDailyChallenge: raw['isDailyChallenge'] == true,
       title: raw['title'] as String?,
+      skillId: raw['skillId'] as String?,
+      adaptive: raw['adaptive'] == true,
     );
   }
 

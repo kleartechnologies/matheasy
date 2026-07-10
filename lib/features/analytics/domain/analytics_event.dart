@@ -58,6 +58,50 @@ class AnalyticsEvent {
   }) =>
       AnalyticsEvent('practice_completed', {'correct': correct, 'total': total});
 
+  /// A batch of adaptive-engine questions was generated for a session.
+  factory AnalyticsEvent.questionGenerated({
+    required String topic,
+    required String difficulty,
+    required int count,
+  }) =>
+      AnalyticsEvent('question_generated', {
+        'topic': topic,
+        'difficulty': difficulty,
+        'count': count,
+      });
+
+  factory AnalyticsEvent.questionCorrect({
+    required String topic,
+    required String difficulty,
+  }) =>
+      AnalyticsEvent(
+        'question_correct',
+        {'topic': topic, 'difficulty': difficulty},
+      );
+
+  factory AnalyticsEvent.questionIncorrect({
+    required String topic,
+    required String difficulty,
+  }) =>
+      AnalyticsEvent(
+        'question_incorrect',
+        {'topic': topic, 'difficulty': difficulty},
+      );
+
+  /// A session pushed a topic into a higher mastery level.
+  factory AnalyticsEvent.masteryIncreased({
+    required String topic,
+    required int level,
+  }) =>
+      AnalyticsEvent('mastery_increased', {'topic': topic, 'level': level});
+
+  /// A Pro adaptive (weakness-targeted) session was started.
+  factory AnalyticsEvent.adaptiveRecommendationUsed({required String topic}) =>
+      AnalyticsEvent('adaptive_recommendation_used', {'topic': topic});
+
+  factory AnalyticsEvent.dailyChallengeCompleted() =>
+      const AnalyticsEvent('daily_challenge_completed');
+
   // ---- Progress ----
   factory AnalyticsEvent.achievementUnlocked({required String id}) =>
       AnalyticsEvent('achievement_unlocked', {'achievement_id': id});

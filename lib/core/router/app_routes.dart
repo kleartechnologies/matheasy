@@ -33,6 +33,10 @@ class AppRoutes {
   static const String practiceSession = '/practice/session';
   static const String practiceSessionName = 'practiceSession';
 
+  static const String practiceVisualSegment = 'visual';
+  static const String practiceVisual = '/practice/visual';
+  static const String practiceVisualName = 'practiceVisual';
+
   static const String tutorChatSegment = 'chat';
   static const String tutorChat = '/tutor/chat';
   static const String tutorChatName = 'tutorChat';

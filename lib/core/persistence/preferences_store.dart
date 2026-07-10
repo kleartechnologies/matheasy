@@ -31,6 +31,7 @@ class PreferencesStore {
   static const String _kOnboardingComplete = 'session.onboarding_complete';
   static const String _kGuestMode = 'session.guest_mode';
   static const String _kPracticeProgress = 'practice.progress';
+  static const String _kPracticeHistory = 'practice.history';
   static const String _kAchievements = 'progress.achievements';
   static const String _kProgressStats = 'progress.stats';
   static const String _kSettings = 'settings.preferences';
@@ -64,6 +65,7 @@ class PreferencesStore {
   /// separately by the auth layer.
   Future<void> clearLearningData() async {
     await _prefs.remove(_kPracticeProgress);
+    await _prefs.remove(_kPracticeHistory);
     await _prefs.remove(_kAchievements);
     await _prefs.remove(_kProgressStats);
     await _prefs.remove(_kSettings);
@@ -80,6 +82,13 @@ class PreferencesStore {
 
   Future<void> setPracticeProgressJson(String json) =>
       _prefs.setString(_kPracticeProgress, json);
+
+  /// The serialized anti-repetition history — recent question fingerprints
+  /// (JSON), or `null` when none saved yet.
+  String? get practiceHistoryJson => _prefs.getString(_kPracticeHistory);
+
+  Future<void> setPracticeHistoryJson(String json) =>
+      _prefs.setString(_kPracticeHistory, json);
 
   /// The serialized achievement unlocks (JSON).
   String? get achievementsJson => _prefs.getString(_kAchievements);

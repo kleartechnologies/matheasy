@@ -9,7 +9,9 @@ import '../../../core/security/rate_limit_service.dart';
 import '../../../core/services/haptics_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
+import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/usage_controller.dart';
+import '../domain/practice_mistake.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
 import 'practice_progress_controller.dart';
@@ -66,6 +68,18 @@ class PracticeSessionState {
   bool get isRevealed => phase == PracticePhase.revealed;
   bool get isComplete => phase == PracticePhase.complete;
   bool get lastWasCorrect => lastAnswer?.isCorrect ?? false;
+
+  /// The mistake just revealed (for the Numi "why is this wrong?" and Visual
+  /// walkthrough hand-offs) — `null` unless the last answer was incorrect.
+  PracticeMistake? get mistake {
+    final answer = lastAnswer;
+    final current = session;
+    if (answer == null || current == null || answer.isCorrect) return null;
+    return PracticeMistake(
+      question: current.currentQuestion,
+      submittedAnswer: answer.submitted,
+    );
+  }
 }
 
 /// Drives a practice session: build → answer → feedback → next → results.
@@ -109,8 +123,19 @@ class PracticeController extends _$PracticeController {
       ref
           .read(usageControllerProvider.notifier)
           .recordPracticeGenerated(session.questions.length);
-      unawaited(ref.read(analyticsServiceProvider).logEvent(
-          AnalyticsEvent.practiceStarted(topic: request.topic.name)));
+      final analytics = ref.read(analyticsServiceProvider);
+      unawaited(analytics
+          .logEvent(AnalyticsEvent.practiceStarted(topic: request.topic.name)));
+      unawaited(analytics.logEvent(AnalyticsEvent.questionGenerated(
+        topic: request.topic.name,
+        difficulty: request.difficulty?.name ?? 'adaptive',
+        count: session.questions.length,
+      )));
+      // Adaptive, weakness-targeted sessions are a Pro capability — track uptake.
+      if (request.adaptive && ref.read(isProProvider)) {
+        unawaited(analytics.logEvent(
+            AnalyticsEvent.adaptiveRecommendationUsed(topic: request.topic.name)));
+      }
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: session,
@@ -137,6 +162,13 @@ class PracticeController extends _$PracticeController {
       xpEarned: isCorrect ? question.xpReward : 0,
     );
 
+    final analytics = ref.read(analyticsServiceProvider);
+    unawaited(analytics.logEvent(isCorrect
+        ? AnalyticsEvent.questionCorrect(
+            topic: question.topic.name, difficulty: question.difficulty.name)
+        : AnalyticsEvent.questionIncorrect(
+            topic: question.topic.name, difficulty: question.difficulty.name)));
+
     state = PracticeSessionState(
       phase: PracticePhase.revealed,
       session: session.recordAnswer(answer),
@@ -153,9 +185,19 @@ class PracticeController extends _$PracticeController {
       final result = ref
           .read(practiceProgressControllerProvider.notifier)
           .recordSession(session, now: DateTime.now());
-      unawaited(ref.read(analyticsServiceProvider).logEvent(
-          AnalyticsEvent.practiceCompleted(
-              correct: result.correct, total: result.total)));
+      final analytics = ref.read(analyticsServiceProvider);
+      unawaited(analytics.logEvent(AnalyticsEvent.practiceCompleted(
+          correct: result.correct, total: result.total)));
+      if (result.leveledUp) {
+        unawaited(analytics.logEvent(AnalyticsEvent.masteryIncreased(
+          topic: result.topic.name,
+          level: result.masteryAfter.index,
+        )));
+      }
+      if (session.request.isDailyChallenge) {
+        unawaited(
+            analytics.logEvent(AnalyticsEvent.dailyChallengeCompleted()));
+      }
       state = PracticeSessionState(
         phase: PracticePhase.complete,
         session: session,

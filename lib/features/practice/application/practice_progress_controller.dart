@@ -4,8 +4,10 @@ import 'dart:math' as math;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/practice_progress.dart';
+import '../domain/practice_question.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
+import '../domain/skill_mastery.dart';
 import '../domain/xp_level.dart';
 import '../domain/xp_reward.dart';
 import 'practice_repository.dart';
@@ -53,6 +55,12 @@ class PracticeProgressController extends _$PracticeProgressController {
       correct: before.correct + session.correctCount,
     );
 
+    // Fine-grained per-skill mastery (Stage 15) — the adaptive engine's signal.
+    // Only skill-tagged questions (engine-generated) contribute; hand-authored
+    // bank questions have no skillId and are ignored here (topic mastery above
+    // still covers them).
+    final updatedSkills = _recordSkills(session, questionsById, today);
+
     final (streakCurrent, streakBest) = _updatedStreak(now);
 
     final updated = state.copyWith(
@@ -66,6 +74,7 @@ class PracticeProgressController extends _$PracticeProgressController {
       lastDailyChallengeEpochDay:
           awardDaily ? today : state.lastDailyChallengeEpochDay,
       topics: {...state.topics, topic: afterTopic},
+      skills: updatedSkills,
       lastRequest: session.request,
     );
 
@@ -81,6 +90,29 @@ class PracticeProgressController extends _$PracticeProgressController {
       masteryAfter: afterTopic.level,
       masteryPointsAfter: afterTopic.masteryPoints,
     );
+  }
+
+  /// Folds a session's skill-tagged answers into per-skill mastery. Returns a
+  /// new `skills` map (unchanged if the session had no skill-tagged questions).
+  Map<String, SkillMastery> _recordSkills(
+    PracticeSession session,
+    Map<String, PracticeQuestion> questionsById,
+    int today,
+  ) {
+    Map<String, SkillMastery>? next;
+    for (final answer in session.answers) {
+      final question = questionsById[answer.questionId];
+      final skillId = question?.skillId;
+      if (question == null || skillId == null) continue;
+      next ??= {...state.skills};
+      final current = next[skillId] ?? SkillMastery(skillId: skillId);
+      next[skillId] = current.record(
+        isCorrect: answer.isCorrect,
+        masteryGain: question.difficulty.masteryPoints,
+        epochDay: today,
+      );
+    }
+    return next ?? state.skills;
   }
 
   /// Adds bonus XP outside a session (e.g. achievement rewards). This is the

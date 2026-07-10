@@ -21,6 +21,7 @@ import 'package:matheasy/features/practice/domain/practice_progress.dart';
 import 'package:matheasy/features/practice/domain/practice_question.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
+import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
 import 'package:matheasy/features/practice/presentation/practice_screen.dart';
 import 'package:matheasy/features/practice/presentation/practice_session_screen.dart';
@@ -44,6 +45,18 @@ const _mcQ = PracticeQuestion(
   prompt: 'Pick the value of x',
   options: [PracticeOption('1'), PracticeOption('3', isCorrect: true)],
   explanation: 'x is 3.',
+);
+
+/// A skill-tagged question (Stage 15) — drives per-skill mastery.
+const _skillQ = PracticeQuestion(
+  id: 'q-skill',
+  topic: PracticeTopic.algebra,
+  difficulty: PracticeDifficulty.medium,
+  type: PracticeQuestionType.input,
+  prompt: 'Solve for x',
+  acceptedAnswers: ['5'],
+  explanation: 'x = 5.',
+  skillId: 'alg_linear_1',
 );
 
 /// A practice service that returns a fixed question list — deterministic and
@@ -232,6 +245,44 @@ void main() {
       expect(state.lastRequest!.topic, PracticeTopic.algebra);
     });
 
+    test('records per-skill mastery for skill-tagged questions (Stage 15)',
+        () async {
+      final container = await _container();
+      _activate(container);
+      final progress =
+          container.read(practiceProgressControllerProvider.notifier);
+
+      final session = PracticeSession(
+        request: const PracticeRequest(topic: PracticeTopic.algebra),
+        questions: const [_skillQ],
+        answers: [_answer(_skillQ, correct: true)], // medium: +3 skill mastery
+      );
+      progress.recordSession(session, now: DateTime(2026, 7, 8));
+
+      final mastery =
+          container.read(practiceProgressControllerProvider).skills['alg_linear_1'];
+      expect(mastery, isNotNull);
+      expect(mastery!.attempts, 1);
+      expect(mastery.correct, 1);
+      expect(mastery.masteryPoints, 3);
+
+      // A hand-authored question (no skillId) leaves the skills map untouched.
+      final beforeCount =
+          container.read(practiceProgressControllerProvider).skills.length;
+      progress.recordSession(
+        PracticeSession(
+          request: const PracticeRequest(topic: PracticeTopic.algebra),
+          questions: const [_inputQ],
+          answers: [_answer(_inputQ, correct: true)],
+        ),
+        now: DateTime(2026, 7, 9),
+      );
+      expect(
+        container.read(practiceProgressControllerProvider).skills.length,
+        beforeCount,
+      );
+    });
+
     test('daily challenge adds the +100 bonus once per day', () async {
       final container = await _container();
       _activate(container);
@@ -328,6 +379,41 @@ void main() {
       expect(loaded.topic(PracticeTopic.algebra).correct, 9);
       expect(loaded.lastRequest!.topic, PracticeTopic.fractions);
       expect(loaded.lastRequest!.difficulty, PracticeDifficulty.hard);
+    });
+
+    test('repository round-trips skill mastery and adaptive request (Stage 15)',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repository = LocalPracticeRepository(PreferencesStore(prefs));
+
+      const progress = PracticeProgress(
+        totalXp: 30,
+        skills: {
+          'alg_linear_1': SkillMastery(
+            skillId: 'alg_linear_1',
+            masteryPoints: 12,
+            attempts: 4,
+            correct: 3,
+            lastSeenEpochDay: 20000,
+          ),
+        },
+        lastRequest: PracticeRequest(
+          topic: PracticeTopic.algebra,
+          skillId: 'alg_linear_1',
+          adaptive: true,
+        ),
+      );
+      await repository.save(progress);
+
+      final loaded = repository.load();
+      final skill = loaded.skills['alg_linear_1']!;
+      expect(skill.masteryPoints, 12);
+      expect(skill.attempts, 4);
+      expect(skill.correct, 3);
+      expect(skill.lastSeenEpochDay, 20000);
+      expect(loaded.lastRequest!.skillId, 'alg_linear_1');
+      expect(loaded.lastRequest!.adaptive, isTrue);
     });
 
     test('corrupt payload falls back to empty', () async {

@@ -6,8 +6,11 @@ import '../../../core/animations/app_transitions.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../subscription/application/subscription_controller.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../application/practice_dashboard_controller.dart';
 import '../domain/practice_session.dart';
+import '../domain/practice_skill.dart';
 import '../domain/practice_topic.dart';
 import 'sections/practice_categories.dart';
 import 'sections/practice_continue.dart';
@@ -26,8 +29,16 @@ class PracticeScreen extends ConsumerWidget {
   void _start(BuildContext context, PracticeRequest request) =>
       context.push(AppRoutes.practiceSession, extra: request);
 
-  void _startTopic(BuildContext context, PracticeTopic topic) =>
-      _start(context, PracticeRequest(topic: topic));
+  /// Launches a topic. Free users are routed to the paywall for advanced topics
+  /// (no free skills); Pro users get an adaptive, weakness-targeted session.
+  void _startTopic(BuildContext context, WidgetRef ref, PracticeTopic topic) {
+    final isPro = ref.read(isProProvider);
+    if (!isPro && !PracticeSkill.topicHasFreeSkills(topic)) {
+      context.push(AppRoutes.paywall, extra: PaywallTrigger.adaptivePractice);
+      return;
+    }
+    _start(context, PracticeRequest(topic: topic, adaptive: isPro));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,15 +61,15 @@ class PracticeScreen extends ConsumerWidget {
       ),
       PracticeRecommendedTopics(
         topics: data.recommendedTopics,
-        onStartTopic: (topic) => _startTopic(context, topic),
+        onStartTopic: (topic) => _startTopic(context, ref, topic),
       ),
       PracticeWeakTopics(
         topics: data.weakTopics,
-        onStartTopic: (topic) => _startTopic(context, topic),
+        onStartTopic: (topic) => _startTopic(context, ref, topic),
       ),
       PracticeCategories(
         categories: data.categories,
-        onStartTopic: (topic) => _startTopic(context, topic),
+        onStartTopic: (topic) => _startTopic(context, ref, topic),
       ),
     ];
 

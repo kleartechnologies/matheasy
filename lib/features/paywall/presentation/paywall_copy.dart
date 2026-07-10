@@ -24,6 +24,9 @@ class PaywallCopy {
         PaywallTrigger.visualLearning =>
           'Understand math visually. Watch every step unfold and learn '
               'faster with animations — a Matheasy Pro exclusive.',
+        PaywallTrigger.adaptivePractice =>
+          'Practice that adapts to you. Unlimited, personalized questions that '
+              'target your weak spots — a Matheasy Pro exclusive.',
         PaywallTrigger.manual =>
           'Learn faster with unlimited AI-powered math help.',
       };
@@ -79,6 +82,16 @@ class PaywallCopy {
       label: 'Practice questions',
       freeLabel: '10 lifetime',
       proLabel: 'Unlimited',
+    ),
+    ComparisonRow(
+      label: 'Adaptive Practice Engine',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
+    ComparisonRow(
+      label: 'Advanced topics & AI questions',
+      freeIncluded: false,
+      proLabel: 'Included',
     ),
     ComparisonRow(
       label: 'Step-by-step explanations',

@@ -14,18 +14,22 @@ class PracticeRequest {
     this.questionCount = 5,
     this.isDailyChallenge = false,
     this.title,
+    this.skillId,
+    this.adaptive = false,
   });
 
   /// The daily challenge: a fixed 5-question set with a bonus on completion.
+  /// [adaptive] so the challenge scales with the learner's mastery (Pro).
   factory PracticeRequest.dailyChallenge() => const PracticeRequest(
         topic: PracticeTopic.algebra,
         isDailyChallenge: true,
         title: 'Daily Challenge',
+        adaptive: true,
       );
 
   final PracticeTopic topic;
 
-  /// A fixed difficulty, or `null` for a mixed (adaptive-feeling) set.
+  /// A fixed difficulty, or `null` for a mixed / adaptively-chosen set.
   final PracticeDifficulty? difficulty;
 
   final int questionCount;
@@ -34,7 +38,36 @@ class PracticeRequest {
   /// Optional session title; falls back to the topic label.
   final String? title;
 
+  /// Pin the whole session to one [PracticeSkill.id] — used for personalized
+  /// reinforcement ("you just solved 2x+5=15, here's more like it"). `null`
+  /// lets the engine pick skills within [topic].
+  final String? skillId;
+
+  /// Whether to select skills adaptively (weakness-weighted). Pro-only; the free
+  /// tier always gets a basic ramp regardless of this flag.
+  final bool adaptive;
+
   String get displayTitle => title ?? topic.label;
+
+  PracticeRequest copyWith({
+    PracticeTopic? topic,
+    PracticeDifficulty? difficulty,
+    int? questionCount,
+    bool? isDailyChallenge,
+    String? title,
+    String? skillId,
+    bool? adaptive,
+  }) {
+    return PracticeRequest(
+      topic: topic ?? this.topic,
+      difficulty: difficulty ?? this.difficulty,
+      questionCount: questionCount ?? this.questionCount,
+      isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
+      title: title ?? this.title,
+      skillId: skillId ?? this.skillId,
+      adaptive: adaptive ?? this.adaptive,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -43,11 +76,20 @@ class PracticeRequest {
       other.difficulty == difficulty &&
       other.questionCount == questionCount &&
       other.isDailyChallenge == isDailyChallenge &&
-      other.title == title;
+      other.title == title &&
+      other.skillId == skillId &&
+      other.adaptive == adaptive;
 
   @override
-  int get hashCode =>
-      Object.hash(topic, difficulty, questionCount, isDailyChallenge, title);
+  int get hashCode => Object.hash(
+        topic,
+        difficulty,
+        questionCount,
+        isDailyChallenge,
+        title,
+        skillId,
+        adaptive,
+      );
 }
 
 /// A recorded answer to one question.

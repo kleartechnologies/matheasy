@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import 'mastery.dart';
 import 'practice_session.dart';
+import 'practice_skill.dart';
 import 'practice_topic.dart';
+import 'skill_mastery.dart';
 import 'xp_level.dart';
 
 /// Per-topic mastery + accuracy stats.
@@ -50,6 +52,7 @@ class PracticeProgress {
     this.lastPracticedEpochDay,
     this.lastDailyChallengeEpochDay,
     this.topics = const {},
+    this.skills = const {},
     this.lastRequest,
   });
 
@@ -74,6 +77,11 @@ class PracticeProgress {
 
   final Map<PracticeTopic, TopicProgress> topics;
 
+  /// Per-skill mastery, keyed by [PracticeSkill.id] — the fine-grained adaptive
+  /// signal (Stage 15). Empty for pre-Stage-15 progress; populated as the
+  /// engine records skill-tagged answers.
+  final Map<String, SkillMastery> skills;
+
   /// The last session's request, powering "Continue practice".
   final PracticeRequest? lastRequest;
 
@@ -82,6 +90,10 @@ class PracticeProgress {
   /// Progress for [topic], defaulting to a fresh (Beginner) entry.
   TopicProgress topic(PracticeTopic topic) =>
       topics[topic] ?? TopicProgress(topic: topic);
+
+  /// Mastery for [skill], defaulting to a fresh (unattempted) entry.
+  SkillMastery skill(PracticeSkill skill) =>
+      skills[skill.id] ?? SkillMastery(skillId: skill.id);
 
   bool get hasHistory => totalXp > 0 || topics.isNotEmpty;
 
@@ -94,6 +106,7 @@ class PracticeProgress {
     int? lastPracticedEpochDay,
     int? lastDailyChallengeEpochDay,
     Map<PracticeTopic, TopicProgress>? topics,
+    Map<String, SkillMastery>? skills,
     PracticeRequest? lastRequest,
   }) {
     return PracticeProgress(
@@ -108,6 +121,7 @@ class PracticeProgress {
       lastDailyChallengeEpochDay:
           lastDailyChallengeEpochDay ?? this.lastDailyChallengeEpochDay,
       topics: topics ?? this.topics,
+      skills: skills ?? this.skills,
       lastRequest: lastRequest ?? this.lastRequest,
     );
   }
