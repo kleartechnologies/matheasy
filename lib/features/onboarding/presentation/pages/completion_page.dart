@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -13,7 +13,7 @@ class CompletionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const OnboardingIntroLayout(
       headline: "You're Ready To Start Learning.",
-      subtitle: 'Numi will guide you every step of the way.',
+      subtitle: 'Matheasy will guide you every step of the way.',
       illustration: _CompletionArt(),
     );
   }
@@ -44,7 +44,7 @@ class _CompletionArt extends StatelessWidget {
             ),
           ),
           const Floaty(
-            child: NumiMascot(expression: NumiExpression.celebrate, size: 200),
+            child: MatheasyBrandAvatar(size: 200),
           ),
           const Positioned(top: 20, left: 26, child: _Sparkle(color: AppColors.gold, size: 20)),
           const Positioned(top: 60, right: 20, child: _Sparkle(color: AppColors.success, size: 15)),

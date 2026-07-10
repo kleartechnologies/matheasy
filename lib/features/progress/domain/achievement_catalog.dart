@@ -34,7 +34,7 @@ class Achievements {
       description: 'Answer your first question correctly.',
       requirement: AchievementRequirement(AchievementMetric.correctAnswers, 1),
       reward: AchievementReward(xp: 15),
-      badge: Badge(emoji: '✅', name: 'Nailed It', color: AppColors.success),
+      badge: Badge(emoji: '✅', name: 'Nailed It', color: AppColors.accentAmber),
     ),
 
     // ---- Consistency ----
@@ -115,7 +115,7 @@ class Achievements {
       description: 'Fully master your first topic.',
       requirement: AchievementRequirement(AchievementMetric.topicsMastered, 1),
       reward: AchievementReward(xp: 150),
-      badge: Badge(emoji: '🎓', name: 'Topic Master', color: AppColors.success),
+      badge: Badge(emoji: '🎓', name: 'Topic Master', color: AppColors.accentAmber),
     ),
     Achievement(
       id: AchievementId.mastered3,
@@ -124,7 +124,7 @@ class Achievements {
       description: 'Master 3 different topics.',
       requirement: AchievementRequirement(AchievementMetric.topicsMastered, 3),
       reward: AchievementReward(xp: 300),
-      badge: Badge(emoji: '📚', name: 'Math Explorer', color: AppColors.success),
+      badge: Badge(emoji: '📚', name: 'Math Explorer', color: AppColors.accentAmber),
     ),
     Achievement(
       id: AchievementId.mastered5,
@@ -138,13 +138,13 @@ class Achievements {
 
     // ---- Exploration ----
     Achievement(
-      id: AchievementId.useNumi,
+      id: AchievementId.useMatheasy,
       category: AchievementCategory.exploration,
-      title: 'Met Numi',
-      description: 'Chat with Numi, your AI tutor.',
+      title: 'Met Matheasy',
+      description: 'Chat with Matheasy, your AI tutor.',
       requirement: AchievementRequirement(AchievementMetric.tutorUses, 1),
       reward: AchievementReward(xp: 20),
-      badge: Badge(emoji: '🤖', name: 'Met Numi', color: AppColors.primary),
+      badge: Badge(emoji: '💬', name: 'Met Matheasy', color: AppColors.primary),
     ),
     Achievement(
       id: AchievementId.dailyChallenge,

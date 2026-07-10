@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/app_durations.dart';
 
-/// Ambient vertical bob used for the Numi mascot and floating accents.
+/// Ambient vertical bob used for the Matheasy brand avatar and floating accents.
 /// Loops forever with a gentle ease; amplitude and period are tokenized.
 class Floaty extends StatefulWidget {
   const Floaty({
@@ -37,7 +37,7 @@ class _FloatyState extends State<Floaty>
 
   @override
   Widget build(BuildContext context) {
-    // Honour reduced-motion (accessibility setting or OS): hold the mascot still
+    // Honour reduced-motion (accessibility setting or OS): hold the avatar still
     // rather than looping the bob.
     final active = widget.enabled && !MediaQuery.disableAnimationsOf(context);
     if (active && !_controller.isAnimating) {

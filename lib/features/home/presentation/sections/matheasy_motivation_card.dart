@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/floaty.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
+import '../../../../core/widgets/widgets.dart';
 
-/// "Numi insight" — a warm weekly summary + encouragement from the mascot.
-class ProgressNumiInsight extends StatelessWidget {
-  const ProgressNumiInsight({super.key, required this.message});
+/// A warm Matheasy prompt inviting the learner into the tutor.
+class MatheasyMotivationCard extends StatelessWidget {
+  const MatheasyMotivationCard({super.key, required this.message});
 
   final String message;
 
@@ -22,27 +25,29 @@ class ProgressNumiInsight extends StatelessWidget {
         borderRadius: AppRadius.cardRadius,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const NumiMascot(size: 48),
+          const Floaty(
+            amplitude: 5,
+            child: MatheasyBrandAvatar(size: 64),
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Numi says',
-                  style: AppTypography.label.copyWith(
-                    color: colors.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
                   message,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: colors.textPrimary,
-                    height: 1.45,
+                    color: colors.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                GhostButton(
+                  label: 'Chat with Matheasy',
+                  icon: Icons.forum_rounded,
+                  size: AppButtonSize.small,
+                  onPressed: () => context.go(AppRoutes.tutor),
                 ),
               ],
             ),

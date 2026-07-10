@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -43,7 +43,7 @@ class _WelcomeArt extends StatelessWidget {
               ),
             ),
           ),
-          const Floaty(child: NumiMascot(expression: NumiExpression.wave, size: 190)),
+          const Floaty(child: MatheasyBrandAvatar(size: 190)),
           const Positioned(top: 12, left: 24, child: _Sparkle(color: AppColors.gold, size: 18)),
           const Positioned(top: 70, right: 20, child: _Sparkle(color: AppColors.primaryTint, size: 13)),
           const Positioned(bottom: 40, left: 14, child: _Sparkle(color: AppColors.success, size: 12)),

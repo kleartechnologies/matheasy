@@ -7,12 +7,11 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import '../../../result/domain/result_models.dart';
 import '../../domain/tutor_models.dart';
 
 /// An inline practice-question card. Shows the question, its difficulty and XP
-/// reward, an encouraging line from Numi, and a call to action to attempt it.
+/// reward, an encouraging line from Matheasy, and a call to action to attempt it.
 class TutorPracticeCard extends StatelessWidget {
   const TutorPracticeCard(this.prompt, {super.key, this.onStart});
 
@@ -71,7 +70,7 @@ class TutorPracticeCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              const NumiMascot(expression: NumiExpression.wink, size: 30),
+              const MatheasyBrandAvatar(size: 30),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

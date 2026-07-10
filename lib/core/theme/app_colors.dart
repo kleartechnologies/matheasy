@@ -3,6 +3,10 @@ import 'package:flutter/widgets.dart';
 /// Brand color palette — the fixed, brightness-agnostic hues that define
 /// Matheasy's identity. These read the same in light and dark mode.
 ///
+/// Anchored to the finalized **Matheasy Brand System (v1.0)**: an optimistic
+/// Emerald (#10B981) paired with Mint and a deep Ink — the language of learning
+/// and correctness, deliberately never fintech / crypto / enterprise.
+///
 /// Theme-dependent tokens (surfaces, text, borders, container tints) live in
 /// [AppSemanticColors] so they can flip between light and dark. Widgets should
 /// pull surface/text colors from `context.colors` (the semantic extension) and
@@ -14,35 +18,68 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
 
-  // ---- Primary (Brand Blue) ----
-  // Anchored to the official brand mark: Brand Blue #2563EB, Deep Blue #1D4ED8.
-  // The lighter/tint steps extend the same hue family for gradients and glows.
-  static const Color primary = Color(0xFF2563EB); // Brand Blue — icon & mark
-  static const Color primaryLight = Color(0xFF3B82F6); // gradient top / hover
-  static const Color primaryDark = Color(0xFF1D4ED8); // Deep Blue — pressed/depth
-  static const Color primaryPressed = Color(0xFF1D4ED8); // Deep Blue — pressed
-  static const Color primaryDeep = Color(0xFF1E40AF); // text on primary container
-  static const Color primaryTint = Color(0xFF60A5FA); // soft glow / ring
+  // ---- Primary (Brand Emerald) ----
+  // Anchored to the brand mark: Emerald #10B981, Dark Emerald #059669. The
+  // lighter/tint steps extend the same hue family for gradients and glows.
+  static const Color primary = Color(0xFF10B981); // Emerald 500 — icon & mark
+  static const Color primaryLight = Color(0xFF34D399); // Emerald 400 — gradient top / dark-mode mark
+  static const Color primaryDark = Color(0xFF059669); // Emerald 600 — pressed/depth
+  static const Color primaryPressed = Color(0xFF059669); // Emerald 600 — pressed
+  static const Color primaryDeep = Color(0xFF065F46); // Emerald 800 — text on primary container
+  static const Color primaryTint = Color(0xFF6EE7B7); // Emerald 300 — soft glow / ring
 
   /// Brand ink — the wordmark & primary text hue from the brand system.
   static const Color ink = Color(0xFF0F172A);
 
-  /// Brand-blue elevation glow (Brand Blue at ~40% alpha) for hero surfaces.
+  /// Deep ink — brand dark sections / immersive backdrops (#0B1220).
+  static const Color inkDeep = Color(0xFF0B1220);
+
+  /// Emerald elevation glow (Emerald at ~40% alpha) for hero surfaces.
   /// A const alpha variant of [primary] — Dart cannot derive alpha at
   /// compile-time, so glow tints live here as named tokens next to [primary].
-  static const Color primaryGlow = Color(0x662563EB);
+  static const Color primaryGlow = Color(0x6610B981);
 
-  /// Stronger brand-blue glow (~45% alpha) for raised CTAs (e.g. the Scan FAB).
-  static const Color primaryGlowStrong = Color(0x732563EB);
+  /// Stronger emerald glow (~45% alpha) for raised CTAs (e.g. the Scan FAB).
+  static const Color primaryGlowStrong = Color(0x7310B981);
 
-  // ---- Secondary (purple) ----
-  static const Color secondary = Color(0xFF7C4DFF);
-  static const Color secondaryLight = Color(0xFF9B6BFF);
+  // ---- Emerald ramp (tints & shades) ----
+  // The full brand ramp, for tonal surfaces and progress states.
+  static const Color emerald50 = Color(0xFFECFDF5);
+  static const Color emerald100 = Color(0xFFD1FAE5);
+  static const Color emerald200 = Color(0xFFA7F3D0);
+  static const Color emerald300 = Color(0xFF6EE7B7);
+  static const Color emerald400 = Color(0xFF34D399);
+  static const Color emerald500 = Color(0xFF10B981);
+  static const Color emerald600 = Color(0xFF059669);
+  static const Color emerald700 = Color(0xFF047857);
+  static const Color emerald800 = Color(0xFF065F46);
+  static const Color emerald900 = Color(0xFF064E3B);
 
-  // ---- Success (green) ----
-  static const Color success = Color(0xFF34C759);
-  static const Color successDark = Color(0xFF28B14C);
-  static const Color successDeep = Color(0xFF158A3F);
+  /// Mint surface — understanding & success tint from the brand system.
+  static const Color mint = Color(0xFFD1FAE5);
+
+  // ---- Categorical accents ----
+  // The emerald brand is near-monochrome; these warm, harmonious hues keep
+  // decorative/categorical UI (badges, topics, avatars, cards) legible without
+  // the retired purple. Emerald stays the first accent; indigo / amber / coral
+  // round out a four-hue set. [secondary] is kept as a name (used by the Material
+  // ColorScheme) and points at the indigo accent.
+  static const Color secondary = Color(0xFF6366F1); // Indigo 500 — categorical accent
+  static const Color secondaryLight = Color(0xFF818CF8); // Indigo 400
+  static const Color accentIndigo = secondary;
+  static const Color accentIndigoLight = secondaryLight;
+  static const Color accentAmber = Color(0xFFF59E0B); // Amber 500
+  static const Color accentAmberLight = Color(0xFFFBBF24); // Amber 400
+  static const Color accentCoral = Color(0xFFFB7185); // Rose 400
+  static const Color accentCoralLight = Color(0xFFFDA4AF); // Rose 300
+
+  // ---- Success (brand emerald doubles as "correct") ----
+  // The brand system reuses the identity green for success on purpose — on an
+  // education product, "correct" *is* the brand. Where success sits beside the
+  // primary as a distinct category, use the accents above instead.
+  static const Color success = Color(0xFF10B981);
+  static const Color successDark = Color(0xFF059669);
+  static const Color successDeep = Color(0xFF065F46);
 
   // ---- Warning / accent (orange) ----
   static const Color warning = Color(0xFFFF7A45);
@@ -66,18 +103,28 @@ class AppColors {
   // ---- Extra accent ----
   static const Color pink = Color(0xFFE8467F);
 
-  // ---- Dark brand surfaces (used verbatim in both themes) ----
-  static const Color scannerBackground = Color(0xFF0B0F1E);
-  static const Color premiumNavy = Color(0xFF1E2440);
-  static const Color premiumNavyLight = Color(0xFF33306B);
-  static const Color paywallTop = Color(0xFF2C3466);
-  static const Color paywallBottom = Color(0xFF11152A);
+  // ---- Dark brand surfaces ----
+  // The scanner stays cool deep-ink (green tint muddies a camera feed); the
+  // premium/paywall surfaces are a deep-emerald prestige (emerald + gold reads
+  // premium and stays on-brand-warm).
+  static const Color scannerBackground = Color(0xFF0A0F1C); // cool deep ink (camera)
+  static const Color premiumNavy = Color(0xFF0E2A21); // deep emerald (premium)
+  static const Color premiumNavyLight = Color(0xFF16493A); // mid emerald
+  static const Color paywallTop = Color(0xFF0F3B2D); // emerald
+  static const Color paywallBottom = Color(0xFF08150F); // near-black emerald-ink
 
   // ---- Gradients ----
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [primaryLight, primary, primaryDark],
+  );
+
+  /// The brand app-icon gradient — Emerald 500 → 600, near-vertical (≈158°).
+  static const LinearGradient iconGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [primary, primaryDark],
   );
 
   static const LinearGradient successGradient = LinearGradient(

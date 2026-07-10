@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/onboarding_layouts.dart';
 
-/// Page 6 — Meet Numi (hero).
-class MeetNumiPage extends StatelessWidget {
-  const MeetNumiPage({super.key});
+/// Page 6 — Meet Matheasy (hero).
+class MeetMatheasyPage extends StatelessWidget {
+  const MeetMatheasyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const OnboardingIntroLayout(
-      headline: 'Meet Numi',
+      headline: 'Meet Matheasy',
       subtitle: 'Your AI Math Coach.',
-      illustration: _MeetNumiArt(),
+      illustration: _MeetMatheasyArt(),
     );
   }
 }
 
-class _MeetNumiArt extends StatelessWidget {
-  const _MeetNumiArt();
+class _MeetMatheasyArt extends StatelessWidget {
+  const _MeetMatheasyArt();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,12 @@ class _MeetNumiArt extends StatelessWidget {
               ),
             ),
           ),
-          const Floaty(child: NumiMascot(expression: NumiExpression.wave, size: 210)),
+          const Floaty(
+            child: MatheasyLogo(
+              variant: MatheasyLogoVariant.vertical,
+              size: MatheasyLogoSize.large,
+            ),
+          ),
           const Positioned(top: 24, left: 30, child: _Sparkle(color: AppColors.gold, size: 20)),
           const Positioned(top: 80, right: 24, child: _Sparkle(color: AppColors.primaryTint, size: 14)),
           const Positioned(bottom: 54, left: 20, child: _Sparkle(color: AppColors.success, size: 13)),

@@ -16,7 +16,7 @@ enum AchievementId {
   mastered1,
   mastered3,
   mastered5,
-  useNumi,
+  useMatheasy,
   dailyChallenge,
   explore3Topics,
 }

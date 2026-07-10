@@ -39,7 +39,7 @@ class ServerValidationResult {
 
 /// The seam for server-authoritative validation of entitlement + metered usage.
 ///
-/// **Why this exists (never trust the client):** scan / Numi / practice quotas
+/// **Why this exists (never trust the client):** scan / tutor / practice quotas
 /// and the Pro entitlement are enforced client-side today (fast, offline-first),
 /// but a determined user can tamper with local counters. The production control
 /// is a Firebase **callable function** that re-checks against the server's copy
@@ -48,7 +48,7 @@ class ServerValidationResult {
 /// ### Callable contract to implement (production)
 /// A `CallableServerValidationService` (adding `cloud_functions`) calls:
 /// * `validateEntitlement()` → `{ active: bool, tier: string }`
-/// * `validateUsage({ feature: 'scan'|'numi'|'practice' })`
+/// * `validateUsage({ feature: 'scan'|'tutor'|'practice' })`
 ///   → `{ allowed: bool, remaining: int, reason?: string }`
 /// The function reads the RevenueCat entitlement (via the REST API / webhook
 /// mirror) and the server-side usage ledger, so client tampering is irrelevant.

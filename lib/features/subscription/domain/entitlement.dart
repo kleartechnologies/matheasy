@@ -9,7 +9,7 @@ enum Entitlement {
   /// No paid entitlement — the free tier.
   none,
 
-  /// The `pro` entitlement (unlimited scans, Numi, practice).
+  /// The `pro` entitlement (unlimited scans, AI tutor, practice).
   pro;
 
   /// Whether this tier unlocks the paid experience (anything above [none]).

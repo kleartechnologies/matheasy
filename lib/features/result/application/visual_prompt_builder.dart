@@ -8,7 +8,7 @@ import '../domain/visual_models.dart';
 /// `functions/src/proxy/visual.ts`, matching the solver/tutor convention that
 /// prompts never ship in the app bundle. This builder owns the client half:
 /// the request payload for the `generateVisualSolution` callable, and the
-/// compact step-context strings handed to Numi so the tutor can answer
+/// compact step-context strings handed to Matheasy so the tutor can answer
 /// "why divide by 2?" about the exact step on screen.
 class VisualPromptBuilder {
   const VisualPromptBuilder._();
@@ -36,10 +36,10 @@ class VisualPromptBuilder {
       };
 
   /// A compact, plain-text description of the step the student is looking at,
-  /// passed to Numi as `TutorLaunchContext.visualStepSummary`. Kept to one
+  /// passed to Matheasy as `TutorLaunchContext.visualStepSummary`. Kept to one
   /// string so the whole tutor pipeline (session storage, callable payload,
   /// server system message) carries it unchanged.
-  static String numiStepContext(VisualSolution solution, int stepIndex) {
+  static String tutorStepContext(VisualSolution solution, int stepIndex) {
     final total = solution.steps.length;
     if (stepIndex < 0 || stepIndex >= total) {
       return 'The visual solution of the problem, answered ${solution.answerLatex}.';

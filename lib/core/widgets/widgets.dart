@@ -22,7 +22,7 @@ export 'cards/streak_card.dart';
 
 // Chat
 export 'chat/chat_bubble.dart';
-export 'chat/numi_bubble.dart';
+export 'chat/matheasy_bubble.dart';
 
 // Chips
 export 'chips/feature_chip.dart';

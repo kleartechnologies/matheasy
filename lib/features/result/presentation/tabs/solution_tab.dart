@@ -28,7 +28,7 @@ class SolutionTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NumiBubble(text: result.numiIntro),
+        MatheasyBubble(text: result.tutorIntro),
         const SizedBox(height: AppSpacing.lg),
         for (var i = 0; i < steps.length; i++)
           AppTransitions.slideUp(
@@ -234,7 +234,7 @@ class _VerifyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: _railIndent),
-      child: NumiBubble(text: text),
+      child: MatheasyBubble(text: text),
     );
   }
 }

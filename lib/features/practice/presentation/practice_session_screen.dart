@@ -11,7 +11,6 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../../shared/mascot/numi_mascot.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_models.dart';
@@ -114,9 +113,9 @@ class _PracticeSessionScreenState
     );
   }
 
-  /// Opens Numi to explain a wrong answer, seeded with the full mistake context
+  /// Opens Matheasy to explain a wrong answer, seeded with the full mistake context
   /// (question + the learner's answer + the correct answer + topic/difficulty).
-  void _askNumiAboutMistake(PracticeMistake mistake) {
+  void _askMatheasyAboutMistake(PracticeMistake mistake) {
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
@@ -124,7 +123,7 @@ class _PracticeSessionScreenState
         answerLatex: mistake.correctAnswer,
         equationType: mistake.difficulty.label,
         topicLabel: mistake.topic.label,
-        seedMessage: mistake.numiSeedMessage,
+        seedMessage: mistake.tutorSeedMessage,
       ),
     );
   }
@@ -183,7 +182,7 @@ class _PracticeSessionScreenState
         child: switch (state.phase) {
           PracticePhase.loading || PracticePhase.idle => const LoadingState(
               message: 'Building your session…',
-              showMascot: true,
+              showBrand: true,
             ),
           PracticePhase.error => ErrorState(
               message: "We couldn't start that session. Please try again.",
@@ -252,7 +251,7 @@ class _PracticeSessionScreenState
                     const SizedBox(height: AppSpacing.md),
                     AppTransitions.slideUp(
                       child: PracticeMistakeActions(
-                        onAskNumi: () => _askNumiAboutMistake(mistake),
+                        onAskMatheasy: () => _askMatheasyAboutMistake(mistake),
                         onShowVisual: () => _showVisualForMistake(mistake),
                       ),
                     ),
@@ -275,8 +274,8 @@ class _PracticeSessionScreenState
 }
 
 /// Shown when a free user has generated all their practice questions. A warm,
-/// non-blocking upsell — Numi frames the limit and the primary action opens the
-/// paywall; "Maybe later" backs out without pressure.
+/// non-blocking upsell — Matheasy frames the limit and the primary action opens
+/// the paywall; "Maybe later" backs out without pressure.
 class _PracticeLockedView extends StatelessWidget {
   const _PracticeLockedView({required this.onSeePlans, required this.onNotNow});
 
@@ -292,7 +291,7 @@ class _PracticeLockedView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const NumiMascot(expression: NumiExpression.wink, size: 120),
+            const MatheasyBrandAvatar(size: 120),
             const SizedBox(height: AppSpacing.lg),
             Text(
               "You're on a roll!",

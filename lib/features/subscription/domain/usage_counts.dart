@@ -1,5 +1,5 @@
 /// The metered features whose free-tier usage is tracked and gated.
-enum UsageFeature { scan, numiMessage, practiceQuestion }
+enum UsageFeature { scan, tutorMessage, practiceQuestion }
 
 /// The lifetime tally of a user's metered actions.
 ///
@@ -9,7 +9,7 @@ enum UsageFeature { scan, numiMessage, practiceQuestion }
 class UsageCounts {
   const UsageCounts({
     this.scansUsed = 0,
-    this.numiMessagesUsed = 0,
+    this.tutorMessagesUsed = 0,
     this.practiceQuestionsGenerated = 0,
   });
 
@@ -17,23 +17,23 @@ class UsageCounts {
   static const UsageCounts empty = UsageCounts();
 
   final int scansUsed;
-  final int numiMessagesUsed;
+  final int tutorMessagesUsed;
   final int practiceQuestionsGenerated;
 
   int usedFor(UsageFeature feature) => switch (feature) {
         UsageFeature.scan => scansUsed,
-        UsageFeature.numiMessage => numiMessagesUsed,
+        UsageFeature.tutorMessage => tutorMessagesUsed,
         UsageFeature.practiceQuestion => practiceQuestionsGenerated,
       };
 
   UsageCounts copyWith({
     int? scansUsed,
-    int? numiMessagesUsed,
+    int? tutorMessagesUsed,
     int? practiceQuestionsGenerated,
   }) {
     return UsageCounts(
       scansUsed: scansUsed ?? this.scansUsed,
-      numiMessagesUsed: numiMessagesUsed ?? this.numiMessagesUsed,
+      tutorMessagesUsed: tutorMessagesUsed ?? this.tutorMessagesUsed,
       practiceQuestionsGenerated:
           practiceQuestionsGenerated ?? this.practiceQuestionsGenerated,
     );
@@ -41,7 +41,7 @@ class UsageCounts {
 
   Map<String, dynamic> toJson() => {
         'scansUsed': scansUsed,
-        'numiMessagesUsed': numiMessagesUsed,
+        'tutorMessagesUsed': tutorMessagesUsed,
         'practiceQuestionsGenerated': practiceQuestionsGenerated,
       };
 
@@ -49,7 +49,7 @@ class UsageCounts {
   /// throwing — a corrupt payload should never lock a user out mid-usage.
   factory UsageCounts.fromJson(Map<String, dynamic> json) => UsageCounts(
         scansUsed: _int(json['scansUsed']),
-        numiMessagesUsed: _int(json['numiMessagesUsed']),
+        tutorMessagesUsed: _int(json['tutorMessagesUsed']),
         practiceQuestionsGenerated: _int(json['practiceQuestionsGenerated']),
       );
 
@@ -59,10 +59,10 @@ class UsageCounts {
   bool operator ==(Object other) =>
       other is UsageCounts &&
       other.scansUsed == scansUsed &&
-      other.numiMessagesUsed == numiMessagesUsed &&
+      other.tutorMessagesUsed == tutorMessagesUsed &&
       other.practiceQuestionsGenerated == practiceQuestionsGenerated;
 
   @override
   int get hashCode =>
-      Object.hash(scansUsed, numiMessagesUsed, practiceQuestionsGenerated);
+      Object.hash(scansUsed, tutorMessagesUsed, practiceQuestionsGenerated);
 }

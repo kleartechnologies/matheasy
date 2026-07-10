@@ -14,7 +14,7 @@ import 'sections/tutor_quick_actions.dart';
 import 'sections/tutor_recent_conversations.dart';
 import 'sections/tutor_suggested_prompts.dart';
 
-/// The Tutor home — the landing page for AI learning with Numi.
+/// The Tutor home — the landing page for AI learning with Matheasy.
 ///
 /// A calm, inviting surface: a hero prompt, suggested starters, recent
 /// conversations, learning categories and quick actions. Every path opens the
@@ -47,7 +47,7 @@ class TutorScreen extends ConsumerWidget {
     TutorQuickAction action,
   ) {
     switch (action.kind) {
-      case TutorQuickActionKind.askNumi:
+      case TutorQuickActionKind.askMatheasy:
         _openChat(context);
       case TutorQuickActionKind.uploadQuestion:
         context.push(AppRoutes.scan);
@@ -63,7 +63,7 @@ class TutorScreen extends ConsumerWidget {
     final data = ref.watch(tutorHomeProvider);
 
     final sections = <Widget>[
-      TutorHero(onAskNumi: () => _openChat(context)),
+      TutorHero(onAskMatheasy: () => _openChat(context)),
       TutorSuggestedPrompts(
         prompts: data.suggestedPrompts,
         onSelected: (prompt) => _seed(context, prompt.message),

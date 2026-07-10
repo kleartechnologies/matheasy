@@ -11,12 +11,11 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import '../../domain/tutor_models.dart';
 
 /// An inline, interactive quiz card. The student taps an option; the card
 /// reveals whether it was right, highlights the correct answer and slides open
-/// an explanation from Numi. Answering is one-shot — once revealed, options
+/// an explanation from Matheasy. Answering is one-shot — once revealed, options
 /// lock so the moment of feedback stays clear.
 class TutorQuizCard extends StatefulWidget {
   const TutorQuizCard(this.question, {super.key});
@@ -274,11 +273,7 @@ class _Explanation extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          NumiMascot(
-            expression:
-                correct ? NumiExpression.celebrate : NumiExpression.happy,
-            size: 30,
-          ),
+          const MatheasyBrandAvatar(size: 30),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(

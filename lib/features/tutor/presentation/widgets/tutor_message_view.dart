@@ -13,8 +13,9 @@ import 'tutor_suggestion_chips.dart';
 /// Renders a single [TutorMessage] in its role-appropriate form:
 ///
 /// * user → a right-aligned [ChatBubble]
-/// * assistant → Numi's avatar + bubble ([NumiBubble]), with any inline card
-///   (quiz/practice) and suggestion chips aligned underneath the bubble
+/// * assistant → Matheasy's brand avatar + bubble ([MatheasyBubble]), with any
+///   inline card (quiz/practice) and suggestion chips aligned underneath the
+///   bubble
 /// * system → a centered, muted notice pill
 ///
 /// Suggestion chips only show for the latest assistant turn ([showSuggestions]),
@@ -29,7 +30,7 @@ class TutorMessageView extends StatelessWidget {
   });
 
   /// Avatar diameter used to indent an assistant turn's card/chips so they line
-  /// up under the bubble. Must match [NumiBubble]'s default `avatarSize`.
+  /// up under the bubble. Must match [MatheasyBubble]'s default `avatarSize`.
   static const double _avatar = 34;
 
   final TutorMessage message;
@@ -51,9 +52,8 @@ class TutorMessageView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NumiBubble(
+        MatheasyBubble(
           text: message.text,
-          expression: message.expression,
         ),
         if (card != null)
           Padding(

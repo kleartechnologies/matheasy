@@ -42,7 +42,7 @@ class SolveResponseMapper {
           _enumByName(Difficulty.values, json['difficulty']) ?? Difficulty.medium,
       answerLatex: _str(json['answerLatex']),
       verifyText: _str(json['verifyText']),
-      numiIntro: _str(json['numiIntro'], fallback: "Here's the solution."),
+      tutorIntro: _str(json['tutorIntro'], fallback: "Here's the solution."),
       steps: _list(json['steps'], _step),
       explanations: _list(json['explanations'], _explanation)
           .whereType<Explanation>()

@@ -8,7 +8,7 @@ import '../../../core/theme/app_colors.dart';
 enum ProfileAvatar {
   ocean('Ocean', [AppColors.primaryLight, AppColors.primaryDark]),
   grape('Grape', [AppColors.secondaryLight, AppColors.secondary]),
-  meadow('Meadow', [AppColors.success, AppColors.successDeep]),
+  meadow('Meadow', [AppColors.accentCoralLight, AppColors.accentCoral]),
   sunset('Sunset', [AppColors.warning, AppColors.warningDeep]),
   blossom('Blossom', [AppColors.pink, AppColors.secondary]);
 

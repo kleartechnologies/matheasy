@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 
 /// A full-screen celebration shown the moment a purchase succeeds, before the
-/// paywall dismisses. A quick scale-in of a cheering Numi over a gold burst —
-/// the reward moment.
+/// paywall dismisses. A quick scale-in of the Matheasy brand avatar over a gold
+/// burst — the reward moment.
 class PurchaseSuccessOverlay extends StatefulWidget {
   const PurchaseSuccessOverlay({super.key, required this.planName});
 
@@ -67,10 +67,7 @@ class _PurchaseSuccessOverlayState extends State<PurchaseSuccessOverlay>
                         ],
                       ),
                     ),
-                    child: const NumiMascot(
-                      expression: NumiExpression.celebrate,
-                      size: 132,
-                    ),
+                    child: const MatheasyBrandAvatar(size: 132),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(

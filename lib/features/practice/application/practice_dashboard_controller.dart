@@ -52,7 +52,7 @@ PracticeDashboardData practiceDashboard(Ref ref) {
       request: PracticeRequest.dailyChallenge(),
     ),
     categories: categories,
-    numiMessage: _numiMessage(progress),
+    tutorMessage: _tutorMessage(progress),
   );
 }
 
@@ -89,7 +89,7 @@ List<WeakTopicView> _weakTopics(
   ];
 }
 
-String _numiMessage(PracticeProgress progress) {
+String _tutorMessage(PracticeProgress progress) {
   if (progress.streakCurrent > 1) {
     return "You're on a ${progress.streakCurrent}-day streak — keep it going! 🔥";
   }

@@ -6,7 +6,7 @@ The server-side backend for Matheasy. Three concerns:
 | --- | --- | --- |
 | `recognizeEquation` | callable | Mathpix OCR proxy — photo → LaTeX. Meters the free `scans` quota. |
 | `solveEquation` | callable | OpenAI solver — LaTeX → full worked solution (`ResultData` shape). |
-| `tutorReply` | callable | OpenAI tutor (Numi) — chat history → reply + suggestions. Meters `numiMessages`. |
+| `tutorReply` | callable | OpenAI tutor (Matheasy) — chat history → reply + suggestions. Meters `tutorMessages`. |
 | `revenuecatWebhook` | HTTPS | Syncs RevenueCat entitlement + subscription state into Firestore. |
 | `aggregateProgress` | Firestore trigger | Rolls `progressEvents` up into aggregate `stats`. |
 
@@ -91,7 +91,7 @@ equivalent for Firestore/Auth).
 ```
 users/{uid}
   entitlement: 'none' | 'pro'          # written only by revenuecatWebhook
-  usage: { scans, numiMessages, practiceQuestions }
+  usage: { scans, tutorMessages, practiceQuestions }
   subscription: { isPro, productId, store, expiresAtMs, willRenew, ... }
   stats: { xp, problemsSolved, streak, lastActivityAt }
   progressEvents/{eventId}             # append-only, client-written

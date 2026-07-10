@@ -7,10 +7,10 @@ import 'matheasy_mark.dart';
 
 /// Which pieces of the logo to render.
 enum MatheasyLogoVariant {
-  /// The symbol only (radical + equals mark).
+  /// The symbol only (the R8 two-check mark).
   mark,
 
-  /// The "matheasy" wordmark only.
+  /// The "Matheasy" wordmark only.
   wordmark,
 
   /// Mark to the left of the wordmark (default).
@@ -25,7 +25,7 @@ enum MatheasyLogoVariant {
 enum MatheasyLogoSize { small, medium, large }
 
 /// The official Matheasy logo — a reusable lockup of the brand [MatheasyMark]
-/// (Concept A) and the Manrope wordmark.
+/// (R8) and the Manrope wordmark.
 ///
 /// One widget covers every configuration the brand system defines:
 /// mark-only, wordmark-only, horizontal and vertical lockups, at small / medium
@@ -36,6 +36,7 @@ enum MatheasyLogoSize { small, medium, large }
 /// const MatheasyLogo(variant: MatheasyLogoVariant.vertical);
 /// const MatheasyLogo(variant: MatheasyLogoVariant.mark, size: MatheasyLogoSize.large);
 /// MatheasyLogo(onDark: true);                             // white-on-dark lockup
+/// const MatheasyLogo(wordmarkAccent: true);               // two-tone "Math·easy"
 /// ```
 class MatheasyLogo extends StatelessWidget {
   const MatheasyLogo({
@@ -45,6 +46,7 @@ class MatheasyLogo extends StatelessWidget {
     this.markSize,
     this.markColor,
     this.wordmarkColor,
+    this.wordmarkAccent = false,
     this.onDark,
   });
 
@@ -54,11 +56,15 @@ class MatheasyLogo extends StatelessWidget {
   /// Explicit mark edge length. When set it overrides [size].
   final double? markSize;
 
-  /// Mark color override. Defaults to Brand Blue.
+  /// Mark color override. Defaults to brand Emerald.
   final Color? markColor;
 
   /// Wordmark color override. Defaults to brand ink (or white when [onDark]).
   final Color? wordmarkColor;
+
+  /// When true, the "easy" half of the wordmark is drawn in the brand accent
+  /// (Emerald on light, Mint on dark) — the featured two-tone lockup.
+  final bool wordmarkAccent;
 
   /// Force the dark-surface treatment (white wordmark). When null it is derived
   /// from the ambient theme brightness.
@@ -81,17 +87,23 @@ class MatheasyLogo extends StatelessWidget {
     final dark = onDark ?? context.isDark;
     final mark = markColor ?? AppColors.primary;
     final word = wordmarkColor ?? (dark ? AppColors.white : AppColors.ink);
+    final accent = wordmarkAccent
+        ? (dark ? AppColors.primaryLight : AppColors.primary)
+        : null;
     final dim = _markDimension;
+    // Two-tone above 28px; single-tone at small sizes per the brand system.
+    final twoTone = dim >= 28;
 
     switch (variant) {
       case MatheasyLogoVariant.mark:
         return MatheasyMark(
           size: dim,
           color: mark,
+          twoTone: twoTone,
           semanticLabel: 'Matheasy',
         );
       case MatheasyLogoVariant.wordmark:
-        return _Wordmark(fontSize: dim * 0.86, color: word);
+        return _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent);
       case MatheasyLogoVariant.horizontal:
         return Semantics(
           label: 'Matheasy',
@@ -99,9 +111,9 @@ class MatheasyLogo extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark),
+              MatheasyMark(size: dim, color: mark, twoTone: twoTone),
               SizedBox(width: dim * 0.34),
-              _Wordmark(fontSize: dim * 0.86, color: word),
+              _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent),
             ],
           ),
         );
@@ -112,9 +124,9 @@ class MatheasyLogo extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark),
+              MatheasyMark(size: dim, color: mark, twoTone: twoTone),
               SizedBox(height: dim * 0.30),
-              _Wordmark(fontSize: dim * 0.68, color: word),
+              _Wordmark(fontSize: dim * 0.68, color: word, accentColor: accent),
             ],
           ),
         );
@@ -122,28 +134,46 @@ class MatheasyLogo extends StatelessWidget {
   }
 }
 
-/// The lowercase "matheasy" wordmark: Manrope ExtraBold, −4% tracking, per the
-/// brand system. Rendered as a single text run so it can't drift from the mark.
+/// The "Matheasy" wordmark: one word, capital M, Manrope ExtraBold, −3.5%
+/// tracking, per the brand system. When [accentColor] is set, the "easy" half
+/// is drawn in the brand accent (the featured two-tone lockup); otherwise it is
+/// a single solid run so it can't drift from the mark.
 class _Wordmark extends StatelessWidget {
-  const _Wordmark({required this.fontSize, required this.color});
+  const _Wordmark({
+    required this.fontSize,
+    required this.color,
+    this.accentColor,
+  });
 
   final double fontSize;
   final Color color;
+  final Color? accentColor;
+
+  static const _behavior = TextHeightBehavior(
+    applyHeightToFirstAscent: false,
+    applyHeightToLastDescent: false,
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'matheasy',
-      style: AppTypography.displayLarge.copyWith(
-        fontSize: fontSize,
-        color: color,
-        letterSpacing: -fontSize * 0.04, // brand tracking: −4%
-        height: 1,
+    final style = AppTypography.displayLarge.copyWith(
+      fontSize: fontSize,
+      color: color,
+      letterSpacing: -fontSize * 0.035, // brand tracking: −3.5%
+      height: 1,
+    );
+    if (accentColor == null) {
+      return Text('Matheasy', style: style, textHeightBehavior: _behavior);
+    }
+    return Text.rich(
+      TextSpan(
+        style: style,
+        children: [
+          const TextSpan(text: 'Math'),
+          TextSpan(text: 'easy', style: TextStyle(color: accentColor)),
+        ],
       ),
-      textHeightBehavior: const TextHeightBehavior(
-        applyHeightToFirstAscent: false,
-        applyHeightToLastDescent: false,
-      ),
+      textHeightBehavior: _behavior,
     );
   }
 }

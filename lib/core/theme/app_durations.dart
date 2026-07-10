@@ -18,7 +18,7 @@ class AppDurations {
   /// Route transitions.
   static const Duration page = Duration(milliseconds: 300);
 
-  /// Ambient mascot "floaty" bob loop.
+  /// Ambient brand-avatar "floaty" bob loop.
   static const Duration floaty = Duration(seconds: 4);
 
   /// Sparkle / celebratory accent loop.

@@ -28,7 +28,7 @@ class MethodsTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const NumiBubble(
+        const MatheasyBubble(
           text: 'Three ways to reach the same answer. Tap one to compare — '
               'the badge is my exam pick.',
         ),

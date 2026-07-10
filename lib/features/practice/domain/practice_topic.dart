@@ -9,10 +9,10 @@ import '../../onboarding/domain/onboarding_models.dart';
 enum PracticeTopic {
   algebra('Algebra', Icons.functions_rounded, AppColors.primary),
   fractions('Fractions', Icons.pie_chart_outline_rounded, AppColors.secondary),
-  geometry('Geometry', Icons.change_history_rounded, AppColors.success),
+  geometry('Geometry', Icons.change_history_rounded, AppColors.accentAmber),
   trigonometry('Trigonometry', Icons.architecture_rounded, AppColors.pink),
   calculus('Calculus', Icons.show_chart_rounded, AppColors.warning),
-  statistics('Statistics', Icons.bar_chart_rounded, AppColors.primaryDeep),
+  statistics('Statistics', Icons.bar_chart_rounded, AppColors.accentCoral),
   wordProblems('Word Problems', Icons.menu_book_rounded, AppColors.amber);
 
   const PracticeTopic(this.label, this.icon, this.color);

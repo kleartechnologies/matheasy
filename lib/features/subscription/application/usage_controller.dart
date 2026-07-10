@@ -10,7 +10,7 @@ import 'usage_tracker.dart';
 
 part 'usage_controller.g.dart';
 
-/// The local usage ledger — records free-tier consumption of scans, Numi
+/// The local usage ledger — records free-tier consumption of scans, AI tutor
 /// messages and generated practice questions. Kept alive; hydrates on build and
 /// persists every change fire-and-forget (mirrors `StatsController`).
 ///
@@ -27,9 +27,9 @@ class UsageController extends _$UsageController {
   void recordScan() =>
       _update(state.copyWith(scansUsed: state.scansUsed + 1));
 
-  /// Records a Numi message sent by the user.
-  void recordNumiMessage() =>
-      _update(state.copyWith(numiMessagesUsed: state.numiMessagesUsed + 1));
+  /// Records an AI tutor message sent by the user.
+  void recordTutorMessage() =>
+      _update(state.copyWith(tutorMessagesUsed: state.tutorMessagesUsed + 1));
 
   /// Records [count] freshly-generated practice questions (a session's worth).
   void recordPracticeGenerated(int count) {

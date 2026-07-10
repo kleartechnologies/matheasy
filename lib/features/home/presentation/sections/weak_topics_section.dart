@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
@@ -127,7 +126,7 @@ class _EmptyTopics extends StatelessWidget {
     return AppCard(
       child: Row(
         children: [
-          const NumiMascot(size: 48),
+          const MatheasyBrandAvatar(size: 48),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(

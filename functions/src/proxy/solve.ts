@@ -30,7 +30,7 @@ interface SolvePayload {
   difficulty: "easy" | "medium" | "hard";
   answerLatex: string;
   verifyText: string;
-  numiIntro: string;
+  tutorIntro: string;
   steps: Array<{
     title: string;
     operationLabel?: string;
@@ -58,14 +58,14 @@ interface SolvePayload {
   }>;
 }
 
-const SYSTEM_PROMPT = `You are Numi, the friendly, encouraging math tutor inside the Matheasy app.
+const SYSTEM_PROMPT = `You are Matheasy, the friendly, encouraging math tutor inside the Matheasy app.
 Solve the given problem and return ONLY a JSON object (no prose, no markdown) with this exact shape:
 {
   "type": "linear|quadratic|fraction|expression|trigonometry",
   "difficulty": "easy|medium|hard",
   "answerLatex": "the final answer as LaTeX",
   "verifyText": "a one-line check that the answer is correct, ending with ✓",
-  "numiIntro": "one warm sentence introducing the solution",
+  "tutorIntro": "one warm sentence introducing the solution",
   "steps": [ { "title": "...", "operationLabel": "optional short op like '÷ 2'", "resultLatex": "state after this step, as LaTeX", "detail": "why this step works, in plain student-friendly language" } ],
   "explanations": [
     { "mode": "simple",  "body": "...", "points": ["...", "..."] },
@@ -104,7 +104,7 @@ export const solveEquation = onCall(
       );
     } catch (err) {
       logger.error("solveEquation failed", { uid, err: String(err) });
-      throw new HttpsError("internal", "Numi couldn't solve that one. Please try again.");
+      throw new HttpsError("internal", "Matheasy couldn't solve that one. Please try again.");
     }
 
     const quota = countAsScan ? await incrementUsage(uid, "scans") : null;

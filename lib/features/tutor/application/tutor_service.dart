@@ -22,8 +22,8 @@ abstract interface class TutorService {
   /// recognized problem.
   TutorResponse greeting(TutorLaunchContext? context);
 
-  /// Numi's reply to [userText], given the running [history] and optional scan
-  /// [context]. Async so a network-backed model drops straight in — the UI
+  /// Matheasy's reply to [userText], given the running [history] and optional
+  /// scan [context]. Async so a network-backed model drops straight in — the UI
   /// already renders a typing state while this resolves.
   Future<TutorResponse> reply(
     String userText, {
@@ -37,8 +37,8 @@ abstract interface class TutorService {
 class TutorTimings {
   const TutorTimings._();
 
-  /// Simulated time Numi spends "thinking" before a reply appears. Long enough
-  /// to show the typing indicator, short enough to stay snappy.
+  /// Simulated time Matheasy spends "thinking" before a reply appears. Long
+  /// enough to show the typing indicator, short enough to stay snappy.
   static const Duration thinking = Duration(milliseconds: 900);
 }
 

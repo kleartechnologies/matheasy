@@ -15,12 +15,12 @@ class PracticeHeader extends StatelessWidget {
     super.key,
     required this.xpLevel,
     required this.streakCurrent,
-    required this.numiMessage,
+    required this.tutorMessage,
   });
 
   final XpLevel xpLevel;
   final int streakCurrent;
-  final String numiMessage;
+  final String tutorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +79,7 @@ class PracticeHeader extends StatelessWidget {
             const SizedBox(width: AppSpacing.xxs),
             Expanded(
               child: Text(
-                numiMessage,
+                tutorMessage,
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.textSecondary,
                 ),

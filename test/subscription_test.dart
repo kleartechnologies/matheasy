@@ -3,8 +3,8 @@
 //
 // The offline LocalSubscriptionService (revenueCatReadyProvider defaults false)
 // backs the controllers here, so purchases/restores are deterministic and need
-// no native SDK. pump() (not pumpAndSettle) is used because Numi's animations
-// loop forever.
+// no native SDK. pump() (not pumpAndSettle) is used because the paywall's
+// animations loop forever.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,11 +81,11 @@ void main() {
 
     test('each feature tracks its own limit', () {
       const counts = UsageCounts(
-        numiMessagesUsed: 20,
+        tutorMessagesUsed: 20,
         practiceQuestionsGenerated: 3,
       );
       final snap = free(counts);
-      expect(snap.canSendNumiMessage, isFalse); // 20/20
+      expect(snap.canSendTutorMessage, isFalse); // 20/20
       expect(snap.canGeneratePractice, isTrue); // 3/10
       expect(snap.remainingPracticeQuestions, 7);
     });
@@ -96,14 +96,14 @@ void main() {
       const snap = UsageSnapshot(
         counts: UsageCounts(
           scansUsed: 999,
-          numiMessagesUsed: 999,
+          tutorMessagesUsed: 999,
           practiceQuestionsGenerated: 999,
         ),
         quota: UsageQuota.free,
         isPro: true,
       );
       expect(snap.canScan, isTrue);
-      expect(snap.canSendNumiMessage, isTrue);
+      expect(snap.canSendTutorMessage, isTrue);
       expect(snap.canGeneratePractice, isTrue);
       expect(snap.remainingScans, UsageQuota.unlimited);
       expect(snap.limit(UsageFeature.scan), UsageQuota.unlimited);
@@ -162,12 +162,12 @@ void main() {
     test('JSON round-trips; corrupt fields degrade to 0', () {
       const counts = UsageCounts(
         scansUsed: 3,
-        numiMessagesUsed: 7,
+        tutorMessagesUsed: 7,
         practiceQuestionsGenerated: 2,
       );
       expect(UsageCounts.fromJson(counts.toJson()), counts);
       expect(
-        UsageCounts.fromJson(const {'scansUsed': 'x', 'numiMessagesUsed': -4}),
+        UsageCounts.fromJson(const {'scansUsed': 'x', 'tutorMessagesUsed': -4}),
         UsageCounts.empty,
       );
     });
@@ -227,12 +227,12 @@ void main() {
       usage
         ..recordScan()
         ..recordScan()
-        ..recordNumiMessage()
+        ..recordTutorMessage()
         ..recordPracticeGenerated(5);
 
       final counts = container.read(usageControllerProvider);
       expect(counts.scansUsed, 2);
-      expect(counts.numiMessagesUsed, 1);
+      expect(counts.tutorMessagesUsed, 1);
       expect(counts.practiceQuestionsGenerated, 5);
 
       await _pump();
@@ -253,7 +253,7 @@ void main() {
     test('hydrates from persisted counts', () async {
       final container = await _container(seed: {
         'subscription.usage':
-            '{"scansUsed":5,"numiMessagesUsed":1,"practiceQuestionsGenerated":0}',
+            '{"scansUsed":5,"tutorMessagesUsed":1,"practiceQuestionsGenerated":0}',
       });
       _activate(container);
       expect(container.read(usageControllerProvider).scansUsed, 5);
@@ -273,13 +273,13 @@ void main() {
     test('purchase grants pro and reopens every gate', () async {
       final container = await _container(seed: {
         'subscription.usage':
-            '{"scansUsed":5,"numiMessagesUsed":20,"practiceQuestionsGenerated":10}',
+            '{"scansUsed":5,"tutorMessagesUsed":20,"practiceQuestionsGenerated":10}',
       });
       _activate(container);
 
       // Free + fully used → all gates closed.
       expect(_snapshot(container).canScan, isFalse);
-      expect(_snapshot(container).canSendNumiMessage, isFalse);
+      expect(_snapshot(container).canSendTutorMessage, isFalse);
       expect(_snapshot(container).canGeneratePractice, isFalse);
 
       final result = await container
@@ -290,7 +290,7 @@ void main() {
       expect(container.read(isProProvider), isTrue);
       // Pro → gates reopen despite exhausted counts.
       expect(_snapshot(container).canScan, isTrue);
-      expect(_snapshot(container).canSendNumiMessage, isTrue);
+      expect(_snapshot(container).canSendTutorMessage, isTrue);
       expect(_snapshot(container).canGeneratePractice, isTrue);
     });
 
@@ -363,7 +363,7 @@ void main() {
     test('locks when the practice quota is exhausted', () async {
       final container = await _container(seed: {
         'subscription.usage':
-            '{"scansUsed":0,"numiMessagesUsed":0,"practiceQuestionsGenerated":10}',
+            '{"scansUsed":0,"tutorMessagesUsed":0,"practiceQuestionsGenerated":10}',
       });
       _activate(container);
 

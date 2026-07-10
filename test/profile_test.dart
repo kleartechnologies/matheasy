@@ -69,10 +69,10 @@ void main() {
       final service = LocalProfileService(PreferencesStore(prefs));
 
       await service.save(
-        const EditableProfile(displayName: 'Numi Fan', avatar: ProfileAvatar.sunset),
+        const EditableProfile(displayName: 'Matheasy Fan', avatar: ProfileAvatar.sunset),
       );
       final loaded = service.load();
-      expect(loaded.displayName, 'Numi Fan');
+      expect(loaded.displayName, 'Matheasy Fan');
       expect(loaded.avatar, ProfileAvatar.sunset);
     });
 

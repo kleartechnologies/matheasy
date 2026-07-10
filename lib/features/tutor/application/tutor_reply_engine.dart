@@ -1,11 +1,10 @@
-import '../../../shared/mascot/numi_expression.dart';
 import '../../result/domain/result_models.dart';
 import '../domain/tutor_models.dart';
 
 /// The deterministic, offline "brain" behind [MockTutorService].
 ///
 /// Maps a student's message to an educational reply by detecting intent from
-/// keywords, then composing warm, on-brand Numi copy plus optional inline cards
+/// keywords, then composing warm, on-brand Matheasy copy plus optional inline cards
 /// (quiz / practice) and follow-up suggestion chips. Pure and stateless — the
 /// running [history] is passed in, so replies can vary (e.g. rotating examples)
 /// while staying fully reproducible for tests.
@@ -29,7 +28,6 @@ class TutorReplyEngine {
           SuggestionAction.explainSimpler,
           SuggestionAction.giveExample,
         ],
-        expression: NumiExpression.wave,
       );
     }
     if (context != null && context.hasScan) {
@@ -48,22 +46,20 @@ class TutorReplyEngine {
           SuggestionAction.giveExample,
           SuggestionAction.createQuiz,
         ],
-        expression: NumiExpression.wave,
       );
     }
     return const TutorResponse(
-      text: "Hi, I'm Numi — your personal math coach! 👋 Ask me anything, and "
+      text: "Hi, I'm Matheasy — your personal math coach! 👋 Ask me anything, and "
           "we'll work through it together, step by step.",
       suggestions: [
         SuggestionAction.giveExample,
         SuggestionAction.createQuiz,
         SuggestionAction.practiceMore,
       ],
-      expression: NumiExpression.wave,
     );
   }
 
-  /// Produce Numi's reply to [userText] given the running [history] and optional
+  /// Produce Matheasy's reply to [userText] given the running [history] and optional
   /// scan [context].
   TutorResponse reply(
     String userText, {
@@ -184,7 +180,6 @@ class TutorReplyEngine {
         SuggestionAction.explainSimpler,
         SuggestionAction.createQuiz,
       ],
-      expression: NumiExpression.wink,
     );
   }
 
@@ -272,7 +267,6 @@ class TutorReplyEngine {
         SuggestionAction.giveExample,
         SuggestionAction.createQuiz,
       ],
-      expression: NumiExpression.wink,
     );
   }
 
@@ -301,7 +295,6 @@ class TutorReplyEngine {
         SuggestionAction.practiceMore,
         SuggestionAction.giveExample,
       ],
-      expression: NumiExpression.wink,
     );
   }
 
@@ -382,7 +375,6 @@ class TutorReplyEngine {
         SuggestionAction.createQuiz,
         SuggestionAction.practiceMore,
       ],
-      expression: NumiExpression.wave,
     );
   }
 
@@ -395,7 +387,6 @@ class TutorReplyEngine {
         SuggestionAction.practiceMore,
         SuggestionAction.createQuiz,
       ],
-      expression: NumiExpression.celebrate,
     );
   }
 
@@ -410,7 +401,6 @@ class TutorReplyEngine {
         SuggestionAction.createQuiz,
         SuggestionAction.practiceMore,
       ],
-      expression: NumiExpression.thinking,
     );
   }
 }

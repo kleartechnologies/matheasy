@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -10,7 +9,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../domain/home_models.dart';
 
 /// Streak card: current + best streak, a 7-day flame strip and a motivational
-/// line from Numi.
+/// line from Matheasy.
 class StreakSection extends StatelessWidget {
   const StreakSection({super.key, required this.streak});
 
@@ -65,7 +64,7 @@ class StreakSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              const NumiMascot(expression: NumiExpression.wink, size: 36),
+              const MatheasyBrandAvatar(size: 36),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

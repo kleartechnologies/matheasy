@@ -15,7 +15,7 @@ import '../../../subscription/domain/usage_counts.dart';
 import '../../../subscription/presentation/widgets/usage_meter.dart';
 
 /// A subtle, non-intrusive Home entry point for free users: their remaining
-/// scans / Numi / practice at a glance, with a quiet upgrade affordance. Pro
+/// scans / AI tutor / practice at a glance, with a quiet upgrade affordance. Pro
 /// users never see it (the caller omits it), so there's no nagging.
 class HomeUsageCard extends ConsumerWidget {
   const HomeUsageCard({super.key});
@@ -65,16 +65,16 @@ class HomeUsageCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           UsageMeter(
             icon: Icons.forum_rounded,
-            label: 'Numi messages',
+            label: 'AI tutor messages',
             color: AppColors.secondary,
-            used: usage.counts.numiMessagesUsed,
-            limit: usage.limit(UsageFeature.numiMessage),
+            used: usage.counts.tutorMessagesUsed,
+            limit: usage.limit(UsageFeature.tutorMessage),
           ),
           const SizedBox(height: AppSpacing.md),
           UsageMeter(
             icon: Icons.fitness_center_rounded,
             label: 'Practice questions',
-            color: AppColors.success,
+            color: AppColors.accentAmber,
             used: usage.counts.practiceQuestionsGenerated,
             limit: usage.limit(UsageFeature.practiceQuestion),
           ),
@@ -90,7 +90,7 @@ class HomeUsageCard extends ConsumerWidget {
               borderRadius: AppRadius.smRadius,
             ),
             child: Text(
-              'Go Pro for unlimited scans, Numi & practice',
+              'Go Pro for unlimited scans, AI tutor & practice',
               textAlign: TextAlign.center,
               style: AppTypography.caption
                   .copyWith(color: colors.onPrimaryContainer),

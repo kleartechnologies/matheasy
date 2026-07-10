@@ -26,7 +26,7 @@ class ProgressOverview {
     required this.achievementsUnlocked,
     required this.achievementsTotal,
     required this.recentActivity,
-    required this.numiInsight,
+    required this.matheasyInsight,
   });
 
   // ---- Profile ----
@@ -55,9 +55,9 @@ class ProgressOverview {
   final int achievementsUnlocked;
   final int achievementsTotal;
 
-  // ---- Activity + Numi ----
+  // ---- Activity + Matheasy ----
   final List<LearningActivity> recentActivity;
-  final String numiInsight;
+  final String matheasyInsight;
 
   /// A friendly, rounded "time learning" label.
   String get timeLearningLabel {

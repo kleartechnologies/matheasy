@@ -23,7 +23,7 @@ import 'widgets/purchase_success_overlay.dart';
 
 /// The full RevenueCat paywall — pushed over the shell, dismissible.
 ///
-/// Numi hero → three pricing cards (Annual preselected) → feature comparison,
+/// Brand hero → three pricing cards (Annual preselected) → feature comparison,
 /// with a persistent purchase + restore footer. Reads live prices and the
 /// purchase flow from [PaywallController]; the entitlement itself is owned by
 /// [SubscriptionController].
@@ -266,7 +266,7 @@ class _PlanCards extends ConsumerWidget {
           title: 'Free',
           priceString: 'RM0',
           periodLabel: 'forever',
-          subtitle: '5 scans · 20 Numi messages · 10 practice',
+          subtitle: '5 scans · 20 AI tutor messages · 10 practice',
           selected: state.selectedPlan == SubscriptionPlan.free,
           onTap: () => select(SubscriptionPlan.free),
         ),
@@ -331,8 +331,8 @@ class _Footer extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(
           isFree
-              ? 'You can upgrade anytime. Free includes limited scans, Numi and '
-                    'practice.'
+              ? 'You can upgrade anytime. Free includes limited scans, AI tutor '
+                    'and practice.'
               : 'Auto-renews at $priceString until cancelled. Cancel anytime in '
                     'your store account. Terms & Privacy apply.',
           textAlign: TextAlign.center,

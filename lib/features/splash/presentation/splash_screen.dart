@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/animations/floaty.dart';
@@ -17,9 +16,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../auth/application/auth_controller.dart';
 
-/// The launch screen — a premium first impression with the Matheasy wordmark
-/// and Numi. After a minimum display window it hands off to the router, which
-/// (via the navigation guards) routes to onboarding, auth or home.
+/// The launch screen — a premium first impression built around the official
+/// Matheasy logo. After a minimum display window it hands off to the router,
+/// which (via the navigation guards) routes to onboarding, auth or home.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -89,42 +88,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 240,
-              height: 240,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          AppColors.primaryTint.withValues(alpha: 0.2),
-                          AppColors.primaryTint.withValues(alpha: 0.0),
-                        ],
+            // The official vertical logo lockup (mark above wordmark) is the
+            // hero identity, resting on the brand glow. Solid brand color, no
+            // gradient, per the brand system.
+            AppTransitions.scaleIn(
+              child: Floaty(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            AppColors.primaryTint.withValues(alpha: 0.2),
+                            AppColors.primaryTint.withValues(alpha: 0.0),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  AppTransitions.scaleIn(
-                    child: const Floaty(
-                      child: NumiMascot(expression: NumiExpression.wave, size: 168),
+                    const MatheasyLogo(
+                      variant: MatheasyLogoVariant.vertical,
+                      markSize: 84,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            // Solid brand wordmark (no gradient) per the brand system.
-            AppTransitions.slideUp(
-              child: const MatheasyLogo(
-                variant: MatheasyLogoVariant.wordmark,
-                markSize: 46,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
             AppTransitions.fadeIn(
               child: Text(
                 AppConstants.appTagline,

@@ -2,17 +2,17 @@ import 'package:flutter/widgets.dart';
 
 /// Elevation tokens as ready-made [BoxShadow] lists.
 ///
-/// Matheasy uses a signature blue-tinted elevation in light mode; dark mode
+/// Matheasy uses a signature emerald-tinted elevation in light mode; dark mode
 /// falls back to soft black shadows so cards stay legible on dark surfaces.
 /// Prefer reading these through the theme-aware `context.elevation`
 /// ([AppElevation]) rather than referencing the light/dark lists directly.
 class AppShadows {
   const AppShadows._();
 
-  // ---- Light (brand-blue-tinted) — rgba(37,99,235,a) ----
+  // ---- Light (brand-emerald-tinted) — rgba(16,185,129,a) ----
   static const List<BoxShadow> cardLight = [
     BoxShadow(
-      color: Color(0x142563EB), // rgba(37,99,235,0.08)
+      color: Color(0x1410B981), // rgba(16,185,129,0.08)
       blurRadius: 26,
       offset: Offset(0, 12),
     ),
@@ -20,7 +20,7 @@ class AppShadows {
 
   static const List<BoxShadow> raisedLight = [
     BoxShadow(
-      color: Color(0x242563EB), // rgba(37,99,235,0.14)
+      color: Color(0x2410B981), // rgba(16,185,129,0.14)
       blurRadius: 30,
       offset: Offset(0, 14),
     ),
@@ -28,7 +28,7 @@ class AppShadows {
 
   static const List<BoxShadow> floatingLight = [
     BoxShadow(
-      color: Color(0x592563EB), // rgba(37,99,235,0.35)
+      color: Color(0x5910B981), // rgba(16,185,129,0.35)
       blurRadius: 40,
       offset: Offset(0, 18),
     ),
@@ -36,7 +36,7 @@ class AppShadows {
 
   static const List<BoxShadow> buttonLight = [
     BoxShadow(
-      color: Color(0x592563EB),
+      color: Color(0x5910B981),
       blurRadius: 24,
       offset: Offset(0, 12),
     ),

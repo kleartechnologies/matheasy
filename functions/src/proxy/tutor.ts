@@ -1,9 +1,9 @@
 /**
- * `tutorReply` — the secure OpenAI tutor proxy (Numi's brain).
+ * `tutorReply` — the secure OpenAI tutor proxy (Matheasy's brain).
  *
- * Takes the running chat history + the student's new message and returns Numi's
+ * Takes the running chat history + the student's new message and returns Matheasy's
  * reply plus follow-up suggestion chips. Mirrors the Flutter `TutorService`
- * contract and meters against the free `numiMessages` quota.
+ * contract and meters against the free `tutorMessages` quota.
  */
 import OpenAI from "openai";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
@@ -19,7 +19,7 @@ import {
 import { createOpenAI } from "../lib/openai";
 
 interface TutorTurn {
-  role?: "user" | "assistant" | "numi";
+  role?: "user" | "assistant";
   text?: string;
 }
 
@@ -30,7 +30,7 @@ interface TutorRequest {
   problemLatex?: string;
   /**
    * Optional one-sentence description of the Visual Learning step the student
-   * tapped (Stage 14), so Numi can explain that exact transformation.
+   * tapped (Stage 14), so Matheasy can explain that exact transformation.
    */
   visualStep?: string;
 }
@@ -40,7 +40,7 @@ interface TutorPayload {
   suggestions: string[];
 }
 
-const SYSTEM_PROMPT = `You are Numi, the warm, patient, encouraging AI math tutor in the Matheasy app for students.
+const SYSTEM_PROMPT = `You are Matheasy, the warm, patient, encouraging AI math tutor in the Matheasy app for students.
 Guide the student to understanding — ask a leading question when they're stuck rather than only handing over the answer, celebrate progress, and keep it concise and age-appropriate.
 Return ONLY a JSON object (no markdown) of the form:
 { "reply": "your message to the student (use plain text; wrap any math in $...$)", "suggestions": ["2-3 short follow-up prompts the student might tap next"] }`;
@@ -61,7 +61,7 @@ export const tutorReply = onCall(
     }
 
     await ensureUserDoc(uid);
-    await assertWithinQuota(uid, "numiMessages");
+    await assertWithinQuota(uid, "tutorMessages");
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: SYSTEM_PROMPT },
@@ -78,7 +78,7 @@ export const tutorReply = onCall(
         content: `The student is looking at this step of the visual solution and may ask about it: ${visualStep}`,
       });
     }
-    // Replay recent history (cap to keep prompts small), mapping "numi" → assistant.
+    // Replay recent history (cap to keep prompts small), mapping any non-user turn → assistant.
     for (const turn of history.slice(-12)) {
       if (!turn.text) continue;
       const role = turn.role === "user" ? "user" : "assistant";
@@ -101,10 +101,10 @@ export const tutorReply = onCall(
       payload = JSON.parse(content) as TutorPayload;
     } catch (err) {
       logger.error("tutorReply failed", { uid, err: String(err) });
-      throw new HttpsError("internal", "Numi is thinking too hard right now. Please try again.");
+      throw new HttpsError("internal", "Matheasy is thinking too hard right now. Please try again.");
     }
 
-    const quota = await incrementUsage(uid, "numiMessages");
+    const quota = await incrementUsage(uid, "tutorMessages");
 
     return {
       reply: payload.reply ?? "",

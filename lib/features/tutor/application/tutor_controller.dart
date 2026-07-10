@@ -23,7 +23,7 @@ part 'tutor_controller.g.dart';
 @riverpod
 TutorHomeData tutorHome(Ref ref) => TutorHomeContent.build();
 
-/// Drives the live chat conversation with Numi.
+/// Drives the live chat conversation with Matheasy.
 ///
 /// Holds the running [TutorSession] and orchestrates the send → typing → reply
 /// loop through the [TutorService]. Kept alive so the conversation survives
@@ -49,7 +49,7 @@ class TutorChatController extends _$TutorChatController {
   /// A *seeded* launch (a tapped suggested prompt or category) always begins a
   /// fresh topic thread — even though this controller is kept alive — so a
   /// starter never appends onto, or duplicates a turn in, an unrelated
-  /// persisted conversation. A plain "Ask Numi" open (no seed) continues the
+  /// persisted conversation. A plain "Ask Matheasy" open (no seed) continues the
   /// existing thread.
   Future<void> start(TutorLaunchContext? context) async {
     unawaited(
@@ -69,8 +69,8 @@ class TutorChatController extends _$TutorChatController {
           TutorMessage.system(
             id: _nextId(),
             text: context.hasVisualStep
-                ? 'Numi can see the visual step you tapped'
-                : 'Numi can see your scanned problem',
+                ? 'Matheasy can see the visual step you tapped'
+                : 'Matheasy can see your scanned problem',
           ),
         );
       }
@@ -103,8 +103,8 @@ class TutorChatController extends _$TutorChatController {
     }
   }
 
-  /// Sends a free-text [rawText] turn and appends Numi's reply. Ignored while
-  /// Numi is already thinking, so a double-tap can't interleave turns.
+  /// Sends a free-text [rawText] turn and appends Matheasy's reply. Ignored while
+  /// Matheasy is already thinking, so a double-tap can't interleave turns.
   Future<void> send(String rawText) async {
     final text = rawText.trim();
     if (text.isEmpty || state.isTyping) return;
@@ -118,9 +118,9 @@ class TutorChatController extends _$TutorChatController {
       return;
     }
 
-    // Count every user message against the free-tier Numi quota — the single
+    // Count every user message against the free-tier AI tutor quota — the single
     // choke point, so seeded prompts and quick replies are all captured.
-    ref.read(usageControllerProvider.notifier).recordNumiMessage();
+    ref.read(usageControllerProvider.notifier).recordTutorMessage();
     unawaited(ref
         .read(analyticsServiceProvider)
         .logEvent(AnalyticsEvent.tutorMessageSent()));
@@ -171,7 +171,6 @@ class TutorChatController extends _$TutorChatController {
         text: response.text,
         card: response.card,
         suggestions: response.suggestions,
-        expression: response.expression,
       );
 }
 
@@ -204,7 +203,7 @@ class TutorHomeContent {
     TutorPrompt(
       label: 'Teach Geometry',
       icon: Icons.change_history_rounded,
-      color: AppColors.success,
+      color: AppColors.accentAmber,
       message: 'Teach me some geometry.',
     ),
     TutorPrompt(
@@ -231,7 +230,7 @@ class TutorHomeContent {
     TutorCategory(
       label: 'Geometry',
       icon: Icons.change_history_rounded,
-      color: AppColors.success,
+      color: AppColors.accentAmber,
       message: 'Teach me some geometry.',
     ),
     TutorCategory(
@@ -261,17 +260,17 @@ class TutorHomeContent {
     TutorCategory(
       label: 'Statistics',
       icon: Icons.bar_chart_rounded,
-      color: AppColors.primaryDeep,
+      color: AppColors.accentCoral,
       message: 'Can you teach me statistics?',
     ),
   ];
 
   static const List<TutorQuickAction> _quickActions = [
     TutorQuickAction(
-      label: 'Ask Numi',
+      label: 'Ask Matheasy',
       icon: Icons.forum_rounded,
       color: AppColors.primary,
-      kind: TutorQuickActionKind.askNumi,
+      kind: TutorQuickActionKind.askMatheasy,
     ),
     TutorQuickAction(
       label: 'Upload Question',
@@ -282,7 +281,7 @@ class TutorHomeContent {
     TutorQuickAction(
       label: 'Practice Topic',
       icon: Icons.fitness_center_rounded,
-      color: AppColors.success,
+      color: AppColors.accentAmber,
       kind: TutorQuickActionKind.practiceTopic,
     ),
     TutorQuickAction(

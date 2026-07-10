@@ -11,7 +11,6 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../../shared/mascot/numi_mascot.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../progress/application/stats_controller.dart';
@@ -22,7 +21,7 @@ import '../domain/tutor_models.dart';
 import 'widgets/tutor_chat_input.dart';
 import 'widgets/tutor_message_view.dart';
 
-/// The full-screen chat with Numi — a modern, premium AI conversation.
+/// The full-screen chat with Matheasy — a modern, premium AI conversation.
 ///
 /// Pushed over the shell. Opens aware of a scanned problem or a tapped prompt
 /// when a [launchContext] is supplied. All responses are local mocks today; the
@@ -52,11 +51,11 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
       final launch = widget.launchContext;
       final seeded = launch?.seedMessage?.trim().isNotEmpty ?? false;
       // A prompt-seeded open auto-sends a message; if the user is out of free
-      // Numi messages, replace the chat with the paywall rather than spend one.
-      if (seeded && !ref.read(usageSnapshotProvider).canSendNumiMessage) {
+      // AI tutor messages, replace the chat with the paywall rather than spend one.
+      if (seeded && !ref.read(usageSnapshotProvider).canSendTutorMessage) {
         context.pushReplacement(
           AppRoutes.paywall,
-          extra: PaywallTrigger.numiLimit,
+          extra: PaywallTrigger.tutorLimit,
         );
         return;
       }
@@ -84,22 +83,22 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   void _recordTutorUse() =>
       ref.read(statsControllerProvider.notifier).recordTutorUsed();
 
-  /// Returns true if a Numi message may be sent; otherwise opens the paywall
+  /// Returns true if an AI tutor message may be sent; otherwise opens the paywall
   /// over the conversation so dismissing it returns the user to the thread.
-  bool _ensureNumiQuota() {
-    if (ref.read(usageSnapshotProvider).canSendNumiMessage) return true;
-    context.push(AppRoutes.paywall, extra: PaywallTrigger.numiLimit);
+  bool _ensureTutorQuota() {
+    if (ref.read(usageSnapshotProvider).canSendTutorMessage) return true;
+    context.push(AppRoutes.paywall, extra: PaywallTrigger.tutorLimit);
     return false;
   }
 
   void _send(String text) {
-    if (!_ensureNumiQuota()) return;
+    if (!_ensureTutorQuota()) return;
     _recordTutorUse();
     unawaited(ref.read(tutorChatControllerProvider.notifier).send(text));
   }
 
   void _sendAction(SuggestionAction action) {
-    if (!_ensureNumiQuota()) return;
+    if (!_ensureTutorQuota()) return;
     _recordTutorUse();
     unawaited(ref.read(tutorChatControllerProvider.notifier).sendAction(action));
   }
@@ -115,8 +114,8 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Opens a practice session from a practice card Numi offered. Numi's practice
-  /// prompts are algebra-focused, so we launch an algebra session.
+  /// Opens a practice session from a practice card Matheasy offered. Matheasy's
+  /// practice prompts are algebra-focused, so we launch an algebra session.
   void _startPractice() {
     context.push(
       AppRoutes.practiceSession,
@@ -147,7 +146,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
           tooltip: 'Back',
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const _NumiAppBarTitle(),
+        title: const _MatheasyAppBarTitle(),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_comment_outlined),
@@ -176,7 +175,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   Widget _buildThread(TutorSession session) {
     if (session.isEmpty) {
       return const Center(
-        child: NumiMascot(expression: NumiExpression.thinking),
+        child: MatheasyBrandAvatar(),
       );
     }
 
@@ -199,8 +198,8 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
             padding: const EdgeInsets.only(top: AppSpacing.md),
             child: Semantics(
               liveRegion: true,
-              label: 'Numi is typing',
-              child: const NumiTypingIndicator(),
+              label: 'Matheasy is typing',
+              child: const MatheasyTypingIndicator(),
             ),
           );
         }
@@ -222,9 +221,10 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   }
 }
 
-/// The chat app-bar identity: Numi's avatar, name and a warm status line.
-class _NumiAppBarTitle extends StatelessWidget {
-  const _NumiAppBarTitle();
+/// The chat app-bar identity: Matheasy's brand avatar, name and a warm status
+/// line.
+class _MatheasyAppBarTitle extends StatelessWidget {
+  const _MatheasyAppBarTitle();
 
   @override
   Widget build(BuildContext context) {
@@ -232,14 +232,14 @@ class _NumiAppBarTitle extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const NumiMascot(size: 34),
+        const MatheasyBrandAvatar(size: 34),
         const SizedBox(width: AppSpacing.sm),
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Numi',
+              'Matheasy',
               style: AppTypography.title.copyWith(color: colors.textPrimary),
             ),
             Text(

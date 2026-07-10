@@ -65,7 +65,7 @@ class ProgressController extends _$ProgressController {
       achievementsUnlocked: achievements.unlockedCount,
       achievementsTotal: achievements.total,
       recentActivity: stats.recentActivity,
-      numiInsight: _insight(progress, stats, mastered),
+      matheasyInsight: _insight(progress, stats, mastered),
     );
   }
 
@@ -80,7 +80,7 @@ class ProgressController extends _$ProgressController {
     }
     if (mastered > 0) {
       return "You've mastered $mastered "
-          '${mastered == 1 ? 'topic' : 'topics'}. Numi is proud — ready for the '
+          '${mastered == 1 ? 'topic' : 'topics'}. Matheasy is proud — ready for the '
           'next one?';
     }
     return "You've earned ${progress.totalXp} XP so far. A little practice each "

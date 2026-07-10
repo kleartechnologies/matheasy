@@ -90,18 +90,18 @@ void main() {
         SyncDomain.usage,
         local: {
           'scansUsed': 5,
-          'numiMessagesUsed': 2,
+          'tutorMessagesUsed': 2,
           'practiceQuestionsGenerated': 10,
         },
         remote: {
           'scansUsed': 3,
-          'numiMessagesUsed': 8,
+          'tutorMessagesUsed': 8,
           'practiceQuestionsGenerated': 4,
         },
         remoteNewer: true,
       );
       expect(merged['scansUsed'], 5);
-      expect(merged['numiMessagesUsed'], 8);
+      expect(merged['tutorMessagesUsed'], 8);
       expect(merged['practiceQuestionsGenerated'], 10);
     });
 
@@ -282,7 +282,7 @@ void main() {
         _uid,
         SyncDomain.usage,
         CloudRecord(
-          payload: {'scansUsed': 2, 'numiMessagesUsed': 9},
+          payload: {'scansUsed': 2, 'tutorMessagesUsed': 9},
           updatedAt: DateTime(2026, 7, 8, 13), // cloud newer
         ),
       );
@@ -291,7 +291,7 @@ void main() {
 
       final merged = store.readPayload(SyncDomain.usage)!;
       expect(merged['scansUsed'], 5); // local kept (max)
-      expect(merged['numiMessagesUsed'], 9); // cloud kept (max)
+      expect(merged['tutorMessagesUsed'], 9); // cloud kept (max)
     });
 
     test('offline is reported without corrupting local data', () async {
@@ -311,7 +311,7 @@ void main() {
       // A realistic full payload (the usage tracker always writes all keys).
       await store.writePayload(SyncDomain.usage, {
         'scansUsed': 5,
-        'numiMessagesUsed': 0,
+        'tutorMessagesUsed': 0,
         'practiceQuestionsGenerated': 0,
       });
       final cloud = InMemoryCloudStore();
@@ -462,7 +462,7 @@ void main() {
         seed: {
           'subscription.usage': jsonEncode({
             'scansUsed': 5,
-            'numiMessagesUsed': 0,
+            'tutorMessagesUsed': 0,
             'practiceQuestionsGenerated': 0,
           }),
         },

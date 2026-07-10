@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -32,15 +31,13 @@ class PracticeTab extends StatelessWidget {
       return const ResultEmpty(
         message: "No practice yet — tap Generate and I'll make some just for "
             'you!',
-        expression: NumiExpression.celebrate,
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const NumiBubble(
+        const MatheasyBubble(
           text: 'Master it! Here are similar questions tuned to your level.',
-          expression: NumiExpression.celebrate,
         ),
         const SizedBox(height: AppSpacing.lg),
         for (final difficulty in Difficulty.values)

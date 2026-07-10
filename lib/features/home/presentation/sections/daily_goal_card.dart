@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/animations/pressable.dart';
@@ -41,16 +40,11 @@ class DailyGoalCard extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Positioned(
+          const Positioned(
             right: -12,
             bottom: -20,
             child: Floaty(
-              child: NumiMascot(
-                expression: isFirstDay
-                    ? NumiExpression.wave
-                    : NumiExpression.celebrate,
-                size: 104,
-              ),
+              child: MatheasyBrandAvatar(size: 104),
             ),
           ),
           Column(

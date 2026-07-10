@@ -15,9 +15,9 @@ class PaywallCopy {
         PaywallTrigger.scanLimit =>
           "You've used all ${UsageQuota.free.scans} free scans. Go Pro for "
               'unlimited snap-and-solve.',
-        PaywallTrigger.numiLimit =>
-          "You've reached ${UsageQuota.free.numiMessages} free Numi messages. "
-              'Go Pro to keep the conversation going.',
+        PaywallTrigger.tutorLimit =>
+          "You've reached ${UsageQuota.free.tutorMessages} free AI tutor "
+              'messages. Go Pro to keep the conversation going.',
         PaywallTrigger.practiceLimit =>
           "You've generated all ${UsageQuota.free.practiceQuestions} free "
               'practice questions. Go Pro for unlimited practice.',
@@ -74,7 +74,7 @@ class PaywallCopy {
       proLabel: 'Unlimited',
     ),
     ComparisonRow(
-      label: 'Numi AI tutor',
+      label: 'Matheasy AI Tutor',
       freeLabel: '20 messages',
       proLabel: 'Unlimited',
     ),

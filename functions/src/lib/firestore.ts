@@ -3,7 +3,7 @@
  *
  * The user document `users/{uid}` is the single source of truth the app reads:
  *   entitlement  : 'none' | 'pro'         (written only by the RevenueCat webhook)
- *   usage        : { scans, numiMessages, practiceQuestions }  (metered counts)
+ *   usage        : { scans, tutorMessages, practiceQuestions }  (metered counts)
  *   subscription : { ...snapshot }         (written only by the webhook)
  *   stats        : { xp, streak, ... }     (written only by the aggregation trigger)
  *
@@ -47,7 +47,7 @@ export async function ensureUserDoc(uid: string): Promise<void> {
   await ref.set(
     {
       entitlement: "none",
-      usage: { scans: 0, numiMessages: 0, practiceQuestions: 0 },
+      usage: { scans: 0, tutorMessages: 0, practiceQuestions: 0 },
       stats: { xp: 0, streak: 0, problemsSolved: 0 },
       createdAt: FieldValue.serverTimestamp(),
     },

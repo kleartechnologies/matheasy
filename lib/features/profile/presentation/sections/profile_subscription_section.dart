@@ -80,7 +80,7 @@ class _ProCard extends StatelessWidget {
                     Text(
                       'Unlimited everything · manage plan',
                       style: AppTypography.bodySmall
-                          .copyWith(color: const Color(0xFFB9BEE0)),
+                          .copyWith(color: const Color(0xFFD1FAE5)),
                     ),
                   ],
                 ),

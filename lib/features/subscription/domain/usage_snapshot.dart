@@ -21,7 +21,7 @@ class UsageSnapshot {
 
   int _limitFor(UsageFeature feature) => switch (feature) {
         UsageFeature.scan => quota.scans,
-        UsageFeature.numiMessage => quota.numiMessages,
+        UsageFeature.tutorMessage => quota.tutorMessages,
         UsageFeature.practiceQuestion => quota.practiceQuestions,
       };
 
@@ -47,10 +47,10 @@ class UsageSnapshot {
 
   // ---- Named conveniences for call sites ----
   bool get canScan => can(UsageFeature.scan);
-  bool get canSendNumiMessage => can(UsageFeature.numiMessage);
+  bool get canSendTutorMessage => can(UsageFeature.tutorMessage);
   bool get canGeneratePractice => can(UsageFeature.practiceQuestion);
 
   int get remainingScans => remaining(UsageFeature.scan);
-  int get remainingNumiMessages => remaining(UsageFeature.numiMessage);
+  int get remainingTutorMessages => remaining(UsageFeature.tutorMessage);
   int get remainingPracticeQuestions => remaining(UsageFeature.practiceQuestion);
 }

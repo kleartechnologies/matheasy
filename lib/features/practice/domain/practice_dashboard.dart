@@ -74,7 +74,7 @@ class PracticeDashboardData {
     required this.weakTopics,
     required this.dailyChallenge,
     required this.categories,
-    required this.numiMessage,
+    required this.tutorMessage,
   });
 
   final XpLevel xpLevel;
@@ -88,5 +88,5 @@ class PracticeDashboardData {
   final List<WeakTopicView> weakTopics;
   final DailyChallengeView dailyChallenge;
   final List<CategoryView> categories;
-  final String numiMessage;
+  final String tutorMessage;
 }

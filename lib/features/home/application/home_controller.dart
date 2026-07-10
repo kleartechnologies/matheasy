@@ -78,7 +78,7 @@ class HomeMock {
         CourseProgress(
           title: 'Triangles',
           icon: Icons.change_history_rounded,
-          color: AppColors.success,
+          color: AppColors.accentAmber,
           completed: 4,
           total: 10,
           estMinutes: 12,
@@ -105,7 +105,7 @@ class HomeMock {
         PracticeRecommendation(question: r'5x - 7 = 18', difficulty: Difficulty.medium),
         PracticeRecommendation(question: r'2(x + 3) = 16', difficulty: Difficulty.medium),
       ],
-      numiMessage: "Ready for today's challenge? You're on a 12-day roll! 🔥",
+      tutorMessage: "Ready for today's challenge? You're on a 12-day roll! 🔥",
     );
   }
 
@@ -134,7 +134,7 @@ class HomeMock {
         PracticeRecommendation(question: r'2 + 3 \times 4', difficulty: Difficulty.easy),
         PracticeRecommendation(question: r'x + 7 = 12', difficulty: Difficulty.easy),
       ],
-      numiMessage: "Welcome to Matheasy! Let's solve your first problem together. 🎉",
+      tutorMessage: "Welcome to Matheasy! Let's solve your first problem together. 🎉",
     );
   }
 

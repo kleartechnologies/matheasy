@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
@@ -405,7 +405,7 @@ class _ScanningChrome extends StatelessWidget {
               ),
             ),
           ),
-          const _NumiHint(),
+          const _MatheasyHint(),
           _BottomControls(
             canCapture: canCapture,
             onGallery: onGallery,
@@ -460,8 +460,8 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _NumiHint extends StatelessWidget {
-  const _NumiHint();
+class _MatheasyHint extends StatelessWidget {
+  const _MatheasyHint();
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +493,7 @@ class _NumiHint extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          const Floaty(child: NumiMascot(size: 52)),
+          const Floaty(child: MatheasyBrandAvatar(size: 52)),
         ],
       ),
     );
@@ -739,7 +739,7 @@ class _ErrorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const NumiMascot(expression: NumiExpression.thinking, size: 110),
+              const MatheasyBrandAvatar(size: 110),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 message,

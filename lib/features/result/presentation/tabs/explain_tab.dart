@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/extensions/context_extensions.dart';
@@ -18,11 +17,11 @@ class ExplainTab extends StatefulWidget {
   const ExplainTab({
     super.key,
     required this.explanations,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
   });
 
   final List<Explanation> explanations;
-  final VoidCallback onAskNumi;
+  final VoidCallback onAskMatheasy;
 
   @override
   State<ExplainTab> createState() => _ExplainTabState();
@@ -35,7 +34,7 @@ class _ExplainTabState extends State<ExplainTab> {
   Widget build(BuildContext context) {
     if (widget.explanations.isEmpty) {
       return const ResultEmpty(
-        message: 'No explanation yet — Numi is still thinking about the best '
+        message: 'No explanation yet — Matheasy is still thinking about the best '
             'way to teach this.',
       );
     }
@@ -63,9 +62,9 @@ class _ExplainTabState extends State<ExplainTab> {
         ),
         const SizedBox(height: AppSpacing.lg),
         SecondaryButton(
-          label: 'Still stuck? Ask Numi',
+          label: 'Still stuck? Ask Matheasy',
           icon: Icons.smart_toy_rounded,
-          onPressed: widget.onAskNumi,
+          onPressed: widget.onAskMatheasy,
         ),
       ],
     );
@@ -84,7 +83,7 @@ class _Content extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NumiBubble(text: explanation.body, expression: NumiExpression.wink),
+        MatheasyBubble(text: explanation.body),
         const SizedBox(height: AppSpacing.lg),
         AppCard(
           child: Column(

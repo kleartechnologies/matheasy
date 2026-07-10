@@ -24,14 +24,14 @@ class QuickActions extends StatelessWidget {
       ),
       _ActionData(
         icon: Icons.forum_rounded,
-        label: 'Ask Numi',
+        label: 'Ask Matheasy',
         color: AppColors.secondary,
         onTap: () => context.go(AppRoutes.tutor),
       ),
       _ActionData(
         icon: Icons.fitness_center_rounded,
         label: 'Practice',
-        color: AppColors.success,
+        color: AppColors.accentAmber,
         onTap: () => context.go(AppRoutes.practice),
       ),
       _ActionData(

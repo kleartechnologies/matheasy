@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// A compact, Numi-fronted empty state used inside the result tabs (no methods,
+/// A compact, brand-fronted empty state used inside the result tabs (no methods,
 /// no explanations, no practice yet).
 class ResultEmpty extends StatelessWidget {
   const ResultEmpty({
     super.key,
     required this.message,
-    this.expression = NumiExpression.thinking,
   });
 
   final String message;
-  final NumiExpression expression;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +21,7 @@ class ResultEmpty extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
       child: Column(
         children: [
-          NumiMascot(expression: expression),
+          const MatheasyBrandAvatar(),
           const SizedBox(height: AppSpacing.md),
           Text(
             message,

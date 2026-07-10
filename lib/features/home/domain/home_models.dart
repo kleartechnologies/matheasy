@@ -137,7 +137,7 @@ class HomeData {
     required this.todayChallenge,
     required this.weakTopics,
     required this.recommendations,
-    required this.numiMessage,
+    required this.tutorMessage,
     required this.isFirstDay,
   });
 
@@ -148,6 +148,6 @@ class HomeData {
   final TodayChallenge? todayChallenge;
   final List<WeakTopic> weakTopics;
   final List<PracticeRecommendation> recommendations;
-  final String numiMessage;
+  final String tutorMessage;
   final bool isFirstDay;
 }

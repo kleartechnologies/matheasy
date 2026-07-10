@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import 'practice_chips.dart';
 
-/// The post-answer feedback: a Numi reaction, the explanation, and (when
+/// The post-answer feedback: a Matheasy reaction, the explanation, and (when
 /// correct) the XP earned. Warm and encouraging on both outcomes.
 class PracticeFeedback extends StatelessWidget {
   const PracticeFeedback({
@@ -22,7 +22,7 @@ class PracticeFeedback extends StatelessWidget {
   final String explanation;
   final int xpEarned;
 
-  /// Rotates the Numi reaction line so repeats feel fresh.
+  /// Rotates the Matheasy reaction line so repeats feel fresh.
   final int reactionSeed;
 
   static const List<String> _praise = [
@@ -60,11 +60,7 @@ class PracticeFeedback extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          NumiMascot(
-            expression:
-                correct ? NumiExpression.celebrate : NumiExpression.happy,
-            size: 40,
-          ),
+          const MatheasyBrandAvatar(size: 40),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

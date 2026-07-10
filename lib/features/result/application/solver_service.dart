@@ -47,7 +47,7 @@ class MockSolverService implements SolverService {
         difficulty: Difficulty.easy,
         answerLatex: r'x = 4',
         verifyText: 'Check: 2(4) + 5 = 13 ✓ — it matches, so we are correct!',
-        numiIntro: "Nice one! Here's exactly how to solve it — "
+        tutorIntro: "Nice one! Here's exactly how to solve it — "
             'tap any step to see why it works.',
         steps: const [
           SolutionStep(
@@ -173,7 +173,7 @@ class MockSolverService implements SolverService {
         difficulty: Difficulty.medium,
         answerLatex: r'x = -2,\ x = -3',
         verifyText: 'Check: (−2)² + 5(−2) + 6 = 0 ✓',
-        numiIntro: "Let's factor this quadratic — it splits into two neat "
+        tutorIntro: "Let's factor this quadratic — it splits into two neat "
             'brackets.',
         steps: const [
           SolutionStep(
@@ -290,7 +290,7 @@ class MockSolverService implements SolverService {
         difficulty: Difficulty.easy,
         answerLatex: r'\frac{5}{4}',
         verifyText: 'Check: 5/4 = 1¼ ✓',
-        numiIntro: 'To add fractions we just need the same denominator first.',
+        tutorIntro: 'To add fractions we just need the same denominator first.',
         steps: const [
           SolutionStep(
             title: 'Start with the sum',
@@ -383,7 +383,7 @@ class MockSolverService implements SolverService {
         difficulty: Difficulty.easy,
         answerLatex: r'= 14',
         verifyText: 'Check with the order of operations (BODMAS) ✓',
-        numiIntro: "Let's work through this step by step.",
+        tutorIntro: "Let's work through this step by step.",
         steps: const [
           SolutionStep(
             title: 'Start with the expression',

@@ -1,9 +1,9 @@
-// Stage 6 tests — the AI Tutor (Numi).
+// Stage 6 tests — the AI Tutor (Matheasy).
 //
 // Covers: the deterministic reply engine (intent → response + cards), the chat
 // controller's send/typing/reset/load loop, the mock home content, and the key
 // widgets (Tutor home, chat send flow, interactive quiz card). pump() (not
-// pumpAndSettle) is used because Numi's mascot/typing animations loop forever.
+// pumpAndSettle) is used because Matheasy's typing animations loop forever.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +20,6 @@ import 'package:matheasy/features/tutor/domain/tutor_models.dart';
 import 'package:matheasy/features/tutor/presentation/tutor_chat_screen.dart';
 import 'package:matheasy/features/tutor/presentation/tutor_screen.dart';
 import 'package:matheasy/features/tutor/presentation/widgets/tutor_quiz_card.dart';
-import 'package:matheasy/shared/mascot/numi_expression.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A zero-delay [TutorService] so controller/widget tests don't wait on the
@@ -44,7 +43,7 @@ class _InstantTutorService implements TutorService {
 }
 
 /// In-memory usage tracker so tutor controller tests need no SharedPreferences —
-/// sending a message now records against the free-tier Numi quota via the
+/// sending a message now records against the free-tier AI tutor quota via the
 /// controller.
 class _MemoryUsageTracker implements UsageTracker {
   UsageCounts _counts = UsageCounts.empty;
@@ -75,9 +74,8 @@ void main() {
 
     test('greets warmly without scan context', () {
       final response = engine.greeting(null);
-      expect(response.text.toLowerCase(), contains('numi'));
+      expect(response.text.toLowerCase(), contains('matheasy'));
       expect(response.suggestions, isNotEmpty);
-      expect(response.expression, NumiExpression.wave);
     });
 
     test('greeting is aware of a scanned problem', () {
@@ -133,7 +131,7 @@ void main() {
     });
 
     test('greets on a real hello but not on substrings like "this"', () {
-      final greeting = engine.reply('hey Numi!', history: const []);
+      final greeting = engine.reply('hey Matheasy!', history: const []);
       expect(greeting.text.toLowerCase(), contains('great to see you'));
 
       // "this" contains "hi" — must NOT be treated as a greeting.

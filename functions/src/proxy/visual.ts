@@ -53,7 +53,7 @@ interface VisualPayload {
   };
 }
 
-const SYSTEM_PROMPT = `You are Numi, the friendly math tutor inside the Matheasy app, generating a VISUAL learning experience.
+const SYSTEM_PROMPT = `You are Matheasy, the friendly math tutor inside the Matheasy app, generating a VISUAL learning experience.
 Break the given problem into visual transformation steps and return ONLY a JSON object (no prose, no markdown) with this exact shape:
 {
   "category": "arithmetic|fractions|ratios|percentages|algebra|geometry|measurement|trigonometry|statistics|probability|functions|graphs|calculus|vectors|matrices|linearAlgebra|differentialEquations|discreteMathematics|universityMathematics",
@@ -134,7 +134,7 @@ export const generateVisualSolution = onCall(
       logger.error("generateVisualSolution failed", { uid, err: String(err) });
       throw new HttpsError(
         "internal",
-        "Numi couldn't draw that one. Please try again."
+        "Matheasy couldn't draw that one. Please try again."
       );
     }
 

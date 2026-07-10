@@ -10,12 +10,12 @@ import '../application/progress_controller.dart';
 import 'sections/progress_achievements.dart';
 import 'sections/progress_learning_overview.dart';
 import 'sections/progress_mastery.dart';
-import 'sections/progress_numi_insight.dart';
+import 'sections/progress_matheasy_insight.dart';
 import 'sections/progress_profile.dart';
 import 'sections/progress_recent_activity.dart';
 
 /// The Progress tab — profile summary, learning overview, achievements, mastery,
-/// recent activity and a Numi insight. Reads an assembled [ProgressOverview]
+/// recent activity and a Matheasy insight. Reads an assembled [ProgressOverview]
 /// that reacts to practice, achievement and analytics changes.
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -32,7 +32,7 @@ class ProgressScreen extends ConsumerWidget {
       ),
       ProgressMastery(mastery: overview.mastery),
       ProgressRecentActivity(activity: overview.recentActivity),
-      ProgressNumiInsight(message: overview.numiInsight),
+      ProgressMatheasyInsight(message: overview.matheasyInsight),
     ];
 
     return Scaffold(

@@ -29,7 +29,7 @@ class AccountUpgradeBenefits extends StatelessWidget {
     ),
     AuthBenefitRow(
       icon: Icons.lock_open_rounded,
-      color: AppColors.success,
+      color: AppColors.accentAmber,
       title: 'Unlock future features',
       subtitle: 'Be first to try new tools as they launch.',
     ),

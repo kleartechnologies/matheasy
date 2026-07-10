@@ -4,7 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/tutor_models.dart';
 
-/// The interactive quick-reply chips Numi offers under a response ("Explain
+/// The interactive quick-reply chips Matheasy offers under a response ("Explain
 /// Simpler", "Give Example", …). Tapping one sends its message back into the
 /// conversation. Wraps to multiple lines on narrow screens.
 class TutorSuggestionChips extends StatelessWidget {

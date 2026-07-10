@@ -48,7 +48,7 @@ class PracticeScreen extends ConsumerWidget {
       PracticeHeader(
         xpLevel: data.xpLevel,
         streakCurrent: data.streakCurrent,
-        numiMessage: data.numiMessage,
+        tutorMessage: data.tutorMessage,
       ),
       if (data.continueRequest != null)
         PracticeContinue(

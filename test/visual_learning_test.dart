@@ -3,7 +3,7 @@
 // Covers the universal schema mapping (defensive JSON → VisualSolution),
 // category → tier selection, the generation controller flow, Pro gating
 // (teaser for free users, renderers after the offline purchase), renderer
-// selection per tier, the never-crash fallback to the Explain tab, the Numi
+// selection per tier, the never-crash fallback to the Explain tab, the Matheasy
 // visual-step context pipeline, and accessibility (semantics + reduced
 // motion). Deterministic and offline throughout: the AI seams are hand-rolled
 // fakes, and Firebase/RevenueCat stay unconfigured as in every other test.
@@ -56,7 +56,7 @@ const _resultData = ResultData(
   difficulty: Difficulty.easy,
   answerLatex: 'x = 4',
   verifyText: '2(4) + 5 = 13 ✓',
-  numiIntro: 'Here we go!',
+  tutorIntro: 'Here we go!',
   steps: [
     SolutionStep(
       title: 'Start with the equation',
@@ -427,8 +427,8 @@ void main() {
       );
     });
 
-    test('Numi step context describes the exact transformation', () {
-      final context = VisualPromptBuilder.numiStepContext(_tier1Visual, 1);
+    test('Matheasy step context describes the exact transformation', () {
+      final context = VisualPromptBuilder.tutorStepContext(_tier1Visual, 1);
       expect(context, contains('Step 2 of 2'));
       expect(context, contains('Divide both sides by 2'));
       expect(context, contains('÷ 2'));
@@ -437,7 +437,7 @@ void main() {
     });
 
     test('an out-of-range step index still yields usable context', () {
-      final context = VisualPromptBuilder.numiStepContext(_tier1Visual, 99);
+      final context = VisualPromptBuilder.tutorStepContext(_tier1Visual, 99);
       expect(context, contains('x = 4'));
     });
   });
@@ -543,7 +543,7 @@ void main() {
           result: _resultData,
           onUnlock: () => unlocked = true,
           onOpenExplain: () {},
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
       );
       await tester.pump(const Duration(milliseconds: 400));
@@ -567,7 +567,7 @@ void main() {
         result: _resultData,
         onUnlock: () {},
         onOpenExplain: () {},
-        onAskNumi: (_, _) {},
+        onAskMatheasy: (_, _) {},
       );
       await _pumpTab(tester, container, teaser);
       await _pumpTab(tester, container, teaser);
@@ -590,7 +590,7 @@ void main() {
           result: _resultData,
           onUnlock: () {},
           onOpenExplain: () {},
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
         // Keeps Tier 1 off auto-play so no timer outlives the test.
         reduceMotion: true,
@@ -639,7 +639,7 @@ void main() {
           result: _resultData,
           onUnlock: () {},
           onOpenExplain: () {},
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
         reduceMotion: true,
       );
@@ -702,7 +702,7 @@ void main() {
           result: _resultData,
           onUnlock: () {},
           onOpenExplain: () => openedExplain = true,
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
         reduceMotion: true,
       );
@@ -741,7 +741,7 @@ void main() {
           result: _resultData,
           onUnlock: () {},
           onOpenExplain: () {},
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
         reduceMotion: true,
       );
@@ -753,7 +753,7 @@ void main() {
     });
   });
 
-  group('Numi visual-step integration', () {
+  group('Matheasy visual-step integration', () {
     test('TutorLaunchContext equality includes the visual step', () {
       const a = TutorLaunchContext(questionLatex: '2x = 8');
       const b = TutorLaunchContext(
@@ -804,7 +804,7 @@ void main() {
       await _pumpTab(
         tester,
         container,
-        Tier1AnimatedTransformation(visual: _tier1Visual, onAskNumi: (_) {}),
+        Tier1AnimatedTransformation(visual: _tier1Visual, onAskMatheasy: (_) {}),
         reduceMotion: true,
       );
       expect(
@@ -819,7 +819,7 @@ void main() {
       await _pumpTab(
         tester,
         container,
-        Tier1AnimatedTransformation(visual: _tier1Visual, onAskNumi: (_) {}),
+        Tier1AnimatedTransformation(visual: _tier1Visual, onAskMatheasy: (_) {}),
         reduceMotion: true,
       );
       expect(find.byIcon(Icons.pause_circle_rounded), findsNothing);
@@ -837,7 +837,7 @@ void main() {
       await _pumpTab(
         tester,
         container,
-        Tier1AnimatedTransformation(visual: _tier1Visual, onAskNumi: (_) {}),
+        Tier1AnimatedTransformation(visual: _tier1Visual, onAskMatheasy: (_) {}),
       );
       expect(find.text('STEP 1 OF 2'), findsOneWidget);
       await tester.pump(const Duration(seconds: 3));
@@ -927,7 +927,7 @@ void main() {
           result: _resultData,
           onUnlock: () => unlocked = true,
           onOpenExplain: () {},
-          onAskNumi: (_, _) {},
+          onAskMatheasy: (_, _) {},
         ),
         reduceMotion: true,
       );
@@ -969,7 +969,7 @@ void main() {
       await _pumpTab(
         tester,
         container,
-        Tier2LearningCards(visual: withConcept, onAskNumi: (_) {}),
+        Tier2LearningCards(visual: withConcept, onAskMatheasy: (_) {}),
         reduceMotion: true,
       );
       expect(find.byType(InteractiveViewer), findsOneWidget);
@@ -984,8 +984,8 @@ void main() {
     const palette = ConceptPalette(
       grid: Color(0xFFEEEEEE),
       axis: Color(0xFF888888),
-      stroke: Color(0xFF2563EB),
-      fill: Color(0x282563EB),
+      stroke: Color(0xFF10B981),
+      fill: Color(0x2810B981),
       accent: Color(0xFFFF7A45),
     );
 

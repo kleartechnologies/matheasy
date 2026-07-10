@@ -114,7 +114,7 @@ class PreferencesStore {
 
   Future<void> setProfileJson(String json) => _prefs.setString(_kProfile, json);
 
-  /// The serialized lifetime usage counters — scans, Numi messages and
+  /// The serialized lifetime usage counters — scans, AI tutor messages and
   /// generated practice questions (JSON).
   String? get usageCountsJson => _prefs.getString(_kUsageCounts);
 

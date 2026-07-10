@@ -22,13 +22,13 @@ class Tier1AnimatedTransformation extends StatefulWidget {
   const Tier1AnimatedTransformation({
     super.key,
     required this.visual,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
   });
 
   final VisualSolution visual;
 
-  /// Called with the index of the step on stage when the student asks Numi.
-  final ValueChanged<int> onAskNumi;
+  /// Called with the index of the step on stage when the student asks Matheasy.
+  final ValueChanged<int> onAskMatheasy;
 
   @override
   State<Tier1AnimatedTransformation> createState() =>
@@ -107,7 +107,7 @@ class _Tier1AnimatedTransformationState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NumiBubble(text: visual.intro),
+        MatheasyBubble(text: visual.intro),
         const SizedBox(height: AppSpacing.lg),
         AppCard(
           child: Column(
@@ -172,7 +172,7 @@ class _Tier1AnimatedTransformationState
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        AskNumiButton(onPressed: () => widget.onAskNumi(_index)),
+        AskMatheasyButton(onPressed: () => widget.onAskMatheasy(_index)),
         if (visual.concept != null) ...[
           const SizedBox(height: AppSpacing.md),
           VisualConceptView(concept: visual.concept!),

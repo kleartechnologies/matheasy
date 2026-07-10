@@ -13,7 +13,7 @@ part 'result_controller.g.dart';
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
 /// Async by design so a future AI solver drops straight in — the screen already
-/// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+/// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
 /// so re-opening the same problem reuses the cached solution.
 @riverpod
 class ResultController extends _$ResultController {

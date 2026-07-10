@@ -4,8 +4,8 @@ import 'practice_difficulty.dart';
 import 'practice_question.dart';
 import 'practice_topic.dart';
 
-/// A wrong answer, captured with everything Numi and the Visual Learning Engine
-/// need to explain it: the question, the learner's answer, the correct answer,
+/// A wrong answer, captured with everything Matheasy and the Visual Learning
+/// Engine need to explain it: the question, the learner's answer, the correct answer,
 /// the topic and the difficulty (exactly the fields the spec calls for).
 @immutable
 class PracticeMistake {
@@ -21,7 +21,7 @@ class PracticeMistake {
 
   String get prompt => question.prompt;
 
-  /// The problem as LaTeX when available (for Numi / Visual), else the plain
+  /// The problem as LaTeX when available (for Matheasy / Visual), else the plain
   /// prompt so there's always *something* to hand off.
   String get problemLatex => question.promptLatex ?? question.prompt;
 
@@ -31,11 +31,11 @@ class PracticeMistake {
 
   PracticeDifficulty get difficulty => question.difficulty;
 
-  /// A first-person message to seed a Numi "why is this wrong?" conversation.
-  /// Carries the learner's answer + the correct answer inline, so Numi has the
+  /// A first-person message to seed a Matheasy "why is this wrong?" conversation.
+  /// Carries the learner's answer + the correct answer inline, so Matheasy has the
   /// full picture even though only the problem latex travels as structured
   /// context on the wire.
-  String get numiSeedMessage {
+  String get tutorSeedMessage {
     final buffer = StringBuffer()
       ..write('I was practicing ${topic.label.toLowerCase()} and got this '
           'wrong:\n')

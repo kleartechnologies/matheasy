@@ -271,7 +271,7 @@ class VisualSolution {
   /// The final answer as delimiter-free LaTeX.
   final String answerLatex;
 
-  /// Numi's one-line welcome to the visual walkthrough.
+  /// Matheasy's one-line welcome to the visual walkthrough.
   final String intro;
 
   final List<VisualStep> steps;

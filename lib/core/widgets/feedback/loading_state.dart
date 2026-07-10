@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../animations/floaty.dart';
+import '../../brand/brand.dart';
 import '../../extensions/context_extensions.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
-/// Full-area loading placeholder. Optionally shows Numi "thinking" for the
-/// warmer, on-brand loading moments (solving, generating practice).
+/// Full-area loading placeholder. Optionally shows the Matheasy brand avatar
+/// for the warmer, on-brand loading moments (solving, generating practice).
 class LoadingState extends StatelessWidget {
   const LoadingState({
     super.key,
     this.message,
-    this.showMascot = false,
+    this.showBrand = false,
   });
 
   final String? message;
-  final bool showMascot;
+  final bool showBrand;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +25,9 @@ class LoadingState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showMascot)
+          if (showBrand)
             const Floaty(
-              child: NumiMascot(expression: NumiExpression.thinking),
+              child: MatheasyBrandAvatar(),
             )
           else
             const SizedBox(

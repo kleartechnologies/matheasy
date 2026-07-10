@@ -12,7 +12,7 @@ class UnderstandPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const OnboardingIntroLayout(
       headline: 'Understand Every Step',
-      subtitle: 'Numi explains the why behind each step — so it actually '
+      subtitle: 'Matheasy explains the why behind each step — so it actually '
           'sticks, not just copies.',
       illustration: _UnderstandArt(),
     );
@@ -31,7 +31,7 @@ class _UnderstandArt extends StatelessWidget {
         children: [
           ChatBubble(text: 'Why do we subtract 5?', isUser: true),
           SizedBox(height: AppSpacing.md),
-          NumiBubble(
+          MatheasyBubble(
             text: 'To get 2x on its own we undo the +5 first. Whatever we do '
                 'to one side, we do to the other. 👍',
           ),

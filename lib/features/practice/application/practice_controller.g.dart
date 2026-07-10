@@ -57,7 +57,7 @@ final class PracticeControllerProvider
 }
 
 String _$practiceControllerHash() =>
-    r'3130fd4cf0fb1990ada24918c45472785bb31c7e';
+    r'12b775512dbc88a2f980335b463894ce143a943e';
 
 /// Drives a practice session: build → answer → feedback → next → results.
 ///

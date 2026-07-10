@@ -7,7 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/tutor_models.dart';
 
-/// A 2×2 grid of Tutor quick actions (Ask Numi, Upload Question, …).
+/// A 2×2 grid of Tutor quick actions (Ask Matheasy, Upload Question, …).
 class TutorQuickActions extends StatelessWidget {
   const TutorQuickActions({
     super.key,

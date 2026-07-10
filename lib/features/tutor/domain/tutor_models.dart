@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/mascot/numi_expression.dart';
 import '../../result/domain/result_models.dart';
 
 /// Who authored a chat message.
 ///
-/// [system] messages are neutral, centered notices (e.g. "Numi can see your
+/// [system] messages are neutral, centered notices (e.g. "Matheasy can see your
 /// scanned problem", "New conversation") — not part of the tutor's voice.
 enum TutorRole { user, assistant, system }
 
@@ -107,7 +106,7 @@ class PracticePrompt {
   final Difficulty difficulty;
   final int xpReward;
 
-  /// A short Numi line, e.g. "You've got this — take your time. 💪".
+  /// A short Matheasy line, e.g. "You've got this — take your time. 💪".
   final String encouragement;
 }
 
@@ -134,8 +133,7 @@ final class PracticeCard extends TutorCard {
 /// A single message in a tutor conversation.
 ///
 /// A message is one "turn": text, an optional rich [card] (quiz/practice), and
-/// the [suggestions] the tutor offers afterwards. [expression] drives the Numi
-/// avatar mood for assistant turns.
+/// the [suggestions] the tutor offers afterwards.
 @immutable
 class TutorMessage {
   const TutorMessage({
@@ -144,29 +142,25 @@ class TutorMessage {
     required this.text,
     this.card,
     this.suggestions = const [],
-    this.expression = NumiExpression.happy,
   });
 
   /// Convenience for a user turn (plain text, no card/suggestions).
   const TutorMessage.user({required this.id, required this.text})
       : role = TutorRole.user,
         card = null,
-        suggestions = const [],
-        expression = NumiExpression.happy;
+        suggestions = const [];
 
   /// Convenience for a neutral, centered system notice.
   const TutorMessage.system({required this.id, required this.text})
       : role = TutorRole.system,
         card = null,
-        suggestions = const [],
-        expression = NumiExpression.happy;
+        suggestions = const [];
 
   final int id;
   final TutorRole role;
   final String text;
   final TutorCard? card;
   final List<SuggestionAction> suggestions;
-  final NumiExpression expression;
 
   bool get isUser => role == TutorRole.user;
   bool get isAssistant => role == TutorRole.assistant;
@@ -184,13 +178,11 @@ class TutorResponse {
     required this.text,
     this.card,
     this.suggestions = const [],
-    this.expression = NumiExpression.happy,
   });
 
   final String text;
   final TutorCard? card;
   final List<SuggestionAction> suggestions;
-  final NumiExpression expression;
 }
 
 /// Context handed to the chat when it opens.
@@ -226,7 +218,7 @@ class TutorLaunchContext {
   final String? topicLabel;
 
   /// The Visual Learning step the student tapped, as one plain-text sentence
-  /// (built by `VisualPromptBuilder.numiStepContext`) — lets Numi answer
+  /// (built by `VisualPromptBuilder.tutorStepContext`) — lets Matheasy answer
   /// "why divide by 2?" about the exact step on screen.
   final String? visualStepSummary;
 
@@ -268,7 +260,7 @@ class TutorSession {
 
   final List<TutorMessage> messages;
 
-  /// True while Numi is "thinking" — drives the typing indicator.
+  /// True while Matheasy is "thinking" — drives the typing indicator.
   final bool isTyping;
 
   /// The scan context this session was opened with, if any.
@@ -323,7 +315,7 @@ class TutorCategory {
   final String message;
 }
 
-/// One quick action on the Tutor home (Ask Numi, Upload Question, …).
+/// One quick action on the Tutor home (Ask Matheasy, Upload Question, …).
 @immutable
 class TutorQuickAction {
   const TutorQuickAction({
@@ -341,7 +333,7 @@ class TutorQuickAction {
 
 /// The behavior a [TutorQuickAction] triggers. Kept as an enum (not a callback)
 /// so the model stays pure and the screen owns navigation/side-effects.
-enum TutorQuickActionKind { askNumi, uploadQuestion, practiceTopic, createQuiz }
+enum TutorQuickActionKind { askMatheasy, uploadQuestion, practiceTopic, createQuiz }
 
 /// A saved (mock) conversation shown under "Recent" on the Tutor home. Tapping
 /// one loads its [messages] back into the chat.

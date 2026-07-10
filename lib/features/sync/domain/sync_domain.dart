@@ -18,7 +18,7 @@ enum SyncDomain {
   /// Unlocked achievements (id → unlock date).
   achievements('achievements'),
 
-  /// Free-tier usage counters (scans / Numi / practice).
+  /// Free-tier usage counters (scans / AI tutor / practice).
   usage('usage'),
 
   /// Learning analytics — scan/tutor counts, learning days, activity feed.

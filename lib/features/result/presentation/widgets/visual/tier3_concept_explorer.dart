@@ -13,13 +13,13 @@ class Tier3ConceptExplorer extends StatelessWidget {
   const Tier3ConceptExplorer({
     super.key,
     required this.visual,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
   });
 
   final VisualSolution visual;
 
-  /// Called with the tapped step's index when the student asks Numi.
-  final ValueChanged<int> onAskNumi;
+  /// Called with the tapped step's index when the student asks Matheasy.
+  final ValueChanged<int> onAskMatheasy;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class Tier3ConceptExplorer extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NumiBubble(text: visual.intro),
+        MatheasyBubble(text: visual.intro),
         const SizedBox(height: AppSpacing.lg),
         if (concept != null) ...[
           VisualConceptView(concept: concept),
@@ -39,7 +39,7 @@ class Tier3ConceptExplorer extends StatelessWidget {
             step: steps[i],
             number: i + 1,
             defaultExpanded: i == 0,
-            onAskNumi: () => onAskNumi(i),
+            onAskMatheasy: () => onAskMatheasy(i),
           ),
         if (visual.explanation != null) ...[
           const SizedBox(height: AppSpacing.xs),

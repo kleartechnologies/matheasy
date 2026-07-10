@@ -4,5 +4,6 @@
 library;
 
 export 'matheasy_app_icon.dart';
+export 'matheasy_brand_avatar.dart';
 export 'matheasy_logo.dart';
 export 'matheasy_mark.dart';

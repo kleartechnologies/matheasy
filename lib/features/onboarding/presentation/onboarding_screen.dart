@@ -18,7 +18,7 @@ import 'pages/challenge_page.dart';
 import 'pages/completion_page.dart';
 import 'pages/daily_goal_page.dart';
 import 'pages/exam_ready_page.dart';
-import 'pages/meet_numi_page.dart';
+import 'pages/meet_matheasy_page.dart';
 import 'pages/practice_page.dart';
 import 'pages/snap_solve_page.dart';
 import 'pages/study_level_page.dart';
@@ -47,7 +47,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     UnderstandPage(), // 2
     PracticePage(), // 3
     ExamReadyPage(), // 4
-    MeetNumiPage(), // 5
+    MeetMatheasyPage(), // 5
     StudyLevelPage(), // 6
     ChallengePage(), // 7
     DailyGoalPage(), // 8

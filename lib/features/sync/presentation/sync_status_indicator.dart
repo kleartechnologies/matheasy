@@ -56,7 +56,7 @@ class SyncStatusIndicator extends ConsumerWidget {
   (IconData, Color) _visual(SyncStatus status, Color neutral) => switch (status) {
         SyncStatus.disabled => (Icons.cloud_off_rounded, neutral),
         SyncStatus.notSynced => (Icons.cloud_queue_rounded, neutral),
-        SyncStatus.syncing => (Icons.sync_rounded, AppColors.primary),
+        SyncStatus.syncing => (Icons.sync_rounded, AppColors.accentIndigo),
         SyncStatus.synced => (Icons.cloud_done_rounded, AppColors.success),
         SyncStatus.offline => (Icons.cloud_off_rounded, AppColors.warning),
         SyncStatus.error => (Icons.error_outline_rounded, AppColors.error),

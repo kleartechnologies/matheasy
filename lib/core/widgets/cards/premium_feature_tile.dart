@@ -36,7 +36,7 @@ class PremiumFeatureTile extends StatelessWidget {
           borderRadius: AppRadius.cardRadius,
           boxShadow: [
             BoxShadow(
-              color: Color(0x521E2440),
+              color: Color(0x52059669),
               blurRadius: 34,
               offset: Offset(0, 18),
             ),
@@ -59,7 +59,7 @@ class PremiumFeatureTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: AppTypography.bodySmall
-                        .copyWith(color: const Color(0xFFB9BEE0)),
+                        .copyWith(color: const Color(0xFFD1FAE5)),
                   ),
                 ],
               ),

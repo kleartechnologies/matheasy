@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -44,7 +43,7 @@ class _SnapArt extends StatelessWidget {
           const Positioned(
             bottom: -26,
             right: -8,
-            child: Floaty(child: NumiMascot(expression: NumiExpression.celebrate, size: 92)),
+            child: Floaty(child: MatheasyBrandAvatar(size: 92)),
           ),
         ],
       ),

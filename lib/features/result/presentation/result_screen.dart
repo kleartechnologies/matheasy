@@ -97,9 +97,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ResultType.trigonometry => PracticeTopic.trigonometry,
       };
 
-  /// Opens the tutor chat aware of this solved problem, so Numi can pick up the
-  /// conversation with full context (mock today).
-  void _askNumi(ResultData result) {
+  /// Opens the tutor chat aware of this solved problem, so Matheasy can pick up
+  /// the conversation with full context (mock today).
+  void _askMatheasy(ResultData result) {
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
@@ -111,9 +111,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     );
   }
 
-  /// Opens Numi aware of the exact Visual Learning step on screen, so the
+  /// Opens Matheasy aware of the exact Visual Learning step on screen, so the
   /// tutor can answer "why divide by 2?" about that transformation.
-  void _askNumiAboutStep(
+  void _askMatheasyAboutStep(
     ResultData result,
     VisualSolution visual,
     int stepIndex,
@@ -125,7 +125,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         answerLatex: result.answerLatex,
         equationType: result.type.label,
         topicLabel: visual.category.label,
-        visualStepSummary: VisualPromptBuilder.numiStepContext(
+        visualStepSummary: VisualPromptBuilder.tutorStepContext(
           visual,
           stepIndex,
         ),
@@ -169,8 +169,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       ),
       body: async.when(
         loading: () => const LoadingState(
-          message: 'Numi is solving your problem…',
-          showMascot: true,
+          message: 'Matheasy is solving your problem…',
+          showBrand: true,
         ),
         error: (error, _) => ErrorState(
           message: "We couldn't solve that one. Try scanning again.",
@@ -182,7 +182,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           ? null
           : ResultActionBar(
               saved: _saved,
-              onAskNumi: () => _askNumi(result),
+              onAskMatheasy: () => _askMatheasy(result),
               onGeneratePractice: () {
                 _selectTab(3);
                 _toast('Fresh practice ready below 👇');
@@ -252,7 +252,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       case 1:
         return ExplainTab(
           explanations: result.explanations,
-          onAskNumi: () => _askNumi(result),
+          onAskMatheasy: () => _askMatheasy(result),
         );
       case 2:
         return MethodsTab(methods: result.methods);
@@ -268,8 +268,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           result: result,
           onUnlock: _openVisualPaywall,
           onOpenExplain: () => _selectTab(1),
-          onAskNumi: (visual, stepIndex) =>
-              _askNumiAboutStep(result, visual, stepIndex),
+          onAskMatheasy: (visual, stepIndex) =>
+              _askMatheasyAboutStep(result, visual, stepIndex),
         );
       case 0:
       default:

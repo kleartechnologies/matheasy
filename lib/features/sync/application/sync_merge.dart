@@ -42,7 +42,7 @@ class SyncMerge {
   ) {
     return {
       'scansUsed': _maxInt(a['scansUsed'], b['scansUsed']),
-      'numiMessagesUsed': _maxInt(a['numiMessagesUsed'], b['numiMessagesUsed']),
+      'tutorMessagesUsed': _maxInt(a['tutorMessagesUsed'], b['tutorMessagesUsed']),
       'practiceQuestionsGenerated':
           _maxInt(a['practiceQuestionsGenerated'], b['practiceQuestionsGenerated']),
     };

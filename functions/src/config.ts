@@ -51,7 +51,7 @@ export const PRODUCT_ANNUAL = "matheasy_pro_annual";
  */
 export const FREE_QUOTA = {
   scans: 5,
-  numiMessages: 20,
+  tutorMessages: 20,
   practiceQuestions: 10,
 } as const;
 

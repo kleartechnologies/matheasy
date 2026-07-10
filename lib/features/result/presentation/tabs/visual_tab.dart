@@ -30,7 +30,7 @@ class VisualTab extends ConsumerWidget {
     required this.result,
     required this.onUnlock,
     required this.onOpenExplain,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
   });
 
   final DetectedEquation equation;
@@ -42,8 +42,8 @@ class VisualTab extends ConsumerWidget {
   /// Switches to the Explain tab (the safe fallback).
   final VoidCallback onOpenExplain;
 
-  /// Opens Numi with the visual solution and tapped step as context.
-  final void Function(VisualSolution visual, int stepIndex) onAskNumi;
+  /// Opens Matheasy with the visual solution and tapped step as context.
+  final void Function(VisualSolution visual, int stepIndex) onAskMatheasy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,8 +61,8 @@ class VisualTab extends ConsumerWidget {
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
         child: LoadingState(
-          message: 'Numi is sketching your visual walkthrough…',
-          showMascot: true,
+          message: 'Matheasy is sketching your visual walkthrough…',
+          showBrand: true,
         ),
       ),
       error: (error, _) {
@@ -83,15 +83,15 @@ class VisualTab extends ConsumerWidget {
           VisualizationType.animatedTransformation =>
             Tier1AnimatedTransformation(
               visual: visual,
-              onAskNumi: (step) => onAskNumi(visual, step),
+              onAskMatheasy: (step) => onAskMatheasy(visual, step),
             ),
           VisualizationType.interactiveCards => Tier2LearningCards(
               visual: visual,
-              onAskNumi: (step) => onAskNumi(visual, step),
+              onAskMatheasy: (step) => onAskMatheasy(visual, step),
             ),
           VisualizationType.conceptExplorer => Tier3ConceptExplorer(
               visual: visual,
-              onAskNumi: (step) => onAskNumi(visual, step),
+              onAskMatheasy: (step) => onAskMatheasy(visual, step),
             ),
         };
       },

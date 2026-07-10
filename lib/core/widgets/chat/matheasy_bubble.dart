@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
+import '../../brand/brand.dart';
 import '../../extensions/context_extensions.dart';
 import '../../theme/app_durations.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
-/// A Numi message: the mascot avatar paired with a speech bubble. Use this for
-/// assistant turns in chat, inline hints, and the "verify" note on solutions.
-class NumiBubble extends StatelessWidget {
-  const NumiBubble({
+/// A Matheasy assistant message: the brand avatar paired with a speech bubble.
+/// Use this for assistant turns in chat, inline hints, and the "verify" note on
+/// solutions.
+class MatheasyBubble extends StatelessWidget {
+  const MatheasyBubble({
     super.key,
     required this.text,
     this.avatarSize = 34,
-    this.expression = NumiExpression.happy,
   });
 
   final String text;
   final double avatarSize;
-  final NumiExpression expression;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class NumiBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            NumiMascot(expression: expression, size: avatarSize),
+            MatheasyBrandAvatar(size: avatarSize),
             const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Container(
@@ -63,17 +62,18 @@ class NumiBubble extends StatelessWidget {
   }
 }
 
-/// Animated "Numi is typing…" indicator (three pulsing dots in a bubble).
-class NumiTypingIndicator extends StatefulWidget {
-  const NumiTypingIndicator({super.key, this.avatarSize = 34});
+/// Animated "Matheasy is typing…" indicator (three pulsing dots in a bubble).
+class MatheasyTypingIndicator extends StatefulWidget {
+  const MatheasyTypingIndicator({super.key, this.avatarSize = 34});
 
   final double avatarSize;
 
   @override
-  State<NumiTypingIndicator> createState() => _NumiTypingIndicatorState();
+  State<MatheasyTypingIndicator> createState() =>
+      _MatheasyTypingIndicatorState();
 }
 
-class _NumiTypingIndicatorState extends State<NumiTypingIndicator>
+class _MatheasyTypingIndicatorState extends State<MatheasyTypingIndicator>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -94,7 +94,7 @@ class _NumiTypingIndicatorState extends State<NumiTypingIndicator>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          NumiMascot(expression: NumiExpression.thinking, size: widget.avatarSize),
+          MatheasyBrandAvatar(size: widget.avatarSize),
           const SizedBox(width: AppSpacing.sm),
           Container(
             padding: const EdgeInsets.symmetric(

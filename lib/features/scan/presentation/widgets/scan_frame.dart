@@ -61,9 +61,9 @@ class _ScanFrameState extends State<ScanFrame>
                         borderRadius: BorderRadius.circular(3),
                         gradient: const LinearGradient(
                           colors: [
-                            Color(0x0060A5FA),
+                            Color(0x0034D399),
                             AppColors.primaryTint,
-                            Color(0x0060A5FA),
+                            Color(0x0034D399),
                           ],
                         ),
                         boxShadow: [

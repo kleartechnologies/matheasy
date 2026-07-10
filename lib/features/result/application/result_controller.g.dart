@@ -11,7 +11,7 @@ part of 'result_controller.dart';
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
 /// Async by design so a future AI solver drops straight in — the screen already
-/// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+/// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
 /// so re-opening the same problem reuses the cached solution.
 
 @ProviderFor(ResultController)
@@ -20,14 +20,14 @@ final resultControllerProvider = ResultControllerFamily._();
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
 /// Async by design so a future AI solver drops straight in — the screen already
-/// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+/// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
 /// so re-opening the same problem reuses the cached solution.
 final class ResultControllerProvider
     extends $AsyncNotifierProvider<ResultController, ResultData> {
   /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
   ///
   /// Async by design so a future AI solver drops straight in — the screen already
-  /// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+  /// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
   /// so re-opening the same problem reuses the cached solution.
   ResultControllerProvider._({
     required ResultControllerFamily super.from,
@@ -70,7 +70,7 @@ String _$resultControllerHash() => r'7730d91c6f44d78aad5d722c923e97e8991ddc67';
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
 /// Async by design so a future AI solver drops straight in — the screen already
-/// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+/// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
 /// so re-opening the same problem reuses the cached solution.
 
 final class ResultControllerFamily extends $Family
@@ -94,7 +94,7 @@ final class ResultControllerFamily extends $Family
   /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
   ///
   /// Async by design so a future AI solver drops straight in — the screen already
-  /// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+  /// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
   /// so re-opening the same problem reuses the cached solution.
 
   ResultControllerProvider call(DetectedEquation equation) =>
@@ -107,7 +107,7 @@ final class ResultControllerFamily extends $Family
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
 /// Async by design so a future AI solver drops straight in — the screen already
-/// renders `loading` (Numi solving) and `error` states. Keyed by the equation,
+/// renders `loading` (Matheasy solving) and `error` states. Keyed by the equation,
 /// so re-opening the same problem reuses the cached solution.
 
 abstract class _$ResultController extends $AsyncNotifier<ResultData> {

@@ -8,11 +8,10 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import '../../domain/achievement.dart';
 import 'badge_card.dart';
 
-/// The full-screen celebration shown when an achievement unlocks: a Numi cheer,
+/// The full-screen celebration shown when an achievement unlocks: a Matheasy cheer,
 /// the badge revealed with a pop, its name/description, the XP reward counting
 /// up, and a dismiss.
 class AchievementUnlockOverlay extends StatelessWidget {
@@ -29,7 +28,7 @@ class AchievementUnlockOverlay extends StatelessWidget {
     'Amazing work!',
     "You're getting stronger every day!",
     'Incredible — keep it up!',
-    'Numi is so proud of you!',
+    'Matheasy is so proud of you!',
   ];
 
   @override
@@ -75,7 +74,7 @@ class AchievementUnlockOverlay extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const _NumiCheer(),
+                          const _MatheasyCheer(),
                           const SizedBox(height: AppSpacing.md),
                           Text(
                             'ACHIEVEMENT UNLOCKED',
@@ -139,14 +138,14 @@ class AchievementUnlockOverlay extends StatelessWidget {
   }
 }
 
-class _NumiCheer extends StatelessWidget {
-  const _NumiCheer();
+class _MatheasyCheer extends StatelessWidget {
+  const _MatheasyCheer();
 
   @override
   Widget build(BuildContext context) {
     return const SizedBox(
       height: 88,
-      child: NumiMascot(expression: NumiExpression.celebrate, size: 88),
+      child: MatheasyBrandAvatar(size: 88),
     );
   }
 }

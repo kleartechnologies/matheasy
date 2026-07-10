@@ -8,11 +8,10 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import '../../domain/practice_result.dart';
 
 /// The session-complete screen: accuracy, XP earned, mastery progress and a
-/// Numi summary, with actions to keep practicing or finish.
+/// Matheasy summary, with actions to keep practicing or finish.
 class PracticeResultsView extends StatelessWidget {
   const PracticeResultsView({
     super.key,
@@ -38,13 +37,8 @@ class PracticeResultsView extends StatelessWidget {
       ),
       children: [
         AppTransitions.scaleIn(
-          child: Center(
-            child: NumiMascot(
-              expression: result.isPerfect
-                  ? NumiExpression.celebrate
-                  : NumiExpression.happy,
-              size: 104,
-            ),
+          child: const Center(
+            child: MatheasyBrandAvatar(size: 104),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -87,7 +81,7 @@ class PracticeResultsView extends StatelessWidget {
 
   String _summary(PracticeResult result) {
     if (result.isPerfect) {
-      return 'A flawless run on ${result.topic.label}. Numi is impressed!';
+      return 'A flawless run on ${result.topic.label}. Matheasy is impressed!';
     }
     if (result.accuracy >= 0.6) {
       return "Solid work on ${result.topic.label} — you're getting stronger!";
@@ -118,7 +112,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatTile(
             icon: Icons.percent_rounded,
-            color: AppColors.primary,
+            color: AppColors.accentIndigo,
             value: '${result.accuracyPercent}%',
             label: 'Accuracy',
           ),

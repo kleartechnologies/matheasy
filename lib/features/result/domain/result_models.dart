@@ -128,7 +128,7 @@ class ResultData {
     required this.explanations,
     required this.methods,
     required this.practice,
-    required this.numiIntro,
+    required this.tutorIntro,
   });
 
   final DetectedEquation equation;
@@ -143,7 +143,7 @@ class ResultData {
   final List<Explanation> explanations;
   final List<MethodSolution> methods;
   final List<PracticeQuestion> practice;
-  final String numiIntro;
+  final String tutorIntro;
 
   String get questionLatex => equation.latex;
 }

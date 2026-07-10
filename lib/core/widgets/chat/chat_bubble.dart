@@ -7,7 +7,8 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
 /// A single chat message bubble. [isUser] flips alignment, color and the
-/// asymmetric corner so user messages hug the right and Numi's hug the left.
+/// asymmetric corner so user messages hug the right and the assistant's hug the
+/// left.
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,

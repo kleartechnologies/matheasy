@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/mascot/numi_mascot.dart';
 import '../../../subscription/domain/paywall_trigger.dart';
 import '../paywall_copy.dart';
 
-/// The paywall's emotional opener: a floating, celebrating Numi over a warm gold
-/// glow, then the headline and a trigger-aware sub-headline.
+/// The paywall's emotional opener: a floating Matheasy brand avatar over a warm
+/// gold glow, then the headline and a trigger-aware sub-headline.
 class PaywallHero extends StatelessWidget {
   const PaywallHero({super.key, required this.trigger});
 
@@ -24,7 +24,7 @@ class PaywallHero extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Soft gold aura behind the mascot.
+              // Soft gold aura behind the brand avatar.
               Container(
                 width: 150,
                 height: 150,
@@ -38,7 +38,7 @@ class PaywallHero extends StatelessWidget {
                   ),
                 ),
               ),
-              const Floaty(child: NumiMascot(expression: NumiExpression.celebrate, size: 116)),
+              const Floaty(child: MatheasyBrandAvatar(size: 116)),
             ],
           ),
         ),

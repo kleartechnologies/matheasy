@@ -30,7 +30,7 @@ void main() {
         'difficulty': 'easy',
         'answerLatex': 'x = 4',
         'verifyText': '2(4) + 5 = 13 ✓',
-        'numiIntro': 'Here we go!',
+        'tutorIntro': 'Here we go!',
         'steps': [
           {
             'title': 'Subtract 5',
@@ -86,7 +86,7 @@ void main() {
       expect(result.difficulty, Difficulty.medium);
       expect(result.steps, isEmpty);
       expect(result.explanations, isEmpty); // unknown mode dropped
-      expect(result.numiIntro, isNotEmpty); // fallback text
+      expect(result.tutorIntro, isNotEmpty); // fallback text
     });
   });
 

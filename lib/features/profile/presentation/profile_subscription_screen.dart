@@ -135,7 +135,7 @@ class _ProPlanCard extends StatelessWidget {
         borderRadius: AppRadius.cardRadius,
         boxShadow: [
           BoxShadow(
-            color: Color(0x521E2440),
+            color: Color(0x52059669),
             blurRadius: 34,
             offset: Offset(0, 18),
           ),
@@ -162,7 +162,7 @@ class _ProPlanCard extends StatelessWidget {
           Text(
             renewLine,
             style: AppTypography.bodySmall
-                .copyWith(color: const Color(0xFFB9BEE0)),
+                .copyWith(color: const Color(0xFFD1FAE5)),
           ),
           if (status.hasBillingIssue) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -231,7 +231,7 @@ class _FreePlanCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Upgrade to Pro for unlimited scans, Numi and practice.',
+            'Upgrade to Pro for unlimited scans, AI tutor and practice.',
             style: AppTypography.bodySmall
                 .copyWith(color: colors.textSecondary),
           ),
@@ -273,16 +273,16 @@ class _UsageSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.forum_rounded,
-            label: 'Numi messages',
+            label: 'AI tutor messages',
             color: AppColors.secondary,
-            used: usage.counts.numiMessagesUsed,
-            limit: usage.limit(UsageFeature.numiMessage),
+            used: usage.counts.tutorMessagesUsed,
+            limit: usage.limit(UsageFeature.tutorMessage),
           ),
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.fitness_center_rounded,
             label: 'Practice questions',
-            color: AppColors.success,
+            color: AppColors.accentAmber,
             used: usage.counts.practiceQuestionsGenerated,
             limit: usage.limit(UsageFeature.practiceQuestion),
           ),

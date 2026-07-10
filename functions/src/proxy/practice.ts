@@ -44,7 +44,7 @@ interface PracticePayload {
 
 const MAX_COUNT = 10;
 
-const SYSTEM_PROMPT = `You are Numi, the friendly math tutor inside the Matheasy app, generating fresh PRACTICE questions.
+const SYSTEM_PROMPT = `You are Matheasy, the friendly math tutor inside the Matheasy app, generating fresh PRACTICE questions.
 Generate the requested number of DISTINCT practice questions for the given skill and difficulty. Vary the numbers/scenario across questions so none are duplicates.
 Return ONLY a JSON object (no prose, no markdown) with this exact shape:
 {
@@ -123,7 +123,7 @@ export const generatePracticeQuestion = onCall(
       });
       throw new HttpsError(
         "internal",
-        "Numi couldn't create those questions. Please try again."
+        "Matheasy couldn't create those questions. Please try again."
       );
     }
 

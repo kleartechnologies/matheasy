@@ -64,4 +64,4 @@ final class PracticeDashboardProvider
   }
 }
 
-String _$practiceDashboardHash() => r'565fd73e81b7787cc26c913ed4a78fb16e587c16';
+String _$practiceDashboardHash() => r'56bd770ab79ef7767aa51143808c211a2730092e';

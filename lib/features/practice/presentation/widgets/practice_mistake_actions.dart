@@ -4,17 +4,17 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 
 /// The two learning hand-offs offered after a wrong answer (Stage 15 ×
-/// Stages 6 & 14): ask Numi to explain the mistake, or watch a visual
+/// Stages 6 & 14): ask Matheasy to explain the mistake, or watch a visual
 /// walkthrough. Shown only on incorrect answers, below the feedback.
 class PracticeMistakeActions extends StatelessWidget {
   const PracticeMistakeActions({
     super.key,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
     required this.onShowVisual,
   });
 
-  /// Opens Numi with the mistake as context ("why is this wrong?").
-  final VoidCallback onAskNumi;
+  /// Opens Matheasy with the mistake as context ("why is this wrong?").
+  final VoidCallback onAskMatheasy;
 
   /// Opens the Visual Learning walkthrough for the problem (Pro-gated at the
   /// call site — free users are routed to the paywall).
@@ -26,10 +26,10 @@ class PracticeMistakeActions extends StatelessWidget {
       children: [
         Expanded(
           child: SecondaryButton(
-            label: 'Ask Numi why',
+            label: 'Ask Matheasy why',
             icon: Icons.chat_bubble_outline_rounded,
             size: AppButtonSize.medium,
-            onPressed: onAskNumi,
+            onPressed: onAskMatheasy,
           ),
         ),
         const SizedBox(width: AppSpacing.md),

@@ -128,7 +128,7 @@ class _StarterCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  'Pick a topic and Numi will guide you.',
+                  'Pick a topic and Matheasy will guide you.',
                   style: AppTypography.bodySmall
                       .copyWith(color: colors.textSecondary),
                 ),

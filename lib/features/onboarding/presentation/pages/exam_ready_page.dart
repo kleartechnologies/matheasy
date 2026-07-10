@@ -27,7 +27,7 @@ class _ExamArt extends StatelessWidget {
   static const _exams = <(String, String, Color)>[
     ('SPM', 'Malaysia', AppColors.primary),
     ('IGCSE', 'Cambridge', AppColors.secondary),
-    ('GCSE', 'UK', AppColors.success),
+    ('GCSE', 'UK', AppColors.accentAmber),
     ('SAT', 'College', AppColors.warning),
   ];
 

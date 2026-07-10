@@ -11,7 +11,7 @@ import 'sections/daily_goal_card.dart';
 import 'sections/home_header.dart';
 import 'sections/home_progress_card.dart';
 import 'sections/home_usage_card.dart';
-import 'sections/numi_motivation_card.dart';
+import 'sections/matheasy_motivation_card.dart';
 import 'sections/quick_actions.dart';
 import 'sections/recommended_practice.dart';
 import 'sections/streak_section.dart';
@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
       WeakTopicsSection(topics: data.weakTopics),
       RecommendedPractice(items: data.recommendations),
       const HomeProgressCard(),
-      NumiMotivationCard(message: data.numiMessage),
+      MatheasyMotivationCard(message: data.tutorMessage),
       // Subtle upgrade entry point — free users see live usage; Pro users don't
       // see any upsell at all.
       if (!isPro) const HomeUsageCard(),

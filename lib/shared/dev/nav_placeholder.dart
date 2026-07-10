@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../core/animations/floaty.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -17,14 +17,12 @@ class NavPlaceholder extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    this.expression = NumiExpression.happy,
     this.showBack = false,
     this.actions = const [],
   });
 
   final String title;
   final String subtitle;
-  final NumiExpression expression;
   final bool showBack;
   final List<Widget> actions;
 
@@ -40,7 +38,7 @@ class NavPlaceholder extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Floaty(child: NumiMascot(expression: expression, size: 128)),
+                const Floaty(child: MatheasyBrandAvatar(size: 128)),
                 const SizedBox(height: AppSpacing.xl),
                 if (!showBack)
                   Text(

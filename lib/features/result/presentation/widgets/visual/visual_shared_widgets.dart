@@ -13,7 +13,7 @@ import 'concept_painter.dart';
 
 /// Building blocks shared by the Visual Learning renderers (Tiers 1–3):
 /// the interactive step card, the operation chip, the key-ideas takeaway,
-/// the method card and the "Ask Numi" affordance.
+/// the method card and the "Ask Matheasy" affordance.
 
 /// The operation applied in a step, e.g. `− 5` — same visual language as the
 /// Solution tab's chip so the two tabs feel related.
@@ -43,19 +43,19 @@ class VisualOperationChip extends StatelessWidget {
 }
 
 /// One expandable learning card (Tier 2/3): the transformation is always
-/// visible; tapping reveals the "why", a revealable hint, and Ask Numi.
+/// visible; tapping reveals the "why", a revealable hint, and Ask Matheasy.
 class VisualStepCard extends StatefulWidget {
   const VisualStepCard({
     super.key,
     required this.step,
     required this.number,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
     this.defaultExpanded = false,
   });
 
   final VisualStep step;
   final int number;
-  final VoidCallback onAskNumi;
+  final VoidCallback onAskMatheasy;
   final bool defaultExpanded;
 
   @override
@@ -161,7 +161,7 @@ class _VisualStepCardState extends State<VisualStepCard> {
                       ),
                     ],
                     const SizedBox(height: AppSpacing.sm),
-                    AskNumiButton(onPressed: widget.onAskNumi),
+                    AskMatheasyButton(onPressed: widget.onAskMatheasy),
                   ],
                 ),
               ),
@@ -349,17 +349,17 @@ class VisualMethodCard extends StatelessWidget {
   }
 }
 
-/// The bridge between Visual Learning and Numi — asks the tutor about the
+/// The bridge between Visual Learning and Matheasy — asks the tutor about the
 /// step currently on screen, with that step's context attached.
-class AskNumiButton extends StatelessWidget {
-  const AskNumiButton({super.key, required this.onPressed});
+class AskMatheasyButton extends StatelessWidget {
+  const AskMatheasyButton({super.key, required this.onPressed});
 
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return GhostButton(
-      label: 'Ask Numi about this step',
+      label: 'Ask Matheasy about this step',
       icon: Icons.chat_bubble_outline_rounded,
       expand: true,
       onPressed: onPressed,

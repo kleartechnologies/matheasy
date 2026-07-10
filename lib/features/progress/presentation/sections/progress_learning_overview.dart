@@ -31,7 +31,7 @@ class ProgressLearningOverview extends StatelessWidget {
       ),
       _StatData(
         icon: Icons.category_rounded,
-        color: AppColors.success,
+        color: AppColors.accentAmber,
         value: '${overview.topicsPracticed}',
         label: 'Topics practiced',
       ),

@@ -69,7 +69,7 @@ class PracticeSessionState {
   bool get isComplete => phase == PracticePhase.complete;
   bool get lastWasCorrect => lastAnswer?.isCorrect ?? false;
 
-  /// The mistake just revealed (for the Numi "why is this wrong?" and Visual
+  /// The mistake just revealed (for the Matheasy "why is this wrong?" and Visual
   /// walkthrough hand-offs) — `null` unless the last answer was incorrect.
   PracticeMistake? get mistake {
     final answer = lastAnswer;

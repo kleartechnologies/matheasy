@@ -76,7 +76,7 @@ final class VisualSolutionControllerProvider
 }
 
 String _$visualSolutionControllerHash() =>
-    r'b9512aea87e5b61d141c6717306b46262adfc697';
+    r'ffb20c20883bc1730d5e2207066fd629210e6982';
 
 /// Generates the [VisualSolution] for a solved problem via the
 /// [VisualSolutionService].

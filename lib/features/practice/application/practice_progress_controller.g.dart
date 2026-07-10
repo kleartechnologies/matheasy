@@ -61,7 +61,7 @@ final class PracticeProgressControllerProvider
 }
 
 String _$practiceProgressControllerHash() =>
-    r'96d9293973bd69653a09e89eee86a69a3b335b08';
+    r'982e2f3674ef26cc7f71a7f894d9767f4c0599f6';
 
 /// The learner's persisted practice state (XP, streak, per-topic mastery, last
 /// session). Kept alive for the whole app; hydrates from the repository on

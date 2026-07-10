@@ -33,8 +33,8 @@ class StatsController extends _$StatsController {
     );
   }
 
-  /// Records that the learner used Numi (the AI tutor). Only the first use adds
-  /// a feed entry, so the activity list isn't spammed.
+  /// Records that the learner used Matheasy (the AI tutor). Only the first use
+  /// adds a feed entry, so the activity list isn't spammed.
   void recordTutorUsed() {
     final now = ref.read(clockProvider)();
     _apply(
@@ -43,7 +43,7 @@ class StatsController extends _$StatsController {
       activity: state.tutorUses == 0
           ? LearningActivity(
               type: LearningActivityType.tutor,
-              title: 'Chatted with Numi',
+              title: 'Chatted with Matheasy',
               subtitle: 'Asked your AI tutor for help',
               epochMillis: now.millisecondsSinceEpoch,
             )

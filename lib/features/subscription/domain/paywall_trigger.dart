@@ -8,7 +8,7 @@
 /// button, subscription card) with no context.
 enum PaywallTrigger {
   scanLimit,
-  numiLimit,
+  tutorLimit,
   practiceLimit,
   visualLearning,
   adaptivePractice,
@@ -16,7 +16,7 @@ enum PaywallTrigger {
 
   bool get isLimit => switch (this) {
         PaywallTrigger.scanLimit ||
-        PaywallTrigger.numiLimit ||
+        PaywallTrigger.tutorLimit ||
         PaywallTrigger.practiceLimit =>
           true,
         PaywallTrigger.visualLearning ||

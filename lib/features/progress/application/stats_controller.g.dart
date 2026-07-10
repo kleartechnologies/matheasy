@@ -56,7 +56,7 @@ final class StatsControllerProvider
   }
 }
 
-String _$statsControllerHash() => r'348444637045250435488c37167c40a003be96f1';
+String _$statsControllerHash() => r'c127503d43f13b2ddf7b114f7f84eb4ce0052a21';
 
 /// The local analytics store — records scans, tutor usage, learning days and the
 /// recent-activity feed. Kept alive; hydrates on build and persists on change.

@@ -61,18 +61,18 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color tabBar;
 
   static const AppSemanticColors light = AppSemanticColors(
-    background: Color(0xFFF4F6FA), // brand page background
+    background: Color(0xFFF4F6F5), // brand page background
     surface: AppColors.white,
-    surfaceMuted: Color(0xFFEDF1F8),
+    surfaceMuted: Color(0xFFEEF2F0),
     surfaceGlass: Color(0xE6FFFFFF),
     textPrimary: AppColors.ink, // brand ink #0F172A
     textSecondary: Color(0xFF5A6579), // brand body text
     textTertiary: Color(0xFF9AA3B2), // brand micro-label grey
     textInverse: AppColors.white,
-    border: Color(0xFFE4E8F0), // brand card border
-    divider: Color(0xFFEEF1F6),
+    border: Color(0xFFE5EAE7), // brand card border
+    divider: Color(0xFFEEF1EE),
     scrim: Color(0x8C0F172A),
-    primaryContainer: Color(0xFFE8F0FE),
+    primaryContainer: Color(0xFFECFDF5), // Emerald 50
     onPrimaryContainer: AppColors.primaryDeep,
     successContainer: Color(0xFFE6F8EC),
     onSuccessContainer: AppColors.successDeep,
@@ -86,19 +86,19 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
-    background: Color(0xFF0E1220),
-    surface: Color(0xFF171C2E),
-    surfaceMuted: Color(0xFF1F2540),
+    background: Color(0xFF0B1220), // brand deep ink
+    surface: Color(0xFF141C2B),
+    surfaceMuted: Color(0xFF1B2333),
     surfaceGlass: Color(0x26FFFFFF),
-    textPrimary: Color(0xFFF2F5FC),
+    textPrimary: Color(0xFFF1F6F4),
     textSecondary: Color(0xFFA2ADC8),
     textTertiary: Color(0xFF6E7999),
-    textInverse: Color(0xFF0E1220),
-    border: Color(0xFF2A3350),
-    divider: Color(0xFF232A44),
+    textInverse: Color(0xFF0B1220),
+    border: Color(0xFF263141),
+    divider: Color(0xFF1E2836),
     scrim: Color(0xB3060912),
-    primaryContainer: Color(0xFF23305A),
-    onPrimaryContainer: Color(0xFFAFC6FF),
+    primaryContainer: Color(0xFF0C3D2E), // deep emerald
+    onPrimaryContainer: Color(0xFF6EE7B7), // mint
     successContainer: Color(0xFF14301F),
     onSuccessContainer: Color(0xFF6BE39A),
     warningContainer: Color(0xFF3A2417),
@@ -107,7 +107,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onErrorContainer: Color(0xFFFF9A90),
     streakContainer: Color(0xFF3A241C),
     xpContainer: Color(0xFF352C12),
-    tabBar: Color(0xD1171C2E),
+    tabBar: Color(0xD1141C2B),
   );
 
   @override

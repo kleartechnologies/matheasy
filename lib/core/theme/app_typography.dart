@@ -82,6 +82,24 @@ class AppTypography {
         letterSpacing: 0.6,
       );
 
+  /// Technical mono label — **JetBrains Mono**, the brand's companion typeface
+  /// for eyebrows, technical captions, and numerals. Loaded at runtime via
+  /// `google_fonts`. Use uppercase, tracked, on brand/technical surfaces.
+  static TextStyle get mono => GoogleFonts.jetBrainsMono(
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        height: 1.2,
+        letterSpacing: 1.4,
+      );
+
+  /// Heavier mono eyebrow for section labels.
+  static TextStyle get monoLabel => GoogleFonts.jetBrainsMono(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        height: 1.2,
+        letterSpacing: 1.8,
+      );
+
   /// Text inside buttons.
   static TextStyle get button =>
       _base(size: 16, weight: FontWeight.w800, height: 1.1);

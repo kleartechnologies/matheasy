@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,8 +9,9 @@ import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Full-screen processing state: Numi + a rotating set of reassuring messages
-/// while the captured photo is recognized (OpenAI Vision round-trip).
+/// Full-screen processing state: the Matheasy brand avatar + a rotating set of
+/// reassuring messages while the captured photo is recognized (OpenAI Vision
+/// round-trip).
 class ProcessingOverlay extends StatefulWidget {
   const ProcessingOverlay({super.key});
 
@@ -52,7 +53,7 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Floaty(
-              child: NumiMascot(expression: NumiExpression.thinking, size: 128),
+              child: MatheasyBrandAvatar(size: 128),
             ),
             const SizedBox(height: AppSpacing.xxl),
             const SizedBox(

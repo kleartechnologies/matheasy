@@ -13,13 +13,13 @@ class ResultActionBar extends StatelessWidget {
   const ResultActionBar({
     super.key,
     required this.saved,
-    required this.onAskNumi,
+    required this.onAskMatheasy,
     required this.onGeneratePractice,
     required this.onToggleSave,
   });
 
   final bool saved;
-  final VoidCallback onAskNumi;
+  final VoidCallback onAskMatheasy;
   final VoidCallback onGeneratePractice;
   final VoidCallback onToggleSave;
 
@@ -46,9 +46,9 @@ class ResultActionBar extends StatelessWidget {
           // Balanced paired CTAs — the secondary action stays fully readable.
           Expanded(
             child: SecondaryButton(
-              label: 'Ask Numi',
+              label: 'Ask Matheasy',
               icon: Icons.smart_toy_rounded,
-              onPressed: onAskNumi,
+              onPressed: onAskMatheasy,
             ),
           ),
           const SizedBox(width: AppSpacing.md),

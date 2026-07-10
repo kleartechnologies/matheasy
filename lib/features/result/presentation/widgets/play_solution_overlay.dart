@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
+import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/animations/floaty.dart';
@@ -17,8 +17,8 @@ import '../../domain/result_models.dart';
 import 'math_text.dart';
 
 /// The "Play Solution" experience — a guided walkthrough that auto-advances
-/// through the steps with Numi narrating, a progress bar, and play/pause + step
-/// controls.
+/// through the steps with Matheasy narrating, a progress bar, and play/pause +
+/// step controls.
 ///
 /// FUTURE-READY (voice): each step exposes a single narration point
 /// ([_narrate]). Wiring a TTS engine there gives spoken explanations without
@@ -127,9 +127,6 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final step = widget.steps[_index];
-    final expression = _isLast
-        ? NumiExpression.celebrate
-        : (_index == 0 ? NumiExpression.happy : NumiExpression.thinking);
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -171,7 +168,7 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Floaty(child: NumiMascot(expression: expression, size: 64)),
+                        const Floaty(child: MatheasyBrandAvatar(size: 64)),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Container(

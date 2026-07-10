@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_colors.dart';
@@ -61,7 +60,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           _progressSection(context),
           _chat(context),
           _feedback(context),
-          _numi(context),
+          _brand(context),
           _overlays(context),
           _navigation(context),
         ],
@@ -81,6 +80,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       ('error', AppColors.error),
       ('pink', AppColors.pink),
       ('xp', AppColors.xp),
+      ('indigo', AppColors.accentIndigo),
+      ('amber', AppColors.accentAmber),
+      ('coral', AppColors.accentCoral),
       ('surface', c.surface),
       ('surfaceMuted', c.surfaceMuted),
       ('background', c.background),
@@ -156,7 +158,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           const PrimaryButton(label: 'Disabled'),
           const SizedBox(height: AppSpacing.md),
           SecondaryButton(
-            label: 'Ask Numi',
+            label: 'Ask Matheasy',
             icon: Icons.smart_toy_rounded,
             onPressed: () {},
           ),
@@ -318,7 +320,6 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               ),
               const ProgressRing(
                 value: 0.88,
-                progressColor: AppColors.success,
                 child: Icon(Icons.check_rounded, color: AppColors.success),
               ),
             ],
@@ -335,14 +336,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          NumiBubble(
+          MatheasyBubble(
             text: 'Hi Sarah! Ask me anything about math — '
                 'or snap a photo of a problem.',
           ),
           SizedBox(height: AppSpacing.md),
           ChatBubble(text: 'Why do we subtract 5?', isUser: true),
           SizedBox(height: AppSpacing.md),
-          NumiTypingIndicator(),
+          MatheasyTypingIndicator(),
         ],
       ),
     );
@@ -389,31 +390,87 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     );
   }
 
-  // ---- Numi ----
-  Widget _numi(BuildContext context) {
-    const expressions = NumiExpression.values;
+  // ---- Brand ----
+  Widget _brand(BuildContext context) {
     return GallerySection(
-      title: 'Numi mascot',
-      child: Wrap(
-        spacing: AppSpacing.lg,
-        runSpacing: AppSpacing.lg,
-        alignment: WrapAlignment.center,
+      title: 'Matheasy brand',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final e in expressions)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NumiMascot(expression: e, size: 88),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  e.name,
-                  style: AppTypography.caption
-                      .copyWith(color: context.colors.textSecondary),
-                ),
-              ],
-            ),
+          _brandLabel(context, 'Brand avatar'),
+          const SizedBox(height: AppSpacing.md),
+          const Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.lg,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _BrandDemo(
+                label: '34',
+                child: MatheasyBrandAvatar(size: 34),
+              ),
+              _BrandDemo(
+                label: '64',
+                child: MatheasyBrandAvatar(size: 64),
+              ),
+              _BrandDemo(
+                label: '96',
+                child: MatheasyBrandAvatar(),
+              ),
+              _BrandDemo(
+                label: '120',
+                child: MatheasyBrandAvatar(size: 120),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _brandLabel(context, 'Logo lockups'),
+          const SizedBox(height: AppSpacing.md),
+          const Wrap(
+            spacing: AppSpacing.xl,
+            runSpacing: AppSpacing.lg,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _BrandDemo(
+                label: 'vertical',
+                child: MatheasyLogo(variant: MatheasyLogoVariant.vertical),
+              ),
+              _BrandDemo(
+                label: 'horizontal',
+                child: MatheasyLogo(),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _brandLabel(context, 'Mark'),
+          const SizedBox(height: AppSpacing.md),
+          const Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.lg,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _BrandDemo(
+                label: '24',
+                child: MatheasyMark(size: 24),
+              ),
+              _BrandDemo(
+                label: '40',
+                child: MatheasyMark(),
+              ),
+              _BrandDemo(
+                label: '64',
+                child: MatheasyMark(size: 64),
+              ),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _brandLabel(BuildContext context, String text) {
+    return Text(
+      text,
+      style: AppTypography.label.copyWith(color: context.colors.textSecondary),
     );
   }
 
@@ -487,6 +544,29 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BrandDemo extends StatelessWidget {
+  const _BrandDemo({required this.child, required this.label});
+
+  final Widget child;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        child,
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          label,
+          style: AppTypography.caption
+              .copyWith(color: context.colors.textSecondary),
+        ),
+      ],
     );
   }
 }

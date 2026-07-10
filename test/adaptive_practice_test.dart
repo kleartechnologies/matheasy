@@ -605,7 +605,7 @@ void main() {
   });
 
   group('PracticeMistake', () {
-    test('numi seed message carries the learner + correct answers', () {
+    test('tutor seed message carries the learner + correct answers', () {
       const question = PracticeQuestion(
         id: 'q',
         topic: PracticeTopic.algebra,
@@ -619,8 +619,8 @@ void main() {
       const mistake =
           PracticeMistake(question: question, submittedAnswer: '3');
       expect(mistake.correctAnswer, '4');
-      expect(mistake.numiSeedMessage, contains('3'));
-      expect(mistake.numiSeedMessage, contains('4'));
+      expect(mistake.tutorSeedMessage, contains('3'));
+      expect(mistake.tutorSeedMessage, contains('4'));
       expect(mistake.problemLatex, '2x + 5 = 13');
     });
   });

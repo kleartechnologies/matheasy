@@ -8,7 +8,7 @@ part of 'usage_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// The local usage ledger — records free-tier consumption of scans, Numi
+/// The local usage ledger — records free-tier consumption of scans, AI tutor
 /// messages and generated practice questions. Kept alive; hydrates on build and
 /// persists every change fire-and-forget (mirrors `StatsController`).
 ///
@@ -20,7 +20,7 @@ part of 'usage_controller.dart';
 @ProviderFor(UsageController)
 final usageControllerProvider = UsageControllerProvider._();
 
-/// The local usage ledger — records free-tier consumption of scans, Numi
+/// The local usage ledger — records free-tier consumption of scans, AI tutor
 /// messages and generated practice questions. Kept alive; hydrates on build and
 /// persists every change fire-and-forget (mirrors `StatsController`).
 ///
@@ -30,7 +30,7 @@ final usageControllerProvider = UsageControllerProvider._();
 /// unlimited regardless), so a lapse back to free reflects real usage.
 final class UsageControllerProvider
     extends $NotifierProvider<UsageController, UsageCounts> {
-  /// The local usage ledger — records free-tier consumption of scans, Numi
+  /// The local usage ledger — records free-tier consumption of scans, AI tutor
   /// messages and generated practice questions. Kept alive; hydrates on build and
   /// persists every change fire-and-forget (mirrors `StatsController`).
   ///
@@ -65,9 +65,9 @@ final class UsageControllerProvider
   }
 }
 
-String _$usageControllerHash() => r'e42427647b68479e7b3290fd10dba09f878e377f';
+String _$usageControllerHash() => r'682342201898e5cb34c72a66aba8948d22480ee5';
 
-/// The local usage ledger — records free-tier consumption of scans, Numi
+/// The local usage ledger — records free-tier consumption of scans, AI tutor
 /// messages and generated practice questions. Kept alive; hydrates on build and
 /// persists every change fire-and-forget (mirrors `StatsController`).
 ///

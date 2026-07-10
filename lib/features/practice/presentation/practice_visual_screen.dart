@@ -66,7 +66,7 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
         .check(RateLimitedAction.visualGeneration);
     if (limit.isLimited) {
       throw const VisualGenerationException(
-        'Give Numi a moment before the next visual.',
+        'Give Matheasy a moment before the next visual.',
       );
     }
     return ref.read(visualSolutionServiceProvider).generate(
@@ -78,14 +78,14 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
         );
   }
 
-  void _askNumi(VisualSolution visual, int stepIndex) {
+  void _askMatheasy(VisualSolution visual, int stepIndex) {
     final args = widget.args;
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
         questionLatex: args?.latex,
         topicLabel: args?.topicLabel,
-        visualStepSummary: VisualPromptBuilder.numiStepContext(
+        visualStepSummary: VisualPromptBuilder.tutorStepContext(
           visual,
           stepIndex,
         ),
@@ -118,8 +118,8 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                       child: LoadingState(
-                        message: 'Numi is sketching your visual walkthrough…',
-                        showMascot: true,
+                        message: 'Matheasy is sketching your visual walkthrough…',
+                        showBrand: true,
                       ),
                     );
                   }
@@ -138,15 +138,15 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
                       VisualizationType.animatedTransformation =>
                         Tier1AnimatedTransformation(
                           visual: visual,
-                          onAskNumi: (step) => _askNumi(visual, step),
+                          onAskMatheasy: (step) => _askMatheasy(visual, step),
                         ),
                       VisualizationType.interactiveCards => Tier2LearningCards(
                           visual: visual,
-                          onAskNumi: (step) => _askNumi(visual, step),
+                          onAskMatheasy: (step) => _askMatheasy(visual, step),
                         ),
                       VisualizationType.conceptExplorer => Tier3ConceptExplorer(
                           visual: visual,
-                          onAskNumi: (step) => _askNumi(visual, step),
+                          onAskMatheasy: (step) => _askMatheasy(visual, step),
                         ),
                     },
                   );

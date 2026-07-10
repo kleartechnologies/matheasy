@@ -5,18 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/animations/floaty.dart';
+import '../../../core/brand/brand.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../shared/mascot/numi_mascot.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_benefit_row.dart';
 import 'widgets/auth_provider_button.dart';
 
-/// The premium sign-in experience: Numi, the value proposition, and the three
-/// ways in — Apple, Google, or Guest.
+/// The premium sign-in experience: the official Matheasy logo, the value
+/// proposition, and the three ways in — Apple, Google, or Guest.
 ///
 /// Navigation is handled by the router guard, not here: the moment the session
 /// becomes authenticated (real or guest), the guard redirects away from `/auth`.
@@ -87,9 +87,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 children: [
                   AppTransitions.scaleIn(
                     child: const Floaty(
-                      child: NumiMascot(
-                        expression: NumiExpression.wave,
-                        size: 128,
+                      child: MatheasyLogo(
+                        variant: MatheasyLogoVariant.vertical,
+                        markSize: 88,
                       ),
                     ),
                   ),
@@ -147,12 +147,12 @@ class _Benefits extends StatelessWidget {
           icon: Icons.auto_awesome_rounded,
           color: AppColors.secondary,
           title: 'Learn faster',
-          subtitle: 'Numi explains the why, at your level, step by step.',
+          subtitle: 'Matheasy explains the why, at your level, step by step.',
         ),
         SizedBox(height: AppSpacing.lg),
         AuthBenefitRow(
           icon: Icons.fitness_center_rounded,
-          color: AppColors.success,
+          color: AppColors.accentAmber,
           title: 'Practice smarter',
           subtitle: 'Targeted practice that adapts as you improve.',
         ),

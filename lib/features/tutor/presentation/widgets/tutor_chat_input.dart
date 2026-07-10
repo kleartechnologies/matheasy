@@ -13,7 +13,7 @@ import '../../../../core/theme/app_typography.dart';
 ///
 /// Future-ready — [onAttach] and [onVoice] are wired for image upload and voice
 /// chat, which a later stage fills in without changing this layout. [enabled]
-/// is false while Numi is replying, so turns can't interleave.
+/// is false while Matheasy is replying, so turns can't interleave.
 class TutorChatInput extends StatefulWidget {
   const TutorChatInput({
     super.key,
@@ -120,7 +120,7 @@ class _TutorChatInputState extends State<TutorChatInput> {
                       decoration: InputDecoration(
                         isCollapsed: true,
                         border: InputBorder.none,
-                        hintText: 'Ask Numi anything…',
+                        hintText: 'Ask Matheasy anything…',
                         hintStyle: AppTypography.bodyMedium.copyWith(
                           color: colors.textTertiary,
                         ),

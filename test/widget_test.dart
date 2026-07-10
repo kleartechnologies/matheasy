@@ -3,7 +3,7 @@
 // Covers: pure guard logic (incl. splash exemption), deep-link parsing, the
 // onboarding flow controller, the splash → onboarding hand-off, and the shell
 // once onboarding is complete. pump() (not pumpAndSettle) is used because
-// mascot/typing animations loop forever.
+// brand and typing animations loop forever.
 
 import 'dart:typed_data';
 
@@ -368,7 +368,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('Numi is solving your problem…'), findsOneWidget);
+      expect(find.text('Matheasy is solving your problem…'), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 600)); // solve delay
       expect(find.text('Linear Equation'), findsOneWidget);
