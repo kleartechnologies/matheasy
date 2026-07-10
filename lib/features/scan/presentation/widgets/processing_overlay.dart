@@ -10,14 +10,14 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
 /// Full-screen processing state: Numi + a rotating set of reassuring messages
-/// while the (mock) analysis runs.
+/// while the captured photo is recognized (OpenAI Vision round-trip).
 class ProcessingOverlay extends StatefulWidget {
   const ProcessingOverlay({super.key});
 
   static const List<String> messages = [
-    'Analyzing your question…',
-    'Finding the best solution…',
-    'Preparing explanations…',
+    'Reading your problem…',
+    'Recognizing the math…',
+    'Almost there…',
   ];
 
   @override

@@ -3,6 +3,12 @@
          Analytics, RevenueCat) works in RELEASE builds — Flutter only adds
          INTERNET to the debug/profile manifests. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Scanner: capture math problems with the back camera. The features are
+         optional so devices without a camera can still install and use the
+         gallery / manual-entry paths. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <application
         android:label="matheasy"
         android:name="${applicationName}"

@@ -23,9 +23,41 @@ class AnalyticsEvent {
       AnalyticsEvent('account_created', {'provider': provider});
 
   // ---- Scan ----
+  /// The scanner screen was opened.
+  factory AnalyticsEvent.scannerOpened() =>
+      const AnalyticsEvent('scanner_opened');
+
+  /// A recognition attempt began. [source] is `camera` / `gallery` / `manual`,
+  /// so this doubles as the "camera used" / "gallery used" signal.
   factory AnalyticsEvent.scanStarted({required String source}) =>
       AnalyticsEvent('scan_started', {'source': source});
 
+  /// The captured photo was cropped before recognition.
+  factory AnalyticsEvent.imageCropped({required String source}) =>
+      AnalyticsEvent('image_cropped', {'source': source});
+
+  /// Recognition returned a problem. [confidence] is a 0–100 percent bucket.
+  factory AnalyticsEvent.recognitionSucceeded({
+    required String source,
+    required int confidence,
+  }) =>
+      AnalyticsEvent(
+        'recognition_success',
+        {'source': source, 'confidence': confidence},
+      );
+
+  /// Recognition failed. [reason] is a coarse backend error code
+  /// (e.g. `not-found`, `unavailable`) — never any image content.
+  factory AnalyticsEvent.recognitionFailed({
+    required String source,
+    required String reason,
+  }) =>
+      AnalyticsEvent(
+        'recognition_failure',
+        {'source': source, 'reason': reason},
+      );
+
+  /// The user confirmed a recognized problem and handed off to the solver.
   factory AnalyticsEvent.scanCompleted() =>
       const AnalyticsEvent('scan_completed');
 

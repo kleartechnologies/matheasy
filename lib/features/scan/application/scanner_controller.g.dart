@@ -11,7 +11,7 @@ part of 'scanner_controller.dart';
 /// Drives the scanner [ScanState] machine off the [ScannerService].
 ///
 /// Auto-disposes with the scanner screen, so every launch starts fresh in
-/// [ScanIdle] with live detection running.
+/// [ScanIdle] with the live camera preview.
 
 @ProviderFor(ScannerController)
 final scannerControllerProvider = ScannerControllerProvider._();
@@ -19,13 +19,13 @@ final scannerControllerProvider = ScannerControllerProvider._();
 /// Drives the scanner [ScanState] machine off the [ScannerService].
 ///
 /// Auto-disposes with the scanner screen, so every launch starts fresh in
-/// [ScanIdle] with live detection running.
+/// [ScanIdle] with the live camera preview.
 final class ScannerControllerProvider
     extends $NotifierProvider<ScannerController, ScanState> {
   /// Drives the scanner [ScanState] machine off the [ScannerService].
   ///
   /// Auto-disposes with the scanner screen, so every launch starts fresh in
-  /// [ScanIdle] with live detection running.
+  /// [ScanIdle] with the live camera preview.
   ScannerControllerProvider._()
     : super(
         from: null,
@@ -53,12 +53,12 @@ final class ScannerControllerProvider
   }
 }
 
-String _$scannerControllerHash() => r'092f7b9b9d51c9f9c990fdd1a04f5d888dc97e03';
+String _$scannerControllerHash() => r'22407a79840d909c177aa9994a6b35774df0b653';
 
 /// Drives the scanner [ScanState] machine off the [ScannerService].
 ///
 /// Auto-disposes with the scanner screen, so every launch starts fresh in
-/// [ScanIdle] with live detection running.
+/// [ScanIdle] with the live camera preview.
 
 abstract class _$ScannerController extends $Notifier<ScanState> {
   ScanState build();

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,13 +10,15 @@ import 'package:matheasy/shared/mascot/numi_mascot.dart';
 
 import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
-import '../../../core/backend/functions_client.dart';
+import '../../../core/monitoring/logging_service.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../progress/application/stats_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
@@ -23,12 +26,17 @@ import '../application/scanner_controller.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
+import 'crop_screen.dart';
 import 'widgets/camera_viewport.dart';
 import 'widgets/capture_confirmation.dart';
 import 'widgets/processing_overlay.dart';
 import 'widgets/scan_frame.dart';
 
 /// The full-screen, immersive scanner. Pushed over the shell (no tab bar).
+///
+/// Owns the real back-camera lifecycle (init / dispose / app-lifecycle) and
+/// drives the capture → crop → recognize → confirm flow through
+/// [ScannerController].
 class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
 
@@ -36,62 +44,196 @@ class ScannerScreen extends ConsumerStatefulWidget {
   ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends ConsumerState<ScannerScreen> {
+class _ScannerScreenState extends ConsumerState<ScannerScreen>
+    with WidgetsBindingObserver {
   final ImagePicker _picker = ImagePicker();
-  bool _flashOn = false;
 
-  /// True while a photo is being captured/recognized (real backend) — shows the
-  /// processing overlay so the network round-trip isn't a dead tap.
-  bool _busy = false;
+  CameraController? _camera;
+  Object? _cameraError;
+  bool _initializingCamera = false;
+  bool _flashOn = false;
+  bool _capturing = false;
+
+  /// True while the app is backgrounded — guards against an in-flight camera
+  /// init activating the session after a pause.
+  bool _appPaused = false;
 
   ScannerController get _controller =>
       ref.read(scannerControllerProvider.notifier);
 
-  /// Shutter: real device camera when the AI backend is live, else the mock
-  /// sample (guest / unconfigured build).
-  Future<void> _shutter() => _capturePhoto(ScanSource.camera, ImageSource.camera);
+  bool get _cameraReady => _camera?.value.isInitialized ?? false;
 
-  Future<void> _gallery() =>
-      _capturePhoto(ScanSource.gallery, ImageSource.gallery);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.scannerOpened()));
+    unawaited(_initCamera());
+  }
 
-  Future<void> _capturePhoto(ScanSource source, ImageSource imageSource) async {
-    if (_busy) return;
-    if (!ref.read(aiBackendReadyProvider)) {
-      await _controller.capture(source); // mock returns a sample photo-free
-      return;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _camera?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _appPaused = false;
+      // Always re-acquire on resume — _initCamera() is a no-op if the camera is
+      // already live or initializing. (The old code guarded on `_camera != null`
+      // here, which meant a disposed camera was never re-acquired.)
+      unawaited(_initCamera());
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      // Free the camera only when truly backgrounded — not on transient
+      // `inactive` (app switcher, Control Center, notification shade), which
+      // would otherwise tear down the preview for a passing system overlay.
+      _appPaused = true;
+      _disposeCamera();
     }
+  }
+
+  // -- Camera lifecycle ------------------------------------------------------
+
+  Future<void> _initCamera() async {
+    if (_initializingCamera || _cameraReady) return;
+    _initializingCamera = true;
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        throw CameraException('no_camera', 'No camera on this device.');
+      }
+      // Back camera only — the front camera is never used for scanning.
+      final back = cameras.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+      final controller = CameraController(
+        back,
+        // 1080p — high enough to read small/dense problem text; the crop is then
+        // downscaled to ≤1600px before upload so the payload stays small.
+        ResolutionPreset.veryHigh,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+      );
+      await controller.initialize();
+      // Bail if we unmounted or were backgrounded during init — otherwise we'd
+      // activate a camera session while the app is in the background.
+      if (!mounted || _appPaused) {
+        await controller.dispose();
+        return;
+      }
+      await controller.setFlashMode(
+          _flashOn ? FlashMode.torch : FlashMode.off);
+      setState(() {
+        _camera = controller;
+        _cameraError = null;
+      });
+    } catch (error, stack) {
+      LoggingService.warning('Camera init failed: $error');
+      if (error is! CameraException) {
+        LoggingService.error('Camera init error',
+            error: error, stackTrace: stack);
+      }
+      if (!mounted) return;
+      setState(() {
+        _camera = null;
+        _cameraError = error;
+      });
+    } finally {
+      _initializingCamera = false;
+    }
+  }
+
+  void _disposeCamera() {
+    final camera = _camera;
+    if (camera == null) return;
+    _camera = null;
+    unawaited(camera.dispose());
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleFlash() async {
+    final next = !_flashOn;
+    setState(() => _flashOn = next);
+    final camera = _camera;
+    if (camera == null || !camera.value.isInitialized) return;
+    try {
+      await camera.setFlashMode(next ? FlashMode.torch : FlashMode.off);
+    } catch (error) {
+      LoggingService.warning('Flash toggle failed: $error');
+      if (mounted) setState(() => _flashOn = !next); // revert on failure
+    }
+  }
+
+  // -- Capture sources -------------------------------------------------------
+
+  /// Shutter: capture from the live camera, then crop + recognize.
+  Future<void> _shutter() async {
+    final camera = _camera;
+    if (_capturing || camera == null || !camera.value.isInitialized) return;
+    setState(() => _capturing = true);
+    Uint8List bytes;
+    try {
+      final file = await camera.takePicture();
+      bytes = await file.readAsBytes();
+    } catch (error) {
+      LoggingService.warning('Capture failed: $error');
+      _toast("Couldn't take the photo. Try again.");
+      return;
+    } finally {
+      if (mounted) setState(() => _capturing = false);
+    }
+    await _cropAndRecognize(ScanSource.camera, bytes);
+  }
+
+  /// Pick from the gallery, then crop + recognize.
+  Future<void> _gallery() async {
+    if (_capturing) return;
     Uint8List bytes;
     try {
       final file = await _picker.pickImage(
-        source: imageSource,
-        maxWidth: 1600,
-        imageQuality: 85,
+        source: ImageSource.gallery,
+        maxWidth: 2000,
+        imageQuality: 90,
       );
-      if (file == null) return; // user cancelled
+      if (file == null) return; // cancelled
       bytes = await file.readAsBytes();
-    } catch (_) {
-      _toast(imageSource == ImageSource.camera
-          ? "Couldn't open the camera."
-          : "Couldn't open your photos.");
+    } catch (error) {
+      LoggingService.warning('Gallery pick failed: $error');
+      _toast("Couldn't open your photos.");
       return;
     }
-    setState(() => _busy = true);
-    await _controller.capture(source, imageBytes: bytes);
-    if (mounted) setState(() => _busy = false);
+    await _cropAndRecognize(ScanSource.gallery, bytes);
   }
 
-  /// Manual entry: type the problem (real backend), else the mock sample.
+  /// Manual entry — type the problem (no OCR).
   Future<void> _type() async {
-    if (_busy) return;
-    if (!ref.read(aiBackendReadyProvider)) {
-      await _controller.capture(ScanSource.manual);
-      return;
-    }
     final latex = await _promptManualEntry();
     if (latex == null || latex.trim().isEmpty) return;
-    setState(() => _busy = true);
-    await _controller.capture(ScanSource.manual, manualLatex: latex.trim());
-    if (mounted) setState(() => _busy = false);
+    await _controller.recognize(ScanSource.manual, manualLatex: latex.trim());
+  }
+
+  /// Pushes the crop screen for [bytes]; on confirm, recognizes the cropped
+  /// image. Cancelling the crop returns to the live preview.
+  Future<void> _cropAndRecognize(ScanSource source, Uint8List bytes) async {
+    if (!mounted) return;
+    final cropped = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => CropScreen(imageBytes: bytes),
+      ),
+    );
+    if (cropped == null || !mounted) return; // cancelled
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
+    await _controller.recognize(source, imageBytes: cropped);
   }
 
   Future<String?> _promptManualEntry() {
@@ -104,9 +246,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           controller: controller,
           autofocus: true,
           textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(
-            hintText: 'e.g. 2x + 5 = 13',
-          ),
+          decoration: const InputDecoration(hintText: 'e.g. 2x + 5 = 13'),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
@@ -135,7 +275,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   /// dismissing it returns to the app) instead of consuming a solve.
   void _onContinue() {
     if (ref.read(usageSnapshotProvider).canScan) {
-      ref.read(scannerControllerProvider.notifier).confirm();
+      _controller.confirm();
       return;
     }
     context.pushReplacement(
@@ -147,15 +287,18 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(scannerControllerProvider);
-    final controller = ref.read(scannerControllerProvider.notifier);
+    final controller = _controller;
 
-    // Hand off to the result screen when analysis completes, recording the scan
+    // Hand off to the result screen when the user confirms, recording the scan
     // for progress/achievements and consuming one from the free-tier quota.
     ref.listen(scannerControllerProvider, (previous, next) {
       if (next is ScanComplete) {
         ref.read(statsControllerProvider.notifier).recordScan();
         ref.read(usageControllerProvider.notifier).recordScan();
         context.pushReplacement(AppRoutes.scanResult, extra: next.equation);
+      } else if (next is ScanQuotaExceeded) {
+        // Server said the free quota is spent — send them to the paywall.
+        context.pushReplacement(AppRoutes.paywall, extra: PaywallTrigger.scanLimit);
       }
     });
 
@@ -166,13 +309,15 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            const CameraViewport(),
+            CameraViewport(
+              controller: _camera,
+              error: _cameraError,
+              onEnableCamera: () => unawaited(_initCamera()),
+            ),
             AnimatedSwitcher(
               duration: AppDurations.medium,
               child: _content(state, controller),
             ),
-            if (_busy)
-              const ProcessingOverlay(key: ValueKey('recognizing')),
           ],
         ),
       ),
@@ -183,24 +328,16 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     return switch (state) {
       ScanIdle() => _ScanningChrome(
           key: const ValueKey('scanning'),
-          locked: false,
           flashOn: _flashOn,
-          onFlash: () => setState(() => _flashOn = !_flashOn),
+          canCapture: _cameraReady && !_capturing,
+          onFlash: () => unawaited(_toggleFlash()),
           onClose: () => context.pop(),
           onGallery: () => unawaited(_gallery()),
           onShutter: () => unawaited(_shutter()),
           onType: () => unawaited(_type()),
         ),
-      ScanDetecting() => _ScanningChrome(
-          key: const ValueKey('scanning'),
-          locked: true,
-          flashOn: _flashOn,
-          onFlash: () => setState(() => _flashOn = !_flashOn),
-          onClose: () => context.pop(),
-          onGallery: () => unawaited(_gallery()),
-          onShutter: () => unawaited(_shutter()),
-          onType: () => unawaited(_type()),
-        ),
+      ScanRecognizing() =>
+        const ProcessingOverlay(key: ValueKey('recognizing')),
       ScanCaptured(:final equation) => _CapturedView(
           key: const ValueKey('captured'),
           equation: equation,
@@ -208,9 +345,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           onRetake: controller.retake,
           onContinue: _onContinue,
         ),
-      ScanProcessing() =>
-        const ProcessingOverlay(key: ValueKey('processing')),
       ScanComplete() => const SizedBox.shrink(key: ValueKey('complete')),
+      ScanQuotaExceeded() =>
+        const SizedBox.shrink(key: ValueKey('quota')),
       ScanError(:final message) => _ErrorView(
           key: const ValueKey('error'),
           message: message,
@@ -221,14 +358,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// Scanning chrome (idle + detecting)
+// Scanning chrome (idle)
 // ---------------------------------------------------------------------------
 
 class _ScanningChrome extends StatelessWidget {
   const _ScanningChrome({
     super.key,
-    required this.locked,
     required this.flashOn,
+    required this.canCapture,
     required this.onFlash,
     required this.onClose,
     required this.onGallery,
@@ -236,8 +373,8 @@ class _ScanningChrome extends StatelessWidget {
     required this.onType,
   });
 
-  final bool locked;
   final bool flashOn;
+  final bool canCapture;
   final VoidCallback onFlash;
   final VoidCallback onClose;
   final VoidCallback onGallery;
@@ -252,27 +389,25 @@ class _ScanningChrome extends StatelessWidget {
           _TopBar(flashOn: flashOn, onFlash: onFlash, onClose: onClose),
           const SizedBox(height: AppSpacing.md),
           Text(
-            locked
-                ? 'Looks good — tap the shutter to solve'
-                : 'Line up the whole question inside the frame',
+            'Line up the whole question, then tap to capture',
             style: AppTypography.bodySmall
                 .copyWith(color: Colors.white.withValues(alpha: 0.75)),
           ),
-          Expanded(
+          const Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(34, AppSpacing.xl, 34, 0),
+              padding: EdgeInsets.fromLTRB(34, AppSpacing.xl, 34, 0),
               child: Align(
-                alignment: const Alignment(0, -0.35),
+                alignment: Alignment(0, -0.35),
                 child: AspectRatio(
                   aspectRatio: 1.6,
-                  child: ScanFrame(locked: locked),
+                  child: ScanFrame(locked: false),
                 ),
               ),
             ),
           ),
           const _NumiHint(),
           _BottomControls(
-            locked: locked,
+            canCapture: canCapture,
             onGallery: onGallery,
             onShutter: onShutter,
             onType: onType,
@@ -367,13 +502,13 @@ class _NumiHint extends StatelessWidget {
 
 class _BottomControls extends StatelessWidget {
   const _BottomControls({
-    required this.locked,
+    required this.canCapture,
     required this.onGallery,
     required this.onShutter,
     required this.onType,
   });
 
-  final bool locked;
+  final bool canCapture;
   final VoidCallback onGallery;
   final VoidCallback onShutter;
   final VoidCallback onType;
@@ -390,7 +525,7 @@ class _BottomControls extends StatelessWidget {
             label: 'Gallery',
             onTap: onGallery,
           ),
-          _ShutterButton(locked: locked, onTap: onShutter),
+          _ShutterButton(enabled: canCapture, onTap: onShutter),
           _LabeledControl(
             icon: Icons.keyboard_rounded,
             label: 'Type it',
@@ -403,41 +538,45 @@ class _BottomControls extends StatelessWidget {
 }
 
 class _ShutterButton extends StatelessWidget {
-  const _ShutterButton({required this.locked, required this.onTap});
+  const _ShutterButton({required this.enabled, required this.onTap});
 
-  final bool locked;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: locked ? 'Scan problem' : 'Take photo',
+      enabled: enabled,
+      label: 'Take photo',
       excludeSemantics: true,
-      child: Pressable(
-        onTap: onTap,
-        scale: 0.92,
-        borderRadius: AppRadius.pillRadius,
-        child: AnimatedContainer(
-          duration: AppDurations.fast,
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: locked
-                  ? AppColors.primaryTint
-                  : Colors.white.withValues(alpha: 0.4),
-              width: 5,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.5,
+        child: Pressable(
+          onTap: enabled ? onTap : () {},
+          scale: 0.92,
+          borderRadius: AppRadius.pillRadius,
+          child: AnimatedContainer(
+            duration: AppDurations.fast,
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: enabled
+                    ? AppColors.primaryTint
+                    : Colors.white.withValues(alpha: 0.4),
+                width: 5,
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(7),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: locked ? AppColors.primaryGradient : null,
-                color: locked ? null : AppColors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(7),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: enabled ? AppColors.primaryGradient : null,
+                  color: enabled ? null : AppColors.white,
+                ),
               ),
             ),
           ),

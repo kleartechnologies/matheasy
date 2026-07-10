@@ -9,7 +9,6 @@ import '../../../core/security/rate_limit_result.dart';
 import '../../../core/security/rate_limit_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
-import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
 import 'scanner_service.dart';
@@ -19,62 +18,33 @@ part 'scanner_controller.g.dart';
 /// Drives the scanner [ScanState] machine off the [ScannerService].
 ///
 /// Auto-disposes with the scanner screen, so every launch starts fresh in
-/// [ScanIdle] with live detection running.
+/// [ScanIdle] with the live camera preview.
 @riverpod
 class ScannerController extends _$ScannerController {
   late final ScannerService _service;
-  StreamSubscription<DetectedEquation?>? _sub;
-  Timer? _processTimer;
   bool _disposed = false;
 
   @override
   ScanState build() {
     _service = ref.read(scannerServiceProvider);
-    ref.onDispose(() {
-      _disposed = true;
-      _sub?.cancel();
-      _processTimer?.cancel();
-    });
-    _listen();
+    ref.onDispose(() => _disposed = true);
     return const ScanIdle();
   }
 
-  void _listen() {
-    _sub?.cancel();
-    _sub = _service.liveDetections().listen((equation) {
-      if (equation != null && state is ScanIdle) {
-        state = ScanDetecting(equation);
-      }
-    });
-  }
-
-  /// Shutter / gallery / manual entry. If a live candidate already exists and
-  /// this is a camera capture, it's used directly for an instant response.
-  Future<void> capture(
+  /// Recognizes a captured/cropped photo (camera / gallery) or a typed problem
+  /// (manual). Moves through [ScanRecognizing] to [ScanCaptured] on success, or
+  /// [ScanError] on failure. Ignored if a recognition is already in flight.
+  Future<void> recognize(
     ScanSource source, {
     Uint8List? imageBytes,
     String? manualLatex,
   }) async {
-    unawaited(ref
-        .read(analyticsServiceProvider)
-        .logEvent(AnalyticsEvent.scanStarted(source: source.name)));
-    // Cancel live detection fire-and-forget: awaiting it would block until the
-    // mock stream's delay resolves. Stale emissions are ignored by _listen's
-    // `state is ScanIdle` guard.
-    final subscription = _sub;
-    _sub = null;
-    if (subscription != null) unawaited(subscription.cancel());
+    if (state is ScanRecognizing) return;
 
-    final current = state;
-    // Use a live mock candidate only when no real photo was supplied.
-    if (current is ScanDetecting &&
-        source == ScanSource.camera &&
-        imageBytes == null &&
-        manualLatex == null) {
-      state = ScanCaptured(current.candidate);
-      return;
-    }
+    final analytics = ref.read(analyticsServiceProvider);
+    unawaited(analytics.logEvent(AnalyticsEvent.scanStarted(source: source.name)));
 
+    state = const ScanRecognizing();
     try {
       final equation = await _service.recognize(
         source,
@@ -83,26 +53,38 @@ class ScannerController extends _$ScannerController {
       );
       if (_disposed) return;
       state = ScanCaptured(equation);
+      unawaited(analytics.logEvent(AnalyticsEvent.recognitionSucceeded(
+        source: source.name,
+        confidence: equation.confidencePercent,
+      )));
     } on BackendException catch (error) {
       if (_disposed) return;
       LoggingService.warning('Recognition failed: ${error.code}');
-      state = ScanError(error.message);
+      unawaited(analytics.logEvent(AnalyticsEvent.recognitionFailed(
+        source: source.name,
+        reason: error.code,
+      )));
+      // The server can reject on quota even if the optimistic client counter is
+      // behind — hand the screen a paywall signal rather than a raw error.
+      state = error.isQuotaExceeded
+          ? const ScanQuotaExceeded()
+          : ScanError(error.message);
     } catch (error, stack) {
       if (_disposed) return;
       LoggingService.error('Recognition error', error: error, stackTrace: stack);
+      unawaited(analytics.logEvent(AnalyticsEvent.recognitionFailed(
+        source: source.name,
+        reason: 'unknown',
+      )));
       state = const ScanError('Something went wrong. Please try again.');
     }
   }
 
-  /// Discards the capture and resumes live detection.
-  void retake() {
-    _processTimer?.cancel();
-    state = const ScanIdle();
-    _listen();
-  }
+  /// Discards the current capture / error and returns to the live preview.
+  void retake() => state = const ScanIdle();
 
-  /// Confirms the capture and runs the (simulated) analysis, ending in
-  /// [ScanComplete] which the screen hands off to the result route.
+  /// Confirms the recognized problem and hands off to the result screen (which
+  /// runs the real solve). [ScanComplete] is the signal the screen listens for.
   void confirm() {
     final current = state;
     if (current is! ScanCaptured) return;
@@ -115,15 +97,8 @@ class ScannerController extends _$ScannerController {
       return;
     }
 
-    state = ScanProcessing(current.equation);
-    _processTimer?.cancel();
-    _processTimer = Timer(ScannerTimings.processing, () {
-      if (state is ScanProcessing) {
-        state = ScanComplete(current.equation);
-        unawaited(ref
-            .read(analyticsServiceProvider)
-            .logEvent(AnalyticsEvent.scanCompleted()));
-      }
-    });
+    state = ScanComplete(current.equation);
+    unawaited(
+        ref.read(analyticsServiceProvider).logEvent(AnalyticsEvent.scanCompleted()));
   }
 }

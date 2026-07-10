@@ -11,7 +11,7 @@
  */
 import "./config";
 
-// --- Secure AI proxy (Mathpix + OpenAI, keys stay server-side) --------------
+// --- Secure AI proxy (OpenAI, keys stay server-side) ------------------------
 export { recognizeEquation } from "./proxy/scan";
 export { solveEquation } from "./proxy/solve";
 export { tutorReply } from "./proxy/tutor";

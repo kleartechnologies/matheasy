@@ -5,6 +5,8 @@
 // once onboarding is complete. pump() (not pumpAndSettle) is used because
 // mascot/typing animations loop forever.
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -252,7 +254,7 @@ void main() {
       expect(gallery.kind, EquationKind.quadratic);
     });
 
-    test('controller drives capture → confirm → retake', () async {
+    test('controller drives recognize → confirm → retake', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       final sub = container.listen(scannerControllerProvider, (_, _) {});
@@ -262,19 +264,22 @@ void main() {
 
       await container
           .read(scannerControllerProvider.notifier)
-          .capture(ScanSource.gallery);
+          .recognize(ScanSource.gallery, imageBytes: Uint8List.fromList([1, 2]));
       final captured = container.read(scannerControllerProvider);
       expect(captured, isA<ScanCaptured>());
       expect((captured as ScanCaptured).equation.kind, EquationKind.quadratic);
 
       container.read(scannerControllerProvider.notifier).confirm();
-      expect(container.read(scannerControllerProvider), isA<ScanProcessing>());
+      expect(container.read(scannerControllerProvider), isA<ScanComplete>());
 
       container.read(scannerControllerProvider.notifier).retake();
       expect(container.read(scannerControllerProvider), isA<ScanIdle>());
     });
 
-    testWidgets('capture shows the confirmation sheet', (tester) async {
+    testWidgets('renders chrome and stays usable when no camera is available',
+        (tester) async {
+      // In the test binding the camera plugin isn't registered, so the screen
+      // must fall back gracefully (no crash) and keep gallery / type reachable.
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -283,19 +288,12 @@ void main() {
           ),
         ),
       );
+      await tester.pump(); // let _initCamera() reject
       await tester.pump();
+
       expect(find.text('Scan a problem'), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.photo_library_rounded));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500)); // recognize delay
-
-      expect(find.text('Continue'), findsOneWidget);
-      expect(find.text('Retake'), findsOneWidget);
-      expect(find.text('Quadratic equation'), findsOneWidget);
-
-      // Let the pending live-detect timer fire so none is left at teardown.
-      await tester.pump(const Duration(seconds: 2));
+      expect(find.byIcon(Icons.photo_library_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_rounded), findsOneWidget);
     });
   });
 

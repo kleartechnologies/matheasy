@@ -6,8 +6,8 @@ import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import 'scanner_service.dart';
 
-/// Real recognizer — sends a captured photo to the `recognizeEquation` Cloud
-/// Function (Mathpix OCR server-side) and maps the returned LaTeX onto a
+/// Real recognizer — sends a captured/cropped photo to the `recognizeEquation`
+/// Cloud Function (OpenAI Vision server-side) and maps the returned LaTeX onto a
 /// [DetectedEquation]. Manual entry skips OCR and wraps the typed problem
 /// directly.
 ///
@@ -18,12 +18,6 @@ class FunctionsScannerService implements ScannerService {
 
   final Future<Map<String, dynamic>> Function(String name, Map<String, dynamic> data)
       _call;
-
-  @override
-  Stream<DetectedEquation?> liveDetections() =>
-      // Recognition is per-photo (no continuous OCR stream) — the user frames
-      // the problem and taps the shutter.
-      Stream<DetectedEquation?>.value(null);
 
   @override
   Future<DetectedEquation> recognize(
@@ -59,12 +53,41 @@ class FunctionsScannerService implements ScannerService {
       );
     }
     final confidence = json['confidence'];
+    final topic = json['topic'] is String ? json['topic'] as String : null;
     return DetectedEquation(
       latex: latex,
       confidence: confidence is num ? confidence.toDouble().clamp(0.0, 1.0) : 0.9,
       source: source,
-      kind: inferKind(latex),
+      kind: kindFromTopic(topic) ?? inferKind(latex),
     );
+  }
+
+  /// Maps the Vision model's `topic` string onto a display [EquationKind].
+  /// Returns `null` for an unknown/absent topic so the caller can fall back to
+  /// [inferKind]. The result screen returns the authoritative type; this is only
+  /// the pre-solve caption.
+  static EquationKind? kindFromTopic(String? topic) {
+    switch (topic) {
+      case 'linear_equation':
+      case 'simultaneous':
+        return EquationKind.linear;
+      case 'quadratic':
+        return EquationKind.quadratic;
+      case 'fraction':
+        return EquationKind.fraction;
+      case 'trigonometry':
+        return EquationKind.trigonometry;
+      case 'arithmetic':
+      case 'percentage':
+      case 'ratio':
+      case 'geometry':
+      case 'calculus':
+      case 'statistics':
+      case 'other':
+        return EquationKind.expression;
+      default:
+        return null;
+    }
   }
 
   /// Best-effort classification from the LaTeX, for the pre-solve caption only —

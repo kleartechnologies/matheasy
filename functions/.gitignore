@@ -1,5 +1,7 @@
 node_modules/
-lib/
+# Compiled output only (anchored to functions/) — must NOT also match the
+# functions/src/lib source helpers, which an unanchored `lib/` was ignoring.
+/lib/
 .env
 .env.*
 .runtimeconfig.json

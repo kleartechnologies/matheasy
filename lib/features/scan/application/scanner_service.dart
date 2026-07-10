@@ -7,22 +7,17 @@ import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import 'functions_scanner_service.dart';
 
-/// Recognizes math problems from the camera / gallery / manual input.
+/// Recognizes a math problem from a captured/picked photo or typed input.
 ///
-/// This is the seam Stage 5 plugs into: swap [MockScannerService] for a real
-/// implementation (Mathpix + camera frames, or an LLM vision fallback) by
-/// overriding [scannerServiceProvider]. Nothing else in the scanner changes —
-/// the controller and UI depend only on this interface and [DetectedEquation].
+/// The production implementation ([FunctionsScannerService]) sends the image to
+/// the `recognizeEquation` Cloud Function (OpenAI Vision, server-side). The
+/// controller and UI depend only on this interface and [DetectedEquation], so
+/// the recognizer can be swapped without touching either.
 abstract interface class ScannerService {
-  /// A live stream of candidate detections from the camera preview. Emits
-  /// `null` while nothing is recognized, then the best current candidate.
-  Stream<DetectedEquation?> liveDetections();
-
   /// Recognizes a single problem from the given [source].
   ///
-  /// [imageBytes] carries a captured/picked photo for OCR (camera + gallery);
-  /// [manualLatex] carries a typed problem (manual entry, no OCR). The mock
-  /// ignores both and returns a sample.
+  /// [imageBytes] carries a captured/cropped photo for OCR (camera + gallery);
+  /// [manualLatex] carries a typed problem (manual entry, no OCR).
   Future<DetectedEquation> recognize(
     ScanSource source, {
     Uint8List? imageBytes,
@@ -30,18 +25,13 @@ abstract interface class ScannerService {
   });
 }
 
-/// Timings for the mock experience — also referenced by the UI/tests so the
-/// simulated pace stays consistent.
-class ScannerTimings {
-  const ScannerTimings._();
-  static const Duration liveDetectDelay = Duration(milliseconds: 1600);
-  static const Duration recognizeDelay = Duration(milliseconds: 400);
-  static const Duration processing = Duration(milliseconds: 2400);
-}
-
-/// A deterministic, offline mock recognizer used through Stage 4.
+/// An offline, deterministic recognizer used only where the real backend can't
+/// run: the unconfigured dev checkout, guests (no auth token to meter against),
+/// and tests. Signed-in users always get the real [FunctionsScannerService].
 class MockScannerService implements ScannerService {
   const MockScannerService();
+
+  static const Duration recognizeDelay = Duration(milliseconds: 400);
 
   static const List<(String, double, EquationKind)> _samples = [
     (r'2x + 5 = 13', 0.99, EquationKind.linear),
@@ -49,7 +39,27 @@ class MockScannerService implements ScannerService {
     (r'\frac{3}{4} + \frac{1}{2}', 0.96, EquationKind.fraction),
   ];
 
-  DetectedEquation _sample(int index, ScanSource source) {
+  @override
+  Future<DetectedEquation> recognize(
+    ScanSource source, {
+    Uint8List? imageBytes,
+    String? manualLatex,
+  }) async {
+    final typed = manualLatex?.trim();
+    if (typed != null && typed.isNotEmpty) {
+      return DetectedEquation(
+        latex: typed,
+        confidence: 1,
+        source: ScanSource.manual,
+        kind: FunctionsScannerService.inferKind(typed),
+      );
+    }
+    await Future<void>.delayed(recognizeDelay);
+    final index = switch (source) {
+      ScanSource.camera => 0,
+      ScanSource.gallery => 1,
+      ScanSource.manual => 2,
+    };
     final (latex, confidence, kind) = _samples[index % _samples.length];
     return DetectedEquation(
       latex: latex,
@@ -58,31 +68,9 @@ class MockScannerService implements ScannerService {
       kind: kind,
     );
   }
-
-  @override
-  Stream<DetectedEquation?> liveDetections() async* {
-    yield null;
-    await Future<void>.delayed(ScannerTimings.liveDetectDelay);
-    yield _sample(0, ScanSource.camera);
-  }
-
-  @override
-  Future<DetectedEquation> recognize(
-    ScanSource source, {
-    Uint8List? imageBytes,
-    String? manualLatex,
-  }) async {
-    await Future<void>.delayed(ScannerTimings.recognizeDelay);
-    final index = switch (source) {
-      ScanSource.camera => 0,
-      ScanSource.gallery => 1,
-      ScanSource.manual => 2,
-    };
-    return _sample(index, source);
-  }
 }
 
-/// Provides the active [ScannerService]: the real Mathpix-backed recognizer
+/// Provides the active [ScannerService]: the real OpenAI-Vision recognizer
 /// (`recognizeEquation` Cloud Function) for signed-in users with Firebase
 /// configured, else the offline mock.
 final Provider<ScannerService> scannerServiceProvider =

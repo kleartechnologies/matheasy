@@ -6,8 +6,6 @@
  * this backend exists. Set each one with:
  *
  *   firebase functions:secrets:set OPENAI_API_KEY
- *   firebase functions:secrets:set MATHPIX_APP_ID
- *   firebase functions:secrets:set MATHPIX_APP_KEY
  *   firebase functions:secrets:set REVENUECAT_WEBHOOK_TOKEN
  *
  * A function only receives a secret's value if it lists it in `secrets: [...]`.
@@ -17,8 +15,6 @@ import { setGlobalOptions } from "firebase-functions/v2";
 
 // --- Secrets (values live in Cloud Secret Manager, not in code) -------------
 export const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
-export const MATHPIX_APP_ID = defineSecret("MATHPIX_APP_ID");
-export const MATHPIX_APP_KEY = defineSecret("MATHPIX_APP_KEY");
 /** Shared secret validated against the RevenueCat webhook Authorization header. */
 export const REVENUECAT_WEBHOOK_TOKEN = defineSecret("REVENUECAT_WEBHOOK_TOKEN");
 
