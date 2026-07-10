@@ -21,6 +21,9 @@ class PaywallCopy {
         PaywallTrigger.practiceLimit =>
           "You've generated all ${UsageQuota.free.practiceQuestions} free "
               'practice questions. Go Pro for unlimited practice.',
+        PaywallTrigger.visualLearning =>
+          'Understand math visually. Watch every step unfold and learn '
+              'faster with animations — a Matheasy Pro exclusive.',
         PaywallTrigger.manual =>
           'Learn faster with unlimited AI-powered math help.',
       };
@@ -84,6 +87,11 @@ class PaywallCopy {
     ),
     ComparisonRow(
       label: 'Multiple solution methods',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
+    ComparisonRow(
+      label: 'Visual Learning Engine',
       freeIncluded: false,
       proLabel: 'Included',
     ),

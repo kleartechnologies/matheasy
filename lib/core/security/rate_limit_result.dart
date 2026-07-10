@@ -3,7 +3,8 @@
 enum RateLimitedAction {
   scan('scan'),
   tutorMessage('tutor_message'),
-  practiceGeneration('practice_generation');
+  practiceGeneration('practice_generation'),
+  visualGeneration('visual_generation');
 
   const RateLimitedAction(this.key);
 

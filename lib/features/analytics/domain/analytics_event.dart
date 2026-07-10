@@ -32,6 +32,16 @@ class AnalyticsEvent {
   factory AnalyticsEvent.resultViewed({required String problemType}) =>
       AnalyticsEvent('result_viewed', {'problem_type': problemType});
 
+  // ---- Visual Learning (Pro) ----
+  factory AnalyticsEvent.visualViewed({
+    required String category,
+    required String tier,
+  }) =>
+      AnalyticsEvent('visual_viewed', {'category': category, 'tier': tier});
+
+  factory AnalyticsEvent.visualTeaserViewed() =>
+      const AnalyticsEvent('visual_teaser_viewed');
+
   // ---- Tutor ----
   factory AnalyticsEvent.tutorOpened() => const AnalyticsEvent('tutor_opened');
 

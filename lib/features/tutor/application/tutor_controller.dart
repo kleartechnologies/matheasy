@@ -68,7 +68,9 @@ class TutorChatController extends _$TutorChatController {
         messages.add(
           TutorMessage.system(
             id: _nextId(),
-            text: 'Numi can see your scanned problem',
+            text: context.hasVisualStep
+                ? 'Numi can see the visual step you tapped'
+                : 'Numi can see your scanned problem',
           ),
         );
       }
@@ -78,7 +80,8 @@ class TutorChatController extends _$TutorChatController {
     } else if (context != null &&
         context.hasScan &&
         context != state.context) {
-      // Re-entered with a different scanned problem — announce and re-greet.
+      // Re-entered with a different scanned problem (or a different visual
+      // step of the same one) — announce and re-greet.
       final greeting = _service.greeting(context);
       state = state.copyWith(
         context: context,
@@ -86,7 +89,9 @@ class TutorChatController extends _$TutorChatController {
           ...state.messages,
           TutorMessage.system(
             id: _nextId(),
-            text: 'Now looking at your new problem',
+            text: context.hasVisualStep
+                ? 'Now looking at the step you tapped'
+                : 'Now looking at your new problem',
           ),
           _assistantFrom(greeting),
         ],

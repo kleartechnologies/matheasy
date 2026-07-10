@@ -33,6 +33,8 @@ class RateLimitService {
         _RateLimitRule(maxRequests: 30, window: Duration(minutes: 1)),
     RateLimitedAction.practiceGeneration:
         _RateLimitRule(maxRequests: 20, window: Duration(minutes: 1)),
+    RateLimitedAction.visualGeneration:
+        _RateLimitRule(maxRequests: 10, window: Duration(minutes: 1)),
   };
 
   final Map<RateLimitedAction, Queue<DateTime>> _hits = {};

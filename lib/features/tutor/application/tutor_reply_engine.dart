@@ -20,6 +20,18 @@ class TutorReplyEngine {
   /// The opening turn when a chat starts. Scan-aware when [context] carries a
   /// recognized problem; otherwise a friendly, inviting welcome.
   TutorResponse greeting(TutorLaunchContext? context) {
+    if (context != null && context.hasVisualStep) {
+      return const TutorResponse(
+        text: "I can see the exact step you're looking at 👀 — ask me "
+            "anything about it, and we'll unpack why it works together.",
+        suggestions: [
+          SuggestionAction.tellMeWhy,
+          SuggestionAction.explainSimpler,
+          SuggestionAction.giveExample,
+        ],
+        expression: NumiExpression.wave,
+      );
+    }
     if (context != null && context.hasScan) {
       final type = context.equationType ?? 'problem';
       final answer = context.answerLatex;

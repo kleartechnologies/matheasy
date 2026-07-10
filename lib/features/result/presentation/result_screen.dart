@@ -10,21 +10,26 @@ import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/result_controller.dart';
+import '../application/visual_prompt_builder.dart';
 import '../domain/result_models.dart';
+import '../domain/visual_models.dart';
 import 'tabs/explain_tab.dart';
 import 'tabs/methods_tab.dart';
 import 'tabs/practice_tab.dart';
 import 'tabs/solution_tab.dart';
+import 'tabs/visual_tab.dart';
 import 'widgets/play_solution_overlay.dart';
 import 'widgets/result_action_bar.dart';
 import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
-/// answer, a step-by-step solution, explanations, methods and practice, plus
-/// the Play Solution walkthrough and a persistent action bar.
+/// answer, a step-by-step solution, explanations, methods, practice and the
+/// Pro-gated Visual Learning tab, plus the Play Solution walkthrough and a
+/// persistent action bar.
 class ResultScreen extends ConsumerStatefulWidget {
   const ResultScreen({super.key, this.equation});
 
@@ -40,7 +45,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     'Explain',
     'Methods',
     'Practice',
+    'Visual',
   ];
+
+  /// The Visual tab's position — appended last so the practice jump in
+  /// [ResultActionBar] (`_selectTab(3)`) keeps its index.
+  static const int _visualTabIndex = 4;
 
   bool _saved = false;
 
@@ -99,6 +109,33 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         topicLabel: result.type.label,
       ),
     );
+  }
+
+  /// Opens Numi aware of the exact Visual Learning step on screen, so the
+  /// tutor can answer "why divide by 2?" about that transformation.
+  void _askNumiAboutStep(
+    ResultData result,
+    VisualSolution visual,
+    int stepIndex,
+  ) {
+    context.push(
+      AppRoutes.tutorChat,
+      extra: TutorLaunchContext(
+        questionLatex: result.questionLatex,
+        answerLatex: result.answerLatex,
+        equationType: result.type.label,
+        topicLabel: visual.category.label,
+        visualStepSummary: VisualPromptBuilder.numiStepContext(
+          visual,
+          stepIndex,
+        ),
+      ),
+    );
+  }
+
+  /// The locked Visual tab's CTA — the Visual Learning paywall.
+  void _openVisualPaywall() {
+    context.push(AppRoutes.paywall, extra: PaywallTrigger.visualLearning);
   }
 
   @override
@@ -182,7 +219,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           selectedIndex: tabIndex,
           onChanged: _selectTab,
           items: [
-            for (final label in _tabLabels) SegmentItem(label: label),
+            for (var i = 0; i < _tabLabels.length; i++)
+              SegmentItem(
+                label: _tabLabels[i],
+                // The Pro star on the Visual segment (the "Visual ⭐" tab).
+                icon: i == _visualTabIndex ? Icons.auto_awesome_rounded : null,
+              ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -219,6 +261,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           questions: result.practice,
           onGenerateMore: () => _practice(result),
           onOpenQuestion: () => _practice(result),
+        );
+      case _visualTabIndex:
+        return VisualTab(
+          equation: result.equation,
+          result: result,
+          onUnlock: _openVisualPaywall,
+          onOpenExplain: () => _selectTab(1),
+          onAskNumi: (visual, stepIndex) =>
+              _askNumiAboutStep(result, visual, stepIndex),
         );
       case 0:
       default:

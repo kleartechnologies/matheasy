@@ -1,15 +1,17 @@
 rules_version = '2';
 
-// Matheasy Firestore security rules — Stage 12 (Firebase Data Layer).
+// Matheasy Firestore security rules.
 //
-// Offline-first, client-owned model: the app's local store is the source of
-// truth and mirrors each user's data to `users/{uid}/state/{domain}`. There is
-// no server code (no Cloud Functions this stage), so the owner is the only
-// reader/writer of their own tree. No public access; no cross-user access.
+// Offline-first, client-owned sync model (Stage 12): the app mirrors each
+// user's learning data to `users/{uid}/state/{domain}`, which only the owner
+// reads and writes.
 //
-// A future production-hardening stage can reintroduce server-side validation
-// (e.g. entitlement written only by the Admin SDK) — intentionally out of scope
-// here.
+// Server-managed fields on the `users/{uid}` document — `entitlement`,
+// `usage`, `subscription`, `stats` — are written ONLY by the Admin SDK
+// (RevenueCat webhook, usage metering, progress aggregation), which bypasses
+// these rules. Stage 14 gates the Pro-only Visual Learning Engine on the
+// `entitlement` field server-side, so the client must not be able to forge it:
+// the user document is therefore read-only to the client.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -17,10 +19,23 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    // A user may read and write only their own document tree, including the
-    // per-domain sync documents under `state/`.
-    match /users/{uid}/{document=**} {
-      allow read, write: if isOwner(uid);
+    // The user document itself holds server-managed fields — readable by its
+    // owner, never client-writable (the Admin SDK provisions and updates it).
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+
+      // Offline-first sync tree — fully client-owned.
+      match /state/{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Immutable progress events the app appends; the `aggregateProgress`
+      // trigger folds them into the server-managed `stats` field.
+      match /progressEvents/{eventId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid);
+      }
     }
   }
 }

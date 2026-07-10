@@ -207,6 +207,7 @@ class TutorLaunchContext {
     this.answerLatex,
     this.equationType,
     this.topicLabel,
+    this.visualStepSummary,
   });
 
   /// Auto-sent as the opening user message (from a suggested prompt/category).
@@ -224,8 +225,16 @@ class TutorLaunchContext {
   /// Optional topic label used to steer explanations (e.g. "Algebra").
   final String? topicLabel;
 
+  /// The Visual Learning step the student tapped, as one plain-text sentence
+  /// (built by `VisualPromptBuilder.numiStepContext`) — lets Numi answer
+  /// "why divide by 2?" about the exact step on screen.
+  final String? visualStepSummary;
+
   /// Whether the chat opened aware of a scanned problem.
   bool get hasScan => questionLatex != null;
+
+  /// Whether the chat opened from a Visual Learning step.
+  bool get hasVisualStep => visualStepSummary != null;
 
   @override
   bool operator ==(Object other) =>
@@ -234,7 +243,8 @@ class TutorLaunchContext {
       other.questionLatex == questionLatex &&
       other.answerLatex == answerLatex &&
       other.equationType == equationType &&
-      other.topicLabel == topicLabel;
+      other.topicLabel == topicLabel &&
+      other.visualStepSummary == visualStepSummary;
 
   @override
   int get hashCode => Object.hash(
@@ -243,6 +253,7 @@ class TutorLaunchContext {
         answerLatex,
         equationType,
         topicLabel,
+        visualStepSummary,
       );
 }
 

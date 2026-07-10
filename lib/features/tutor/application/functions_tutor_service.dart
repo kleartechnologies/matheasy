@@ -38,6 +38,8 @@ class FunctionsTutorService implements TutorService {
             },
       ],
       if (context?.questionLatex != null) 'problemLatex': context!.questionLatex,
+      if (context?.visualStepSummary != null)
+        'visualStep': context!.visualStepSummary,
     });
     return TutorReplyMapper.toResponse(json);
   }

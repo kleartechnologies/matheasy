@@ -60,6 +60,9 @@ void main() {
         AnalyticsEvent.scanStarted(source: 'camera'),
         AnalyticsEvent.scanCompleted(),
         AnalyticsEvent.resultViewed(problemType: 'linear'),
+        AnalyticsEvent.visualViewed(
+            category: 'algebra', tier: 'animatedTransformation'),
+        AnalyticsEvent.visualTeaserViewed(),
         AnalyticsEvent.tutorOpened(),
         AnalyticsEvent.tutorMessageSent(),
         AnalyticsEvent.practiceStarted(topic: 'algebra'),
@@ -71,7 +74,7 @@ void main() {
         AnalyticsEvent.profileEdited(),
         AnalyticsEvent.syncCompleted(downloaded: 2, uploaded: 1),
       ];
-      expect(events.length, 16);
+      expect(events.length, 18);
       final snake = RegExp(r'^[a-z][a-z0-9_]{0,39}$');
       for (final e in events) {
         expect(snake.hasMatch(e.name), isTrue, reason: e.name);
