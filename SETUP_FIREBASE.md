@@ -2,7 +2,7 @@
 
 All the app-side auth code, native wiring, and tests are done. The app **builds
 and runs today** in guest-only mode against a placeholder config. To turn on
-real Google / Apple sign-in against your Firebase project **`matheasy-873e2`**,
+real Google / Apple sign-in against your Firebase project **`matheasy-f9b3f`**,
 complete the steps below. They require your Google + Apple developer accounts,
 so they can't be automated from here.
 
@@ -20,7 +20,7 @@ firebase login --reauth
 
 # Wire this repo to your project (overwrites lib/firebase_options.dart and
 # downloads android/app/google-services.json + ios/Runner/GoogleService-Info.plist):
-flutterfire configure --project=matheasy-873e2 --platforms=ios,android
+flutterfire configure --project=matheasy-f9b3f --platforms=ios,android
 ```
 
 ## 2. Enable the sign-in providers (Firebase console)

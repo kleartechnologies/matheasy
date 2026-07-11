@@ -17,7 +17,7 @@ usage counts can't be forged on-device.
 
 ## Prerequisites
 
-- Logged into the Firebase CLI as an account that owns `matheasy-873e2`
+- Logged into the Firebase CLI as an account that owns `matheasy-f9b3f`
   (`firebase login`), the **Blaze** plan (already enabled), and Node 22.
 
 ## 1. Install dependencies
@@ -54,7 +54,7 @@ firebase deploy --only firestore:rules
 ```
 
 The first deploy prints each callable's URL and the webhook URL:
-`https://us-central1-matheasy-873e2.cloudfunctions.net/revenuecatWebhook`
+`https://us-central1-matheasy-f9b3f.cloudfunctions.net/revenuecatWebhook`
 
 ## 4. Wire RevenueCat → the webhook
 

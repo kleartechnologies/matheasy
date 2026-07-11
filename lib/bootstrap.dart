@@ -73,7 +73,7 @@ Future<bool> _initializeFirebase() async {
   if (options.apiKey.startsWith('REPLACE_')) {
     LoggingService.info(
       'Firebase not configured (placeholder config) — cloud sign-in disabled, '
-      'guest mode only. Run: flutterfire configure --project=matheasy-873e2',
+      'guest mode only. Run: flutterfire configure --project=matheasy-f9b3f',
     );
     return false;
   }
