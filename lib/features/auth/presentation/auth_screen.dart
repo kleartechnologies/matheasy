@@ -8,7 +8,6 @@ import '../../../core/animations/floaty.dart';
 import '../../../core/brand/brand.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../settings/presentation/legal_document_screen.dart';
@@ -17,10 +16,12 @@ import 'widgets/auth_benefit_row.dart';
 import 'widgets/auth_provider_button.dart';
 
 /// The premium sign-in experience: the official Matheasy logo, the value
-/// proposition, and the three ways in — Apple, Google, or Guest.
+/// proposition, and the two ways in — Apple or Google. Sign-in is required
+/// (there is no guest mode), so the app's AI features always run for a real
+/// account rather than on canned offline data.
 ///
 /// Navigation is handled by the router guard, not here: the moment the session
-/// becomes authenticated (real or guest), the guard redirects away from `/auth`.
+/// becomes authenticated, the guard redirects away from `/auth`.
 /// This screen only triggers actions and reflects their loading/error state.
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -41,9 +42,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           : notifier.signInWithGoogle(),
     );
   }
-
-  void _continueAsGuest() =>
-      ref.read(authControllerProvider.notifier).continueAsGuest();
 
   void _showError(String message) {
     ScaffoldMessenger.of(context)
@@ -116,7 +114,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     pending: _pending,
                     onApple: () => _signIn(AuthButtonProvider.apple),
                     onGoogle: () => _signIn(AuthButtonProvider.google),
-                    onGuest: _continueAsGuest,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   const _LegalFootnote(),
@@ -168,14 +165,12 @@ class _Actions extends StatelessWidget {
     required this.pending,
     required this.onApple,
     required this.onGoogle,
-    required this.onGuest,
   });
 
   final bool busy;
   final AuthButtonProvider? pending;
   final VoidCallback onApple;
   final VoidCallback onGoogle;
-  final VoidCallback onGuest;
 
   @override
   Widget build(BuildContext context) {
@@ -192,39 +187,7 @@ class _Actions extends StatelessWidget {
           isLoading: pending == AuthButtonProvider.google,
           onPressed: busy ? null : onGoogle,
         ),
-        const SizedBox(height: AppSpacing.md),
-        _GuestButton(onPressed: busy ? null : onGuest),
       ],
-    );
-  }
-}
-
-class _GuestButton extends StatelessWidget {
-  const _GuestButton({required this.onPressed});
-
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final enabled = onPressed != null;
-    // TextButton already exposes button + label ('Continue as Guest') + tap
-    // semantics, so no extra Semantics wrapper is needed (it would double the
-    // announcement).
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
-        foregroundColor: colors.textSecondary,
-      ),
-      child: AnimatedDefaultTextStyle(
-        duration: AppDurations.fast,
-        style: AppTypography.button.copyWith(
-          color: enabled ? colors.textSecondary : colors.textTertiary,
-          fontSize: 16,
-        ),
-        child: const Text('Continue as Guest'),
-      ),
     );
   }
 }

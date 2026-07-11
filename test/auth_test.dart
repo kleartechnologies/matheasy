@@ -43,16 +43,15 @@ void main() {
           AuthStatus.unauthenticated);
     });
 
-    test('restores a persisted guest session on launch', () async {
+    test('guest mode is removed: a persisted guest_mode flag no longer '
+        'creates a session — sign-in is required', () async {
       final container = await sessionContainer(guest: true);
       addTearDown(container.dispose);
       _activate(container);
       await _settle();
 
-      final state = container.read(authControllerProvider);
-      expect(state.isAuthenticated, isTrue);
-      expect(state.isGuest, isTrue);
-      expect(state.user!.provider, AuthProviderType.guest);
+      expect(container.read(authControllerProvider).status,
+          AuthStatus.unauthenticated);
     });
 
     test('restores a persisted cloud session on launch', () async {
@@ -65,21 +64,6 @@ void main() {
       expect(state.isAuthenticated, isTrue);
       expect(state.isGuest, isFalse);
       expect(state.user!.provider, AuthProviderType.google);
-    });
-
-    test('continueAsGuest authenticates and persists the guest flag', () async {
-      final container = await sessionContainer();
-      addTearDown(container.dispose);
-      _activate(container);
-      await _settle();
-
-      container.read(authControllerProvider.notifier).continueAsGuest();
-      await _settle();
-
-      final state = container.read(authControllerProvider);
-      expect(state.isAuthenticated, isTrue);
-      expect(state.isGuest, isTrue);
-      expect(container.read(preferencesStoreProvider).guestMode, isTrue);
     });
 
     test('Google sign-in produces a non-guest authenticated user', () async {
@@ -106,38 +90,6 @@ void main() {
       final state = container.read(authControllerProvider);
       expect(state.user!.provider, AuthProviderType.apple);
       expect(state.isAuthenticated, isTrue);
-    });
-
-    test('upgrading a guest to a cloud account clears the guest flag',
-        () async {
-      final container = await sessionContainer(guest: true);
-      addTearDown(container.dispose);
-      _activate(container);
-      await _settle();
-      expect(container.read(authControllerProvider).isGuest, isTrue);
-
-      await container.read(authControllerProvider.notifier).signInWithGoogle();
-      await _settle();
-
-      final state = container.read(authControllerProvider);
-      expect(state.isGuest, isFalse);
-      expect(state.user!.provider, AuthProviderType.google);
-      expect(container.read(preferencesStoreProvider).guestMode, isFalse);
-    });
-
-    test('sign-out clears the session and the guest flag', () async {
-      final container = await sessionContainer(guest: true);
-      addTearDown(container.dispose);
-      _activate(container);
-      await _settle();
-      expect(container.read(authControllerProvider).isAuthenticated, isTrue);
-
-      await container.read(authControllerProvider.notifier).signOut();
-      await _settle();
-
-      expect(container.read(authControllerProvider).status,
-          AuthStatus.unauthenticated);
-      expect(container.read(preferencesStoreProvider).guestMode, isFalse);
     });
 
     test('delete session ends the account session', () async {
@@ -201,7 +153,7 @@ void main() {
     });
   });
 
-  group('Guest-only fallback (Firebase not configured)', () {
+  group('Unconfigured Firebase fallback', () {
     test('cloud sign-in reports notConfigured; stream is signed-out', () async {
       const service = UnconfiguredAuthService();
       expect(
@@ -216,30 +168,9 @@ void main() {
       );
       expect(await service.authStateChanges().first, isNull);
     });
-
-    test('controller still supports guest mode with the fallback', () async {
-      final container = await sessionContainer(
-        authService: const UnconfiguredAuthService(),
-      );
-      addTearDown(container.dispose);
-      _activate(container);
-      await _settle();
-
-      container.read(authControllerProvider.notifier).continueAsGuest();
-      await _settle();
-      expect(container.read(authControllerProvider).isGuest, isTrue);
-    });
   });
 
   group('Router status projection', () {
-    test('guest is authenticated for routing', () async {
-      final container = await sessionContainer(guest: true);
-      addTearDown(container.dispose);
-      _activate(container);
-      await _settle();
-      expect(container.read(authStatusProvider), AuthStatus.authenticated);
-    });
-
     test('guard sends an unauthenticated user to /auth after onboarding', () {
       final target = RouteGuard.evaluate(
         matchedLocation: AppRoutes.home,

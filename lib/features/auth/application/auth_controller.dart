@@ -46,16 +46,10 @@ class AuthController extends _$AuthController {
   Future<void> signInWithApple() =>
       _runSignIn(() => ref.read(authRepositoryProvider).signInWithApple());
 
-  /// Enters a local, cloud-free guest session.
-  void continueAsGuest() {
-    final guest = ref.read(authRepositoryProvider).continueAsGuest();
-    state = AuthState.authenticated(guest);
-  }
-
   /// Ends the session (keeps any cloud account).
   Future<void> signOut() => ref.read(authRepositoryProvider).signOut();
 
-  /// Permanently deletes the cloud account (or ends a guest session).
+  /// Permanently deletes the cloud account.
   Future<void> deleteSession() =>
       ref.read(authRepositoryProvider).deleteSession();
 

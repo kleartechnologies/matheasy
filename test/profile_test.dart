@@ -133,17 +133,6 @@ void main() {
       expect(view.editable.displayName, isNull);
       expect(view.displayName, 'Sarah Lee');
     });
-
-    test('a guest with no name shows a friendly fallback', () async {
-      final container = await _container(guest: true);
-      _activate(container);
-      await _settle();
-
-      final view = container.read(profileControllerProvider);
-      expect(view.isGuest, isTrue);
-      expect(view.provider, AuthProviderType.guest);
-      expect(view.displayName, 'Guest learner');
-    });
   });
 
   group('Account actions', () {
@@ -160,7 +149,7 @@ void main() {
     });
 
     test('deleteAccount ends the session and wipes local data', () async {
-      final container = await _container(guest: true);
+      final container = await _container(signedIn: googleTestUser());
       _activate(container);
       await _settle();
 
@@ -169,7 +158,7 @@ void main() {
           .setThemeMode(ThemeMode.dark);
       container.read(practiceProgressControllerProvider.notifier).awardXp(50);
       await _settle();
-      expect(container.read(authControllerProvider).isGuest, isTrue);
+      expect(container.read(authStatusProvider), AuthStatus.authenticated);
 
       await container.read(profileControllerProvider.notifier).deleteAccount();
       await _settle();
@@ -186,53 +175,9 @@ void main() {
       expect(container.read(practiceProgressControllerProvider).totalXp, 0);
     });
 
-    test('guest upgrade preserves local progress and settings', () async {
-      final container = await _container(guest: true);
-      _activate(container);
-      await _settle();
-
-      container.read(practiceProgressControllerProvider.notifier).awardXp(80);
-      container
-          .read(settingsControllerProvider.notifier)
-          .setThemeMode(ThemeMode.dark);
-      await _settle();
-
-      await container.read(authControllerProvider.notifier).signInWithGoogle();
-      await _settle();
-
-      final auth = container.read(authControllerProvider);
-      expect(auth.isGuest, isFalse);
-      expect(auth.user?.provider, AuthProviderType.google);
-      expect(container.read(practiceProgressControllerProvider).totalXp, 80);
-      expect(
-        container.read(settingsControllerProvider).appearance.themeMode,
-        ThemeMode.dark,
-      );
-    });
   });
 
   group('Widgets', () {
-    testWidgets('guest profile shows the create-account upsell',
-        (tester) async {
-      final container = await _container(guest: true);
-      _activate(container);
-      tester.view.physicalSize = const Size(1200, 2600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(home: ProfileScreen()),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(find.text('Create free account'), findsOneWidget);
-      expect(find.text('Guest account'), findsOneWidget);
-      expect(find.text('Delete guest data'), findsOneWidget);
-    });
-
     testWidgets('signed-in profile shows account details', (tester) async {
       final container = await _container(signedIn: googleTestUser());
       _activate(container);

@@ -6,20 +6,15 @@ import '../../../core/persistence/preferences_store.dart';
 import '../domain/app_user.dart';
 import 'auth_service.dart';
 
-/// Orchestrates the cloud identity layer ([AuthService]) with the local-only
-/// guest session ([PreferencesStore]) and exposes a single merged user stream.
-///
-/// Resolution order per emission: a signed-in cloud user wins; otherwise a
-/// persisted guest; otherwise `null` (signed out). Guest is never sent to the
-/// cloud — it exists only as a local flag, so guest data stays on-device.
+/// Exposes the cloud identity layer ([AuthService]) as a single merged user
+/// stream. There is no guest mode: a signed-in cloud user is emitted, otherwise
+/// `null` (signed out) — the router then requires sign-in.
 class AuthRepository {
   AuthRepository({
     required AuthService authService,
     required PreferencesStore preferences,
-    required DateTime Function() clock,
   })  : _service = authService,
-        _prefs = preferences,
-        _clock = clock {
+        _prefs = preferences {
     _cloudSub = _service.authStateChanges().listen((cloudUser) {
       _cloudUser = cloudUser;
       _emit();
@@ -28,7 +23,6 @@ class AuthRepository {
 
   final AuthService _service;
   final PreferencesStore _prefs;
-  final DateTime Function() _clock;
 
   final StreamController<AppUser?> _controller =
       StreamController<AppUser?>.broadcast();
@@ -43,32 +37,11 @@ class AuthRepository {
     _controller.add(_resolve());
   }
 
-  AppUser? _resolve() {
-    if (_cloudUser != null) return _cloudUser;
-    if (_prefs.guestMode) return AppUser.guest(createdAt: _clock());
-    return null;
-  }
+  AppUser? _resolve() => _cloudUser;
 
-  Future<AppUser> signInWithGoogle() async {
-    final user = await _service.signInWithGoogle();
-    await _prefs.setGuestMode(value: false); // upgraded away from guest
-    return user;
-  }
+  Future<AppUser> signInWithGoogle() => _service.signInWithGoogle();
 
-  Future<AppUser> signInWithApple() async {
-    final user = await _service.signInWithApple();
-    await _prefs.setGuestMode(value: false);
-    return user;
-  }
-
-  /// Starts a local, cloud-free guest session and persists it across launches.
-  AppUser continueAsGuest() {
-    unawaited(_prefs.setGuestMode(value: true));
-    _cloudUser = null;
-    final guest = AppUser.guest(createdAt: _clock());
-    _emit();
-    return guest;
-  }
+  Future<AppUser> signInWithApple() => _service.signInWithApple();
 
   Future<void> signOut() async {
     await _service.signOut();
@@ -97,7 +70,6 @@ final Provider<AuthRepository> authRepositoryProvider =
   final repository = AuthRepository(
     authService: ref.watch(authServiceProvider),
     preferences: ref.watch(preferencesStoreProvider),
-    clock: DateTime.now,
   );
   ref.onDispose(repository.dispose);
   return repository;
