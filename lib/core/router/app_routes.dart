@@ -70,6 +70,11 @@ class AppRoutes {
   static const String paywall = '/paywall';
   static const String paywallName = 'paywall';
 
+  /// Manual math entry — type a problem with the math keyboard, then hand it to
+  /// the same recognize → solve pipeline as a scan.
+  static const String manualInput = '/manual';
+  static const String manualInputName = 'manualInput';
+
   static const String gallery = '/gallery';
   static const String galleryName = 'gallery';
 

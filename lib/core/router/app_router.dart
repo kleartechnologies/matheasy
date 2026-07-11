@@ -20,6 +20,7 @@ import '../../features/progress/presentation/achievements_screen.dart';
 import '../../features/progress/presentation/progress_screen.dart';
 import '../../features/result/presentation/result_screen.dart';
 import '../../features/scan/domain/detected_equation.dart';
+import '../../features/scan/presentation/manual_input_screen.dart';
 import '../../features/scan/presentation/scanner_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/shell/presentation/app_shell.dart';
@@ -104,6 +105,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.gallery,
         name: AppRoutes.galleryName,
         builder: (context, state) => const GalleryScreen(),
+      ),
+      // Manual math entry — a full-screen route over the shell (like Scan),
+      // reachable from the scanner's "Type it" and the Home quick action.
+      GoRoute(
+        path: AppRoutes.manualInput,
+        name: AppRoutes.manualInputName,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const ManualInputScreen(),
       ),
       GoRoute(
         path: AppRoutes.diagnostics,

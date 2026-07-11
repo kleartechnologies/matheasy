@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
@@ -8,13 +9,19 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../practice/presentation/practice_visual_screen.dart'
+    show PracticeVisualArgs;
+import '../../../subscription/application/subscription_controller.dart';
+import '../../../subscription/domain/paywall_trigger.dart';
 
-/// 2×2 grid of the primary Home actions.
-class QuickActions extends StatelessWidget {
+/// 2×2 grid of the primary Home actions: the top row is the two ways to enter a
+/// problem (**Scan · Type**), the bottom row the two ways to learn from it
+/// (**Visual Learning · Practice**). Ask Matheasy stays one tap away in the nav.
+class QuickActions extends ConsumerWidget {
   const QuickActions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final actions = <_ActionData>[
       _ActionData(
         icon: Icons.center_focus_strong_rounded,
@@ -23,24 +30,22 @@ class QuickActions extends StatelessWidget {
         onTap: () => context.push(AppRoutes.scan),
       ),
       _ActionData(
-        icon: Icons.forum_rounded,
-        label: 'Ask Matheasy',
+        icon: Icons.keyboard_rounded,
+        label: 'Type Problem',
         color: AppColors.secondary,
-        onTap: () => context.go(AppRoutes.tutor),
+        onTap: () => context.push(AppRoutes.manualInput),
+      ),
+      _ActionData(
+        icon: Icons.auto_awesome_rounded,
+        label: 'Visual Learning',
+        color: AppColors.accentCoral,
+        onTap: () => _openVisualLearning(context, ref),
       ),
       _ActionData(
         icon: Icons.fitness_center_rounded,
         label: 'Practice',
         color: AppColors.accentAmber,
         onTap: () => context.go(AppRoutes.practice),
-      ),
-      _ActionData(
-        icon: Icons.functions_rounded,
-        label: 'Formula Library',
-        color: AppColors.amber,
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Formula Library is coming soon.')),
-        ),
       ),
     ];
 
@@ -58,6 +63,24 @@ class QuickActions extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  /// Opens the flagship Visual Learning experience — a sample step-by-step
+  /// walkthrough for Pro learners, or the Visual Learning paywall for free
+  /// users (so the flagship is discoverable within a tap of Home).
+  void _openVisualLearning(BuildContext context, WidgetRef ref) {
+    if (ref.read(isProProvider)) {
+      context.push(
+        AppRoutes.practiceVisual,
+        extra: const PracticeVisualArgs(
+          latex: r'2x^2 - 8 = 0',
+          topicLabel: 'Algebra',
+          answerLatex: r'x = \pm 2',
+        ),
+      );
+    } else {
+      context.push(AppRoutes.paywall, extra: PaywallTrigger.visualLearning);
+    }
   }
 }
 
@@ -100,8 +123,9 @@ class _ActionTile extends StatelessWidget {
             child: Text(
               data.label,
               style: AppTypography.title
-                  .copyWith(color: context.colors.textPrimary, fontSize: 14.5),
+                  .copyWith(color: context.colors.textPrimary),
               maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

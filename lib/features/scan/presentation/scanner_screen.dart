@@ -212,12 +212,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     await _cropAndRecognize(ScanSource.gallery, bytes);
   }
 
-  /// Manual entry — type the problem (no OCR).
-  Future<void> _type() async {
-    final latex = await _promptManualEntry();
-    if (latex == null || latex.trim().isEmpty) return;
-    await _controller.recognize(ScanSource.manual, manualLatex: latex.trim());
-  }
+  /// Manual entry — opens the math-keyboard screen. The typed problem flows
+  /// into the same recognize → solve pipeline as a scan (see ManualInputScreen).
+  void _type() => context.push(AppRoutes.manualInput);
 
   /// Pushes the crop screen for [bytes]; on confirm, recognizes the cropped
   /// image. Cancelling the crop returns to the live preview.
@@ -234,33 +231,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
         .read(analyticsServiceProvider)
         .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
     await _controller.recognize(source, imageBytes: cropped);
-  }
-
-  Future<String?> _promptManualEntry() {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Type a problem'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(hintText: 'e.g. 2x + 5 = 13'),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Solve'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _toast(String message) {
@@ -334,7 +304,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           onClose: () => context.pop(),
           onGallery: () => unawaited(_gallery()),
           onShutter: () => unawaited(_shutter()),
-          onType: () => unawaited(_type()),
+          onType: _type,
         ),
       ScanRecognizing() =>
         const ProcessingOverlay(key: ValueKey('recognizing')),
