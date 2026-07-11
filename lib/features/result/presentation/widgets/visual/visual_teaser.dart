@@ -248,7 +248,7 @@ class _UnlockCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Semantics(
             button: true,
-            label: 'Start Free Trial',
+            label: 'Unlock Pro',
             child: ExcludeSemantics(
               child: Pressable(
                 onTap: onUnlock,
@@ -261,7 +261,7 @@ class _UnlockCard extends StatelessWidget {
                     borderRadius: AppRadius.pillRadius,
                   ),
                   child: Text(
-                    'Start Free Trial',
+                    'Unlock Pro',
                     style: AppTypography.button
                         .copyWith(color: AppColors.onGold),
                   ),

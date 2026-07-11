@@ -88,6 +88,18 @@ class LegalDocumentScreen extends StatelessWidget {
                 'mode collects no identifying information at all.',
           ),
           (
+            'AI processing (OpenAI)',
+            'Matheasy is powered by AI. When you scan a problem, type an '
+                'equation, ask the AI tutor, or open Visual Learning, that '
+                'content — the photo of your work, the equation text, or your '
+                'question — is sent over a secure connection to our AI provider, '
+                'OpenAI, so it can recognise the problem and generate the '
+                'solution, explanation or reply. This content is used only to '
+                'answer you; it is never sold, never shown to advertisers, and '
+                "not used to build advertising profiles. OpenAI's handling of "
+                'this data is governed by their API data-usage policies.',
+          ),
+          (
             'You are in control',
             'You can edit or clear your preferences at any time. Deleting your '
                 'account removes your synced learning data from our servers '

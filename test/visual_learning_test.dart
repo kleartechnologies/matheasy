@@ -553,7 +553,7 @@ void main() {
       expect(find.text('Unlock Pro to continue'), findsOneWidget);
       expect(find.byType(Tier1AnimatedTransformation), findsNothing);
 
-      await tester.tap(find.text('Start Free Trial'));
+      await tester.tap(find.text('Unlock Pro'));
       expect(unlocked, isTrue);
     });
 
@@ -856,7 +856,7 @@ void main() {
         container,
         VisualTeaser(result: _resultData, onUnlock: () {}),
       );
-      expect(find.bySemanticsLabel('Start Free Trial'), findsOneWidget);
+      expect(find.bySemanticsLabel('Unlock Pro'), findsOneWidget);
       handle.dispose();
     });
   });
@@ -937,7 +937,7 @@ void main() {
       // The server said "upgrade", so show the teaser CTA, not "Try again".
       expect(find.byType(VisualTeaser), findsOneWidget);
       expect(find.text('Try again'), findsNothing);
-      await tester.tap(find.text('Start Free Trial'));
+      await tester.tap(find.text('Unlock Pro'));
       expect(unlocked, isTrue);
     });
   });

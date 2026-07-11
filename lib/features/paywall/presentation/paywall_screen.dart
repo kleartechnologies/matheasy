@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../settings/presentation/legal_document_screen.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../subscription/domain/purchase_result.dart';
@@ -457,15 +458,84 @@ class _Footer extends StatelessWidget {
           isFree
               ? 'You can upgrade anytime. Free includes limited scans, AI tutor '
                     'and practice.'
-              : 'Auto-renews at $priceString until cancelled. Cancel anytime in '
-                    'your store account. Terms & Privacy apply.',
+              : 'Auto-renews at $priceString/${plan.period} until cancelled. '
+                    'Cancel anytime in your store account; payment is charged at '
+                    'confirmation.',
           textAlign: TextAlign.center,
           style: AppTypography.caption.copyWith(
             color: Colors.white.withValues(alpha: 0.5),
             fontWeight: FontWeight.w500,
           ),
         ),
+        const SizedBox(height: AppSpacing.xxs),
+        // Functional Terms of Use (EULA) + Privacy Policy links at the point of
+        // purchase — required for auto-renewable subscriptions (Apple 3.1.2).
+        const _LegalLinksRow(),
       ],
+    );
+  }
+}
+
+/// The Terms of Use + Privacy Policy links Apple requires on the purchase
+/// screen (Guideline 3.1.2). Routes to the in-app [LegalDocumentScreen], the
+/// same destination the auth screen and Settings use.
+class _LegalLinksRow extends StatelessWidget {
+  const _LegalLinksRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = AppTypography.caption.copyWith(
+      color: Colors.white.withValues(alpha: 0.72),
+      fontWeight: FontWeight.w700,
+      decoration: TextDecoration.underline,
+      decorationColor: Colors.white.withValues(alpha: 0.45),
+    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _LegalLink(document: LegalDocument.terms, style: style),
+        Text(
+          '·',
+          style: style.copyWith(decoration: TextDecoration.none),
+        ),
+        _LegalLink(document: LegalDocument.privacy, style: style),
+      ],
+    );
+  }
+}
+
+class _LegalLink extends StatelessWidget {
+  const _LegalLink({required this.document, required this.style});
+
+  final LegalDocument document;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: document.title,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => LegalDocumentScreen(document: document),
+          ),
+        ),
+        // ≥48dp tap target around the small caption link.
+        child: ExcludeSemantics(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Center(
+              heightFactor: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Text(document.title, style: style),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

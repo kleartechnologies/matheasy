@@ -133,16 +133,34 @@ class TutorChatController extends _$TutorChatController {
       isTyping: true,
     );
 
-    final response = await _service.reply(
-      text,
-      history: state.messages,
-      context: state.context,
-    );
-
-    state = state.copyWith(
-      messages: [...state.messages, _assistantFrom(response)],
-      isTyping: false,
-    );
+    try {
+      final response = await _service.reply(
+        text,
+        history: state.messages,
+        context: state.context,
+      );
+      state = state.copyWith(
+        messages: [...state.messages, _assistantFrom(response)],
+        isTyping: false,
+      );
+    } catch (error, stackTrace) {
+      // Never leave the composer stuck in "typing" — surface a friendly,
+      // retryable message and always clear the typing state.
+      LoggingService.error('Tutor reply failed',
+          error: error, stackTrace: stackTrace);
+      state = state.copyWith(
+        messages: [
+          ...state.messages,
+          TutorMessage(
+            id: _nextId(),
+            role: TutorRole.assistant,
+            text: "Sorry — I couldn't reach the tutor just now. Please check "
+                'your connection and try again.',
+          ),
+        ],
+        isTyping: false,
+      );
+    }
   }
 
   /// Sends the message behind a tapped suggestion chip.
