@@ -78,9 +78,9 @@ class _CategoryCard extends StatelessWidget {
               category.label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.title.copyWith(
+              style: AppTypography.bodyMedium.copyWith(
                 color: context.colors.textPrimary,
-                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

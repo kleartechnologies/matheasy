@@ -90,7 +90,7 @@ class HomeUsageCard extends ConsumerWidget {
               borderRadius: AppRadius.smRadius,
             ),
             child: Text(
-              'Go Pro for unlimited scans, AI tutor & practice',
+              'Unlock Visual Learning + unlimited scans, tutor & practice',
               textAlign: TextAlign.center,
               style: AppTypography.caption
                   .copyWith(color: colors.onPrimaryContainer),

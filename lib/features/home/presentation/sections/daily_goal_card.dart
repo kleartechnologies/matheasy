@@ -21,8 +21,8 @@ class DailyGoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = isFirstDay
-        ? "Let's start your\nfirst lesson!"
-        : '${goal.lessonsDone} of ${goal.lessonsTarget} lessons\ndone — nearly there!';
+        ? "Let's start your first lesson!"
+        : '${goal.lessonsDone} of ${goal.lessonsTarget} lessons done — nearly there!';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -56,6 +56,9 @@ class DailyGoalCard extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 210),
                 child: Text(
                   title,
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.headingMedium
                       .copyWith(color: AppColors.white),
                 ),
@@ -131,7 +134,7 @@ class _ContinueButton extends StatelessWidget {
             Text(
               label,
               style: AppTypography.button
-                  .copyWith(color: AppColors.primary, fontSize: 15),
+                  .copyWith(color: AppColors.primary),
             ),
             const SizedBox(width: AppSpacing.xs),
             const Icon(Icons.arrow_forward_rounded,

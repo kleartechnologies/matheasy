@@ -174,8 +174,10 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
 
   Widget _buildThread(TutorSession session) {
     if (session.isEmpty) {
-      return const Center(
-        child: MatheasyBrandAvatar(),
+      return const EmptyState(
+        title: 'Ask Matheasy anything',
+        message:
+            'Snap a photo or type a question and get a clear, step-by-step explanation.',
       );
     }
 
@@ -234,22 +236,30 @@ class _MatheasyAppBarTitle extends StatelessWidget {
       children: [
         const MatheasyBrandAvatar(size: 34),
         const SizedBox(width: AppSpacing.sm),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Matheasy',
-              style: AppTypography.title.copyWith(color: colors.textPrimary),
-            ),
-            Text(
-              'Your AI math tutor',
-              style: AppTypography.caption.copyWith(
-                color: colors.textSecondary,
-                fontWeight: FontWeight.w500,
+        // Flexible + clamped lines so the title never overflows the app bar at
+        // large text scales.
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Matheasy',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.title.copyWith(color: colors.textPrimary),
               ),
-            ),
-          ],
+              Text(
+                'Your AI math tutor',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.caption.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

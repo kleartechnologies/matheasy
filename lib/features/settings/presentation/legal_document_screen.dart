@@ -69,22 +69,30 @@ class LegalDocumentScreen extends StatelessWidget {
       case LegalDocument.privacy:
         return const [
           (
-            'Your data stays on your device',
-            'Matheasy stores your progress, achievements, learning preferences '
-                'and settings locally on this device. Nothing you do in the app '
-                'is sold or shared with advertisers.',
+            'Where your data lives',
+            'Matheasy keeps your progress, achievements, learning preferences '
+                'and settings on this device. When you sign in with Google or '
+                'Apple, this learning data is also securely synced to your '
+                'account (via Google Firebase) so it is backed up and stays '
+                'with you across sessions. In guest mode everything stays on '
+                'this device only. Nothing you do in Matheasy is sold or shared '
+                'with advertisers.',
           ),
           (
             'What we collect',
             'When you sign in with Google or Apple we receive a basic profile '
-                '(name, email and photo) to personalise your account. Guest '
+                '(name, email and photo) to create and personalise your '
+                'account. To run the app we process what you scan and your '
+                'practice activity; for signed-in users this learning data is '
+                'stored in your account so it can sync across devices. Guest '
                 'mode collects no identifying information at all.',
           ),
           (
             'You are in control',
-            'You can edit or clear your preferences at any time, and deleting '
-                'your account removes your on-device learning data. Cloud sync '
-                'and backups are not part of this version.',
+            'You can edit or clear your preferences at any time. Deleting your '
+                'account removes your synced learning data from our servers '
+                'along with the copy on this device. Prefer to keep everything '
+                'local? Use Matheasy in guest mode.',
           ),
         ];
       case LegalDocument.terms:
@@ -119,18 +127,28 @@ class _OnlineLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
-      child: TextButton.icon(
-        onPressed: () => ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text('${document.title} opens in your browser soon.'),
+      child: Column(
+        children: [
+          Icon(Icons.shield_moon_outlined, size: 20, color: colors.textTertiary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'The current version is shown above. The always-up-to-date policy '
+            'also lives online at',
+            textAlign: TextAlign.center,
+            style: AppTypography.caption.copyWith(color: colors.textTertiary),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          SelectableText(
+            document.url,
+            textAlign: TextAlign.center,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
             ),
           ),
-        icon: const Icon(Icons.open_in_new_rounded, size: 18),
-        label: const Text('View the full version online'),
-        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+        ],
       ),
     );
   }

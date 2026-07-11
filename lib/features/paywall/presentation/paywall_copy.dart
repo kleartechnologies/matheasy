@@ -28,7 +28,8 @@ class PaywallCopy {
           'Practice that adapts to you. Unlimited, personalized questions that '
               'target your weak spots — a Matheasy Pro exclusive.',
         PaywallTrigger.manual =>
-          'Learn faster with unlimited AI-powered math help.',
+          'See every step come alive, practice what you actually struggle '
+              'with, and get unlimited AI help.',
       };
 
   /// The annual card's value line — the per-month equivalent and the saving vs.
@@ -66,8 +67,35 @@ class PaywallCopy {
     return (((yearAtMonthly - annualPrice) / yearAtMonthly) * 100).round();
   }
 
-  /// The Free vs Pro comparison table rows (in display order).
+  /// The Free vs Pro comparison table rows (in display order). The Pro-exclusive
+  /// experiences lead — Visual Learning (the flagship) first — so the table
+  /// frames Pro around what makes it special before the unlimited-quota rows.
   static const List<ComparisonRow> comparison = [
+    ComparisonRow(
+      label: 'Visual Learning Engine',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
+    ComparisonRow(
+      label: 'Adaptive Practice Engine',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
+    ComparisonRow(
+      label: 'Multiple solution methods',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
+    ComparisonRow(
+      label: 'Step-by-step explanations',
+      freeLabel: 'Basic',
+      proLabel: 'In depth',
+    ),
+    ComparisonRow(
+      label: 'Advanced topics & AI questions',
+      freeIncluded: false,
+      proLabel: 'Included',
+    ),
     ComparisonRow(
       label: 'Scans',
       freeLabel: '5 lifetime',
@@ -84,34 +112,9 @@ class PaywallCopy {
       proLabel: 'Unlimited',
     ),
     ComparisonRow(
-      label: 'Adaptive Practice Engine',
+      label: 'New features as we add them',
       freeIncluded: false,
-      proLabel: 'Included',
-    ),
-    ComparisonRow(
-      label: 'Advanced topics & AI questions',
-      freeIncluded: false,
-      proLabel: 'Included',
-    ),
-    ComparisonRow(
-      label: 'Step-by-step explanations',
-      freeLabel: 'Basic',
-      proLabel: 'In depth',
-    ),
-    ComparisonRow(
-      label: 'Multiple solution methods',
-      freeIncluded: false,
-      proLabel: 'Included',
-    ),
-    ComparisonRow(
-      label: 'Visual Learning Engine',
-      freeIncluded: false,
-      proLabel: 'Included',
-    ),
-    ComparisonRow(
-      label: 'Future premium features',
-      freeIncluded: false,
-      proLabel: 'Included',
+      proLabel: 'Always included',
     ),
   ];
 }

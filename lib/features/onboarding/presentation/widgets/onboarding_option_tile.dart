@@ -30,50 +30,56 @@ class OnboardingOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AppCard(
-      onTap: onTap,
-      elevated: !selected,
-      color: selected ? colors.primaryContainer : colors.surface,
-      border: Border.all(
-        color: selected ? AppColors.primary : colors.border,
-        width: selected ? 2 : 1.5,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: selected
-                  ? AppColors.primary.withValues(alpha: 0.14)
-                  : colors.surfaceMuted,
-              borderRadius: AppRadius.smRadius,
-            ),
-            child: Icon(
-              icon,
-              size: 23,
-              color: selected ? AppColors.primary : colors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              label,
-              style: AppTypography.title.copyWith(
-                color: selected ? colors.onPrimaryContainer : colors.textPrimary,
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: label,
+      child: AppCard(
+        onTap: onTap,
+        elevated: !selected,
+        color: selected ? colors.primaryContainer : colors.surface,
+        border: Border.all(
+          color: selected ? AppColors.primary : colors.border,
+          width: selected ? 2 : 1.5,
+        ),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.primary.withValues(alpha: 0.14)
+                    : colors.surfaceMuted,
+                borderRadius: AppRadius.smRadius,
+              ),
+              child: Icon(
+                icon,
+                size: 23,
+                color: selected ? AppColors.primary : colors.textSecondary,
               ),
             ),
-          ),
-          if (trailingText != null) ...[
-            Text(
-              trailingText!,
-              style: AppTypography.label.copyWith(color: AppColors.primary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.title.copyWith(
+                  color:
+                      selected ? colors.onPrimaryContainer : colors.textPrimary,
+                ),
+              ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            if (trailingText != null) ...[
+              Text(
+                trailingText!,
+                style: AppTypography.label.copyWith(color: AppColors.primary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            _SelectionDot(selected: selected),
           ],
-          _SelectionDot(selected: selected),
-        ],
+        ),
       ),
     );
   }

@@ -29,7 +29,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.errorContainer,
     required this.onErrorContainer,
     required this.streakContainer,
+    required this.onStreakContainer,
     required this.xpContainer,
+    required this.onXpContainer,
     required this.tabBar,
   });
 
@@ -56,7 +58,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color errorContainer;
   final Color onErrorContainer;
   final Color streakContainer;
+  final Color onStreakContainer;
   final Color xpContainer;
+  final Color onXpContainer;
 
   final Color tabBar;
 
@@ -67,12 +71,12 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     surfaceGlass: Color(0xE6FFFFFF),
     textPrimary: AppColors.ink, // brand ink #0F172A
     textSecondary: Color(0xFF5A6579), // brand body text
-    textTertiary: Color(0xFF9AA3B2), // brand micro-label grey
+    textTertiary: Color(0xFF64748B), // brand micro-label grey — AA-legible on white
     textInverse: AppColors.white,
     border: Color(0xFFE5EAE7), // brand card border
     divider: Color(0xFFEEF1EE),
     scrim: Color(0x8C0F172A),
-    primaryContainer: Color(0xFFECFDF5), // Emerald 50
+    primaryContainer: AppColors.emerald50, // Emerald 50 (brand ramp)
     onPrimaryContainer: AppColors.primaryDeep,
     successContainer: Color(0xFFE6F8EC),
     onSuccessContainer: AppColors.successDeep,
@@ -81,24 +85,26 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     errorContainer: Color(0xFFFDECEC),
     onErrorContainer: AppColors.errorDeep,
     streakContainer: Color(0xFFFFEEE6),
+    onStreakContainer: Color(0xFF9A3412), // deep orange — AA on the peach container
     xpContainer: Color(0xFFFFF6DC),
+    onXpContainer: Color(0xFF7A5300), // deep gold — AA on the pale-gold container
     tabBar: Color(0xD1FFFFFF),
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
-    background: Color(0xFF0B1220), // brand deep ink
+    background: AppColors.inkDeep, // brand deep ink #0B1220
     surface: Color(0xFF141C2B),
     surfaceMuted: Color(0xFF1B2333),
     surfaceGlass: Color(0x26FFFFFF),
     textPrimary: Color(0xFFF1F6F4),
     textSecondary: Color(0xFFA2ADC8),
     textTertiary: Color(0xFF6E7999),
-    textInverse: Color(0xFF0B1220),
+    textInverse: AppColors.inkDeep,
     border: Color(0xFF263141),
     divider: Color(0xFF1E2836),
     scrim: Color(0xB3060912),
     primaryContainer: Color(0xFF0C3D2E), // deep emerald
-    onPrimaryContainer: Color(0xFF6EE7B7), // mint
+    onPrimaryContainer: AppColors.emerald300, // Emerald 300 (brand ramp)
     successContainer: Color(0xFF14301F),
     onSuccessContainer: Color(0xFF6BE39A),
     warningContainer: Color(0xFF3A2417),
@@ -106,7 +112,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     errorContainer: Color(0xFF3A1A18),
     onErrorContainer: Color(0xFFFF9A90),
     streakContainer: Color(0xFF3A241C),
+    onStreakContainer: Color(0xFFFFB088), // light orange on the dark streak container
     xpContainer: Color(0xFF352C12),
+    onXpContainer: Color(0xFFFFD54A), // gold on the dark xp container
     tabBar: Color(0xD1141C2B),
   );
 
@@ -132,7 +140,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? errorContainer,
     Color? onErrorContainer,
     Color? streakContainer,
+    Color? onStreakContainer,
     Color? xpContainer,
+    Color? onXpContainer,
     Color? tabBar,
   }) {
     return AppSemanticColors(
@@ -156,7 +166,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       errorContainer: errorContainer ?? this.errorContainer,
       onErrorContainer: onErrorContainer ?? this.onErrorContainer,
       streakContainer: streakContainer ?? this.streakContainer,
+      onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       xpContainer: xpContainer ?? this.xpContainer,
+      onXpContainer: onXpContainer ?? this.onXpContainer,
       tabBar: tabBar ?? this.tabBar,
     );
   }
@@ -189,7 +201,10 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onErrorContainer:
           Color.lerp(onErrorContainer, other.onErrorContainer, t)!,
       streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
+      onStreakContainer:
+          Color.lerp(onStreakContainer, other.onStreakContainer, t)!,
       xpContainer: Color.lerp(xpContainer, other.xpContainer, t)!,
+      onXpContainer: Color.lerp(onXpContainer, other.onXpContainer, t)!,
       tabBar: Color.lerp(tabBar, other.tabBar, t)!,
     );
   }

@@ -53,15 +53,22 @@ class HomeHeader extends ConsumerWidget {
         const SizedBox(width: AppSpacing.sm),
         Pressable(
           onTap: () => context.go(AppRoutes.profile),
-          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          borderRadius: AppRadius.pillRadius,
           child: Semantics(
             button: true,
             label: 'Open profile',
-            child: ProfileAvatarView(
-              avatar: profile.editable.avatar,
-              initial: profile.initial,
-              photoUrl: profile.photoUrl,
-              size: 46,
+            // 48dp minimum touch target around the 46px avatar visual.
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: ProfileAvatarView(
+                  avatar: profile.editable.avatar,
+                  initial: profile.initial,
+                  photoUrl: profile.photoUrl,
+                  size: 46,
+                ),
+              ),
             ),
           ),
         ),
@@ -82,28 +89,35 @@ class _StreakPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: AppRadius.mdRadius,
-        boxShadow: context.elevation.card,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.local_fire_department_rounded,
-              size: 20, color: AppColors.streak),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$count',
-            style:
-                AppTypography.title.copyWith(color: context.colors.textPrimary),
+    // The pill shows a bare number; give screen readers the full context and
+    // silence the inner glyph + digit so it isn't read twice.
+    return Semantics(
+      label: '$count-day streak',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
-        ],
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: AppRadius.mdRadius,
+            boxShadow: context.elevation.card,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.local_fire_department_rounded,
+                  size: 20, color: AppColors.streak),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '$count',
+                style: AppTypography.title
+                    .copyWith(color: context.colors.textPrimary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

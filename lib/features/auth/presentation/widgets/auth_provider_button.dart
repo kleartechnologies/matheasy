@@ -86,12 +86,14 @@ class AuthProviderButton extends StatelessWidget {
                       const SizedBox(width: AppSpacing.sm),
                       // The outer Semantics already carries the label — exclude
                       // the visual text so it isn't announced twice.
-                      ExcludeSemantics(
-                        child: Text(
-                          label,
-                          style: AppTypography.button.copyWith(
-                            color: foreground,
-                            fontSize: 16,
+                      Flexible(
+                        child: ExcludeSemantics(
+                          child: Text(
+                            label,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.button.copyWith(
+                              color: foreground,
+                            ),
                           ),
                         ),
                       ),
@@ -104,8 +106,12 @@ class AuthProviderButton extends StatelessWidget {
   }
 }
 
-/// The leading provider glyph. Apple uses the built-in logo; Google uses a
-/// coloured "G" (the official multi-colour asset is dropped in later).
+/// The leading provider glyph. Apple uses the built-in logo; Google currently
+/// uses a placeholder single-colour "G".
+///
+// TODO(release-blocker): Replace the placeholder Google "G" below with the
+// official multi-colour Google logo asset before App Store / Play submission —
+// Google Sign-In branding guidelines require the official mark on the button.
 class _Glyph extends StatelessWidget {
   const _Glyph({required this.provider, required this.color});
 

@@ -64,9 +64,9 @@ class AchievementBadgeCard extends StatelessWidget {
                 badge.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.title.copyWith(
+                style: AppTypography.bodyMedium.copyWith(
                   color: unlocked ? colors.textPrimary : colors.textSecondary,
-                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxs),
@@ -74,9 +74,8 @@ class AchievementBadgeCard extends StatelessWidget {
                 achievement.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
+                style: AppTypography.caption.copyWith(
                   color: colors.textSecondary,
-                  fontSize: 12,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -87,7 +86,7 @@ class AchievementBadgeCard extends StatelessWidget {
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
                       '+${achievement.reward.xp} XP',
-                      style: AppTypography.label.copyWith(color: AppColors.amber),
+                      style: AppTypography.label.copyWith(color: AppColors.xp),
                     ),
                   ],
                 )

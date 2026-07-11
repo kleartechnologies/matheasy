@@ -28,7 +28,7 @@ class _ExamArt extends StatelessWidget {
     ('SPM', 'Malaysia', AppColors.primary),
     ('IGCSE', 'Cambridge', AppColors.secondary),
     ('GCSE', 'UK', AppColors.accentAmber),
-    ('SAT', 'College', AppColors.warning),
+    ('SAT', 'College', AppColors.accentCoral),
   ];
 
   @override

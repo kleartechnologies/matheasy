@@ -134,9 +134,8 @@ class _DayFlame extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           label,
-          style: AppTypography.caption.copyWith(
+          style: AppTypography.label.copyWith(
             color: colors.textTertiary,
-            fontSize: 10.5,
           ),
         ),
       ],

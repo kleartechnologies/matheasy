@@ -40,16 +40,19 @@ class PracticeQuestionView extends StatelessWidget {
               label: '${question.prompt}. '
                   '${question.spokenPrompt ?? question.promptLatex}',
               child: ExcludeSemantics(
-                child: Math.tex(
-                  latex,
-                  mathStyle: MathStyle.text,
-                  textStyle: AppTypography.displayMedium.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                  onErrorFallback: (_) => Text(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Math.tex(
                     latex,
-                    style: AppTypography.displayMedium.copyWith(
+                    mathStyle: MathStyle.text,
+                    textStyle: AppTypography.displayMedium.copyWith(
                       color: colors.textPrimary,
+                    ),
+                    onErrorFallback: (_) => Text(
+                      latex,
+                      style: AppTypography.displayMedium.copyWith(
+                        color: colors.textPrimary,
+                      ),
                     ),
                   ),
                 ),

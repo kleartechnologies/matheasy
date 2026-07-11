@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../extensions/context_extensions.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
@@ -49,13 +48,13 @@ class MathSolutionCard extends StatelessWidget {
                 if (label != null)
                   Row(
                     children: [
-                      const Icon(Icons.check_circle_rounded,
-                          size: 15, color: AppColors.successDeep),
+                      Icon(Icons.check_circle_rounded,
+                          size: 15, color: colors.onSuccessContainer),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         label!,
                         style: AppTypography.label
-                            .copyWith(color: AppColors.successDeep),
+                            .copyWith(color: colors.onSuccessContainer),
                       ),
                     ],
                   ),
@@ -132,11 +131,15 @@ class _Tex extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Math.tex(
-      tex,
-      textStyle: style,
-      mathStyle: MathStyle.text,
-      onErrorFallback: (_) => Text(tex, style: style),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Math.tex(
+        tex,
+        textStyle: style,
+        mathStyle: MathStyle.text,
+        onErrorFallback: (_) => Text(tex, style: style),
+      ),
     );
   }
 }

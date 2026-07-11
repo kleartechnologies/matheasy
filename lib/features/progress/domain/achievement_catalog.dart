@@ -162,7 +162,7 @@ class Achievements {
       description: 'Practice 3 different topics.',
       requirement: AchievementRequirement(AchievementMetric.distinctTopics, 3),
       reward: AchievementReward(xp: 75),
-      badge: Badge(emoji: '🗺️', name: 'Explorer', color: AppColors.pink),
+      badge: Badge(emoji: '🗺️', name: 'Explorer', color: AppColors.accentCoral),
     ),
   ];
 

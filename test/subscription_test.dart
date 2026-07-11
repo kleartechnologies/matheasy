@@ -397,6 +397,11 @@ void main() {
     Future<ProviderContainer> pumpPaywall(WidgetTester tester,
         {PaywallTrigger trigger = PaywallTrigger.scanLimit}) async {
       final container = await _container();
+      // The paywall stacks a hero, a "what you get with Pro" value strip and
+      // three plan cards in a ListView; use a tall surface so every plan card
+      // builds without scrolling (a real device scrolls). Reset afterwards.
+      await tester.binding.setSurfaceSize(const Size(500, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,

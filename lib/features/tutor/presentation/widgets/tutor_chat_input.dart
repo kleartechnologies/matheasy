@@ -160,7 +160,13 @@ class _IconAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = dense ? 40.0 : 44.0;
+    // Icon-only controls need a comfortable tap target. The standalone
+    // attach/send controls are 44dp (the app-wide icon-button size). The
+    // [dense] variant is the voice control nested inside the composer field:
+    // it keeps the field's compact height (so the composer doesn't inflate and
+    // the sibling buttons stay aligned) while widening its horizontal tap area.
+    final double width = dense ? 48.0 : 44.0;
+    final double height = dense ? 40.0 : 44.0;
     return Semantics(
       button: true,
       label: tooltip,
@@ -170,8 +176,8 @@ class _IconAction extends StatelessWidget {
           onTap: onTap,
           borderRadius: AppRadius.pillRadius,
           child: SizedBox(
-            width: size,
-            height: size,
+            width: width,
+            height: height,
             child: Icon(
               icon,
               size: 24,

@@ -11,6 +11,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../settings/presentation/legal_document_screen.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_benefit_row.dart';
 import 'widgets/auth_provider_button.dart';
@@ -249,12 +250,20 @@ class _LegalFootnote extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _LegalLink(label: 'Terms', style: linkStyle),
+            _LegalLink(
+              label: 'Terms',
+              document: LegalDocument.terms,
+              style: linkStyle,
+            ),
             Text(
               '  ·  ',
               style: AppTypography.caption.copyWith(color: colors.textTertiary),
             ),
-            _LegalLink(label: 'Privacy Policy', style: linkStyle),
+            _LegalLink(
+              label: 'Privacy Policy',
+              document: LegalDocument.privacy,
+              style: linkStyle,
+            ),
           ],
         ),
       ],
@@ -263,25 +272,42 @@ class _LegalFootnote extends StatelessWidget {
 }
 
 class _LegalLink extends StatelessWidget {
-  const _LegalLink({required this.label, required this.style});
+  const _LegalLink({
+    required this.label,
+    required this.document,
+    required this.style,
+  });
 
   final String label;
+  final LegalDocument document;
   final TextStyle style;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: label,
+      label: document.title,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text('$label opens in your browser soon.')),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => LegalDocumentScreen(document: document),
           ),
+        ),
         // Label already carried by the Semantics above — don't announce twice.
-        child: ExcludeSemantics(child: Text(label, style: style)),
+        child: ExcludeSemantics(
+          // ≥48dp tap target around the small caption link.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Center(
+              heightFactor: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                child: Text(label, style: style),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

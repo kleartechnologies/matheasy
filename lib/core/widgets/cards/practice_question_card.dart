@@ -38,15 +38,18 @@ class PracticeQuestionCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-          Math.tex(
-            questionTex,
-            textStyle: AppTypography.displayMedium
-                .copyWith(color: colors.textPrimary),
-            mathStyle: MathStyle.text,
-            onErrorFallback: (_) => Text(
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Math.tex(
               questionTex,
-              style: AppTypography.displayMedium
+              textStyle: AppTypography.displayMedium
                   .copyWith(color: colors.textPrimary),
+              mathStyle: MathStyle.text,
+              onErrorFallback: (_) => Text(
+                questionTex,
+                style: AppTypography.displayMedium
+                    .copyWith(color: colors.textPrimary),
+              ),
             ),
           ),
         ],

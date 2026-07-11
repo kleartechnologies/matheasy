@@ -11,8 +11,9 @@ import '../buttons/app_button.dart';
 class ErrorState extends StatelessWidget {
   const ErrorState({
     super.key,
-    this.title = 'Something went wrong',
-    required this.message,
+    this.title = "That didn't go through",
+    this.message =
+        'Something got in the way just now. Check your connection and give it another try.',
     this.onRetry,
     this.retryLabel = 'Try again',
   });

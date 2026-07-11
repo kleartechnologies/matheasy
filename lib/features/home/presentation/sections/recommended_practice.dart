@@ -66,15 +66,19 @@ class _RecommendationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Math.tex(
-              item.question,
-              textStyle: AppTypography.headingSmall
-                  .copyWith(color: colors.textPrimary),
-              mathStyle: MathStyle.text,
-              onErrorFallback: (_) => Text(
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Math.tex(
                 item.question,
-                style: AppTypography.headingSmall
+                textStyle: AppTypography.headingSmall
                     .copyWith(color: colors.textPrimary),
+                mathStyle: MathStyle.text,
+                onErrorFallback: (_) => Text(
+                  item.question,
+                  style: AppTypography.headingSmall
+                      .copyWith(color: colors.textPrimary),
+                ),
               ),
             ),
             Container(

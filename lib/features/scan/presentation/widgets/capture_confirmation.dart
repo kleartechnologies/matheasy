@@ -54,15 +54,19 @@ class CaptureConfirmation extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Math.tex(
-            equation.latex,
-            textStyle:
-                AppTypography.displaySmall.copyWith(color: colors.textPrimary),
-            mathStyle: MathStyle.text,
-            onErrorFallback: (_) => Text(
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Math.tex(
               equation.latex,
-              style: AppTypography.displaySmall
-                  .copyWith(color: colors.textPrimary),
+              textStyle:
+                  AppTypography.displaySmall.copyWith(color: colors.textPrimary),
+              mathStyle: MathStyle.text,
+              onErrorFallback: (_) => Text(
+                equation.latex,
+                style: AppTypography.displaySmall
+                    .copyWith(color: colors.textPrimary),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.xs),

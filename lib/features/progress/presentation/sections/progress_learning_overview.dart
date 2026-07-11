@@ -37,7 +37,7 @@ class ProgressLearningOverview extends StatelessWidget {
       ),
       _StatData(
         icon: Icons.schedule_rounded,
-        color: AppColors.amber,
+        color: AppColors.accentCoral,
         value: overview.timeLearningLabel,
         label: 'Time learning',
       ),

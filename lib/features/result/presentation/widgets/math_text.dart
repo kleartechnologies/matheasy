@@ -16,11 +16,18 @@ class MathText extends StatelessWidget {
     return Semantics(
       label: latex,
       child: ExcludeSemantics(
-        child: Math.tex(
-          latex,
-          textStyle: style,
-          mathStyle: MathStyle.text,
-          onErrorFallback: (_) => Text(latex, style: style),
+        // Long OCR/AI-recognized equations can exceed their bounded box, and
+        // flutter_math neither wraps nor scrolls. Scale down to fit instead of
+        // overflowing — centralized here so every MathText caller is safe.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Math.tex(
+            latex,
+            textStyle: style,
+            mathStyle: MathStyle.text,
+            onErrorFallback: (_) => Text(latex, style: style),
+          ),
         ),
       ),
     );

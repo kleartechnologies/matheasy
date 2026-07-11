@@ -24,7 +24,6 @@ class AppColors {
   static const Color primary = Color(0xFF10B981); // Emerald 500 — icon & mark
   static const Color primaryLight = Color(0xFF34D399); // Emerald 400 — gradient top / dark-mode mark
   static const Color primaryDark = Color(0xFF059669); // Emerald 600 — pressed/depth
-  static const Color primaryPressed = Color(0xFF059669); // Emerald 600 — pressed
   static const Color primaryDeep = Color(0xFF065F46); // Emerald 800 — text on primary container
   static const Color primaryTint = Color(0xFF6EE7B7); // Emerald 300 — soft glow / ring
 
@@ -67,9 +66,7 @@ class AppColors {
   static const Color secondary = Color(0xFF6366F1); // Indigo 500 — categorical accent
   static const Color secondaryLight = Color(0xFF818CF8); // Indigo 400
   static const Color accentIndigo = secondary;
-  static const Color accentIndigoLight = secondaryLight;
-  static const Color accentAmber = Color(0xFFF59E0B); // Amber 500
-  static const Color accentAmberLight = Color(0xFFFBBF24); // Amber 400
+  static const Color accentAmber = Color(0xFFF59E0B); // Amber 500 — categorical amber
   static const Color accentCoral = Color(0xFFFB7185); // Rose 400
   static const Color accentCoralLight = Color(0xFFFDA4AF); // Rose 300
 
@@ -84,7 +81,12 @@ class AppColors {
   // ---- Warning / accent (orange) ----
   static const Color warning = Color(0xFFFF7A45);
   static const Color warningDeep = Color(0xFFF1740B);
-  static const Color amber = Color(0xFFE8A400);
+
+  /// Legacy amber — unified to the single categorical brand amber
+  /// [accentAmber] (#F59E0B) so the palette holds exactly one amber. Retained
+  /// as a name for existing call sites; new code should reach for [accentAmber]
+  /// (categorical) or [gold] / [xp] (premium / gamification) directly.
+  static const Color amber = accentAmber;
 
   // ---- Premium / XP (gold) ----
   static const Color gold = Color(0xFFFFD54A);

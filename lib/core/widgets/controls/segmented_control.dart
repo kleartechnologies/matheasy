@@ -38,7 +38,7 @@ class SegmentedControl extends StatelessWidget {
         final segmentWidth =
             (constraints.maxWidth - padding * 2) / items.length;
         return Container(
-          height: 46,
+          constraints: const BoxConstraints(minHeight: 48),
           padding: const EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: colors.surfaceMuted,

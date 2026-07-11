@@ -27,8 +27,8 @@ class HomeMock {
   const HomeMock._();
 
   static const _weakPalette = [
-    AppColors.warning,
-    AppColors.pink,
+    AppColors.accentAmber,
+    AppColors.accentCoral,
     AppColors.secondary,
   ];
 
@@ -45,14 +45,14 @@ class HomeMock {
               icon: Icons.menu_book_rounded,
               accuracy: 54,
               note: 'needs work',
-              color: AppColors.warning,
+              color: AppColors.accentAmber,
             ),
             WeakTopic(
               label: 'Trigonometry',
               icon: Icons.architecture_rounded,
               accuracy: 61,
               note: 'improving',
-              color: AppColors.pink,
+              color: AppColors.accentCoral,
             ),
           ];
 

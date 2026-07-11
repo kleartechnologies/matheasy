@@ -10,10 +10,10 @@ enum PracticeTopic {
   algebra('Algebra', Icons.functions_rounded, AppColors.primary),
   fractions('Fractions', Icons.pie_chart_outline_rounded, AppColors.secondary),
   geometry('Geometry', Icons.change_history_rounded, AppColors.accentAmber),
-  trigonometry('Trigonometry', Icons.architecture_rounded, AppColors.pink),
-  calculus('Calculus', Icons.show_chart_rounded, AppColors.warning),
-  statistics('Statistics', Icons.bar_chart_rounded, AppColors.accentCoral),
-  wordProblems('Word Problems', Icons.menu_book_rounded, AppColors.amber);
+  trigonometry('Trigonometry', Icons.architecture_rounded, AppColors.accentCoral),
+  calculus('Calculus', Icons.show_chart_rounded, AppColors.secondaryLight),
+  statistics('Statistics', Icons.bar_chart_rounded, AppColors.primaryDark),
+  wordProblems('Word Problems', Icons.menu_book_rounded, AppColors.accentCoralLight);
 
   const PracticeTopic(this.label, this.icon, this.color);
 

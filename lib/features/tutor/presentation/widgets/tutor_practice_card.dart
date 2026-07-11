@@ -51,16 +51,19 @@ class TutorPracticeCard extends StatelessWidget {
             child: Semantics(
               label: prompt.questionLatex,
               child: ExcludeSemantics(
-                child: Math.tex(
-                  prompt.questionLatex,
-                  mathStyle: MathStyle.text,
-                  textStyle: AppTypography.displaySmall.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                  onErrorFallback: (_) => Text(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Math.tex(
                     prompt.questionLatex,
-                    style: AppTypography.displaySmall.copyWith(
+                    mathStyle: MathStyle.text,
+                    textStyle: AppTypography.displaySmall.copyWith(
                       color: colors.textPrimary,
+                    ),
+                    onErrorFallback: (_) => Text(
+                      prompt.questionLatex,
+                      style: AppTypography.displaySmall.copyWith(
+                        color: colors.textPrimary,
+                      ),
                     ),
                   ),
                 ),

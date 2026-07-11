@@ -144,6 +144,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         children: [
                           PaywallHero(trigger: widget.trigger),
                           const SizedBox(height: AppSpacing.xl),
+                          const _ProBenefits(),
+                          const SizedBox(height: AppSpacing.xl),
                           _PlanCards(state: state),
                           const SizedBox(height: AppSpacing.xl),
                           const PaywallComparison(),
@@ -269,6 +271,105 @@ class _PlanCards extends ConsumerWidget {
           subtitle: '5 scans · 20 AI tutor messages · 10 practice',
           selected: state.selectedPlan == SubscriptionPlan.free,
           onTap: () => select(SubscriptionPlan.free),
+        ),
+      ],
+    );
+  }
+}
+
+/// A compact "what you get with Pro" value strip shown above the plan cards, so
+/// every paywall impression sells the flagship experiences — led by Visual
+/// Learning — before the price is ever asked.
+class _ProBenefits extends StatelessWidget {
+  const _ProBenefits();
+
+  static const List<(IconData, Color, String, String)> _benefits = [
+    (
+      Icons.auto_awesome_rounded,
+      AppColors.gold,
+      'Visual Learning',
+      'See every step animate — understand, don’t just memorize.',
+    ),
+    (
+      Icons.fitness_center_rounded,
+      AppColors.primaryLight,
+      'Adaptive Practice',
+      'Questions that target your exact weak spots.',
+    ),
+    (
+      Icons.forum_rounded,
+      AppColors.primaryLight,
+      'AI Tutor',
+      'A patient tutor that explains until it clicks.',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'What you get with Pro',
+          style: AppTypography.label.copyWith(
+            color: Colors.white.withValues(alpha: 0.6),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        for (final (index, b) in _benefits.indexed) ...[
+          if (index > 0) const SizedBox(height: AppSpacing.md),
+          _BenefitRow(icon: b.$1, tint: b.$2, title: b.$3, detail: b.$4),
+        ],
+      ],
+    );
+  }
+}
+
+class _BenefitRow extends StatelessWidget {
+  const _BenefitRow({
+    required this.icon,
+    required this.tint,
+    required this.title,
+    required this.detail,
+  });
+
+  final IconData icon;
+  final Color tint;
+  final String title;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: tint.withValues(alpha: 0.16),
+            borderRadius: AppRadius.smRadius,
+          ),
+          child: Icon(icon, size: 21, color: tint),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTypography.title.copyWith(color: AppColors.white),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                detail,
+                style: AppTypography.bodySmall.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -451,8 +552,8 @@ class _RestoreButton extends StatelessWidget {
       onPressed: onTap,
       child: Text(
         loading ? 'Restoring…' : 'Restore purchases',
-        style: AppTypography.button.copyWith(
-          fontSize: 14,
+        style: AppTypography.bodyMedium.copyWith(
+          fontWeight: FontWeight.w700,
           color: Colors.white.withValues(alpha: 0.82),
         ),
       ),

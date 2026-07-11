@@ -151,7 +151,7 @@ class _TopBar extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 40,
+          width: 48,
           child: back == null
               ? null
               : _NavIconButton(icon: Icons.arrow_back_rounded, onTap: back),
@@ -183,19 +183,30 @@ class _NavIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Pressable(
-      onTap: onTap,
-      scale: 0.94,
-      borderRadius: AppRadius.smRadius,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: AppRadius.smRadius,
-          border: Border.all(color: colors.border),
+    final isBack = icon == Icons.arrow_back_rounded;
+    return Semantics(
+      button: true,
+      label: isBack ? 'Back' : 'Next',
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.94,
+        borderRadius: AppRadius.smRadius,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: AppRadius.smRadius,
+                border: Border.all(color: colors.border),
+              ),
+              child: Icon(icon, size: 20, color: colors.textPrimary),
+            ),
+          ),
         ),
-        child: Icon(icon, size: 20, color: colors.textPrimary),
       ),
     );
   }

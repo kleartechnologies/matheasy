@@ -77,7 +77,7 @@ class _CourseCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.title
-                  .copyWith(color: context.colors.textPrimary, fontSize: 15),
+                  .copyWith(color: context.colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.sm),
             XPProgressBar(

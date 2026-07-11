@@ -209,13 +209,13 @@ class TutorHomeContent {
     TutorPrompt(
       label: 'Prepare For Exams',
       icon: Icons.assignment_turned_in_rounded,
-      color: AppColors.warning,
+      color: AppColors.accentCoral,
       message: 'Help me prepare for my exams.',
     ),
     TutorPrompt(
       label: 'Create A Quiz',
       icon: Icons.quiz_outlined,
-      color: AppColors.pink,
+      color: AppColors.secondary,
       message: 'Create a quiz for me.',
     ),
   ];
@@ -242,25 +242,25 @@ class TutorHomeContent {
     TutorCategory(
       label: 'Calculus',
       icon: Icons.show_chart_rounded,
-      color: AppColors.warning,
+      color: AppColors.secondaryLight,
       message: 'Can you introduce me to calculus?',
     ),
     TutorCategory(
       label: 'Trigonometry',
       icon: Icons.architecture_rounded,
-      color: AppColors.pink,
+      color: AppColors.accentCoral,
       message: 'Explain trigonometry to me.',
     ),
     TutorCategory(
       label: 'Word Problems',
       icon: Icons.menu_book_rounded,
-      color: AppColors.amber,
+      color: AppColors.accentCoralLight,
       message: 'Help me with word problems.',
     ),
     TutorCategory(
       label: 'Statistics',
       icon: Icons.bar_chart_rounded,
-      color: AppColors.accentCoral,
+      color: AppColors.primaryDark,
       message: 'Can you teach me statistics?',
     ),
   ];
@@ -287,7 +287,7 @@ class TutorHomeContent {
     TutorQuickAction(
       label: 'Create Quiz',
       icon: Icons.quiz_outlined,
-      color: AppColors.warning,
+      color: AppColors.accentCoral,
       kind: TutorQuickActionKind.createQuiz,
     ),
   ];

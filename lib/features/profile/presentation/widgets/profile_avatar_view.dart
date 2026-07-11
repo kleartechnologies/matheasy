@@ -49,6 +49,10 @@ class ProfileAvatarView extends StatelessWidget {
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
+                // Show the gradient-initial fallback while the photo loads so
+                // there's no blank flash, then swap in the image once ready.
+                loadingBuilder: (context, child, progress) =>
+                    progress == null ? child : fallback,
                 errorBuilder: (_, _, _) => fallback,
               ),
             ),

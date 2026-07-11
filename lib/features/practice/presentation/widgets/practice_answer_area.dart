@@ -138,7 +138,7 @@ class PracticeAnswerArea extends StatelessWidget {
           Text(
             'Correct answer: ${question.correctAnswerText}',
             style: AppTypography.bodySmall.copyWith(
-              color: AppColors.successDeep,
+              color: colors.onSuccessContainer,
               fontWeight: FontWeight.w700,
             ),
           ),

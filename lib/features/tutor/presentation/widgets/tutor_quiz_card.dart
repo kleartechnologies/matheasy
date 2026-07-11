@@ -80,16 +80,19 @@ class _TutorQuizCardState extends State<TutorQuizCard> {
             Semantics(
               label: question.promptLatex,
               child: ExcludeSemantics(
-                child: Math.tex(
-                  question.promptLatex!,
-                  mathStyle: MathStyle.text,
-                  textStyle: AppTypography.headingMedium.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                  onErrorFallback: (_) => Text(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Math.tex(
                     question.promptLatex!,
-                    style: AppTypography.headingMedium.copyWith(
+                    mathStyle: MathStyle.text,
+                    textStyle: AppTypography.headingMedium.copyWith(
                       color: colors.textPrimary,
+                    ),
+                    onErrorFallback: (_) => Text(
+                      question.promptLatex!,
+                      style: AppTypography.headingMedium.copyWith(
+                        color: colors.textPrimary,
+                      ),
                     ),
                   ),
                 ),

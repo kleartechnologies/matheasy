@@ -26,6 +26,7 @@ class AppSwitch extends StatelessWidget {
   static const double _width = 50;
   static const double _height = 30;
   static const double _thumb = 24;
+  static const double _minTapHeight = 48;
 
   void _handleTap() {
     HapticsService.selection();
@@ -43,35 +44,41 @@ class AppSwitch extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: enabled ? _handleTap : null,
-        child: Opacity(
-          opacity: enabled ? 1 : 0.5,
-          child: AnimatedContainer(
-            duration: AppDurations.medium,
-            curve: AppCurves.standard,
-            width: _width,
-            height: _height,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: value ? AppColors.primary : trackOff,
-              borderRadius: AppRadius.pillRadius,
-            ),
-            child: AnimatedAlign(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: (_minTapHeight - _height) / 2,
+          ),
+          child: Opacity(
+            opacity: enabled ? 1 : 0.5,
+            child: AnimatedContainer(
               duration: AppDurations.medium,
               curve: AppCurves.standard,
-              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-              child: Container(
-                width: _thumb,
-                height: _thumb,
-                decoration: const BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 4,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
+              width: _width,
+              height: _height,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: value ? AppColors.primary : trackOff,
+                borderRadius: AppRadius.pillRadius,
+              ),
+              child: AnimatedAlign(
+                duration: AppDurations.medium,
+                curve: AppCurves.standard,
+                alignment:
+                    value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: _thumb,
+                  height: _thumb,
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
