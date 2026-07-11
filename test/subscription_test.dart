@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
+import 'package:matheasy/features/auth/application/auth_controller.dart';
+import 'package:matheasy/features/auth/domain/app_user.dart';
 import 'package:matheasy/features/paywall/application/paywall_controller.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_copy.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_screen.dart';
@@ -20,6 +22,7 @@ import 'package:matheasy/features/practice/domain/practice_session.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
 import 'package:matheasy/features/subscription/application/subscription_cache.dart';
 import 'package:matheasy/features/subscription/application/subscription_controller.dart';
+import 'package:matheasy/features/subscription/application/subscription_service.dart';
 import 'package:matheasy/features/subscription/application/usage_controller.dart';
 import 'package:matheasy/features/subscription/application/usage_tracker.dart';
 import 'package:matheasy/features/subscription/domain/entitlement.dart';
@@ -547,4 +550,79 @@ void main() {
       expect(PaywallCopy.annualValueLine(null, null), 'Best value');
     });
   });
+
+  group('RevenueCat billing identity (revenueCatIdentitySyncProvider)', () {
+    ProviderContainer containerFor(AppUser? user) {
+      final fake = _RecordingSubscriptionService();
+      final container = ProviderContainer(
+        overrides: [
+          subscriptionServiceProvider.overrideWithValue(fake),
+          currentUserProvider.overrideWith((ref) => user),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test('logs in a signed-in user by their Firebase uid', () async {
+      final container = containerFor(
+        AppUser(
+          id: 'uid_abc123',
+          provider: AuthProviderType.apple,
+          isGuest: false,
+          createdAt: DateTime(2024),
+        ),
+      );
+      container.read(revenueCatIdentitySyncProvider); // fireImmediately
+      await Future<void>.delayed(Duration.zero);
+
+      final fake = container.read(subscriptionServiceProvider)
+          as _RecordingSubscriptionService;
+      expect(fake.loggedInAs, 'uid_abc123');
+      expect(fake.logOutCount, 0);
+    });
+
+    test('logs out (anonymous) for a guest session', () async {
+      final container = containerFor(AppUser.guest(createdAt: DateTime(2024)));
+      container.read(revenueCatIdentitySyncProvider);
+      await Future<void>.delayed(Duration.zero);
+
+      final fake = container.read(subscriptionServiceProvider)
+          as _RecordingSubscriptionService;
+      expect(fake.loggedInAs, isNull);
+      expect(fake.logOutCount, 1);
+    });
+
+    test('logs out when signed out (no user)', () async {
+      final container = containerFor(null);
+      container.read(revenueCatIdentitySyncProvider);
+      await Future<void>.delayed(Duration.zero);
+
+      final fake = container.read(subscriptionServiceProvider)
+          as _RecordingSubscriptionService;
+      expect(fake.loggedInAs, isNull);
+      expect(fake.logOutCount, 1);
+    });
+  });
+}
+
+/// Records the billing-identity calls the sync provider makes. Only [logIn] /
+/// [logOut] are exercised, so the rest is handled by [noSuchMethod].
+class _RecordingSubscriptionService implements SubscriptionService {
+  String? loggedInAs;
+  int logOutCount = 0;
+
+  @override
+  Future<void> logIn(String appUserId) async {
+    loggedInAs = appUserId;
+  }
+
+  @override
+  Future<void> logOut() async {
+    logOutCount++;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
 }

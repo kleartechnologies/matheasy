@@ -81,6 +81,14 @@ class LocalSubscriptionService implements SubscriptionService {
     _controller.add(_current);
   }
 
+  // No billing backend offline, so identity is a no-op (there's nothing to
+  // attribute a purchase to). Kept to satisfy the interface.
+  @override
+  Future<void> logIn(String appUserId) async {}
+
+  @override
+  Future<void> logOut() async {}
+
   Future<void> _emit(SubscriptionStatus status) async {
     _current = status;
     await _cache.write(status);

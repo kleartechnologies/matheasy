@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/persistence/preferences_store.dart';
+import '../../auth/application/auth_controller.dart';
+import '../../auth/domain/app_user.dart';
 import '../domain/purchase_result.dart';
 import '../domain/subscription_plan.dart';
 import '../domain/subscription_product.dart';
@@ -43,6 +45,15 @@ abstract interface class SubscriptionService {
   /// Forces a status refresh from the source of truth.
   Future<void> refresh();
 
+  /// Associates the billing identity with [appUserId] (the Firebase uid), so a
+  /// purchase is attributed to this account and the RevenueCat webhook can map
+  /// `app_user_id` → the user's Firestore doc. Call after a real sign-in.
+  Future<void> logIn(String appUserId);
+
+  /// Clears the billing identity (returns to an anonymous id) on sign-out or a
+  /// guest session, so the next user's purchases aren't attributed here.
+  Future<void> logOut();
+
   /// Releases listeners / stream controllers.
   void dispose();
 }
@@ -63,4 +74,30 @@ final Provider<SubscriptionService> subscriptionServiceProvider =
       : LocalSubscriptionService(cache);
   ref.onDispose(service.dispose);
   return service;
+});
+
+/// Keeps the billing identity in step with the signed-in user: on a real
+/// sign-in it calls `logIn(uid)` so purchases attribute to the Firebase uid (and
+/// the RevenueCat webhook can map `app_user_id` → their Firestore doc); guests /
+/// sign-out fall back to an anonymous id via `logOut`.
+///
+/// Deliberately its own provider (kept alive by [AppShell]) rather than folded
+/// into [subscriptionControllerProvider], so it runs only during real app use —
+/// not on every `isPro` entitlement check.
+final Provider<void> revenueCatIdentitySyncProvider = Provider<void>((ref) {
+  void sync(AppUser? user) {
+    final service = ref.read(subscriptionServiceProvider);
+    if (user != null && !user.isGuest) {
+      unawaited(service.logIn(user.id));
+    } else {
+      unawaited(service.logOut());
+    }
+  }
+
+  // fireImmediately covers the already-signed-in-at-launch case.
+  ref.listen<AppUser?>(
+    currentUserProvider,
+    (_, next) => sync(next),
+    fireImmediately: true,
+  );
 });

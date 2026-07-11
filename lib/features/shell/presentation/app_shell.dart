@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/app_lifecycle.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../subscription/application/subscription_service.dart';
 import '../../sync/application/sync_controller.dart';
 
 /// Hosts the [StatefulNavigationShell] (the indexed-stack of the 5 tab
@@ -33,6 +34,9 @@ class AppShell extends ConsumerWidget {
     // Keep the sync engine alive whenever the app shell is shown, so background
     // cloud sync runs for signed-in users (a no-op for guests).
     ref.watch(syncControllerProvider);
+    // Keep the RevenueCat billing identity in step with the signed-in user, so
+    // purchases attribute to their Firebase uid (a no-op offline / for guests).
+    ref.watch(revenueCatIdentitySyncProvider);
 
     return Scaffold(
       extendBody: true,

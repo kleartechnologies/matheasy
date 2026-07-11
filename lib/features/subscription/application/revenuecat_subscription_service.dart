@@ -60,6 +60,26 @@ class RevenueCatSubscriptionService implements SubscriptionService {
   }
 
   @override
+  Future<void> logIn(String appUserId) async {
+    try {
+      final result = await Purchases.logIn(appUserId);
+      _apply(_mapCustomerInfo(result.customerInfo));
+    } on PlatformException catch (error) {
+      AppLogger.error('RevenueCat logIn failed', error: error);
+    }
+  }
+
+  @override
+  Future<void> logOut() async {
+    try {
+      _apply(_mapCustomerInfo(await Purchases.logOut()));
+    } on PlatformException catch (error) {
+      // logOut throws when the id is already anonymous — a benign no-op here.
+      AppLogger.info('RevenueCat logOut skipped: ${error.message}');
+    }
+  }
+
+  @override
   Future<List<SubscriptionProduct>> loadProducts() async {
     try {
       final offerings = await Purchases.getOfferings();
