@@ -16,10 +16,14 @@ import 'package:flutter/foundation.dart';
 class RevenueCatConfig {
   const RevenueCatConfig._();
 
-  /// Public SDK key for the Apple App Store (starts with `appl_`).
-  static const String appleApiKey = 'REPLACE_WITH_REVENUECAT_APPLE_KEY';
+  /// Public SDK key for the Apple App Store (starts with `appl_`). This is a
+  /// PUBLIC key — safe to ship in the binary (unlike the RevenueCat secret /
+  /// App Store Connect keys, which stay server-side).
+  static const String appleApiKey = 'appl_vSSJZftjytGbgtEAuCghBIuYNXh';
 
-  /// Public SDK key for Google Play (starts with `goog_`).
+  /// Public SDK key for Google Play (starts with `goog_`). Still a placeholder
+  /// — the app runs the offline subscription fallback on Android until a Play
+  /// app + key are set up in RevenueCat.
   static const String googleApiKey = 'REPLACE_WITH_REVENUECAT_GOOGLE_KEY';
 
   /// The entitlement identifier configured in the RevenueCat dashboard.
