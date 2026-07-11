@@ -33,6 +33,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.xpContainer,
     required this.onXpContainer,
     required this.tabBar,
+    required this.tabBarGlass,
   });
 
   final Color background;
@@ -64,6 +65,12 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   final Color tabBar;
 
+  /// Translucent overlay painted over the tab bar's [BackdropFilter] blur.
+  /// Deliberately more transparent than [tabBar] so scrollable content genuinely
+  /// blurs through the bar (the "liquid glass" surface); [tabBar] stays for the
+  /// opaque badge ring that masks the badge from the icon beneath it.
+  final Color tabBarGlass;
+
   static const AppSemanticColors light = AppSemanticColors(
     background: Color(0xFFF4F6F5), // brand page background
     surface: AppColors.white,
@@ -89,20 +96,21 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     xpContainer: Color(0xFFFFF6DC),
     onXpContainer: Color(0xFF7A5300), // deep gold — AA on the pale-gold container
     tabBar: Color(0xD1FFFFFF),
+    tabBarGlass: Color(0xC2FFFFFF), // frosted white @ ~76% — content blurs through
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
-    background: AppColors.inkDeep, // brand deep ink #0B1220
-    surface: Color(0xFF141C2B),
-    surfaceMuted: Color(0xFF1B2333),
-    surfaceGlass: Color(0x26FFFFFF),
+    background: Color(0xFF07111F), // calm deep navy — no radial glow behind content
+    surface: Color(0xFF111827), // flat card surface
+    surfaceMuted: Color(0xFF161E2B), // subtly raised surface
+    surfaceGlass: Color(0x1FFFFFFF),
     textPrimary: Color(0xFFF1F6F4),
     textSecondary: Color(0xFFA2ADC8),
     textTertiary: Color(0xFF6E7999),
     textInverse: AppColors.inkDeep,
-    border: Color(0xFF263141),
-    divider: Color(0xFF1E2836),
-    scrim: Color(0xB3060912),
+    border: Color(0x0FFFFFFF), // white 6% — subtle hairline, not a solid slate line
+    divider: Color(0x0AFFFFFF), // white 4%
+    scrim: Color(0xB3040A14),
     primaryContainer: Color(0xFF0C3D2E), // deep emerald
     onPrimaryContainer: AppColors.emerald300, // Emerald 300 (brand ramp)
     successContainer: Color(0xFF14301F),
@@ -115,7 +123,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onStreakContainer: Color(0xFFFFB088), // light orange on the dark streak container
     xpContainer: Color(0xFF352C12),
     onXpContainer: Color(0xFFFFD54A), // gold on the dark xp container
-    tabBar: Color(0xD1141C2B),
+    tabBar: Color(0xE6111827),
+    tabBarGlass: Color(0x8C0C1420), // deep-navy @ 55% — frosted glass over content
   );
 
   @override
@@ -144,6 +153,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? xpContainer,
     Color? onXpContainer,
     Color? tabBar,
+    Color? tabBarGlass,
   }) {
     return AppSemanticColors(
       background: background ?? this.background,
@@ -170,6 +180,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       xpContainer: xpContainer ?? this.xpContainer,
       onXpContainer: onXpContainer ?? this.onXpContainer,
       tabBar: tabBar ?? this.tabBar,
+      tabBarGlass: tabBarGlass ?? this.tabBarGlass,
     );
   }
 
@@ -206,6 +217,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       xpContainer: Color.lerp(xpContainer, other.xpContainer, t)!,
       onXpContainer: Color.lerp(onXpContainer, other.onXpContainer, t)!,
       tabBar: Color.lerp(tabBar, other.tabBar, t)!,
+      tabBarGlass: Color.lerp(tabBarGlass, other.tabBarGlass, t)!,
     );
   }
 }

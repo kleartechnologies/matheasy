@@ -40,7 +40,8 @@ class DeepLinkParser {
       case 'practice':
         return AppRoutes.practice;
       case 'tutor':
-        return AppRoutes.tutor;
+        // The AI Tutor is contextual now — a deep link opens the chat directly.
+        return AppRoutes.tutorChat;
       case 'paywall':
         return AppRoutes.paywall;
       case 'home':

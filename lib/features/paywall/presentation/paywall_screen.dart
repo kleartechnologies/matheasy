@@ -125,6 +125,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: AppColors.paywallBottom,
+        // A subtle vertical navy gradient for depth — no glow, no illustration.
+        // TODO(bg-watermark): OPTIONAL A/B test only — a faint (3–5% opacity),
+        //   monochrome, static math-symbol watermark behind the hero icon area
+        //   ONLY (never behind the pricing cards or CTA). Test against this plain
+        //   gradient and keep whichever converts better; do not ship untested.
         body: DecoratedBox(
           decoration: const BoxDecoration(gradient: AppColors.paywallGradient),
           child: Stack(
@@ -149,6 +154,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           _PlanCards(state: state),
                           const SizedBox(height: AppSpacing.xl),
                           const PaywallComparison(),
+                          // TODO(social-proof): a real testimonials / rating
+                          //   section (App/Play Store reviews or real beta
+                          //   feedback + real rating & user count) slots in here.
+                          //   Never fabricate reviews, ratings or usage stats.
                           const SizedBox(height: AppSpacing.sm),
                         ],
                       ),
@@ -241,13 +250,23 @@ class _PlanCards extends ConsumerWidget {
       notifier.select(plan);
     }
 
+    // The annual card headlines the per-month equivalent (RM12.50/month) to
+    // soften sticker shock; the annual total stays visible on the value line
+    // ("… billed yearly"). Both are the store's live prices — the per-month is
+    // computed (annual ÷ 12), everything else is the localized store string.
+    // Falls back to the annual total /year when no live price is available.
+    final annualPerMonth = annual?.pricePerMonthComputed;
+    final hasPerMonth = annualPerMonth != null && annualPerMonth.isNotEmpty;
+
     return Column(
       children: [
         PaywallPlanCard(
           title: 'Annual Pro',
-          priceString:
-              annual?.priceString ?? SubscriptionPlan.proAnnual.fallbackPrice,
-          periodLabel: '/year',
+          priceString: hasPerMonth
+              ? annualPerMonth
+              : (annual?.priceString ??
+                    SubscriptionPlan.proAnnual.fallbackPrice),
+          periodLabel: hasPerMonth ? '/month' : '/year',
           subtitle: PaywallCopy.annualValueLine(annual, monthly),
           badge: 'BEST VALUE',
           selected: state.selectedPlan == SubscriptionPlan.proAnnual,
@@ -412,9 +431,13 @@ class _Footer extends StatelessWidget {
     final isFree = !plan.isPaid;
     final priceString =
         state.productFor(plan)?.priceString ?? plan.fallbackPrice;
-    final ctaLabel = isFree
-        ? 'Continue with Free'
-        : 'Start Pro · $priceString${plan.isAnnual ? '/yr' : '/mo'}';
+    // The price is intentionally kept OFF the button (it stays fully visible on
+    // the selected plan card above and in the auto-renew disclosure below) — a
+    // large number at the tap point adds friction at the decision moment.
+    // TODO(trial): when an intro free-trial offer is added (RevenueCat intro
+    //   pricing + eligibility check), switch this to 'Start free trial' and the
+    //   headline to trial framing for eligible users.
+    final ctaLabel = isFree ? 'Continue with Free' : 'Unlock Unlimited';
 
     return _FooterShell(
       children: [

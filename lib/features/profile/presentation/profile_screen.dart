@@ -20,6 +20,7 @@ import 'sections/profile_guest_card.dart';
 import 'sections/profile_header.dart';
 import 'sections/profile_stats.dart';
 import 'sections/profile_subscription_section.dart';
+import 'sections/profile_usage_section.dart';
 import 'widgets/guest_upgrade_sheet.dart';
 
 /// The Profile tab — identity, headline stats, guest upsell (or account details)
@@ -105,6 +106,7 @@ class ProfileScreen extends ConsumerWidget {
       else
         ProfileAccountSection(profile: profile),
       const ProfileSubscriptionSection(),
+      const ProfileUsageSection(),
       if (!isGuest) const ProfileSyncTile(),
       SettingsSection(
         children: [

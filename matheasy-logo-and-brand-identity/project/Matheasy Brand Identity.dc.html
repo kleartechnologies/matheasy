@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#F4F6F5;font-family:'Manrope',system-ui,-apple-system,sans-serif;color:#0F172A;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:#059669;text-decoration:none}
+  a:hover{color:#047857}
+  ::selection{background:#D1FAE5;color:#065F46}
+</style>
+</helmet>
+
+<svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+  <symbol id="mk01" viewBox="0 0 48 48">
+    <path d="M5 25 L11.5 33 L20 11 L43 6.5" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round"></path>
+    <circle cx="43" cy="6.5" r="3.4" style="fill:currentColor"></circle>
+  </symbol>
+  <symbol id="mk02" viewBox="0 0 48 48">
+    <rect x="7" y="27" width="23" height="6.4" rx="3.2" style="fill:currentColor"></rect>
+    <rect x="18" y="14.8" width="23" height="6.4" rx="3.2" style="fill:currentColor"></rect>
+  </symbol>
+  <symbol id="mk03" viewBox="0 0 48 48">
+    <path d="M8 40 L8 11 L23 32 L40 8 L40 40" style="fill:none;stroke:currentColor;stroke-width:4.6;stroke-linecap:round;stroke-linejoin:round"></path>
+  </symbol>
+  <symbol id="mk04" viewBox="0 0 48 48">
+    <path d="M5 25 L11 32.5 L18 13 L44 13" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round"></path>
+    <path d="M22.5 21.5 L44 21.5" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round"></path>
+  </symbol>
+  <symbol id="mk05" viewBox="0 0 48 48">
+    <path d="M4.5 26 L11.5 33.5 L20 10 L44 10" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round"></path>
+  </symbol>
+  <symbol id="mk06" viewBox="0 0 48 48">
+    <path d="M7 24 L14 31 L25 15.5" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round;opacity:0.45"></path>
+    <path d="M20 27 L29 36 L45 9" style="fill:none;stroke:currentColor;stroke-width:4.4;stroke-linecap:round;stroke-linejoin:round"></path>
+  </symbol>
+</svg>
+
+<section style="background:#0B1220;color:#F8FAFC;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-220px;left:50%;transform:translateX(-50%);width:760px;height:760px;background:radial-gradient(circle,rgba(16,185,129,0.22),rgba(16,185,129,0) 62%);pointer-events:none"></div>
+  <div style="position:relative;max-width:1240px;margin:0 auto;padding:92px 40px 100px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:#34D399">Brand Identity Exploration</div>
+    <h1 style="font:800 clamp(56px,10vw,120px)/0.98 'Manrope',sans-serif;letter-spacing:-0.045em;margin:26px 0 0">Math<span style="color:{{ easyColor }}">easy</span></h1>
+    <p style="max-width:600px;color:#94A3B8;font-size:18px;line-height:1.6;margin:26px 0 0">An emerald identity system for an AI-powered platform that helps students understand, practice, and master mathematics — from primary school to university.</p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.16em;color:#475569;margin-top:20px">SIX DIRECTIONS · BUILT ON THREE MARKS &nbsp;√ &nbsp;= &nbsp;M</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:52px">
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk01"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">01</span></div>
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk02"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">02</span></div>
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk03"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">03</span></div>
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk04"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">04</span></div>
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk05"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">05</span></div>
+      <div style="width:112px;height:112px;border-radius:24px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><svg viewBox="0 0 48 48" width="42" height="42" style="color:#ECFDF5;display:block"><use href="#mk06"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:#64748B">06</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:80px 40px 28px">
+  <div style="display:grid;grid-template-columns:1.45fr 1fr;gap:20px">
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:28px 30px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color system</div>
+      <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px">
+          <div style="height:92px;border-radius:14px;background:#10B981"></div>
+          <div style="margin-top:12px;font-weight:700;font-size:14px">Emerald</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#10B981;margin-top:3px">#10B981</div>
+          <div style="color:#64748B;font-size:12px;margin-top:3px">Primary · growth</div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div style="height:92px;border-radius:14px;background:#059669"></div>
+          <div style="margin-top:12px;font-weight:700;font-size:14px">Dark Emerald</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#059669;margin-top:3px">#059669</div>
+          <div style="color:#64748B;font-size:12px;margin-top:3px">Depth · mastery</div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div style="height:92px;border-radius:14px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></div>
+          <div style="margin-top:12px;font-weight:700;font-size:14px">Mint</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#059669;margin-top:3px">#D1FAE5</div>
+          <div style="color:#64748B;font-size:12px;margin-top:3px">Surface · understanding</div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div style="height:92px;border-radius:14px;background:#0F172A"></div>
+          <div style="margin-top:12px;font-weight:700;font-size:14px">Slate</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#0F172A;margin-top:3px">#0F172A</div>
+          <div style="color:#64748B;font-size:12px;margin-top:3px">Text · trust</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:28px 30px;display:flex;flex-direction:column">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Typography</div>
+      <div style="font:800 46px 'Manrope',sans-serif;letter-spacing:-0.035em;line-height:1;margin-top:18px">Manrope</div>
+      <div style="color:#64748B;margin-top:8px;font-size:13.5px;line-height:1.5">Wordmark &amp; interface — a geometric sans that reads friendly, precise, and premium. Weights 400–800.</div>
+      <div style="height:1px;background:rgba(15,23,42,0.08);margin:20px 0"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;letter-spacing:-0.01em">JetBrains Mono</div>
+      <div style="color:#64748B;margin-top:8px;font-size:13.5px;line-height:1.5">Technical labels, values &amp; step annotations.</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">01</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 01 · √ + growth</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">Radical Rise</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">The square-root radical, redrawn so its stroke lifts off into an upward path toward a single point of mastery. Solving and growing become one gesture — the tick that means "correct" and the line that means "forward."</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><use href="#mk01"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk01"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk01"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk01"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk01"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk01"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk01"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk01"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk01"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">Adaptive practice</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">Start practice</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk01"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">Adaptive practice</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">Start practice</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>Emerald mark on white — the default lockup.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#0F172A;flex:none;margin-top:4px"></span><span>White knockout on emerald for the app icon.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#059669;flex:none;margin-top:4px"></span><span>Mint reserved for the mastery node &amp; highlights.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk01"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">02</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 02 · = as progress</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">Ascending Equals</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">The equals sign — the instant a problem resolves into understanding — split into two bars that step upward. Balance and forward motion reduced to their absolute minimum. It reads at a glance, even at 16px.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><use href="#mk02"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk02"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk02"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk02"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk02"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk02"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk02"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk02"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk02"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">Adaptive practice</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">Start practice</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk02"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">Adaptive practice</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">Start practice</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>Two emerald bars; dark emerald deepens the lower bar at scale.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#0F172A;flex:none;margin-top:4px"></span><span>Reverses cleanly to white on emerald.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#059669;flex:none;margin-top:4px"></span><span>Mint powers progress fills &amp; active states.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk02"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">03</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 03 · M + radical</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">Root M</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">A confident geometric M whose central valley is sharpened into a radical stroke. The letter of the brand and the symbol of mathematics share one silhouette — a genuine monogram, never a mascot.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><use href="#mk03"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk03"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk03"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk03"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk03"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk03"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk03"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk03"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk03"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">AI math coach</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">Ask the coach</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk03"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">AI math coach</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">Ask the coach</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>Emerald monogram on white; white knockout on emerald.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#059669;flex:none;margin-top:4px"></span><span>Dark emerald for hover &amp; pressed states.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#D1FAE5;flex:none;margin-top:4px;border:1px solid rgba(15,23,42,0.12)"></span><span>Mint tints the counter space in large use.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk03"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">04</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 04 · √ = fused</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">Root Equals</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">The two ideas fused literally: a radical whose vinculum doubles into an equals sign. √ leads in, = resolves — the visual grammar of "the answer, understood" carried in a single mark.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><use href="#mk04"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk04"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk04"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk04"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk04"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk04"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk04"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk04"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk04"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">Visual learning</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">See it solved</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk04"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">Visual learning</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">See it solved</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>Emerald throughout; the paired bars may split emerald / dark.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#0F172A;flex:none;margin-top:4px"></span><span>White reversal for the app icon.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#059669;flex:none;margin-top:4px"></span><span>Mint underlines the equals in motion.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk04"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">05</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 05 · pure √ + mint</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">The Radical</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">The radical at its most essential, drawn with optical precision, the space beneath the root filled in mint — the value being understood. Photomath-simple, Linear-clean; the confident, timeless choice.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><rect x="20" y="14" width="24" height="24.5" rx="4" style="fill:#D1FAE5"></rect><use href="#mk05"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk05"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk05"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk05"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk05"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk05"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk05"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk05"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk05"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">Master the basics</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">Solve now</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk05"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">Master the basics</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">Solve now</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#D1FAE5;flex:none;margin-top:4px;border:1px solid rgba(15,23,42,0.12)"></span><span>Emerald stroke + mint radicand — the signature pairing.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>On emerald icons the radicand drops to white.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#0F172A;flex:none;margin-top:4px"></span><span>Slate anchors all supporting type.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk05"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px">
+    <div style="display:flex;align-items:flex-start;gap:26px;margin-bottom:40px">
+      <div style="font:800 clamp(56px,8vw,92px)/0.9 'Manrope',sans-serif;color:#10B981;letter-spacing:-0.04em;flex:none">06</div>
+      <div style="padding-top:8px;min-width:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Direction 06 · mastery, doubled</div>
+        <h2 style="font:800 clamp(28px,4vw,38px)/1.05 'Manrope',sans-serif;letter-spacing:-0.025em;margin:8px 0 0;color:#0F172A">Ascending Checks</h2>
+        <p style="max-width:620px;color:#475569;font-size:16px;line-height:1.6;margin:12px 0 0">Two check marks — the radical's tick, the universal sign of "right" — nested and climbing. Repeated correctness becomes visible momentum. Warm and motivating, unmistakably about learning, never finance.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:20px">
+      <div style="grid-column:span 7;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px;background:#FBFCFC;min-height:230px"><svg viewBox="0 0 48 48" width="140" height="140" style="color:#10B981;display:block"><use href="#mk06"></use></svg></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px;border-top:1px solid rgba(15,23,42,0.07)">
+          <div style="display:flex;align-items:flex-end;gap:24px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="48" height="48" style="color:#0F172A;display:block"><use href="#mk06"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">48</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="32" height="32" style="color:#0F172A;display:block"><use href="#mk06"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px"><svg viewBox="0 0 48 48" width="24" height="24" style="color:#0F172A;display:block"><use href="#mk06"></use></svg><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#94A3B8">24</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;text-align:right;max-width:150px;line-height:1.5">Crisp at 24px and below</div>
+        </div>
+      </div>
+      <div style="grid-column:span 5;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:26px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">App icon</div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><div style="width:108px;height:108px;border-radius:{{ iconR }};background:linear-gradient(160deg,#10B981,#059669);box-shadow:0 18px 34px -14px rgba(16,185,129,0.7);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="58" height="58" style="color:#fff;display:block"><use href="#mk06"></use></svg></div></div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#10B981;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#fff;display:block"><use href="#mk06"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">EMERALD</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#0F172A;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#34D399;display:block"><use href="#mk06"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">DARK</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:52px;height:52px;border-radius:{{ iconR }};background:#D1FAE5;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 48 48" width="30" height="30" style="color:#059669;display:block"><use href="#mk06"></use></svg></div><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#94A3B8">MINT</span></div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Light mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#10B981;display:block"><use href="#mk06"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:16px;height:7px;border-radius:4px;background:#E2E8F0"></span><span style="width:22px;height:22px;border-radius:50%;background:#D1FAE5"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#10B981">Daily streak</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#0F172A;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#fff;font-weight:700;font-size:13px">Keep going</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Dark mode</div>
+        <div style="margin-top:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;background:#0F172A">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 48 48" width="20" height="20" style="color:#ECFDF5;display:block"><use href="#mk06"></use></svg><span style="font:800 14px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC">Math<span style="color:#34D399">easy</span></span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:24px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:16px;height:7px;border-radius:4px;background:rgba(255,255,255,0.14)"></span><span style="width:22px;height:22px;border-radius:50%;background:#065F46"></span></div>
+          </div>
+          <div style="padding:20px 16px 22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#6EE7B7">Daily streak</div>
+            <div style="font:800 18px 'Manrope';letter-spacing:-0.02em;color:#F8FAFC;margin-top:7px;line-height:1.2">Understand<br/>every step.</div>
+            <div style="display:inline-flex;margin-top:16px;padding:9px 16px;border-radius:9px;background:#10B981;color:#04231A;font-weight:700;font-size:13px">Keep going</div>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:span 4;background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);padding:22px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#94A3B8">Color application</div>
+        <div style="display:flex;gap:8px;margin-top:14px"><span style="flex:1;height:34px;border-radius:8px;background:#10B981"></span><span style="flex:1;height:34px;border-radius:8px;background:#059669"></span><span style="flex:1;height:34px;border-radius:8px;background:#D1FAE5;border:1px solid rgba(15,23,42,0.06)"></span><span style="flex:1;height:34px;border-radius:8px;background:#0F172A"></span></div>
+        <ul style="list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:10px">
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#10B981;flex:none;margin-top:4px"></span><span>Emerald checks on white; white on emerald reversed.</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#059669;flex:none;margin-top:4px"></span><span>Dark emerald deepens the leading check (shown faded).</span></li>
+          <li style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;line-height:1.45"><span style="width:9px;height:9px;border-radius:50%;background:#D1FAE5;flex:none;margin-top:4px;border:1px solid rgba(15,23,42,0.12)"></span><span>Mint flags completed &amp; correct states.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(15,23,42,0.07);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,0.03),0 22px 44px -30px rgba(15,23,42,0.16);margin-top:20px;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 48 48" width="44" height="44" style="color:#10B981;display:block"><use href="#mk06"></use></svg><span style="font:800 34px 'Manrope';letter-spacing:-0.03em;color:#0F172A">Math<span style="color:{{ easyColor }}">easy</span></span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;letter-spacing:0.05em">MANROPE EXTRABOLD · −3% TRACKING</div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid rgba(15,23,42,0.08)">
+  <div style="max-width:1240px;margin:0 auto;padding:72px 40px 104px;text-align:center">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#10B981">Next step</div>
+    <h3 style="font:800 clamp(26px,4vw,34px)/1.1 'Manrope';letter-spacing:-0.025em;margin:12px 0 0;color:#0F172A">Tell me which direction to develop.</h3>
+    <p style="color:#475569;max-width:540px;margin:14px auto 0;font-size:16px;line-height:1.6">Reference any direction by its number — 01 through 06 — and I'll build the full system: clear-space, motion, favicon set, and a live product surface.</p>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;iconRadius&quot;: {&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:24,&quot;min&quot;:16,&quot;max&quot;:45,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;App icon&quot;},
+  &quot;wordmarkTwoTone&quot;: {&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Wordmark&quot;}
+}">
+class Component extends DCLogic {
+  renderVals() {
+    const pct = this.props.iconRadius ?? 24;
+    return {
+      iconR: pct + '%',
+      easyColor: this.props.wordmarkTwoTone ? '#10B981' : 'inherit'
+    };
+  }
+}
+</script>
+</body>
+</html>

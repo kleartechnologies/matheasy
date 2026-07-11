@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matheasy Brand Blue — adaptive app-icon background. -->
-    <color name="ic_launcher_background">#2563EB</color>
+    <!-- Matheasy Brand Emerald — adaptive app-icon background fallback. -->
+    <color name="ic_launcher_background">#10B981</color>
+    <!-- Launch splash background — brand page background (light). -->
+    <color name="launch_background">#F4F6F5</color>
 </resources>

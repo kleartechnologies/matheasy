@@ -7,6 +7,9 @@ import '../../subscription/domain/usage_quota.dart';
 class PaywallCopy {
   const PaywallCopy._();
 
+  // TODO(headline): consider a continuity-framed headline ("Keep learning
+  //   without limits") once A/B testing is set up — the paywall is shown mostly
+  //   to users who just hit a free-tier limit, so continuity may convert better.
   static const String headline = 'Unlock Unlimited Learning';
 
   /// The sub-headline, framed around what the user just bumped into so the pitch
@@ -39,18 +42,29 @@ class PaywallCopy {
     SubscriptionProduct? annual,
     SubscriptionProduct? monthly,
   ) {
-    final perMonth = annual?.pricePerMonthString;
     final savings = _savingsPercent(annual, monthly);
-    final savingLabel = 'Save $savings%';
-    if (perMonth != null && perMonth.isNotEmpty) {
-      return 'Just $perMonth/mo · $savingLabel';
+    final perMonth = annual?.pricePerMonthComputed;
+    final annualPrice = annual?.priceString;
+    // Only ever append a saving we could compute from BOTH prices shown, so the
+    // percentage can never contradict the two prices on the cards (e.g. a
+    // partial catalog where one plan is live and the other is a fallback).
+    final savingSuffix = savings != null ? ' · Save $savings%' : '';
+    // When a per-month price is available it becomes the card's headline price,
+    // so this value line carries the annual total (store-required to keep
+    // visible) plus the saving vs paying monthly.
+    if (perMonth != null && perMonth.isNotEmpty && annualPrice != null) {
+      return '$annualPrice billed yearly$savingSuffix';
     }
-    return '$savingLabel vs monthly';
+    // No per-month framing (e.g. no annual price at all): show the saving line
+    // when we can state one truthfully, else a neutral value cue.
+    return savings != null ? 'Save $savings% vs monthly' : 'Best value';
   }
 
-  /// Percentage saved by paying annually instead of 12× monthly. Falls back to
-  /// the spec's locked 37% when raw prices aren't available.
-  static int _savingsPercent(
+  /// Percentage saved by paying annually instead of 12× monthly, computed from
+  /// the two prices actually shown. Returns `null` (rather than a hardcoded
+  /// figure) whenever it can't be computed from both prices or the annual isn't
+  /// actually cheaper — so the paywall never asserts a saving it can't back up.
+  static int? _savingsPercent(
     SubscriptionProduct? annual,
     SubscriptionProduct? monthly,
   ) {
@@ -60,10 +74,10 @@ class PaywallCopy {
         monthlyPrice == null ||
         monthlyPrice <= 0 ||
         annualPrice <= 0) {
-      return 37;
+      return null;
     }
     final yearAtMonthly = monthlyPrice * 12;
-    if (yearAtMonthly <= annualPrice) return 0;
+    if (yearAtMonthly <= annualPrice) return null;
     return (((yearAtMonthly - annualPrice) / yearAtMonthly) * 100).round();
   }
 

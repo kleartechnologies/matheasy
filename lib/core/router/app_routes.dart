@@ -84,10 +84,10 @@ class AppRoutes {
 
   /// Branch index for each tab root (must match the order of branches in the
   /// [StatefulShellRoute]). Scan is NOT a branch — it's a full-screen route
-  /// pushed over the shell from the center Scan button.
+  /// pushed over the shell from the center Scan button. Tutor is no longer a
+  /// branch — the AI Tutor is contextual (a full-screen chat route).
   static const int homeBranch = 0;
   static const int practiceBranch = 1;
-  static const int tutorBranch = 2;
-  static const int profileBranch = 3;
-  static const int progressBranch = 4;
+  static const int profileBranch = 2;
+  static const int progressBranch = 3;
 }

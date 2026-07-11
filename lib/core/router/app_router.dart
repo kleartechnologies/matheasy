@@ -29,7 +29,6 @@ import '../../features/subscription/application/subscription_controller.dart';
 import '../../features/subscription/domain/paywall_trigger.dart';
 import '../../features/tutor/domain/tutor_models.dart';
 import '../../features/tutor/presentation/tutor_chat_screen.dart';
-import '../../features/tutor/presentation/tutor_screen.dart';
 import '../extensions/context_extensions.dart';
 import '../session/app_session.dart';
 import '../theme/app_spacing.dart';
@@ -114,6 +113,17 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const ManualInputScreen(),
       ),
+      // AI Tutor is a contextual feature, not a tab. The chat is reachable from
+      // result pages, Visual Learning, wrong answers and practice mistakes as a
+      // full-screen route over the shell.
+      GoRoute(
+        path: AppRoutes.tutorChat,
+        name: AppRoutes.tutorChatName,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => TutorChatScreen(
+          launchContext: state.extra as TutorLaunchContext?,
+        ),
+      ),
       GoRoute(
         path: AppRoutes.diagnostics,
         name: AppRoutes.diagnosticsName,
@@ -180,27 +190,7 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Branch 2 — Tutor
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.tutor,
-                name: AppRoutes.tutorName,
-                builder: (context, state) => const TutorScreen(),
-                routes: [
-                  GoRoute(
-                    path: AppRoutes.tutorChatSegment,
-                    name: AppRoutes.tutorChatName,
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => TutorChatScreen(
-                      launchContext: state.extra as TutorLaunchContext?,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          // Branch 3 — Profile
+          // Branch 2 — Profile
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -231,7 +221,7 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Branch 4 — Progress
+          // Branch 3 — Progress
           StatefulShellBranch(
             routes: [
               GoRoute(

@@ -24,8 +24,12 @@ class AppSpacing {
   /// Inner padding used by [AppCard] and most surfaces.
   static const double card = 16;
 
-  /// Bottom padding to clear the floating tab bar on scrollable screens.
-  static const double tabClearance = 120;
+  /// Bottom padding to clear the floating "liquid glass" tab bar on scrollable
+  /// screens. Sized for the bar's worst-case footprint (~78dp + bottom inset),
+  /// covering Android 3-button navigation (~48dp inset) as well as home-indicator
+  /// notches — so the last item never hides behind the frosted bar or the raised
+  /// Scan FAB.
+  static const double tabClearance = 128;
 
   /// Top padding to clear the status bar area on custom headers.
   static const double statusBar = 58;

@@ -217,8 +217,8 @@ void main() {
     });
 
     testWidgets('first-day dashboard shows starter content', (tester) async {
-      // Home now reads real progress providers (HomeProgressCard), so it needs
-      // seeded prefs + a fake auth backend.
+      // Home's greeting reads the profile provider, so it needs seeded prefs +
+      // a fake auth backend.
       final container = await sessionContainer();
       addTearDown(container.dispose);
       await tester.pumpWidget(
@@ -238,8 +238,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
 
-      // First-day CTA (only present when isFirstDay) proves the empty-state path.
-      expect(find.text('Start learning'), findsOneWidget);
+      // First-day starter content: the hero always shows, and the daily
+      // challenge renders even with no courses/recommendations yet.
+      expect(find.textContaining('solve today'), findsOneWidget);
+      expect(find.text('Solve your first problem'), findsOneWidget);
     });
   });
 

@@ -112,8 +112,11 @@ class AppColors {
   static const Color scannerBackground = Color(0xFF0A0F1C); // cool deep ink (camera)
   static const Color premiumNavy = Color(0xFF0E2A21); // deep emerald (premium)
   static const Color premiumNavyLight = Color(0xFF16493A); // mid emerald
-  static const Color paywallTop = Color(0xFF0F3B2D); // emerald
-  static const Color paywallBottom = Color(0xFF08150F); // near-black emerald-ink
+  // Paywall background — two very close deep-navy stops. The gap is deliberately
+  // near-imperceptible: this reads as depth, not a visible gradient (no colour
+  // shift, no glow). Fixed (theme-independent) because the paywall is always dark.
+  static const Color paywallTop = Color(0xFF0C1826); // navy (top)
+  static const Color paywallBottom = Color(0xFF07111F); // deeper navy (bottom) — matches dark bg
 
   // ---- Gradients ----
   static const LinearGradient primaryGradient = LinearGradient(
@@ -145,6 +148,9 @@ class AppColors {
     colors: [premiumNavy, premiumNavyLight],
   );
 
+  /// Paywall backdrop: a subtle vertical navy gradient (top → bottom) for depth
+  /// only. Both stops are dark enough that white / emerald / gold text stays
+  /// fully legible over it.
   static const LinearGradient paywallGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

@@ -1,6 +1,7 @@
-// Generates the official Matheasy app-icon assets (Concept C) for iOS and
-// Android from the exact same [MatheasyMarkPainter] used by the in-app logo, so
-// the shipped icon can never drift from the brand mark.
+// Generates the official Matheasy app-icon assets (the Emerald variant) for iOS
+// and Android from the exact same [MatheasyMarkPainter] used by the in-app logo,
+// so the shipped icon can never drift from the brand mark: a white two-tone
+// mark on an Emerald gradient tile (Emerald 500 -> 600).
 //
 // Run with:  flutter test tool/generate_app_icons.dart
 //
@@ -64,12 +65,17 @@ void _paintMark(Canvas canvas, double size, double fraction) {
   canvas.restore();
 }
 
+/// Emerald gradient tile paint (Emerald 500 -> 600), the brand icon fill.
+Paint _tilePaint(double size) {
+  return Paint()
+    ..shader = AppColors.iconGradient.createShader(
+      Rect.fromLTWH(0, 0, size, size),
+    );
+}
+
 /// Full opaque square (iOS masks its own corners — no alpha allowed).
 void _drawSquare(Canvas canvas, double size) {
-  canvas.drawRect(
-    Rect.fromLTWH(0, 0, size, size),
-    Paint()..color = AppColors.primary,
-  );
+  canvas.drawRect(Rect.fromLTWH(0, 0, size, size), _tilePaint(size));
   _paintMark(canvas, size, kMarkFraction);
 }
 
@@ -79,7 +85,7 @@ void _drawRounded(Canvas canvas, double size) {
     Rect.fromLTWH(0, 0, size, size),
     Radius.circular(size * kRadiusFraction),
   );
-  canvas.drawRRect(rrect, Paint()..color = AppColors.primary);
+  canvas.drawRRect(rrect, _tilePaint(size));
   _paintMark(canvas, size, kMarkFraction);
 }
 
@@ -99,7 +105,7 @@ Future<void> _write(String path, Uint8List bytes) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('generate iOS + Android app icons from Concept C', () async {
+  test('generate iOS + Android app icons (Emerald variant)', () async {
     final root = Directory.current.path;
 
     // ---- iOS: opaque square, every size in the appiconset ----

@@ -13,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/features/paywall/application/paywall_controller.dart';
+import 'package:matheasy/features/paywall/presentation/paywall_copy.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_screen.dart';
 import 'package:matheasy/features/practice/application/practice_controller.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
@@ -25,6 +26,7 @@ import 'package:matheasy/features/subscription/domain/entitlement.dart';
 import 'package:matheasy/features/subscription/domain/paywall_trigger.dart';
 import 'package:matheasy/features/subscription/domain/purchase_result.dart';
 import 'package:matheasy/features/subscription/domain/subscription_plan.dart';
+import 'package:matheasy/features/subscription/domain/subscription_product.dart';
 import 'package:matheasy/features/subscription/domain/subscription_status.dart';
 import 'package:matheasy/features/subscription/domain/usage_counts.dart';
 import 'package:matheasy/features/subscription/domain/usage_quota.dart';
@@ -421,19 +423,128 @@ void main() {
       expect(find.text('Annual Pro'), findsOneWidget);
       expect(find.text('Monthly Pro'), findsOneWidget);
       expect(find.text('Free'), findsOneWidget);
-      expect(find.textContaining('Start Pro'), findsOneWidget);
+      // The CTA carries no price — the price stays on the selected card + the
+      // auto-renew disclosure. 'Unlock Unlimited' is an exact match, so it does
+      // not collide with the 'Unlock Unlimited Learning' headline.
+      expect(find.text('Unlock Unlimited'), findsOneWidget);
       expect(find.text('Restore purchases'), findsOneWidget);
+      // Store-required disclosure stays intact and keeps the price visible.
+      expect(find.textContaining('Auto-renews at'), findsOneWidget);
     });
 
     testWidgets('purchasing shows the success celebration', (tester) async {
       final container = await pumpPaywall(tester);
-      await tester.tap(find.textContaining('Start Pro'));
+      await tester.tap(find.text('Unlock Unlimited'));
       await tester.pump(); // kick off purchase
       await tester.pump(); // settle result listener
       expect(find.text("You're all set!"), findsOneWidget);
       expect(container.read(isProProvider), isTrue);
       // Flush the auto-dismiss timer so none stays pending.
       await tester.pump(const Duration(seconds: 2));
+    });
+  });
+
+  group('SubscriptionProduct pricing (per-month framing)', () {
+    SubscriptionProduct annual({
+      required String priceString,
+      double? rawPrice,
+      String? pricePerMonthString,
+    }) => SubscriptionProduct(
+      plan: SubscriptionPlan.proAnnual,
+      priceString: priceString,
+      rawPrice: rawPrice,
+      pricePerMonthString: pricePerMonthString,
+    );
+
+    test('extracts the currency symbol the store returned', () {
+      expect(annual(priceString: 'RM149.99').currencySymbol, 'RM');
+      expect(annual(priceString: r'$59.99').currencySymbol, r'$');
+      expect(annual(priceString: '€9,99').currencySymbol, '€');
+      expect(annual(priceString: 'RM0').currencySymbol, 'RM');
+      // Non-Latin numerals (Devanagari) must not leak into the symbol.
+      expect(annual(priceString: '₹१,२९९').currencySymbol, '₹');
+    });
+
+    test('computes per-month as annual ÷ 12 with the store symbol (MYR)', () {
+      // 149.99 / 12 = 12.4991… → 12.50, symbol taken from the price string.
+      expect(
+        annual(priceString: 'RM149.99', rawPrice: 149.99).pricePerMonthComputed,
+        'RM12.50',
+      );
+    });
+
+    test('renders correctly on a non-MYR storefront (USD)', () {
+      expect(
+        annual(priceString: r'$60.00', rawPrice: 60).pricePerMonthComputed,
+        r'$5.00',
+      );
+    });
+
+    test('prefers the store localized per-month string over hand-computing', () {
+      // A comma-decimal locale: the store string must win so the numerals and
+      // separator stay correct (hand-computing would force "€12.50").
+      expect(
+        annual(
+          priceString: '€149,99',
+          rawPrice: 149.99,
+          pricePerMonthString: '€12,50',
+        ).pricePerMonthComputed,
+        '€12,50',
+      );
+    });
+
+    test('computes only when the store gives no per-month string, else null',
+        () {
+      // No store per-month + no raw price -> null (no live price to compute).
+      expect(annual(priceString: 'RM149.99').pricePerMonthComputed, isNull);
+    });
+
+    test('annual value line shows the billed-yearly total + computed saving',
+        () {
+      final a = annual(priceString: 'RM149.99', rawPrice: 149.99);
+      const m = SubscriptionProduct(
+        plan: SubscriptionPlan.proMonthly,
+        priceString: 'RM19.99',
+        rawPrice: 19.99,
+      );
+      // 12×19.99 = 239.88; (239.88−149.99)/239.88 ≈ 37%.
+      expect(
+        PaywallCopy.annualValueLine(a, m),
+        'RM149.99 billed yearly · Save 37%',
+      );
+    });
+
+    test('saving reconciles with the prices shown (never a fabricated %)', () {
+      // Partial catalog: annual is live (RM120/yr) but monthly fell back to its
+      // constant (RM19.99). The saving must be computed from those two shown
+      // prices — 12×19.99=239.88 vs 120 -> ~50% — not a hardcoded 37%.
+      final liveAnnual = annual(priceString: 'RM120.00', rawPrice: 120);
+      final fallbackMonthly =
+          SubscriptionProduct.fallback(SubscriptionPlan.proMonthly);
+      expect(
+        PaywallCopy.annualValueLine(liveAnnual, fallbackMonthly),
+        'RM120.00 billed yearly · Save 50%',
+      );
+    });
+
+    test('fallback products carry a numeric price parsed from the constant', () {
+      expect(
+        SubscriptionProduct.fallback(SubscriptionPlan.proAnnual).rawPrice,
+        149.99,
+      );
+      // Offline (both fallback) still reconciles: 149.99 vs 12×19.99 -> 37%.
+      expect(
+        PaywallCopy.annualValueLine(
+          SubscriptionProduct.fallback(SubscriptionPlan.proAnnual),
+          SubscriptionProduct.fallback(SubscriptionPlan.proMonthly),
+        ),
+        'RM149.99 billed yearly · Save 37%',
+      );
+    });
+
+    test('no savings claim when it cannot be computed from both prices', () {
+      // With no price data at all we must not assert any percentage.
+      expect(PaywallCopy.annualValueLine(null, null), 'Best value');
     });
   });
 }
