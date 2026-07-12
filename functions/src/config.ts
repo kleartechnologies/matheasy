@@ -59,3 +59,30 @@ export const UNLIMITED = -1;
 
 /** The metered features the server enforces quotas for. */
 export type MeteredFeature = keyof typeof FREE_QUOTA;
+
+/**
+ * Per-user, server-enforced RATE LIMITS on the paid OpenAI endpoints (spec §10).
+ *
+ * These are the cost/abuse backstop that the free-tier quota can't provide:
+ *   • the free `scans` quota is a lifetime total, not a rate — it can't stop a
+ *     retry-loop bug from firing thousands of calls in a minute;
+ *   • Pro users are quota-unlimited, so WITHOUT a rate limit a single looping or
+ *     compromised Pro account could run an unbounded OpenAI bill;
+ *   • `solveEquation(countAsScan:false)` skips the quota check (a scan already
+ *     paid for OCR-sourced problems) yet still makes a paid LLM narration call —
+ *     the rate limit is what caps that otherwise-uncapped path.
+ *
+ * Applied to EVERY user (free and Pro) BEFORE the paid call. The ceilings are
+ * generous for a human (a person can't scan 20 problems in a minute) but tight
+ * for a script/loop. A `perMinute` catches bursts; a `perDay` caps slow drip.
+ */
+export const RATE_LIMITS = {
+  recognize: { perMinute: 20, perDay: 300 },
+  solve: { perMinute: 30, perDay: 400 },
+  tutor: { perMinute: 30, perDay: 300 },
+  visual: { perMinute: 15, perDay: 100 },
+  practice: { perMinute: 20, perDay: 200 },
+} as const;
+
+/** The paid endpoints the server rate-limits per user. */
+export type RateLimitedAction = keyof typeof RATE_LIMITS;

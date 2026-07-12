@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matheasy/app.dart';
 import 'package:matheasy/core/router/app_routes.dart';
@@ -32,8 +33,14 @@ import 'package:matheasy/features/scan/application/scanner_service.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
 import 'package:matheasy/features/scan/domain/scan_state.dart';
+import 'package:matheasy/features/scan/presentation/manual_input_screen.dart';
 import 'package:matheasy/features/scan/presentation/scanner_screen.dart';
+import 'package:matheasy/features/scan/presentation/widgets/capture_confirmation.dart';
 import 'package:matheasy/features/splash/presentation/splash_screen.dart';
+import 'package:matheasy/features/subscription/application/usage_controller.dart';
+import 'package:matheasy/features/subscription/domain/usage_counts.dart';
+import 'package:matheasy/features/subscription/domain/usage_quota.dart';
+import 'package:matheasy/features/subscription/domain/usage_snapshot.dart';
 
 import 'support/fake_auth_service.dart';
 
@@ -297,6 +304,101 @@ void main() {
       expect(find.byIcon(Icons.photo_library_rounded), findsOneWidget);
       expect(find.byIcon(Icons.keyboard_rounded), findsOneWidget);
     });
+
+    testWidgets('a capped free user is sent to the paywall before capturing',
+        (tester) async {
+      // Gallery works without a live camera, so it's the tappable path in tests.
+      // A capped user tapping it must hit the EXISTING paywall — never the
+      // picker — so no scan is spent (spec §2/§10 pre-scan gate).
+      final router = GoRouter(
+        initialLocation: '/scan',
+        routes: [
+          GoRoute(path: '/scan', builder: (_, _) => const ScannerScreen()),
+          GoRoute(
+            path: AppRoutes.paywall,
+            builder: (_, _) => const Text('PAYWALL_STUB'),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            usageSnapshotProvider.overrideWith(
+              (ref) => const UsageSnapshot(
+                counts: UsageCounts(scansUsed: 5), // at the free cap
+                quota: UsageQuota.free,
+                isPro: false,
+              ),
+            ),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump(); // let _initCamera() reject (no plugin in tests)
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.photo_library_rounded));
+      await tester.pump(); // start the route transition
+      await tester.pump(const Duration(milliseconds: 600)); // finish it
+
+      expect(find.text('PAYWALL_STUB'), findsOneWidget);
+    });
+
+    testWidgets('detected equation is tappable-to-edit; low confidence prompts a '
+        'check (§3)', (tester) async {
+      var edited = false;
+      const lowConf = DetectedEquation(
+        latex: r'5x^2 + 3x - 2 = 0',
+        confidence: 0.5, // below CaptureConfirmation.lowConfidenceThreshold
+        source: ScanSource.camera,
+        kind: EquationKind.quadratic,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: CaptureConfirmation(
+              equation: lowConf,
+              onRetake: () {},
+              onContinue: () {},
+              onEdit: () => edited = true,
+            ),
+          ),
+        ),
+      );
+
+      // Low confidence → a "check this" prompt, not a confident "detected".
+      expect(find.textContaining('CHECK THIS'), findsOneWidget);
+      expect(find.textContaining('tap the problem to fix'), findsOneWidget);
+      // The primary action reads "Solve".
+      expect(find.text('Solve'), findsOneWidget);
+      // The equation itself is tappable → opens the editor.
+      await tester.tap(find.byIcon(Icons.edit_rounded));
+      expect(edited, isTrue);
+    });
+
+    testWidgets('the editor pre-fills with the recognized LaTeX in edit mode (§3)',
+        (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ManualInputScreen(
+              args: ManualInputArgs(
+                initialLatex: r'2x + 5 = 13',
+                editMode: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Pre-filled with the recognized LaTeX (not blank) and in edit mode.
+      expect(find.text(r'2x + 5 = 13'), findsOneWidget);
+      expect(find.text('Fix the problem'), findsOneWidget);
+      expect(find.text('Use this'), findsOneWidget); // not "Solve"
+    });
   });
 
   group('Result', () {
@@ -360,7 +462,13 @@ void main() {
       expect(fraction.type, ResultType.fraction);
     });
 
-    testWidgets('screen solves and renders the solution', (tester) async {
+    testWidgets('screen solves; steps reveal one at a time (§5)', (tester) async {
+      // Keep the default 800 width (no IntrinsicHeight sub-pixel overflow) but
+      // taller, so "Reveal all" is on-screen and tappable.
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -375,6 +483,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600)); // solve delay
       expect(find.text('Linear Equation'), findsOneWidget);
       expect(find.text('FINAL ANSWER'), findsOneWidget);
+      // One-at-a-time (spec §5): the first step shows; a later one is hidden
+      // behind "Next step".
+      expect(find.text('Start with the equation'), findsOneWidget);
+      expect(find.text('Subtract 5 from both sides'), findsNothing);
+      expect(find.textContaining('Next step'), findsOneWidget);
+
+      // Reveal all → the later step appears.
+      await tester.tap(find.text('Reveal all'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Subtract 5 from both sides'), findsOneWidget);
     });
 

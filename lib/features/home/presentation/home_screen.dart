@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../history/application/history_controller.dart';
 import '../application/home_controller.dart';
 import 'sections/home_continue_card.dart';
 import 'sections/home_daily_challenge_card.dart';
 import 'sections/home_greeting.dart';
 import 'sections/home_hero.dart';
+import 'sections/home_recent_section.dart';
 import 'sections/home_recommended_card.dart';
 
 /// The Matheasy Home — deliberately not a dashboard.
@@ -24,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(homeControllerProvider);
+    final recent = ref.watch(historyControllerProvider);
 
     final sections = <Widget>[
       HomeGreeting(userName: data.userName),
@@ -34,6 +37,8 @@ class HomeScreen extends ConsumerWidget {
         HomeRecommendedCard(topic: data.weakTopics.first),
       if (data.todayChallenge != null)
         HomeDailyChallengeCard(challenge: data.todayChallenge!),
+      if (recent.isNotEmpty)
+        HomeRecentSection(entries: recent.take(3).toList()),
     ];
 
     return Scaffold(

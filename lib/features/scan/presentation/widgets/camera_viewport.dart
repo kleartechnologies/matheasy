@@ -17,6 +17,8 @@ class CameraViewport extends StatelessWidget {
     required this.controller,
     this.error,
     this.onEnableCamera,
+    this.onOpenSettings,
+    this.onType,
   });
 
   /// The initialized camera controller, or `null` while initializing / on error.
@@ -25,8 +27,14 @@ class CameraViewport extends StatelessWidget {
   /// The failure that stopped the camera from starting, if any.
   final Object? error;
 
-  /// Invoked when the user taps "Enable camera" after a permission denial.
+  /// Retries camera init (e.g. after granting access in Settings).
   final VoidCallback? onEnableCamera;
+
+  /// Opens the OS app-settings page so a denied camera can be re-enabled.
+  final VoidCallback? onOpenSettings;
+
+  /// Opens the manual math keyboard — always available when the camera isn't.
+  final VoidCallback? onType;
 
   bool get _permissionDenied {
     final e = error;
@@ -44,6 +52,8 @@ class CameraViewport extends StatelessWidget {
       permissionDenied: _permissionDenied,
       hasError: error != null,
       onEnableCamera: onEnableCamera,
+      onOpenSettings: onOpenSettings,
+      onType: onType,
     );
   }
 }
@@ -77,11 +87,15 @@ class _FallbackScene extends StatelessWidget {
     required this.permissionDenied,
     required this.hasError,
     required this.onEnableCamera,
+    required this.onOpenSettings,
+    required this.onType,
   });
 
   final bool permissionDenied;
   final bool hasError;
   final VoidCallback? onEnableCamera;
+  final VoidCallback? onOpenSettings;
+  final VoidCallback? onType;
 
   @override
   Widget build(BuildContext context) {
@@ -98,55 +112,156 @@ class _FallbackScene extends StatelessWidget {
           stops: [0, 0.55, 1],
         ),
       ),
+      // A denied permission needs the Settings deep-link; any other camera
+      // failure (restricted / no camera / busy) still gets an honest message and
+      // a way forward — never an unexplained blank preview (spec §9).
       child: permissionDenied
-          ? _PermissionPrompt(onEnableCamera: onEnableCamera)
-          : const SizedBox.expand(),
+          ? _CameraUnavailable(
+              icon: Icons.no_photography_rounded,
+              title: 'Matheasy needs the camera to scan problems',
+              body: "It's turned off right now. Turn it on in Settings, or "
+                  'pick a photo or type the problem instead.',
+              primaryLabel: 'Open Settings',
+              onPrimary: onOpenSettings,
+              onRetry: onEnableCamera,
+              onType: onType,
+            )
+          : hasError
+              ? _CameraUnavailable(
+                  icon: Icons.videocam_off_rounded,
+                  title: 'Your camera isn’t available',
+                  body: 'Something’s blocking it on this device. You can still '
+                      'pick a photo or type the problem in.',
+                  onRetry: onEnableCamera,
+                  onType: onType,
+                )
+              : const SizedBox.expand(),
     );
   }
 }
 
-class _PermissionPrompt extends StatelessWidget {
-  const _PermissionPrompt({required this.onEnableCamera});
+/// The calm, directive camera-unavailable state (denied / restricted / no
+/// camera). Gives the way forward — Settings and/or retry, and always the
+/// manual-entry escape — rather than an apology or a blank screen.
+class _CameraUnavailable extends StatelessWidget {
+  const _CameraUnavailable({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.onRetry,
+    required this.onType,
+    this.primaryLabel,
+    this.onPrimary,
+  });
 
-  final VoidCallback? onEnableCamera;
+  final IconData icon;
+  final String title;
+  final String body;
+  final VoidCallback? onRetry;
+  final VoidCallback? onType;
+  final String? primaryLabel;
+  final VoidCallback? onPrimary;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.no_photography_rounded,
-                color: AppColors.white, size: 48),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Camera access is off',
-              textAlign: TextAlign.center,
-              style: AppTypography.title.copyWith(color: AppColors.white),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Enable camera access in Settings, or use Gallery or Type it below.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodySmall
-                  .copyWith(color: Colors.white.withValues(alpha: 0.75)),
-            ),
-            if (onEnableCamera != null) ...[
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: AppColors.white, size: 48),
               const SizedBox(height: AppSpacing.lg),
-              OutlinedButton.icon(
-                onPressed: onEnableCamera,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.white,
-                  side: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.4)),
-                ),
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try again'),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: AppTypography.title.copyWith(color: AppColors.white),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                body,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall
+                    .copyWith(color: Colors.white.withValues(alpha: 0.75)),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  if (primaryLabel != null && onPrimary != null)
+                    _GlassPill(
+                      icon: Icons.settings_rounded,
+                      label: primaryLabel!,
+                      onTap: onPrimary!,
+                    ),
+                  if (onType != null)
+                    _GlassPill(
+                      icon: Icons.keyboard_rounded,
+                      label: 'Type it in',
+                      onTap: onType!,
+                    ),
+                  if (onRetry != null)
+                    _GlassPill(
+                      icon: Icons.refresh_rounded,
+                      label: 'Try again',
+                      onTap: onRetry!,
+                    ),
+                ],
               ),
             ],
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassPill extends StatelessWidget {
+  const _GlassPill({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 48),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: AppColors.white, size: 18),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  label,
+                  style: AppTypography.button.copyWith(color: AppColors.white),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

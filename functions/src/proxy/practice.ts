@@ -19,6 +19,7 @@ import { logger } from "firebase-functions/v2";
 import { OPENAI_API_KEY, OPENAI_MODEL, PRO_ENTITLEMENT_ID } from "../config";
 import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
+import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
 
 interface PracticeRequest {
@@ -88,6 +89,7 @@ export const generatePracticeQuestion = onCall(
     const requested = Math.max(1, Math.min(MAX_COUNT, Number(count) || 3));
 
     await ensureUserDoc(uid);
+    await assertWithinRateLimit(uid, "practice");
 
     // Adaptive / AI-generated practice is Pro-exclusive — enforce server-side.
     const entitlement = await getEntitlement(uid);

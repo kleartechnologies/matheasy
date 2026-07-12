@@ -1,3 +1,5 @@
+import 'dart:ui' show Offset;
+
 import '../../scan/domain/detected_equation.dart';
 import '../../scan/domain/scan_source.dart';
 import '../domain/result_models.dart';
@@ -26,8 +28,18 @@ class FunctionsSolverService implements SolverService {
   }
 }
 
-/// Pure JSON → [ResultData] mapping for the `solveEquation` response. Kept
-/// separate so it's unit-testable without any Firebase plugin.
+/// Pure JSON → [ResultData] mapping for the `solveEquation` response.
+///
+/// The Cloud Function returns the deterministic §4 schema (`problemLatex`,
+/// `problemType`, `finalAnswer {latex, plain}`, `verified`, `methods[{id, name,
+/// examPick, steps[{expression, operation, why}]}]`, `graph`). We map it onto the
+/// existing [ResultData] the result UI already renders:
+///   • the worked steps come from the exam-pick method,
+///   • `verified` drives an honest verify line (spec §1.1),
+///   • explanations / practice aren't part of §4 (separate features), so they
+///     map to empty lists — the Explain/Practice tabs already show empty states.
+///
+/// Kept separate so it's unit-testable without any Firebase plugin.
 class SolveResponseMapper {
   const SolveResponseMapper._();
 
@@ -35,65 +47,132 @@ class SolveResponseMapper {
     DetectedEquation equation,
     Map<String, dynamic> json,
   ) {
+    final verified = json['verified'] == true;
+    final finalAnswer = json['finalAnswer'];
+    final answerLatex = finalAnswer is Map ? _str(finalAnswer['latex']) : '';
+    final answerPlain = finalAnswer is Map ? _str(finalAnswer['plain']) : '';
+
+    final methods = _list(json['methods'], _method);
+    final examMethod = _pickExamMethod(json['methods']);
+
     return ResultData(
       equation: equation,
-      type: _enumByName(ResultType.values, json['type']) ?? ResultType.expression,
-      difficulty:
-          _enumByName(Difficulty.values, json['difficulty']) ?? Difficulty.medium,
-      answerLatex: _str(json['answerLatex']),
-      verifyText: _str(json['verifyText']),
-      tutorIntro: _str(json['tutorIntro'], fallback: "Here's the solution."),
-      steps: _list(json['steps'], _step),
-      explanations: _list(json['explanations'], _explanation)
-          .whereType<Explanation>()
-          .toList(),
-      methods: _list(json['methods'], _method),
-      practice: _list(json['practice'], _practice),
+      type: _typeFor(_str(json['problemType']), equation.kind),
+      difficulty: Difficulty.medium,
+      answerLatex: answerLatex,
+      answerPlain: answerPlain,
+      verified: verified,
+      verifyText: verified
+          ? 'Checked by substituting the answer back into the problem ✓'
+          : "Matheasy couldn't verify this answer — try re-scanning or "
+              'typing it in.',
+      tutorIntro: verified
+          ? "Here's the solution — tap any step to see why it works."
+          : "I couldn't fully check this one, so I'd rather not guess.",
+      steps: examMethod == null ? const [] : _list(examMethod['steps'], _step),
+      explanations: const [], // not in §4 — Explain tab shows its empty state
+      methods: methods,
+      practice: const [], // not in §4 — Practice tab shows its empty state
+      graph: _graph(json['graph']),
     );
   }
 
-  static SolutionStep _step(Map<String, dynamic> m) => SolutionStep(
-        title: _str(m['title']),
-        resultLatex: _str(m['resultLatex']),
-        detail: _str(m['detail']),
-        operationLabel: (m['operationLabel'] as String?)?.trim().isEmpty ?? true
-            ? null
-            : m['operationLabel'] as String,
-      );
-
-  static Explanation? _explanation(Map<String, dynamic> m) {
-    final mode = _enumByName(ExplanationMode.values, m['mode']);
-    if (mode == null) return null;
-    return Explanation(
-      mode: mode,
-      body: _str(m['body']),
-      points: _strList(m['points']),
+  static SolutionStep _step(Map<String, dynamic> m) {
+    final operation = _str(m['operation']);
+    return SolutionStep(
+      title: operation.isEmpty ? 'Step' : operation,
+      resultLatex: _str(m['expression']),
+      detail: _str(m['why']),
+      operationLabel: operation.isEmpty ? null : operation,
     );
   }
 
   static MethodSolution _method(Map<String, dynamic> m) => MethodSolution(
-        name: _str(m['name']),
-        subtitle: _str(m['subtitle']),
-        description: _str(m['description']),
-        advantages: _strList(m['advantages']),
-        whenToUse: _str(m['whenToUse']),
-        steps: _strList(m['steps']),
-        recommended: m['recommended'] == true,
+        name: _str(m['name'], fallback: 'Method'),
+        subtitle: '',
+        description: '',
+        advantages: const [],
+        whenToUse: '',
+        // The methods tab lists each step's resulting expression as text…
+        steps: _list(m['steps'], (s) => _str(s['expression']))
+            .where((s) => s.isNotEmpty)
+            .toList(),
+        // …while the Solution-tab switcher renders this method's OWN structured
+        // stepper (expression + operation + why) — spec §5.
+        stepperSteps: _list(m['steps'], _step),
+        recommended: m['examPick'] == true,
       );
 
-  static PracticeQuestion _practice(Map<String, dynamic> m) => PracticeQuestion(
-        questionLatex: _str(m['questionLatex']),
-        difficulty:
-            _enumByName(Difficulty.values, m['difficulty']) ?? Difficulty.medium,
-        xpReward: m['xpReward'] is int ? m['xpReward'] as int : 20,
-      );
+  static GraphData? _graph(Object? g) {
+    if (g is! Map) return null;
+    final expression = _str(g['expression']);
+    if (expression.isEmpty) return null;
+    final points =
+        _list(g['keyPoints'], _keyPoint).whereType<GraphKeyPoint>().toList();
+    final curve = <Offset>[];
+    final rawCurve = g['curve'];
+    if (rawCurve is List) {
+      for (final p in rawCurve) {
+        if (p is Map) {
+          final x = p['x'];
+          final y = p['y'];
+          if (x is num && y is num) curve.add(Offset(x.toDouble(), y.toDouble()));
+        }
+      }
+    }
+    return GraphData(
+      kind: _str(g['kind'], fallback: 'function'),
+      expression: expression,
+      keyPoints: points,
+      curve: curve,
+    );
+  }
+
+  static GraphKeyPoint? _keyPoint(Map<String, dynamic> m) {
+    final x = m['x'];
+    final y = m['y'];
+    if (x is! num || y is! num) return null;
+    return GraphKeyPoint(label: _str(m['label']), x: x.toDouble(), y: y.toDouble());
+  }
+
+  /// The first method with `examPick: true`, else the first method, else null.
+  static Map<String, dynamic>? _pickExamMethod(Object? methods) {
+    if (methods is! List) return null;
+    Map<String, dynamic>? first;
+    for (final m in methods) {
+      if (m is Map) {
+        final mm = Map<String, dynamic>.from(m);
+        first ??= mm;
+        if (mm['examPick'] == true) return mm;
+      }
+    }
+    return first;
+  }
+
+  /// Map the §4 snake-case `problemType` onto the display [ResultType], keeping
+  /// the pre-solve fraction caption when the server just calls it arithmetic.
+  static ResultType _typeFor(String problemType, EquationKind kind) {
+    switch (problemType) {
+      case 'linear_equation':
+        return ResultType.linear;
+      case 'quadratic_equation':
+      case 'polynomial_equation':
+        return ResultType.quadratic;
+      case 'trigonometric_equation':
+        return ResultType.trigonometry;
+      case 'arithmetic':
+      case 'expression':
+        return kind == EquationKind.fraction
+            ? ResultType.fraction
+            : ResultType.expression;
+      default:
+        return ResultType.expression;
+    }
+  }
 
   // ---- Helpers ----
   static String _str(Object? v, {String fallback = ''}) =>
-      v is String && v.isNotEmpty ? v : fallback;
-
-  static List<String> _strList(Object? v) =>
-      v is List ? [for (final e in v) if (e is String) e] : const [];
+      v is String && v.trim().isNotEmpty ? v.trim() : fallback;
 
   static List<T> _list<T>(Object? v, T Function(Map<String, dynamic>) map) =>
       v is List
@@ -102,12 +181,4 @@ class SolveResponseMapper {
                 if (e is Map) map(Map<String, dynamic>.from(e)),
             ]
           : const [];
-
-  static T? _enumByName<T extends Enum>(List<T> values, Object? name) {
-    if (name is! String) return null;
-    for (final value in values) {
-      if (value.name == name) return value;
-    }
-    return null;
-  }
 }

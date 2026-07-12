@@ -33,9 +33,22 @@ class _ExplainTabState extends State<ExplainTab> {
   @override
   Widget build(BuildContext context) {
     if (widget.explanations.isEmpty) {
-      return const ResultEmpty(
-        message: 'No explanation yet — Matheasy is still thinking about the best '
-            'way to teach this.',
+      // Honest: there's no write-up for this one — offer the tutor instead of
+      // pretending something is loading (spec §9 — a way forward, not a mood).
+      return Column(
+        children: [
+          const ResultEmpty(
+            message: 'No write-up for this one — but I can talk you through '
+                'it step by step.',
+          ),
+          const SizedBox(height: AppSpacing.md),
+          PrimaryButton(
+            label: 'Ask Matheasy',
+            icon: Icons.forum_rounded,
+            expand: false,
+            onPressed: widget.onAskMatheasy,
+          ),
+        ],
       );
     }
 

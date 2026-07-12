@@ -118,7 +118,7 @@ final class TutorChatControllerProvider
 }
 
 String _$tutorChatControllerHash() =>
-    r'7c802ae998cd13d05588148a1aa27e67dce783cc';
+    r'61632908b5d3480ca2f6763413a803b98f6dc91c';
 
 /// Drives the live chat conversation with Matheasy.
 ///

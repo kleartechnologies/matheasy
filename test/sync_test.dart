@@ -53,6 +53,7 @@ Map<SyncDomain, CloudRepository> _repos(CloudStore store) => {
       SyncDomain.achievements: CloudAchievementRepository(store),
       SyncDomain.usage: CloudUsageRepository(store),
       SyncDomain.analytics: CloudAnalyticsRepository(store),
+      SyncDomain.history: CloudHistoryRepository(store),
     };
 
 FirestoreSyncService _service(

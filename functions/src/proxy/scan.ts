@@ -17,7 +17,8 @@ import {
   ensureUserDoc,
   incrementUsage,
 } from "../lib/firestore";
-import { chatVisionJson, createOpenAI } from "../lib/openai";
+import { assertWithinRateLimit } from "../lib/rateLimit";
+import { chatVisionJson, createOpenAI, moderateImage } from "../lib/openai";
 
 interface ScanRequest {
   imageBase64?: string;
@@ -80,11 +81,32 @@ export const recognizeEquation = onCall(
       : `data:${mimeType};base64,${imageBase64}`;
 
     await ensureUserDoc(uid);
+    // Rate limit BEFORE the quota check and the paid call — the abuse backstop
+    // that caps every user (free and Pro), spec §10.
+    await assertWithinRateLimit(uid, "recognize");
     await assertWithinQuota(uid, "scans");
+
+    const client = createOpenAI(OPENAI_API_KEY.value());
+
+    // COPPA moderation gate (minors, 8–18): screen the image BEFORE the paid
+    // vision call so inappropriate content is never processed. Fails CLOSED on a
+    // flag (rejects), and OPEN on a moderation-service error — the isMath output
+    // contract below is the backstop, so the model can still only ever return
+    // math LaTeX, never arbitrary content.
+    const verdict = await moderateImage(client, imageDataUri);
+    if (verdict.flagged) {
+      logger.warn("recognizeEquation blocked by moderation", {
+        uid,
+        categories: verdict.categories,
+      });
+      throw new HttpsError(
+        "invalid-argument",
+        "That image can’t be scanned. Point the camera at a math problem."
+      );
+    }
 
     let result: ScanPayload;
     try {
-      const client = createOpenAI(OPENAI_API_KEY.value());
       result = await chatVisionJson<ScanPayload>(
         client,
         OPENAI_MODEL.value(),

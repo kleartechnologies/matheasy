@@ -53,7 +53,7 @@ final class ScannerControllerProvider
   }
 }
 
-String _$scannerControllerHash() => r'8e2aac1174258caddf0d50e1c72733a002d1c47b';
+String _$scannerControllerHash() => r'fdd77c3601501d7febe7a7ba217d9d27feb7b48b';
 
 /// Drives the scanner [ScanState] machine off the [ScannerService].
 ///

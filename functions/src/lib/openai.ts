@@ -12,6 +12,45 @@ export function createOpenAI(apiKey: string): OpenAI {
   return new OpenAI({ apiKey });
 }
 
+export interface ModerationVerdict {
+  flagged: boolean;
+  categories: string[];
+}
+
+/**
+ * COPPA safety gate for the vision path (spec §10). Screens an image with
+ * OpenAI's free `omni-moderation-latest` model BEFORE the paid vision call so
+ * inappropriate content is never processed into an answer.
+ *
+ * Deliberately fails OPEN (returns `flagged:false`) on any moderation-service
+ * error: an outage must not take the whole scanner down, and the caller's
+ * math-only output contract is the backstop — a flagged image that slipped
+ * through can still only ever come back as `isMath:false` → rejected. It fails
+ * CLOSED (`flagged:true`) only on a real, positive moderation flag.
+ */
+export async function moderateImage(
+  client: OpenAI,
+  imageDataUri: string
+): Promise<ModerationVerdict> {
+  try {
+    const result = await client.moderations.create({
+      model: "omni-moderation-latest",
+      input: [{ type: "image_url", image_url: { url: imageDataUri } }],
+    });
+    const first = result.results?.[0];
+    if (!first) return { flagged: false, categories: [] };
+    const categories = Object.entries(first.categories ?? {})
+      .filter(([, on]) => on === true)
+      .map(([name]) => name);
+    return { flagged: first.flagged === true, categories };
+  } catch (err) {
+    logger.warn("Image moderation unavailable — proceeding on the math-only backstop", {
+      err: String(err),
+    });
+    return { flagged: false, categories: [] };
+  }
+}
+
 export interface ChatJsonOptions {
   /** Lower = more deterministic. Math wants a steady hand. */
   temperature?: number;

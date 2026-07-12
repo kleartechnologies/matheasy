@@ -11,6 +11,7 @@ import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
+import 'functions_scanner_service.dart';
 import 'scanner_service.dart';
 
 part 'scanner_controller.g.dart';
@@ -66,9 +67,18 @@ class ScannerController extends _$ScannerController {
       )));
       // The server can reject on quota even if the optimistic client counter is
       // behind — hand the screen a paywall signal rather than a raw error.
-      state = error.isQuotaExceeded
-          ? const ScanQuotaExceeded()
-          : ScanError(error.message);
+      // Otherwise map the failure to an honest §9 state (spec §9): a dropped
+      // connection, an unreadable image, or an unexpected error each get their
+      // own voice + next action rather than one generic "something went wrong".
+      if (error.isQuotaExceeded) {
+        state = const ScanQuotaExceeded();
+      } else if (error.isOffline) {
+        state = ScanError(error.message, kind: ScanErrorKind.offline);
+      } else if (error.code == 'not-found') {
+        state = ScanError(error.message, kind: ScanErrorKind.couldntRecognize);
+      } else {
+        state = ScanError(error.message);
+      }
     } catch (error, stack) {
       if (_disposed) return;
       LoggingService.error('Recognition error', error: error, stackTrace: stack);
@@ -82,6 +92,24 @@ class ScannerController extends _$ScannerController {
 
   /// Discards the current capture / error and returns to the live preview.
   void retake() => state = const ScanIdle();
+
+  /// Applies a user-corrected LaTeX (from the §3 detected-equation editor) to
+  /// the current capture. The scan SOURCE is preserved, so re-solving the fixed
+  /// problem goes through the SAME already-charged scan — never a second one.
+  /// Confidence becomes 100% (a human verified it) and the kind is re-inferred.
+  void applyEdit(String latex) {
+    final current = state;
+    if (current is! ScanCaptured) return;
+    final trimmed = latex.trim();
+    if (trimmed.isEmpty) return;
+    state = ScanCaptured(
+      current.equation.copyWith(
+        latex: trimmed,
+        confidence: 1,
+        kind: FunctionsScannerService.inferKind(trimmed),
+      ),
+    );
+  }
 
   /// Confirms the recognized problem and hands off to the result screen (which
   /// runs the real solve). [ScanComplete] is the signal the screen listens for.

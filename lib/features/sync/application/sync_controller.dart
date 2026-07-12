@@ -7,6 +7,7 @@ import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/app_user.dart';
+import '../../history/application/history_controller.dart';
 import '../../practice/application/practice_progress_controller.dart';
 import '../../profile/application/profile_controller.dart';
 import '../../progress/application/achievement_controller.dart';
@@ -77,6 +78,8 @@ class SyncController extends _$SyncController {
         (_, _) => _onLocalChange(SyncDomain.usage));
     ref.listen(statsControllerProvider,
         (_, _) => _onLocalChange(SyncDomain.analytics));
+    ref.listen(historyControllerProvider,
+        (_, _) => _onLocalChange(SyncDomain.history));
 
     final store = ref.read(syncStoreProvider);
     _seedBaseline(store);
@@ -288,6 +291,8 @@ class SyncController extends _$SyncController {
           ref.invalidate(usageControllerProvider);
         case SyncDomain.analytics:
           ref.invalidate(statsControllerProvider);
+        case SyncDomain.history:
+          ref.invalidate(historyControllerProvider);
       }
     }
   }

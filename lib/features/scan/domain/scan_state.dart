@@ -40,11 +40,29 @@ class ScanComplete extends ScanState {
   final DetectedEquation equation;
 }
 
-/// Recognition failed — blurry / empty / non-math image, or a network/backend
-/// error. [canRetry] gates whether the retry affordance is shown.
+/// Why recognition failed — drives the §9 voice + the right next action.
+enum ScanErrorKind {
+  /// The image was read but held no legible math ("try again or type it in").
+  couldntRecognize,
+
+  /// The recognition request never reached the server ("you're offline").
+  offline,
+
+  /// An unexpected server / client failure (calm retry).
+  generic,
+}
+
+/// Recognition failed — blurry / empty / non-math image, a network drop, or a
+/// backend error. [kind] selects the honest §9 state to show; [message] is the
+/// underlying detail (kept for logging / the generic case).
 class ScanError extends ScanState {
-  const ScanError(this.message, {this.canRetry = true});
+  const ScanError(
+    this.message, {
+    this.kind = ScanErrorKind.generic,
+    this.canRetry = true,
+  });
   final String message;
+  final ScanErrorKind kind;
   final bool canRetry;
 }
 

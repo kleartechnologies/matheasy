@@ -14,6 +14,7 @@ import { logger } from "firebase-functions/v2";
 import { OPENAI_API_KEY, OPENAI_MODEL, PRO_ENTITLEMENT_ID } from "../config";
 import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
+import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
 
 interface VisualRequest {
@@ -100,6 +101,7 @@ export const generateVisualSolution = onCall(
     }
 
     await ensureUserDoc(uid);
+    await assertWithinRateLimit(uid, "visual");
 
     // The Visual Learning Engine is Pro-exclusive — enforce the entitlement
     // server-side (the UI gate alone is spoofable).

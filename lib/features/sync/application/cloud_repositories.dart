@@ -55,6 +55,11 @@ class CloudAnalyticsRepository extends CloudRepository {
       : super(store, SyncDomain.analytics);
 }
 
+class CloudHistoryRepository extends CloudRepository {
+  const CloudHistoryRepository(CloudStore store)
+      : super(store, SyncDomain.history);
+}
+
 /// Every cloud repository keyed by domain, sharing the active [CloudStore]. The
 /// [SyncService] iterates this map to sync all domains uniformly.
 final Provider<Map<SyncDomain, CloudRepository>> cloudRepositoriesProvider =
@@ -67,5 +72,6 @@ final Provider<Map<SyncDomain, CloudRepository>> cloudRepositoriesProvider =
     SyncDomain.achievements: CloudAchievementRepository(store),
     SyncDomain.usage: CloudUsageRepository(store),
     SyncDomain.analytics: CloudAnalyticsRepository(store),
+    SyncDomain.history: CloudHistoryRepository(store),
   };
 });

@@ -16,6 +16,7 @@ import {
   ensureUserDoc,
   incrementUsage,
 } from "../lib/firestore";
+import { assertWithinRateLimit } from "../lib/rateLimit";
 import { createOpenAI } from "../lib/openai";
 
 interface TutorTurn {
@@ -61,6 +62,7 @@ export const tutorReply = onCall(
     }
 
     await ensureUserDoc(uid);
+    await assertWithinRateLimit(uid, "tutor");
     await assertWithinQuota(uid, "tutorMessages");
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [

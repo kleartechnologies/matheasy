@@ -49,6 +49,7 @@ class MathKeyboard extends StatefulWidget {
     required this.onMoveLeft,
     required this.onMoveRight,
     this.onSolve,
+    this.solveLabel = 'Solve',
   });
 
   /// Insert [latex] at the caret, then step back [caretBack] chars.
@@ -59,6 +60,10 @@ class MathKeyboard extends StatefulWidget {
 
   /// Submit. `null` disables the Solve key (empty / invalid input).
   final VoidCallback? onSolve;
+
+  /// Label on the submit key — "Solve" for typing; "Use this" when editing an
+  /// OCR result (which returns to the confirmation sheet rather than solving).
+  final String solveLabel;
 
   static const List<MathKeyCategory> categories = [
     MathKeyCategory('123', [
@@ -302,7 +307,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
             button: true,
             enabled: widget.onSolve != null,
             excludeSemantics: true,
-            label: 'Solve',
+            label: widget.solveLabel,
             child: Pressable(
               onTap: widget.onSolve == null
                   ? null
@@ -323,7 +328,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                       : Border.all(color: colors.border),
                 ),
                 child: Text(
-                  'Solve',
+                  widget.solveLabel,
                   style: AppTypography.button.copyWith(
                     color: widget.onSolve != null
                         ? AppColors.white

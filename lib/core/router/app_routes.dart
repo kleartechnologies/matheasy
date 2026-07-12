@@ -78,6 +78,10 @@ class AppRoutes {
   static const String gallery = '/gallery';
   static const String galleryName = 'gallery';
 
+  /// Solved-problem history — the cache of past solutions, re-openable for free.
+  static const String history = '/history';
+  static const String historyName = 'history';
+
   /// Developer diagnostics (non-production tooling; entry point is debug-gated).
   static const String diagnostics = '/diagnostics';
   static const String diagnosticsName = 'diagnostics';

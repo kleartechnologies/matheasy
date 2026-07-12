@@ -144,7 +144,7 @@ void main() {
       expect((state as ScanCaptured).equation, _equation);
     });
 
-    test('recognize failure surfaces a ScanError with the backend message',
+    test('an unreadable image surfaces a couldnt-recognize ScanError (§9)',
         () async {
       final container = containerWith(_FakeScannerService(
         error: const BackendException('No math detected.', code: 'not-found'),
@@ -154,6 +154,18 @@ void main() {
       final state = container.read(scannerControllerProvider);
       expect(state, isA<ScanError>());
       expect((state as ScanError).message, 'No math detected.');
+      expect(state.kind, ScanErrorKind.couldntRecognize);
+    });
+
+    test('a dropped connection surfaces an OFFLINE ScanError (§9)', () async {
+      final container = containerWith(_FakeScannerService(
+        error: const BackendException('unavailable', code: 'unavailable'),
+      ));
+      final notifier = container.read(scannerControllerProvider.notifier);
+      await notifier.recognize(ScanSource.camera, imageBytes: _bytes());
+      final state = container.read(scannerControllerProvider);
+      expect(state, isA<ScanError>());
+      expect((state as ScanError).kind, ScanErrorKind.offline);
     });
 
     test('unexpected errors surface a generic ScanError', () async {
@@ -161,7 +173,9 @@ void main() {
           containerWith(_FakeScannerService(error: StateError('boom')));
       final notifier = container.read(scannerControllerProvider.notifier);
       await notifier.recognize(ScanSource.camera, imageBytes: _bytes());
-      expect(container.read(scannerControllerProvider), isA<ScanError>());
+      final state = container.read(scannerControllerProvider);
+      expect(state, isA<ScanError>());
+      expect((state as ScanError).kind, ScanErrorKind.generic);
     });
 
     test('a server quota rejection surfaces ScanQuotaExceeded (paywall signal)',
@@ -218,6 +232,36 @@ void main() {
       final notifier = container.read(scannerControllerProvider.notifier);
       notifier.confirm();
       expect(container.read(scannerControllerProvider), isA<ScanIdle>());
+    });
+
+    test('applyEdit rewrites the latex, KEEPS the source, and sets 100% conf',
+        () async {
+      final container = containerWith(_FakeScannerService(result: _equation));
+      final notifier = container.read(scannerControllerProvider.notifier);
+      await notifier.recognize(ScanSource.camera, imageBytes: _bytes());
+
+      notifier.applyEdit(r'x^2 - 9 = 0');
+      final state = container.read(scannerControllerProvider) as ScanCaptured;
+      expect(state.equation.latex, r'x^2 - 9 = 0');
+      // Source preserved → re-solving reuses the already-charged scan (no
+      // double-metering); confidence is 100% (the human verified it); kind
+      // re-inferred from the corrected LaTeX.
+      expect(state.equation.source, ScanSource.camera);
+      expect(state.equation.confidence, 1);
+      expect(state.equation.kind, EquationKind.quadratic);
+    });
+
+    test('applyEdit is ignored off Captured or with empty latex', () async {
+      final container = containerWith(_FakeScannerService(result: _equation));
+      final notifier = container.read(scannerControllerProvider.notifier);
+
+      notifier.applyEdit('x = 1'); // still Idle → ignored
+      expect(container.read(scannerControllerProvider), isA<ScanIdle>());
+
+      await notifier.recognize(ScanSource.camera, imageBytes: _bytes());
+      notifier.applyEdit('   '); // empty → capture unchanged
+      final state = container.read(scannerControllerProvider) as ScanCaptured;
+      expect(state.equation.latex, _equation.latex);
     });
   });
 

@@ -4,8 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 
 /// The scanning frame: four rounded corner guides plus a sweeping scan line.
-/// When [locked] (a candidate is detected) the guides turn primary-blue and the
-/// scan line stops.
+///
+/// The guides use the Matheasy primary accent (emerald) — never Photomath's red
+/// (spec §2). When [locked] (a candidate is detected) they brighten and the scan
+/// line stops.
 class ScanFrame extends StatefulWidget {
   const ScanFrame({super.key, required this.locked});
 
@@ -30,7 +32,7 @@ class _ScanFrameState extends State<ScanFrame>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.locked ? AppColors.primary : AppColors.white;
+    final color = widget.locked ? AppColors.primaryLight : AppColors.primary;
     // Respect reduced-motion: drop the sweeping scan line, keep the guides.
     final animate = !widget.locked && !MediaQuery.disableAnimationsOf(context);
     if (animate && !_controller.isAnimating) {

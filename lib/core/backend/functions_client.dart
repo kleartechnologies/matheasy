@@ -13,13 +13,28 @@ const String kFunctionsRegion = 'us-central1';
 /// failure. Keeps the `cloud_functions` `FirebaseFunctionsException` type
 /// quarantined behind [callFunction].
 class BackendException implements Exception {
-  const BackendException(this.message, {this.code = 'internal'});
+  const BackendException(this.message, {this.code = 'internal', this.details});
 
   final String message;
   final String code;
 
+  /// Structured error payload from the server (an `HttpsError`'s `details`).
+  final Map<String, dynamic>? details;
+
   bool get isUnauthenticated => code == 'unauthenticated';
-  bool get isQuotaExceeded => code == 'resource-exhausted';
+
+  /// A per-user RATE limit ("you're going too fast — wait a moment"), the
+  /// server's abuse backstop (spec §10). Distinct from the free-tier quota even
+  /// though both use `resource-exhausted`: a rate limit is transient and must
+  /// NOT route to the paywall (upgrading doesn't lift a burst limit).
+  bool get isRateLimited =>
+      code == 'resource-exhausted' && details?['rateLimited'] == true;
+
+  /// The free-tier allowance is spent → route to the paywall. Excludes a rate
+  /// limit so a throttled user is never wrongly asked to pay.
+  bool get isQuotaExceeded =>
+      code == 'resource-exhausted' && !isRateLimited;
+
   bool get isOffline => code == 'unavailable' || code == 'deadline-exceeded';
 
   @override
@@ -58,9 +73,13 @@ Future<Map<String, dynamic>> callFunction(
     if (value is Map) return Map<String, dynamic>.from(value);
     throw const BackendException('Unexpected response from the server.');
   } on FirebaseFunctionsException catch (error) {
+    final rawDetails = error.details;
     throw BackendException(
       error.message ?? 'Something went wrong. Please try again.',
       code: error.code,
+      details: rawDetails is Map
+          ? Map<String, dynamic>.from(rawDetails)
+          : null,
     );
   }
 }

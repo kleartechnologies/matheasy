@@ -39,6 +39,27 @@ class DetectedEquation {
 
   int get confidencePercent => (confidence * 100).round();
 
+  Map<String, dynamic> toJson() => {
+        'latex': latex,
+        'confidence': confidence,
+        'source': source.name,
+        'kind': kind.name,
+      };
+
+  factory DetectedEquation.fromJson(Map<String, dynamic> json) =>
+      DetectedEquation(
+        latex: json['latex'] as String? ?? '',
+        confidence: (json['confidence'] as num?)?.toDouble() ?? 1,
+        source: ScanSource.values.firstWhere(
+          (s) => s.name == json['source'],
+          orElse: () => ScanSource.manual,
+        ),
+        kind: EquationKind.values.firstWhere(
+          (k) => k.name == json['kind'],
+          orElse: () => EquationKind.expression,
+        ),
+      );
+
   DetectedEquation copyWith({
     String? latex,
     double? confidence,

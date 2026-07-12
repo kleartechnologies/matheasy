@@ -10,6 +10,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../../scan/presentation/manual_input_screen.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/result_controller.dart';
@@ -23,6 +24,7 @@ import 'tabs/solution_tab.dart';
 import 'tabs/visual_tab.dart';
 import 'widgets/play_solution_overlay.dart';
 import 'widgets/result_action_bar.dart';
+import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
 
@@ -172,13 +174,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           message: 'Matheasy is solving your problem…',
           showBrand: true,
         ),
-        error: (error, _) => ErrorState(
-          message: "We couldn't solve that one. Try scanning again.",
-          onRetry: () => ref.invalidate(resultControllerProvider(equation)),
-        ),
+        error: (error, _) => _buildSolveError(error),
         data: (data) => _buildContent(data),
       ),
-      bottomNavigationBar: result == null
+      bottomNavigationBar: result == null || !result.verified
           ? null
           : ResultActionBar(
               saved: _saved,
@@ -195,7 +194,55 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     );
   }
 
+  /// The solve-threw state (spec §9). An offline drop gets its own honest voice
+  /// — and names what still works (saved solutions open offline) — instead of
+  /// telling the user to "scan again", which would also fail with no signal.
+  Widget _buildSolveError(Object error) {
+    final offline = error is ResultSolveFailure && error.offline;
+    // Reachable only past the null-equation guard in build().
+    void retry() => ref.invalidate(resultControllerProvider(widget.equation!));
+    return offline
+        ? ErrorState(
+            title: "You're offline",
+            message: 'I need a connection to work out a new solution. Your '
+                'saved solutions still open offline — reconnect and try again.',
+            retryLabel: 'Retry',
+            onRetry: retry,
+          )
+        : ErrorState(
+            title: "That one didn't go through",
+            message: "I couldn't work that solution out just now. Give it "
+                'another try.',
+            onRetry: retry,
+          );
+  }
+
   Widget _buildContent(ResultData result) {
+    // The answer failed its substitution check (spec §1.1): show the honest
+    // "couldn't verify" state (spec §9), not a confident (empty) answer.
+    if (!result.verified) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenH,
+          AppSpacing.lg,
+          AppSpacing.screenH,
+          AppSpacing.xl,
+        ),
+        children: [
+          ResultCouldntVerify(
+            result: result,
+            onRescan: () => context.push(AppRoutes.scan),
+            // Pre-fill the editor with what we read so the student fixes the
+            // likely misread in place (a corrected read then solves normally).
+            onEdit: () => context.push(
+              AppRoutes.manualInput,
+              extra: ManualInputArgs(initialLatex: result.questionLatex),
+            ),
+          ),
+        ],
+      );
+    }
+
     final tabIndex = ref.watch(resultTabProvider);
     return ListView(
       padding: const EdgeInsets.fromLTRB(

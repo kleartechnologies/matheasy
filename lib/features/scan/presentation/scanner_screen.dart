@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matheasy/core/brand/brand.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
@@ -23,10 +26,12 @@ import '../../progress/application/stats_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../application/scanner_controller.dart';
+import '../application/steadiness_detector.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
 import 'crop_screen.dart';
+import 'manual_input_screen.dart';
 import 'widgets/camera_viewport.dart';
 import 'widgets/capture_confirmation.dart';
 import 'widgets/processing_overlay.dart';
@@ -54,6 +59,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   bool _flashOn = false;
   bool _capturing = false;
 
+  /// Auto-capture (spec §10) — a nice-to-have that fires the SAME capped shutter
+  /// flow when the phone is held steady. On by default; the manual shutter is
+  /// always the fallback. Backed by the accelerometer via [SteadinessDetector].
+  bool _autoCapture = true;
+  SteadinessDetector _steady = SteadinessDetector();
+  StreamSubscription<UserAccelerometerEvent>? _accelSub;
+
   /// True while the app is backgrounded — guards against an in-flight camera
   /// init activating the session after a pause.
   bool _appPaused = false;
@@ -71,13 +83,52 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
         .read(analyticsServiceProvider)
         .logEvent(AnalyticsEvent.scannerOpened()));
     unawaited(_initCamera());
+    _startSteadiness();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unawaited(_accelSub?.cancel());
     _camera?.dispose();
     super.dispose();
+  }
+
+  // -- Auto-capture (steadiness) --------------------------------------------
+
+  /// Subscribes to the accelerometer to drive auto-capture. Guarded like the
+  /// camera: on a device / test binding without the sensor the stream just
+  /// errors and auto-capture stays off — the manual shutter is unaffected.
+  void _startSteadiness() {
+    try {
+      _accelSub = userAccelerometerEventStream(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(_onAccel, onError: (_) {}, cancelOnError: false);
+    } catch (_) {
+      // No sensor available — manual shutter only.
+    }
+  }
+
+  void _onAccel(UserAccelerometerEvent event) {
+    if (!_autoCapture || !_cameraReady || _capturing) return;
+    if (ref.read(scannerControllerProvider) is! ScanIdle) return;
+    // Don't auto-route a capped free user to the paywall — let them tap.
+    if (!ref.read(usageSnapshotProvider).canScan) return;
+
+    final magnitude =
+        math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_steady.isReadyToCapture(magnitude, now)) {
+      _steady.disarm(); // fire once; a re-aim (movement) re-arms it
+      unawaited(_shutter());
+    }
+  }
+
+  void _toggleAutoCapture() {
+    setState(() {
+      _autoCapture = !_autoCapture;
+      _steady = SteadinessDetector(); // fresh, armed
+    });
   }
 
   @override
@@ -173,10 +224,21 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
 
   // -- Capture sources -------------------------------------------------------
 
+  /// Free-tier scan gate (spec §2/§10): a capped free user is sent to the
+  /// EXISTING paywall BEFORE we spend a scan — so they never waste a capture.
+  /// This client check is UX only; the server's `ScanQuotaExceeded` remains the
+  /// authoritative backstop. Returns true when a scan may proceed.
+  bool _allowScanOrPaywall() {
+    if (ref.read(usageSnapshotProvider).canScan) return true;
+    context.pushReplacement(AppRoutes.paywall, extra: PaywallTrigger.scanLimit);
+    return false;
+  }
+
   /// Shutter: capture from the live camera, then crop + recognize.
   Future<void> _shutter() async {
     final camera = _camera;
     if (_capturing || camera == null || !camera.value.isInitialized) return;
+    if (!_allowScanOrPaywall()) return;
     setState(() => _capturing = true);
     Uint8List bytes;
     try {
@@ -195,6 +257,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// Pick from the gallery, then crop + recognize.
   Future<void> _gallery() async {
     if (_capturing) return;
+    if (!_allowScanOrPaywall()) return;
     Uint8List bytes;
     try {
       final file = await _picker.pickImage(
@@ -240,18 +303,24 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// The "Continue → solve" commit point. Checks the scan quota first: a free
-  /// user out of scans is sent to the paywall (the scanner is replaced, so
-  /// dismissing it returns to the app) instead of consuming a solve.
+  /// The "Solve" commit point. Re-checks the scan quota (the same gate as
+  /// capture): a free user out of scans is sent to the paywall instead of
+  /// consuming a solve.
   void _onContinue() {
-    if (ref.read(usageSnapshotProvider).canScan) {
-      _controller.confirm();
-      return;
-    }
-    context.pushReplacement(
-      AppRoutes.paywall,
-      extra: PaywallTrigger.scanLimit,
+    if (_allowScanOrPaywall()) _controller.confirm();
+  }
+
+  /// Opens the math editor pre-filled with the recognized LaTeX (spec §3). The
+  /// correction is folded back into the SAME capture, so re-solving goes through
+  /// the already-charged scan — no second charge. The user then verifies the
+  /// corrected equation on the sheet and taps Solve.
+  Future<void> _editEquation(DetectedEquation equation) async {
+    final corrected = await context.push<String?>(
+      AppRoutes.manualInput,
+      extra: ManualInputArgs(initialLatex: equation.latex, editMode: true),
     );
+    if (!mounted || corrected == null) return;
+    _controller.applyEdit(corrected);
   }
 
   @override
@@ -283,6 +352,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               controller: _camera,
               error: _cameraError,
               onEnableCamera: () => unawaited(_initCamera()),
+              onOpenSettings: () => unawaited(openAppSettings()),
+              onType: _type,
             ),
             AnimatedSwitcher(
               duration: AppDurations.medium,
@@ -300,6 +371,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           key: const ValueKey('scanning'),
           flashOn: _flashOn,
           canCapture: _cameraReady && !_capturing,
+          autoCapture: _autoCapture,
+          onToggleAuto: _toggleAutoCapture,
           onFlash: () => unawaited(_toggleFlash()),
           onClose: () => context.pop(),
           onGallery: () => unawaited(_gallery()),
@@ -314,14 +387,16 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           onClose: () => context.pop(),
           onRetake: controller.retake,
           onContinue: _onContinue,
+          onEdit: () => unawaited(_editEquation(equation)),
         ),
       ScanComplete() => const SizedBox.shrink(key: ValueKey('complete')),
       ScanQuotaExceeded() =>
         const SizedBox.shrink(key: ValueKey('quota')),
-      ScanError(:final message) => _ErrorView(
+      ScanError(:final kind) => _ErrorView(
           key: const ValueKey('error'),
-          message: message,
+          kind: kind,
           onRetry: controller.retake,
+          onTypeItIn: _type,
         ),
     };
   }
@@ -336,6 +411,8 @@ class _ScanningChrome extends StatelessWidget {
     super.key,
     required this.flashOn,
     required this.canCapture,
+    required this.autoCapture,
+    required this.onToggleAuto,
     required this.onFlash,
     required this.onClose,
     required this.onGallery,
@@ -345,6 +422,8 @@ class _ScanningChrome extends StatelessWidget {
 
   final bool flashOn;
   final bool canCapture;
+  final bool autoCapture;
+  final VoidCallback onToggleAuto;
   final VoidCallback onFlash;
   final VoidCallback onClose;
   final VoidCallback onGallery;
@@ -359,10 +438,14 @@ class _ScanningChrome extends StatelessWidget {
           _TopBar(flashOn: flashOn, onFlash: onFlash, onClose: onClose),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Line up the whole question, then tap to capture',
+            autoCapture
+                ? 'Hold steady on the question — I’ll capture it'
+                : 'Line up the whole question, then tap to capture',
             style: AppTypography.bodySmall
                 .copyWith(color: Colors.white.withValues(alpha: 0.75)),
           ),
+          const SizedBox(height: AppSpacing.sm),
+          _AutoCaptureToggle(enabled: autoCapture, onTap: onToggleAuto),
           const Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(34, AppSpacing.xl, 34, 0),
@@ -383,6 +466,62 @@ class _ScanningChrome extends StatelessWidget {
             onType: onType,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The auto-capture on/off pill. Auto-capture is additive — this only changes
+/// whether steadiness triggers the same shutter; the manual shutter is always
+/// there — so a user who finds it fiddly turns it off and taps.
+class _AutoCaptureToggle extends StatelessWidget {
+  const _AutoCaptureToggle({required this.enabled, required this.onTap});
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        enabled ? AppColors.primaryTint : Colors.white.withValues(alpha: 0.7);
+    return Semantics(
+      button: true,
+      toggled: enabled,
+      label: enabled ? 'Auto capture on' : 'Auto capture off',
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.95,
+        borderRadius: AppRadius.pillRadius,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 40),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
+          decoration: BoxDecoration(
+            color: enabled
+                ? AppColors.primary.withValues(alpha: 0.18)
+                : Colors.white.withValues(alpha: 0.1),
+            borderRadius: AppRadius.pillRadius,
+            border: Border.all(
+              color: enabled
+                  ? AppColors.primaryTint.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(enabled ? Icons.bolt_rounded : Icons.bolt_outlined,
+                  size: 16, color: color),
+              const SizedBox(width: 4),
+              Text(
+                enabled ? 'Auto on' : 'Auto off',
+                style: AppTypography.caption
+                    .copyWith(color: color, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -647,12 +786,14 @@ class _CapturedView extends StatelessWidget {
     required this.onClose,
     required this.onRetake,
     required this.onContinue,
+    required this.onEdit,
   });
 
   final DetectedEquation equation;
   final VoidCallback onClose;
   final VoidCallback onRetake;
   final VoidCallback onContinue;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -678,6 +819,7 @@ class _CapturedView extends StatelessWidget {
             equation: equation,
             onRetake: onRetake,
             onContinue: onContinue,
+            onEdit: onEdit,
           ),
         ),
       ],
@@ -689,39 +831,152 @@ class _CapturedView extends StatelessWidget {
 // Error view
 // ---------------------------------------------------------------------------
 
+/// The honest recognition-failure state (spec §9). Each [ScanErrorKind] gets its
+/// own voice + next action — errors give direction, never a dead end:
+/// * couldn't-recognize → "hard to read — try again or type it in";
+/// * offline → "you're offline", and it says what still works;
+/// * generic → a calm retry.
+/// Every kind offers a "Type it in" escape to the math keyboard so the user is
+/// never stuck behind a camera that can't read the page.
 class _ErrorView extends StatelessWidget {
   const _ErrorView({
     super.key,
-    required this.message,
+    required this.kind,
     required this.onRetry,
+    required this.onTypeItIn,
   });
 
-  final String message;
+  final ScanErrorKind kind;
   final VoidCallback onRetry;
+  final VoidCallback onTypeItIn;
+
+  ({IconData icon, String title, String body, String retryLabel}) get _copy =>
+      switch (kind) {
+        ScanErrorKind.couldntRecognize => (
+            icon: Icons.image_search_rounded,
+            title: 'That was hard to read',
+            body: 'Line the whole problem up in good light and try again — or '
+                'type it in and I’ll take it from there.',
+            retryLabel: 'Try again',
+          ),
+        ScanErrorKind.offline => (
+            icon: Icons.wifi_off_rounded,
+            title: "You're offline",
+            body: 'Reading a new problem needs a connection. Your saved '
+                'solutions still open offline — reconnect and try again.',
+            retryLabel: 'Retry',
+          ),
+        ScanErrorKind.generic => (
+            icon: Icons.refresh_rounded,
+            title: 'That scan didn’t go through',
+            body: 'Something interrupted it. Give it another try, or type the '
+                'problem in instead.',
+            retryLabel: 'Try again',
+          ),
+      };
 
   @override
   Widget build(BuildContext context) {
+    final copy = _copy;
     return ColoredBox(
       color: AppColors.scannerBackground.withValues(alpha: 0.95),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const MatheasyBrandAvatar(),
+                const SizedBox(height: AppSpacing.lg),
+                Icon(copy.icon,
+                    color: Colors.white.withValues(alpha: 0.85), size: 28),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  copy.title,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.title.copyWith(color: AppColors.white),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  copy.body,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium
+                      .copyWith(color: Colors.white.withValues(alpha: 0.75)),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PillButton(
+                      icon: Icons.keyboard_rounded,
+                      label: 'Type it in',
+                      onTap: onTypeItIn,
+                      filled: false,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    _PillButton(
+                      icon: Icons.refresh_rounded,
+                      label: copy.retryLabel,
+                      onTap: onRetry,
+                      filled: true,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact pill CTA for the scanner's dark overlays (the error state). Filled =
+/// primary (emerald), outlined = secondary — both legible on the dark scrim.
+class _PillButton extends StatelessWidget {
+  const _PillButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.filled,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.95,
+        borderRadius: AppRadius.pillRadius,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            gradient: filled ? AppColors.primaryGradient : null,
+            color: filled ? null : Colors.white.withValues(alpha: 0.12),
+            borderRadius: AppRadius.pillRadius,
+            border: filled
+                ? null
+                : Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          ),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const MatheasyBrandAvatar(size: 110),
-              const SizedBox(height: AppSpacing.lg),
+              Icon(icon, color: AppColors.white, size: 18),
+              const SizedBox(width: AppSpacing.xs),
               Text(
-                message,
-                textAlign: TextAlign.center,
-                style: AppTypography.title.copyWith(color: AppColors.white),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              _GlassButton(
-                icon: Icons.refresh_rounded,
-                onTap: onRetry,
-                label: 'Try again',
-                size: 56,
+                label,
+                style: AppTypography.button.copyWith(color: AppColors.white),
               ),
             ],
           ),

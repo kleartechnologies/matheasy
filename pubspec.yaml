@@ -56,6 +56,12 @@ dependencies:
   camera: ^0.12.0+1
   crop_your_image: ^2.0.0
   image: ^4.9.1
+  # Opens the OS app-settings page so a user who denied the camera can re-enable
+  # it (spec §9 — no dead-end permission states). Only openAppSettings() is used.
+  permission_handler: ^12.0.1
+  # Accelerometer stream for auto-capture steadiness (spec §10) — "hold still"
+  # detection that triggers the existing capped shutter flow. No permissions.
+  sensors_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:

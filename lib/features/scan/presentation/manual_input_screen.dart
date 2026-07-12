@@ -24,6 +24,19 @@ import '../domain/math_input.dart';
 import '../domain/scan_source.dart';
 import 'widgets/math_keyboard.dart';
 
+/// Arguments passed as the route `extra` for [ManualInputScreen].
+class ManualInputArgs {
+  const ManualInputArgs({this.initialLatex, this.editMode = false});
+
+  /// Pre-fills the editor — e.g. a recognized OCR result the user is correcting.
+  final String? initialLatex;
+
+  /// EDITOR mode (§3 detected-equation edit): the primary action returns the
+  /// corrected LaTeX to the caller instead of solving + metering — the scan was
+  /// already charged at recognition, so re-solving here must not re-charge.
+  final bool editMode;
+}
+
 /// Type a math problem with the educational math keyboard, then hand it to the
 /// exact same pipeline a scanned problem uses.
 ///
@@ -31,8 +44,15 @@ import 'widgets/math_keyboard.dart';
 /// shared [ScannerService] (source `manual`, no OCR) and pushed to `/scan/result`
 /// — where the existing solver, Visual Learning Engine, AI Tutor and Adaptive
 /// Practice all run unchanged. No separate solving architecture.
+///
+/// With [ManualInputArgs.editMode] it doubles as the §3 detected-equation
+/// editor: pre-filled with the recognized LaTeX, its primary action returns the
+/// correction (`context.pop(latex)`) so the scanner can solve it via the
+/// already-charged scan (no double metering).
 class ManualInputScreen extends ConsumerStatefulWidget {
-  const ManualInputScreen({super.key});
+  const ManualInputScreen({super.key, this.args});
+
+  final ManualInputArgs? args;
 
   @override
   ConsumerState<ManualInputScreen> createState() => _ManualInputScreenState();
@@ -48,6 +68,14 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_onChanged);
+    // Pre-fill with the recognized LaTeX when editing an OCR result, caret at end.
+    final initial = widget.args?.initialLatex?.trim();
+    if (initial != null && initial.isNotEmpty) {
+      _controller.value = TextEditingValue(
+        text: initial,
+        selection: TextSelection.collapsed(offset: initial.length),
+      );
+    }
     // Focus the field so the caret shows; readOnly keeps the OS keyboard away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focus.requestFocus();
@@ -118,8 +146,23 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
     if (!_focus.hasFocus) _focus.requestFocus();
   }
 
-  // ---- Submit (identical downstream treatment to a scan) --------------------
+  // ---- Submit ---------------------------------------------------------------
 
+  /// Edit mode (§3): validate and return the corrected LaTeX to the caller (the
+  /// scanner). No recognize, no solve, no metering — the scan was already
+  /// charged at recognition, so the scanner re-solves it via that same scan.
+  void _useCorrected() {
+    final latex = _controller.text.trim();
+    final error = MathInput.validate(latex);
+    if (error != null) {
+      setState(() => _error = error);
+      return;
+    }
+    context.pop(latex);
+  }
+
+  /// Standalone typing: wrap the LaTeX and run it through the full scan pipeline
+  /// (identical downstream treatment to a scan).
   Future<void> _solve() async {
     final latex = _controller.text.trim();
     final error = MathInput.validate(latex);
@@ -176,12 +219,13 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final editMode = widget.args?.editMode ?? false;
     final canSolve = _controller.text.trim().isNotEmpty && !_submitting;
 
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Type a problem'),
+        title: Text(editMode ? 'Fix the problem' : 'Type a problem'),
         leading: IconButton(
           tooltip: 'Close',
           icon: const Icon(Icons.close_rounded),
@@ -212,7 +256,10 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
             onBackspace: _backspace,
             onMoveLeft: () => _move(-1),
             onMoveRight: () => _move(1),
-            onSolve: canSolve ? () => unawaited(_solve()) : null,
+            solveLabel: editMode ? 'Use this' : 'Solve',
+            onSolve: canSolve
+                ? (editMode ? _useCorrected : () => unawaited(_solve()))
+                : null,
           ),
         ],
       ),

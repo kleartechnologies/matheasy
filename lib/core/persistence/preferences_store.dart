@@ -36,6 +36,7 @@ class PreferencesStore {
   static const String _kProgressStats = 'progress.stats';
   static const String _kSettings = 'settings.preferences';
   static const String _kProfile = 'profile.editable';
+  static const String _kHistory = 'history.solutions';
   static const String _kUsageCounts = 'subscription.usage';
   static const String _kSubscriptionCache = 'subscription.cache';
   static const String _kLastPaywallImpression = 'subscription.last_paywall';
@@ -70,6 +71,7 @@ class PreferencesStore {
     await _prefs.remove(_kProgressStats);
     await _prefs.remove(_kSettings);
     await _prefs.remove(_kProfile);
+    await _prefs.remove(_kHistory);
     await _prefs.remove(_kUsageCounts);
     await _prefs.remove(_kSubscriptionCache);
     await _prefs.remove(_kLastPaywallImpression);
@@ -113,6 +115,13 @@ class PreferencesStore {
   String? get profileJson => _prefs.getString(_kProfile);
 
   Future<void> setProfileJson(String json) => _prefs.setString(_kProfile, json);
+
+  /// The serialized solved-problem history — the local cache of past solutions
+  /// (LaTeX + solution JSON, never images), most-recent-first (JSON).
+  String? get historyJson => _prefs.getString(_kHistory);
+
+  Future<void> setHistoryJson(String json) =>
+      _prefs.setString(_kHistory, json);
 
   /// The serialized lifetime usage counters — scans, AI tutor messages and
   /// generated practice questions (JSON).

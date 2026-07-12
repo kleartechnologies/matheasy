@@ -23,70 +23,131 @@ const _equation = DetectedEquation(
 );
 
 void main() {
-  group('SolveResponseMapper', () {
-    test('maps the full solveEquation payload onto ResultData', () {
+  group('SolveResponseMapper (§4 schema)', () {
+    test('maps a verified solveEquation payload onto ResultData', () {
       final result = SolveResponseMapper.toResultData(_equation, {
-        'type': 'linear',
-        'difficulty': 'easy',
-        'answerLatex': 'x = 4',
-        'verifyText': '2(4) + 5 = 13 ✓',
-        'tutorIntro': 'Here we go!',
-        'steps': [
-          {
-            'title': 'Subtract 5',
-            'operationLabel': '− 5',
-            'resultLatex': '2x = 8',
-            'detail': 'Undo the + 5.',
-          },
-          {'title': 'Divide by 2', 'resultLatex': 'x = 4', 'detail': 'Undo ×2.'},
-        ],
-        'explanations': [
-          {'mode': 'simple', 'body': 'Isolate x.', 'points': ['a', 'b']},
-          {'mode': 'teacher', 'body': 'Inverse ops.', 'points': ['x']},
-          {'mode': 'exam', 'body': 'Steps.', 'points': ['x = 4']},
-        ],
+        'problemLatex': '5x^2 + 3x - 2 = 0',
+        'problemType': 'quadratic_equation',
+        'finalAnswer': {
+          'latex': r'x_1 = -1,\; x_2 = \tfrac{2}{5}',
+          'plain': 'x = -1 or x = 2/5',
+        },
+        'verified': true,
         'methods': [
           {
-            'name': 'Balance',
-            'subtitle': 'Both sides',
-            'description': 'Do the same to both sides.',
-            'advantages': ['reliable'],
-            'whenToUse': 'always',
-            'steps': ['2x = 8', 'x = 4'],
-            'recommended': true,
+            'id': 'factoring',
+            'name': 'Factoring',
+            'examPick': true,
+            'steps': [
+              {
+                'expression': '(5x - 2)(x + 1) = 0',
+                'operation': 'Factor',
+                'why': 'Split the middle term and factor by grouping.',
+              },
+              {
+                'expression': r'x = -1,\ x = \tfrac{2}{5}',
+                'operation': 'Find the roots',
+                'why': 'Each factor can be zero.',
+              },
+            ],
+          },
+          {
+            'id': 'quadratic_formula',
+            'name': 'Quadratic formula',
+            'examPick': false,
+            'steps': [
+              {'expression': 'a=5, b=3, c=-2', 'operation': 'Identify a, b, c', 'why': ''},
+            ],
           },
         ],
-        'practice': [
-          {'questionLatex': 'x + 4 = 9', 'difficulty': 'easy', 'xpReward': 15},
-        ],
+        'graph': {
+          'kind': 'function',
+          'expression': '5x^2 + 3x - 2',
+          'keyPoints': [
+            {'label': 'root', 'x': -1, 'y': 0},
+            {'label': 'root', 'x': 0.4, 'y': 0},
+            {'label': 'vertex', 'x': -0.3, 'y': -2.45},
+          ],
+          'curve': [
+            {'x': -2, 'y': 12},
+            {'x': -1, 'y': 0},
+            {'x': 0, 'y': -2},
+            {'x': 1, 'y': 6},
+          ],
+        },
       });
 
       expect(result.equation, _equation);
-      expect(result.type, ResultType.linear);
-      expect(result.difficulty, Difficulty.easy);
-      expect(result.answerLatex, 'x = 4');
+      expect(result.type, ResultType.quadratic);
+      expect(result.verified, isTrue);
+      expect(result.answerLatex, r'x_1 = -1,\; x_2 = \tfrac{2}{5}');
+      expect(result.answerPlain, 'x = -1 or x = 2/5');
+      // Steps come from the exam-pick method.
       expect(result.steps, hasLength(2));
-      expect(result.steps.first.operationLabel, '− 5');
-      expect(result.steps[1].operationLabel, isNull);
-      expect(result.explanations.map((e) => e.mode),
-          [ExplanationMode.simple, ExplanationMode.teacher, ExplanationMode.exam]);
-      expect(result.methods.single.recommended, isTrue);
-      expect(result.practice.single.xpReward, 15);
+      expect(result.steps.first.operationLabel, 'Factor');
+      expect(result.steps.first.resultLatex, '(5x - 2)(x + 1) = 0');
+      // Both methods carried; recommended flag mirrors examPick.
+      expect(result.methods, hasLength(2));
+      expect(result.methods.first.recommended, isTrue);
+      expect(result.methods[1].recommended, isFalse);
+      // §4 doesn't carry explanations / practice → empty (tabs show empty state).
+      expect(result.explanations, isEmpty);
+      expect(result.practice, isEmpty);
+      // Graph mapped with typed key points.
+      expect(result.graph, isNotNull);
+      expect(result.graph!.expression, '5x^2 + 3x - 2');
+      expect(result.graph!.keyPoints, hasLength(3));
+      expect(result.graph!.keyPoints.last.label, 'vertex');
+      expect(result.graph!.keyPoints.last.y, closeTo(-2.45, 0.001));
+      // §7 curve samples parsed into plottable points.
+      expect(result.graph!.curve, hasLength(4));
+      expect(result.graph!.curve[1], const Offset(-1, 0));
+    });
+
+    test('couldn\'t-verify → no answer, honest state', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemLatex': 'x^2 + 1 = 0',
+        'problemType': 'quadratic_equation',
+        'finalAnswer': null,
+        'verified': false,
+        'methods': <dynamic>[],
+        'graph': null,
+      });
+      expect(result.verified, isFalse);
+      expect(result.answerLatex, isEmpty);
+      expect(result.steps, isEmpty);
+      expect(result.methods, isEmpty);
+      expect(result.graph, isNull);
+      expect(result.verifyText, contains("couldn't verify"));
     });
 
     test('degrades gracefully on missing / unknown fields', () {
       final result = SolveResponseMapper.toResultData(_equation, {
-        'type': 'nonsense',
-        'answerLatex': 'x = 1',
-        'explanations': [
-          {'mode': 'weird', 'body': 'x', 'points': <String>[]},
-        ],
+        'problemType': 'nonsense',
+        'verified': true,
+        'finalAnswer': {'latex': 'x = 1', 'plain': 'x = 1'},
       });
       expect(result.type, ResultType.expression); // unknown → fallback
       expect(result.difficulty, Difficulty.medium);
       expect(result.steps, isEmpty);
-      expect(result.explanations, isEmpty); // unknown mode dropped
+      expect(result.methods, isEmpty);
       expect(result.tutorIntro, isNotEmpty); // fallback text
+    });
+
+    test('falls back to the fraction caption for arithmetic on a fraction scan', () {
+      const fractionEq = DetectedEquation(
+        latex: r'\frac{3}{4} + \frac{1}{2}',
+        confidence: 0.9,
+        source: ScanSource.camera,
+        kind: EquationKind.fraction,
+      );
+      final result = SolveResponseMapper.toResultData(fractionEq, {
+        'problemType': 'arithmetic',
+        'verified': true,
+        'finalAnswer': {'latex': r'\tfrac{5}{4}', 'plain': '5/4'},
+        'methods': <dynamic>[],
+      });
+      expect(result.type, ResultType.fraction);
     });
   });
 

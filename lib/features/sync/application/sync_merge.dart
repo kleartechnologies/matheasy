@@ -14,6 +14,9 @@ class SyncMerge {
   /// Keep the analytics feed bounded (the local repo re-caps on next write).
   static const int _maxActivity = 20;
 
+  /// Keep the solved-problem history bounded (mirrors the local repo's cap).
+  static const int _maxHistory = 200;
+
   static Map<String, dynamic> merge(
     SyncDomain domain, {
     required Map<String, dynamic> local,
@@ -32,6 +35,8 @@ class SyncMerge {
         return _mergeProgress(local, remote, remoteNewer);
       case SyncDomain.analytics:
         return _mergeAnalytics(local, remote);
+      case SyncDomain.history:
+        return _mergeHistory(local, remote);
     }
   }
 
@@ -136,6 +141,43 @@ class SyncMerge {
       'recentActivity': deduped,
     };
   }
+
+  // ---- History: union by canonical key; same key → newest by timestamp. ----
+  //
+  // Union means a local-only offline solve (present here, absent in the cloud)
+  // survives and syncs up, and a cloud-only entry appears locally. When the same
+  // problem was solved on both devices, last-write-wins by timestamp. Bounded,
+  // most-recent-first — the local repo re-caps on its next write.
+  static Map<String, dynamic> _mergeHistory(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final byKey = <String, Map<String, dynamic>>{};
+    for (final entry in [
+      ..._entryList(a['entries']),
+      ..._entryList(b['entries']),
+    ]) {
+      final key = entry['canonicalKey'];
+      if (key is! String) continue;
+      final existing = byKey[key];
+      if (existing == null ||
+          _asInt(entry['timestampMillis']) >
+              _asInt(existing['timestampMillis'])) {
+        byKey[key] = entry;
+      }
+    }
+    final merged = byKey.values.toList()
+      ..sort((x, y) => _asInt(y['timestampMillis'])
+          .compareTo(_asInt(x['timestampMillis'])));
+    return {
+      'entries':
+          merged.length > _maxHistory ? merged.sublist(0, _maxHistory) : merged,
+    };
+  }
+
+  static List<Map<String, dynamic>> _entryList(Object? v) => v is List
+      ? [for (final e in v) if (e is Map) Map<String, dynamic>.from(e)]
+      : const [];
 
   // ---- Helpers ----
   static int _asInt(Object? v) => v is int ? v : 0;

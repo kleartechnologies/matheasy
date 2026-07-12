@@ -6,6 +6,7 @@ import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/gallery/presentation/gallery_screen.dart';
+import '../../features/history/presentation/history_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/paywall/presentation/paywall_screen.dart';
@@ -105,13 +106,22 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.galleryName,
         builder: (context, state) => const GalleryScreen(),
       ),
+      // Solved-problem history — a full-screen route over the shell, reachable
+      // from the Home "Recent" section's "See all".
+      GoRoute(
+        path: AppRoutes.history,
+        name: AppRoutes.historyName,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const HistoryScreen(),
+      ),
       // Manual math entry — a full-screen route over the shell (like Scan),
       // reachable from the scanner's "Type it" and the Home quick action.
       GoRoute(
         path: AppRoutes.manualInput,
         name: AppRoutes.manualInputName,
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const ManualInputScreen(),
+        builder: (context, state) =>
+            ManualInputScreen(args: state.extra as ManualInputArgs?),
       ),
       // AI Tutor is a contextual feature, not a tab. The chat is reachable from
       // result pages, Visual Learning, wrong answers and practice mistakes as a

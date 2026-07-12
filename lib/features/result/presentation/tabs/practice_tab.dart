@@ -28,9 +28,22 @@ class PracticeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (questions.isEmpty) {
-      return const ResultEmpty(
-        message: "No practice yet — tap Generate and I'll make some just for "
-            'you!',
+      // The empty state must carry the Generate button itself — otherwise the
+      // copy tells the user to "tap Generate" with no button to tap (spec §9).
+      return Column(
+        children: [
+          const ResultEmpty(
+            message: 'No practice yet — want a few problems just like this '
+                "one? I'll build them for you.",
+          ),
+          const SizedBox(height: AppSpacing.md),
+          PrimaryButton(
+            label: 'Generate practice',
+            icon: Icons.auto_awesome_rounded,
+            expand: false,
+            onPressed: onGenerateMore,
+          ),
+        ],
       );
     }
     return Column(

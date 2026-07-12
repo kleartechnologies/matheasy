@@ -4,16 +4,29 @@ The server-side backend for Matheasy. Three concerns:
 
 | Function | Type | What it does |
 | --- | --- | --- |
-| `recognizeEquation` | callable | Mathpix OCR proxy — photo → LaTeX. Meters the free `scans` quota. |
-| `solveEquation` | callable | OpenAI solver — LaTeX → full worked solution (`ResultData` shape). |
+| `recognizeEquation` | callable | OpenAI Vision OCR proxy — photo → LaTeX. Meters the free `scans` quota. |
+| `solveEquation` | callable | **Deterministic** solver — mathsteps + mathjs compute + verify the answer; the LLM only narrates. Returns the §4 schema. |
 | `tutorReply` | callable | OpenAI tutor (Matheasy) — chat history → reply + suggestions. Meters `tutorMessages`. |
 | `revenuecatWebhook` | HTTPS | Syncs RevenueCat entitlement + subscription state into Firestore. |
 | `aggregateProgress` | Firestore trigger | Rolls `progressEvents` up into aggregate `stats`. |
 
-**Why this exists:** the Mathpix and OpenAI API keys must never ship inside the
-app. The client calls these functions; the functions hold the secrets (in Cloud
-Secret Manager) and enforce the free-tier quotas server-side, so paid status and
-usage counts can't be forged on-device.
+**Why this exists:** the OpenAI API key must never ship inside the app. The
+client calls these functions; the functions hold the secret (in Cloud Secret
+Manager) and enforce the free-tier quotas server-side, so paid status and usage
+counts can't be forged on-device.
+
+**The solver's golden rule (see `src/solver/`):** the answer is ALWAYS computed
+by a symbolic engine (`mathsteps` for equation-solving + simplification, `mathjs`
+for evaluation + derivatives) and substituted back into the original problem to
+**verify** before it is returned. The LLM never produces the math — it only
+writes the plain-language "why" for each already-computed step. When no engine
+can solve a problem, a constrained LLM proposes a *candidate* that must still
+pass the same substitution gate, or the function returns a `verified:false`
+"couldn't verify" state instead of a confident wrong answer. Coverage today:
+arithmetic, simplification, linear + quadratic equations, and derivatives solve
+fully deterministically; higher-degree/trig equations, systems, and integrals go
+through the verified-candidate path; anything unverifiable returns the honest
+"couldn't verify" state.
 
 ## Prerequisites
 
@@ -33,8 +46,6 @@ Each value is stored in Cloud Secret Manager, never in the repo:
 
 ```bash
 firebase functions:secrets:set OPENAI_API_KEY
-firebase functions:secrets:set MATHPIX_APP_ID
-firebase functions:secrets:set MATHPIX_APP_KEY
 firebase functions:secrets:set REVENUECAT_WEBHOOK_TOKEN   # invent a long random string
 ```
 
@@ -92,10 +103,48 @@ equivalent for Firestore/Auth).
 users/{uid}
   entitlement: 'none' | 'pro'          # written only by revenuecatWebhook
   usage: { scans, tutorMessages, practiceQuestions }
+  rateLimits: { recognize|solve|tutor|visual|practice: { minEpoch, minCount, dayEpoch, dayCount } }
   subscription: { isPro, productId, store, expiresAtMs, willRenew, ... }
   stats: { xp, problemsSolved, streak, lastActivityAt }
   progressEvents/{eventId}             # append-only, client-written
+
+solveCache/{sha256(canonicalLatex)}    # global, verified-only; { key, payload, createdAt, expiresAt }
 ```
+
+## Cost & safety hardening (spec §10)
+
+Enforced server-side, before the paid OpenAI call, on every user (client gates
+are UX-only and bypassable):
+
+- **Free-tier quota** — `assertWithinQuota` caps lifetime `scans` (5) / tutor
+  (20) / practice (10). `users/{uid}` is `allow write: if false`, so counters
+  can't be forged.
+- **Per-user rate limits** (`RATE_LIMITS` in `config.ts`) — a per-minute burst +
+  per-day ceiling on `recognize`/`solve`/`tutor`/`visual`/`practice`, applied to
+  free **and** Pro users. This is what caps the otherwise-uncapped
+  `solveEquation(countAsScan:false)` path and any retry loop. Over-limit throws
+  `resource-exhausted` with `details.rateLimited = true` (the client shows "slow
+  down", not the paywall).
+- **Image moderation** — `recognizeEquation` screens the photo with the free
+  `omni-moderation-latest` model before the paid vision call (fail-closed on a
+  flag, fail-open on a moderation outage; the math-only output contract is the
+  backstop). Minors-facing / COPPA.
+- **Server solve cache** — a repeat problem returns the verified payload with no
+  LLM call, keyed by a collision-safe canonical LaTeX (same transforms as the
+  client `historyCacheKey`). Scan images are **never** written to Storage.
+
+### One-time console setup
+
+The `solveCache` docs carry an `expiresAt` timestamp for auto-purge. Enable a
+Firestore **TTL policy** on that field (once):
+
+```bash
+gcloud firestore fields ttls update expiresAt \
+  --collection-group=solveCache --enable-ttl
+```
+
+Without it the cache still works but is never purged; with it, cached solutions
+auto-delete ~30 days after they're written (minimal-retention posture).
 
 ## Client call signatures (Flutter `cloud_functions`)
 
@@ -106,7 +155,9 @@ final fns = FirebaseFunctions.instance;
 final scan = await fns.httpsCallable('recognizeEquation')
     .call({'imageBase64': base64Jpeg, 'mimeType': 'image/jpeg', 'source': 'camera'});
 
-// LaTeX → solution
+// LaTeX → solution (returns the §4 schema: problemLatex, problemType,
+// finalAnswer {latex, plain}, verified, methods[], graph). `verified:false`
+// means the answer couldn't be proven — show the "try re-scanning" state.
 final solved = await fns.httpsCallable('solveEquation')
     .call({'latex': scan.data['latex']});
 

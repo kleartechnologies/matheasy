@@ -22,7 +22,11 @@ enum SyncDomain {
   usage('usage'),
 
   /// Learning analytics — scan/tutor counts, learning days, activity feed.
-  analytics('analytics');
+  analytics('analytics'),
+
+  /// Solved-problem history — the cache of past solutions (LaTeX + solution
+  /// JSON, never images) that re-opens instantly, offline and free.
+  history('history');
 
   const SyncDomain(this.docId);
 
