@@ -7,7 +7,7 @@
          protocol scheme is fb<APP_ID>. Until real values land the SDK stays
          dormant (auto-logging + advertiser-id collection are off, and the Dart
          MetaConfig gate keeps every SDK call disabled). -->
-    <string name="facebook_app_id">000000000000000</string>
-    <string name="facebook_client_token">REPLACE_WITH_META_CLIENT_TOKEN</string>
-    <string name="fb_login_protocol_scheme">fb000000000000000</string>
+    <string name="facebook_app_id">1922020571820303</string>
+    <string name="facebook_client_token">21c3c2ae2a862af07015dd69dcdeb80f</string>
+    <string name="fb_login_protocol_scheme">fb1922020571820303</string>
 </resources>

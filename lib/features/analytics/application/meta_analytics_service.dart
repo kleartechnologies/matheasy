@@ -17,15 +17,28 @@ class MetaSdk {
 
   static FacebookAppEvents? _events;
 
+  /// Whether ad tracking is permitted for the current user. Defaults to FALSE
+  /// and only flips true once the COPPA age gate confirms a 13+ user (see
+  /// `AgeGateController`). While false, NOTHING reaches Meta — no events, no
+  /// `activateApp`, no ATT prompt, no attribution — regardless of configuration.
+  static bool trackingAllowed = false;
+
   /// Whether the Facebook SDK is configured and installed this launch.
   static bool get isReady => _events != null;
 
   /// Installs the SDK handle. Called once from bootstrap.
   static void install(FacebookAppEvents events) => _events = events;
 
-  /// Clears the handle — tests only.
+  /// Clears the handle + tracking flag — tests only.
   @visibleForTesting
-  static void reset() => _events = null;
+  static void reset() {
+    _events = null;
+    trackingAllowed = false;
+  }
+
+  /// Logs the install/session activation signal. Called only once the age gate
+  /// permits tracking, so an install ping is never sent for an under-13 user.
+  static Future<void> activateApp() async => _events?.activateApp();
 
   /// Enables/disables collection of the device advertiser id (IDFA / GAID).
   /// Driven by the ATT decision on iOS; on Android it is subject to the AD_ID
@@ -54,6 +67,8 @@ class MetaAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logEvent(AnalyticsEvent event) async {
+    // COPPA gate: no app events reach Meta until the age gate permits tracking.
+    if (!MetaSdk.trackingAllowed) return;
     final meta = MetaEventMapper.map(event);
     if (meta == null) return;
     await _events.logEvent(
@@ -66,6 +81,7 @@ class MetaAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> setUserId(String? id) async {
+    if (!MetaSdk.trackingAllowed) return;
     if (id == null) {
       await _events.clearUserID();
     } else {
@@ -111,11 +127,11 @@ Future<MetaAnalyticsService?> initializeMetaAnalytics() async {
     await events.setAdvertiserIdCollectionEnabled(false);
     // Keep automatic app-event logging OFF: it also enables the SDK's implicit
     // in-app-purchase observer, which would DOUBLE-COUNT the purchases/trials
-    // RevenueCat already sends server-side (Conversions API). We still emit the
-    // install/session signal explicitly via activateApp() — install campaigns
-    // need it and it carries no purchase or advertiser-id data.
+    // RevenueCat already sends server-side (Conversions API). The install/session
+    // signal is emitted explicitly via MetaSdk.activateApp() from the consent
+    // flow — only AFTER the COPPA age gate permits tracking, so no install ping
+    // is ever sent for an under-13 user.
     await events.setAutoLogAppEventsEnabled(false);
-    await events.activateApp();
     MetaSdk.install(events);
     return MetaAnalyticsService(events);
   } catch (error, stack) {

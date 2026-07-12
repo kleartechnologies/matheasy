@@ -23,9 +23,9 @@
 	     below (fb<APP_ID>). Until then the SDK stays dormant (auto-logging off,
 	     no advertiser-id collection). -->
 	<key>FacebookAppID</key>
-	<string>000000000000000</string>
+	<string>1922020571820303</string>
 	<key>FacebookClientToken</key>
-	<string>REPLACE_WITH_META_CLIENT_TOKEN</string>
+	<string>21c3c2ae2a862af07015dd69dcdeb80f</string>
 	<key>FacebookDisplayName</key>
 	<string>Matheasy</string>
 	<!-- Privacy-safe defaults: no automatic event logging and no IDFA collection
@@ -93,7 +93,7 @@
 			<string>com.facebook.sdk</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fb000000000000000</string>
+				<string>fb1922020571820303</string>
 			</array>
 		</dict>
 	</array>

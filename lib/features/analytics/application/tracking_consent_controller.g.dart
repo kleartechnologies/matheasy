@@ -8,66 +8,39 @@ part of 'tracking_consent_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Orchestrates the App Tracking Transparency (ATT) prompt and propagates the
-/// user's decision to the ad SDKs.
+/// Runs the App Tracking Transparency (ATT) prompt and propagates the user's
+/// decision to the ad SDKs. Driven by `AdConsentGate` **after** the COPPA age
+/// gate confirms a 13+ user — never for under-13 / unknown-age users.
 ///
-/// TRIGGER POINT (best practice): kept alive and watched by `AppShell`, so it
-/// runs the first time the user reaches the main app — NEVER during launch or
-/// the first frame, where Apple silently no-ops the prompt. A post-frame
-/// callback defers the request until the app is foreground/active. It is only
-/// meaningful once Meta is configured, so it no-ops otherwise (and on a fresh,
-/// unconfigured checkout it never prompts).
-///
-/// On the ATT result it:
-///   * enables Meta advertiser-id (IDFA) collection only when authorized, and
-///   * hands RevenueCat the Facebook anonymous id + device identifiers so
-///     server-side purchase events attribute to the Meta ad click.
-///
-/// Recommendation: for higher opt-in, move the [requestIfNeeded] call to just
-/// after the user's first solved problem (the "aha" moment) — this controller
-/// is the single seam, so only the call site changes.
+/// When permitted it: emits the Meta install/session signal ([MetaSdk.activateApp]),
+/// enables Meta advertiser-id (IDFA) collection only when ATT is authorized, and
+/// hands RevenueCat the Facebook anonymous id + device identifiers so
+/// server-side purchase events attribute to the Meta ad click. A tracking denial
+/// is honoured — no matching identifiers are shared.
 
 @ProviderFor(TrackingConsentController)
 final trackingConsentControllerProvider = TrackingConsentControllerProvider._();
 
-/// Orchestrates the App Tracking Transparency (ATT) prompt and propagates the
-/// user's decision to the ad SDKs.
+/// Runs the App Tracking Transparency (ATT) prompt and propagates the user's
+/// decision to the ad SDKs. Driven by `AdConsentGate` **after** the COPPA age
+/// gate confirms a 13+ user — never for under-13 / unknown-age users.
 ///
-/// TRIGGER POINT (best practice): kept alive and watched by `AppShell`, so it
-/// runs the first time the user reaches the main app — NEVER during launch or
-/// the first frame, where Apple silently no-ops the prompt. A post-frame
-/// callback defers the request until the app is foreground/active. It is only
-/// meaningful once Meta is configured, so it no-ops otherwise (and on a fresh,
-/// unconfigured checkout it never prompts).
-///
-/// On the ATT result it:
-///   * enables Meta advertiser-id (IDFA) collection only when authorized, and
-///   * hands RevenueCat the Facebook anonymous id + device identifiers so
-///     server-side purchase events attribute to the Meta ad click.
-///
-/// Recommendation: for higher opt-in, move the [requestIfNeeded] call to just
-/// after the user's first solved problem (the "aha" moment) — this controller
-/// is the single seam, so only the call site changes.
+/// When permitted it: emits the Meta install/session signal ([MetaSdk.activateApp]),
+/// enables Meta advertiser-id (IDFA) collection only when ATT is authorized, and
+/// hands RevenueCat the Facebook anonymous id + device identifiers so
+/// server-side purchase events attribute to the Meta ad click. A tracking denial
+/// is honoured — no matching identifiers are shared.
 final class TrackingConsentControllerProvider
     extends $NotifierProvider<TrackingConsentController, void> {
-  /// Orchestrates the App Tracking Transparency (ATT) prompt and propagates the
-  /// user's decision to the ad SDKs.
+  /// Runs the App Tracking Transparency (ATT) prompt and propagates the user's
+  /// decision to the ad SDKs. Driven by `AdConsentGate` **after** the COPPA age
+  /// gate confirms a 13+ user — never for under-13 / unknown-age users.
   ///
-  /// TRIGGER POINT (best practice): kept alive and watched by `AppShell`, so it
-  /// runs the first time the user reaches the main app — NEVER during launch or
-  /// the first frame, where Apple silently no-ops the prompt. A post-frame
-  /// callback defers the request until the app is foreground/active. It is only
-  /// meaningful once Meta is configured, so it no-ops otherwise (and on a fresh,
-  /// unconfigured checkout it never prompts).
-  ///
-  /// On the ATT result it:
-  ///   * enables Meta advertiser-id (IDFA) collection only when authorized, and
-  ///   * hands RevenueCat the Facebook anonymous id + device identifiers so
-  ///     server-side purchase events attribute to the Meta ad click.
-  ///
-  /// Recommendation: for higher opt-in, move the [requestIfNeeded] call to just
-  /// after the user's first solved problem (the "aha" moment) — this controller
-  /// is the single seam, so only the call site changes.
+  /// When permitted it: emits the Meta install/session signal ([MetaSdk.activateApp]),
+  /// enables Meta advertiser-id (IDFA) collection only when ATT is authorized, and
+  /// hands RevenueCat the Facebook anonymous id + device identifiers so
+  /// server-side purchase events attribute to the Meta ad click. A tracking denial
+  /// is honoured — no matching identifiers are shared.
   TrackingConsentControllerProvider._()
     : super(
         from: null,
@@ -96,26 +69,17 @@ final class TrackingConsentControllerProvider
 }
 
 String _$trackingConsentControllerHash() =>
-    r'c5347f377932f3c0b628058b71ba4eed55100b46';
+    r'daf21bd3cae6bfff09533fff4b8f9a0d029020fa';
 
-/// Orchestrates the App Tracking Transparency (ATT) prompt and propagates the
-/// user's decision to the ad SDKs.
+/// Runs the App Tracking Transparency (ATT) prompt and propagates the user's
+/// decision to the ad SDKs. Driven by `AdConsentGate` **after** the COPPA age
+/// gate confirms a 13+ user — never for under-13 / unknown-age users.
 ///
-/// TRIGGER POINT (best practice): kept alive and watched by `AppShell`, so it
-/// runs the first time the user reaches the main app — NEVER during launch or
-/// the first frame, where Apple silently no-ops the prompt. A post-frame
-/// callback defers the request until the app is foreground/active. It is only
-/// meaningful once Meta is configured, so it no-ops otherwise (and on a fresh,
-/// unconfigured checkout it never prompts).
-///
-/// On the ATT result it:
-///   * enables Meta advertiser-id (IDFA) collection only when authorized, and
-///   * hands RevenueCat the Facebook anonymous id + device identifiers so
-///     server-side purchase events attribute to the Meta ad click.
-///
-/// Recommendation: for higher opt-in, move the [requestIfNeeded] call to just
-/// after the user's first solved problem (the "aha" moment) — this controller
-/// is the single seam, so only the call site changes.
+/// When permitted it: emits the Meta install/session signal ([MetaSdk.activateApp]),
+/// enables Meta advertiser-id (IDFA) collection only when ATT is authorized, and
+/// hands RevenueCat the Facebook anonymous id + device identifiers so
+/// server-side purchase events attribute to the Meta ad click. A tracking denial
+/// is honoured — no matching identifiers are shared.
 
 abstract class _$TrackingConsentController extends $Notifier<void> {
   void build();

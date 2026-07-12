@@ -30,6 +30,8 @@ class PreferencesStore {
 
   static const String _kOnboardingComplete = 'session.onboarding_complete';
   static const String _kGuestMode = 'session.guest_mode';
+  static const String _kBirthYear = 'privacy.birth_year';
+  static const String _kAdConsentPrompted = 'privacy.ad_consent_prompted';
   static const String _kPracticeProgress = 'practice.progress';
   static const String _kPracticeHistory = 'practice.history';
   static const String _kAchievements = 'progress.achievements';
@@ -55,6 +57,19 @@ class PreferencesStore {
 
   Future<void> setGuestMode({required bool value}) =>
       _prefs.setBool(_kGuestMode, value);
+
+  /// The user's declared birth year, or `null` if never answered. Used only by
+  /// the ad-tracking age gate (COPPA) — no ad SDK activates for under-13s.
+  int? get birthYear => _prefs.getInt(_kBirthYear);
+
+  Future<void> setBirthYear(int year) => _prefs.setInt(_kBirthYear, year);
+
+  /// Whether the neutral age prompt has been shown (so we don't re-nag a user
+  /// who dismissed it — they simply stay in the no-tracking state).
+  bool get adConsentPrompted => _prefs.getBool(_kAdConsentPrompted) ?? false;
+
+  Future<void> setAdConsentPrompted() =>
+      _prefs.setBool(_kAdConsentPrompted, true);
 
   /// Clears session-scoped flags (guest mode) on sign-out. Onboarding
   /// completion is intentionally preserved.

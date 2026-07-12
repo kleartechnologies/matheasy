@@ -5,13 +5,19 @@
 // verify the load-bearing logic (correct Meta event per source event, NO
 // revenue double-firing, one-fire-per-event, error isolation) without a device.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matheasy/core/config/meta_config.dart';
 import 'package:matheasy/core/monitoring/crash_reporting_service.dart';
+import 'package:matheasy/core/persistence/preferences_store.dart';
+import 'package:matheasy/features/analytics/application/age_gate_controller.dart';
 import 'package:matheasy/features/analytics/application/analytics_service.dart';
 import 'package:matheasy/features/analytics/application/composite_analytics_service.dart';
+import 'package:matheasy/features/analytics/application/meta_analytics_service.dart';
+import 'package:matheasy/features/analytics/domain/age_assurance.dart';
 import 'package:matheasy/features/analytics/domain/analytics_event.dart';
 import 'package:matheasy/features/analytics/domain/meta_event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Records every call for assertions.
 class _RecordingAnalyticsService implements AnalyticsService {
@@ -43,10 +49,10 @@ class _ThrowingAnalyticsService implements AnalyticsService {
 
 void main() {
   group('MetaConfig', () {
-    test('is not configured with the shipped placeholders', () {
-      expect(MetaConfig.isConfigured, isFalse);
-      expect(MetaConfig.appId.startsWith('REPLACE_'), isTrue);
-      expect(MetaConfig.clientToken.startsWith('REPLACE_'), isTrue);
+    test('is configured once the real App ID + Client Token are wired', () {
+      expect(MetaConfig.isConfigured, isTrue);
+      expect(MetaConfig.appId.startsWith('REPLACE_'), isFalse);
+      expect(MetaConfig.clientToken.startsWith('REPLACE_'), isFalse);
     });
   });
 
@@ -209,5 +215,106 @@ void main() {
         expect(healthy.events.single.name, 'scan_completed');
       },
     );
+  });
+
+  group('AgeAssurance (COPPA age gate)', () {
+    test('classifies birth year against the current year', () {
+      expect(
+        assuranceForBirthYear(null, currentYear: 2026),
+        AgeAssurance.unknown,
+      );
+      // age 13 → the threshold is inclusive.
+      expect(
+        assuranceForBirthYear(2013, currentYear: 2026),
+        AgeAssurance.teenOrAdult,
+      );
+      // age 12 → child.
+      expect(
+        assuranceForBirthYear(2014, currentYear: 2026),
+        AgeAssurance.child,
+      );
+      expect(
+        assuranceForBirthYear(1990, currentYear: 2026),
+        AgeAssurance.teenOrAdult,
+      );
+    });
+
+    test(
+      'implausible years fail closed to unknown (never unlock tracking)',
+      () {
+        expect(
+          assuranceForBirthYear(2030, currentYear: 2026),
+          AgeAssurance.unknown,
+        );
+        expect(
+          assuranceForBirthYear(1800, currentYear: 2026),
+          AgeAssurance.unknown,
+        );
+      },
+    );
+
+    test('only a confirmed teen/adult permits ad tracking', () {
+      expect(AgeAssurance.teenOrAdult.adTrackingPermitted, isTrue);
+      expect(AgeAssurance.child.adTrackingPermitted, isFalse);
+      expect(AgeAssurance.unknown.adTrackingPermitted, isFalse);
+    });
+  });
+
+  group('AgeGateController drives MetaSdk.trackingAllowed', () {
+    tearDown(MetaSdk.reset);
+
+    Future<ProviderContainer> containerWith(Map<String, Object> seed) async {
+      SharedPreferences.setMockInitialValues(seed);
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test('a confirmed adult unlocks tracking', () async {
+      final year = DateTime.now().year - 30;
+      final container = await containerWith({'privacy.birth_year': year});
+      expect(
+        container.read(ageGateControllerProvider),
+        AgeAssurance.teenOrAdult,
+      );
+      expect(MetaSdk.trackingAllowed, isTrue);
+    });
+
+    test('a child keeps tracking OFF', () async {
+      final year = DateTime.now().year - 8;
+      final container = await containerWith({'privacy.birth_year': year});
+      expect(container.read(ageGateControllerProvider), AgeAssurance.child);
+      expect(MetaSdk.trackingAllowed, isFalse);
+    });
+
+    test(
+      'unknown age fails closed and does not prompt while Meta is off',
+      () async {
+        final container = await containerWith({});
+        expect(container.read(ageGateControllerProvider), AgeAssurance.unknown);
+        expect(MetaSdk.trackingAllowed, isFalse);
+        // Meta isn't configured in tests (MetaSdk.isReady == false) → never prompt.
+        expect(
+          container.read(ageGateControllerProvider.notifier).shouldPrompt,
+          isFalse,
+        );
+      },
+    );
+
+    test('recording an adult birth year flips the gate on', () async {
+      final container = await containerWith({});
+      expect(MetaSdk.trackingAllowed, isFalse);
+      await container
+          .read(ageGateControllerProvider.notifier)
+          .recordBirthYear(DateTime.now().year - 25);
+      expect(
+        container.read(ageGateControllerProvider),
+        AgeAssurance.teenOrAdult,
+      );
+      expect(MetaSdk.trackingAllowed, isTrue);
+    });
   });
 }

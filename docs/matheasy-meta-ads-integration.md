@@ -12,22 +12,20 @@ Manager can optimize Matheasy campaigns.
 > dormant until real Meta credentials are pasted in. Revenue attribution is
 > **server-side via RevenueCat's Conversions API** (the client feeds it the FB
 > anonymous id + device identifiers), so purchases are never double-counted.
-> `flutter analyze` is clean and **380 tests pass**. Remaining work is external
+> `flutter analyze` is clean and **387 tests pass**. Remaining work is external
 > config (Meta credentials, RevenueCat dashboard, an AGP bump) — see
 > [§10](#10-launch-readiness-score) and [Required manual steps](#required-manual-steps-before-go-live).
 
-> 🛑 **COPPA BLOCKER — resolve before pasting real Meta credentials.** Matheasy
-> has *actual knowledge* of a child audience: `functions/src/proxy/scan.ts`
-> calls its moderation a "COPPA moderation gate (minors, 8–18)" and onboarding
-> offers "Primary School". COPPA prohibits collecting persistent identifiers
-> (IDFA/GAID/FB anon id) from under-13 users for advertising, and a child tapping
-> "Allow" on ATT is **not** valid consent. The Meta layer is safe today only
-> because credentials are placeholders. **Before enabling Meta you MUST** decide
-> the audience policy and, if child-directed / mixed-audience, gate
-> `TrackingConsentController.requestIfNeeded()` behind a neutral age check (skip
-> ATT + all identifier collection for under-13/unknown-age users). A `// COPPA`
-> comment marks the gate in code. This was intentionally **not** auto-implemented
-> — it is a product/legal decision and "do not build unrelated features" applies.
+> ✅ **COPPA age gate — IMPLEMENTED.** Matheasy has *actual knowledge* of a child
+> audience (`functions/src/proxy/scan.ts` "COPPA moderation gate (minors, 8–18)";
+> onboarding offers "Primary School"), and COPPA bars collecting persistent
+> identifiers (IDFA/GAID/FB anon id) from under-13s for ads — ATT "Allow" is not
+> valid child consent. So a neutral **birth-year age gate** now guards the entire
+> Meta layer via the `MetaSdk.trackingAllowed` flag (default **false** — fails
+> closed). Under-13 **and unknown-age** users get **zero** Meta activity: no
+> events, no `activateApp`, no ATT prompt, no advertiser-id/attribution. Only a
+> confirmed 13+ user unlocks tracking. See [§6](#6-att-status--implemented) and
+> [Age gate](#coppa-age-gate-how-it-works).
 
 ---
 
@@ -77,15 +75,19 @@ zero changes to any event call site.
 - `lib/features/analytics/domain/meta_event.dart` — `MetaEvent` value object, `MetaEventNames` (canonical strings), and the **pure** `MetaEventMapper` (app taxonomy → Meta events; drops revenue events).
 - `lib/features/analytics/application/composite_analytics_service.dart` — fans every analytics call to Firebase **and** Meta with per-delegate error isolation.
 - `lib/features/analytics/application/meta_analytics_service.dart` — `MetaAnalyticsService` (Meta backend), `MetaSdk` (quarantined SDK handle), `initializeMetaAnalytics()`.
-- `lib/features/analytics/application/tracking_consent_controller.dart` — ATT request + consent propagation to Meta + RevenueCat.
+- `lib/features/analytics/application/tracking_consent_controller.dart` — ATT request + consent propagation to Meta + RevenueCat (gated behind the age gate).
+- `lib/features/analytics/domain/age_assurance.dart` — pure birth-year → `AgeAssurance` classifier (COPPA threshold, fail-closed).
+- `lib/features/analytics/application/age_gate_controller.dart` — persists birth year, drives `MetaSdk.trackingAllowed`.
+- `lib/features/analytics/presentation/ad_consent_gate.dart` — invisible shell wrapper: neutral birth-year prompt → consent flow.
 - `android/app/src/main/res/values/strings.xml` — Facebook string resources.
-- `test/meta_analytics_test.dart` — 12 tests (mapper correctness, **no revenue double-firing**, fan-out isolation, config gate).
+- `test/meta_analytics_test.dart` — 20 tests (mapper correctness, **no revenue double-firing**, fan-out isolation, config gate, **age-gate classification + `trackingAllowed`**).
 
 **Modified files**
 
 - `pubspec.yaml` — the two dependencies.
 - `lib/bootstrap.dart` — after Firebase/RevenueCat init, composes Meta onto `Analytics.instance` (no-op when unconfigured).
-- `lib/features/shell/presentation/app_shell.dart` — watches `trackingConsentControllerProvider` to trigger ATT once, in-app.
+- `lib/features/shell/presentation/app_shell.dart` — wraps the shell in `AdConsentGate` (age gate → ATT), in-app.
+- `lib/core/persistence/preferences_store.dart` — persisted `birthYear` + `adConsentPrompted`.
 - `lib/features/subscription/application/subscription_service.dart` (+ RevenueCat/Local impls) — `attachAdAttribution()`.
 - `ios/Runner/Info.plist`, `android/app/src/main/AndroidManifest.xml` — native config above.
 
@@ -202,10 +204,11 @@ the FB SDK's implicit purchase detection can't double-count.
   `notDetermined`; reuses the decision otherwise).
 - **Explanation:** `NSUserTrackingUsageDescription` (honest, App-Review-safe).
 - **Timing (best practice):** **NOT at launch.** Triggered from `AppShell` (the
-  first post-auth content screen) via an `addPostFrameCallback`, so the app is
-  foreground/active — Apple silently no-ops an ATT prompt shown before the app is
-  active. Release-only + a no-op until Meta is configured, so debug builds and a
-  fresh checkout never prompt.
+  first post-auth content screen) via `AdConsentGate`'s post-frame callback, so
+  the app is foreground/active — Apple silently no-ops an ATT prompt shown before
+  the app is active. It runs **only after the COPPA age gate confirms a 13+
+  user** (the neutral birth-year prompt shows first). Release-only + a no-op
+  until Meta is configured, so debug builds and a fresh checkout never prompt.
 - **Consequences wired:** on the result it sets Meta
   `setAdvertiserIdCollectionEnabled(authorized)`. **A denial is honoured** —
   `attachAdAttribution` (FB anon id + device identifiers to RevenueCat) runs
@@ -220,6 +223,26 @@ opt-in booster.
 
 **Android:** ATT is iOS-only; on Android advertiser-id collection is enabled
 (subject to the `AD_ID` permission + the user's Google settings).
+
+### COPPA age gate — how it works
+
+1. **`MetaSdk.trackingAllowed`** (default **false**) is the single flag every Meta
+   path checks — event forwarding (`MetaAnalyticsService`), `activateApp()`, the
+   ATT prompt, and RevenueCat attribution all short-circuit when it's false. So
+   the safe default is *no collection from anyone*.
+2. **`AgeGateController`** reads a persisted birth year, classifies it
+   (`AgeAssurance`: `unknown` / `child` / `teenOrAdult`, threshold 13,
+   implausible years → `unknown`), and sets `trackingAllowed` to true **only** for
+   a confirmed `teenOrAdult`.
+3. **`AdConsentGate`** (wraps the shell) shows a **neutral birth-year picker**
+   once — no mention of ads, no stated eligible age (COPPA-safe, non-leading) —
+   then runs the ATT/attribution flow only if the gate opened. A dismissed prompt
+   leaves the user untracked and isn't re-nagged.
+4. Result: under-13 **and** unknown-age users produce **zero** Meta activity;
+   `activateApp` (install) is delayed until a 13+ user is confirmed, so even the
+   install ping is never sent for a child.
+
+You should still set the App Store age rating / Play Data-Safety form to match.
 
 ---
 
@@ -286,7 +309,9 @@ accounts/build machines** and can't be done from the repo:
 
 | Blocker | Owner | Effort |
 |---|---|---|
-| Real Meta App ID + Client Token (MetaConfig + Info.plist + strings.xml) | You | 5 min |
+| **Meta App ID `1922020571820303` + Client Token are BOTH wired** ⇒ `MetaConfig.isConfigured == true`, so Meta **activates in release builds** (for confirmed 13+ users). Debug/profile stay dormant. | ✅ done | — |
+| **COPPA age gate — implemented** (birth-year gate → `MetaSdk.trackingAllowed`, fails closed). | ✅ done | — |
+| App Store age-rating / Play Data-Safety declarations match the ad-tracking behaviour | You | 15 min |
 | RevenueCat Meta **Conversions API** integration (Dataset ID + token) | You | 15 min |
 | AGP 8.11.1 → 8.13.0 + verify Android release build | You | 15 min |
 | `pod install` + iOS build/TestFlight smoke test | You | 15 min |
@@ -352,17 +377,16 @@ double-count warnings** on `Subscribe`/`Purchase`.
 | No test app IDs / no unconfigured SDK activity | ✅ `MetaConfig.isConfigured` gate ⇒ placeholder checkout never touches the SDK, never prompts ATT, never sends events. |
 | Advertiser id (IDFA/GAID) privacy | ✅ Collection stays OFF (native default + runtime) until ATT authorizes; a **denial is honoured** (no identifiers handed to RevenueCat/Meta). Android `AD_ID` permission stripped by default. |
 | No revenue double-counting | ✅ `MetaEventMapper` drops `subscription_purchased`; unit-tested. Revenue is server-side (RevenueCat CAPI) only. |
-| COPPA / minors — **decision required** | ⚠️ Matheasy can serve minors. The SDK is dormant until configured, collects an advertiser id only post-ATT, and honours denials — but **ATT alone is not COPPA compliance**. Before enabling Meta in production you MUST decide: is the app child-directed / do you have actual knowledge of under-13 users? If so, **gate `TrackingConsentController.requestIfNeeded()` behind an age check** (skip it for those users — behavioural ad tracking of children is prohibited regardless of the ATT answer) and complete the App Store "Kids"/Play "Families" + Data Safety declarations accordingly. The code has a matching `// COPPA` comment at the gate. |
+| COPPA / minors | ✅ A neutral **birth-year age gate** (`AgeGateController` + `AdConsentGate`) drives `MetaSdk.trackingAllowed` (default **false**, fails closed). Under-13/unknown-age users get zero Meta activity (no events, `activateApp`, ATT, or attribution); only confirmed 13+ unlock it. Unit-tested. Still complete the App Store age-rating / Play Data-Safety declarations to match. |
 
 ---
 
 ## Required manual steps before go-live
 
-1. **Paste real Meta credentials** in three places (must match):
-   `lib/core/config/meta_config.dart` (`appId`, `clientToken`),
-   `ios/Runner/Info.plist` (`FacebookAppID`, `FacebookClientToken`, and the
-   `fb<APP_ID>` URL scheme), `android/.../res/values/strings.xml`
-   (`facebook_app_id`, `facebook_client_token`, `fb_login_protocol_scheme`).
+1. **Paste the Meta Client Token** (the App ID `1922020571820303` is already
+   wired). Set `clientToken` in `lib/core/config/meta_config.dart`,
+   `FacebookClientToken` in `ios/Runner/Info.plist`, and `facebook_client_token`
+   in `android/.../res/values/strings.xml`. (App Secret must NEVER be used.)
 2. **RevenueCat → Meta Conversions API** integration (Dataset ID + Client Token);
    set Meta dashboard "Log In-App Events Automatically → No".
 3. **Android:** bump AGP to 8.13.0; verify the release build; confirm compileSdk ≥ 36.

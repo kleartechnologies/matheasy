@@ -19,11 +19,11 @@ class MetaConfig {
 
   /// The Meta App ID from Meta for Developers → App → Settings → Basic. Numeric,
   /// and safe to ship in the binary (it is public, like the RevenueCat SDK key).
-  static const String appId = 'REPLACE_WITH_META_APP_ID';
+  static const String appId = '1922020571820303';
 
   /// The Meta Client Token from App → Settings → Advanced → Client Token. Public
   /// (client-side) token — NOT the App Secret, which must never ship in the app.
-  static const String clientToken = 'REPLACE_WITH_META_CLIENT_TOKEN';
+  static const String clientToken = '21c3c2ae2a862af07015dd69dcdeb80f';
 
   /// The name shown as the Facebook display name (`FacebookDisplayName`).
   static const String displayName = 'Matheasy';
