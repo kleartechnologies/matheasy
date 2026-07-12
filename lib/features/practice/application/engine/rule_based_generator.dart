@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import '../../domain/practice_difficulty.dart';
+import '../../domain/practice_figure.dart';
 import '../../domain/practice_question.dart';
 import '../../domain/practice_skill.dart';
 import 'generated_question.dart';
@@ -38,6 +41,11 @@ class RuleBasedGenerator {
     PracticeSkill.triangleAngle.id: _triangleAngle,
     PracticeSkill.rectangleArea.id: _rectangleArea,
     PracticeSkill.pythagoras.id: _pythagoras,
+    PracticeSkill.anglesStraightLine.id: _anglesStraightLine,
+    PracticeSkill.quadrilateralAngles.id: _quadrilateralAngles,
+    PracticeSkill.isoscelesTriangle.id: _isoscelesTriangle,
+    PracticeSkill.circleMeasures.id: _circleMeasures,
+    PracticeSkill.triangleAreaBaseHeight.id: _triangleAreaBaseHeight,
     PracticeSkill.trigRatio.id: _trigRatio,
     PracticeSkill.statsMean.id: _mean,
     PracticeSkill.statsMedianMode.id: _medianMode,
@@ -82,8 +90,28 @@ class RuleBasedGenerator {
       explanation: explanation,
       skillId: skill.id,
       acceptedAnswers: ['$third', '$third°', '$third degrees'],
+      figure: _triangleAngleFigure(a, b),
     );
     return GeneratedQuestion.of(question, signature: signature);
+  }
+
+  /// Triangle placed by the law of sines so the DRAWN base angles are exactly
+  /// the generated `a`,`b`; the apex (the answer) is left unlabelled.
+  static PracticeFigure _triangleAngleFigure(int a, int b) {
+    final third = 180 - a - b;
+    final ac = math.sin(_rad(b)) / math.sin(_rad(third)); // side AC (opposite B)
+    final c = PracticeFigurePoint(ac * math.cos(_rad(a)), ac * math.sin(_rad(a)));
+    return PracticeFigure(
+      kind: PracticeFigureKind.polygon,
+      semanticsLabel:
+          'A triangle with angles of $a° and $b°; the third angle is unknown.',
+      vertices: [
+        const PracticeFigurePoint(0, 0),
+        const PracticeFigurePoint(1, 0),
+        c,
+      ],
+      angleLabels: ['$a°', '$b°', ''], // givens at A,B; apex (answer) blank
+    );
   }
 
   // ---- Geometry: area & perimeter ------------------------------------------
@@ -115,9 +143,23 @@ class RuleBasedGenerator {
       explanation: explanation,
       skillId: skill.id,
       acceptedAnswers: ['$value'],
+      figure: _rectangleFigure(l, w),
     );
     return GeneratedQuestion.of(question, signature: signature);
   }
+
+  /// Rectangle with both sides labelled from the exact generated dimensions.
+  static PracticeFigure _rectangleFigure(int l, int w) => PracticeFigure(
+        kind: PracticeFigureKind.polygon,
+        semanticsLabel: 'A rectangle $l by $w.',
+        vertices: [
+          const PracticeFigurePoint(0, 0),
+          PracticeFigurePoint(l.toDouble(), 0),
+          PracticeFigurePoint(l.toDouble(), w.toDouble()),
+          PracticeFigurePoint(0, w.toDouble()),
+        ],
+        sideLabels: ['$l', '$w', '', ''], // bottom = l, right = w (others redundant)
+      );
 
   // ---- Geometry: Pythagoras ------------------------------------------------
 
@@ -147,9 +189,216 @@ class RuleBasedGenerator {
       explanation: explanation,
       skillId: skill.id,
       acceptedAnswers: ['$c'],
+      figure: _pythagorasFigure(a, b),
     );
     return GeneratedQuestion.of(question, signature: signature);
   }
+
+  /// Right triangle: legs a,b labelled + a right-angle mark; the hypotenuse
+  /// (the answer) is left unlabelled.
+  static PracticeFigure _pythagorasFigure(int a, int b) => PracticeFigure(
+        kind: PracticeFigureKind.polygon,
+        semanticsLabel:
+            'A right triangle with legs of $a and $b; the hypotenuse is unknown.',
+        vertices: [
+          const PracticeFigurePoint(0, 0), // right angle
+          PracticeFigurePoint(a.toDouble(), 0),
+          PracticeFigurePoint(0, b.toDouble()),
+        ],
+        sideLabels: ['$a', '', '$b'], // base leg, hypotenuse (answer) blank, height leg
+        rightAngleVertices: const [0],
+      );
+
+  // ---- Geometry: angles on a straight line ---------------------------------
+
+  static GeneratedQuestion _anglesStraightLine(
+    PracticeSkill skill,
+    PracticeDifficulty difficulty,
+    ParameterGenerator rng,
+    String id,
+  ) {
+    final given = rng.between(20, 160);
+    final unknown = 180 - given;
+    final question = PracticeQuestion(
+      id: id,
+      topic: skill.topic,
+      difficulty: difficulty,
+      type: PracticeQuestionType.input,
+      prompt: 'Two angles lie on a straight line. One of them is $given°. '
+          'What is the other angle, in degrees?',
+      explanation:
+          'Angles on a straight line sum to 180°: 180 − $given = $unknown°.',
+      skillId: skill.id,
+      acceptedAnswers: ['$unknown', '$unknown°', '$unknown degrees'],
+      figure: _straightLineFigure(given),
+    );
+    return GeneratedQuestion.of(question, signature: 'line|$given');
+  }
+
+  /// The ray is placed at exactly the given angle above the line, so the drawn
+  /// A-O-C angle IS `given`; the other angle (the answer) is left blank.
+  static PracticeFigure _straightLineFigure(int given) {
+    final c = PracticeFigurePoint(-math.cos(_rad(given)), math.sin(_rad(given)));
+    return PracticeFigure(
+      kind: PracticeFigureKind.straightLineAngles,
+      semanticsLabel:
+          'Two angles on a straight line; one is $given°, the other is unknown.',
+      vertices: [
+        const PracticeFigurePoint(-1, 0), // A (line, left)
+        const PracticeFigurePoint(0, 0), // O (vertex)
+        const PracticeFigurePoint(1, 0), // B (line, right)
+        c, // C (ray tip)
+      ],
+      lineGivenLabel: '$given°',
+    );
+  }
+
+  // ---- Geometry: quadrilateral angles (TEXT-ONLY, no figure) ----------------
+
+  static GeneratedQuestion _quadrilateralAngles(
+    PracticeSkill skill,
+    PracticeDifficulty difficulty,
+    ParameterGenerator rng,
+    String id,
+  ) {
+    final a = rng.between(70, 110);
+    final b = rng.between(70, 110);
+    final c = rng.between(70, 110);
+    final fourth = 360 - a - b - c; // guaranteed in [30, 150]
+    // No figure: a quadrilateral is NOT determined by its interior angles, so a
+    // drawn quad's corners can't be made to visibly match the labels without
+    // risking a "120°" label on a 117° corner. Faithfulness over coverage.
+    final question = PracticeQuestion(
+      id: id,
+      topic: skill.topic,
+      difficulty: difficulty,
+      type: PracticeQuestionType.input,
+      prompt: 'A quadrilateral has three angles of $a°, $b° and $c°. '
+          'What is the fourth angle, in degrees?',
+      explanation:
+          'Angles in a quadrilateral sum to 360°: 360 − $a − $b − $c = $fourth°.',
+      skillId: skill.id,
+      acceptedAnswers: ['$fourth', '$fourth°', '$fourth degrees'],
+    );
+    return GeneratedQuestion.of(question, signature: 'quad|$a|$b|$c');
+  }
+
+  // ---- Geometry: isosceles triangle ----------------------------------------
+
+  static GeneratedQuestion _isoscelesTriangle(
+    PracticeSkill skill,
+    PracticeDifficulty difficulty,
+    ParameterGenerator rng,
+    String id,
+  ) {
+    final apex = 2 * rng.between(10, 50); // even (20..100) → integer base angle
+    final base = (180 - apex) ~/ 2;
+    final question = PracticeQuestion(
+      id: id,
+      topic: skill.topic,
+      difficulty: difficulty,
+      type: PracticeQuestionType.input,
+      prompt: 'An isosceles triangle has an apex angle of $apex°. '
+          'What is each base angle, in degrees?',
+      explanation:
+          'The two base angles are equal: (180 − $apex) ÷ 2 = $base°.',
+      skillId: skill.id,
+      acceptedAnswers: ['$base', '$base°', '$base degrees'],
+      figure: _isoscelesFigure(apex),
+    );
+    return GeneratedQuestion.of(question, signature: 'iso|$apex');
+  }
+
+  /// Apex constructed exactly for the given apex angle; the two equal sides get
+  /// tick marks, the apex angle is labelled, the base angles (answer) are blank.
+  static PracticeFigure _isoscelesFigure(int apex) {
+    final h = 1 / math.tan(_rad(apex / 2)); // base half-width 1 ⇒ tan(apex/2)=1/h
+    return PracticeFigure(
+      kind: PracticeFigureKind.polygon,
+      semanticsLabel:
+          'An isosceles triangle with two equal sides and an apex angle of $apex°.',
+      vertices: [
+        const PracticeFigurePoint(-1, 0), // base-left
+        const PracticeFigurePoint(1, 0), // base-right
+        PracticeFigurePoint(0, h), // apex
+      ],
+      angleLabels: ['', '', '$apex°'], // apex labelled; base angles (answer) blank
+      tickEdges: const {1: 1, 2: 1}, // the two slanted (equal) sides
+    );
+  }
+
+  // ---- Geometry: circle radius & diameter ----------------------------------
+
+  static GeneratedQuestion _circleMeasures(
+    PracticeSkill skill,
+    PracticeDifficulty difficulty,
+    ParameterGenerator rng,
+    String id,
+  ) {
+    final r = rng.between(3, [8, 12, 20, 40][_tier(difficulty)]);
+    final diameter = 2 * r;
+    final question = PracticeQuestion(
+      id: id,
+      topic: skill.topic,
+      difficulty: difficulty,
+      type: PracticeQuestionType.input,
+      prompt: 'A circle has a radius of $r. What is its diameter?',
+      explanation: 'The diameter is twice the radius: 2 × $r = $diameter.',
+      skillId: skill.id,
+      acceptedAnswers: ['$diameter'],
+      figure: PracticeFigure(
+        kind: PracticeFigureKind.circle,
+        semanticsLabel: 'A circle with a radius of $r.',
+        circleLabel: '$r',
+      ),
+    );
+    return GeneratedQuestion.of(question, signature: 'circ|$r');
+  }
+
+  // ---- Geometry: area of a triangle (base × height) ------------------------
+
+  static GeneratedQuestion _triangleAreaBaseHeight(
+    PracticeSkill skill,
+    PracticeDifficulty difficulty,
+    ParameterGenerator rng,
+    String id,
+  ) {
+    final base = 2 * rng.between(2, [3, 5, 8, 12][_tier(difficulty)]); // even
+    final height = rng.between(3, [8, 12, 16, 24][_tier(difficulty)]);
+    final area = base * height ~/ 2; // base even ⇒ integer
+    final question = PracticeQuestion(
+      id: id,
+      topic: skill.topic,
+      difficulty: difficulty,
+      type: PracticeQuestionType.input,
+      prompt: 'A triangle has a base of $base and a height of $height. '
+          'What is its area?',
+      explanation: 'Area = ½ × base × height = ½ × $base × $height = $area.',
+      skillId: skill.id,
+      acceptedAnswers: ['$area'],
+      figure: _baseHeightFigure(base, height),
+    );
+    return GeneratedQuestion.of(question, signature: 'triarea|$base|$height');
+  }
+
+  /// Right-triangle form: base = horizontal leg, height = VERTICAL leg (a real,
+  /// visible perpendicular of exactly `height`) + a right-angle mark. Both
+  /// labelled; the area (the answer) never appears.
+  static PracticeFigure _baseHeightFigure(int base, int height) => PracticeFigure(
+        kind: PracticeFigureKind.polygon,
+        semanticsLabel:
+            'A right triangle with a base of $base and a height of $height.',
+        vertices: [
+          const PracticeFigurePoint(0, 0), // right angle (base meets height)
+          PracticeFigurePoint(base.toDouble(), 0),
+          PracticeFigurePoint(0, height.toDouble()),
+        ],
+        sideLabels: ['$base', '', '$height'], // base leg, hypotenuse blank, height leg
+        rightAngleVertices: const [0],
+      );
+
+  /// Degrees → radians.
+  static double _rad(num deg) => deg * math.pi / 180;
 
   // ---- Trigonometry: ratios ------------------------------------------------
 

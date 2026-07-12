@@ -8,7 +8,8 @@ enum EquationKind {
   quadratic('Quadratic equation'),
   fraction('Fraction arithmetic'),
   expression('Arithmetic expression'),
-  trigonometry('Trigonometry');
+  trigonometry('Trigonometry'),
+  geometry('Geometry');
 
   const EquationKind(this.label);
 

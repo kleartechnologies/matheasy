@@ -97,6 +97,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           PracticeTopic.algebra,
         ResultType.fraction => PracticeTopic.fractions,
         ResultType.trigonometry => PracticeTopic.trigonometry,
+        ResultType.geometry => PracticeTopic.geometry,
       };
 
   /// Opens the tutor chat aware of this solved problem, so Matheasy can pick up

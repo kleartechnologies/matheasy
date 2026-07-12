@@ -77,10 +77,17 @@ class FunctionsScannerService implements ScannerService {
         return EquationKind.fraction;
       case 'trigonometry':
         return EquationKind.trigonometry;
+      // The Vision topic is the ONLY geometry signal in the pipeline — the solver
+      // is geometry-blind (a geometry problem looks like a linear equation), so we
+      // preserve it here to route solved geometry to geometry practice.
+      // KNOWN LIMITATION: this lights up SCANNED geometry only. The math-keyboard
+      // (typed) path carries no Vision topic, so typed geometry stays classified
+      // as its LaTeX shape (algebra) — a deliberate scope boundary, not a bug.
+      case 'geometry':
+        return EquationKind.geometry;
       case 'arithmetic':
       case 'percentage':
       case 'ratio':
-      case 'geometry':
       case 'calculus':
       case 'statistics':
       case 'other':

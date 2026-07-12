@@ -65,7 +65,8 @@ Rules:
 - For "multipleChoice" provide exactly 4 options with EXACTLY ONE isCorrect:true; for "trueFalse" provide 2 options; do NOT include "acceptedAnswers".
 - For "input" and "equation" provide 1-3 "acceptedAnswers" (include equivalent forms) and OMIT "options".
 - LaTeX must be valid and delimiter-free (no surrounding $). Keep answer choices short and unambiguous.
-- Make every question solvable with a single, unambiguous answer at the stated difficulty. Keep language age-appropriate.`;
+- Make every question solvable with a single, unambiguous answer at the stated difficulty. Keep language age-appropriate.
+- Do NOT reference a diagram, figure, picture or "the shape shown" — there is none. Every number the student needs must be stated in the text.`;
 
 export const generatePracticeQuestion = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },

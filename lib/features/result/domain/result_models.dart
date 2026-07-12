@@ -8,7 +8,8 @@ enum ResultType {
   quadratic('Quadratic Equation'),
   fraction('Fraction Arithmetic'),
   expression('Arithmetic Expression'),
-  trigonometry('Trigonometry');
+  trigonometry('Trigonometry'),
+  geometry('Geometry');
 
   const ResultType(this.label);
 

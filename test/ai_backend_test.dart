@@ -149,6 +149,27 @@ void main() {
       });
       expect(result.type, ResultType.fraction);
     });
+
+    test('a geometry-kind scan maps to ResultType.geometry, kind BEFORE the '
+        'problemType switch (order is load-bearing)', () {
+      // The solver is geometry-blind: it parses "third angle = 180 − 86 − 37" as
+      // a linear equation. The Vision topic on `kind` is the only geometry
+      // signal, and _typeFor must honour it BEFORE the problemType switch —
+      // otherwise the linear_equation arm would grab it and mis-type it.
+      const geoEq = DetectedEquation(
+        latex: r'x = 180 - 86 - 37',
+        confidence: 0.9,
+        source: ScanSource.camera,
+        kind: EquationKind.geometry,
+      );
+      final result = SolveResponseMapper.toResultData(geoEq, {
+        'problemType': 'linear_equation', // would win if order were wrong
+        'verified': true,
+        'finalAnswer': {'latex': 'x = 57', 'plain': 'x = 57'},
+        'methods': <dynamic>[],
+      });
+      expect(result.type, ResultType.geometry);
+    });
   });
 
   group('TutorReplyMapper', () {
@@ -231,6 +252,15 @@ void main() {
       expect(FunctionsScannerService.inferKind('2x + 5 = 13'),
           EquationKind.linear);
       expect(FunctionsScannerService.inferKind('2 + 3 times 4'),
+          EquationKind.expression);
+    });
+
+    test('kindFromTopic preserves the Vision geometry signal (not collapsed to '
+        'expression)', () {
+      expect(FunctionsScannerService.kindFromTopic('geometry'),
+          EquationKind.geometry);
+      // Neighbours in the old group still collapse to expression.
+      expect(FunctionsScannerService.kindFromTopic('statistics'),
           EquationKind.expression);
     });
   });

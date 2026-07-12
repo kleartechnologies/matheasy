@@ -404,6 +404,7 @@ class _ConceptCanvas extends StatelessWidget {
       stroke: AppColors.primary,
       fill: AppColors.primary.withValues(alpha: 0.16),
       accent: AppColors.warning,
+      textColor: colors.textPrimary,
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

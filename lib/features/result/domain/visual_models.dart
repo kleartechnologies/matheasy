@@ -205,7 +205,18 @@ enum VisualConceptKind {
   barChart,
 
   /// A closed polygon from [VisualConcept.points] (vertices in order).
+  /// Optional annotations via params: `rightAngle{i}` marks a right angle at
+  /// vertex i, `tick{i}` draws that many congruence ticks on edge i→i+1.
   geometryShape,
+
+  /// A plain circle with a labelled radius (or diameter when param
+  /// `diameter` > 0); the measure text comes from `labels['measure']`.
+  circle,
+
+  /// Two angles on a straight line: [VisualConcept.points] are `[A, O, B, C]`
+  /// (A,O,B collinear; C the ray tip). The given angle A-O-C is labelled from
+  /// `labels['angle']`; the other angle is left blank.
+  straightLineAngles,
 
   /// No drawable form — the explorer renders cards only.
   generic,

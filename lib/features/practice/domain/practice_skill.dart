@@ -125,6 +125,41 @@ enum PracticeSkill {
     GenerationTier.ruleBased,
     proOnly: true,
   ),
+  anglesStraightLine(
+    'geo_straight_line',
+    PracticeTopic.geometry,
+    'Angles on a line',
+    GenerationTier.ruleBased,
+    proOnly: true,
+  ),
+  quadrilateralAngles(
+    'geo_quad_angles',
+    PracticeTopic.geometry,
+    'Quadrilateral angles',
+    GenerationTier.ruleBased,
+    proOnly: true,
+  ),
+  isoscelesTriangle(
+    'geo_isosceles',
+    PracticeTopic.geometry,
+    'Isosceles triangles',
+    GenerationTier.ruleBased,
+    proOnly: true,
+  ),
+  circleMeasures(
+    'geo_circle',
+    PracticeTopic.geometry,
+    'Circle radius & diameter',
+    GenerationTier.ruleBased,
+    proOnly: true,
+  ),
+  triangleAreaBaseHeight(
+    'geo_triangle_area',
+    PracticeTopic.geometry,
+    'Area of a triangle',
+    GenerationTier.ruleBased,
+    proOnly: true,
+  ),
 
   // ---- Trigonometry — Pro (rule-based) ----
   trigRatio(

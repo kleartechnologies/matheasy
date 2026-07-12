@@ -35,7 +35,9 @@ class MockSolverService implements SolverService {
       EquationKind.linear => _linear(equation),
       EquationKind.quadratic => _quadratic(equation),
       EquationKind.fraction => _fraction(equation),
-      EquationKind.expression || EquationKind.trigonometry =>
+      EquationKind.expression ||
+      EquationKind.trigonometry ||
+      EquationKind.geometry =>
         _fallback(equation),
     };
   }

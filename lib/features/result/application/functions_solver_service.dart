@@ -152,6 +152,12 @@ class SolveResponseMapper {
   /// Map the §4 snake-case `problemType` onto the display [ResultType], keeping
   /// the pre-solve fraction caption when the server just calls it arithmetic.
   static ResultType _typeFor(String problemType, EquationKind kind) {
+    // Geometry is invisible to the solver — classify.ts sees a geometry problem
+    // as an equation, so `problemType` is never "geometry". The Vision topic,
+    // carried on `kind`, is the only signal. Check it FIRST: after the switch, a
+    // geometry problem parsed as (e.g.) a linear equation would be grabbed by the
+    // linear/quadratic arm and mis-typed. Order is load-bearing.
+    if (kind == EquationKind.geometry) return ResultType.geometry;
     switch (problemType) {
       case 'linear_equation':
         return ResultType.linear;

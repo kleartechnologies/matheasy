@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/visual_models.dart';
 
 /// Theme-derived colors handed to [ConceptPainter] (painters can't read
@@ -14,6 +15,7 @@ class ConceptPalette {
     required this.stroke,
     required this.fill,
     required this.accent,
+    required this.textColor,
   });
 
   final Color grid;
@@ -22,6 +24,9 @@ class ConceptPalette {
   final Color fill;
   final Color accent;
 
+  /// Colour for on-canvas labels (angle values, side lengths, vertex names).
+  final Color textColor;
+
   @override
   bool operator ==(Object other) =>
       other is ConceptPalette &&
@@ -29,10 +34,11 @@ class ConceptPalette {
       other.axis == axis &&
       other.stroke == stroke &&
       other.fill == fill &&
-      other.accent == accent;
+      other.accent == accent &&
+      other.textColor == textColor;
 
   @override
-  int get hashCode => Object.hash(grid, axis, stroke, fill, accent);
+  int get hashCode => Object.hash(grid, axis, stroke, fill, accent, textColor);
 }
 
 /// Paints a [VisualConcept] — the Tier 3 drawable metadata — with native
@@ -65,6 +71,10 @@ class ConceptPainter extends CustomPainter {
         _paintBarChart(canvas, size);
       case VisualConceptKind.geometryShape:
         _paintGeometryShape(canvas, size);
+      case VisualConceptKind.circle:
+        _paintCircle(canvas, size);
+      case VisualConceptKind.straightLineAngles:
+        _paintStraightLineAngles(canvas, size);
       case VisualConceptKind.generic:
         break; // The explorer renders a card instead of a canvas.
     }
@@ -328,6 +338,12 @@ class ConceptPainter extends CustomPainter {
       _strokePaint(palette.accent, 2),
     );
     canvas.drawCircle(point, 6, Paint()..color = palette.accent);
+
+    // The angle value near the arc bisector, if the concept labels it (opt-in —
+    // an unlabelled unit circle renders exactly as before).
+    final labelAt =
+        center + Offset(math.cos(angle / 2), -math.sin(angle / 2)) * (radius * 0.45);
+    _labelAt(canvas, size, labelAt, 'angle');
   }
 
   // ---- Bar chart ---------------------------------------------------------------------
@@ -408,9 +424,211 @@ class ConceptPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, Paint()..color = palette.fill);
     canvas.drawPath(path, _strokePaint(palette.stroke, 2.5));
-    for (final p in points) {
-      canvas.drawCircle(map(p), 4.5, Paint()..color = palette.accent);
+    final mapped = [for (final p in points) map(p)];
+    for (final m in mapped) {
+      canvas.drawCircle(m, 4.5, Paint()..color = palette.accent);
     }
+
+    // Labels (opt-in via concept.labels): vertex names sit OUTSIDE the shape,
+    // angle values INSIDE (nudged toward the centroid), side lengths at edge
+    // midpoints. Correct-by-construction: a template supplies these from the
+    // same numbers it drew the figure with.
+    var centroid = Offset.zero;
+    for (final m in mapped) {
+      centroid += m;
+    }
+    centroid = centroid / mapped.length.toDouble();
+    for (var i = 0; i < mapped.length; i++) {
+      final v = mapped[i];
+      final away = v - centroid;
+      final dir =
+          away.distance < 1e-6 ? const Offset(0, -1) : away / away.distance;
+      _labelAt(canvas, size, v + dir * 12, 'v$i');
+      _labelAt(canvas, size, v - dir * 16, 'a$i');
+      final next = mapped[(i + 1) % mapped.length];
+      _labelAt(canvas, size, (v + next) / 2, 's$i');
+      // Optional annotations (opt-in via params): a right-angle mark at vertex
+      // i, and `tick{i}` congruence ticks on edge i→i+1 (equal sides).
+      if (concept.param('rightAngle$i') > 0) _drawRightAngle(canvas, mapped, i);
+      // Sanitize before rounding/looping: `tick{i}` can arrive from untrusted AI
+      // metadata, and `.round()` throws on NaN/Infinity while an unbounded count
+      // would stall the raster thread (cf. `_ticks`' 400-cap). A congruence mark
+      // is 1–3 in practice, so cap hard.
+      final tickRaw = concept.param('tick$i');
+      final ticks = tickRaw.isFinite ? tickRaw.round().clamp(0, 8) : 0;
+      if (ticks > 0) _drawTicks(canvas, v, next, ticks);
+    }
+  }
+
+  /// A small square right-angle mark at vertex [i], nestled between its two
+  /// adjacent edges.
+  void _drawRightAngle(Canvas canvas, List<Offset> pts, int i) {
+    final v = pts[i];
+    final u1 = _unit(pts[(i - 1 + pts.length) % pts.length] - v);
+    final u2 = _unit(pts[(i + 1) % pts.length] - v);
+    const s = 11.0;
+    final paint = _strokePaint(palette.stroke, 1.8);
+    canvas.drawLine(v + u1 * s, v + (u1 + u2) * s, paint);
+    canvas.drawLine(v + u2 * s, v + (u1 + u2) * s, paint);
+  }
+
+  /// [count] congruence ticks at the midpoint of edge [a]→[b] (marks equal
+  /// sides).
+  void _drawTicks(Canvas canvas, Offset a, Offset b, int count) {
+    final dir = _unit(b - a);
+    final perp = Offset(-dir.dy, dir.dx);
+    final mid = (a + b) / 2;
+    final paint = _strokePaint(palette.accent, 2);
+    const gap = 4.0, len = 5.0;
+    final start = -(count - 1) / 2 * gap;
+    for (var k = 0; k < count; k++) {
+      final c = mid + dir * (start + k * gap);
+      canvas.drawLine(c - perp * len, c + perp * len, paint);
+    }
+  }
+
+  static Offset _unit(Offset o) {
+    final d = o.distance;
+    return d < 1e-6 ? Offset.zero : o / d;
+  }
+
+  // ---- Circle ------------------------------------------------------------------------------
+
+  void _paintCircle(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2 - _pad;
+    if (radius <= 0) return;
+    canvas.drawCircle(center, radius, _strokePaint(palette.stroke, 2.5));
+
+    final measure = concept.labels['measure'];
+    if (concept.param('diameter') > 0) {
+      final l = center + Offset(-radius, 0);
+      final r = center + Offset(radius, 0);
+      canvas.drawLine(l, r, _strokePaint(palette.accent, 2));
+      canvas.drawCircle(center, 3, Paint()..color = palette.accent);
+      if (measure != null) _labelAtText(canvas, size, center, measure);
+    } else {
+      final edge = center + Offset(radius, 0);
+      canvas.drawLine(center, edge, _strokePaint(palette.accent, 2));
+      canvas.drawCircle(center, 3, Paint()..color = palette.accent);
+      if (measure != null) _labelAtText(canvas, size, (center + edge) / 2, measure);
+    }
+  }
+
+  // ---- Angles on a straight line -----------------------------------------------------------
+
+  void _paintStraightLineAngles(Canvas canvas, Size size) {
+    final pts = concept.points;
+    if (pts.length < 4) return;
+    final map = _fit(pts, size);
+    final a = map(pts[0]); // A (line, left)
+    final o = map(pts[1]); // O (vertex)
+    final b = map(pts[2]); // B (line, right)
+    final c = map(pts[3]); // C (ray tip)
+
+    canvas.drawLine(a, b, _strokePaint(palette.stroke, 2.5)); // the straight line
+    canvas.drawLine(o, c, _strokePaint(palette.accent, 2.5)); // the ray
+    canvas.drawCircle(o, 3, Paint()..color = palette.stroke);
+
+    // Given angle A-O-C (accent arc + label); the other angle C-O-B stays blank.
+    _drawAngleArc(canvas, o, a, c, palette.accent, 22);
+    _drawAngleArc(canvas, o, c, b, palette.grid, 18);
+    final given = concept.labels['angle'];
+    if (given != null && given.isNotEmpty) {
+      final bisector = _unit(_unit(a - o) + _unit(c - o));
+      _labelAtText(canvas, size, o + bisector * 34, given);
+    }
+  }
+
+  /// Draws the angle arc at [center] swept from direction [p1] to direction
+  /// [p2], at pixel [radius].
+  void _drawAngleArc(
+    Canvas canvas,
+    Offset center,
+    Offset p1,
+    Offset p2,
+    Color color,
+    double radius,
+  ) {
+    final start = (p1 - center).direction;
+    var sweep = (p2 - center).direction - start;
+    // Normalise to the shortest signed sweep so the arc hugs the actual angle.
+    while (sweep <= -math.pi) {
+      sweep += 2 * math.pi;
+    }
+    while (sweep > math.pi) {
+      sweep -= 2 * math.pi;
+    }
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      start,
+      sweep,
+      false,
+      _strokePaint(color, 2),
+    );
+  }
+
+  /// Draws [text] centred on [at] (used for interior labels like a circle's
+  /// radius or a straight-line angle) — reuses [_drawLabel]'s placement.
+  void _labelAtText(Canvas canvas, Size size, Offset at, String text) =>
+      _drawLabel(canvas, size, at, text);
+
+  /// Maps figure-space [VisualPoint]s into the canvas, uniformly scaled +
+  /// centred with padding. Shared by the point-driven figures.
+  Offset Function(VisualPoint) _fit(List<VisualPoint> points, Size size) {
+    var xMin = points.first.x, xMax = points.first.x;
+    var yMin = points.first.y, yMax = points.first.y;
+    for (final p in points) {
+      xMin = math.min(xMin, p.x);
+      xMax = math.max(xMax, p.x);
+      yMin = math.min(yMin, p.y);
+      yMax = math.max(yMax, p.y);
+    }
+    final spanX = xMax - xMin, spanY = yMax - yMin;
+    final sx = spanX < 1e-9 ? double.infinity : (size.width - 2 * _pad) / spanX;
+    final sy = spanY < 1e-9 ? double.infinity : (size.height - 2 * _pad) / spanY;
+    final scale = math.min(sx, sy);
+    final s = scale.isFinite ? scale : 1.0;
+    final ox = (size.width - spanX * s) / 2;
+    final oy = (size.height - spanY * s) / 2;
+    return (VisualPoint p) => Offset(
+          ox + (p.x - xMin) * s,
+          size.height - oy - (p.y - yMin) * s,
+        );
+  }
+
+  // ---- On-canvas labels -------------------------------------------------------------------
+
+  /// Draws [text] near [at], placed above-right and clamped inside the canvas.
+  /// Ported verbatim from `result_graph.dart:_drawLabel` (the proven TextPainter
+  /// pattern) — only the colour is swapped to `palette.textColor`.
+  void _drawLabel(Canvas canvas, Size size, Offset at, String text) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style:
+            AppTypography.caption.copyWith(color: palette.textColor, fontSize: 11),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    // Place above-right, clamped inside the canvas.
+    var dx = at.dx + 8;
+    var dy = at.dy - tp.height - 6;
+    if (dx + tp.width > size.width) dx = at.dx - tp.width - 8;
+    if (dy < 0) dy = at.dy + 8;
+    tp.paint(canvas, Offset(dx, dy));
+  }
+
+  /// Draws `concept.labels[key]` near [at] when present. Geometry figures follow
+  /// a documented key convention so a rule template can populate labels from its
+  /// OWN verified numbers (spec Stage 2/4 — figure correct by construction):
+  ///   `v{i}` = vertex i name, `a{i}` = angle at vertex i, `s{i}` = length of edge
+  ///   i→i+1; `angle` = the unit-circle angle. Empty/absent keys draw nothing, so
+  ///   existing unlabelled concepts render exactly as before.
+  void _labelAt(Canvas canvas, Size size, Offset at, String key) {
+    final text = concept.labels[key];
+    if (text == null || text.isEmpty) return;
+    _drawLabel(canvas, size, at, text);
   }
 
   // ---- Shared primitives ------------------------------------------------------------------

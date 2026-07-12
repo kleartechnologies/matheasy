@@ -987,6 +987,7 @@ void main() {
       stroke: Color(0xFF10B981),
       fill: Color(0x2810B981),
       accent: Color(0xFFFF7A45),
+      textColor: Color(0xFF111827),
     );
 
     void paintOnce(VisualConcept concept) {
@@ -1016,6 +1017,73 @@ void main() {
         params: {'a': 0, 'b': 0, 'c': 0},
       ));
       expect(true, isTrue); // Reaching here means no hang / no throw.
+    });
+
+    test('malformed tick{i} metadata cannot crash or hang the paint frame '
+        '(Stage-4 congruence-tick guard)', () {
+      const triangle = [
+        VisualPoint(0, 0),
+        VisualPoint(4, 0),
+        VisualPoint(2, 3),
+      ];
+      // `tick{i}` is read by _paintGeometryShape and flows unsanitized from the
+      // AI visual concept. `.round()` throws on NaN/Infinity, and an unbounded
+      // count would spin the raster thread — both must be defended.
+      paintOnce(const VisualConcept(
+        kind: VisualConceptKind.geometryShape,
+        caption: 'inf ticks',
+        points: triangle,
+        params: {'tick0': double.infinity},
+      ));
+      paintOnce(const VisualConcept(
+        kind: VisualConceptKind.geometryShape,
+        caption: 'nan ticks',
+        points: triangle,
+        params: {'tick1': double.nan},
+      ));
+      paintOnce(const VisualConcept(
+        kind: VisualConceptKind.geometryShape,
+        caption: 'billions of ticks',
+        points: triangle,
+        params: {'tick2': 2000000000},
+      ));
+      expect(true, isTrue); // No throw, no hang → the guard holds.
+    });
+
+    test('geometry labels actually render — a labelled triangle differs from an '
+        'unlabelled one (proves on-canvas text)', () async {
+      Future<List<int>> raster(VisualConcept c) async {
+        final recorder = ui.PictureRecorder();
+        ConceptPainter(concept: c, palette: palette)
+            .paint(Canvas(recorder), const Size(240, 240));
+        final image = await recorder.endRecording().toImage(240, 240);
+        final bytes = await image.toByteData();
+        image.dispose();
+        return bytes!.buffer.asUint8List();
+      }
+
+      const triangle = [
+        VisualPoint(0, 0),
+        VisualPoint(4, 0),
+        VisualPoint(2, 3),
+      ];
+      const unlabelled = VisualConcept(
+        kind: VisualConceptKind.geometryShape,
+        caption: 'triangle',
+        points: triangle,
+      );
+      const labelled = VisualConcept(
+        kind: VisualConceptKind.geometryShape,
+        caption: 'triangle',
+        points: triangle,
+        labels: {'v0': 'A', 'v1': 'B', 'v2': 'C', 'a2': '86°', 's0': '5 cm'},
+      );
+
+      final plain = await raster(unlabelled);
+      final withLabels = await raster(labelled);
+      expect(plain.length, withLabels.length);
+      // The labels drew pixels the bare figure didn't — same shape, different image.
+      expect(plain, isNot(equals(withLabels)));
     });
 
     test('areaUnderCurve keeps the integration bounds inside the window', () {

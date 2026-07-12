@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'practice_difficulty.dart';
+import 'practice_figure.dart';
 import 'practice_topic.dart';
 
 /// How a practice question is answered. New types slot in without touching the
@@ -46,6 +47,7 @@ class PracticeQuestion {
     this.options = const [],
     this.acceptedAnswers = const [],
     this.skillId,
+    this.figure,
   });
 
   final String id;
@@ -79,6 +81,11 @@ class PracticeQuestion {
   /// Shown after the student answers — the "why".
   final String explanation;
 
+  /// Optional geometry figure rendered above the prompt (Stage 3+). Built by a
+  /// rule template from its own verified numbers, so it's correct by
+  /// construction. `null` for every non-figure question (the vast majority).
+  final PracticeFigure? figure;
+
   /// A clone with a different [id] — used by the engine to stamp a unique
   /// per-slot id onto a cached / reused question.
   PracticeQuestion withId(String id) => PracticeQuestion(
@@ -93,6 +100,11 @@ class PracticeQuestion {
         options: options,
         acceptedAnswers: acceptedAnswers,
         skillId: skillId,
+        // TRAP: withId() hand-copies every field. Omitting `figure` here would
+        // SILENTLY drop the figure at slot-restamp (adaptive_practice_service
+        // stamps every generated question via .withId(slotId)) — no error, no
+        // log, figures just never appear. Covered by a survives-restamp test.
+        figure: figure,
       );
 
   int get xpReward => difficulty.baseXp;

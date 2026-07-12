@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_question.dart';
+import 'practice_figure_view.dart';
 
 /// The question surface: the instruction plus, when present, the equation
 /// rendered large. Word-style questions (no LaTeX) show their prompt as the
@@ -27,6 +28,10 @@ class PracticeQuestionView extends StatelessWidget {
       ),
       child: Column(
         children: [
+          if (question.figure != null) ...[
+            PracticeFigureView(figure: question.figure!),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           if (latex != null) ...[
             Text(
               question.prompt,
