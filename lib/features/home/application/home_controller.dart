@@ -1,156 +1,120 @@
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../onboarding/application/onboarding_controller.dart';
-import '../../onboarding/domain/onboarding_models.dart';
+import '../../practice/application/practice_progress_controller.dart';
+import '../../practice/domain/practice_progress.dart';
+import '../../practice/domain/practice_session.dart';
+import '../../practice/domain/xp_reward.dart';
+import '../../profile/application/profile_controller.dart';
+import '../../progress/application/achievement_service.dart';
 import '../domain/home_models.dart';
 
 part 'home_controller.g.dart';
 
-/// Supplies the Home dashboard's data.
+/// Supplies the Home dashboard's data — derived entirely from REAL per-user
+/// state, never a mock.
 ///
-/// STAGE 3: entirely mock/in-memory — no backend, no persistence. It lightly
-/// personalizes from the onboarding answers (weak topics + daily-goal target)
-/// to show the layers connecting; a later stage swaps this for real data.
+/// Identity comes from [profileControllerProvider] (the SAME source the greeting
+/// avatar reads, so name + avatar always agree). Because that provider
+/// transitively watches `currentUserProvider`, Home rebuilds across the
+/// sign-in / sign-up boundary — that reactive dependency is the whole fix for
+/// "Home shows the previous/demo user after signup".
+///
+/// Learning state (streak, weak topics, daily-challenge completion, first-day)
+/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
+/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
+/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
 @riverpod
 class HomeController extends _$HomeController {
   @override
   HomeData build() {
+    final profile = ref.watch(profileControllerProvider);
+    final progress = ref.watch(practiceProgressControllerProvider);
     final onboarding = ref.watch(onboardingFlowControllerProvider);
-    return HomeMock.returningUser(onboarding);
-  }
-}
-
-/// Builders for realistic fake Home data.
-class HomeMock {
-  const HomeMock._();
-
-  static const _weakPalette = [
-    AppColors.accentAmber,
-    AppColors.accentCoral,
-    AppColors.secondary,
-  ];
-
-  /// A rich, motivating dashboard for a returning learner, personalized from
-  /// the (optional) onboarding answers.
-  static HomeData returningUser(OnboardingData onboarding) {
-    final target = onboarding.goal?.minutes ?? 15;
-
-    final weakTopics = onboarding.hasTopics
-        ? _topicsFrom(onboarding.topics)
-        : const [
-            WeakTopic(
-              label: 'Word Problems',
-              icon: Icons.menu_book_rounded,
-              accuracy: 54,
-              note: 'needs work',
-              color: AppColors.accentAmber,
-            ),
-            WeakTopic(
-              label: 'Trigonometry',
-              icon: Icons.architecture_rounded,
-              accuracy: 61,
-              note: 'improving',
-              color: AppColors.accentCoral,
-            ),
-          ];
+    final now = ref.watch(clockProvider)();
 
     return HomeData(
-      userName: 'Sarah',
-      isFirstDay: false,
-      streak: const StreakInfo(current: 12, best: 21),
-      dailyGoal: DailyGoalInfo(
-        minutesStudied: 8,
-        minutesTarget: target,
-        lessonsDone: 2,
-        lessonsTarget: 3,
+      userName: profile.displayName,
+      isFirstDay: !progress.hasHistory,
+      streak: StreakInfo(
+        current: progress.streakCurrent,
+        best: progress.streakBest,
       ),
-      continueCourses: const [
-        CourseProgress(
-          title: 'Linear Equations',
-          icon: Icons.calculate_rounded,
-          color: AppColors.primary,
-          completed: 8,
-          total: 11,
-          estMinutes: 6,
-        ),
-        CourseProgress(
-          title: 'Triangles',
-          icon: Icons.change_history_rounded,
-          color: AppColors.accentAmber,
-          completed: 4,
-          total: 10,
-          estMinutes: 12,
-        ),
-        CourseProgress(
-          title: 'Fractions',
-          icon: Icons.percent_rounded,
-          color: AppColors.secondary,
-          completed: 9,
-          total: 10,
-          estMinutes: 3,
-        ),
-      ],
-      todayChallenge: const TodayChallenge(
-        title: 'Solve 5 algebra questions',
-        subtitle: 'Sharpen your algebra skills',
-        done: 2,
-        target: 5,
-        xpReward: 50,
-      ),
-      weakTopics: weakTopics,
-      recommendations: const [
-        PracticeRecommendation(question: r'3x + 4 = 19', difficulty: Difficulty.easy),
-        PracticeRecommendation(question: r'5x - 7 = 18', difficulty: Difficulty.medium),
-        PracticeRecommendation(question: r'2(x + 3) = 16', difficulty: Difficulty.medium),
-      ],
-      tutorMessage: "Ready for today's challenge? You're on a 12-day roll! 🔥",
-    );
-  }
-
-  /// A warm, non-empty first-day dashboard with starter content.
-  static HomeData firstDay() {
-    return const HomeData(
-      userName: 'Sarah',
-      isFirstDay: true,
-      streak: StreakInfo(current: 0, best: 0),
       dailyGoal: DailyGoalInfo(
+        // Per-day time/lesson tracking isn't built yet → honest zero progress,
+        // with the target taken from the learner's onboarding goal.
         minutesStudied: 0,
-        minutesTarget: 10,
+        minutesTarget: onboarding.goal?.minutes ?? 15,
         lessonsDone: 0,
         lessonsTarget: 3,
       ),
-      continueCourses: [],
-      todayChallenge: TodayChallenge(
-        title: 'Solve your first problem',
-        subtitle: 'Snap a photo or try a quick practice',
-        done: 0,
-        target: 1,
-        xpReward: 20,
-      ),
-      weakTopics: [],
-      recommendations: [
-        PracticeRecommendation(question: r'2 + 3 \times 4', difficulty: Difficulty.easy),
-        PracticeRecommendation(question: r'x + 7 = 12', difficulty: Difficulty.easy),
-      ],
-      tutorMessage: "Welcome to Matheasy! Let's solve your first problem together. 🎉",
+      // No real course/lesson-count source exists → empty, so the continue card
+      // is hidden (never fabricated "8 / 11 lessons").
+      continueCourses: const [],
+      todayChallenge: _dailyChallenge(progress, now),
+      weakTopics: _weakTopics(progress),
+      // Home's recommendation card reads [weakTopics]; this list is unused by the
+      // current layout, so it stays honestly empty rather than carrying samples.
+      recommendations: const [],
+      tutorMessage: _insight(progress),
     );
   }
 
-  static List<WeakTopic> _topicsFrom(Set<MathTopic> topics) {
-    const accuracies = [54, 61, 58, 66, 49, 63];
+  /// The real, launchable daily-challenge CTA — its title / size / XP come from
+  /// [PracticeRequest.dailyChallenge]. `done` is HONEST: 0, or the full target
+  /// only when today's challenge has actually been completed. No fake partial.
+  static TodayChallenge _dailyChallenge(PracticeProgress progress, DateTime now) {
+    final request = PracticeRequest.dailyChallenge();
+    final doneToday = progress.lastDailyChallengeEpochDay == _epochDay(now);
+    return TodayChallenge(
+      title: request.displayTitle,
+      subtitle:
+          'Solve ${request.questionCount} ${request.topic.label.toLowerCase()} questions',
+      done: doneToday ? request.questionCount : 0,
+      target: request.questionCount,
+      xpReward: XpReward.dailyChallengeBonus,
+    );
+  }
+
+  /// Weak topics from REAL measured accuracy only: topics with enough attempts
+  /// (≥3) and accuracy below 75%, weakest first. An unpracticed learner has
+  /// none, so the recommendation card is hidden — never a fabricated accuracy.
+  static List<WeakTopic> _weakTopics(PracticeProgress progress) {
+    final weak = progress.topics.entries
+        .where((e) => e.value.answered >= 3 && e.value.accuracy < 0.75)
+        .toList()
+      ..sort((a, b) => a.value.accuracy.compareTo(b.value.accuracy));
     return [
-      for (final (index, topic) in topics.take(3).indexed)
+      for (final entry in weak)
         WeakTopic(
-          label: topic.label,
-          icon: topic.icon,
-          accuracy: accuracies[index % accuracies.length],
-          note: accuracies[index % accuracies.length] < 60
-              ? 'needs work'
-              : 'improving',
-          color: _weakPalette[index % _weakPalette.length],
+          label: entry.key.label,
+          icon: entry.key.icon,
+          accuracy: (entry.value.accuracy * 100).round(),
+          note: entry.value.accuracy < 0.6 ? 'needs work' : 'improving',
+          color: entry.key.color,
         ),
     ];
   }
+
+  /// A short encouragement line computed from REAL progress (mirrors the
+  /// per-dashboard insight helpers). Not rendered by the current Home layout, but
+  /// kept honest — its wording branches on real history/streak/XP.
+  static String _insight(PracticeProgress progress) {
+    if (!progress.hasHistory) {
+      return "Let's begin! Scan a problem or try a quick practice to start "
+          'earning XP.';
+    }
+    if (progress.streakCurrent >= 3) {
+      return "You're on a ${progress.streakCurrent}-day streak — keep the "
+          'momentum going! 🔥';
+    }
+    return "You've earned ${progress.totalXp} XP so far. A little practice each "
+        'day adds up fast!';
+  }
+
+  /// UTC-anchored epoch day, matching `PracticeProgressController`'s streak/daily
+  /// bookkeeping so the "done today?" comparison lines up exactly.
+  static int _epochDay(DateTime dt) =>
+      DateTime.utc(dt.year, dt.month, dt.day).millisecondsSinceEpoch ~/
+          Duration.millisecondsPerDay;
 }

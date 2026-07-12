@@ -27,6 +27,16 @@ AppUser appleTestUser() => AppUser(
       email: 'alex@example.com',
     );
 
+/// A freshly-created account with NO profile name yet (e.g. an Apple relay that
+/// hides the name) — exercises the honest 'Learner' fallback + empty first-day
+/// dashboard.
+AppUser newAccountUser() => AppUser(
+      id: 'new-uid-1',
+      provider: AuthProviderType.apple,
+      isGuest: false,
+      createdAt: DateTime(2024),
+    );
+
 /// An in-memory [AuthService] double — no Firebase, fully deterministic.
 ///
 /// Mirrors the real service's contract: [authStateChanges] restores

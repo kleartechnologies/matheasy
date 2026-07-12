@@ -8,27 +8,51 @@ part of 'home_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Supplies the Home dashboard's data.
+/// Supplies the Home dashboard's data — derived entirely from REAL per-user
+/// state, never a mock.
 ///
-/// STAGE 3: entirely mock/in-memory — no backend, no persistence. It lightly
-/// personalizes from the onboarding answers (weak topics + daily-goal target)
-/// to show the layers connecting; a later stage swaps this for real data.
+/// Identity comes from [profileControllerProvider] (the SAME source the greeting
+/// avatar reads, so name + avatar always agree). Because that provider
+/// transitively watches `currentUserProvider`, Home rebuilds across the
+/// sign-in / sign-up boundary — that reactive dependency is the whole fix for
+/// "Home shows the previous/demo user after signup".
+///
+/// Learning state (streak, weak topics, daily-challenge completion, first-day)
+/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
+/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
+/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
 
 @ProviderFor(HomeController)
 final homeControllerProvider = HomeControllerProvider._();
 
-/// Supplies the Home dashboard's data.
+/// Supplies the Home dashboard's data — derived entirely from REAL per-user
+/// state, never a mock.
 ///
-/// STAGE 3: entirely mock/in-memory — no backend, no persistence. It lightly
-/// personalizes from the onboarding answers (weak topics + daily-goal target)
-/// to show the layers connecting; a later stage swaps this for real data.
+/// Identity comes from [profileControllerProvider] (the SAME source the greeting
+/// avatar reads, so name + avatar always agree). Because that provider
+/// transitively watches `currentUserProvider`, Home rebuilds across the
+/// sign-in / sign-up boundary — that reactive dependency is the whole fix for
+/// "Home shows the previous/demo user after signup".
+///
+/// Learning state (streak, weak topics, daily-challenge completion, first-day)
+/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
+/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
+/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
 final class HomeControllerProvider
     extends $NotifierProvider<HomeController, HomeData> {
-  /// Supplies the Home dashboard's data.
+  /// Supplies the Home dashboard's data — derived entirely from REAL per-user
+  /// state, never a mock.
   ///
-  /// STAGE 3: entirely mock/in-memory — no backend, no persistence. It lightly
-  /// personalizes from the onboarding answers (weak topics + daily-goal target)
-  /// to show the layers connecting; a later stage swaps this for real data.
+  /// Identity comes from [profileControllerProvider] (the SAME source the greeting
+  /// avatar reads, so name + avatar always agree). Because that provider
+  /// transitively watches `currentUserProvider`, Home rebuilds across the
+  /// sign-in / sign-up boundary — that reactive dependency is the whole fix for
+  /// "Home shows the previous/demo user after signup".
+  ///
+  /// Learning state (streak, weak topics, daily-challenge completion, first-day)
+  /// comes from [practiceProgressControllerProvider]; onboarding supplies only the
+  /// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
+  /// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
   HomeControllerProvider._()
     : super(
         from: null,
@@ -56,13 +80,21 @@ final class HomeControllerProvider
   }
 }
 
-String _$homeControllerHash() => r'b7f4c842cd2ba47348b27c13fc02bcb4e8a3b8c9';
+String _$homeControllerHash() => r'd4257ddcbdd4c5850ba9710404b328e7820a90db';
 
-/// Supplies the Home dashboard's data.
+/// Supplies the Home dashboard's data — derived entirely from REAL per-user
+/// state, never a mock.
 ///
-/// STAGE 3: entirely mock/in-memory — no backend, no persistence. It lightly
-/// personalizes from the onboarding answers (weak topics + daily-goal target)
-/// to show the layers connecting; a later stage swaps this for real data.
+/// Identity comes from [profileControllerProvider] (the SAME source the greeting
+/// avatar reads, so name + avatar always agree). Because that provider
+/// transitively watches `currentUserProvider`, Home rebuilds across the
+/// sign-in / sign-up boundary — that reactive dependency is the whole fix for
+/// "Home shows the previous/demo user after signup".
+///
+/// Learning state (streak, weak topics, daily-challenge completion, first-day)
+/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
+/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
+/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
 
 abstract class _$HomeController extends $Notifier<HomeData> {
   HomeData build();

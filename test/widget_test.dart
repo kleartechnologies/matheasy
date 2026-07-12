@@ -19,6 +19,7 @@ import 'package:matheasy/core/router/route_guard.dart';
 import 'package:matheasy/core/session/app_session.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/core/widgets/widgets.dart';
+import 'package:matheasy/features/auth/application/auth_controller.dart';
 import 'package:matheasy/features/home/application/home_controller.dart';
 import 'package:matheasy/features/home/domain/home_models.dart';
 import 'package:matheasy/features/home/presentation/home_screen.dart';
@@ -175,7 +176,9 @@ void main() {
     testWidgets('onboarded users boot into the Home dashboard', (tester) async {
       await _bootApp(tester, onboarded: true, signedIn: true);
       expect(find.byType(AppTabBar), findsOneWidget);
-      expect(find.text('Sarah'), findsOneWidget); // header greeting name
+      // The greeting shows the REAL signed-in account name (googleTestUser),
+      // not the old hardcoded 'Sarah' mock.
+      expect(find.text('Sarah Lee'), findsOneWidget);
     });
 
     testWidgets('tapping Practice tab switches branch', (tester) async {
@@ -199,56 +202,68 @@ void main() {
       expect(greetingForHour(20), 'Good evening');
     });
 
-    test('mock controller yields rich returning-user data', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final data = container.read(homeControllerProvider);
-      expect(data.userName, 'Sarah');
-      expect(data.streak.current, 12);
-      expect(data.continueCourses, hasLength(3));
-      expect(data.weakTopics, hasLength(2)); // defaults when no onboarding
-      expect(data.isFirstDay, isFalse);
-    });
-
-    test('personalizes weak topics from onboarding answers', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      container.read(onboardingFlowControllerProvider.notifier)
-        ..toggleTopic(MathTopic.geometry)
-        ..toggleTopic(MathTopic.calculus);
-
-      final data = container.read(homeControllerProvider);
-      final labels = data.weakTopics.map((t) => t.label).toList();
-      expect(labels, contains('Geometry'));
-      expect(labels, contains('Calculus'));
-    });
-
-    testWidgets('first-day dashboard shows starter content', (tester) async {
-      // Home's greeting reads the profile provider, so it needs seeded prefs +
-      // a fake auth backend.
-      final container = await sessionContainer();
+    testWidgets('a signed-in user sees their REAL name on Home, never the '
+        'demo mock', (tester) async {
+      // The greeting name now comes from the profile (real account), not a
+      // hardcoded 'Sarah'.
+      final container = await sessionContainer(signedInUser: appleTestUser());
       addTearDown(container.dispose);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: ProviderScope(
-            overrides: [
-              homeControllerProvider.overrideWith(_FirstDayHomeController.new),
-            ],
-            child: MaterialApp(
-              theme: AppTheme.light,
-              home: const HomeScreen(),
-            ),
-          ),
+          child: MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
         ),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
 
-      // First-day starter content: the hero always shows, and the daily
-      // challenge renders even with no courses/recommendations yet.
-      expect(find.textContaining('solve today'), findsOneWidget);
-      expect(find.text('Solve your first problem'), findsOneWidget);
+      expect(find.text('Alex Kim'), findsOneWidget);
+      expect(find.text('Sarah'), findsNothing); // the old mock is gone
+    });
+
+    testWidgets('a brand-new user gets an HONEST first-day dashboard, not the '
+        'returning-user mock', (tester) async {
+      // Fresh account (no name, no practice history) + empty local prefs.
+      final container = await sessionContainer(signedInUser: newAccountUser());
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      final data = container.read(homeControllerProvider);
+      expect(data.userName, 'Learner'); // honest fallback, not 'Sarah'
+      expect(data.isFirstDay, isTrue);
+      expect(data.streak.current, 0); // not a fabricated 12-day streak
+      expect(data.continueCourses, isEmpty); // not 3 fake courses → card hidden
+      expect(data.weakTopics, isEmpty); // no fabricated accuracies → card hidden
+      expect(data.todayChallenge!.done, 0); // honest, not a fake "2 of 5"
+    });
+
+    test('Home rebuilds for the new user across the sign-in boundary '
+        '(the signup fix)', () async {
+      // Start signed OUT, then sign in — the real reactive chain
+      // (auth → currentUser → profile → home) must repoint Home at the new user.
+      final container = await sessionContainer();
+      addTearDown(container.dispose);
+      final sub = container.listen(
+        homeControllerProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      addTearDown(sub.close);
+
+      expect(container.read(homeControllerProvider).userName, isNot('Sarah'));
+
+      await container.read(authControllerProvider.notifier).signInWithApple();
+
+      // No manual invalidation anywhere — the watch(profile→currentUser) chain
+      // rebuilds Home on its own. This is exactly what was broken before.
+      expect(container.read(homeControllerProvider).userName, 'Alex Kim');
     });
   });
 
@@ -516,10 +531,4 @@ void main() {
       expect(find.text('RECOMMENDED'), findsOneWidget);
     });
   });
-}
-
-/// Forces the first-day dataset for the empty-state test.
-class _FirstDayHomeController extends HomeController {
-  @override
-  HomeData build() => HomeMock.firstDay();
 }
