@@ -10,6 +10,8 @@
  *     a CANDIDATE (numeric solution + narrated steps). The orchestrator then puts
  *     that candidate through the verification gate; nothing ships unverified.
  */
+import { logger } from "firebase-functions/v2";
+
 import { asciiToLatex, latexToAscii } from "./latex";
 import {
   Classification,
@@ -132,13 +134,25 @@ export async function generateLlmCandidate(
   let json: Record<string, unknown>;
   try {
     json = await complete(CANDIDATE_SYSTEM, user, 2000);
-  } catch {
+  } catch (err) {
+    // Was swallowed silently — an OpenAI 429 / timeout / malformed JSON here is
+    // the difference between "the model errored" and "we honestly couldn't
+    // solve it", and the caller can't tell null apart. Log it.
+    logger.error("generateLlmCandidate.completerFailed", {
+      problemType: cls.problemType,
+      err: String(err),
+    });
     return null;
   }
 
   const answerLatex = str(json.answerLatex);
   const answerPlain = str(json.answerPlain) || answerLatex;
-  if (!answerLatex) return null;
+  if (!answerLatex) {
+    logger.info("generateLlmCandidate.emptyAnswer", {
+      problemType: cls.problemType,
+    });
+    return null;
+  }
 
   const assignments: CandidateAssignment[] = [];
   if (Array.isArray(json.solutions)) {

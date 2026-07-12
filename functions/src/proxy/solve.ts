@@ -65,7 +65,16 @@ interface SolveRequest {
 }
 
 /** A `verified:false` payload — an honest "couldn't verify", never a guess. */
-function couldNotVerify(cls: Classification): SolvePayload {
+function couldNotVerify(cls: Classification, reason: string): SolvePayload {
+  // Observability: record WHICH branch declined, so in production an honest
+  // refusal is distinguishable from an OpenAI outage or a rejected candidate
+  // (they otherwise all surface as the same "couldn't solve" to the user).
+  logger.info("solve.couldNotVerify", {
+    reason,
+    problemType: cls.problemType,
+    strategy: cls.strategy,
+    verifyMode: cls.verifyMode,
+  });
   return {
     problemLatex: cls.latex,
     problemType: cls.problemType,
@@ -167,13 +176,13 @@ export async function solve(
   }
 
   // 2) Constrained LLM candidate — still must pass the verification gate.
-  if (cls.verifyMode === "none") return couldNotVerify(cls);
+  if (cls.verifyMode === "none") return couldNotVerify(cls, "no_verify_mode");
 
   const llm = await generateLlmCandidate(complete, cls);
-  if (!llm) return couldNotVerify(cls);
+  if (!llm) return couldNotVerify(cls, "llm_no_candidate");
 
   const outcome = verifyCandidate(cls, llm);
-  if (!outcome.ok) return couldNotVerify(cls);
+  if (!outcome.ok) return couldNotVerify(cls, "verify_gate_failed");
 
   return {
     problemLatex: cls.latex,

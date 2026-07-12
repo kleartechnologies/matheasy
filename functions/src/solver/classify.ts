@@ -232,12 +232,30 @@ function hasTopLevelAddSub(ascii: string): boolean {
   return false;
 }
 
-/** Rough polynomial degree in `unknown` from the highest `^n` on that variable. */
+/**
+ * Rough polynomial degree in `unknown`, from the highest `^n` on that variable
+ * AND on parenthesized groups that contain it. A bare `x^n` contributes `n`; a
+ * group `(…)^n` contributes `degree(inside) * n` — so `(x+1)^3` → 3,
+ * `(2x-5)^4` → 4 and `(x^2+1)^5` → 10. Without the group rule the exponent sits
+ * on a `)`, not on `x`, so a higher-degree/rational equation was mislabelled
+ * `linear` (see the `\frac{x+2}{(x+1)^3}=…` regression).
+ */
 function detectDegree(ascii: string, unknown: string): number {
-  let degree = ascii.includes(unknown) ? 1 : 0;
-  const re = new RegExp(`${unknown}\\s*\\^\\s*\\(?\\s*(\\d+)`, "g");
-  for (const m of ascii.matchAll(re)) {
+  if (!ascii.includes(unknown)) return 0;
+  let degree = 1;
+  // Bare variable: `x^n` (or `x^(n)`).
+  const bare = new RegExp(`${unknown}\\s*\\^\\s*\\(?\\s*(\\d+)`, "g");
+  for (const m of ascii.matchAll(bare)) {
     degree = Math.max(degree, Number(m[1]));
+  }
+  // A parenthesized group raised to a power: `(…)^n` → degree(inside) * n. The
+  // inner group carries no nested parens (matched by `[^()]+`), which covers
+  // OCR output like `(x + 1)^3`; the inside's degree is measured recursively.
+  const group = /\(([^()]+)\)\s*\^\s*\(?\s*(\d+)/g;
+  for (const m of ascii.matchAll(group)) {
+    const inside = m[1];
+    if (!inside.includes(unknown)) continue;
+    degree = Math.max(degree, detectDegree(inside, unknown) * Number(m[2]));
   }
   return degree;
 }

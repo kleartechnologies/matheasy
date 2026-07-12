@@ -188,3 +188,28 @@ describe("solve — resilience", () => {
     expect(cls.verifyMode).toBe("none");
   });
 });
+
+describe("solve — \\frac{x+2}{(x+1)^3}=\\frac{120}{x} reaches the LLM tier honestly", () => {
+  const EQ = "\\frac{x + 2}{(x + 1)^3} = \\frac{120}{x}";
+
+  it("the deterministic engine can't solve it, so the LLM candidate leg runs "
+    + "and is told the TRUE (non-linear) problem type", async () => {
+    const calls: { system: string; user: string }[] = [];
+    const spy: JsonCompleter = async (system, user) => {
+      calls.push({ system, user });
+      return {}; // empty candidate → still couldn't-verify, but the leg WAS reached
+    };
+
+    const p = await solve(classify(EQ), spy);
+
+    // The candidate prompt (narrate.ts) is `Problem (LaTeX): …\nProblem type: …`.
+    const candidateCall = calls.find((c) => c.user.includes("Problem type:"));
+    expect(candidateCall).toBeDefined(); // the LLM tier was reached
+    expect(candidateCall!.user).toContain("Problem type: polynomial_equation");
+    expect(candidateCall!.user).not.toContain("linear_equation");
+    // The mock returned no usable candidate, so the gate honestly declines —
+    // but the §4 problemType still reflects the real classification, not "linear".
+    expect(p.verified).toBe(false);
+    expect(p.problemType).toBe("polynomial_equation");
+  });
+});

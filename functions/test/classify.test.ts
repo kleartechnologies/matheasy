@@ -9,6 +9,12 @@ describe("classify", () => {
     ["2x + 5 = 15", "linear_equation", "equation"],
     ["5x^2 + 3x - 2 = 0", "quadratic_equation", "equation"],
     ["x^3 - 6x^2 + 11x - 6 = 0", "polynomial_equation", "llm_candidate"],
+    // Grouped exponents: the power sits on a `)`, not on `x`. Regression —
+    // these used to fall through to "linear_equation" (detectDegree missed them).
+    ["(x + 1)^3 = 0", "polynomial_equation", "llm_candidate"], // degree 3
+    ["(2x - 5)^4 = 0", "polynomial_equation", "llm_candidate"], // degree 4
+    ["(x^2 + 1)^5 = 0", "polynomial_equation", "llm_candidate"], // degree 2*5 = 10
+    ["(x + 1)^2 = 4", "quadratic_equation", "equation"], // squared group → degree 2
     ["\\sin(x) = 0.5", "trigonometric_equation", "llm_candidate"],
     ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],
@@ -36,6 +42,25 @@ describe("classify", () => {
     expect(classify("2x + 5 = 15").verifyMode).toBe("substitution");
     expect(classify("\\int x^2 dx").verifyMode).toBe("derivative_back");
     expect(classify("2x + 3x").verifyMode).toBe("equality");
+  });
+
+  // Regression: a rational equation whose exponent is on `(x+1)`, not on `x`,
+  // was mislabelled `linear_equation` and fed to mathsteps + the model as
+  // "linear". It has a real root (x = -6/5) the LLM tier can find, so it must
+  // reach that tier with an HONEST (non-linear) problem type.
+  describe("\\frac{x+2}{(x+1)^3} = \\frac{120}{x} (regression)", () => {
+    const EQ = "\\frac{x + 2}{(x + 1)^3} = \\frac{120}{x}";
+    it("is no longer classified linear_equation", () => {
+      const c = classify(EQ);
+      expect(c.problemType).not.toBe("linear_equation");
+      expect(c.problemType).toBe("polynomial_equation");
+    });
+    it("routes to the verified LLM-candidate tier with substitution", () => {
+      const c = classify(EQ);
+      expect(c.strategy).toBe("llm_candidate");
+      expect(c.isEquation).toBe(true);
+      expect(c.verifyMode).toBe("substitution");
+    });
   });
 });
 
