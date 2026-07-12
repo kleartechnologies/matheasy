@@ -11,6 +11,52 @@
 	<string>Matheasy uses the camera to scan and solve math problems.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Matheasy uses your photos to scan and solve math problems.</string>
+	<!-- App Tracking Transparency (iOS 14.5+). Shown by the ATT system prompt,
+	     requested only after the user is in the app (never at launch). Required
+	     by App Review whenever ATT is requested. -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Allow tracking so we can measure ad performance and keep Matheasy free to try. This links your activity to ads you may have seen.</string>
+	<!-- ===== Meta (Facebook) SDK — App Events / Ads attribution =====
+	     REPLACE the App ID + Client Token with your real values from Meta for
+	     Developers (App → Settings → Basic / Advanced). The SAME App ID must
+	     also go into lib/core/config/meta_config.dart and the fb URL scheme
+	     below (fb<APP_ID>). Until then the SDK stays dormant (auto-logging off,
+	     no advertiser-id collection). -->
+	<key>FacebookAppID</key>
+	<string>000000000000000</string>
+	<key>FacebookClientToken</key>
+	<string>REPLACE_WITH_META_CLIENT_TOKEN</string>
+	<key>FacebookDisplayName</key>
+	<string>Matheasy</string>
+	<!-- Privacy-safe defaults: no automatic event logging and no IDFA collection
+	     until the app explicitly enables them post-consent (see MetaConfig +
+	     TrackingConsentController). -->
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<false/>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<false/>
+	<!-- App-switch query schemes used by the Facebook SDK. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
+	<!-- SKAdNetwork identifiers for Meta app-install / AEO campaign attribution
+	     (Meta primary + Audience Network). Source: Meta for Developers —
+	     SKAdNetwork docs. -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>FlutterDeepLinkingEnabled</key>
@@ -35,6 +81,19 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.1074284213933-35lj9ddrj06iigrj47r9h85u9ml03par</string>
+			</array>
+		</dict>
+		<!-- Facebook URL scheme (fb<APP_ID>) — used by the Facebook SDK for
+		     Login / deferred-deep-link handback. REPLACE the trailing digits
+		     with your real Meta App ID (must match FacebookAppID above). -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.facebook.sdk</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb000000000000000</string>
 			</array>
 		</dict>
 	</array>

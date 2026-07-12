@@ -80,6 +80,23 @@ class RevenueCatSubscriptionService implements SubscriptionService {
   }
 
   @override
+  Future<void> attachAdAttribution({String? fbAnonymousId}) async {
+    try {
+      // The Facebook anonymous id populates RevenueCat's reserved `$fbAnonId`
+      // attribute, which its Meta Conversions API integration sends as the
+      // `anon_id` so server-side purchase events match the ad click.
+      if (fbAnonymousId != null && fbAnonymousId.isNotEmpty) {
+        await Purchases.setFBAnonymousID(fbAnonymousId);
+      }
+      // Collects `$idfa`/`$idfv` (iOS) / `$gpsAdId` (Android) — the other Meta
+      // matching keys. Run post-ATT so a real (non-zeroed) IDFA is captured.
+      await Purchases.collectDeviceIdentifiers();
+    } on PlatformException catch (error) {
+      AppLogger.error('RevenueCat attachAdAttribution failed', error: error);
+    }
+  }
+
+  @override
   Future<List<SubscriptionProduct>> loadProducts() async {
     try {
       final offerings = await Purchases.getOfferings();

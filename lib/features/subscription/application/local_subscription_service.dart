@@ -89,6 +89,9 @@ class LocalSubscriptionService implements SubscriptionService {
   @override
   Future<void> logOut() async {}
 
+  @override
+  Future<void> attachAdAttribution({String? fbAnonymousId}) async {}
+
   Future<void> _emit(SubscriptionStatus status) async {
     _current = status;
     await _cache.write(status);

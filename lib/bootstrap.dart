@@ -11,6 +11,8 @@ import 'core/monitoring/crash_reporting_service.dart';
 import 'core/monitoring/logging_service.dart';
 import 'core/persistence/preferences_store.dart';
 import 'features/analytics/application/analytics_service.dart';
+import 'features/analytics/application/composite_analytics_service.dart';
+import 'features/analytics/application/meta_analytics_service.dart';
 import 'features/auth/application/auth_service.dart';
 import 'features/subscription/application/revenuecat_bootstrap.dart';
 import 'features/subscription/application/subscription_service.dart';
@@ -45,6 +47,15 @@ Future<void> bootstrap() async {
       final preferences = await SharedPreferences.getInstance();
       final firebaseReady = await _initializeFirebase();
       final revenueCatReady = await initializeRevenueCat();
+
+      // Compose Meta App Events onto the analytics fan-out (a no-op until Meta
+      // is configured). Every existing event emission point then reaches both
+      // Firebase and Meta through the one `analyticsServiceProvider` seam.
+      final metaAnalytics = await initializeMetaAnalytics();
+      if (metaAnalytics != null) {
+        Analytics.instance =
+            CompositeAnalyticsService([Analytics.instance, metaAnalytics]);
+      }
 
       runApp(
         ProviderScope(

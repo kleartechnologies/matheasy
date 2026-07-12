@@ -1,8 +1,16 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Required in the main manifest so networking (Firebase, Firestore,
          Analytics, RevenueCat) works in RELEASE builds — Flutter only adds
          INTERNET to the debug/profile manifests. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- The Facebook SDK auto-merges the advertising-id permission. While Meta
+         is dormant (and for Google Play Families compliance) we strip it by
+         default. WHEN YOU GO LIVE with Meta Ads on Android, delete this line so
+         the SDK can collect the GAID for attribution (unless you remain in the
+         Families program, in which case keep it removed). -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove"/>
     <!-- Scanner: capture math problems with the back camera. The features are
          optional so devices without a camera can still install and use the
          gallery / manual-entry paths. -->
@@ -51,6 +59,29 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- ===== Meta (Facebook) SDK — App Events / Ads attribution =====
+             App ID + Client Token are read from res/values/strings.xml (replace
+             the placeholders there). The SDK auto-initializes at startup (do NOT
+             set com.facebook.sdk.AutoInitEnabled=false — the plugin builds an
+             AppEventsLogger at launch and needs the SDK initialized), but we
+             keep it privacy-safe: automatic event logging and advertiser-id
+             (GAID) collection stay OFF until the app explicitly enables them
+             post-consent (MetaConfig + TrackingConsentController). The AD_ID
+             permission the SDK would merge in is stripped by default above;
+             re-enable it when going live with Meta (see that comment). -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="false" />
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

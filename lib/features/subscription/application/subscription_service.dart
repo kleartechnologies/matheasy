@@ -54,6 +54,14 @@ abstract interface class SubscriptionService {
   /// guest session, so the next user's purchases aren't attributed here.
   Future<void> logOut();
 
+  /// Feeds ad-network matching identifiers to the billing backend so server-side
+  /// purchase events (RevenueCat → Meta Conversions API) attribute to the ad
+  /// click: the Facebook anonymous id ([fbAnonymousId]) plus the device
+  /// identifiers (`$idfa`/`$idfv`/`$gpsAdId`). Called after the ATT decision so a
+  /// real (non-zeroed) IDFA is captured when authorized. No-op on the offline
+  /// fallback (there is no backend to attribute a purchase to).
+  Future<void> attachAdAttribution({String? fbAnonymousId});
+
   /// Releases listeners / stream controllers.
   void dispose();
 }

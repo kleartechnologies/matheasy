@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/app_lifecycle.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../analytics/application/tracking_consent_controller.dart';
 import '../../subscription/application/subscription_service.dart';
 import '../../sync/application/sync_controller.dart';
 
@@ -37,6 +38,10 @@ class AppShell extends ConsumerWidget {
     // Keep the RevenueCat billing identity in step with the signed-in user, so
     // purchases attribute to their Firebase uid (a no-op offline / for guests).
     ref.watch(revenueCatIdentitySyncProvider);
+    // Request App Tracking Transparency once the user reaches the app (never at
+    // launch), then propagate the decision to Meta + RevenueCat attribution.
+    // A no-op until Meta is configured.
+    ref.watch(trackingConsentControllerProvider);
 
     return Scaffold(
       extendBody: true,

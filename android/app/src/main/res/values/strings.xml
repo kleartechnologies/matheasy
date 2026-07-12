@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Meta (Facebook) SDK credentials, referenced from AndroidManifest.xml.
+         REPLACE these with your real values from Meta for Developers
+         (App -> Settings -> Basic / Advanced). The App ID must match
+         lib/core/config/meta_config.dart and the iOS FacebookAppID; the login
+         protocol scheme is fb<APP_ID>. Until real values land the SDK stays
+         dormant (auto-logging + advertiser-id collection are off, and the Dart
+         MetaConfig gate keeps every SDK call disabled). -->
+    <string name="facebook_app_id">000000000000000</string>
+    <string name="facebook_client_token">REPLACE_WITH_META_CLIENT_TOKEN</string>
+    <string name="fb_login_protocol_scheme">fb000000000000000</string>
+</resources>
