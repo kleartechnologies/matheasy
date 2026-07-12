@@ -182,7 +182,16 @@ export async function solve(
   if (!llm) return couldNotVerify(cls, "llm_no_candidate");
 
   const outcome = verifyCandidate(cls, llm);
-  if (!outcome.ok) return couldNotVerify(cls, "verify_gate_failed");
+  if (!outcome.ok) {
+    // Log WHAT the model returned so a rejection reads as "model was wrong /
+    // imprecise" vs a gate problem — the substitution check itself is trusted.
+    logger.info("solve.candidateRejected", {
+      problemType: cls.problemType,
+      answer: llm.answer.plain,
+      values: llm.assignments.map((a) => a.value),
+    });
+    return couldNotVerify(cls, "verify_gate_failed");
+  }
 
   return {
     problemLatex: cls.latex,

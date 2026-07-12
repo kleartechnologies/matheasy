@@ -189,6 +189,42 @@ describe("solve — resilience", () => {
   });
 });
 
+describe("solve — 3^{2x+1}+4(3^x)-15=0 (exponential) verifies a precise root", () => {
+  const EQ = "3^{2x+1} + 4(3^x) - 15 = 0";
+
+  it("classifies as exponential and verifies the true root x=log_3(5/3) when "
+    + "the candidate is precise (6+ sig digits)", async () => {
+    const p = await solve(
+      classify(EQ),
+      completerWith({
+        answerLatex: "x = \\log_3 \\tfrac{5}{3}",
+        answerPlain: "x = log_3(5/3)",
+        solutions: [{ variable: "x", value: 0.46497352 }],
+        methods: [],
+      })
+    );
+    expect(p.problemType).toBe("exponential_equation");
+    expect(p.verified).toBe(true);
+    // Substitution-verified candidates report the numeric root (an irrational
+    // root can't be rationalised, so it shows as a decimal ~0.46497).
+    expect(p.finalAnswer?.plain).toContain("0.46");
+  });
+
+  it("still declines an IMPRECISE candidate (0.465) — the safety gate is not "
+    + "loosened", async () => {
+    const p = await solve(
+      classify(EQ),
+      completerWith({
+        answerLatex: "x \\approx 0.465",
+        answerPlain: "x = 0.465",
+        solutions: [{ variable: "x", value: 0.465 }],
+        methods: [],
+      })
+    );
+    expect(p.verified).toBe(false); // 0.465 → residual ~7e-4 > tolerance
+  });
+});
+
 describe("solve — \\frac{x+2}{(x+1)^3}=\\frac{120}{x} reaches the LLM tier honestly", () => {
   const EQ = "\\frac{x + 2}{(x + 1)^3} = \\frac{120}{x}";
 

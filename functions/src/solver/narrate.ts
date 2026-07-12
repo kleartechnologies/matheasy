@@ -116,8 +116,9 @@ Solve the problem exactly. Return ONLY a JSON object (no prose, no markdown) of 
 }
 Rules:
 - "value" must be a decimal number (e.g. 0.4, -1.5, 0.5235988), never a string, ALWAYS in RADIANS for trigonometric problems, and with at least 6 significant digits for non-integer values.
-- "solutions" carries the numeric solution(s) the answer is CHECKED against:
-  • Polynomial/linear equation: one entry per solution value (repeat "variable" for multiple roots).
+- "solutions" carries the numeric solution(s) the answer is CHECKED against by substitution, so the "value" must be PRECISE (an irrational root rounded to 2-3 places will fail the check — give 6+ significant digits, or the exact value's decimal):
+  • Polynomial/linear equation: one entry per solution value (repeat "variable" for multiple roots). For degree ≥ 3, test rational roots (±factors of the constant term over factors of the leading coefficient) FIRST so exact roots are found before resorting to numeric ones.
+  • Exponential/transcendental equation (the unknown is in an exponent, e.g. 3^(2x+1)+4·3^x-15=0): substitute u = base^x to get a polynomial in u, solve it, DISCARD non-positive u (base^x > 0), then take the log: x = log_base(u). Put the exact form in "answerLatex" (e.g. x = \\log_3 \\tfrac{5}{3}) and the numeric root(s) in "solutions" to 6+ significant digits.
   • System of equations: one entry per variable.
   • Trigonometric equation (infinitely many solutions): put the GENERAL solution in "answerLatex" (e.g. "x = \\frac{\\pi}{6} + 2\\pi n"), and list the PRINCIPAL numeric solutions in the interval [0, 2\\pi) in "solutions" as decimal radians (one entry each).
   • Indefinite integral: put the antiderivative (WITHOUT +C) in "answerLatex"; leave "solutions" as [].

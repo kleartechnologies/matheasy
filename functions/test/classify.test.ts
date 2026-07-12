@@ -15,6 +15,11 @@ describe("classify", () => {
     ["(2x - 5)^4 = 0", "polynomial_equation", "llm_candidate"], // degree 4
     ["(x^2 + 1)^5 = 0", "polynomial_equation", "llm_candidate"], // degree 2*5 = 10
     ["(x + 1)^2 = 4", "quadratic_equation", "equation"], // squared group → degree 2
+    // Exponential: the unknown is in the EXPONENT (not the base). Regression —
+    // these were mislabelled linear_equation and fed to mathsteps + the model
+    // as "linear". (x^2 / (x+1)^3 above stay polynomial: unknown in the base.)
+    ["3^{2x+1} + 4(3^x) - 15 = 0", "exponential_equation", "llm_candidate"],
+    ["2^x = 8", "exponential_equation", "llm_candidate"],
     ["\\sin(x) = 0.5", "trigonometric_equation", "llm_candidate"],
     ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],

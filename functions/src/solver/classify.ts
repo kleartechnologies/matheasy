@@ -145,6 +145,22 @@ export function classify(rawLatex: string): Classification {
   }
 
   const unknown = pickUnknown(vars);
+
+  // Exponential / transcendental: the unknown sits in an EXPONENT (3^x,
+  // 2^(x-1), 3^{2x+1}). mathsteps/mathjs can't solve these, and labelling them
+  // "linear"/"quadratic" misleads both the engine (wasted attempt) and the LLM
+  // (wrong context). Route to the verified LLM-candidate tier with an honest
+  // type; the substitution gate still proves any candidate before it ships.
+  if (unknownInExponent(ascii, unknown)) {
+    return base(
+      "exponential_equation",
+      "llm_candidate",
+      unknown,
+      true,
+      "substitution"
+    );
+  }
+
   const degree = detectDegree(ascii, unknown);
 
   if (degree >= 2) {
@@ -230,6 +246,19 @@ function hasTopLevelAddSub(ascii: string): boolean {
     }
   }
   return false;
+}
+
+/**
+ * True if `unknown` appears in an EXPONENT (e.g. `3^x`, `3^(2x+1)`, `x^x`) — an
+ * exponential/transcendental equation, not a polynomial. Matches a `^` followed
+ * by either a parenthesized exponent mentioning the unknown, or a bare exponent
+ * token starting with (an optional coefficient then) the unknown. Excludes
+ * `x^2` / `(x+1)^3` (unknown in the BASE, numeric exponent).
+ */
+function unknownInExponent(ascii: string, unknown: string): boolean {
+  const u = unknown.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`\\^\\s*(?:\\([^()]*${u}[^()]*\\)|-?[0-9.]*\\s*\\*?\\s*${u})`);
+  return re.test(ascii);
 }
 
 /**
