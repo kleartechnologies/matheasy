@@ -121,6 +121,36 @@ void main() {
       expect(result.verifyText, contains("couldn't verify"));
     });
 
+    test('routeToTutor → conceptual state, no answer, honest framing', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemLatex': r'\text{Prove that } \sqrt{2} \text{ is irrational}',
+        'problemType': 'conceptual',
+        'finalAnswer': null,
+        'verified': false,
+        'routeToTutor': true,
+        'methods': <dynamic>[],
+        'graph': null,
+      });
+      expect(result.routeToTutor, isTrue);
+      expect(result.verified, isFalse);
+      expect(result.answerLatex, isEmpty);
+      // Honest, proof-aware framing — NOT the generic "couldn't verify" error.
+      expect(result.verifyText, contains('proof'));
+      expect(result.verifyText, isNot(contains("couldn't verify")));
+      // A round-trip (history caching) preserves the flag.
+      final restored = ResultData.fromJson(result.toJson());
+      expect(restored.routeToTutor, isTrue);
+    });
+
+    test('an ordinary verified payload leaves routeToTutor false', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemType': 'linear_equation',
+        'verified': true,
+        'finalAnswer': {'latex': 'x = 4', 'plain': 'x = 4'},
+      });
+      expect(result.routeToTutor, isFalse);
+    });
+
     test('degrades gracefully on missing / unknown fields', () {
       final result = SolveResponseMapper.toResultData(_equation, {
         'problemType': 'nonsense',

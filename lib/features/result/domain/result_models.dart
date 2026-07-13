@@ -282,6 +282,7 @@ class ResultData {
     this.verified = true,
     this.answerPlain = '',
     this.graph,
+    this.routeToTutor = false,
   });
 
   final DetectedEquation equation;
@@ -309,6 +310,11 @@ class ResultData {
   /// The plottable function for this problem, or `null`.
   final GraphData? graph;
 
+  /// True for a proof / abstract-algebra / real-analysis prompt: there's no
+  /// answer to compute-and-verify, so the result screen offers to work through
+  /// it in the AI tutor instead of showing a "couldn't verify" error.
+  final bool routeToTutor;
+
   String get questionLatex => equation.latex;
 
   Map<String, dynamic> toJson() => {
@@ -324,6 +330,7 @@ class ResultData {
         'methods': methods.map((m) => m.toJson()).toList(),
         'practice': practice.map((p) => p.toJson()).toList(),
         'tutorIntro': tutorIntro,
+        if (routeToTutor) 'routeToTutor': true,
         if (graph != null) 'graph': graph!.toJson(),
       };
 
@@ -355,6 +362,7 @@ class ResultData {
             .map((e) => PracticeQuestion.fromJson(e as Map<String, dynamic>))
             .toList(),
         tutorIntro: j['tutorIntro'] as String? ?? '',
+        routeToTutor: j['routeToTutor'] as bool? ?? false,
         graph: j['graph'] == null
             ? null
             : GraphData.fromJson(j['graph'] as Map<String, dynamic>),

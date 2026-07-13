@@ -27,6 +27,7 @@ import 'widgets/result_action_bar.dart';
 import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
+import 'widgets/result_tutor_invite.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
 /// answer, a step-by-step solution, explanations, methods, practice and the
@@ -87,6 +88,21 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     context.push(
       AppRoutes.practiceSession,
       extra: PracticeRequest(topic: PracticeTopic.fromResultType(result.type)),
+    );
+  }
+
+  /// Opens the tutor for a proof/conceptual prompt, SEEDED so it auto-sends the
+  /// opening ask — the student lands mid-conversation, already working through it.
+  void _discussConceptual(ResultData result) {
+    context.push(
+      AppRoutes.tutorChat,
+      extra: TutorLaunchContext(
+        questionLatex: result.questionLatex,
+        equationType: result.type.label,
+        topicLabel: result.type.label,
+        seedMessage:
+            'Can you help me work through this step by step? ${result.questionLatex}',
+      ),
     );
   }
 
@@ -209,6 +225,30 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   Widget _buildContent(ResultData result) {
+    // A proof / abstract-algebra / analysis prompt (spec §1): there's nothing to
+    // compute-and-verify, so invite the student to reason it through in the tutor
+    // rather than show a misleading "couldn't verify" error.
+    if (result.routeToTutor) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenH,
+          AppSpacing.lg,
+          AppSpacing.screenH,
+          AppSpacing.xl,
+        ),
+        children: [
+          ResultTutorInvite(
+            result: result,
+            onDiscuss: () => _discussConceptual(result),
+            onEdit: () => context.push(
+              AppRoutes.manualInput,
+              extra: ManualInputArgs(initialLatex: result.questionLatex),
+            ),
+          ),
+        ],
+      );
+    }
+
     // The answer failed its substitution check (spec §1.1): show the honest
     // "couldn't verify" state (spec §9), not a confident (empty) answer.
     if (!result.verified) {

@@ -12,6 +12,7 @@ import 'package:matheasy/features/result/presentation/tabs/solution_tab.dart';
 import 'package:matheasy/features/result/presentation/widgets/math_text.dart';
 import 'package:matheasy/features/result/presentation/widgets/result_couldnt_verify.dart';
 import 'package:matheasy/features/result/presentation/widgets/result_graph.dart';
+import 'package:matheasy/features/result/presentation/widgets/result_tutor_invite.dart';
 import 'package:matheasy/features/result/presentation/widgets/step_diff.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
@@ -268,4 +269,81 @@ void main() {
       expect(find.text('Methods'), findsNothing); // no tab strip
     });
   });
+
+  group('routeToTutor conceptual state (§1 golden rule)', () {
+    testWidgets('invites the tutor, shows no answer, offers a way forward',
+        (tester) async {
+      var discussed = false;
+      var edited = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ResultTutorInvite(
+                result: _conceptualResult(),
+                onDiscuss: () => discussed = true,
+                onEdit: () => edited = true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text("LET'S REASON IT THROUGH"), findsOneWidget);
+      expect(find.text('FINAL ANSWER'), findsNothing); // never a computed answer
+      expect(find.text('WHAT I READ'), findsOneWidget);
+      await tester.tap(find.text('Work through it with the tutor'));
+      await tester.tap(find.text('Edit the problem'));
+      expect(discussed, isTrue);
+      expect(edited, isTrue);
+    });
+
+    testWidgets('ResultScreen routes a routeToTutor solve to the invite',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            solverServiceProvider.overrideWithValue(_ConceptualSolver()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ResultScreen(equation: _eq),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600)); // solve
+
+      expect(find.text("LET'S REASON IT THROUGH"), findsOneWidget);
+      expect(find.text("COULDN'T VERIFY"), findsNothing); // not the error state
+      expect(find.text('Methods'), findsNothing); // no tab strip
+    });
+  });
+}
+
+ResultData _conceptualResult() => const ResultData(
+      equation: _eq,
+      type: ResultType.expression,
+      difficulty: Difficulty.medium,
+      answerLatex: '',
+      verified: false,
+      routeToTutor: true,
+      verifyText: "This is a proof-style problem — let's reason through it.",
+      tutorIntro: '',
+      steps: [],
+      explanations: [],
+      methods: [],
+      practice: [],
+    );
+
+class _ConceptualSolver implements SolverService {
+  @override
+  Future<ResultData> solve(DetectedEquation equation) async =>
+      _conceptualResult();
 }

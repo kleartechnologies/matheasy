@@ -67,6 +67,14 @@ export function classify(rawLatex: string): Classification {
     ...extra,
   });
 
+  // --- Proofs / abstract algebra / real analysis → the AI tutor -----------
+  // Detected FIRST: these have no answer to compute-and-verify, so instead of
+  // faking one (or a misleading "couldn't verify"), classify marks them so solve
+  // returns a routeToTutor state and the client offers to work through it.
+  if (looksLikeConceptual(rawLatex)) {
+    return base("conceptual", "conceptual", "x", false, "none");
+  }
+
   // --- Taylor / Maclaurin series (deterministic via mathjs) ---------------
   // Distinctive keyword, so detected first. Coefficients are built by repeated
   // differentiation and proven by an independent contact-order test; verifyMode
@@ -432,6 +440,25 @@ function looksLikeWordProblem(rawLatex: string): boolean {
     (w) => !NON_NARRATIVE.has(w.toLowerCase())
   );
   return words.length >= 4;
+}
+
+/** An explicit request to PROVE/DISPROVE something (unambiguous — these are never
+ * a compute-and-verify task). Deliberately excludes bare "show that", which often
+ * fronts a computation the solver CAN do. */
+const PROOF_CUES =
+  /\b(prove|disprove|proof\s+(?:that|of|by)|by\s+(?:induction|contradiction)|q\.?e\.?d\.?)\b/i;
+/** Abstract-algebra / real-analysis / logic terms whose answer is a proof or a
+ * concept, not a number — so the solver can't substitution-verify them. Each is
+ * specific enough not to collide with a computational problem (e.g. "cyclic
+ * group", not bare "group"; "is continuous", not bare "continuous"). */
+const CONCEPT_TERMS =
+  /\b(homomorphism|isomorphi(?:sm|c)|automorphism|abelian|(?:sub|normal\s+sub|quotient|cyclic)\s*group|group\s+(?:is|of\s+order|homomorphism)|coset|kernel\s+of|generator\s+of|ring\s+homomorphism|integral\s+domain|(?:principal|maximal|prime)\s+ideal|polynomial\s+ring|field\s+extension|vector\s+space\s+axiom|supremum|infimum|least\s+upper\s+bound|greatest\s+lower\s+bound|epsilon[-\s]*delta|cauchy\s+sequence|uniformly\s+continuous|is\s+continuous|converges?|diverges?|monotone\s+sequence|bounded\s+(?:above|below)|injective|surjective|bijecti(?:ve|on)|equivalence\s+relation|well[-\s]*defined|countably|uncountabl)/i;
+
+/** A proof / abstract-algebra / real-analysis prompt — there's no answer to
+ * compute-and-verify, so it's routed to the AI tutor rather than the solver
+ * (spec §1: we never fabricate a proof). */
+function looksLikeConceptual(rawLatex: string): boolean {
+  return PROOF_CUES.test(rawLatex) || CONCEPT_TERMS.test(rawLatex);
 }
 
 /**

@@ -178,6 +178,20 @@ export async function solve(
   complete: JsonCompleter,
   onCouldNotVerify?: (reason: string) => void
 ): Promise<SolvePayload> {
+  // 0) A proof / abstract-algebra / analysis prompt: there's nothing to compute
+  // and substitution-verify. Hand it to the tutor instead of faking an answer.
+  if (cls.strategy === "conceptual") {
+    return {
+      problemLatex: cls.latex,
+      problemType: "conceptual",
+      finalAnswer: null,
+      verified: false,
+      methods: [],
+      graph: null,
+      routeToTutor: true,
+    };
+  }
+
   // 1) Deterministic engine, gated by the verifier.
   const candidate = solveDeterministic(cls);
   if (candidate && candidate.verify()) {

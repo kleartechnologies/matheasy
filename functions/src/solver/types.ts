@@ -71,6 +71,13 @@ export interface SolvePayload {
   verified: boolean;
   methods: MethodData[];
   graph: GraphData | null;
+  /**
+   * True for a proof / abstract-algebra / real-analysis prompt: there is no
+   * answer to compute-and-verify, so instead of a dishonest "couldn't verify"
+   * the client offers to work through it in the AI tutor (spec §1 golden rule —
+   * we never fake a proof). Absent/false for every ordinary problem.
+   */
+  routeToTutor?: boolean;
 }
 
 // --- Internal pipeline types ------------------------------------------------
@@ -84,6 +91,7 @@ export type Strategy =
   | "statistics" // a descriptive statistic over a data set (mean/median/…)
   | "linalg" // matrix/vector operation (det/inverse/eigenvalues) via mathjs
   | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
+  | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
 /** How an LLM-candidate answer gets proven. */

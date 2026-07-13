@@ -48,6 +48,7 @@ class SolveResponseMapper {
     Map<String, dynamic> json,
   ) {
     final verified = json['verified'] == true;
+    final routeToTutor = json['routeToTutor'] == true;
     final finalAnswer = json['finalAnswer'];
     final answerLatex = finalAnswer is Map ? _str(finalAnswer['latex']) : '';
     final answerPlain = finalAnswer is Map ? _str(finalAnswer['plain']) : '';
@@ -62,13 +63,19 @@ class SolveResponseMapper {
       answerLatex: answerLatex,
       answerPlain: answerPlain,
       verified: verified,
+      routeToTutor: routeToTutor,
       verifyText: verified
           ? 'Checked by substituting the answer back into the problem ✓'
-          : "Matheasy couldn't verify this answer — try re-scanning or "
-              'typing it in.',
+          : routeToTutor
+              ? "This is a proof-style problem — there's no single answer to "
+                  'check, so let\'s reason through it together.'
+              : "Matheasy couldn't verify this answer — try re-scanning or "
+                  'typing it in.',
       tutorIntro: verified
           ? "Here's the solution — tap any step to see why it works."
-          : "I couldn't fully check this one, so I'd rather not guess.",
+          : routeToTutor
+              ? "I don't compute proofs — but I can walk you through one."
+              : "I couldn't fully check this one, so I'd rather not guess.",
       steps: examMethod == null ? const [] : _list(examMethod['steps'], _step),
       explanations: const [], // not in §4 — Explain tab shows its empty state
       methods: methods,
