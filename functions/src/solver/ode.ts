@@ -73,6 +73,8 @@ function guessDepVar(s: string): string | null {
 function detectDerivative(
   s: string
 ): { depVar: string; indepVar: string; order: number } | null {
+  // 3rd+ order (triple prime, or d^3…/dx^3) is out of scope — decline cleanly.
+  if (/[a-zA-Z]\s*'''/.test(s) || /d\s*\^\s*\{?\s*[3-9]/.test(s)) return null;
   let m: RegExpMatchArray | null;
   // 2nd-order Leibniz: \frac{d^2 y}{dx^2}
   m = s.match(
@@ -88,10 +90,12 @@ function detectDerivative(
   // 1st-order slashed: dy/dx
   m = s.match(/d\s*([a-zA-Z])\s*\/\s*d\s*([a-zA-Z])/);
   if (m) return { depVar: m[1], indepVar: m[2], order: 1 };
-  // prime: y'' / y' — the independent variable is implicit (guess from the text)
-  m = s.match(/([a-zA-Z])\s*''/);
+  // prime: y'' / y' — the independent variable is implicit (guess from the text).
+  // The negative lookahead rejects an apostrophe inside prose ("it's", "Tom's"),
+  // where the ' is followed by a letter, so a word problem isn't hijacked.
+  m = s.match(/([a-zA-Z])\s*''(?![A-Za-z'])/);
   if (m) return { depVar: m[1], indepVar: guessIndep(s, m[1]), order: 2 };
-  m = s.match(/([a-zA-Z])\s*'/);
+  m = s.match(/([a-zA-Z])\s*'(?![A-Za-z'])/);
   if (m) return { depVar: m[1], indepVar: guessIndep(s, m[1]), order: 1 };
   return null;
 }
@@ -115,9 +119,10 @@ function buildResidual(odeText: string, dep: string, indep: string): string | nu
   s = s.replace(/d\s*\^\s*\{?\s*2\s*\}?\s*[a-zA-Z]\s*\/\s*d\s*[a-zA-Z]\s*\^\s*\{?\s*2\s*\}?/g, " ddy ");
   s = s.replace(/\\frac\s*\{\s*d\s*[a-zA-Z]\s*\}\s*\{\s*d\s*[a-zA-Z]\s*\}/g, " dy ");
   s = s.replace(/d\s*[a-zA-Z]\s*\/\s*d\s*[a-zA-Z]/g, " dy ");
-  // prime, with an optional functional argument y''(x) / y'(x)
-  s = s.replace(new RegExp(`${dep}\\s*''\\s*(?:\\(\\s*${indep}\\s*\\))?`, "g"), " ddy ");
-  s = s.replace(new RegExp(`${dep}\\s*'\\s*(?:\\(\\s*${indep}\\s*\\))?`, "g"), " dy ");
+  // prime, with an optional functional argument y''(x) / y'(x); the negative
+  // lookahead keeps a prose apostrophe from being turned into a derivative.
+  s = s.replace(new RegExp(`${dep}\\s*''(?![A-Za-z'])\\s*(?:\\(\\s*${indep}\\s*\\))?`, "g"), " ddy ");
+  s = s.replace(new RegExp(`${dep}\\s*'(?![A-Za-z'])\\s*(?:\\(\\s*${indep}\\s*\\))?`, "g"), " dy ");
   // dep value notation y(x) → y
   s = s.replace(new RegExp(`${dep}\\s*\\(\\s*${indep}\\s*\\)`, "g"), ` ${dep} `);
 

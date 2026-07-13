@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { classify } from "../src/solver/classify";
 import { solve } from "../src/proxy/solve";
-import { verifyOde } from "../src/solver/ode";
+import { parseOde, verifyOde } from "../src/solver/ode";
 import type { JsonCompleter } from "../src/solver/narrate";
 
 /** A completer returning `{}` for narration and a canned ODE candidate otherwise. */
@@ -53,6 +53,18 @@ describe("classify — ODE detection", () => {
     expect(classify(String.raw`2x + 3 = 7`).verifyMode).not.toBe("ode");
     expect(classify(String.raw`x^2 - 5x + 6 = 0`).verifyMode).not.toBe("ode");
     expect(classify(String.raw`\frac{d}{dx}(x^2)`).verifyMode).not.toBe("ode");
+  });
+
+  it("an apostrophe in prose is NOT a derivative (no word-problem hijack)", () => {
+    // "it's"/"Tom's" — the ' is followed by a letter, so it's not a prime.
+    expect(parseOde("it's x = 2")).toBeNull();
+    expect(parseOde("Tom's age is x, and his father = 2x")).toBeNull();
+    expect(classify("it's x = 2").verifyMode).not.toBe("ode");
+  });
+
+  it("declines a 3rd-order ODE (out of scope, never mis-verified as order 2)", () => {
+    expect(parseOde(String.raw`y''' + y = 0`)).toBeNull();
+    expect(classify(String.raw`y''' + y = 0`).verifyMode).not.toBe("ode");
   });
 });
 
