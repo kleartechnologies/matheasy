@@ -17,6 +17,11 @@ describe("latexToAscii", () => {
       "((3)/(4)) + ((1)/(2))"
     );
   });
+  it("reads a mixed number's FULL whole part (multi-digit), not just the last digit", () => {
+    // Regression: "10\frac{1}{2}" is 10.5, not 1×(0+½)=0.5.
+    expect(latexToAscii("10\\frac{1}{2}")).toBe("(10+((1)/(2)))");
+    expect(latexToAscii("2\\frac{1}{2}")).toBe("(2+((1)/(2)))");
+  });
   it("converts sqrt, cdot and functions", () => {
     expect(latexToAscii("\\sqrt{2} \\cdot x + \\sin(3x)")).toBe(
       "sqrt(2) * x + sin(3x)"

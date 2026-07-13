@@ -66,7 +66,7 @@ export function latexToAscii(latex: string): string {
   // so precedence holds in context: "2½x" → (2+½)x, "5-2½" → 5-(2+½). Runs
   // before the general \frac rewrite.
   s = s.replace(
-    /(\d)\s*\\frac\s*\{\s*(\d+)\s*\}\s*\{\s*(\d+)\s*\}/g,
+    /(\d+)\s*\\frac\s*\{\s*(\d+)\s*\}\s*\{\s*(\d+)\s*\}/g,
     "($1+\\frac{$2}{$3})"
   );
 

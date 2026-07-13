@@ -144,6 +144,25 @@ describe("classify + solve — linear independence & span", () => {
   });
 });
 
+describe("regression — rank/matrix review findings", () => {
+  it("#3 a scalar keyword (rank) over A+B declines, never returns the sum", () => {
+    // "rank of A + B" must NOT be read as the matrix sum A+B.
+    const c = classify(
+      String.raw`rank of \begin{pmatrix}1 & 2\\3 & 4\end{pmatrix} + \begin{pmatrix}5 & 6\\7 & 8\end{pmatrix}`
+    );
+    expect(c.strategy).not.toBe("linalg");
+    expect(c.problemType).not.toBe("matrix_sum");
+  });
+
+  it("#4 a numerically-ambiguous (near-singular) rank declines rather than guessing", async () => {
+    // det ≈ 1e-12: neither clearly rank 1 nor clearly rank 2 → decline.
+    const r = await run(
+      String.raw`rank of \begin{pmatrix}1 & 1\\1 & 1.000000000001\end{pmatrix}`
+    );
+    expect(r.verified).toBe(false);
+  });
+});
+
 describe("classify + solve — matrix sum / difference", () => {
   const B = String.raw`\begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}`;
 

@@ -62,7 +62,7 @@ describe("parseLinearSystem — unit", () => {
       ],
       ["x", "y"]
     );
-    expect(sys).toEqual({ a: [[2, 1], [1, -1]], b: [5, 1], vars: ["x", "y"] });
+    expect(sys).toMatchObject({ a: [[2, 1], [1, -1]], b: [5, 1], vars: ["x", "y"] });
   });
 
   it("declines a non-square system", () => {
@@ -81,5 +81,31 @@ describe("parseLinearSystem — unit", () => {
         ["x", "y"]
       )
     ).toBeNull();
+  });
+});
+
+// Findings from the adversarial review — each shipped a WRONG answer verified:true.
+describe("regression — linear-system review findings", () => {
+  it("#1 a multi-digit mixed number is read correctly (10½, not ½)", async () => {
+    // 10.5x + y = 21, x - y = 0 → x = y = 21/11.5 = 42/23.
+    const r = await run(String.raw`10\frac{1}{2}x + y = 21, x - y = 0`);
+    expect(r).toMatchObject({ strategy: "linsystem", verified: true, plain: "x = 42/23, y = 42/23" });
+  });
+
+  it("#2 a rank-deficient system with huge coefficients declines (no false unique)", async () => {
+    // row3 = row1 + row2 exactly → rank 2, consistent → infinitely many solutions.
+    const r = await run(
+      String.raw`\begin{cases} 123456789x + 987654321y + 111111111z = 1222222221 \\ 222222222x + 333333333y + 444444444z = 999999999 \\ 345679011x + 1320987654y + 555555555z = 2222222220 \end{cases}`
+    );
+    expect(r.verified).toBe(false);
+  });
+
+  it("#6 a non-linear term that fools the 2-probe check is caught by re-substitution", () => {
+    // (x-0.05)^3/3 is even-symmetric about the old probe midpoint — a linearize-
+    // and-verify-against-A/b gate would pass it. It must NOT route to linsystem
+    // (3-probe + original-equation substitution reject it).
+    expect(classify(String.raw`\begin{cases} (x-0.05)^3/3 + y = 5 \\ x + y = 2 \end{cases}`).strategy).not.toBe(
+      "linsystem"
+    );
   });
 });

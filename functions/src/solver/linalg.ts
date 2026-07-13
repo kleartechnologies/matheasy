@@ -88,7 +88,7 @@ export function parseLinalg(
   // scope — decline honestly rather than silently return the raw A·B.
   const hasOuterOp =
     /\\begin\{vmatrix\}/.test(rawLatex) ||
-    /\bdeterminant\b|\bdet\b|\\det|eigen|inverse/.test(lower);
+    /\bdeterminant\b|\bdet\b|\\det|eigen|inverse|\brank\b|\btrace\b/.test(lower);
 
   if (matrices.length >= 2) {
     if (matrices.length > 2) return null; // A·B·C etc. — ambiguous to verify, decline
@@ -188,9 +188,9 @@ export function solveLinalg(cls: {
         ]);
       }
       case "rank": {
-        const r1 = gaussianRank(A); // row reduction
-        const r2 = gramRank(A); // count of nonzero eigenvalues of AᵀA
-        if (r2 === null || r1 !== r2) return null; // two independent methods must agree
+        const r1 = cleanRank(A); // row reduction, declines an ambiguous pivot
+        const r2 = gramRank(A); // count of nonzero eigenvalues of AᵀA (independent)
+        if (r1 === null || r2 === null || r1 !== r2) return null; // must agree, unambiguously
         return candidate(fmt(r1), "Rank", [matStep(A), resultStep("\\text{rank}(A) = " + r1)]);
       }
     }
@@ -309,9 +309,9 @@ export function solveVectors(cls: {
       case "spans": {
         // Vectors as rows; rank via TWO independent methods must agree.
         if (vecs.length < 2 || !vecs.every((v) => v.length === vecs[0].length)) return null;
-        const r1 = gaussianRank(vecs);
+        const r1 = cleanRank(vecs);
         const r2 = gramRank(vecs);
-        if (r2 === null || r1 !== r2) return null;
+        if (r1 === null || r2 === null || r1 !== r2) return null;
         if (op === "independent") {
           const indep = r1 === vecs.length;
           const plain = indep ? "Linearly independent" : "Linearly dependent";
@@ -378,24 +378,30 @@ function close(a: number, b: number): boolean {
   return Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a), Math.abs(b));
 }
 
-/** Rank by Gaussian row reduction (scale-relative pivot tolerance). */
-export function gaussianRank(rows: number[][]): number {
+/** Rank by Gaussian row reduction that DECLINES (null) when any pivot lands in
+ * the numerically-ambiguous band — neither clearly zero nor clearly nonzero. A
+ * legitimate exact-rank matrix (integers, simple decimals) has pivots that are
+ * either ~0 or O(magnitude); an entry engineered to sit in the crack (e.g.
+ * differing by 1e-12) is declined rather than guessed. */
+export function cleanRank(rows: number[][]): number | null {
   const m = rows.map((r) => [...r]);
   const nRows = m.length;
   const nCols = m[0]?.length ?? 0;
   const gmax = Math.max(1, ...m.flat().map((v) => Math.abs(v)));
-  const tol = 1e-9 * gmax;
+  const LO = 1e-13 * gmax; // below this, a pivot is treated as zero
+  const HI = 1e-7 * gmax; // above this, clearly nonzero; the gap between is ambiguous
   let rank = 0;
   for (let col = 0; col < nCols && rank < nRows; col++) {
-    let piv = -1;
-    let best = tol;
-    for (let r = rank; r < nRows; r++) {
+    let piv = rank;
+    let best = rank < nRows ? Math.abs(m[rank][col]) : 0;
+    for (let r = rank + 1; r < nRows; r++) {
       if (Math.abs(m[r][col]) > best) {
         best = Math.abs(m[r][col]);
         piv = r;
       }
     }
-    if (piv === -1) continue;
+    if (best < LO) continue; // clearly-zero column: no pivot here
+    if (best < HI) return null; // ambiguous pivot → decline
     [m[rank], m[piv]] = [m[piv], m[rank]];
     const pv = m[rank][col];
     for (let r = 0; r < nRows; r++) {
@@ -409,7 +415,7 @@ export function gaussianRank(rows: number[][]): number {
 }
 
 /** Rank as the number of nonzero eigenvalues of AᵀA (the squared singular values)
- * — an INDEPENDENT method (mathjs eigs) that must agree with gaussianRank. */
+ * — an INDEPENDENT method (mathjs eigs) that must agree with cleanRank. */
 export function gramRank(a: number[][]): number | null {
   try {
     const g = toGrid(multiply(transpose(a), a));

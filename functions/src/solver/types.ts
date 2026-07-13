@@ -142,9 +142,15 @@ export interface Classification {
   /** A vector request: dot/cross/magnitude + the operand vector(s). */
   vectorOp?: string;
   vectorData?: number[][];
-  /** A linear system Ax=b: the coefficient matrix, the RHS, and the unknown
-   * order — solved deterministically and verified by A·x=b. */
-  system?: { a: number[][]; b: number[]; vars: string[] };
+  /** A linear system Ax=b: the coefficient matrix, the RHS, the unknown order,
+   * and the original equations (for re-substitution) — solved deterministically
+   * and verified by A·x=b AND against the original equations. */
+  system?: {
+    a: number[][];
+    b: number[];
+    vars: string[];
+    parts: { lhs: string; rhs: string }[];
+  };
   /** A Taylor/Maclaurin request: the function (ascii), center + its display, and
    * order. The expansion variable is `unknown`. */
   taylorFn?: string;

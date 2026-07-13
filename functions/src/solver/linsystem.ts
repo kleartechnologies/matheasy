@@ -10,15 +10,19 @@
  * the coefficient of variable v is ∂f/∂v (which must be constant ⇒ linear), and
  * the constant term is f evaluated at all-zero.
  */
-import { derivative, det, lusolve } from "mathjs";
+import { derivative, lusolve } from "mathjs";
 
+import { cleanRank, gramRank } from "./linalg";
 import { FinalAnswer, SolveCandidate } from "./types";
-import { evalReal } from "./verify";
+import { evalReal, verifySolution } from "./verify";
 
 export interface LinearSystem {
   a: number[][];
   b: number[];
   vars: string[];
+  /** The ORIGINAL equations (ascii lhs/rhs) — the solution is re-substituted into
+   * these, so a parse that built the wrong A/b can't self-verify. */
+  parts: { lhs: string; rhs: string }[];
 }
 
 /** Preferred unknown ordering, then any extra letters alphabetically. */
@@ -37,7 +41,8 @@ function probeScope(vars: string[], seed: number): Record<string, number> {
 }
 
 /** The (constant) coefficient of `v` in linear `f`, or null if `f` isn't linear
- * in `v` (the partial derivative isn't constant across probe points). */
+ * in `v` (the partial derivative isn't constant across THREE probe points — the
+ * final verifySolution against the original equations is the real backstop). */
 function linearCoeff(f: string, v: string, vars: string[]): number | null {
   let d: string;
   try {
@@ -45,12 +50,10 @@ function linearCoeff(f: string, v: string, vars: string[]): number | null {
   } catch {
     return null;
   }
-  const c1 = evalReal(d, probeScope(vars, 1.1));
-  const c2 = evalReal(d, probeScope(vars, -2.4));
-  if (!Number.isFinite(c1) || !Number.isFinite(c2) || Math.abs(c1 - c2) > 1e-9) {
-    return null;
-  }
-  return c1;
+  const cs = [1.1, -2.4, 0.55].map((seed) => evalReal(d, probeScope(vars, seed)));
+  if (cs.some((c) => !Number.isFinite(c))) return null;
+  if (Math.abs(cs[0] - cs[1]) > 1e-9 || Math.abs(cs[0] - cs[2]) > 1e-9) return null;
+  return cs[0];
 }
 
 /**
@@ -84,7 +87,7 @@ export function parseLinearSystem(
     a.push(row);
     b.push(-constTerm); // Σ cᵢvᵢ + const = 0  ⇒  Σ cᵢvᵢ = −const
   }
-  return { a, b, vars: ordered };
+  return { a, b, vars: ordered, parts };
 }
 
 /** Solve the system, gated by A·x = b (independent recompute). */
@@ -93,22 +96,34 @@ export function solveLinearSystem(cls: {
 }): SolveCandidate | null {
   const sys = cls.system;
   if (!sys) return null;
-  const { a, b, vars } = sys;
+  const { a, b, vars, parts } = sys;
+
+  // A UNIQUE solution needs a full-rank A. Two independent rank methods must both
+  // agree it's full rank (scale-invariant — an absolute det threshold is fooled
+  // by large-coefficient roundoff); a rank-deficient system (0 or ∞ solutions)
+  // declines rather than shipping one of infinitely many as "the" answer.
+  const n = a.length;
+  if (cleanRank(a) !== n || gramRank(a) !== n) return null;
 
   let x: number[];
   try {
-    if (Math.abs(Number(det(a))) < 1e-9) return null; // singular → no unique solution
     x = toColumn(lusolve(a, b));
   } catch {
     return null;
   }
   if (x.length !== vars.length || !x.every(Number.isFinite)) return null;
 
-  // VERIFY: A·x ≈ b, computed independently of lusolve (row·x for every row).
+  // VERIFY (1): A·x ≈ b, computed independently of lusolve (row·x for every row).
   for (let i = 0; i < a.length; i++) {
     const dot = a[i].reduce((s, aij, j) => s + aij * x[j], 0);
     if (!close(dot, b[i])) return null;
   }
+  // VERIFY (2): substitute back into the ORIGINAL equations — so a parse that
+  // built a wrong-but-self-consistent A/b (e.g. a linearized non-linear term)
+  // can't slip through by matching its own A·x=b.
+  const scope: Record<string, number> = {};
+  vars.forEach((v, i) => (scope[v] = x[i]));
+  if (!verifySolution(parts, scope)) return null;
 
   const answer = systemAnswer(vars, x);
   return {
