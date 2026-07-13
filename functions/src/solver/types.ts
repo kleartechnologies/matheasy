@@ -81,6 +81,7 @@ export type Strategy =
   | "simplify" // simplify an expression in one variable
   | "arithmetic" // evaluate a pure-numeric expression
   | "derivative" // d/dx of an expression
+  | "statistics" // a descriptive statistic over a data set (mean/median/…)
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
 /** How an LLM-candidate answer gets proven. */
@@ -113,6 +114,9 @@ export interface Classification {
   /** Lower/upper limits of a definite integral, as ascii. */
   lowerBound?: string;
   upperBound?: string;
+  /** The requested descriptive statistic + its data set (statistics strategy). */
+  statKind?: string;
+  statData?: number[];
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */

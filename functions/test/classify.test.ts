@@ -25,6 +25,9 @@ describe("classify", () => {
     ["\\ln(x) + \\ln(x-3) = \\ln(10)", "logarithmic_equation", "llm_candidate"],
     ["\\log_2(x) = 5", "logarithmic_equation", "llm_candidate"],
     ["\\sin(x) = 0.5", "trigonometric_equation", "llm_candidate"],
+    // Descriptive statistics — deterministic (keyword + a comma-separated list).
+    ["mean of 2, 4, 6, 8", "statistics", "statistics"],
+    ["standard deviation of 2, 4, 4, 4, 5, 5, 7, 9", "statistics", "statistics"],
     ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],
     ["\\int x^2 dx", "integral", "llm_candidate"],

@@ -13,6 +13,7 @@ import { derivative, fraction, simplify } from "mathjs";
 import { equationParts } from "./classify";
 import { resymbolize } from "./exact";
 import { asciiToLatex, variablesIn } from "./latex";
+import { solveStatistics } from "./statistics";
 import {
   evalReal,
   verifyDerivative,
@@ -37,6 +38,8 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
       return solveArithmetic(cls);
     case "derivative":
       return solveDerivative(cls);
+    case "statistics":
+      return solveStatistics(cls);
     default:
       return null; // llm_candidate — handled by the orchestrator
   }

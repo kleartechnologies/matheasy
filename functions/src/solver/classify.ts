@@ -6,6 +6,7 @@
  * tier otherwise (integrals, higher-degree/trig equations, systems). Every path
  * carries a `verifyMode`: the answer is proven before it is ever returned.
  */
+import { parseStatistics } from "./statistics";
 import { Classification, Strategy, VerifyMode } from "./types";
 import {
   cleanLatex,
@@ -115,6 +116,21 @@ export function classify(rawLatex: string): Classification {
     }
     return base("derivative", "derivative", unknown, false, "derivative_back", {
       derivativeTarget: target,
+    });
+  }
+
+  // --- Descriptive statistics over a data set (mean/median/std of a list) ---
+  // A DETERMINISTIC path: the engine computes it and cross-checks by an
+  // independent recompute, so it needs no equation. Detected before the
+  // expression/equation split (a stats query usually has no `=`).
+  const statQuery = parseStatistics(rawLatex);
+  if (statQuery) {
+    // verifyMode "none": the deterministic path IS the verification (compute +
+    // independent recompute). If it can't handle a case, decline — don't hand a
+    // stats query to the generic LLM tier, which has no stats verification.
+    return base("statistics", "statistics", "x", false, "none", {
+      statKind: statQuery.stat,
+      statData: statQuery.data,
     });
   }
 
