@@ -5,20 +5,27 @@ import 'practice_session.dart';
 import 'practice_topic.dart';
 import 'xp_level.dart';
 
-/// A topic the learner is weaker in (shown on the dashboard).
+/// A topic to strengthen, derived from the learner's REAL scan history — never
+/// a placeholder. Carries the raw counts (not a fabricated accuracy %): how many
+/// problems in this topic were scanned, and how many of those verified.
 @immutable
 class WeakTopicView {
   const WeakTopicView({
     required this.topic,
-    required this.accuracy,
-    required this.note,
+    required this.solvedCount,
+    required this.correctCount,
   });
 
   final PracticeTopic topic;
 
-  /// Accuracy percentage (0–100).
-  final int accuracy;
-  final String note;
+  /// Problems scanned in this topic.
+  final int solvedCount;
+
+  /// Of those, how many produced a verified solution.
+  final int correctCount;
+
+  /// Verified-solve rate in [0, 1] — used to rank weakest-first, not displayed.
+  double get accuracy => solvedCount == 0 ? 0 : correctCount / solvedCount;
 }
 
 /// A topic category tile with its current mastery.

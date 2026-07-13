@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../onboarding/domain/onboarding_models.dart';
+import '../../result/domain/result_models.dart';
 
 /// A practiceable math topic. Carries its own icon + brand color (matching the
 /// codebase convention where content enums bundle presentation hints, e.g.
@@ -32,6 +33,19 @@ enum PracticeTopic {
       MathTopic.wordProblems => PracticeTopic.wordProblems,
     };
   }
+
+  /// Maps a solved-problem [ResultType] onto the practice topic to drill — the
+  /// single source of truth for "scan → topic" (Result screen + the Practice
+  /// dashboard's scan-history-driven "Strengthen these").
+  static PracticeTopic fromResultType(ResultType type) => switch (type) {
+        ResultType.linear ||
+        ResultType.quadratic ||
+        ResultType.expression =>
+          PracticeTopic.algebra,
+        ResultType.fraction => PracticeTopic.fractions,
+        ResultType.trigonometry => PracticeTopic.trigonometry,
+        ResultType.geometry => PracticeTopic.geometry,
+      };
 
   /// Resolves a topic from a human label (from Home weak-topics / Result type),
   /// defaulting to [algebra] when unrecognized.

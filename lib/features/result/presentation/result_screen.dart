@@ -86,19 +86,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void _practice(ResultData result) {
     context.push(
       AppRoutes.practiceSession,
-      extra: PracticeRequest(topic: _practiceTopicFor(result.type)),
+      extra: PracticeRequest(topic: PracticeTopic.fromResultType(result.type)),
     );
   }
-
-  PracticeTopic _practiceTopicFor(ResultType type) => switch (type) {
-        ResultType.linear ||
-        ResultType.quadratic ||
-        ResultType.expression =>
-          PracticeTopic.algebra,
-        ResultType.fraction => PracticeTopic.fractions,
-        ResultType.trigonometry => PracticeTopic.trigonometry,
-        ResultType.geometry => PracticeTopic.geometry,
-      };
 
   /// Opens the tutor chat aware of this solved problem, so Matheasy can pick up
   /// the conversation with full context (mock today).

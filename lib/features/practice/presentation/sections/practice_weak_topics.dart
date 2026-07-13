@@ -58,9 +58,12 @@ class _WeakRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final solved = view.solvedCount == 1
+        ? 'Solved 1 problem'
+        : 'Solved ${view.solvedCount} problems';
     return Semantics(
       button: true,
-      label: '${view.topic.label}, ${view.accuracy}% accuracy, ${view.note}',
+      label: '${view.topic.label}, $solved',
       child: InkWell(
         onTap: () => onTap(view.topic),
         borderRadius: AppRadius.mdRadius,
@@ -94,7 +97,7 @@ class _WeakRow extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      '${view.accuracy}% accuracy · ${view.note}',
+                      solved,
                       style: AppTypography.bodySmall.copyWith(
                         color: colors.textSecondary,
                       ),

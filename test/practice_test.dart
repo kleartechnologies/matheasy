@@ -438,11 +438,13 @@ void main() {
 
       expect(find.text('Practice'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('Algebra'),
+        // 'Algebra' appears in both "Recommended" and "All topics"; scroll to
+        // the first and assert at least one category renders.
+        find.text('Algebra').first,
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Algebra'), findsOneWidget);
+      expect(find.text('Algebra'), findsWidgets);
     });
 
     testWidgets('session grades an answer and shows feedback', (tester) async {

@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../history/application/history_controller.dart';
+import '../../history/domain/history_entry.dart';
 import '../../onboarding/application/onboarding_controller.dart';
 import '../domain/practice_dashboard.dart';
 import '../domain/practice_progress.dart';
@@ -17,6 +19,7 @@ part 'practice_dashboard_controller.g.dart';
 PracticeDashboardData practiceDashboard(Ref ref) {
   final progress = ref.watch(practiceProgressControllerProvider);
   final onboarding = ref.watch(onboardingFlowControllerProvider);
+  final history = ref.watch(historyControllerProvider);
 
   final recommended = onboarding.topics.isEmpty
       ? const [
@@ -42,7 +45,7 @@ PracticeDashboardData practiceDashboard(Ref ref) {
     streakBest: progress.streakBest,
     continueRequest: progress.lastRequest,
     recommendedTopics: recommended,
-    weakTopics: _weakTopics(progress, recommended),
+    weakTopics: _weakTopics(history),
     dailyChallenge: DailyChallengeView(
       title: 'Daily Challenge',
       subtitle: 'Solve 5 algebra questions',
@@ -56,37 +59,34 @@ PracticeDashboardData practiceDashboard(Ref ref) {
   );
 }
 
-/// Weak topics from real progress (lowest accuracy, still practiced) when
-/// available, otherwise a friendly starter pair drawn from recommendations.
-List<WeakTopicView> _weakTopics(
-  PracticeProgress progress,
-  List<PracticeTopic> recommended,
-) {
-  final practiced = progress.topics.values
-      .where((t) => t.answered >= 3 && t.accuracy < 0.75)
-      .toList()
-    ..sort((a, b) => a.accuracy.compareTo(b.accuracy));
-
-  if (practiced.isNotEmpty) {
-    return [
-      for (final t in practiced.take(2))
-        WeakTopicView(
-          topic: t.topic,
-          accuracy: (t.accuracy * 100).round(),
-          note: t.accuracy < 0.6 ? 'needs work' : 'improving',
-        ),
-    ];
+/// "Strengthen these" — built ENTIRELY from the learner's real scan history,
+/// never placeholders. Each scanned problem is aggregated into its topic (total
+/// solved + how many verified); topics are ranked weakest-first. Returns empty
+/// when there's no scan history, so the section hides itself for a new user.
+List<WeakTopicView> _weakTopics(List<HistoryEntry> history) {
+  final solved = <PracticeTopic, int>{};
+  final correct = <PracticeTopic, int>{};
+  for (final entry in history) {
+    final topic = PracticeTopic.fromResultType(entry.result.type);
+    solved[topic] = (solved[topic] ?? 0) + 1;
+    if (entry.result.verified) correct[topic] = (correct[topic] ?? 0) + 1;
   }
 
-  // Starter placeholders until we've seen enough answers to judge.
-  const starters = [
-    (PracticeTopic.wordProblems, 54, 'needs work'),
-    (PracticeTopic.trigonometry, 61, 'improving'),
-  ];
   return [
-    for (final (topic, accuracy, note) in starters)
-      WeakTopicView(topic: topic, accuracy: accuracy, note: note),
-  ];
+    for (final topic in solved.keys)
+      WeakTopicView(
+        topic: topic,
+        solvedCount: solved[topic]!,
+        correctCount: correct[topic] ?? 0,
+      ),
+  ]..sort((a, b) {
+      // Weakest first: lowest verified-rate, then fewest solved (matches the
+      // spec example — Fractions[1] before Algebra[2] when both fully verified).
+      final byAccuracy = a.accuracy.compareTo(b.accuracy);
+      return byAccuracy != 0
+          ? byAccuracy
+          : a.solvedCount.compareTo(b.solvedCount);
+    });
 }
 
 String _tutorMessage(PracticeProgress progress) {

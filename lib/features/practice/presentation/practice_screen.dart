@@ -63,10 +63,12 @@ class PracticeScreen extends ConsumerWidget {
         topics: data.recommendedTopics,
         onStartTopic: (topic) => _startTopic(context, ref, topic),
       ),
-      PracticeWeakTopics(
-        topics: data.weakTopics,
-        onStartTopic: (topic) => _startTopic(context, ref, topic),
-      ),
+      // Scan-history-driven; absent entirely for a learner with no scans.
+      if (data.weakTopics.isNotEmpty)
+        PracticeWeakTopics(
+          topics: data.weakTopics,
+          onStartTopic: (topic) => _startTopic(context, ref, topic),
+        ),
       PracticeCategories(
         categories: data.categories,
         onStartTopic: (topic) => _startTopic(context, ref, topic),
