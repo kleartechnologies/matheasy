@@ -31,6 +31,7 @@ import { chatJson, createOpenAI } from "../lib/openai";
 
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
+import { verifyOde } from "../solver/ode";
 import { exactForm } from "../solver/exact";
 import { buildGraph, GraphInput } from "../solver/graph";
 import { variablesIn } from "../solver/latex";
@@ -297,6 +298,21 @@ function verifyCandidate(cls: Classification, llm: LlmCandidate): VerifyOutcome 
         cls.ineqOp,
         cls.unknown,
         llm.intervals
+      )
+        ? { ok: true, answer: llm.answer }
+        : { ok: false };
+    }
+    case "ode": {
+      // Substitute the model's candidate solution back into the ODE: differentiate
+      // it and check the residual ≈ 0 across samples + constant values (+ any
+      // initial conditions). A non-solution leaves a residual and is rejected.
+      if (!cls.odeResidual || !cls.odeDepVar || !cls.odeIndepVar) return { ok: false };
+      return verifyOde(
+        cls.odeResidual,
+        cls.odeDepVar,
+        cls.odeIndepVar,
+        llm.odeSolution,
+        cls.odeInitial ?? []
       )
         ? { ok: true, answer: llm.answer }
         : { ok: false };

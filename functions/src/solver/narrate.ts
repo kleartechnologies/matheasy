@@ -108,6 +108,9 @@ export interface LlmCandidate {
   intervals: Interval[];
   /** The equation the model EXTRACTED from a word problem (ascii), for its gate. */
   setupEquation: string;
+  /** An ODE solution y(x) as a bare ascii expression (constants C1, C2), for the
+   * substitution gate. */
+  odeSolution: string;
   methods: MethodData[];
 }
 
@@ -154,6 +157,7 @@ Rules:
   • Definite integral: put the exact value in "answerLatex" and "answerPlain"; leave "solutions" as [].
 - Inequality (e.g. 2x+3 < 7, x²-5x+6 ≥ 0): leave "solutions" as [] and instead give the solution SET in an "intervals" array — one object per interval: { "lo": number|null, "hi": number|null, "loOpen": bool, "hiOpen": bool } where lo/hi = null means -∞/+∞, and *Open = true for a STRICT boundary (open circle), false for ≤/≥ (closed). Example: x < 2 → [{ "lo": null, "hi": 2, "loOpen": true, "hiOpen": true }]; x ≤ 2 or x > 3 → two objects. Also put a readable form in "answerLatex" (e.g. x < 2, or x \\le 2 \\text{ or } x > 3). Factor quadratics and use a sign chart to get the intervals right.
 - Word problem (a real-world story in words): FIRST translate it into ONE equation with a single unknown and put that equation (delimiter-free LaTeX) in "setupLatex" (e.g. "x = 3 + 5" or "2x + 5 = 17"). Solve it and give the numeric answer in "solutions" and a friendly "answerLatex"/"answerPlain" (with units, e.g. "8 apples"). Make the FIRST method step state your reading ("I read this as: …" + the equation) so the student can catch a misread. The answer is checked against YOUR setupLatex, so it must be self-consistent.
+- Differential equation (an ODE, e.g. y' = 2y, y'' + y = 0, \\frac{dy}{dx} = xy): solve for y as a function of the independent variable. Put the solution in "answerLatex"/"answerPlain" (e.g. "y = C_1 e^{2x}") AND, CRUCIALLY, put the SAME solution as a bare plain-ascii expression for y in "solutionExpr" — no "y =" prefix, using e^() for exponentials, and naming the arbitrary constants EXACTLY C1 and C2 (e.g. "C1*e^(2*x)" or "C1*cos(x) + C2*sin(x)"). If (and only if) numeric initial conditions are given, apply them so "solutionExpr" is the PARTICULAR solution with NO arbitrary constants left (e.g. y(0)=3 ⇒ "3*e^(2*x)"). Leave "solutions" as []. Your solutionExpr is substituted back into the ODE to check it, so it must be exact.
 - Provide 1-2 methods, exactly one with "examPick": true, each with 2-5 steps.
 - All LaTeX must be valid and delimiter-free (no $, no \\[ \\]).`;
 
@@ -205,8 +209,17 @@ export async function generateLlmCandidate(
     assignments,
     intervals: parseIntervals(json.intervals),
     setupEquation: latexToAscii(str(json.setupLatex)),
+    odeSolution: normalizeOdeSolution(str(json.solutionExpr)),
     methods,
   };
+}
+
+/** The model's ODE solution expression, tidied to mathjs-friendly ascii. */
+function normalizeOdeSolution(raw: string): string {
+  if (!raw) return "";
+  // Accept "y = ..." or a bare expression; keep only the RHS. Convert any LaTeX.
+  const rhs = raw.includes("=") ? raw.slice(raw.lastIndexOf("=") + 1) : raw;
+  return latexToAscii(rhs).trim();
 }
 
 function coerceMethods(raw: unknown): MethodData[] {

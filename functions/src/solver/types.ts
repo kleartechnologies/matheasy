@@ -95,6 +95,7 @@ export type VerifyMode =
   | "trig" // periodic equation: verify principal solutions + 2π-periodicity
   | "inequality" // solution set: points inside satisfy it, points outside don't
   | "word_problem" // NL: the answer must satisfy the model's EXTRACTED equation
+  | "ode" // differential equation: substitute the candidate solution back in
   | "none"; // nothing to check against → forces couldn't-verify
 
 export interface Classification {
@@ -138,6 +139,14 @@ export interface Classification {
   taylorCenter?: number;
   taylorCenterLatex?: string;
   taylorOrder?: number;
+  /** An ODE: the residual (ascii, in tokens indepVar/depVar/dy/ddy), its
+   * variables + order, and any numeric initial conditions — the LLM's candidate
+   * solution is substituted into the residual to verify. */
+  odeResidual?: string;
+  odeDepVar?: string;
+  odeIndepVar?: string;
+  odeOrder?: number;
+  odeInitial?: { order: number; at: number; value: number }[];
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */

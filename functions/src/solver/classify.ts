@@ -7,6 +7,7 @@
  * carries a `verifyMode`: the answer is proven before it is ever returned.
  */
 import { parseLinalg, parseVectors } from "./linalg";
+import { parseOde } from "./ode";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
 import { Classification, Strategy, VerifyMode } from "./types";
@@ -109,6 +110,21 @@ export function classify(rawLatex: string): Classification {
     // Indefinite: verified by differentiating the antiderivative back.
     return base("integral", "llm_candidate", parsed.unknown, false, "derivative_back", {
       integrand: parsed.integrand,
+    });
+  }
+
+  // --- ODEs (y' = 2y, y'' + y = 0, \frac{dy}{dx} = …) ---------------------
+  // A differential equation (a derivative OF the dependent variable, with an `=`)
+  // must be caught BEFORE the plain d/dx block. No engine integrates it, so the
+  // LLM proposes a solution y(x) and the "ode" gate substitutes it back in.
+  const ode = parseOde(rawLatex);
+  if (ode) {
+    return base("differential_equation", "llm_candidate", ode.depVar, true, "ode", {
+      odeResidual: ode.residual,
+      odeDepVar: ode.depVar,
+      odeIndepVar: ode.indepVar,
+      odeOrder: ode.order,
+      odeInitial: ode.initial,
     });
   }
 
