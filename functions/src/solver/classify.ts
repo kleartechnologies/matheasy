@@ -161,6 +161,21 @@ export function classify(rawLatex: string): Classification {
     );
   }
 
+  // Logarithmic: the unknown sits inside a log — log(x)=2, ln(x)+ln(x-3)=ln10.
+  // (After latexToAscii, \ln→log, \log→log10, \log_b→(log/log).) mathsteps can't
+  // solve these; route to the verified LLM tier with an honest type (mirrors the
+  // exponential route). The substitution gate proves the root — and rejects any
+  // extraneous root outside the log's domain (arg>0), where evalReal → NaN.
+  if (unknownInLog(ascii, unknown)) {
+    return base(
+      "logarithmic_equation",
+      "llm_candidate",
+      unknown,
+      true,
+      "substitution"
+    );
+  }
+
   const degree = detectDegree(ascii, unknown);
 
   if (degree >= 2) {
@@ -259,6 +274,16 @@ function unknownInExponent(ascii: string, unknown: string): boolean {
   const u = unknown.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(`\\^\\s*(?:\\([^()]*${u}[^()]*\\)|-?[0-9.]*\\s*\\*?\\s*${u})`);
   return re.test(ascii);
+}
+
+/**
+ * True if `unknown` appears inside a logarithm's argument (e.g. `log(x)=2`,
+ * `log10(x-3)`) — a logarithmic equation. After latexToAscii, `\ln`→`log` and
+ * `\log`→`log10`, so both spellings are covered (log10 tried first).
+ */
+function unknownInLog(ascii: string, unknown: string): boolean {
+  const u = unknown.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:log10|log)\\s*\\([^()]*${u}`).test(ascii);
 }
 
 /**

@@ -20,6 +20,10 @@ describe("classify", () => {
     // as "linear". (x^2 / (x+1)^3 above stay polynomial: unknown in the base.)
     ["3^{2x+1} + 4(3^x) - 15 = 0", "exponential_equation", "llm_candidate"],
     ["2^x = 8", "exponential_equation", "llm_candidate"],
+    // Logarithmic: the unknown is inside a log (not the base/exponent).
+    ["\\ln(x) = 2", "logarithmic_equation", "llm_candidate"],
+    ["\\ln(x) + \\ln(x-3) = \\ln(10)", "logarithmic_equation", "llm_candidate"],
+    ["\\log_2(x) = 5", "logarithmic_equation", "llm_candidate"],
     ["\\sin(x) = 0.5", "trigonometric_equation", "llm_candidate"],
     ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],

@@ -22,6 +22,9 @@ const FUNCTIONS = [
   "arcsin",
   "arccos",
   "arctan",
+  "asin",
+  "acos",
+  "atan",
   "sinh",
   "cosh",
   "tanh",
@@ -90,6 +93,11 @@ export function latexToAscii(latex: string): string {
     s = s.replace(new RegExp(`\\\\${fn}\\b`, "g"), fn);
   }
 
+  // Inverse trig → mathjs's names: `arcsin/arccos/arctan` → `asin/acos/atan`.
+  // mathjs's `derivative()`/`evalReal` THROW on `arctan`, silently killing both
+  // inverse-trig evaluation and every correct `∫1/(1+x²)=arctan x`.
+  s = s.replace(/arc(sin|cos|tan)/g, "a$1");
+
   // Absolute value → abs(): `\lvert…\rvert` / `\vert` macros first, then the
   // bar pair (`\left|…\right|` already lost its \left/\right in cleanLatex).
   // Wrapped in parens so a preceding function/coefficient binds: `log|x+3|` →
@@ -153,9 +161,12 @@ export function splitEquation(ascii: string): SplitEquation {
 export function variablesIn(ascii: string): string[] {
   const reserved = new Set([...FUNCTIONS, "pi", "e", "theta", "i"]);
   const found = new Set<string>();
-  // strip function names so their letters don't count as variables
+  // Strip function names so their letters don't count as variables. LONGEST
+  // first, so a short name isn't peeled out of a longer one (`sin` out of
+  // `asin`/`arcsin`, leaking a/r/c) before the full name is matched.
   let stripped = ascii;
-  for (const fn of FUNCTIONS) stripped = stripped.replace(new RegExp(fn, "g"), " ");
+  const byLenDesc = [...FUNCTIONS].sort((a, b) => b.length - a.length);
+  for (const fn of byLenDesc) stripped = stripped.replace(new RegExp(fn, "g"), " ");
   stripped = stripped.replace(/pi|theta/g, " ");
   for (const m of stripped.matchAll(/[a-zA-Z]/g)) {
     const v = m[0];

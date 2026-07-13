@@ -324,3 +324,37 @@ describe("solve — failure-analytics callback (onCouldNotVerify)", () => {
     expect(reasons).toEqual([]);
   });
 });
+
+describe("solve — Phase A quick wins (inverse trig + logs)", () => {
+  it("∫1/(1+x²)dx verifies with arctan(x) (arcsin/arctan naming fix)", async () => {
+    const p = await run("\\int \\frac{1}{1+x^2} dx", completerWith({
+      answerLatex: "\\arctan(x) + C",
+      answerPlain: "arctan(x) + C",
+      solutions: [],
+      methods: [{ id: "std", name: "Standard form", examPick: true, steps: [{ expression: "\\arctan(x) + C", operation: "Integrate", why: "..." }] }],
+    }));
+    expect(p.problemType).toBe("integral");
+    expect(p.verified).toBe(true);
+  });
+
+  it("logarithmic equation verifies its valid root", async () => {
+    const p = await run("\\ln(x) + \\ln(x-3) = \\ln(10)", completerWith({
+      answerLatex: "x = 5",
+      answerPlain: "x = 5",
+      solutions: [{ variable: "x", value: 5 }],
+      methods: [{ id: "combine", name: "Combine logs", examPick: true, steps: [{ expression: "x=5", operation: "Solve", why: "..." }] }],
+    }));
+    expect(p.problemType).toBe("logarithmic_equation");
+    expect(p.verified).toBe(true);
+  });
+
+  it("logarithmic equation REJECTS an extraneous root (log arg ≤ 0)", async () => {
+    const p = await run("\\ln(x) + \\ln(x-3) = \\ln(10)", completerWith({
+      answerLatex: "x = 5, -2",
+      answerPlain: "x = 5 or -2",
+      solutions: [{ variable: "x", value: 5 }, { variable: "x", value: -2 }],
+      methods: [],
+    }));
+    expect(p.verified).toBe(false); // ln(-2) is NaN → the whole answer fails the gate
+  });
+});

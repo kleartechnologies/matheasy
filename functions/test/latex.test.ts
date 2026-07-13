@@ -33,6 +33,15 @@ describe("latexToAscii", () => {
     expect(latexToAscii("\\lvert x \\rvert")).toBe("(abs(x))");
   });
 
+  it("rewrites inverse trig to mathjs names (arcsin→asin) so they differentiate", () => {
+    expect(latexToAscii("\\arctan(x)")).toBe("atan(x)");
+    expect(latexToAscii("\\arcsin(2x)")).toBe("asin(2x)");
+    expect(latexToAscii("\\arccos(x)")).toBe("acos(x)");
+    // …and their letters no longer leak into variable detection (sin⊄asin).
+    expect(variablesIn(latexToAscii("\\arctan(x)"))).toEqual(["x"]);
+    expect(variablesIn(latexToAscii("\\arcsin(2x)"))).toEqual(["x"]);
+  });
+
   it("strips braces from exponents", () => {
     expect(latexToAscii("x^{2} - 5x + 6 = 0")).toBe("x^(2) - 5x + 6 = 0");
   });
