@@ -98,6 +98,52 @@ describe("classify + solve — vectors", () => {
   });
 });
 
+describe("classify + solve — rank (two independent methods must agree)", () => {
+  it("full-rank 2×2 → 2", async () => {
+    const r = await run(String.raw`rank of \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}`);
+    expect(r).toMatchObject({ op: "rank", verified: true, plain: "2" });
+  });
+
+  it("singular 2×2 (parallel rows) → 1", async () => {
+    const r = await run(String.raw`rank of \begin{pmatrix} 1 & 2 \\ 2 & 4 \end{pmatrix}`);
+    expect(r).toMatchObject({ verified: true, plain: "1" });
+  });
+
+  it("non-square 2×3 → 2 (rank works on any shape)", async () => {
+    const r = await run(String.raw`rank of \begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix}`);
+    expect(r).toMatchObject({ verified: true, plain: "2" });
+  });
+
+  it("3×3 all rows proportional → 1", async () => {
+    const r = await run(
+      String.raw`rank of \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 3 & 6 & 9 \end{pmatrix}`
+    );
+    expect(r).toMatchObject({ verified: true, plain: "1" });
+  });
+});
+
+describe("classify + solve — linear independence & span", () => {
+  it("independent basis vectors", async () => {
+    const r = await runVec(String.raw`Are (1,0),(0,1) linearly independent?`);
+    expect(r).toMatchObject({ op: "independent", verified: true, plain: "Linearly independent" });
+  });
+
+  it("parallel vectors are dependent", async () => {
+    const r = await runVec(String.raw`Are (1,2),(2,4) linearly independent?`);
+    expect(r).toMatchObject({ verified: true, plain: "Linearly dependent" });
+  });
+
+  it("standard basis spans R^3", async () => {
+    const r = await runVec(String.raw`Do (1,0,0),(0,1,0),(0,0,1) span R^3?`);
+    expect(r).toMatchObject({ op: "spans", verified: true, plain: "Yes — they span R^3" });
+  });
+
+  it("two vectors cannot span R^3", async () => {
+    const r = await runVec(String.raw`Do (1,0,0),(0,1,0) span R^3?`);
+    expect(r).toMatchObject({ verified: true, plain: "No — they do not span R^3" });
+  });
+});
+
 describe("classify + solve — matrix sum / difference", () => {
   const B = String.raw`\begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}`;
 

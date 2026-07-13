@@ -8,7 +8,7 @@
  *   • eigenvalues  — det(A − λI) ≈ 0 for every λ
  * Numeric, real-valued matrices only (complex spectra decline honestly).
  */
-import { cross, det, dot, eigs, identity, inv, multiply, norm, subtract } from "mathjs";
+import { cross, det, dot, eigs, identity, inv, multiply, norm, subtract, transpose } from "mathjs";
 
 import { FinalAnswer, RawStep, SolveCandidate } from "./types";
 
@@ -18,7 +18,8 @@ export type LinalgOp =
   | "eigenvalues"
   | "multiply"
   | "add"
-  | "subtract";
+  | "subtract"
+  | "rank";
 
 /** A single clean number token, or null — rejects "" (Number("")=0), a bare
  * ".", and thousands-style groups like "000"/"007" (a leading zero before more
@@ -106,6 +107,9 @@ export function parseLinalg(
   }
 
   const matrix = matrices[0];
+  // Rank applies to ANY shape — detect it before the square-only ops.
+  if (/\brank\b/.test(lower)) return { op: "rank", matrix };
+
   let op: LinalgOp | null = null;
   if (/\\begin\{vmatrix\}/.test(rawLatex) || /\bdeterminant\b|\bdet\b|\\det/.test(lower)) {
     op = "determinant";
@@ -183,6 +187,12 @@ export function solveLinalg(cls: {
           resultStep(`A ${symbol} B = ` + matrixLatex(out)),
         ]);
       }
+      case "rank": {
+        const r1 = gaussianRank(A); // row reduction
+        const r2 = gramRank(A); // count of nonzero eigenvalues of AᵀA
+        if (r2 === null || r1 !== r2) return null; // two independent methods must agree
+        return candidate(fmt(r1), "Rank", [matStep(A), resultStep("\\text{rank}(A) = " + r1)]);
+      }
     }
   } catch {
     return null;
@@ -192,7 +202,7 @@ export function solveLinalg(cls: {
 
 // ---- Vectors (dot / cross / magnitude) -------------------------------------
 
-export type VectorOp = "dot" | "cross" | "magnitude";
+export type VectorOp = "dot" | "cross" | "magnitude" | "independent" | "spans";
 
 /** Numeric vectors written as `(1, 2, 3)` or `\langle 1,2,3 \rangle`. */
 function extractVectors(rawLatex: string): number[][] {
@@ -227,6 +237,16 @@ export function parseVectors(
   }
   const vecs = extractVectors(rawLatex);
   const lower = rawLatex.toLowerCase();
+
+  // Linear independence / span — need ≥2 vectors that live in the SAME space.
+  const sameLen = vecs.length >= 2 && vecs.every((v) => v.length === vecs[0].length);
+  if (sameLen && /linear(?:ly)?\s+(?:in)?depend/.test(lower)) {
+    return { op: "independent", vectors: vecs };
+  }
+  if (sameLen && /\bspan(?:s|ned|ning)?\b/.test(lower)) {
+    return { op: "spans", vectors: vecs };
+  }
+
   const magCue =
     /\bmagnitude\b|\bnorm\b/.test(lower) ||
     /\\lVert|\\rVert|\\Vert|\\\|/.test(rawLatex);
@@ -285,6 +305,32 @@ export function solveVectors(cls: {
           resultStep("a \\times b = " + vecLatex(c)),
         ]);
       }
+      case "independent":
+      case "spans": {
+        // Vectors as rows; rank via TWO independent methods must agree.
+        if (vecs.length < 2 || !vecs.every((v) => v.length === vecs[0].length)) return null;
+        const r1 = gaussianRank(vecs);
+        const r2 = gramRank(vecs);
+        if (r2 === null || r1 !== r2) return null;
+        if (op === "independent") {
+          const indep = r1 === vecs.length;
+          const plain = indep ? "Linearly independent" : "Linearly dependent";
+          return candidate(
+            { latex: `\\text{${plain}}`, plain },
+            "Linear independence",
+            [resultStep(`\\text{rank} = ${r1} \\text{ of } ${vecs.length} \\Rightarrow \\text{${plain.toLowerCase()}}`)]
+          );
+        }
+        const n = vecs[0].length; // ambient dimension ℝⁿ
+        const spans = r1 === n;
+        const plain = spans ? `Yes — they span R^${n}` : `No — they do not span R^${n}`;
+        const rn = `\\mathbb{R}^{${n}}`;
+        return candidate(
+          { latex: spans ? `\\text{Yes — they span } ${rn}` : `\\text{No — they do not span } ${rn}`, plain },
+          "Span",
+          [resultStep(`\\text{rank} = ${r1},\\; \\dim = ${n}`)]
+        );
+      }
     }
   } catch {
     return null;
@@ -330,6 +376,55 @@ function eigenReal(a: number[][]): number[] | null {
 
 function close(a: number, b: number): boolean {
   return Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a), Math.abs(b));
+}
+
+/** Rank by Gaussian row reduction (scale-relative pivot tolerance). */
+export function gaussianRank(rows: number[][]): number {
+  const m = rows.map((r) => [...r]);
+  const nRows = m.length;
+  const nCols = m[0]?.length ?? 0;
+  const gmax = Math.max(1, ...m.flat().map((v) => Math.abs(v)));
+  const tol = 1e-9 * gmax;
+  let rank = 0;
+  for (let col = 0; col < nCols && rank < nRows; col++) {
+    let piv = -1;
+    let best = tol;
+    for (let r = rank; r < nRows; r++) {
+      if (Math.abs(m[r][col]) > best) {
+        best = Math.abs(m[r][col]);
+        piv = r;
+      }
+    }
+    if (piv === -1) continue;
+    [m[rank], m[piv]] = [m[piv], m[rank]];
+    const pv = m[rank][col];
+    for (let r = 0; r < nRows; r++) {
+      if (r === rank) continue;
+      const f = m[r][col] / pv;
+      for (let cc = col; cc < nCols; cc++) m[r][cc] -= f * m[rank][cc];
+    }
+    rank++;
+  }
+  return rank;
+}
+
+/** Rank as the number of nonzero eigenvalues of AᵀA (the squared singular values)
+ * — an INDEPENDENT method (mathjs eigs) that must agree with gaussianRank. */
+export function gramRank(a: number[][]): number | null {
+  try {
+    const g = toGrid(multiply(transpose(a), a));
+    if (!g) return null;
+    const raw = eigs(g).values as unknown;
+    const arr = Array.isArray(raw)
+      ? raw
+      : ((raw as { toArray?: () => unknown[] }).toArray?.() ?? []);
+    const vals = arr.map((v) => Number(v));
+    if (vals.some((v) => !Number.isFinite(v))) return null;
+    const maxV = Math.max(1, ...vals.map((v) => Math.abs(v)));
+    return vals.filter((v) => v > 1e-8 * maxV).length; // eigenvalues of AᵀA are ≥ 0
+  } catch {
+    return null;
+  }
 }
 
 /** Independent row-by-column matrix multiply (checks mathjs). */

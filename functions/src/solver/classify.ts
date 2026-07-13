@@ -7,6 +7,7 @@
  * carries a `verifyMode`: the answer is proven before it is ever returned.
  */
 import { parseLinalg, parseVectors } from "./linalg";
+import { parseLinearSystem } from "./linsystem";
 import { parseOde } from "./ode";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
@@ -47,7 +48,19 @@ export function equationParts(ascii: string): { lhs: string; rhs: string }[] {
 
 export function classify(rawLatex: string): Classification {
   const latex = cleanLatex(rawLatex);
-  const ascii = latexToAscii(rawLatex);
+  // A cases/aligned system writes its equations with `\\` row breaks; turn those
+  // into `;` (and drop the wrapper + `&` alignment tabs) so equationParts can
+  // split them. Only when such an environment is present — matrices (pmatrix,
+  // handled separately from rawLatex) are untouched.
+  const rawForAscii =
+    /\\begin\s*\{\s*(?:cases|aligned|split|gather)/i.test(rawLatex)
+      ? rawLatex
+          .replace(/\\begin\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
+          .replace(/\\end\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
+          .replace(/\\\\/g, " ; ")
+          .replace(/&/g, " ")
+      : rawLatex;
+  const ascii = latexToAscii(rawForAscii);
 
   const base = (
     problemType: string,
@@ -268,6 +281,17 @@ export function classify(rawLatex: string): Classification {
   const multiEquation = parts.length > 1;
 
   if (multiEquation || vars.length >= 2) {
+    // A square LINEAR system solves deterministically (mathjs, verified A·x=b).
+    // Only when that declines (non-linear, non-square, singular) fall back to the
+    // verified LLM tier.
+    if (multiEquation) {
+      const sys = parseLinearSystem(parts, vars);
+      if (sys) {
+        return base("linear_system", "linsystem", sys.vars[0], true, "none", {
+          system: sys,
+        });
+      }
+    }
     return base(
       "system_of_equations",
       "llm_candidate",

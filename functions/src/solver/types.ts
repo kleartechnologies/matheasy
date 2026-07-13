@@ -90,6 +90,7 @@ export type Strategy =
   | "derivative" // d/dx of an expression
   | "statistics" // a descriptive statistic over a data set (mean/median/…)
   | "linalg" // matrix/vector operation (det/inverse/eigenvalues) via mathjs
+  | "linsystem" // a linear system Ax=b, solved via mathjs, verified by A·x=b
   | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
   | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
@@ -141,6 +142,9 @@ export interface Classification {
   /** A vector request: dot/cross/magnitude + the operand vector(s). */
   vectorOp?: string;
   vectorData?: number[][];
+  /** A linear system Ax=b: the coefficient matrix, the RHS, and the unknown
+   * order — solved deterministically and verified by A·x=b. */
+  system?: { a: number[][]; b: number[]; vars: string[] };
   /** A Taylor/Maclaurin request: the function (ascii), center + its display, and
    * order. The expansion variable is `unknown`. */
   taylorFn?: string;

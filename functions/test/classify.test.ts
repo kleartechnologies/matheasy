@@ -31,7 +31,8 @@ describe("classify", () => {
     // Inequalities — solution set via the verified LLM tier.
     ["2x + 3 < 7", "inequality", "llm_candidate"],
     ["x^2 - 5x + 6 \\geq 0", "inequality", "llm_candidate"],
-    ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
+    // A LINEAR system now solves deterministically (Ax=b, verified A·x=b).
+    ["2x + 3y = 6, x - y = 3", "linear_system", "linsystem"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],
     ["\\int x^2 dx", "integral", "llm_candidate"],
   ];

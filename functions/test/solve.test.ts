@@ -106,21 +106,17 @@ describe("solve — the verification gate", () => {
     expect(p.finalAnswer).toBeNull();
   });
 
-  it("verifies a system by substituting into every equation", async () => {
-    const p = await run("2x + 3y = 6, x - y = 3", completerWith({
-      answerLatex: "x=3,\\; y=0",
-      answerPlain: "x=3, y=0",
-      solutions: [{ variable: "x", value: 3 }, { variable: "y", value: 0 }],
-      methods: [
-        { id: "elimination", name: "Elimination", examPick: true, steps: [{ expression: "x=3, y=0", operation: "Solve", why: "..." }] },
-      ],
-    }));
+  it("solves a LINEAR system deterministically (no LLM), verified A·x=b", async () => {
+    // 2x+3y=6, x-y=3 → x=3, y=0. Deterministic path, so the completer is NEVER used.
+    const p = await run("2x + 3y = 6, x - y = 3", NEVER);
     expect(p.verified).toBe(true);
-    expect(p.problemType).toBe("system_of_equations");
+    expect(p.problemType).toBe("linear_system");
+    expect(p.finalAnswer?.plain).toBe("x = 3, y = 0");
   });
 
-  it("rejects a wrong system solution", async () => {
-    const p = await run("2x + 3y = 6, x - y = 3", completerWith({
+  it("rejects a wrong candidate for a NON-linear system (LLM substitution gate)", async () => {
+    // x²+y=5, x-y=1 isn't linear → the LLM tier; a wrong candidate fails the gate.
+    const p = await run("x^2 + y = 5, x - y = 1", completerWith({
       answerLatex: "x=1,\\; y=1",
       answerPlain: "x=1, y=1",
       solutions: [{ variable: "x", value: 1 }, { variable: "y", value: 1 }],

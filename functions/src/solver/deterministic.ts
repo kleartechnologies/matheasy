@@ -14,6 +14,7 @@ import { equationParts } from "./classify";
 import { resymbolize } from "./exact";
 import { asciiToLatex, variablesIn } from "./latex";
 import { solveLinalg, solveVectors } from "./linalg";
+import { solveLinearSystem } from "./linsystem";
 import { solveStatistics } from "./statistics";
 import { solveTaylor } from "./taylor";
 import {
@@ -44,6 +45,8 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
       return solveStatistics(cls);
     case "linalg":
       return solveLinalg(cls) ?? solveVectors(cls);
+    case "linsystem":
+      return solveLinearSystem(cls);
     case "taylor":
       return solveTaylor(cls);
     default:
