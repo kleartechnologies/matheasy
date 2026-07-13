@@ -123,6 +123,8 @@ export interface Classification {
   verifyMode: VerifyMode;
   /** The operand of a derivative, as ascii (derivative strategy only). */
   derivativeTarget?: string;
+  /** Order of a derivative (1 by default; 2 for d²/dx², etc.). */
+  derivativeOrder?: number;
   /** The integrand of an integral, as ascii (integral paths). */
   integrand?: string;
   /** Lower/upper limits of a definite integral, as ascii. */

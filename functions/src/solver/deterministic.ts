@@ -301,9 +301,17 @@ function solveArithmetic(cls: Classification): SolveCandidate | null {
 function solveDerivative(cls: Classification): SolveCandidate | null {
   const target = cls.derivativeTarget;
   if (!target) return null;
+  const order = cls.derivativeOrder ?? 1;
   let d: string;
+  // `penult` is the (order-1)th derivative; the answer is d/dx(penult). Verifying
+  // the answer against penult reuses the first-order gate and still proves the
+  // nth derivative, since d^n/dx^n(f) = d/dx( d^(n-1)/dx^(n-1)(f) ).
+  let penult = target;
   try {
-    d = derivative(target, cls.unknown).toString();
+    for (let k = 0; k < order - 1; k++) {
+      penult = derivative(penult, cls.unknown).toString();
+    }
+    d = derivative(penult, cls.unknown).toString();
   } catch {
     return null;
   }
@@ -311,6 +319,7 @@ function solveDerivative(cls: Classification): SolveCandidate | null {
   // differentiates. Restore exact symbolic form for DISPLAY; verification still
   // uses the raw `d` (numeric substitution), so the gate is unchanged.
   const display = resymbolize(d);
+  const opLatex = order > 1 ? `d^${order}/d${cls.unknown}^${order}` : `d/d${cls.unknown}`;
   return {
     answer: { latex: asciiToLatex(display), plain: display },
     methods: [
@@ -320,7 +329,7 @@ function solveDerivative(cls: Classification): SolveCandidate | null {
         examPick: true,
         steps: [
           {
-            ascii: `d/d${cls.unknown}(${target})`,
+            ascii: `${opLatex}(${target})`,
             operationCode: "DIFFERENTIATE",
           },
           { ascii: display, operationCode: "RESULT" },
@@ -328,7 +337,7 @@ function solveDerivative(cls: Classification): SolveCandidate | null {
       },
     ],
     plotExpression: variablesIn(target).length === 1 ? target : null,
-    verify: () => verifyDerivative(target, d, cls.unknown),
+    verify: () => verifyDerivative(penult, d, cls.unknown),
   };
 }
 

@@ -33,14 +33,51 @@ const FUNCTIONS = [
   "sqrt",
 ];
 
+/**
+ * Fold rendered/scanned LaTeX variants onto their canonical macro so the rest of
+ * the pipeline sees ONE spelling. Applied to the raw problem (in `classify`, so
+ * the `\int` / `\frac{d}{dx}` detectors match) AND inside `cleanLatex` (so the
+ * ascii conversion + any LLM answer benefit). Idempotent, so double-application
+ * is harmless. Purely a spelling normalization — no structure is removed.
+ */
+export function normalizeMacros(s: string): string {
+  return (
+    s
+      // \dfrac / \tfrac (display/text-style fractions) are just \frac.
+      .replace(/\\[dt]frac\b/g, "\\frac")
+      // Upright/text styling wrappers carry no math — keep the CONTENT:
+      //   \mathrm{d}x → dx (the physics/EU differential), \operatorname{sin} → sin.
+      .replace(
+        /\\(?:mathrm|mathit|mathbf|mathsf|mathtt|mathnormal|operatorname\*?|text(?:rm|it|bf|sf|tt)?|boldsymbol|mathchoice)\s*\{([^{}]*)\}/g,
+        "$1"
+      )
+      // …and a bare styling macro with no braces (e.g. `\mathrm dx`).
+      .replace(/\\(?:mathrm|mathit|mathbf|mathsf|mathtt|mathnormal|boldsymbol)\b/g, "")
+  );
+  // NOTE: unicode operators (· × ÷ −) are NOT folded here — that would run before
+  // classify's raw-LaTeX vector/matrix detectors (which read `×` as a cross
+  // product), turning a cross into a multiply. They're converted in latexToAscii
+  // instead, on the mathjs-bound path only, AFTER that structural detection.
+}
+
 /** Strip cosmetic LaTeX that never carries meaning. */
 export function cleanLatex(latex: string): string {
-  return latex
-    .replace(/\$\$?|\\\[|\\\]|\\\(|\\\)/g, "") // math delimiters
-    .replace(/\\left|\\right/g, "")
-    .replace(/\\!|\\,|\\;|\\:|\\ |\\quad|\\qquad|\\displaystyle|\\;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    normalizeMacros(latex)
+      .replace(/\$\$?|\\\[|\\\]|\\\(|\\\)/g, "") // math delimiters
+      .replace(/\\left|\\right/g, "")
+      .replace(/\\!|\\,|\\;|\\:|\\ |\\quad|\\qquad|\\displaystyle|\\;/g, " ")
+      .replace(/\s+/g, " ")
+      // A scanned prompt often ends in an empty "= ?" / "= □" / bare "=" — the
+      // "compute this" placeholder ("∫ … dx = ?", "d/dx(…) = ?"). It carries no
+      // math, but left in it makes the integrand/derivative operand unparseable
+      // (the target becomes "… = ?") and every such scan declines. Strip a
+      // trailing equals whose RHS is empty or a question/box placeholder ONLY —
+      // a real equation ("2x+5 = 15") keeps its "=" because 15 isn't a placeholder.
+      .replace(/=\s*(?:\?+|\\square|\\Box|\\ldots|\\dots|\\cdots|_+|\.{2,})?\s*$/, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 /**
@@ -50,7 +87,23 @@ export function cleanLatex(latex: string): string {
 export function latexToAscii(latex: string): string {
   let s = cleanLatex(latex);
 
+  // A backslash is LaTeX's own token boundary: `x\ln x`, `x\cos x`, `x\sqrt{…}`,
+  // `2\pi`, `\sin x\cos x` all mean an implicit MULTIPLY across the `\`. But the
+  // macro strips below drop the backslash, gluing the preceding symbol onto the
+  // name (`x\cos`→`xcos`, `x\ln`→`xlog`) into one undefined identifier — so every
+  // `∫x·(trig/ln/√) dx` and by-parts antiderivative silently failed the gate.
+  // Re-insert the boundary as a space wherever a `\macro` follows a symbol/`)`.
+  s = s.replace(/([A-Za-z0-9)}])\s*\\([a-zA-Z])/g, "$1 \\$2");
+
   s = s.replace(/\\times/g, "*").replace(/\\cdot/g, "*").replace(/\\div/g, "/");
+  // Unicode operators OCR / rendered math emit — folded here (not in
+  // normalizeMacros) so classify's raw-LaTeX vector/matrix detectors still see a
+  // cross `×`/dot `·` before this multiply conversion. `−`/`–`/`—` → ascii `-`.
+  s = s
+    .replace(/[·∙⋅]/g, "*")
+    .replace(/×/g, "*")
+    .replace(/÷/g, "/")
+    .replace(/[−–—]/g, "-");
   s = s.replace(/\\pi\b/g, "pi").replace(/\\theta\b/g, "theta");
 
   // Logarithms: mathjs's natural log is `log`, base-10 is `log10`.
@@ -98,6 +151,16 @@ export function latexToAscii(latex: string): string {
   // inverse-trig evaluation and every correct `∫1/(1+x²)=arctan x`.
   s = s.replace(/arc(sin|cos|tan)/g, "a$1");
 
+  // Give every trig/log function an explicit parenthesized argument. LaTeX writes
+  // `\sin x`, `\sin 2x`, `\sin^2 x`, `\sin^{-1} x` — but mathjs can't parse a bare
+  // `sin x` (it throws) and reads `sin^2 x` as garbage, so a `∫\sin x\cos x\,dx`
+  // integrand and any `\sin^2 x` antiderivative silently failed the gate. This
+  // rewrites `sin x`→`sin(x)`, `sin 2x`→`sin(2x)`, `sin^2 x`→`sin(x)^2`, and the
+  // inverse form `\sin^{-1} x`→`asin(x)` (NOT `sin(x)^-1`=csc — that would verify
+  // a DIFFERENT problem than asked, a golden-rule break). Already-parenthesized
+  // args (`sin(x)`, `\sin\frac{x}{2}`→`sin((x)/(2))`) are preserved.
+  s = wrapFunctionArgs(s);
+
   // Absolute value → abs(): `\lvert…\rvert` / `\vert` macros first, then the
   // bar pair (`\left|…\right|` already lost its \left/\right in cleanLatex).
   // Wrapped in parens so a preceding function/coefficient binds: `log|x+3|` →
@@ -110,6 +173,151 @@ export function latexToAscii(latex: string): string {
   s = s.replace(/[{}]/g, ""); // any braces the conversions left behind
   s = s.replace(/\\\\/g, " "); // row breaks
   return s.replace(/\s+/g, " ").trim();
+}
+
+/** Single-argument functions written prefix-style in LaTeX (`\sin x`). `sqrt`/
+ * `nthRoot`/`abs` are excluded — those already carry parenthesized arguments by
+ * the time this runs. `log10` is listed before `log` so the longer name wins. */
+const UNARY_FUNCTIONS = [
+  "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
+  "asin", "acos", "atan", "acot", "asec", "acsc",
+  "log10", "log", "sin", "cos", "tan", "cot", "sec", "csc",
+];
+/** Trig/hyperbolic → inverse-function name, for the `f^{-1}` (arc) spelling. */
+const INVERSE_FUNCTION: Record<string, string> = {
+  sin: "asin", cos: "acos", tan: "atan", cot: "acot", sec: "asec", csc: "acsc",
+  sinh: "asinh", cosh: "acosh", tanh: "atanh",
+};
+
+/** Read a balanced `(...)` group starting at `i` (s[i] === "("); returns the
+ * index just past the matching `)`, or -1 if unbalanced. */
+function readGroup(s: string, i: number): number {
+  let depth = 0;
+  for (let k = i; k < s.length; k++) {
+    if (s[k] === "(") depth++;
+    else if (s[k] === ")") {
+      depth--;
+      if (depth === 0) return k + 1;
+    }
+  }
+  return -1;
+}
+
+/** Read a bare atom (number/identifier run, plus an optional trailing `^power`)
+ * starting at `i`; returns the index just past it, or `i` if none. So
+ * `x` → past `x`, `2x` → past `2x`, `x^2` → past `x^2`, `x^(2)` → past the group. */
+function readAtom(s: string, i: number): number {
+  const m = /^[A-Za-z0-9.]+/.exec(s.slice(i));
+  if (!m) return i;
+  let k = i + m[0].length;
+  if (s[k] === "^") {
+    k++;
+    if (s[k] === "(") {
+      const g = readGroup(s, k);
+      if (g !== -1) k = g;
+    } else {
+      const p = /^-?[A-Za-z0-9.]+/.exec(s.slice(k));
+      if (p) k += p[0].length;
+    }
+  }
+  return k;
+}
+
+/**
+ * Wrap the argument of every prefix-style function call in parentheses so mathjs
+ * can parse it — see the call site in `latexToAscii`. A hand-written scan (not a
+ * regex) because a function's argument may be a balanced, arbitrarily-nested
+ * `(...)` group that no regular expression can match.
+ */
+function wrapFunctionArgs(s: string): string {
+  let out = "";
+  let i = 0;
+  while (i < s.length) {
+    const prev = i > 0 ? s[i - 1] : "";
+    let fn: string | null = null;
+    // The name must not be glued to a LETTER on either side, so `sin` isn't
+    // peeled out of `asin` / a variable. A DIGIT before is fine — it's a
+    // coefficient (`2\sin x` → `2sin(x)` = 2·sin x), so only letters block here.
+    if (!/[A-Za-z]/.test(prev)) {
+      for (const cand of UNARY_FUNCTIONS) {
+        if (s.startsWith(cand, i) && !/[A-Za-z0-9]/.test(s[i + cand.length] ?? "")) {
+          fn = cand;
+          break;
+        }
+      }
+    }
+    if (!fn) {
+      out += s[i];
+      i++;
+      continue;
+    }
+
+    let j = i + fn.length;
+    // Optional power immediately after the name: `^2`, `^(2)`, `^{-1}`→`^-1`.
+    let power: string | null = null;
+    let k = j;
+    while (s[k] === " ") k++;
+    if (s[k] === "^") {
+      let p = k + 1;
+      while (s[p] === " ") p++;
+      if (s[p] === "(") {
+        const g = readGroup(s, p);
+        if (g !== -1) {
+          power = s.slice(p, g);
+          k = g;
+        }
+      } else {
+        const pm = /^-?[A-Za-z0-9.]+/.exec(s.slice(p));
+        if (pm) {
+          power = pm[0];
+          k = p + pm[0].length;
+        }
+      }
+      if (power !== null) j = k;
+    }
+
+    // The argument: a `(...)` group or a bare atom.
+    let a = j;
+    while (s[a] === " ") a++;
+    let arg: string | null = null;
+    if (s[a] === "(") {
+      const g = readGroup(s, a);
+      if (g !== -1) {
+        arg = s.slice(a, g);
+        a = g;
+      }
+    } else {
+      const end = readAtom(s, a);
+      if (end > a) {
+        arg = s.slice(a, end);
+        a = end;
+      }
+    }
+
+    if (arg === null) {
+      // No argument to bind (e.g. a stray `sin` before an operator) — leave the
+      // name untouched; mathjs will decline it and the gate keeps us honest.
+      out += fn;
+      i += fn.length;
+      continue;
+    }
+
+    const wrapped = arg.startsWith("(") ? arg : `(${arg})`;
+    // Normalize the power for the inverse test: strip whitespace AND one layer of
+    // wrapping parens, so `^{-1}` (→`^(-1)`) reads as "-1" and `\sin^{-1} x`
+    // becomes the INVERSE function asin(x), never sin(x)^(-1)=csc (wrong problem).
+    const powNorm =
+      power === null ? null : power.replace(/\s+/g, "").replace(/^\((.*)\)$/, "$1");
+    if (powNorm === "-1" && INVERSE_FUNCTION[fn]) {
+      out += `${INVERSE_FUNCTION[fn]}${wrapped}`;
+    } else if (powNorm !== null) {
+      out += `${fn}${wrapped}^(${powNorm})`;
+    } else {
+      out += `${fn}${wrapped}`;
+    }
+    i = a;
+  }
+  return out;
 }
 
 /**

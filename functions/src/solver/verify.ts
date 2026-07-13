@@ -11,8 +11,18 @@ import { derivative, evaluate, parse } from "mathjs";
 
 import { variablesIn } from "./latex";
 
-/** Deterministic sample points — fixed (not random) so tests are reproducible. */
-const SAMPLES = [-2.7, -1.3, 0.37, 1.6, 2.9, 4.2, -0.6];
+/**
+ * Deterministic sample points for the derivative/integral gate — fixed (not
+ * random) so tests are reproducible. Dense INSIDE (-1, 1) as well as outside it:
+ * the antiderivative of a form like 1/√(1-x²) (=arcsin) is only real on that
+ * narrow interval, and the old 7-point grid had just 2 points there — below the
+ * MIN_SAMPLES=3 floor — so arcsin/arccos and every tight-domain integral wrongly
+ * declined its own CORRECT answer. Eight in-domain points now clear the floor.
+ */
+const SAMPLES = [
+  -4.2, -2.7, -1.6, -0.9, -0.63, -0.35, -0.13,
+  0.13, 0.37, 0.62, 0.87, 1.3, 1.6, 2.9, 4.2,
+];
 /**
  * A wide, dense deterministic grid (-19.63 … 20.37, step 0.5). Used for equality
  * checks so we can still find enough in-domain points when the domain is

@@ -3,6 +3,7 @@ import {
   asciiToLatex,
   cleanLatex,
   latexToAscii,
+  normalizeMacros,
   splitEquation,
   stripOuterParens,
   variablesIn,
@@ -30,7 +31,7 @@ describe("latexToAscii", () => {
   it("converts absolute-value bars to abs() (so ln|…| antiderivatives verify)", () => {
     // Bars, wrapped so a preceding function/coefficient binds correctly.
     expect(latexToAscii("5\\ln|x+3| + 4\\ln|x-2|")).toBe(
-      "5log(abs(x+3)) + 4log(abs(x-2))"
+      "5 log(abs(x+3)) + 4 log(abs(x-2))"
     );
     // \left|…\right| loses its \left/\right in cleanLatex, then the bars fold.
     expect(latexToAscii("\\left|x-2\\right|")).toBe("(abs(x-2))");
@@ -87,10 +88,96 @@ describe("latexToAscii", () => {
   });
 });
 
+describe("normalizeMacros — scanner/rendered-LaTeX spelling variants", () => {
+  it("folds \\dfrac / \\tfrac onto \\frac", () => {
+    expect(normalizeMacros("\\dfrac{1}{2}")).toBe("\\frac{1}{2}");
+    expect(normalizeMacros("\\tfrac{d}{dx}")).toBe("\\frac{d}{dx}");
+  });
+  it("keeps the content of styling wrappers (\\mathrm{d}x → dx, \\operatorname{sin} → sin)", () => {
+    expect(normalizeMacros("\\mathrm{d}x")).toBe("dx");
+    expect(normalizeMacros("\\operatorname{sin} x")).toBe("sin x");
+    expect(normalizeMacros("\\text{if } x")).toBe("if  x");
+  });
+  it("does NOT fold unicode operators (× stays for the raw cross-product detector)", () => {
+    // Unicode ·×÷ are converted on the ascii path (latexToAscii), NOT here, so
+    // classify's raw-LaTeX vector detector still reads `×` as a cross product.
+    expect(normalizeMacros("2×x")).toBe("2×x");
+  });
+});
+
+describe("latexToAscii — unicode operators OCR emits", () => {
+  it("folds · × ÷ − onto * * / - so mathjs can parse them", () => {
+    expect(latexToAscii("2·x")).toBe("2*x");
+    expect(latexToAscii("3×4")).toBe("3*4");
+    expect(latexToAscii("6÷2")).toBe("6/2");
+    expect(latexToAscii("x − 3")).toBe("x - 3"); // U+2212 minus
+  });
+});
+
+describe("latexToAscii — implicit multiply across a macro boundary (scanner fix)", () => {
+  it("keeps a variable×function product parseable (x\\ln x → x log(x))", () => {
+    // The `\` was LaTeX's token boundary; dropping it glued `x\cos`→`xcos`
+    // (undefined) and broke every ∫x·(trig/ln/√)dx and by-parts antiderivative.
+    expect(latexToAscii("x\\ln x")).toBe("x log(x)");
+    expect(latexToAscii("x\\cos x")).toBe("x cos(x)");
+    expect(latexToAscii("x\\sqrt{x^2+1}")).toBe("x sqrt(x^2+1)");
+    expect(latexToAscii("\\sin x\\cos x")).toBe("sin(x) cos(x)"); // no space before \cos
+  });
+});
+
+describe("latexToAscii — prefix-style function arguments (scanner fix)", () => {
+  it("wraps a bare trig argument so mathjs can parse it", () => {
+    // `\sin x` alone THREW in mathjs; `\sin x \cos x` (the ∫sin x cos x dx
+    // integrand) was unparseable — now both become explicit calls.
+    expect(latexToAscii("\\sin x")).toBe("sin(x)");
+    expect(latexToAscii("\\sin x \\cos x")).toBe("sin(x) cos(x)");
+    expect(latexToAscii("\\tan x")).toBe("tan(x)");
+    expect(latexToAscii("\\ln x")).toBe("log(x)");
+  });
+  it("moves a power off the function onto its argument (\\sin^2 x → sin(x)^2)", () => {
+    expect(latexToAscii("\\sin^2 x")).toBe("sin(x)^(2)");
+    expect(latexToAscii("\\sec^2 x")).toBe("sec(x)^(2)");
+    expect(latexToAscii("\\cos^{2} x")).toBe("cos(x)^(2)");
+  });
+  it("reads f^{-1} as the INVERSE function, never (f)^-1=csc (golden rule)", () => {
+    // \sin^{-1} x is arcsin, NOT 1/sin — the wrong reading would verify a
+    // different problem than asked.
+    expect(latexToAscii("\\sin^{-1} x")).toBe("asin(x)");
+    expect(latexToAscii("\\cos^{-1}(x)")).toBe("acos(x)");
+    expect(latexToAscii("\\tan^{-1} x")).toBe("atan(x)");
+  });
+  it("keeps a coefficient multiplying the function (2\\sin x → 2 sin(x))", () => {
+    // The `\` is LaTeX's own token boundary and an implicit multiply, preserved
+    // as a space (mathjs reads `2 sin(x)` as 2·sin x).
+    expect(latexToAscii("2\\sin x + 1")).toBe("2 sin(x) + 1");
+    expect(latexToAscii("3\\cos x")).toBe("3 cos(x)");
+  });
+  it("binds only the next atom, not a following +/- term", () => {
+    expect(latexToAscii("\\sin x + 1")).toBe("sin(x) + 1"); // NOT sin(x+1)
+    expect(latexToAscii("\\sin 2x")).toBe("sin(2x)");
+  });
+  it("preserves an already-parenthesized (possibly nested) argument", () => {
+    expect(latexToAscii("\\sin(x)")).toBe("sin(x)");
+    expect(latexToAscii("\\ln(x^2+1)")).toBe("log(x^2+1)");
+    expect(latexToAscii("\\sin\\frac{x}{2}")).toBe("sin((x)/(2))");
+  });
+});
+
 describe("cleanLatex", () => {
   it("drops delimiters and spacing macros", () => {
     expect(cleanLatex("$$ 2x + 5 = 15 $$")).toBe("2x + 5 = 15");
     expect(cleanLatex("\\left( x \\right)")).toBe("( x )");
+  });
+  it("strips an empty 'compute this' trailer (= ?, =?, = □) but keeps a real RHS", () => {
+    // A scanned "∫ … dx = ?" / "d/dx(…) = ?" placeholder made the target
+    // unparseable ("… = ?") and every such scan declined — now it's dropped.
+    expect(cleanLatex("\\int \\sin x \\, dx = ?")).toBe("\\int \\sin x dx");
+    expect(cleanLatex("\\frac{d}{dx}(x^2) =?")).toBe("\\frac{d}{dx}(x^2)");
+    expect(cleanLatex("f(x) = \\square")).toBe("f(x)");
+    expect(cleanLatex("x =")).toBe("x");
+    // A genuine equation's "=" is untouched (the RHS is real math, not a blank).
+    expect(cleanLatex("2x + 5 = 15")).toBe("2x + 5 = 15");
+    expect(cleanLatex("x^2 - 4 = 0")).toBe("x^2 - 4 = 0");
   });
 });
 

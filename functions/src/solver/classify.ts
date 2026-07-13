@@ -15,6 +15,7 @@ import { Classification, Strategy, VerifyMode } from "./types";
 import {
   cleanLatex,
   latexToAscii,
+  normalizeMacros,
   splitEquation,
   stripOuterParens,
   variablesIn,
@@ -47,6 +48,11 @@ export function equationParts(ascii: string): { lhs: string; rhs: string }[] {
 }
 
 export function classify(rawLatex: string): Classification {
+  // Fold display/text macro variants (\dfrac, \mathrm{d}x, \operatorname, unicode
+  // ·×÷) onto their canonical spelling FIRST, so every raw-LaTeX detector below
+  // (\int, \frac{d}{dx}, ODE, …) sees one form. cleanLatex re-applies it for the
+  // ascii path; it's idempotent.
+  rawLatex = normalizeMacros(rawLatex);
   const latex = cleanLatex(rawLatex);
   // A cases/aligned system writes its equations with `\\` row breaks; turn those
   // into `;` (and drop the wrapper + `&` alignment tabs) so equationParts can
@@ -157,6 +163,17 @@ export function classify(rawLatex: string): Classification {
   // already differentiates w.r.t. v holding every other symbol constant (that IS
   // the partial derivative), and verifyDerivative samples all free variables — so
   // a partial verifies exactly like a single-variable derivative.
+  // A HIGHER-ORDER Leibniz operator (d²/dx², d³/dx³) is matched first — its `d^n`
+  // carries the order. Without this it fell through to the algebra path where
+  // mathjs read `dx` as a phantom variable and every candidate was rejected.
+  const higherRe = new RegExp(
+    [
+      // \frac{d^2}{dx^2}
+      String.raw`\\frac\s*\{\s*d\s*\^\s*\{?\s*(\d+)\s*\}?\s*\}\s*\{\s*d\s*([a-zA-Z])\s*\^\s*\{?\s*\d+\s*\}?\s*\}`,
+      // d^2/dx^2
+      String.raw`\bd\s*\^\s*\{?\s*(\d+)\s*\}?\s*\/\s*d\s*([a-zA-Z])\s*\^\s*\{?\s*\d+\s*\}?`,
+    ].join("|")
+  );
   const derivRe = new RegExp(
     [
       String.raw`\\frac\s*\{\s*d\s*\}\s*\{\s*d\s*([a-zA-Z])\s*\}`, // \frac{d}{dx}
@@ -168,15 +185,28 @@ export function classify(rawLatex: string): Classification {
       String.raw`∂\s*_\s*([a-zA-Z])`, // ∂_x
     ].join("|")
   );
-  const deriv = rawLatex.match(derivRe);
+  const higher = rawLatex.match(higherRe);
+  const deriv = higher ?? rawLatex.match(derivRe);
   if (deriv) {
-    const unknown = deriv.slice(1).find((g) => g) ?? "x";
+    let order = 1;
+    let unknown: string;
+    if (higher) {
+      const groups = deriv.slice(1).filter((g): g is string => Boolean(g));
+      order = Number(groups.find((g) => /^\d+$/.test(g)) ?? 1);
+      unknown = groups.find((g) => /^[a-zA-Z]$/.test(g)) ?? "x";
+    } else {
+      unknown = deriv.slice(1).find((g) => g) ?? "x";
+    }
     const isPartial = /\\partial|∂/.test(deriv[0]);
     const derivType = isPartial ? "partial_derivative" : "derivative";
     const before = rawLatex.slice(0, deriv.index ?? 0).trim();
+    // Square-bracket grouping (`d/dx[f]`, `\left[…\right]`) is common textbook
+    // notation — normalize `[ ]` to `( )` so stripOuterParens + mathjs accept it.
     const afterLatex = cleanLatex(
       rawLatex.slice((deriv.index ?? 0) + deriv[0].length)
-    );
+    )
+      .replace(/\[/g, "(")
+      .replace(/\]/g, ")");
     const stripped = stripOuterParens(afterLatex);
     const wasWrapped = stripped !== afterLatex;
     const target = latexToAscii(stripped);
@@ -186,11 +216,17 @@ export function classify(rawLatex: string): Classification {
     // or a single term with no top-level +/- the operator wouldn't scope over.
     // Anything else would let a wrong answer pass its own gate, so route it to
     // the verified-candidate tier (here: couldn't-verify).
-    if (before !== "" || (!wasWrapped && hasTopLevelAddSub(target))) {
+    if (
+      before !== "" ||
+      (!wasWrapped && hasTopLevelAddSub(target)) ||
+      order < 1 ||
+      order > 6
+    ) {
       return base(derivType, "llm_candidate", unknown, false, "none");
     }
     return base(derivType, "derivative", unknown, false, "derivative_back", {
       derivativeTarget: target,
+      derivativeOrder: order,
     });
   }
 
@@ -362,9 +398,70 @@ interface ParsedIntegral {
   unknown: string;
 }
 
-/** Strip one wrapping brace pair: `{0}` → `0`. */
-function stripBraces(s: string): string {
-  return s.replace(/^\s*\{|\}\s*$/g, "").trim();
+/**
+ * Read a bound token after a `_`/`^`: a BALANCED `{…}` group (returning its
+ * inside) or a single bare token. A regex `\{[^{}]*\}` couldn't match a group
+ * with nested braces, so a `\frac`-valued bound like `^{\frac{\pi}{2}}` was
+ * dropped and the integral misread as indefinite. Returns the value and how many
+ * chars were consumed, or null.
+ */
+function readBoundToken(s: string): { value: string; consumed: number } | null {
+  if (s[0] === "{") {
+    let depth = 0;
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] === "{") depth++;
+      else if (s[i] === "}") {
+        depth--;
+        if (depth === 0) return { value: s.slice(1, i).trim(), consumed: i + 1 };
+      }
+    }
+    return null; // unbalanced
+  }
+  const t = s.match(/^[^\s{}^_]+/);
+  return t ? { value: t[0], consumed: t[0].length } : null;
+}
+
+/**
+ * Rewrite `\frac{[NUM] d<var>}{DEN}` → `(NUM)/(DEN) d<var>` so the standard
+ * trailing-differential extractor finds it. Reads BALANCED brace groups (a regex
+ * couldn't, because DEN may nest braces like `x^{2}` or `\sqrt{x}`). Leaves a
+ * fraction whose numerator is NOT a differential (e.g. the `\frac{d}{dx}`
+ * operator, whose numerator `d` has no variable after it) untouched.
+ */
+function hoistFractionDifferential(s: string): string {
+  const idx = s.indexOf("\\frac");
+  if (idx === -1) return s;
+  let i = idx + "\\frac".length;
+  while (s[i] === " ") i++;
+  const num = readBraceGroup(s, i);
+  if (!num) return s;
+  let j = num.end;
+  while (s[j] === " ") j++;
+  const den = readBraceGroup(s, j);
+  if (!den) return s;
+  // Numerator must END in a differential d<var> (after an optional factor/space).
+  const dm = num.value.match(/^(.*?)(?:\\[,;:! ])?\s*d\s*([a-zA-Z])\s*$/s);
+  if (!dm) return s;
+  const factor = dm[1].replace(/\\[,;:! ]/g, "").trim();
+  return `${s.slice(0, idx)} (${factor || "1"})/(${den.value}) d${dm[2]} ${s.slice(den.end)}`;
+}
+
+/** Read a balanced `{…}` group at index `i` (s[i] must be `{`); returns its inner
+ * text and the index just past the closing brace, or null. */
+function readBraceGroup(
+  s: string,
+  i: number
+): { value: string; end: number } | null {
+  if (s[i] !== "{") return null;
+  let depth = 0;
+  for (let k = i; k < s.length; k++) {
+    if (s[k] === "{") depth++;
+    else if (s[k] === "}") {
+      depth--;
+      if (depth === 0) return { value: s.slice(i + 1, k), end: k + 1 };
+    }
+  }
+  return null;
 }
 
 /**
@@ -381,13 +478,20 @@ function parseIntegral(rawLatex: string): ParsedIntegral {
   let lower: string | undefined;
   let upper: string | undefined;
   for (let i = 0; i < 2; i++) {
-    const b = rest.match(/^\s*([_^])\s*(\{[^{}]*\}|[^\s{}^_]+)/);
-    if (!b) break;
-    const val = stripBraces(b[2]);
-    if (b[1] === "_") lower = val;
-    else upper = val;
-    rest = rest.slice(b[0].length);
+    const m = rest.match(/^\s*([_^])\s*/);
+    if (!m) break;
+    const tok = readBoundToken(rest.slice(m[0].length));
+    if (!tok) break;
+    if (m[1] === "_") lower = tok.value;
+    else upper = tok.value;
+    rest = rest.slice(m[0].length + tok.consumed);
   }
+
+  // A differential written INSIDE a fraction numerator — ∫ dx/x, ∫ (2x dx)/(x²+1),
+  // ∫ dx/(1+x²)=arctan x — means ∫ (numerator-without-dx / denominator) dx. The
+  // trailing-d<var> extractor below only finds a differential at the very end, so
+  // hoist it out of the fraction first (numerator without the dx → 1 if empty).
+  rest = hoistFractionDifferential(rest);
 
   const cleaned = latexToAscii(rest);
   const m = cleaned.match(/^(.*?)\s*d\s*([a-zA-Z])\s*$/);

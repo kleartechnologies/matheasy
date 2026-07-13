@@ -163,6 +163,102 @@ describe("solve — integral via differentiate-back", () => {
   });
 });
 
+describe("solve — reported scanner failures (= ? trailer + trig notation)", () => {
+  // The exact problems a user scanned that all returned "couldn't verify":
+  // a trailing "= ?" made the integrand/derivative target unparseable, and
+  // `\sin x \cos x` didn't parse in mathjs.
+  it("∫ sin x · cos x dx = ?  (=? trailer + bare-arg trig) verifies", async () => {
+    const cls = classify("\\int \\sin x \\cdot \\cos x \\, dx = ?");
+    expect(cls.problemType).toBe("integral");
+    expect(cls.integrand).toBe("sin(x) * cos(x)"); // NOT "... dx = ?"
+    const p = await solve(
+      cls,
+      completerWith({
+        answerLatex: "\\frac{1}{2}\\sin^2 x",
+        answerPlain: "(1/2) sin^2 x",
+        solutions: [],
+        methods: [],
+      })
+    );
+    expect(p.verified).toBe(true);
+  });
+
+  it("d/dx((x-1)/(x+2)) = ?  (=? trailer) solves deterministically", async () => {
+    // No LLM needed — the deterministic mathjs derivative must handle it once
+    // the "= ?" no longer corrupts the target.
+    const cls = classify("\\frac{d}{dx}\\left(\\frac{x-1}{x+2}\\right) = ?");
+    expect(cls.problemType).toBe("derivative");
+    expect(cls.derivativeTarget).toBe("((x-1)/(x+2))"); // NOT "... = ?"
+    const p = await solve(cls, NEVER);
+    expect(p.verified).toBe(true);
+    // 3/(x+2)^2 — the quotient-rule result.
+    expect(p.finalAnswer?.plain.replace(/\s/g, "")).toBe("3/(x+2)^2");
+  });
+});
+
+describe("solve — calculus/scanner robustness (adversarial audit fixes)", () => {
+  it("definite integral with a \\frac bound (∫_0^{π/2} cos x dx) classifies + verifies", async () => {
+    const cls = classify("\\int_0^{\\frac{\\pi}{2}} \\cos x dx");
+    expect(cls.problemType).toBe("definite_integral");
+    const p = await solve(cls, completerWith({ answerLatex: "1", answerPlain: "1" }));
+    expect(p.verified).toBe(true);
+  });
+
+  it("∫ 1/√(1-x²) dx verifies arcsin x (dense grid reaches the tight domain)", async () => {
+    const p = await run(
+      "\\int \\frac{1}{\\sqrt{1-x^2}} dx",
+      completerWith({ answerLatex: "\\arcsin x", answerPlain: "arcsin(x)" })
+    );
+    expect(p.verified).toBe(true);
+  });
+
+  it("∫ dx/x (differential inside the fraction) verifies ln|x|", async () => {
+    const p = await run(
+      "\\int \\frac{dx}{x}",
+      completerWith({ answerLatex: "\\ln|x|", answerPlain: "ln|x|" })
+    );
+    expect(p.verified).toBe(true);
+  });
+
+  it("∫ x·ln x dx (by-parts, implicit multiply) verifies x ln x − x", async () => {
+    const p = await run(
+      "\\int \\ln x dx",
+      completerWith({ answerLatex: "x\\ln x - x", answerPlain: "x ln x - x" })
+    );
+    expect(p.verified).toBe(true);
+  });
+
+  it("∫ x²\\mathrm{d}x (upright differential) verifies", async () => {
+    const p = await run(
+      "\\int x^{2}\\,\\mathrm{d}x",
+      completerWith({ answerLatex: "\\frac{x^3}{3}", answerPlain: "x^3/3" })
+    );
+    expect(p.verified).toBe(true);
+  });
+
+  it("second derivative d²/dx²(x³) solves deterministically to 6x", async () => {
+    const cls = classify("\\frac{d^2}{dx^2}(x^3)");
+    expect(cls.problemType).toBe("derivative");
+    expect(cls.derivativeOrder).toBe(2);
+    const p = await solve(cls, NEVER);
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain.replace(/[\s*]/g, "")).toBe("6x");
+  });
+
+  it("derivative with square-bracket grouping d/dx[x² sin x] solves", async () => {
+    const p = await solve(classify("\\frac{d}{dx}[x^2 \\sin x]"), NEVER);
+    expect(p.verified).toBe(true);
+  });
+
+  it("still REJECTS a wrong antiderivative after all the parsing fixes (golden rule)", async () => {
+    const p = await run(
+      "\\int \\cos x dx",
+      completerWith({ answerLatex: "2\\sin x", answerPlain: "2 sin(x)" })
+    );
+    expect(p.verified).toBe(false);
+  });
+});
+
 describe("solve — resilience", () => {
   it("still returns a verified deterministic answer if narration throws", async () => {
     const flaky: JsonCompleter = async (system) => {
