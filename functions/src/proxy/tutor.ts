@@ -9,7 +9,7 @@ import OpenAI from "openai";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL } from "../config";
+import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -47,7 +47,7 @@ Return ONLY a JSON object (no markdown) of the form:
 { "reply": "your message to the student (use plain text; wrap any math in $...$)", "suggestions": ["2-3 short follow-up prompts the student might tap next"] }`;
 
 export const tutorReply = onCall(
-  { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
+  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
     const {

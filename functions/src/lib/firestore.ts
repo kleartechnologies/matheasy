@@ -19,6 +19,7 @@ import {
   FREE_QUOTA,
   MeteredFeature,
   PRO_ENTITLEMENT_ID,
+  REVENUECAT_SECRET_KEY,
   UNLIMITED,
 } from "../config";
 
@@ -84,6 +85,12 @@ export async function assertWithinQuota(
   const limit = FREE_QUOTA[feature];
   const current = Number(snap.get(`usage.${feature}`) ?? 0);
   if (current >= limit) {
+    // The webhook-written cache says free + over quota — but RevenueCat webhooks
+    // can lag or miss a grant (common in sandbox), which would wrongly paywall a
+    // paying user. Re-check with RevenueCat directly before blocking. This stays
+    // server-authoritative: it trusts RevenueCat's OWN subscriber record, never
+    // a client "I'm Pro" claim. Dormant until REVENUECAT_SECRET_KEY is set.
+    if (await isProViaRevenueCat(uid)) return { isPro: true };
     throw new HttpsError(
       "resource-exhausted",
       `Free-tier limit reached for "${feature}" (${limit}). Upgrade to Pro for unlimited access.`,
@@ -91,6 +98,56 @@ export async function assertWithinQuota(
     );
   }
   return { isPro };
+}
+
+/**
+ * Whether the `pro` entitlement is ACTIVE in a RevenueCat `/subscribers` payload.
+ * Pure (no I/O) so it's unit-testable: active iff the entitlement exists and its
+ * `expires_date` is null (non-expiring) or in the future.
+ */
+export function proEntitlementActive(body: unknown, nowMs: number): boolean {
+  const subscriber = (body as { subscriber?: { entitlements?: unknown } })
+    ?.subscriber;
+  const entitlements = subscriber?.entitlements as
+    | Record<string, { expires_date?: string | null }>
+    | undefined;
+  const ent = entitlements?.[PRO_ENTITLEMENT_ID];
+  if (!ent || typeof ent !== "object") return false;
+  const expires = ent.expires_date;
+  if (expires == null) return true; // lifetime / non-expiring grant
+  const t = Date.parse(String(expires));
+  return Number.isFinite(t) ? t > nowMs : false;
+}
+
+/**
+ * Server-authoritative Pro check via RevenueCat's REST API — the resilience
+ * fallback for a lagged/missed webhook. Reads RevenueCat's own record for [uid]
+ * (never a client claim). Returns false — failing CLOSED so the webhook stays
+ * the primary path — when the key is unset/placeholder, on any non-OK response,
+ * or on any error.
+ */
+async function isProViaRevenueCat(uid: string): Promise<boolean> {
+  let key: string;
+  try {
+    key = REVENUECAT_SECRET_KEY.value();
+  } catch {
+    return false; // secret not bound to this function
+  }
+  if (!key || key.startsWith("REPLACE_")) return false; // dormant until configured
+  try {
+    const res = await fetch(
+      `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(uid)}`,
+      { headers: { Authorization: `Bearer ${key}` } }
+    );
+    if (!res.ok) {
+      logger.warn("RevenueCat REST verify non-OK", { uid, status: res.status });
+      return false;
+    }
+    return proEntitlementActive(await res.json(), Date.now());
+  } catch (err) {
+    logger.warn("RevenueCat REST verify failed", { uid, err: String(err) });
+    return false;
+  }
 }
 
 /**

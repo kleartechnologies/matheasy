@@ -10,7 +10,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL } from "../config";
+import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -56,7 +56,7 @@ Rules:
 - confidence must reflect legibility: high when the problem is crisp and centered, lower when blurry or partially cropped.`;
 
 export const recognizeEquation = onCall(
-  { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 60 },
+  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 60 },
   async (request) => {
     const uid = requireUid(request);
     const { imageBase64, mimeType = "image/jpeg", source = "camera" } =

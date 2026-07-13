@@ -17,6 +17,13 @@ import { setGlobalOptions } from "firebase-functions/v2";
 export const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 /** Shared secret validated against the RevenueCat webhook Authorization header. */
 export const REVENUECAT_WEBHOOK_TOKEN = defineSecret("REVENUECAT_WEBHOOK_TOKEN");
+/**
+ * RevenueCat SECRET (REST) API key — server-only, from RevenueCat → API keys →
+ * Secret keys. Powers the quota gate's on-demand Pro verification when the
+ * webhook-written entitlement lags/misses. Optional: leave unset (or a
+ * `REPLACE_` placeholder) to keep the fallback dormant and rely on the webhook.
+ */
+export const REVENUECAT_SECRET_KEY = defineSecret("REVENUECAT_SECRET_KEY");
 
 // --- Parameters (non-secret, overridable at deploy time) --------------------
 /**
