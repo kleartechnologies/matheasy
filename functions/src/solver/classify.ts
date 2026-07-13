@@ -8,6 +8,7 @@
  */
 import { parseLinalg, parseVectors } from "./linalg";
 import { parseStatistics } from "./statistics";
+import { parseTaylor } from "./taylor";
 import { Classification, Strategy, VerifyMode } from "./types";
 import {
   cleanLatex,
@@ -65,6 +66,27 @@ export function classify(rawLatex: string): Classification {
     ...extra,
   });
 
+  // --- Taylor / Maclaurin series (deterministic via mathjs) ---------------
+  // Distinctive keyword, so detected first. Coefficients are built by repeated
+  // differentiation and proven by an independent contact-order test; verifyMode
+  // "none" so an unparsed request declines rather than hitting the LLM tier.
+  const taylor = parseTaylor(rawLatex);
+  if (taylor) {
+    return base(
+      taylor.center === 0 ? "maclaurin_series" : "taylor_series",
+      "taylor",
+      taylor.variable,
+      false,
+      "none",
+      {
+        taylorFn: taylor.fn,
+        taylorCenter: taylor.center,
+        taylorCenterLatex: taylor.centerLatex,
+        taylorOrder: taylor.order,
+      }
+    );
+  }
+
   // --- Integral: ∫ f dx (indefinite) or ∫_a^b f dx (definite) -----------
   if (/\\int|∫/.test(rawLatex)) {
     const parsed = parseIntegral(rawLatex);
@@ -94,11 +116,26 @@ export function classify(rawLatex: string): Classification {
   // Match the operator on the ORIGINAL LaTeX and take the operand from the text
   // that follows it — deriving the operand from the ascii is fragile because the
   // `\frac{d}{dx}` conversion introduces stray parentheses.
-  const derivRe =
-    /\\frac\s*\{\s*d\s*\}\s*\{\s*d\s*([a-zA-Z])\s*\}|\bd\s*\/\s*d\s*([a-zA-Z])/;
+  // Ordinary d/dx AND partial ∂/∂x share ONE path: mathjs `derivative(f, v)`
+  // already differentiates w.r.t. v holding every other symbol constant (that IS
+  // the partial derivative), and verifyDerivative samples all free variables — so
+  // a partial verifies exactly like a single-variable derivative.
+  const derivRe = new RegExp(
+    [
+      String.raw`\\frac\s*\{\s*d\s*\}\s*\{\s*d\s*([a-zA-Z])\s*\}`, // \frac{d}{dx}
+      String.raw`\\frac\s*\{\s*\\partial\s*\}\s*\{\s*\\partial\s*([a-zA-Z])\s*\}`, // \frac{\partial}{\partial x}
+      String.raw`\bd\s*\/\s*d\s*([a-zA-Z])`, // d/dx
+      String.raw`\\partial\s*\/\s*\\partial\s*([a-zA-Z])`, // \partial/\partial x
+      String.raw`\\partial\s*_\s*\{?\s*([a-zA-Z])\s*\}?`, // \partial_x
+      String.raw`∂\s*\/\s*∂\s*([a-zA-Z])`, // ∂/∂x
+      String.raw`∂\s*_\s*([a-zA-Z])`, // ∂_x
+    ].join("|")
+  );
   const deriv = rawLatex.match(derivRe);
   if (deriv) {
-    const unknown = deriv[1] ?? deriv[2] ?? "x";
+    const unknown = deriv.slice(1).find((g) => g) ?? "x";
+    const isPartial = /\\partial|∂/.test(deriv[0]);
+    const derivType = isPartial ? "partial_derivative" : "derivative";
     const before = rawLatex.slice(0, deriv.index ?? 0).trim();
     const afterLatex = cleanLatex(
       rawLatex.slice((deriv.index ?? 0) + deriv[0].length)
@@ -113,9 +150,9 @@ export function classify(rawLatex: string): Classification {
     // Anything else would let a wrong answer pass its own gate, so route it to
     // the verified-candidate tier (here: couldn't-verify).
     if (before !== "" || (!wasWrapped && hasTopLevelAddSub(target))) {
-      return base("derivative", "llm_candidate", unknown, false, "none");
+      return base(derivType, "llm_candidate", unknown, false, "none");
     }
-    return base("derivative", "derivative", unknown, false, "derivative_back", {
+    return base(derivType, "derivative", unknown, false, "derivative_back", {
       derivativeTarget: target,
     });
   }

@@ -83,6 +83,7 @@ export type Strategy =
   | "derivative" // d/dx of an expression
   | "statistics" // a descriptive statistic over a data set (mean/median/…)
   | "linalg" // matrix/vector operation (det/inverse/eigenvalues) via mathjs
+  | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
 /** How an LLM-candidate answer gets proven. */
@@ -131,6 +132,12 @@ export interface Classification {
   /** A vector request: dot/cross/magnitude + the operand vector(s). */
   vectorOp?: string;
   vectorData?: number[][];
+  /** A Taylor/Maclaurin request: the function (ascii), center + its display, and
+   * order. The expansion variable is `unknown`. */
+  taylorFn?: string;
+  taylorCenter?: number;
+  taylorCenterLatex?: string;
+  taylorOrder?: number;
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */
