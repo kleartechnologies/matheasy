@@ -56,6 +56,7 @@ import {
   unknownInDenominator,
   verifyDerivative,
   verifyEquality,
+  verifyInequality,
   verifyRoots,
   verifySolution,
 } from "../solver/verify";
@@ -286,6 +287,20 @@ function verifyCandidate(cls: Classification, llm: LlmCandidate): VerifyOutcome 
       return verifyEquality(cls.ascii, llm.answerAscii, variablesIn(cls.ascii))
         ? { ok: true, answer: llm.answer }
         : { ok: false };
+    case "inequality": {
+      // The candidate solution SET is proven by sampling: inside ⟺ the
+      // inequality holds. The answer is the model's (now-verified) interval form.
+      if (!cls.ineqLhs || !cls.ineqRhs || !cls.ineqOp) return { ok: false };
+      return verifyInequality(
+        cls.ineqLhs,
+        cls.ineqRhs,
+        cls.ineqOp,
+        cls.unknown,
+        llm.intervals
+      )
+        ? { ok: true, answer: llm.answer }
+        : { ok: false };
+    }
     case "derivative_back": {
       // The antiderivative is correct iff d/dx(answer) equals the integrand:
       // target = the candidate antiderivative, expected = the integrand.

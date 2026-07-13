@@ -134,6 +134,20 @@ export function classify(rawLatex: string): Classification {
     });
   }
 
+  // --- Inequalities (2x+3 < 7, x²-5x+6 ≥ 0) --------------------------------
+  // splitEquation strips the comparison operator, so a bare inequality used to
+  // fall into simplify and only echo an expression. Route it to the verified
+  // LLM tier: the model proposes a solution SET, and the interval-sampling gate
+  // proves every point inside satisfies it (and every point outside doesn't).
+  const ineq = parseInequality(rawLatex);
+  if (ineq) {
+    return base("inequality", "llm_candidate", ineq.unknown, true, "inequality", {
+      ineqLhs: ineq.lhs,
+      ineqRhs: ineq.rhs,
+      ineqOp: ineq.op,
+    });
+  }
+
   const { isEquation } = splitEquation(ascii);
 
   // --- Expressions (no '=') --------------------------------------------
@@ -300,6 +314,31 @@ function unknownInExponent(ascii: string, unknown: string): boolean {
 function unknownInLog(ascii: string, unknown: string): boolean {
   const u = unknown.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(?:log10|log)\\s*\\([^()]*${u}`).test(ascii);
+}
+
+/**
+ * A single-variable inequality: normalize the comparison macro, then split on
+ * the ONE top-level operator into ascii `lhs`/`rhs`. Returns null for a plain
+ * equation (no operator), a numeric comparison (no variable), a chained
+ * inequality (two operators), or a multi-variable relation.
+ */
+function parseInequality(
+  rawLatex: string
+): { lhs: string; rhs: string; op: "<" | ">" | "<=" | ">="; unknown: string } | null {
+  const s = rawLatex
+    .replace(/\\leq|\\le(?![a-z])|≤/g, "<=")
+    .replace(/\\geq|\\ge(?![a-z])|≥/g, ">=")
+    .replace(/\\lt(?![a-z])/g, "<")
+    .replace(/\\gt(?![a-z])/g, ">");
+  const ops = s.match(/<=|>=|<|>/g);
+  if (!ops || ops.length !== 1) return null;
+  const op = ops[0] as "<" | ">" | "<=" | ">=";
+  const idx = s.indexOf(op);
+  const lhs = latexToAscii(s.slice(0, idx));
+  const rhs = latexToAscii(s.slice(idx + op.length));
+  const vars = variablesIn(`${lhs} ${rhs}`);
+  if (vars.length !== 1) return null; // solve single-variable inequalities only
+  return { lhs, rhs, op, unknown: pickUnknown(vars) };
 }
 
 /**

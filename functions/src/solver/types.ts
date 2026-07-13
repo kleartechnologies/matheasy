@@ -91,6 +91,7 @@ export type VerifyMode =
   | "derivative_back" // indefinite integral: d/dx(candidate) == integrand
   | "definite_integral" // definite integral: numeric integration == candidate
   | "trig" // periodic equation: verify principal solutions + 2π-periodicity
+  | "inequality" // solution set: points inside satisfy it, points outside don't
   | "none"; // nothing to check against → forces couldn't-verify
 
 export interface Classification {
@@ -117,6 +118,10 @@ export interface Classification {
   /** The requested descriptive statistic + its data set (statistics strategy). */
   statKind?: string;
   statData?: number[];
+  /** An inequality's two sides (ascii) + operator, for the inequality gate. */
+  ineqLhs?: string;
+  ineqRhs?: string;
+  ineqOp?: "<" | ">" | "<=" | ">=";
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */

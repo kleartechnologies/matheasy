@@ -28,6 +28,9 @@ describe("classify", () => {
     // Descriptive statistics — deterministic (keyword + a comma-separated list).
     ["mean of 2, 4, 6, 8", "statistics", "statistics"],
     ["standard deviation of 2, 4, 4, 4, 5, 5, 7, 9", "statistics", "statistics"],
+    // Inequalities — solution set via the verified LLM tier.
+    ["2x + 3 < 7", "inequality", "llm_candidate"],
+    ["x^2 - 5x + 6 \\geq 0", "inequality", "llm_candidate"],
     ["2x + 3y = 6, x - y = 3", "system_of_equations", "llm_candidate"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],
     ["\\int x^2 dx", "integral", "llm_candidate"],

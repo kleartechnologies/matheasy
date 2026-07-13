@@ -302,3 +302,99 @@ export function numericIntegrate(
 export function closeEnough(a: number, b: number): boolean {
   return close(a, b);
 }
+
+// ---- Inequalities ----------------------------------------------------------
+
+/** A single interval of the real line. `null` bound = ±∞; `*Open` = exclusive. */
+export interface Interval {
+  lo: number | null;
+  hi: number | null;
+  loOpen: boolean;
+  hiOpen: boolean;
+}
+
+export type IneqOp = "<" | ">" | "<=" | ">=";
+
+function inIntervals(x: number, intervals: Interval[]): boolean {
+  return intervals.some((iv) => {
+    const okLo = iv.lo === null || (iv.loOpen ? x > iv.lo : x >= iv.lo);
+    const okHi = iv.hi === null || (iv.hiOpen ? x < iv.hi : x <= iv.hi);
+    return okLo && okHi;
+  });
+}
+
+function satisfies(diff: number, op: IneqOp): boolean {
+  switch (op) {
+    case "<":
+      return diff < 0;
+    case ">":
+      return diff > 0;
+    case "<=":
+      return diff <= 0;
+    case ">=":
+      return diff >= 0;
+  }
+}
+
+/**
+ * Verify a candidate SOLUTION SET for `lhs op rhs` by sampling the real line: at
+ * every test point, being inside the claimed intervals must match the
+ * inequality actually holding there. Dense sampling around each boundary
+ * catches a misplaced boundary; a separate check at each genuine equality
+ * boundary confirms the open/closed choice (strict `<`/`>` → open, `≤`/`≥` →
+ * closed). Points on the boundary (diff≈0) and domain holes (NaN) are skipped.
+ */
+export function verifyInequality(
+  lhs: string,
+  rhs: string,
+  op: IneqOp,
+  unknown: string,
+  intervals: Interval[]
+): boolean {
+  if (!Array.isArray(intervals)) return false;
+  const bounds = intervals
+    .flatMap((iv) => [iv.lo, iv.hi])
+    .filter((b): b is number => b !== null && Number.isFinite(b));
+
+  // Sample grid: a wide span framing every finite boundary, each boundary ±δ,
+  // and far tails for unbounded intervals.
+  const lo = bounds.length ? Math.min(...bounds) - 10 : -50;
+  const hi = bounds.length ? Math.max(...bounds) + 10 : 50;
+  const samples = new Set<number>([-1e6, -1e4, 1e4, 1e6]);
+  for (let x = lo; x <= hi; x += 0.5) samples.add(Number(x.toFixed(4)));
+  for (const b of bounds) {
+    samples.add(b - 1e-3);
+    samples.add(b + 1e-3);
+  }
+
+  const diffAt = (x: number): number => {
+    const l = evalReal(lhs, { [unknown]: x });
+    const r = evalReal(rhs, { [unknown]: x });
+    return Number.isFinite(l) && Number.isFinite(r) ? l - r : NaN;
+  };
+
+  let matched = 0;
+  for (const x of samples) {
+    const diff = diffAt(x);
+    if (Number.isNaN(diff) || Math.abs(diff) < 1e-7) continue; // hole / on-boundary
+    if (satisfies(diff, op) !== inIntervals(x, intervals)) return false;
+    matched++;
+  }
+  if (matched < 8) return false; // too few valid points to trust
+
+  // Open/closed correctness at genuine equality boundaries (lhs = rhs there).
+  const boundaryClosed = op === "<=" || op === ">=";
+  for (const iv of intervals) {
+    for (const [b, open] of [
+      [iv.lo, iv.loOpen],
+      [iv.hi, iv.hiOpen],
+    ] as [number | null, boolean][]) {
+      if (b === null || !Number.isFinite(b)) continue;
+      const d = diffAt(b);
+      if (!Number.isNaN(d) && Math.abs(d) < 1e-6 && open === boundaryClosed) {
+        return false; // an included boundary should be closed only for ≤/≥
+      }
+    }
+  }
+  return true;
+}

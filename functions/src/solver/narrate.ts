@@ -20,6 +20,7 @@ import {
   RawMethod,
   StepData,
 } from "./types";
+import { Interval } from "./verify";
 
 /** Injected JSON-mode completion (wired to OpenAI in the proxy; stubbed in tests). */
 export type JsonCompleter = (
@@ -103,7 +104,32 @@ export interface LlmCandidate {
   answerAscii: string;
   /** Numeric solution(s): one per variable (system) or one per root. */
   assignments: CandidateAssignment[];
+  /** Solution-set intervals (inequalities) — verified by the interval gate. */
+  intervals: Interval[];
   methods: MethodData[];
+}
+
+/** Parse the model's `intervals` array into the gate's [Interval] shape. */
+function parseIntervals(raw: unknown): Interval[] {
+  if (!Array.isArray(raw)) return [];
+  const bound = (v: unknown): number | null => {
+    if (v == null) return null;
+    if (typeof v === "string" && /inf/i.test(v)) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const out: Interval[] = [];
+  for (const it of raw) {
+    if (!it || typeof it !== "object") continue;
+    const o = it as Record<string, unknown>;
+    out.push({
+      lo: bound(o.lo),
+      hi: bound(o.hi),
+      loOpen: o.loOpen !== false, // default open (strict)
+      hiOpen: o.hiOpen !== false,
+    });
+  }
+  return out;
 }
 
 const CANDIDATE_SYSTEM = `You are Matheasy, a careful math solver + tutor for students aged 8-18.
@@ -124,6 +150,7 @@ Rules:
   • Trigonometric equation (infinitely many solutions): put the GENERAL solution in "answerLatex" (e.g. "x = \\frac{\\pi}{6} + 2\\pi n"), and list the PRINCIPAL numeric solutions in the interval [0, 2\\pi) in "solutions" as decimal radians (one entry each).
   • Indefinite integral: put the antiderivative (WITHOUT +C) in "answerLatex"; leave "solutions" as []. For a rational integrand, use partial fractions; the antiderivative may contain natural logs of absolute values (e.g. 5\\ln|x+3| + 4\\ln|x-2|) — that exact form is fine.
   • Definite integral: put the exact value in "answerLatex" and "answerPlain"; leave "solutions" as [].
+- Inequality (e.g. 2x+3 < 7, x²-5x+6 ≥ 0): leave "solutions" as [] and instead give the solution SET in an "intervals" array — one object per interval: { "lo": number|null, "hi": number|null, "loOpen": bool, "hiOpen": bool } where lo/hi = null means -∞/+∞, and *Open = true for a STRICT boundary (open circle), false for ≤/≥ (closed). Example: x < 2 → [{ "lo": null, "hi": 2, "loOpen": true, "hiOpen": true }]; x ≤ 2 or x > 3 → two objects. Also put a readable form in "answerLatex" (e.g. x < 2, or x \\le 2 \\text{ or } x > 3). Factor quadratics and use a sign chart to get the intervals right.
 - Provide 1-2 methods, exactly one with "examPick": true, each with 2-5 steps.
 - All LaTeX must be valid and delimiter-free (no $, no \\[ \\]).`;
 
@@ -173,6 +200,7 @@ export async function generateLlmCandidate(
     answer: { latex: answerLatex, plain: answerPlain },
     answerAscii: latexToAscii(answerLatex),
     assignments,
+    intervals: parseIntervals(json.intervals),
     methods,
   };
 }
