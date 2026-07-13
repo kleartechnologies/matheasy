@@ -6,6 +6,8 @@
 // no native SDK. pump() (not pumpAndSettle) is used because the paywall's
 // animations loop forever.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +46,48 @@ Future<ProviderContainer> _container({Map<String, Object> seed = const {}}) asyn
   );
   addTearDown(container.dispose);
   return container;
+}
+
+/// A subscription service whose `purchase()` returns [PurchasePending] (the
+/// sandbox receipt-validation lag), then lets the test push the granted
+/// entitlement onto the status stream LATER — reproducing the "grey/stuck
+/// paywall after a successful sandbox payment" bug.
+class _PendingThenActiveService implements SubscriptionService {
+  final StreamController<SubscriptionStatus> _controller =
+      StreamController<SubscriptionStatus>.broadcast();
+  SubscriptionStatus _current = SubscriptionStatus.free;
+
+  @override
+  Stream<SubscriptionStatus> statusChanges() => _controller.stream;
+  @override
+  SubscriptionStatus get currentStatus => _current;
+  @override
+  Future<PurchaseResult> purchase(SubscriptionPlan plan) async =>
+      const PurchasePending(); // receipt not validated yet
+  @override
+  Future<PurchaseResult> restore() async => const PurchaseNothingToRestore();
+  @override
+  Future<List<SubscriptionProduct>> loadProducts() async =>
+      [for (final p in SubscriptionPlan.paidPlans) SubscriptionProduct.fallback(p)];
+  @override
+  Future<void> refresh() async {}
+  @override
+  Future<void> logIn(String appUserId) async {}
+  @override
+  Future<void> logOut() async {}
+  @override
+  Future<void> attachAdAttribution({String? fbAnonymousId}) async {}
+  @override
+  void dispose() => unawaited(_controller.close());
+
+  /// Simulates the entitlement propagating AFTER purchase() already returned.
+  void activatePro() {
+    _current = const SubscriptionStatus(
+      entitlement: Entitlement.pro,
+      activePlan: SubscriptionPlan.proAnnual,
+    );
+    _controller.add(_current);
+  }
 }
 
 /// Keeps the keepAlive controllers alive across a test (mirrors settings_test).
@@ -444,6 +488,47 @@ void main() {
       expect(container.read(isProProvider), isTrue);
       // Flush the auto-dismiss timer so none stays pending.
       await tester.pump(const Duration(seconds: 2));
+    });
+
+    testWidgets('a PENDING purchase that activates later still celebrates + '
+        'dismisses (the grey/stuck-after-paying regression)', (tester) async {
+      final service = _PendingThenActiveService();
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        subscriptionServiceProvider.overrideWithValue(service),
+      ]);
+      addTearDown(container.dispose);
+      await tester.binding.setSurfaceSize(const Size(500, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const PaywallScreen(trigger: PaywallTrigger.scanLimit),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Sandbox lag: purchase() returns Pending → NO celebration, NOT yet Pro.
+      // (Before the fix the paywall would sit here forever.)
+      await tester.tap(find.text('Unlock Unlimited'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text("You're all set!"), findsNothing);
+      expect(container.read(isProProvider), isFalse);
+
+      // The entitlement propagates via the customer-info stream. The fix must
+      // now celebrate + dismiss instead of stranding the user on the paywall.
+      service.activatePro();
+      await tester.pump(); // stream → controller state = pro → isPro flips
+      await tester.pump(); // celebration setState
+      expect(container.read(isProProvider), isTrue);
+      expect(find.text("You're all set!"), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2)); // flush the dismiss timer
     });
   });
 

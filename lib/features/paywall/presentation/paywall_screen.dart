@@ -63,22 +63,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void _onResult(PurchaseResult result) {
     switch (result) {
       case PurchaseSuccess(:final status):
-        HapticsService.success();
-        // Name the plan from the granted entitlement (not the selected card),
-        // so a Restore celebrates the plan the user actually owns.
-        setState(() {
-          _celebrating = true;
-          _celebrationPlanName = _planLabel(status.activePlan);
-        });
-        // Let the celebration play, then dismiss the paywall.
-        Timer(const Duration(milliseconds: 1700), () {
-          if (mounted) Navigator.of(context).maybePop();
-        });
+        // The entitlement is already active — celebrate + dismiss. (The
+        // isProProvider listener in build() is the same trigger for the ASYNC
+        // case where the entitlement lands after the call returned Pending; the
+        // idempotency guard means only one of them runs.)
+        _celebrateAndDismiss(_planLabel(status.activePlan));
       case PurchasePending():
-        _toast(
-          'Your purchase is pending approval. It will unlock once '
-          'confirmed.',
-        );
+        // Common in sandbox: the receipt hasn't validated yet, so the granted
+        // entitlement isn't on the returned customerInfo. Don't strand the
+        // paywall — the isProProvider listener dismisses it the moment the
+        // entitlement propagates via RevenueCat's customer-info update.
+        _toast('Confirming your purchase — this can take a moment…');
       case PurchaseNothingToRestore():
         _toast('No previous purchases found to restore.');
       case PurchaseFailure(:final message):
@@ -87,6 +82,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         break; // Silent — the user chose to back out.
     }
     ref.read(paywallControllerProvider.notifier).clearResult();
+  }
+
+  /// Plays the celebration overlay, then dismisses the paywall. Idempotent, so
+  /// the synchronous PurchaseSuccess path and the async isPro-activation path
+  /// can't double-fire. Names the plan from the granted entitlement (not the
+  /// selected card), so a Restore celebrates the plan the user actually owns.
+  void _celebrateAndDismiss(String planName) {
+    if (_celebrating || !mounted) return;
+    HapticsService.success();
+    setState(() {
+      _celebrating = true;
+      _celebrationPlanName = planName;
+    });
+    // Let the celebration play, then dismiss the paywall.
+    Timer(const Duration(milliseconds: 1700), () {
+      if (mounted) Navigator.of(context).maybePop();
+    });
   }
 
   void _toast(String message) {
@@ -115,6 +127,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Widget build(BuildContext context) {
     ref.listen(paywallControllerProvider.select((s) => s.result), (_, next) {
       if (next != null) _onResult(next);
+    });
+    // The Pro entitlement can activate AFTER purchase() has already returned —
+    // a sandbox receipt-validation lag (purchase() returns Pending, not
+    // Success), or any async propagation through RevenueCat's customer-info
+    // listener. Celebrate + dismiss on that false→true transition too, so a
+    // "pending" purchase never leaves the paywall stuck open (the reported
+    // grey/frozen-after-paying bug).
+    ref.listen(isProProvider, (prev, next) {
+      if (next && prev != true) {
+        _celebrateAndDismiss(
+          _planLabel(ref.read(subscriptionControllerProvider).activePlan),
+        );
+      }
     });
 
     final state = ref.watch(paywallControllerProvider);
