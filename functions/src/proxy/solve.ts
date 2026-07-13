@@ -301,6 +301,18 @@ function verifyCandidate(cls: Classification, llm: LlmCandidate): VerifyOutcome 
         ? { ok: true, answer: llm.answer }
         : { ok: false };
     }
+    case "word_problem": {
+      // We can't verify the READING, but we can verify the ARITHMETIC: the
+      // answer must satisfy the equation the model extracted (setupEquation).
+      // A self-consistent setup+answer passes; an arithmetic slip fails.
+      const parts = equationParts(llm.setupEquation);
+      const values = llm.assignments.map((a) => a.value);
+      if (parts.length === 0 || values.length === 0) return { ok: false };
+      const variable = llm.assignments[0]?.variable ?? cls.unknown;
+      return verifyRoots(parts, variable, values)
+        ? { ok: true, answer: llm.answer }
+        : { ok: false };
+    }
     case "derivative_back": {
       // The antiderivative is correct iff d/dx(answer) equals the integrand:
       // target = the candidate antiderivative, expected = the integrand.

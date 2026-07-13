@@ -82,6 +82,7 @@ export type Strategy =
   | "arithmetic" // evaluate a pure-numeric expression
   | "derivative" // d/dx of an expression
   | "statistics" // a descriptive statistic over a data set (mean/median/…)
+  | "linalg" // matrix/vector operation (det/inverse/eigenvalues) via mathjs
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
 /** How an LLM-candidate answer gets proven. */
@@ -92,6 +93,7 @@ export type VerifyMode =
   | "definite_integral" // definite integral: numeric integration == candidate
   | "trig" // periodic equation: verify principal solutions + 2π-periodicity
   | "inequality" // solution set: points inside satisfy it, points outside don't
+  | "word_problem" // NL: the answer must satisfy the model's EXTRACTED equation
   | "none"; // nothing to check against → forces couldn't-verify
 
 export interface Classification {
@@ -122,6 +124,9 @@ export interface Classification {
   ineqLhs?: string;
   ineqRhs?: string;
   ineqOp?: "<" | ">" | "<=" | ">=";
+  /** A linear-algebra request: the operation + its (square) matrix. */
+  linalgOp?: string;
+  matrixData?: number[][];
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */

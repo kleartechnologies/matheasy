@@ -6,6 +6,7 @@
  * tier otherwise (integrals, higher-degree/trig equations, systems). Every path
  * carries a `verifyMode`: the answer is proven before it is ever returned.
  */
+import { parseLinalg } from "./linalg";
 import { parseStatistics } from "./statistics";
 import { Classification, Strategy, VerifyMode } from "./types";
 import {
@@ -146,6 +147,26 @@ export function classify(rawLatex: string): Classification {
       ineqRhs: ineq.rhs,
       ineqOp: ineq.op,
     });
+  }
+
+  // --- Linear algebra (determinant / inverse / eigenvalues) ---------------
+  // DETERMINISTIC via mathjs; the gap was parsing the matrix + a verify gate.
+  // Property-checked (A·A⁻¹=I, det(A−λI)=0, independent cofactor det).
+  const linalg = parseLinalg(rawLatex);
+  if (linalg) {
+    return base("linalg", "linalg", "x", false, "none", {
+      linalgOp: linalg.op,
+      matrixData: linalg.matrix,
+    });
+  }
+
+  // --- Word problems (natural language) -----------------------------------
+  // Prose can't be parsed into an equation directly. The LLM EXTRACTS the model
+  // equation and solves it; the gate then confirms the answer satisfies that
+  // extracted equation (so the arithmetic is verified — though the reading is
+  // not, which is why the interpretation is shown to the learner).
+  if (looksLikeWordProblem(rawLatex)) {
+    return base("word_problem", "llm_candidate", "x", false, "word_problem");
   }
 
   const { isEquation } = splitEquation(ascii);
@@ -314,6 +335,29 @@ function unknownInExponent(ascii: string, unknown: string): boolean {
 function unknownInLog(ascii: string, unknown: string): boolean {
   const u = unknown.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(?:log10|log)\\s*\\([^()]*${u}`).test(ascii);
+}
+
+// Math directives / operators / function words that are NOT narrative content.
+const NON_NARRATIVE = new Set([
+  "solve", "find", "for", "the", "value", "values", "simplify", "evaluate",
+  "calculate", "compute", "determine", "what", "and", "are", "where", "given",
+  "let", "sin", "cos", "tan", "cot", "sec", "csc", "log", "sqrt", "arcsin",
+  "arccos", "arctan", "sinh", "cosh", "tanh", "pi", "theta",
+]);
+
+/**
+ * Conservative prose detector: does the input read like a word problem? Strips
+ * LaTeX commands + math, then counts NARRATIVE words (≥3 letters, not a math
+ * directive/function). Requires several such words AND a digit, so a directive
+ * like "solve for the value of x" and any structured math stay OUT.
+ */
+function looksLikeWordProblem(rawLatex: string): boolean {
+  const text = cleanLatex(rawLatex).replace(/\\[a-zA-Z]+/g, " ");
+  if (!/\d/.test(text)) return false; // a computable word problem has numbers
+  const words = (text.match(/[a-zA-Z]{3,}/g) ?? []).filter(
+    (w) => !NON_NARRATIVE.has(w.toLowerCase())
+  );
+  return words.length >= 4;
 }
 
 /**

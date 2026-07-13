@@ -106,6 +106,8 @@ export interface LlmCandidate {
   assignments: CandidateAssignment[];
   /** Solution-set intervals (inequalities) — verified by the interval gate. */
   intervals: Interval[];
+  /** The equation the model EXTRACTED from a word problem (ascii), for its gate. */
+  setupEquation: string;
   methods: MethodData[];
 }
 
@@ -151,6 +153,7 @@ Rules:
   • Indefinite integral: put the antiderivative (WITHOUT +C) in "answerLatex"; leave "solutions" as []. For a rational integrand, use partial fractions; the antiderivative may contain natural logs of absolute values (e.g. 5\\ln|x+3| + 4\\ln|x-2|) — that exact form is fine.
   • Definite integral: put the exact value in "answerLatex" and "answerPlain"; leave "solutions" as [].
 - Inequality (e.g. 2x+3 < 7, x²-5x+6 ≥ 0): leave "solutions" as [] and instead give the solution SET in an "intervals" array — one object per interval: { "lo": number|null, "hi": number|null, "loOpen": bool, "hiOpen": bool } where lo/hi = null means -∞/+∞, and *Open = true for a STRICT boundary (open circle), false for ≤/≥ (closed). Example: x < 2 → [{ "lo": null, "hi": 2, "loOpen": true, "hiOpen": true }]; x ≤ 2 or x > 3 → two objects. Also put a readable form in "answerLatex" (e.g. x < 2, or x \\le 2 \\text{ or } x > 3). Factor quadratics and use a sign chart to get the intervals right.
+- Word problem (a real-world story in words): FIRST translate it into ONE equation with a single unknown and put that equation (delimiter-free LaTeX) in "setupLatex" (e.g. "x = 3 + 5" or "2x + 5 = 17"). Solve it and give the numeric answer in "solutions" and a friendly "answerLatex"/"answerPlain" (with units, e.g. "8 apples"). Make the FIRST method step state your reading ("I read this as: …" + the equation) so the student can catch a misread. The answer is checked against YOUR setupLatex, so it must be self-consistent.
 - Provide 1-2 methods, exactly one with "examPick": true, each with 2-5 steps.
 - All LaTeX must be valid and delimiter-free (no $, no \\[ \\]).`;
 
@@ -201,6 +204,7 @@ export async function generateLlmCandidate(
     answerAscii: latexToAscii(answerLatex),
     assignments,
     intervals: parseIntervals(json.intervals),
+    setupEquation: latexToAscii(str(json.setupLatex)),
     methods,
   };
 }
