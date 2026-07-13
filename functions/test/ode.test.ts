@@ -72,7 +72,8 @@ describe("solve — ODE substitution gate accepts real solutions", () => {
   it("first-order linear: y' = 2y → C₁e^{2x}", async () => {
     const r = await run(String.raw`y' = 2y`, "y = C_1 e^{2x}", "C1*e^(2*x)");
     expect(r.verified).toBe(true);
-    expect(r.answer).toContain("e^{2x}");
+    // The displayed answer is rendered from the VERIFIED solutionExpr.
+    expect(r.answer).toBe("y = C1*e^(2*x)");
   });
 
   it("second-order: y'' + y = 0 → C₁cos x + C₂sin x", async () => {
@@ -140,12 +141,68 @@ describe("solve — ODE gate REJECTS non-solutions (golden rule)", () => {
 
 describe("verifyOde — unit", () => {
   it("accepts a correct solution, rejects a perturbed one", () => {
-    expect(verifyOde("(dy) - (2y)", "y", "x", "C1*e^(2*x)", [])).toBe(true);
-    expect(verifyOde("(dy) - (2y)", "y", "x", "C1*e^(2.01*x)", [])).toBe(false);
+    expect(verifyOde("(dy) - (2y)", "y", "x", 1, "C1*e^(2*x)", [])).toBe(true);
+    expect(verifyOde("(dy) - (2y)", "y", "x", 1, "C1*e^(2.01*x)", [])).toBe(false);
   });
 
   it("enforces initial conditions", () => {
-    expect(verifyOde("(dy) - (2y)", "y", "x", "3*e^(2*x)", [{ order: 0, at: 0, value: 3 }])).toBe(true);
-    expect(verifyOde("(dy) - (2y)", "y", "x", "3*e^(2*x)", [{ order: 0, at: 0, value: 4 }])).toBe(false);
+    expect(verifyOde("(dy) - (2y)", "y", "x", 1, "3*e^(2*x)", [{ order: 0, at: 0, value: 3 }])).toBe(true);
+    expect(verifyOde("(dy) - (2y)", "y", "x", 1, "3*e^(2*x)", [{ order: 0, at: 0, value: 4 }])).toBe(false);
+  });
+});
+
+// Every finding from the adversarial review of the ODE solver: each shipped a
+// WRONG answer as verified:true (a golden-rule hole). These lock the fixes.
+describe("regression — ODE review findings", () => {
+  const cand = (solutionExpr: string): JsonCompleter => async (system: string) =>
+    system.includes("ALREADY-SOLVED")
+      ? {}
+      : { answerLatex: "y = ?", answerPlain: "y = ?", solutionExpr, solutions: [] };
+  const solveWith = async (ode: string, sol: string) =>
+    (await solve(classify(ode), cand(sol))).verified;
+
+  it("#1 CRITICAL: a collapsed residual (dy/dx = dx/dy) no longer accepts anything", async () => {
+    // buildResidual must NOT map \frac{dx}{dy} to the same dy token → residual is
+    // not identically zero → a garbage candidate is rejected.
+    expect(await solveWith(String.raw`\frac{dy}{dx} = \frac{dx}{dy}`, "x^3 + 7")).toBe(false);
+    expect(await solveWith(String.raw`\frac{dy}{dx} = \frac{dz}{dx}`, "sin(5*x)")).toBe(false);
+    // The degeneracy guard also rejects a tautology (same derivative both sides).
+    expect(verifyOde("(dy) - (dy)", "y", "x", 1, "x^3 + 7", [])).toBe(false);
+  });
+
+  it("#2 HIGH: an incomplete general solution is rejected (constants ≠ order)", async () => {
+    // y'' - 4y = 0 needs TWO independent constants; one branch is not enough.
+    expect(await solveWith(String.raw`y'' - 4y = 0`, "C1*e^(2*x)")).toBe(false);
+    // A dropped constant (particular passed off as general) is rejected.
+    expect(await solveWith(String.raw`y' = 2y`, "e^(2*x)")).toBe(false);
+    // Repeated root written as C1 e^x + C2 e^x — two symbols, one DOF (rank 1).
+    expect(await solveWith(String.raw`y'' - 2y' + y = 0`, "C1*e^(x) + C2*e^(x)")).toBe(false);
+    // The genuine general solutions still verify.
+    expect(await solveWith(String.raw`y'' - 4y = 0`, "C1*e^(2*x) + C2*e^(-2*x)")).toBe(true);
+    expect(await solveWith(String.raw`y' = 2y`, "C1*e^(2*x)")).toBe(true);
+  });
+
+  it("#3 MEDIUM: the DISPLAYED answer is the verified expression, not free text", async () => {
+    // solutionExpr is correct but answerLatex diverges → we ship the verified one.
+    const c = classify(String.raw`y' = 2y`);
+    const p = await solve(
+      c,
+      async (system: string) =>
+        system.includes("ALREADY-SOLVED")
+          ? {}
+          : {
+              answerLatex: "y = 5 e^{2x} + 7x", // WRONG, never checked
+              answerPlain: "y = 5 e^{2x} + 7x",
+              solutionExpr: "C1*e^(2*x)", // correct
+              solutions: [],
+            }
+    );
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("y = C1*e^(2*x)"); // the verified expression
+    expect(p.finalAnswer?.plain).not.toContain("7x"); // never the divergent free text
+  });
+
+  it("declines an absurdly long input (no pathological backtracking)", () => {
+    expect(parseOde("y' = " + " ".repeat(5000) + "2y")).toBeNull();
   });
 });

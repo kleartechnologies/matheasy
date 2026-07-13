@@ -31,7 +31,7 @@ import { chatJson, createOpenAI } from "../lib/openai";
 
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
-import { verifyOde } from "../solver/ode";
+import { odeAnswer, verifyOde } from "../solver/ode";
 import { exactForm } from "../solver/exact";
 import { buildGraph, GraphInput } from "../solver/graph";
 import { variablesIn } from "../solver/latex";
@@ -325,10 +325,13 @@ function verifyCandidate(cls: Classification, llm: LlmCandidate): VerifyOutcome 
         cls.odeResidual,
         cls.odeDepVar,
         cls.odeIndepVar,
+        cls.odeOrder ?? 1,
         llm.odeSolution,
         cls.odeInitial ?? []
       )
-        ? { ok: true, answer: llm.answer }
+        ? // Display the VERIFIED solution, not the model's free-text answerLatex
+          // (which the gate never checks) — mirrors substitution/trig answers.
+          { ok: true, answer: odeAnswer(cls.odeDepVar, llm.odeSolution) }
         : { ok: false };
     }
     case "word_problem": {
