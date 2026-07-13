@@ -42,6 +42,14 @@ export interface StatQuery {
  * of ≥2 numbers (e.g. `mean of 2, 4, 6, 8`, `median(3,1,4,1,5)`), or null.
  */
 export function parseStatistics(rawLatex: string): StatQuery | null {
+  // A vector operation dressed in a stat-sounding word ("sum of vectors (1,2,3)
+  // and (4,5,6)", "range of the cross product") must NOT be read as a statistic
+  // over one operand's components — that ships a confident wrong scalar. Decline
+  // so it routes to the vector solver or an honest couldn't-verify instead.
+  if (/vector|\\vec\b|\\langle|cross\s+product|dot\s+product|magnitude/i.test(rawLatex)) {
+    return null;
+  }
+
   let stat: StatKind | null = null;
   for (const [re, s] of KEYWORDS) {
     if (re.test(rawLatex)) {

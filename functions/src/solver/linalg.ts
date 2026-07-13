@@ -12,19 +12,43 @@ import { cross, det, dot, eigs, identity, inv, multiply, norm, subtract } from "
 
 import { FinalAnswer, RawStep, SolveCandidate } from "./types";
 
-export type LinalgOp = "determinant" | "inverse" | "eigenvalues" | "multiply";
+export type LinalgOp =
+  | "determinant"
+  | "inverse"
+  | "eigenvalues"
+  | "multiply"
+  | "add"
+  | "subtract";
 
-/** One matrix body (`1 & 2 \\ 3 & 4`) → grid, or null if ragged/non-numeric. */
+/** A single clean number token, or null — rejects "" (Number("")=0), a bare
+ * ".", and thousands-style groups like "000"/"007" (a leading zero before more
+ * digits is never a real matrix entry / vector component, but a locale
+ * thousands separator or malformed input). `0`, `0.5`, `-0.5` stay valid. */
+function numToken(t: string): number | null {
+  const s = t.trim();
+  if (!/^-?\d+(?:\.\d+)?$/.test(s) || /^-?0\d/.test(s)) return null;
+  return Number(s);
+}
+
+/** One matrix body (`1 & 2 \\ 3 & 4`) → grid, or null if ragged / any cell is
+ * blank or non-numeric (a dropped cell must DECLINE, not silently become 0). */
 function gridFrom(body: string): number[][] | null {
   const rows = body
     .split(/\\\\/)
     .map((r) => r.trim())
     .filter(Boolean);
   if (rows.length === 0) return null;
-  const grid = rows.map((r) => r.split("&").map((c) => Number(c.replace(/[{}\s]/g, ""))));
+  const grid: number[][] = [];
+  for (const r of rows) {
+    const cells = r.split("&").map((c) => numToken(c.replace(/[{}]/g, "")));
+    if (cells.some((c) => c === null)) return null; // blank / non-numeric cell
+    grid.push(cells as number[]);
+  }
   const w = grid[0].length;
-  return grid.every((row) => row.length === w && row.every(Number.isFinite)) ? grid : null;
+  return grid.every((row) => row.length === w) ? grid : null;
 }
+
+const MATRIX_RE = /\\begin\{[pbv]matrix\}[\s\S]*?\\end\{[pbv]matrix\}/g;
 
 /** All p/b/v-matrices in the input, in order. */
 function parseMatrices(rawLatex: string): number[][][] {
@@ -37,21 +61,51 @@ function parseMatrices(rawLatex: string): number[][][] {
   return out;
 }
 
-/** A matrix operation + its matrix (+ a second matrix for A·B), or null. */
+function sameShape(a: number[][], b: number[][]): boolean {
+  return a.length === b.length && a.every((row, i) => row.length === b[i].length);
+}
+
+/** The text BETWEEN the two matrix blocks (the connective `+` / `-` / `\cdot`).
+ * Each block is swapped for a sentinel that can't occur in LaTeX, then we read
+ * the span between the first two sentinels. */
+function matrixGap(rawLatex: string): string {
+  const SENTINEL = "@@MATRIX@@";
+  const parts = rawLatex.replace(MATRIX_RE, SENTINEL).split(SENTINEL);
+  return parts[1] ?? "";
+}
+
+/** A matrix operation + its matrix (+ a second matrix for A±B / A·B), or null. */
 export function parseLinalg(
   rawLatex: string
 ): { op: LinalgOp; matrix: number[][]; matrixB?: number[][] } | null {
   const matrices = parseMatrices(rawLatex);
   if (matrices.length === 0) return null;
+  const lower = rawLatex.toLowerCase();
 
-  // Two matrices side by side (or with ×/·) → multiply, when conformable.
+  // A scalar/whole-matrix keyword applied to a MATRIX EXPRESSION of two operands
+  // (det/inverse/eigenvalues of a product, det·det of two vmatrices, …) is out of
+  // scope — decline honestly rather than silently return the raw A·B.
+  const hasOuterOp =
+    /\\begin\{vmatrix\}/.test(rawLatex) ||
+    /\bdeterminant\b|\bdet\b|\\det|eigen|inverse/.test(lower);
+
   if (matrices.length >= 2) {
+    if (matrices.length > 2) return null; // A·B·C etc. — ambiguous to verify, decline
+    if (hasOuterOp) return null;
     const [a, b] = matrices;
-    return a[0].length === b.length ? { op: "multiply", matrix: a, matrixB: b } : null;
+    // What connects the two matrices? Replace each block with a marker and read
+    // the text between them, so `A + B` is a SUM and never a silent product.
+    const gap = matrixGap(rawLatex);
+    if (/\+/.test(gap)) return sameShape(a, b) ? { op: "add", matrix: a, matrixB: b } : null;
+    if (/-|−/.test(gap)) return sameShape(a, b) ? { op: "subtract", matrix: a, matrixB: b } : null;
+    // multiply only when nothing but whitespace / an explicit ×,·,* joins them
+    if (/^\s*(\\cdot|\\times|\*|·|×)?\s*$/.test(gap)) {
+      return a[0].length === b.length ? { op: "multiply", matrix: a, matrixB: b } : null;
+    }
+    return null; // unknown connective → decline
   }
 
   const matrix = matrices[0];
-  const lower = rawLatex.toLowerCase();
   let op: LinalgOp | null = null;
   if (/\\begin\{vmatrix\}/.test(rawLatex) || /\bdeterminant\b|\bdet\b|\\det/.test(lower)) {
     op = "determinant";
@@ -116,6 +170,19 @@ export function solveLinalg(cls: {
           resultStep("AB = " + matrixLatex(prod)),
         ]);
       }
+      case "add":
+      case "subtract": {
+        const b = cls.matrixB;
+        if (!b || !sameShape(A, b)) return null;
+        const s = op === "add" ? 1 : -1;
+        // Independent element-wise recompute is the check (mathjs never touched).
+        const out = A.map((row, i) => row.map((v, j) => v + s * b[i][j]));
+        const symbol = op === "add" ? "+" : "-";
+        return candidate(matrixAnswer(out), op === "add" ? "Matrix sum" : "Matrix difference", [
+          matStep(A),
+          resultStep(`A ${symbol} B = ` + matrixLatex(out)),
+        ]);
+      }
     }
   } catch {
     return null;
@@ -134,25 +201,42 @@ function extractVectors(rawLatex: string): number[][] {
   for (let m = re.exec(rawLatex); m; m = re.exec(rawLatex)) {
     const body = (m[1] ?? m[2] ?? "").trim();
     if (!body.includes(",")) continue;
-    const v = body.split(",").map((t) => Number(t.trim())).filter(Number.isFinite);
-    if (v.length >= 2) out.push(v);
+    const toks = body.split(",").map((t) => numToken(t));
+    // A vector is only a vector when EVERY component is a clean number. A blank
+    // ("(1,,3)"), a bare "." ("(1,.,3)"), a trailing comma, or a thousands group
+    // ("(1,000)") means this parenthesis is NOT a vector — skip it rather than
+    // silently coerce a component to 0 and answer a question never asked.
+    if (toks.length >= 2 && toks.every((t) => t !== null)) out.push(toks as number[]);
   }
   return out;
 }
 
-/** A vector operation + its operand(s): dot/cross (two), magnitude (one). */
+/** A vector operation + its operand(s): dot/cross (two), magnitude (one).
+ * The cues are deliberately narrow: the magnitude trigger is the vector-specific
+ * "magnitude"/"norm" (or \lVert…\rVert bars) — NOT the generic word "length",
+ * which collides with intervals, line segments and word problems and would hijack
+ * them into a bogus |v|. dot/cross still require TWO clean vector operands, so a
+ * stray \cdot/\times (e.g. scalar multiplication) can't trigger one on its own. */
 export function parseVectors(
   rawLatex: string
 ): { op: VectorOp; vectors: number[][] } | null {
+  // A stat word wrapping a vector op ("range of the cross product") is a nested,
+  // un-verifiable composition — decline rather than return the raw vector op.
+  if (/\b(mean|average|median|mode|variance|deviation|range|sum|summation)\b/i.test(rawLatex)) {
+    return null;
+  }
   const vecs = extractVectors(rawLatex);
   const lower = rawLatex.toLowerCase();
-  if (/magnitude|norm|length/.test(lower) && vecs.length === 1) {
+  const magCue =
+    /\bmagnitude\b|\bnorm\b/.test(lower) ||
+    /\\lVert|\\rVert|\\Vert|\\\|/.test(rawLatex);
+  if (magCue && vecs.length === 1) {
     return { op: "magnitude", vectors: vecs };
   }
-  if ((/cross/.test(lower) || /\\times|×/.test(rawLatex)) && vecs.length === 2) {
+  if ((/\bcross\b/.test(lower) || /\\times|×/.test(rawLatex)) && vecs.length === 2) {
     return { op: "cross", vectors: vecs };
   }
-  if ((/dot/.test(lower) || /\\cdot|·/.test(rawLatex)) && vecs.length === 2) {
+  if ((/\bdot\b/.test(lower) || /\\cdot|·/.test(rawLatex)) && vecs.length === 2) {
     return { op: "dot", vectors: vecs };
   }
   return null;

@@ -155,8 +155,13 @@ export function classify(rawLatex: string): Classification {
   // independent row×column recompute for the product).
   const linalg = parseLinalg(rawLatex);
   if (linalg) {
+    const linalgType: Record<string, string> = {
+      multiply: "matrix_product",
+      add: "matrix_sum",
+      subtract: "matrix_difference",
+    };
     return base(
-      linalg.op === "multiply" ? "matrix_product" : "linalg",
+      linalgType[linalg.op] ?? "linalg",
       "linalg",
       "x",
       false,
