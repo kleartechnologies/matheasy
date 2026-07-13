@@ -23,6 +23,7 @@ import {
   assertWithinQuota,
   ensureUserDoc,
   incrementUsage,
+  recordSolveFailure,
 } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { getCachedSolve, putCachedSolve } from "../lib/solveCache";
@@ -65,7 +66,11 @@ interface SolveRequest {
 }
 
 /** A `verified:false` payload — an honest "couldn't verify", never a guess. */
-function couldNotVerify(cls: Classification, reason: string): SolvePayload {
+function couldNotVerify(
+  cls: Classification,
+  reason: string,
+  onFail?: (reason: string) => void
+): SolvePayload {
   // Observability: record WHICH branch declined, so in production an honest
   // refusal is distinguishable from an OpenAI outage or a rejected candidate
   // (they otherwise all surface as the same "couldn't solve" to the user).
@@ -75,6 +80,7 @@ function couldNotVerify(cls: Classification, reason: string): SolvePayload {
     strategy: cls.strategy,
     verifyMode: cls.verifyMode,
   });
+  onFail?.(reason); // persist to the failure-analytics store (wrapper-provided)
   return {
     problemLatex: cls.latex,
     problemType: cls.problemType,
@@ -129,7 +135,17 @@ export const solveEquation = onCall(
       };
 
       try {
-        payload = await solve(cls, complete);
+        payload = await solve(cls, complete, (reason) => {
+          // Fire-and-forget: turn every unverified solve into analytics data
+          // (recordSolveFailure swallows its own errors + never blocks).
+          void recordSolveFailure({
+            latex: cls.latex,
+            problemType: cls.problemType,
+            strategy: cls.strategy,
+            verifyMode: cls.verifyMode,
+            reason,
+          });
+        });
       } catch (err) {
         logger.error("solveEquation failed", { uid, err: String(err) });
         throw new HttpsError(
@@ -150,10 +166,15 @@ export const solveEquation = onCall(
   }
 );
 
-/** The pure solve pipeline — testable without Firebase. */
+/**
+ * The pure solve pipeline — testable without Firebase. [onCouldNotVerify] is
+ * invoked (with the failing branch's reason) whenever the result is
+ * `verified:false`, so the caller can persist it for the failure analytics.
+ */
 export async function solve(
   cls: Classification,
-  complete: JsonCompleter
+  complete: JsonCompleter,
+  onCouldNotVerify?: (reason: string) => void
 ): Promise<SolvePayload> {
   // 1) Deterministic engine, gated by the verifier.
   const candidate = solveDeterministic(cls);
@@ -176,10 +197,12 @@ export async function solve(
   }
 
   // 2) Constrained LLM candidate — still must pass the verification gate.
-  if (cls.verifyMode === "none") return couldNotVerify(cls, "no_verify_mode");
+  if (cls.verifyMode === "none") {
+    return couldNotVerify(cls, "no_verify_mode", onCouldNotVerify);
+  }
 
   const llm = await generateLlmCandidate(complete, cls);
-  if (!llm) return couldNotVerify(cls, "llm_no_candidate");
+  if (!llm) return couldNotVerify(cls, "llm_no_candidate", onCouldNotVerify);
 
   const outcome = verifyCandidate(cls, llm);
   if (!outcome.ok) {
@@ -190,7 +213,7 @@ export async function solve(
       answer: llm.answer.plain,
       values: llm.assignments.map((a) => a.value),
     });
-    return couldNotVerify(cls, "verify_gate_failed");
+    return couldNotVerify(cls, "verify_gate_failed", onCouldNotVerify);
   }
 
   return {

@@ -170,3 +170,80 @@ export async function incrementUsage(
   const remaining = isPro ? UNLIMITED : Math.max(0, FREE_QUOTA[feature] - used);
   return { used, remaining };
 }
+
+// ---- Solve-failure analytics (turn "couldn't verify" into prioritizable data)
+
+/**
+ * Coarse math domain for a classifier `problemType`, so failures roll up to a
+ * topic even though `classify` only labels the types it knows.
+ */
+export function topicForProblemType(problemType: string): string {
+  switch (problemType) {
+    case "arithmetic":
+    case "expression":
+    case "linear_equation":
+    case "quadratic_equation":
+    case "polynomial_equation":
+    case "exponential_equation":
+    case "system_of_equations":
+      return "algebra";
+    case "trigonometric_equation":
+      return "trigonometry";
+    case "derivative":
+    case "integral":
+    case "definite_integral":
+      return "calculus";
+    default:
+      return "other";
+  }
+}
+
+export interface SolveFailure {
+  latex: string;
+  problemType: string; // classify's problemType (the classification)
+  strategy: string; // equation | simplify | arithmetic | derivative | llm_candidate
+  verifyMode: string; // substitution | derivative_back | trig | ... | none
+  reason: string; // no_verify_mode | llm_no_candidate | verify_gate_failed
+}
+
+/**
+ * Records a solve that returned `verified:false`, so real-world gaps are
+ * measured instead of guessed. Writes BOTH a raw drill-down doc
+ * (`solve_failures/*`) and increments a single aggregate dashboard doc
+ * (`analytics/solveFailures`) by topic / problemType / reason.
+ *
+ * Deliberately ANONYMOUS — no uid — and the equation is length-capped: the
+ * audience includes minors, and the analytic question is "which TYPES fail",
+ * not "who". Best-effort: never throws into the request path.
+ */
+export async function recordSolveFailure(f: SolveFailure): Promise<void> {
+  try {
+    const db = getFirestore();
+    const topic = topicForProblemType(f.problemType);
+    const latex = f.latex.slice(0, 400);
+    const batch = db.batch();
+    batch.set(db.collection("solve_failures").doc(), {
+      latex,
+      topic,
+      problemType: f.problemType,
+      strategy: f.strategy,
+      verifyMode: f.verifyMode,
+      reason: f.reason,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    batch.set(
+      db.doc("analytics/solveFailures"),
+      {
+        total: FieldValue.increment(1),
+        byTopic: { [topic]: FieldValue.increment(1) },
+        byProblemType: { [f.problemType]: FieldValue.increment(1) },
+        byReason: { [f.reason]: FieldValue.increment(1) },
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    await batch.commit();
+  } catch (err) {
+    logger.warn("recordSolveFailure failed", { err: String(err) });
+  }
+}

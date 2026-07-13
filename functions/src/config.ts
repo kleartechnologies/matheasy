@@ -36,6 +36,13 @@ export const OPENAI_MODEL = defineString("OPENAI_MODEL", {
   default: "gpt-4o",
 });
 
+/**
+ * Firebase uid allowed to read the solve-failure analytics report. Empty (the
+ * default) denies everyone — set it to your uid to enable:
+ *   firebase functions:secrets  N/A — it's a param: set ADMIN_UID in .env or at deploy.
+ */
+export const ADMIN_UID = defineString("ADMIN_UID", { default: "" });
+
 // The region all functions run in. Keep it close to your users / Firestore.
 export const REGION = "us-central1";
 

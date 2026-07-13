@@ -23,3 +23,6 @@ export { revenuecatWebhook } from "./billing/revenuecatWebhook";
 
 // --- Firestore data layer ---------------------------------------------------
 export { aggregateProgress } from "./data/aggregateProgress";
+
+// --- Analytics (admin-only solve-failure dashboard) -------------------------
+export { solveFailureReport } from "./analytics/solveFailureReport";

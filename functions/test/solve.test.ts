@@ -281,3 +281,46 @@ describe("solve — \\frac{x+2}{(x+1)^3}=\\frac{120}{x} reaches the LLM tier hon
     expect(p.problemType).toBe("polynomial_equation");
   });
 });
+
+describe("solve — failure-analytics callback (onCouldNotVerify)", () => {
+  it("fires with the branch reason on an unverified solve", async () => {
+    const reasons: string[] = [];
+    const noneCls = { ...classify("x^2 + 1 = 0"), verifyMode: "none" as const };
+    const p = await solve(noneCls, NEVER, (r) => reasons.push(r));
+    expect(p.verified).toBe(false);
+    expect(reasons).toEqual(["no_verify_mode"]);
+  });
+
+  it("reports llm_no_candidate when the model returns no answer", async () => {
+    const reasons: string[] = [];
+    const p = await solve(
+      classify("\\int \\frac{9x+2}{x^2+x-6} dx"),
+      completerWith({}),
+      (r) => reasons.push(r)
+    );
+    expect(p.verified).toBe(false);
+    expect(reasons).toEqual(["llm_no_candidate"]);
+  });
+
+  it("reports verify_gate_failed when the candidate fails the gate", async () => {
+    const reasons: string[] = [];
+    const p = await solve(
+      classify("\\int \\frac{9x+2}{x^2+x-6} dx"),
+      completerWith({ answerLatex: "x", answerPlain: "x", solutions: [], methods: [] }),
+      (r) => reasons.push(r)
+    );
+    expect(p.verified).toBe(false);
+    expect(reasons).toEqual(["verify_gate_failed"]);
+  });
+
+  it("does NOT fire when the solve verifies", async () => {
+    const reasons: string[] = [];
+    const p = await solve(
+      classify("5x^2 + 3x - 2 = 0"),
+      completerWith({}),
+      (r) => reasons.push(r)
+    );
+    expect(p.verified).toBe(true);
+    expect(reasons).toEqual([]);
+  });
+});
