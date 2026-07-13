@@ -37,52 +37,58 @@ export interface TaylorQuery {
   order: number;
 }
 
-/** A named center token → { numeric value, LaTeX display }. */
-const CENTERS: Record<string, { value: number; latex: string }> = {
-  "0": { value: 0, latex: "0" },
-  origin: { value: 0, latex: "0" },
-  pi: { value: Math.PI, latex: "\\pi" },
-  "\\pi": { value: Math.PI, latex: "\\pi" },
-  "π": { value: Math.PI, latex: "\\pi" },
-};
-
 /** Parse a Taylor/Maclaurin request → { fn, variable, center, order } or null. */
 export function parseTaylor(rawLatex: string): TaylorQuery | null {
-  const lower = rawLatex.toLowerCase();
-  const isMaclaurin = /maclaurin/.test(lower);
-  if (!isMaclaurin && !/taylor/.test(lower)) return null;
+  // The keyword must be a SERIES keyword — "taylor" alone is a common surname, so
+  // require it adjacent to series/polynomial/expansion/approximation. "maclaurin"
+  // is unambiguous. This stops a word problem ("Taylor drew a 5° angle…") from
+  // being hijacked into a bogus series.
+  const isMaclaurin = /\bmaclaurin\b/i.test(rawLatex);
+  const isTaylor =
+    /\btaylor'?s?\s+(?:series|polynomial|expansion|approximation)\b/i.test(rawLatex);
+  if (!isMaclaurin && !isTaylor) return null;
 
   // --- order: "order 4" / "degree 4" / "4th order" / "5 terms" (→ degree 4) ---
-  const om =
-    lower.match(/(?:order|degree)\s*(\d+)/) ||
-    lower.match(/(\d+)\s*(?:st|nd|rd|th)?[-\s]*(?:order|degree)/) ||
-    lower.match(/(?:first\s+)?(\d+)\s*terms?/);
+  const orderRes = [
+    /(?:order|degree)\s*(\d+)/i,
+    /(\d+)\s*(?:st|nd|rd|th)?[-\s]*(?:order|degree)/i,
+    /(?:first\s+)?(\d+)\s*terms?/i,
+  ];
+  let om: RegExpMatchArray | null = null;
+  for (const re of orderRes) {
+    const m = rawLatex.match(re);
+    if (m) {
+      om = m;
+      break;
+    }
+  }
   if (!om) return null;
   let order = parseInt(om[1], 10);
-  if (/terms?/.test(om[0])) order -= 1; // "n terms" → degree n−1
+  if (/terms?/i.test(om[0])) order -= 1; // "n terms" → degree n−1
   if (!Number.isInteger(order) || order < 1 || order > MAX_ORDER) return null;
 
-  // --- center: Maclaurin ⇒ 0; else "around/about/at [x=] value" -----------
+  // Blank out the order phrase so "at 3rd order" / "at 4 terms" can never be
+  // misread as a center of 3 / 4.
+  const idx = om.index ?? 0;
+  const withoutOrder =
+    rawLatex.slice(0, idx) + " ".repeat(om[0].length) + rawLatex.slice(idx + om[0].length);
+
+  // --- center: Maclaurin ⇒ 0; else parse the WHOLE center expression ---------
+  // No center cue ⇒ Maclaurin (center 0). A cue that's present but unparseable
+  // (a symbolic center, a bad token) DECLINES — it must never silently fall back
+  // to 0 and answer a different problem than was asked.
   let center = 0;
   let centerLatex = "0";
   if (!isMaclaurin) {
-    const cm = rawLatex.match(
-      /(?:around|about|centered\s+at|center(?:ed)?(?:\s+at)?|at)\s+(?:[a-zA-Z]\s*=\s*)?(\\pi|π|pi|origin|-?\d+(?:\.\d+)?)/i
+    const cm = withoutOrder.match(
+      /(?:around|about|centered\s+(?:at|on)|center(?:ed)?(?:\s+(?:at|on))?|at)\s+(?:the\s+point\s+)?(?:[a-zA-Z]\s*=\s*)?([^\s,;]+(?:\s*[\/*]\s*[^\s,;]+)*)/i
     );
     if (cm) {
-      const tok = cm[1];
-      const known = CENTERS[tok] ?? CENTERS[tok.toLowerCase()];
-      if (known) {
-        center = known.value;
-        centerLatex = known.latex;
-      } else {
-        const v = Number(tok);
-        if (!Number.isFinite(v)) return null;
-        center = v;
-        centerLatex = String(Math.abs(v)); // sign handled at display time
-      }
+      const parsed = parseCenter(cm[1]);
+      if (!parsed) return null; // center cue present but unparseable → decline
+      center = parsed.value;
+      centerLatex = parsed.latex;
     }
-    // No explicit center on a "Taylor series" ⇒ treat as Maclaurin (center 0).
   }
 
   // --- function ------------------------------------------------------------
@@ -95,6 +101,28 @@ export function parseTaylor(rawLatex: string): TaylorQuery | null {
   if (!Number.isFinite(evalReal(fn, { [variable]: center }))) return null;
 
   return { fn, variable, center, centerLatex, order };
+}
+
+/**
+ * Evaluate a center expression (`\pi/6`, `1/2`, `2\pi/3`, `-3`, `\pi`) to a
+ * numeric value + a LaTeX display, or null when it isn't a finite real — a bare
+ * variable ("a") or garbage returns null so the caller DECLINES rather than
+ * expanding about the wrong point.
+ */
+function parseCenter(raw: string): { value: number; latex: string } | null {
+  const norm = raw.trim().replace(/\\pi/gi, "pi").replace(/π/g, "pi").replace(/\\/g, "");
+  const value = evalReal(norm);
+  if (!Number.isFinite(value)) return null;
+  return { value, latex: centerLatexOf(raw) };
+}
+
+/** A tidy LaTeX rendering of a center expression (fractions → \frac, π kept). */
+function centerLatexOf(raw: string): string {
+  let s = raw.trim().replace(/\s+/g, "").replace(/\*/g, "");
+  s = s.replace(/\\pi|π|pi/gi, "π").replace(/\\/g, "").replace(/π/g, "\\pi");
+  const frac = s.match(/^(-?)(.+?)\/(.+)$/);
+  if (frac) return `${frac[1]}\\frac{${frac[2]}}{${frac[3]}}`;
+  return s;
 }
 
 /**

@@ -116,3 +116,58 @@ describe("Taylor gate — the contact-order test rejects wrong coefficients", ()
     expect(verifyTaylor("cos(x)", "x", 0, 4, [2, 0, -1 / 2, 0, 1 / 24])).toBe(false);
   });
 });
+
+// The adversarial review found 5 golden-rule violations, ALL center-parse
+// fidelity: a correct series about the WRONG center (the gate can't catch that,
+// since the series IS valid about whatever center it was handed). These lock the
+// fixes: the right center is parsed, or the request DECLINES.
+describe("regression — review findings (center fidelity)", () => {
+  it("#1 a π/6 center is parsed as π/6, not π", async () => {
+    const r = await run(String.raw`Taylor series of \sin(x) around x = \pi/6 to order 3`);
+    expect(r.center).toBeCloseTo(Math.PI / 6, 6);
+    expect(r.verified).toBe(true);
+    expect(r.plain?.startsWith("1/2")).toBe(true); // sin(π/6)=1/2
+    expect(r.plain).toContain("\\frac{\\pi}{6}");
+    expect(r.plain).not.toContain("(x - \\pi)"); // the old wrong-center output
+  });
+
+  it("#1 a 1/2 center is parsed as 0.5, not 1", async () => {
+    const r = await run(String.raw`Taylor series of e^x around x = 1/2 to order 3`);
+    expect(r.center).toBeCloseTo(0.5, 9);
+    expect(r.verified).toBe(true);
+    expect(r.plain?.startsWith("1.648721")).toBe(true); // √e, not e
+  });
+
+  it("#2 'at 3rd order' is the ORDER, not a center of 3", async () => {
+    const r = await run(String.raw`Taylor series of \sin(x) at 3rd order`);
+    expect(r).toMatchObject({ center: 0, verified: true, plain: "x - (1/6)x^3" });
+  });
+
+  it("#2 'at 4 terms' is the term COUNT, not a center of 4", async () => {
+    const r = await run(String.raw`Taylor series of \cos(x) at 4 terms`);
+    expect(r).toMatchObject({ center: 0, verified: true });
+  });
+
+  it("#3 a pole at the (correctly-parsed) center declines honestly", async () => {
+    const r = await run(String.raw`Taylor series of \tan(x) around \pi/2 order 4`);
+    expect(r.strategy).toBe("taylor");
+    expect(r.center).toBeCloseTo(Math.PI / 2, 6);
+    expect(r.verified).toBe(false); // tan has a pole at π/2 — no series
+  });
+
+  it("#3 a symbolic center declines (never silently defaults to 0)", () => {
+    const c = classify(String.raw`Taylor series of e^x centered at a to order 3`);
+    expect(c.strategy).not.toBe("taylor");
+  });
+
+  it("#4 'about the point x=2' is parsed as center 2, not Maclaurin", async () => {
+    const r = await run(String.raw`Find the Taylor series of e^x about the point x=2 to order 3`);
+    expect(r).toMatchObject({ center: 2, verified: true });
+    expect(r.plain).toContain("(x - 2)");
+  });
+
+  it("#5 the surname 'Taylor' in prose is NOT a series request", () => {
+    const c = classify(String.raw`Taylor drew a 5 degree angle, then a line. Find the value of x.`);
+    expect(c.strategy).not.toBe("taylor");
+  });
+});
