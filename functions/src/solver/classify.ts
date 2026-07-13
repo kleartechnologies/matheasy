@@ -6,7 +6,7 @@
  * tier otherwise (integrals, higher-degree/trig equations, systems). Every path
  * carries a `verifyMode`: the answer is proven before it is ever returned.
  */
-import { parseLinalg } from "./linalg";
+import { parseLinalg, parseVectors } from "./linalg";
 import { parseStatistics } from "./statistics";
 import { Classification, Strategy, VerifyMode } from "./types";
 import {
@@ -149,14 +149,30 @@ export function classify(rawLatex: string): Classification {
     });
   }
 
-  // --- Linear algebra (determinant / inverse / eigenvalues) ---------------
+  // --- Linear algebra (determinant / inverse / eigenvalues / product) ------
   // DETERMINISTIC via mathjs; the gap was parsing the matrix + a verify gate.
-  // Property-checked (A·A⁻¹=I, det(A−λI)=0, independent cofactor det).
+  // Property-checked (A·A⁻¹=I, det(A−λI)=0, independent cofactor det, and an
+  // independent row×column recompute for the product).
   const linalg = parseLinalg(rawLatex);
   if (linalg) {
-    return base("linalg", "linalg", "x", false, "none", {
-      linalgOp: linalg.op,
-      matrixData: linalg.matrix,
+    return base(
+      linalg.op === "multiply" ? "matrix_product" : "linalg",
+      "linalg",
+      "x",
+      false,
+      "none",
+      { linalgOp: linalg.op, matrixData: linalg.matrix, matrixB: linalg.matrixB }
+    );
+  }
+
+  // --- Vectors (dot / cross / magnitude) ----------------------------------
+  // Also deterministic: mathjs computes it, then an independent recompute
+  // agrees (cross also proven ⊥ to both operands).
+  const vectors = parseVectors(rawLatex);
+  if (vectors) {
+    return base("vector_" + vectors.op, "linalg", "x", false, "none", {
+      vectorOp: vectors.op,
+      vectorData: vectors.vectors,
     });
   }
 

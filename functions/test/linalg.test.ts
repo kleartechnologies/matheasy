@@ -51,3 +51,49 @@ describe("classify + solve — linear algebra", () => {
     expect(r.verified).toBe(false); // ±i are not real
   });
 });
+
+describe("classify + solve — matrix product", () => {
+  it("multiplies two conformable matrices (recompute-verified)", async () => {
+    const B = String.raw`\begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}`;
+    const r = await run(`${M2} ${B}`);
+    expect(r.type).toBe("matrix_product");
+    expect(r.op).toBe("multiply");
+    expect(r).toMatchObject({ verified: true, plain: "19, 22; 43, 50" });
+  });
+
+  it("declines a non-conformable product (shapes don't line up)", async () => {
+    // 2×2 times 3×2 — inner dimensions 2 ≠ 3.
+    const A = String.raw`\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}`;
+    const B = String.raw`\begin{pmatrix} 1 & 2 \\ 3 & 4 \\ 5 & 6 \end{pmatrix}`;
+    const r = await run(`${A} ${B}`);
+    expect(r.verified).toBe(false);
+  });
+});
+
+async function runVec(input: string) {
+  const c = classify(input);
+  const p = await solve(c, NEVER);
+  return { op: c.vectorOp, type: c.problemType, verified: p.verified, plain: p.finalAnswer?.plain };
+}
+
+describe("classify + solve — vectors", () => {
+  it("dot product (independent recompute)", async () => {
+    const r = await runVec(String.raw`(1,2,3) \cdot (4,5,6)`);
+    expect(r).toMatchObject({ op: "dot", type: "vector_dot", verified: true, plain: "32" });
+  });
+
+  it("cross product (recompute + ⊥ to both operands)", async () => {
+    const r = await runVec(String.raw`(1,0,0) \times (0,1,0)`);
+    expect(r).toMatchObject({ op: "cross", verified: true, plain: "(0, 0, 1)" });
+  });
+
+  it("magnitude of a vector", async () => {
+    const r = await runVec(String.raw`magnitude of (3,4)`);
+    expect(r).toMatchObject({ op: "magnitude", verified: true, plain: "5" });
+  });
+
+  it("cross product of parallel vectors is the zero vector", async () => {
+    const r = await runVec(String.raw`(1,2,3) \times (2,4,6)`);
+    expect(r).toMatchObject({ op: "cross", verified: true, plain: "(0, 0, 0)" });
+  });
+});

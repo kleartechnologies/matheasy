@@ -124,9 +124,13 @@ export interface Classification {
   ineqLhs?: string;
   ineqRhs?: string;
   ineqOp?: "<" | ">" | "<=" | ">=";
-  /** A linear-algebra request: the operation + its (square) matrix. */
+  /** A linear-algebra request: the operation + its matrix (+ a second, for A·B). */
   linalgOp?: string;
   matrixData?: number[][];
+  matrixB?: number[][];
+  /** A vector request: dot/cross/magnitude + the operand vector(s). */
+  vectorOp?: string;
+  vectorData?: number[][];
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */
