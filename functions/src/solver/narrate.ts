@@ -121,7 +121,7 @@ Rules:
   • Exponential/transcendental equation (the unknown is in an exponent, e.g. 3^(2x+1)+4·3^x-15=0): substitute u = base^x to get a polynomial in u, solve it, DISCARD non-positive u (base^x > 0), then take the log: x = log_base(u). Put the exact form in "answerLatex" (e.g. x = \\log_3 \\tfrac{5}{3}) and the numeric root(s) in "solutions" to 6+ significant digits.
   • System of equations: one entry per variable.
   • Trigonometric equation (infinitely many solutions): put the GENERAL solution in "answerLatex" (e.g. "x = \\frac{\\pi}{6} + 2\\pi n"), and list the PRINCIPAL numeric solutions in the interval [0, 2\\pi) in "solutions" as decimal radians (one entry each).
-  • Indefinite integral: put the antiderivative (WITHOUT +C) in "answerLatex"; leave "solutions" as [].
+  • Indefinite integral: put the antiderivative (WITHOUT +C) in "answerLatex"; leave "solutions" as []. For a rational integrand, use partial fractions; the antiderivative may contain natural logs of absolute values (e.g. 5\\ln|x+3| + 4\\ln|x-2|) — that exact form is fine.
   • Definite integral: put the exact value in "answerLatex" and "answerPlain"; leave "solutions" as [].
 - Provide 1-2 methods, exactly one with "examPick": true, each with 2-5 steps.
 - All LaTeX must be valid and delimiter-free (no $, no \\[ \\]).`;

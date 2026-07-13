@@ -189,6 +189,38 @@ describe("solve — resilience", () => {
   });
 });
 
+describe("solve — ∫(9x+2)/(x²+x-6)dx (rational integral) verifies via ln|…|", () => {
+  it("classifies as an indefinite integral and verifies the partial-fractions "
+    + "antiderivative 5ln|x+3|+4ln|x-2| (abs no longer breaks derivative-back)",
+    async () => {
+    const p = await solve(
+      classify("\\int \\frac{9x+2}{x^2+x-6} dx"),
+      completerWith({
+        answerLatex: "5\\ln|x+3| + 4\\ln|x-2|",
+        answerPlain: "5 ln|x+3| + 4 ln|x-2|",
+        solutions: [],
+        methods: [],
+      })
+    );
+    expect(p.problemType).toBe("integral");
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.latex).toContain("\\ln");
+  });
+
+  it("still REJECTS a wrong antiderivative (derivative-back gate intact)", async () => {
+    const p = await solve(
+      classify("\\int \\frac{9x+2}{x^2+x-6} dx"),
+      completerWith({
+        answerLatex: "\\ln|x+3| + \\ln|x-2|", // wrong coefficients
+        answerPlain: "ln|x+3| + ln|x-2|",
+        solutions: [],
+        methods: [],
+      })
+    );
+    expect(p.verified).toBe(false);
+  });
+});
+
 describe("solve — 3^{2x+1}+4(3^x)-15=0 (exponential) verifies a precise root", () => {
   const EQ = "3^{2x+1} + 4(3^x) - 15 = 0";
 

@@ -90,6 +90,15 @@ export function latexToAscii(latex: string): string {
     s = s.replace(new RegExp(`\\\\${fn}\\b`, "g"), fn);
   }
 
+  // Absolute value → abs(): `\lvert…\rvert` / `\vert` macros first, then the
+  // bar pair (`\left|…\right|` already lost its \left/\right in cleanLatex).
+  // Wrapped in parens so a preceding function/coefficient binds: `log|x+3|` →
+  // `log(abs(x+3))`, `5|x|` → `5(abs(x))`. mathjs can't parse a bare `|`, and
+  // its symbolic derivative DOES handle abs — so a `\ln|…|` antiderivative (the
+  // natural form for ∫ of a rational function) now verifies instead of throwing.
+  s = s.replace(/\\[lr]?[vV]ert/g, "|");
+  s = s.replace(/\|([^|]+)\|/g, (_, inner) => `(abs(${inner.trim()}))`);
+
   s = s.replace(/[{}]/g, ""); // any braces the conversions left behind
   s = s.replace(/\\\\/g, " "); // row breaks
   return s.replace(/\s+/g, " ").trim();

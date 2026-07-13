@@ -22,6 +22,17 @@ describe("latexToAscii", () => {
       "sqrt(2) * x + sin(3x)"
     );
   });
+  it("converts absolute-value bars to abs() (so ln|…| antiderivatives verify)", () => {
+    // Bars, wrapped so a preceding function/coefficient binds correctly.
+    expect(latexToAscii("5\\ln|x+3| + 4\\ln|x-2|")).toBe(
+      "5log(abs(x+3)) + 4log(abs(x-2))"
+    );
+    // \left|…\right| loses its \left/\right in cleanLatex, then the bars fold.
+    expect(latexToAscii("\\left|x-2\\right|")).toBe("(abs(x-2))");
+    // \lvert…\rvert / \vert macros too.
+    expect(latexToAscii("\\lvert x \\rvert")).toBe("(abs(x))");
+  });
+
   it("strips braces from exponents", () => {
     expect(latexToAscii("x^{2} - 5x + 6 = 0")).toBe("x^(2) - 5x + 6 = 0");
   });
