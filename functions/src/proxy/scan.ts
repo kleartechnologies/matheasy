@@ -41,19 +41,52 @@ interface ScanPayload {
   confidence: number;
 }
 
-const SYSTEM_PROMPT = `You are the math OCR engine inside the Matheasy app. You read a photo and return ONLY a JSON object (no prose, no markdown) with this exact shape:
-{
-  "isMath": boolean,      // true only if the image contains a real math problem or expression
-  "problem": string,      // the single primary problem as clean LaTeX, e.g. "2x + 5 = 15" or "\\frac{3}{4} + \\frac{1}{2}"; "" when isMath is false
-  "topic": string,        // one of: arithmetic, fraction, percentage, ratio, linear_equation, quadratic, simultaneous, trigonometry, geometry, calculus, statistics, other
-  "confidence": number    // 0.0-1.0, how clearly the problem was read
+/** A coerced, trusted recognition result (field types validated). */
+export interface ScanResult {
+  isMath: boolean;
+  problem: string;
+  topic: string;
+  confidence: number;
 }
-Rules:
-- Identify the main math problem in the photo. If several are present, choose the single clearest, most complete problem.
-- Extract it as valid LaTeX with NO surrounding math delimiters (no $, no \\[ \\], no \\( \\)).
-- Classify the topic using exactly one of the allowed values above.
-- Set isMath=false (and problem="") for photos that contain no math.
-- confidence must reflect legibility: high when the problem is crisp and centered, lower when blurry or partially cropped.`;
+
+/**
+ * Coerce the model's raw JSON into a trusted [ScanResult]. `json_object` mode
+ * guarantees syntactic JSON, not field types, so nothing here is trusted before
+ * validation. Crucially it TRIMS but never truncates `problem` — the full
+ * multi-line transcription (every line, sub-part and the question, with `\\` row
+ * breaks) must survive intact to reach the solver.
+ */
+export function coerceScanResult(raw: unknown): ScanResult {
+  const r = (raw ?? {}) as Partial<ScanPayload>;
+  return {
+    isMath: r.isMath === true,
+    problem: typeof r.problem === "string" ? r.problem.trim() : "",
+    topic: typeof r.topic === "string" ? r.topic : "other",
+    confidence:
+      typeof r.confidence === "number"
+        ? Math.min(1, Math.max(0, r.confidence))
+        : 0.9,
+  };
+}
+
+export const SYSTEM_PROMPT = `You are the math OCR engine inside the Matheasy app. You read a photo of a math problem and return ONLY a JSON object (no prose, no markdown) with this exact shape:
+{
+  "isMath": boolean,      // true if the image contains any real math problem, expression, or question
+  "problem": string,      // the COMPLETE problem transcribed as LaTeX (see rules below); "" when isMath is false
+  "topic": string,        // one of: arithmetic, fraction, percentage, ratio, linear_equation, quadratic, simultaneous, trigonometry, geometry, calculus, statistics, other
+  "confidence": number    // 0.0-1.0, how clearly the WHOLE problem was read
+}
+Transcription rules — capture the ENTIRE problem, never just one line:
+- Transcribe EVERYTHING in the photo that is part of the problem: every line, all given conditions and definitions, EVERY sub-part, and the actual question(s) asked. NEVER drop a line, a "given", or the question — a problem can only be solved with its full context (e.g. a condition like "f'(2) = 10" or "tan θ = 2", and the "find …" question, are essential and MUST be included).
+- Preserve the LINE STRUCTURE: put each printed line / statement on its own line, separated by a LaTeX row break " \\\\ ".
+- Preserve PART NUMBERING exactly as printed — (i), (ii), (a), (b), 1., 2., etc. — each kept with its own text.
+- Preserve every mathematical relationship exactly: equations, primes for derivatives (f'(x)), subscripts, powers, fractions, integrals, d/dx, Greek letters like θ, etc.
+- Write words and instructions as \\text{...} and math as LaTeX; keep everything delimiter-free (no $, no \\[ \\], no \\( \\)).
+- Do NOT solve, simplify, evaluate, or answer anything — transcribe ONLY what is written.
+- Classify the topic using exactly one allowed value (use the topic of the main computation). Set isMath=false (and problem="") only when the image contains no math at all.
+- confidence reflects how legibly the WHOLE problem was read.
+Example of a well-formed multi-part transcription:
+"\\text{It is given that } \\tan\\theta = 2. \\\\ \\text{(i) Find the exact value of } \\tan A \\text{, given that } \\tan(A+\\theta)=4. \\\\ \\text{(ii) Find the exact value of } \\tan B \\text{, given that } \\sin(B+\\theta)=3\\cos(B-\\theta)."`;
 
 export const recognizeEquation = onCall(
   { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 60 },
@@ -112,8 +145,9 @@ export const recognizeEquation = onCall(
         OPENAI_MODEL.value(),
         SYSTEM_PROMPT,
         imageDataUri,
-        "Read the math problem in this photo and return the JSON described above.",
-        { temperature: 0.1, maxTokens: 700 }
+        "Read the ENTIRE math problem in this photo — every line, all given conditions, every sub-part, and the question(s) — and return the JSON described above.",
+        // Room for a full multi-part transcription (givens + (i)/(ii)/… + questions).
+        { temperature: 0.1, maxTokens: 1200 }
       );
     } catch (err) {
       // A not-found (or any other HttpsError) must not be masked as internal.
@@ -127,16 +161,9 @@ export const recognizeEquation = onCall(
       );
     }
 
-    // Coerce the model's output — `json_object` guarantees syntactic JSON, not
-    // field types, so never trust `result.problem` to be a string.
-    const isMath = result.isMath === true;
-    const problem =
-      typeof result.problem === "string" ? result.problem.trim() : "";
-    const topic = typeof result.topic === "string" ? result.topic : "other";
-    const confidence =
-      typeof result.confidence === "number"
-        ? Math.min(1, Math.max(0, result.confidence))
-        : 0.9;
+    // Coerce the model's output (types are not guaranteed by json_object mode).
+    // Preserves the full multi-line `problem` intact for the solver.
+    const { isMath, problem, topic, confidence } = coerceScanResult(result);
 
     // Meter the paid Vision call HERE, before the not-found check: the request
     // was billed the moment `chatVisionJson` returned, whether or not math was

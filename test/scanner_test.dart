@@ -86,6 +86,24 @@ void main() {
       expect(eq.confidence, closeTo(0.9, 1e-9));
     });
 
+    test('preserves a FULL multi-line problem transcription (no truncation)',
+        () async {
+      // Regression: OCR used to drop everything but one equation. The client must
+      // pass the whole multi-line problem — given + question + all parts — through
+      // to DetectedEquation.latex verbatim, so the solver receives full context.
+      const fullProblem =
+          r"\text{f(x) is differentiable} \\ x \cdot f'(x) + f(x) = "
+          r"\frac{d}{dx}(x^4 - x) \\ f'(2) = 10 \\ \text{what is } f(-1)?";
+      final service = FunctionsScannerService((name, data) async =>
+          {'latex': fullProblem, 'confidence': 0.9, 'topic': 'calculus'});
+      final eq =
+          await service.recognize(ScanSource.camera, imageBytes: _bytes());
+      expect(eq.latex, fullProblem); // every line intact
+      expect(eq.latex, contains("f'(2) = 10")); // the given
+      expect(eq.latex, contains('f(-1)')); // the question
+      expect(r'\\'.allMatches(eq.latex).length, 3); // 4 lines → 3 row breaks
+    });
+
     test('falls back to LaTeX inference when topic is unknown/absent', () async {
       final service = FunctionsScannerService((name, data) async =>
           {'latex': r'\frac{1}{2} + \frac{1}{3}', 'confidence': 0.8});

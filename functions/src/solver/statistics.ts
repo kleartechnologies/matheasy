@@ -50,10 +50,35 @@ export function parseStatistics(rawLatex: string): StatQuery | null {
     return null;
   }
 
+  // A descriptive statistic is computed over a concrete NUMERIC DATA SET. The
+  // stat KEYWORDS are common English, so they collide with CALCULUS ("average
+  // value of f(x) on [0,6]", "minimum value of f", "range of the function",
+  // "average rate of change", "Mean Value Theorem") and with WORD PROBLEMS ("the
+  // average of three numbers is 20 … find the third"). Reading a statistic off
+  // the interval endpoints or the given numbers there ships a CONFIDENT WRONG
+  // answer (mean([0,6])=3 for an average-value integral whose answer is 12).
+  // Decline anything that isn't a bare data-set query, and let the calculus /
+  // word-problem paths (or an honest couldn't-verify) handle it:
+  //   (a) a function/variable in a math expression, an interval literal, or a
+  //       calculus phrase ⇒ it's not a data set;
+  if (
+    /[A-Za-z]\s*\(\s*[A-Za-z]/.test(rawLatex) || // function notation, e.g. f(x)
+    /[A-Za-z]\s*\^\s*[-{(\d]|[A-Za-z][²³]/.test(rawLatex) || // a variable power, e.g. x^2
+    /\[\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*\]/.test(rawLatex) || // an interval [a,b]
+    /\b(rate\s+of\s+change|the\s+function|value\s+of|mean\s+value\s+theorem|average\s+value|on\s+the\s+interval|derivative|integral|tangent|gradient|curve)\b/i.test(
+      rawLatex
+    )
+  ) {
+    return null;
+  }
+
   let stat: StatKind | null = null;
+  let keywordEnd = -1;
   for (const [re, s] of KEYWORDS) {
-    if (re.test(rawLatex)) {
+    const m = re.exec(rawLatex);
+    if (m) {
       stat = s;
+      keywordEnd = m.index + m[0].length;
       break;
     }
   }
@@ -64,6 +89,16 @@ export function parseStatistics(rawLatex: string): StatQuery | null {
   const runs = rawLatex.match(/-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?)+/g);
   if (!runs) return null;
   const best = runs.slice().sort((a, b) => b.length - a.length)[0];
+
+  //   (b) the data must DIRECTLY follow the keyword — only connective words in
+  //       between — so a narrative sentence can't sit between them ("the average
+  //       of three numbers is 20. Two of them are 12, 15" reads mean([12,15])).
+  const dataStart = rawLatex.indexOf(best);
+  if (dataStart < keywordEnd) return null; // data appears before the keyword
+  const gapWords =
+    rawLatex.slice(keywordEnd, dataStart).toLowerCase().match(/[a-z]+/g) ?? [];
+  if (gapWords.some((w) => !GAP_CONNECTIVES.has(w))) return null;
+
   const data = best
     .split(",")
     .map((t) => Number(t.trim()))
@@ -71,6 +106,13 @@ export function parseStatistics(rawLatex: string): StatQuery | null {
   if (data.length < 2) return null;
   return { stat, data };
 }
+
+/** Words allowed between a stat keyword and its data ("mean OF THE DATA SET …"). */
+const GAP_CONNECTIVES = new Set([
+  "of", "the", "a", "an", "data", "set", "list", "value", "values", "number",
+  "numbers", "following", "for", "are", "is", "and", "given", "these", "this",
+  "text",
+]);
 
 /** Solves a descriptive-statistics request, gated by an independent recompute. */
 export function solveStatistics(cls: {

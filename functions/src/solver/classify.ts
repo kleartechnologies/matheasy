@@ -53,7 +53,24 @@ export function classify(rawLatex: string): Classification {
   // (\int, \frac{d}{dx}, ODE, …) sees one form. cleanLatex re-applies it for the
   // ascii path; it's idempotent.
   rawLatex = normalizeMacros(rawLatex);
+  // The DISPLAY latex keeps the whole problem as read (directives + prose).
   const latex = cleanLatex(rawLatex);
+
+  // The tutor-routing checks need the FULL text (they look for "find x²", sub-
+  // parts, "hence"); compute them BEFORE stripping the leading directive below.
+  const conceptual = looksLikeConceptual(rawLatex);
+  const multiPart = !conceptual && looksLikeMultiPart(rawLatex);
+
+  // With the OCR now capturing prose, a single problem often arrives with a
+  // leading imperative — "Solve 2x+5=15", "Find x: …", "Calculate the value of
+  // …". Those directive words would pollute classification (their letters read
+  // as variables → a bogus system → decline). Strip a leading directive from the
+  // SOLVING representation (never a conceptual / multi-part one) so the clean
+  // math underneath classifies normally; the display `latex` above is untouched.
+  if (!conceptual && !multiPart) {
+    rawLatex = stripLeadingDirective(rawLatex);
+  }
+
   // A cases/aligned system writes its equations with `\\` row breaks; turn those
   // into `;` (and drop the wrapper + `&` alignment tabs) so equationParts can
   // split them. Only when such an environment is present — matrices (pmatrix,
@@ -87,11 +104,22 @@ export function classify(rawLatex: string): Classification {
   });
 
   // --- Proofs / abstract algebra / real analysis → the AI tutor -----------
-  // Detected FIRST: these have no answer to compute-and-verify, so instead of
-  // faking one (or a misleading "couldn't verify"), classify marks them so solve
-  // returns a routeToTutor state and the client offers to work through it.
-  if (looksLikeConceptual(rawLatex)) {
+  // These have no answer to compute-and-verify, so instead of faking one (or a
+  // misleading "couldn't verify"), route to the tutor (routeToTutor state).
+  if (conceptual) {
     return base("conceptual", "conceptual", "x", false, "none");
+  }
+
+  // --- Multi-part / derived-question problems → the AI tutor --------------
+  // A single problem gets ONE verified answer; a MULTI-PART question does not.
+  // With the OCR now capturing the whole problem, inputs like "given 2x+5=15,
+  // find x²", "(i) … (ii) …", or "solve the system, find xy" reach the solver.
+  // The single-answer engines would solve the equation and confidently show its
+  // ROOT — the WRONG quantity for a question that asks for x² / xy / sin 2x /
+  // part (b). There's no single value to substitution-verify, so (like a proof)
+  // route it to the tutor rather than ship a confident wrong answer.
+  if (multiPart) {
+    return base("multi_part", "conceptual", "x", false, "none");
   }
 
   // --- Taylor / Maclaurin series (deterministic via mathjs) ---------------
@@ -317,9 +345,8 @@ export function classify(rawLatex: string): Classification {
   const multiEquation = parts.length > 1;
 
   if (multiEquation || vars.length >= 2) {
-    // A square LINEAR system solves deterministically (mathjs, verified A·x=b).
-    // Only when that declines (non-linear, non-square, singular) fall back to the
-    // verified LLM tier.
+    // A square LINEAR system solves deterministically (mathjs, verified A·x=b) and
+    // is provably UNIQUE — keep that path.
     if (multiEquation) {
       const sys = parseLinearSystem(parts, vars);
       if (sys) {
@@ -328,13 +355,12 @@ export function classify(rawLatex: string): Classification {
         });
       }
     }
-    return base(
-      "system_of_equations",
-      "llm_candidate",
-      pickUnknown(vars),
-      true,
-      "substitution"
-    );
+    // Anything else here is a NON-linear or NON-square/underdetermined system
+    // (y=x² & y=x+2 has two solutions; x+y+z=6 & x−y=0 has infinitely many). The
+    // substitution gate can only confirm that ONE assignment satisfies the
+    // equations — it can't prove that assignment is unique or complete — so
+    // shipping it would be a confident wrong/partial answer. Route to the tutor.
+    return base("system_of_equations", "conceptual", pickUnknown(vars), true, "none");
   }
 
   const unknown = pickUnknown(vars);
@@ -471,6 +497,12 @@ function readBraceGroup(
  */
 function parseIntegral(rawLatex: string): ParsedIntegral {
   const intMatch = rawLatex.match(/\\int|∫/);
+  // A coefficient or sign BEFORE the integral sign — `-\int`, `2\int`,
+  // `\frac{1}{2}\int` — scales the whole integral. Fold it into the integrand so
+  // the gate (which numerically integrates / differentiates the integrand) sees
+  // it; otherwise it was silently dropped and `-\int_0^1 x²dx` verified as +1/3.
+  const prefixRaw = intMatch ? rawLatex.slice(0, intMatch.index ?? 0).trim() : "";
+  const coefficient = prefixRaw ? latexToAscii(prefixRaw).trim() : "";
   let rest = intMatch
     ? rawLatex.slice((intMatch.index ?? 0) + intMatch[0].length)
     : rawLatex.replace(/\bintegral\b/gi, "");
@@ -495,9 +527,16 @@ function parseIntegral(rawLatex: string): ParsedIntegral {
 
   const cleaned = latexToAscii(rest);
   const m = cleaned.match(/^(.*?)\s*d\s*([a-zA-Z])\s*$/);
-  const integrand = (m ? m[1] : cleaned).trim();
+  let integrand = (m ? m[1] : cleaned).trim();
   const unknown = m ? m[2] : "x";
   const definite = lower !== undefined && upper !== undefined;
+
+  // Apply the leading coefficient/sign as a factor on the integrand.
+  if (coefficient === "-" || coefficient === "+") {
+    integrand = `${coefficient}(${integrand})`;
+  } else if (coefficient) {
+    integrand = `(${coefficient})*(${integrand})`;
+  }
 
   return {
     definite,
@@ -588,6 +627,169 @@ const CONCEPT_TERMS =
 function looksLikeConceptual(rawLatex: string): boolean {
   return PROOF_CUES.test(rawLatex) || CONCEPT_TERMS.test(rawLatex);
 }
+
+/** Imperatives that pose a question part ("find …", "hence …", "sketch …"). */
+const ASK_VERBS =
+  /\b(find|evaluate|determine|calculate|compute|work\s*out|factori[sz]e|expand|simplify|sketch|state|prove|verify|show\s+that|write\s+down|hence)\b/gi;
+
+/**
+ * True when the input is a MULTI-PART or DERIVED-QUANTITY question rather than a
+ * single solvable problem — see the call site. The single-answer engines would
+ * confidently return one equation's root, which is the wrong quantity when the
+ * question asks for a derived expression (x², xy, sin 2x) or has several parts.
+ * Conservative: it fires on explicit multi-part structure, never on a bare
+ * "solve …" / "find x" / "find the roots" / an integral / a derivative.
+ */
+function looksLikeMultiPart(rawLatex: string): boolean {
+  // 1) Sub-part labels: (i) (ii) (iii) (iv) (a) (b) (c) (d). The "(" must not be
+  //    glued to a symbol, so a function value like f(a) or a point (a,b) is safe.
+  if (/(?:^|[\s\\}])\(\s*(?:i{1,3}|iv|v|[a-d])\s*\)/i.test(rawLatex)) return true;
+  // 2) "hence" always chains a second part off the first.
+  if (/\bhence\b/i.test(rawLatex)) return true;
+  // 3) Two or more distinct question imperatives ⇒ multi-part.
+  if ((rawLatex.match(ASK_VERBS) ?? []).length >= 2) return true;
+  // 3b) A word problem that asks SEVERAL things — two "?" / question phrases
+  //     ("what is its area? what is its perimeter?"), or "find X and the Y".
+  const questionMarks = (rawLatex.match(/\?/g) ?? []).length;
+  const questionPhrases = (
+    rawLatex.match(/\b(what\s+(?:is|are)|how\s+(?:many|much|far|fast|long|old|big))\b/gi) ?? []
+  ).length;
+  if (Math.max(questionMarks, questionPhrases) >= 2) return true;
+  if (
+    /\b(?:find|calculate|determine|work\s*out|what\s+(?:is|are))\b[^.?]*\b(?:and\s+(?:the|also|her|his|its|their)|as\s+well\s+as|along\s+with|together\s+with)\b/i.test(
+      rawLatex
+    )
+  ) {
+    return true;
+  }
+  // 4) A separate "<expression> = ?" / "= □" question line alongside another
+  //    equation (a GIVEN): the placeholder marks a derived quantity to compute
+  //    ("cos x = 3/5  \\  sin 2x = ?"), distinct from solving the given.
+  if (
+    /=\s*(?:\?|\\square|\\Box)/.test(rawLatex) &&
+    (rawLatex.match(/=/g) ?? []).length >= 2
+  ) {
+    return true;
+  }
+  // 5) Two separated statements that mix a standalone EXPRESSION (no "=") with an
+  //    EQUATION — two different problems run together (e.g. "factor x²-5x+6" and
+  //    "solve x-2=0"), which flattening would merge into one wrong equation.
+  const segments = rawLatex
+    .split(/\\\\|[;\n\r]|\\begin\s*\{[^}]*\}|\\end\s*\{[^}]*\}/)
+    .map((seg) => seg.replace(/\\text\s*\{[^{}]*\}/g, " ").trim())
+    .filter((seg) => /[a-zA-Z0-9]/.test(seg));
+  if (segments.length >= 2) {
+    // Each side must START as its own statement (an alphanumeric, "(", or a
+    // function macro like \cos) — not a binary operator, which would mark a
+    // wrapped continuation of one equation ("x²+2x  \\  +1=0"), not two problems.
+    const statement = (seg: string) => /^(?:[a-zA-Z0-9(]|\\[a-zA-Z])/.test(seg);
+    const hasBareExpr = segments.some(
+      (seg) =>
+        statement(seg) &&
+        !seg.includes("=") &&
+        // A standalone expression the "=" question is derived from: a polynomial
+        // (x²-5x+6), a coefficient·variable (2x), OR a trig/log function (cos x —
+        // "given sin x=0.5, find cos x" splits its ask onto its own line).
+        /[a-zA-Z].*[-+*/^].*\d|\d.*[-+*/^].*[a-zA-Z]|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b/i.test(
+          seg
+        )
+    );
+    const hasEquation = segments.some(
+      (seg) => statement(seg) && /[a-zA-Z0-9]\s*=\s*\S/.test(seg)
+    );
+    if (hasBareExpr && hasEquation) return true;
+  }
+  // 6) A "find/evaluate <derived expression>" alongside an equation/given: the
+  //    ask is for something COMPUTED FROM the solution (x², xy, 1/x, sin 2x,
+  //    2x+1), not the plain solution itself. `find x` / `find the roots` / `find
+  //    the value of x` are the plain solution and DON'T count.
+  return asksForDerivedQuantity(rawLatex);
+}
+
+/** Does the input pair an equation/given with a "find <derived expression>"? */
+function asksForDerivedQuantity(rawLatex: string): boolean {
+  // Needs a relation to solve first (an "=", excluding a blank "= □" placeholder).
+  if (!/=/.test(rawLatex.replace(/\\square|\\Box|=\s*\?/g, ""))) return false;
+  // Grab the text right after a "find / evaluate / what is / how many" ask
+  // (keep words; drop \text braces and environment delimiters).
+  const s = rawLatex
+    .replace(/\\(?:begin|end)\s*\{[^{}]*\}/g, " ")
+    .replace(/\\text\s*\{([^{}]*)\}/g, " $1 ");
+  const m =
+    /\b(?:find|evaluate|determine|calculate|compute|work\s*out|what\s+(?:is|are)|how\s+(?:many|much))\b\s+(.*)$/is.exec(
+      s
+    );
+  if (!m) return false;
+  // Cut at the first clause end — a ":", sentence stop, or row break — so a
+  // trailing "…: 2x+5=15" equation isn't mistaken for the ask target.
+  let target = (m[1] ?? "").split(/[:.?;]|\\\\/)[0].trim();
+  // A request for a Taylor/Maclaurin SERIES, an INTEGRAL, a DERIVATIVE, or a
+  // LIMIT is not a derived-quantity ask — it has its own deterministic engine
+  // ("find the Taylor series of e^x about x=2"). Leave it for that parser.
+  if (
+    /\b(series|expansion|maclaurin|taylor|integral|antiderivative|derivative|limit)\b/i.test(
+      target
+    )
+  ) {
+    return false;
+  }
+  // Strip a "(the) (exact) value(s) of" / leading "the" lead-in.
+  target = target
+    .replace(/^(?:the\s+)?(?:exact\s+)?values?\s+of\s+/i, "")
+    .replace(/^the\s+/i, "")
+    .trim();
+  if (!target) return false;
+  // The plain SOLUTION — not derived, so a normal solve handles it: the roots /
+  // solutions, a bare variable, or a variable list ("x and y", "x, y").
+  if (/^(?:roots?|solutions?)\b/i.test(target)) return false;
+  if (/^[a-zA-Z]$/.test(target)) return false;
+  if (/^[a-zA-Z](?:\s*(?:,|and)\s*[a-zA-Z])+$/i.test(target)) return false;
+  // A short all-letter token that isn't a common word is a VARIABLE PRODUCT (xy,
+  // pq) — a derived quantity.
+  if (/^[a-z]{2,4}$/i.test(target) && !NON_PRODUCT_WORDS.has(target.toLowerCase())) {
+    return true;
+  }
+  // Derived if the ask target applies an OPERATION to a variable: a power (x²,
+  // x^2), a trig/log function, a product/ratio, an added term (2x+1), a function
+  // evaluated at a point (f(2)), or the words squared/cubed/product.
+  return /[a-zA-Z]\s*\^|[a-zA-Z][²³]|\bsquared\b|\bcubed\b|\bproduct\b|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b|\\frac|[a-zA-Z]\s*[/*]|[a-zA-Z]\s*\(\s*-?\d|\d\s*[a-zA-Z]|[a-zA-Z]\s+[a-zA-Z]/i.test(
+    target
+  );
+}
+
+/**
+ * Strip a leading imperative directive ("Solve …", "Find x: …", "Calculate the
+ * value of …", "Evaluate …") when it's immediately followed by the MATH to work
+ * on, so the directive words don't pollute classification. Only strips when what
+ * remains starts as math — a word problem ("Find the number of apples John …")
+ * has prose after the verb and is left untouched.
+ */
+function stripLeadingDirective(rawLatex: string): string {
+  const m =
+    /^\s*(?:\\text\s*\{\s*)?(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b(?:\s+(?:for|the|exact|values?|of|roots?|solutions?))*(?:\s+[a-z](?=\s*[:.}]))?\s*[:.]?\s*\}?\s*/i.exec(
+      rawLatex
+    );
+  if (!m) return rawLatex;
+  const rest = rawLatex.slice(m[0].length).trim();
+  // Keep the strip only if the remainder begins as a math expression, not more
+  // prose — a number, a fraction/integral/function macro, a parenthesis, or a
+  // variable next to an operator (`x =`, `2x`, `x^2`).
+  if (
+    /^(?:[-(]?\d|\\frac|\\d?frac|\\int|∫|\\sqrt|\\sin|\\cos|\\tan|\\log|\\ln|\(|[a-zA-Z]\s*[=+\-*/^]|[a-zA-Z]\s*\()/.test(
+      rest
+    )
+  ) {
+    return rest;
+  }
+  return rawLatex;
+}
+
+/** Short words that are NOT a variable product (so "find the sum" isn't derived). */
+const NON_PRODUCT_WORDS = new Set([
+  "the", "and", "for", "all", "any", "one", "two", "six", "ten", "sum", "set",
+  "let", "get", "see", "are", "its", "new", "area", "cost", "rate", "mean",
+  "mode", "size", "time", "term", "each", "them", "this", "that", "then",
+]);
 
 /**
  * A single-variable inequality: normalize the comparison macro, then split on
