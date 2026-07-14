@@ -101,10 +101,29 @@ codesign --verify --strict "$STAGE/Runner.app" || die "Signature verification fa
 say "Signed & verified."
 
 # --- 5. install + launch ---------------------------------------------------
+# devicectl logs "Failed to load provisioning parameter list … No provider was
+# found" when installing a PRE-SIGNED bundle headlessly: it looks for a developer
+# ACCOUNT provider to (re)provision through, finds none in this CLI context, and
+# installs the already-validly-signed app anyway. It is benign — the app carries
+# a valid embedded profile that lists this device — so we DROP that specific line
+# and instead trust the explicit "App installed" / "Launched application"
+# markers, dying only if THOSE are missing (a real failure).
+BENIGN='No provider was found|Failed to load provisioning'
+
 say "Installing on device…"
-xcrun devicectl device install app --device "$UDID" "$STAGE/Runner.app" 2>&1 \
-  | grep -iE "App installed|bundleID|error" | sed 's/^/  /'
+INSTALL_OUT="$(xcrun devicectl device install app --device "$UDID" "$STAGE/Runner.app" 2>&1)"
+echo "$INSTALL_OUT" | grep -iE "App installed|bundleID" | sed 's/^/  /'
+echo "$INSTALL_OUT" | grep -qi "App installed" || {
+  echo "$INSTALL_OUT" | grep -iE "error" | grep -vE "$BENIGN" | sed 's/^/  /'
+  die "Install failed (no 'App installed' confirmation)."
+}
+
 say "Launching…"
-xcrun devicectl device process launch --device "$UDID" "$BUNDLE_ID" 2>&1 \
-  | grep -iE "Launched|error" | sed 's/^/  /'
+LAUNCH_OUT="$(xcrun devicectl device process launch --device "$UDID" "$BUNDLE_ID" 2>&1)"
+echo "$LAUNCH_OUT" | grep -iE "Launched application" | sed 's/^/  /'
+echo "$LAUNCH_OUT" | grep -qi "Launched application" || {
+  echo "$LAUNCH_OUT" | grep -iE "error" | grep -vE "$BENIGN" | sed 's/^/  /'
+  die "Launch failed (no 'Launched application' confirmation)."
+}
+
 printf '\033[1;32m✅ Matheasy is on your iPhone.\033[0m\n'
