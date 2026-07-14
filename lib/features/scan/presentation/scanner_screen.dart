@@ -59,6 +59,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   bool _flashOn = false;
   bool _capturing = false;
 
+  /// True for the WHOLE capture→crop→recognize flow — from the moment a photo is
+  /// handed to [_cropAndRecognize] until the crop is cancelled or recognition
+  /// starts. `_capturing` only covers `takePicture()` and is cleared BEFORE the
+  /// crop route opens, so without this flag auto-capture (steadiness) kept firing
+  /// while the crop screen was up and stacked a new crop screen every ~0.8s.
+  bool _busy = false;
+
   /// Auto-capture (spec §10) — a nice-to-have that fires the SAME capped shutter
   /// flow when the phone is held steady. On by default; the manual shutter is
   /// always the fallback. Backed by the accelerometer via [SteadinessDetector].
@@ -110,7 +117,12 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   }
 
   void _onAccel(UserAccelerometerEvent event) {
-    if (!_autoCapture || !_cameraReady || _capturing) return;
+    if (!_autoCapture || !_cameraReady || _capturing || _busy) return;
+    // A route is pushed OVER the scanner (crop, gallery picker, manual input,
+    // paywall): the scanner isn't the top route, so never auto-capture. Without
+    // this, steadiness kept firing while the crop screen was up (state is still
+    // ScanIdle then) and stacked a new crop screen each time.
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
     if (ref.read(scannerControllerProvider) is! ScanIdle) return;
     // Don't auto-route a capped free user to the paywall — let them tap.
     if (!ref.read(usageSnapshotProvider).canScan) return;
@@ -237,7 +249,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// Shutter: capture from the live camera, then crop + recognize.
   Future<void> _shutter() async {
     final camera = _camera;
-    if (_capturing || camera == null || !camera.value.isInitialized) return;
+    if (_busy || _capturing || camera == null || !camera.value.isInitialized) {
+      return;
+    }
     if (!_allowScanOrPaywall()) return;
     setState(() => _capturing = true);
     Uint8List bytes;
@@ -256,7 +270,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
 
   /// Pick from the gallery, then crop + recognize.
   Future<void> _gallery() async {
-    if (_capturing) return;
+    if (_capturing || _busy) return;
     if (!_allowScanOrPaywall()) return;
     Uint8List bytes;
     try {
@@ -282,18 +296,29 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// Pushes the crop screen for [bytes]; on confirm, recognizes the cropped
   /// image. Cancelling the crop returns to the live preview.
   Future<void> _cropAndRecognize(ScanSource source, Uint8List bytes) async {
-    if (!mounted) return;
-    final cropped = await Navigator.of(context).push<Uint8List>(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => CropScreen(imageBytes: bytes),
-      ),
-    );
-    if (cropped == null || !mounted) return; // cancelled
-    unawaited(ref
-        .read(analyticsServiceProvider)
-        .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
-    await _controller.recognize(source, imageBytes: cropped);
+    // `_busy` is set BEFORE the first await and spans the whole flow, so
+    // auto-capture (steadiness) can't push a second crop screen while this one is
+    // open. Cleared in `finally` on every exit — cancel, error, or recognize —
+    // so returning to the live preview re-enables capture. Set synchronously
+    // right after `takePicture()` clears `_capturing`, so no accel event can
+    // interleave in the gap.
+    if (!mounted || _busy) return;
+    _busy = true;
+    try {
+      final cropped = await Navigator.of(context).push<Uint8List>(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => CropScreen(imageBytes: bytes),
+        ),
+      );
+      if (cropped == null || !mounted) return; // cancelled
+      unawaited(ref
+          .read(analyticsServiceProvider)
+          .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
+      await _controller.recognize(source, imageBytes: cropped);
+    } finally {
+      _busy = false;
+    }
   }
 
   void _toast(String message) {
