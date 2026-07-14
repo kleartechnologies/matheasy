@@ -106,6 +106,14 @@ describe("solve — non-unique systems + merged/multi-question → tutor", () =>
     ["two-question word problem", "A rectangle is 8 cm by 5 cm. What is its area? What is its perimeter?"],
     ["find X and the Y", "A car goes 60 km/h for 2 h then 80 km/h for 3 h. Find the total distance and the average speed."],
     ["'as well as' connector", "A worker earns RM15 per hour and works 40 hours a week. Calculate her weekly wage as well as her yearly income over 52 weeks."],
+    ["multi-step sequence", "\\text{Start with 5.} \\\\ \\text{Multiply by 3.} \\\\ \\text{Add 4.} \\\\ \\text{What is the result?}"],
+    ["'then' sequencer", "\\text{Ravi has 20 marbles and gives 8 away.} \\\\ \\text{Find how many remain. Then double that count.}"],
+    ["past-participle 2nd ask", "A projectile is launched at 20 m/s. Find the maximum height. Its total flight time should also be computed."],
+    ["obtuse-angle constraint", "The obtuse angle x makes \\cos x = -\\frac{1}{2} true. Determine x."],
+    ["acute-angle constraint", "The acute angle x satisfies 2\\sin x = 1. Determine x."],
+    ["reflex-angle in words", "A rotating arm turns through a reflex angle x between \\pi and 2\\pi radians, where its tangent equals one. Find the angle x."],
+    ["system + trailing x·y =", "\\begin{cases} 3x + 2y = 12 \\\\ x - y = 1 \\end{cases} \\\\ x \\cdot y ="],
+    ["system + trailing x + y", "\\begin{cases} 5x - 2y = 16 \\\\ 3x + 2y = 16 \\end{cases} \\\\ x + y"],
   ];
   for (const [name, latex] of cases) {
     it(`${name} → routeToTutor`, async () => {
@@ -144,6 +152,12 @@ describe("solve — genuine single problems still solve (no over-routing)", () =
     const p = await solve(classify("mean of 2, 4, 6, 8"), completerWith({}));
     expect(p.verified).toBe(true);
     expect(p.finalAnswer?.plain).toBe("5");
+  });
+  it("a single equation with a trailing 'x =' answer blank still solves", async () => {
+    // '5x = 20 \n x =' — the blank must not merge into the equation.
+    const p = await solve(classify("5x = 20\nx ="), completerWith({}));
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("x = 4");
   });
   it("does not call the LLM for a tutor-routed problem", async () => {
     const p = await solve(classify("\\begin{aligned} 2x+5=15 \\\\ \\text{find } x^2 \\end{aligned}"), NEVER);

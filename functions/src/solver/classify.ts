@@ -53,6 +53,10 @@ export function classify(rawLatex: string): Classification {
   // (\int, \frac{d}{dx}, ODE, …) sees one form. cleanLatex re-applies it for the
   // ascii path; it's idempotent.
   rawLatex = normalizeMacros(rawLatex);
+  // A trailing answer BLANK — a separate line that is just "<var> =" (the "x = __"
+  // slot on a worksheet) — carries no math. Drop it so it doesn't merge into the
+  // equation on the line above (`5x=20 \n x =` was read as one broken equation).
+  rawLatex = rawLatex.replace(/(?:\\\\|[\n;])\s*[a-zA-Z]\s*=\s*$/, "").trim();
   // The DISPLAY latex keeps the whole problem as read (directives + prose).
   const latex = cleanLatex(rawLatex);
 
@@ -646,8 +650,17 @@ function looksLikeMultiPart(rawLatex: string): boolean {
   if (/(?:^|[\s\\}])\(\s*(?:i{1,3}|iv|v|[a-d])\s*\)/i.test(rawLatex)) return true;
   // 2) "hence" always chains a second part off the first.
   if (/\bhence\b/i.test(rawLatex)) return true;
-  // 3) Two or more distinct question imperatives ⇒ multi-part.
-  if ((rawLatex.match(ASK_VERBS) ?? []).length >= 2) return true;
+  // 3) Two or more distinct asks ⇒ multi-part. Counts ASK_VERBS, their PAST-
+  //    PARTICIPLE forms ("… should also be computed / is required"), and multi-
+  //    STEP instruction verbs ("multiply by 3 … add 4").
+  const asks =
+    (rawLatex.match(ASK_VERBS) ?? []).length +
+    (rawLatex.match(/\b(computed?|required|determined|calculated|evaluated|needed|wanted)\b/gi) ?? []).length +
+    (rawLatex.match(/\b(multiply|divide|add|subtract|double|triple|halve|increase|decrease)\b/gi) ?? []).length;
+  if (asks >= 2) return true;
+  // A single ask followed by a sequencer ("… then double that", "… also …") is a
+  // second step, so it's multi-part too.
+  if (asks >= 1 && /\b(then|also|too|as\s+well|next|after\s+that)\b/i.test(rawLatex)) return true;
   // 3b) A word problem that asks SEVERAL things — two "?" / question phrases
   //     ("what is its area? what is its perimeter?"), or "find X and the Y".
   const questionMarks = (rawLatex.match(/\?/g) ?? []).length;
@@ -662,11 +675,24 @@ function looksLikeMultiPart(rawLatex: string): boolean {
   ) {
     return true;
   }
-  // 4) A separate "<expression> = ?" / "= □" question line alongside another
-  //    equation (a GIVEN): the placeholder marks a derived quantity to compute
-  //    ("cos x = 3/5  \\  sin 2x = ?"), distinct from solving the given.
+  // A SOLUTION CONSTRAINT stated in prose that the arithmetic gate can't enforce
+  // — an angle qualifier, an interval, or a smallest/largest/quadrant selector.
+  // The gate would verify a root of the bare equation on the WRONG branch (e.g.
+  // "the obtuse angle x: cos x = −½" → 4π/3 instead of 2π/3). Route to the tutor.
   if (
-    /=\s*(?:\?|\\square|\\Box)/.test(rawLatex) &&
+    /\b(obtuse|acute|reflex|right)\s+angle|\bbetween\b[^.]*\band\b|\bin\s+the\s+(?:range|interval)\b|\b(?:smallest|largest|first|second|third|fourth)\b[^.]*\b(?:positive|negative|angle|value|quadrant|solution|root)\b|\bquadrant\b/i.test(
+      rawLatex
+    )
+  ) {
+    return true;
+  }
+  // 4) A separate "<expression> =" question line alongside another equation (a
+  //    GIVEN): a "= ?" / "= □" placeholder, OR a trailing bare "=" left after a
+  //    derived expression ("… \\ x·y =", "cos x = 3/5 \\ sin 2x = ?"). A plain
+  //    "<var> =" answer blank was already stripped above, so a surviving trailing
+  //    "=" marks a derived quantity to compute, distinct from solving the given.
+  if (
+    (/=\s*(?:\?|\\square|\\Box)/.test(rawLatex) || /\S\s*=\s*$/.test(rawLatex)) &&
     (rawLatex.match(/=/g) ?? []).length >= 2
   ) {
     return true;
@@ -688,9 +714,10 @@ function looksLikeMultiPart(rawLatex: string): boolean {
         statement(seg) &&
         !seg.includes("=") &&
         // A standalone expression the "=" question is derived from: a polynomial
-        // (x²-5x+6), a coefficient·variable (2x), OR a trig/log function (cos x —
-        // "given sin x=0.5, find cos x" splits its ask onto its own line).
-        /[a-zA-Z].*[-+*/^].*\d|\d.*[-+*/^].*[a-zA-Z]|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b/i.test(
+        // (x²-5x+6), a coefficient·variable (2x), a product/sum of variables
+        // (x+y, x·y), OR a trig/log function (cos x — "given sin x=0.5, find
+        // cos x" splits its ask onto its own line).
+        /[a-zA-Z].*[-+*/^].*\d|\d.*[-+*/^].*[a-zA-Z]|[a-zA-Z]\s*[-+*/·]\s*[a-zA-Z]|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b/i.test(
           seg
         )
     );
