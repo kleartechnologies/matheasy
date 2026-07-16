@@ -56,11 +56,27 @@ export interface ScanResult {
  * multi-line transcription (every line, sub-part and the question, with `\\` row
  * breaks) must survive intact to reach the solver.
  */
+/**
+ * Repair LaTeX backslashes the model under-escaped in its JSON. A macro must be
+ * written `\\text` inside a JSON string; when the model writes `\text`, JSON.parse
+ * consumes `\t` as a TAB and the macro arrives as TAB+"ext{…}" — which then reads
+ * as prose/variables instead of a command. The same trap hits `\f`rac, `\b`egin.
+ * Only TAB/FORM-FEED/BACKSPACE are repaired: they are never legitimate in math
+ * LaTeX, whereas a real newline IS a legitimate line separator, so it is left be.
+ */
+function repairJsonEscapedMacros(s: string): string {
+  return s
+    .replace(/\t(?=[a-zA-Z])/g, "\\t") // \text, \times, \tan, \theta, \tfrac
+    .replace(/\f(?=[a-zA-Z])/g, "\\f") // \frac
+    .replace(/[\b](?=[a-zA-Z])/g, "\\b"); // \begin, \binom
+}
+
 export function coerceScanResult(raw: unknown): ScanResult {
   const r = (raw ?? {}) as Partial<ScanPayload>;
   return {
     isMath: r.isMath === true,
-    problem: typeof r.problem === "string" ? r.problem.trim() : "",
+    problem:
+      typeof r.problem === "string" ? repairJsonEscapedMacros(r.problem).trim() : "",
     topic: typeof r.topic === "string" ? r.topic : "other",
     confidence:
       typeof r.confidence === "number"

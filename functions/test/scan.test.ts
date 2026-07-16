@@ -86,6 +86,20 @@ describe("coerceScanResult — preserves the full multi-line transcription", () 
     expect(out.problem).toBe(UPLOADED_IMAGE_TRANSCRIPTION);
   });
 
+  it("repairs LaTeX macros the model under-escaped in its JSON", () => {
+    // A macro must be written `\\text` inside a JSON string. When the model
+    // writes `\text`, JSON.parse eats `\t` as a TAB and the macro arrives as
+    // TAB+"ext{…}" — which then reads as prose/variables, not a command.
+    expect(
+      coerceScanResult({ isMath: true, problem: "\text{Solve this.} 3 - x - 2x^2 = 0" }).problem
+    ).toBe("\\text{Solve this.} 3 - x - 2x^2 = 0");
+    // \f (form feed) → \frac, \b (backspace) → \begin
+    expect(coerceScanResult({ isMath: true, problem: "\frac{1}{2}" }).problem).toBe("\\frac{1}{2}");
+    expect(coerceScanResult({ isMath: true, problem: "\begin{cases}" }).problem).toBe("\\begin{cases}");
+    // A real newline is a legitimate separator and must NOT become "\n".
+    expect(coerceScanResult({ isMath: true, problem: "5x = 20\nx = 4" }).problem).toBe("5x = 20\nx = 4");
+  });
+
   it("coerces bad field types safely (json_object guarantees syntax, not types)", () => {
     expect(coerceScanResult({}).problem).toBe("");
     expect(coerceScanResult({ isMath: true, problem: 42 }).problem).toBe("");

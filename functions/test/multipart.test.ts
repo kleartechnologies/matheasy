@@ -127,6 +127,44 @@ describe("solve — non-unique systems + merged/multi-question → tutor", () =>
   }
 });
 
+describe("solve — reported scans: prose-labelled problems still solve", () => {
+  // Regression: the OCR marks instructions with \text{…}. Unwrapping that into
+  // the math made every prose letter a "variable" (S,o,l,v,e…), so a one-line
+  // equation misread as a multi-variable system and routed to the tutor. The
+  // prose must be DROPPED on the solving path (display keeps it).
+  it("'Solve the algebraic equation. 3 − x − 2x² = 0' → the quadratic solves", async () => {
+    const cls = classify("\\text{Solve the algebraic equation.} 3 - x - 2x^2 = 0");
+    expect(cls.problemType).toBe("quadratic_equation");
+    const p = await solve(cls, completerWith({}));
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("x = -3/2 or x = 1");
+  });
+  it("'iii. Simplify … (4x²+3/2y²)²' is directive+math, not a word problem", async () => {
+    const cls = classify(
+      "\\text{iii. Simplify the algebraic expression below} (4x^2 + \\frac{3}{2}y^2)^2"
+    );
+    expect(cls.problemType).toBe("expression");
+    const p = await solve(cls, completerWith({}));
+    expect(p.verified).toBe(true);
+  });
+  it("3x(x-1)/2 = x+6 — a variable before '(' is a product, not a function call", async () => {
+    // mathjs read `x(x-1)` as calling a function x, so the correct roots were
+    // rejected; latexToAscii now inserts the implicit '*'.
+    const p = await solve(
+      classify("\\frac{3x(x-1)}{2} = x + 6"),
+      completerWith({
+        answerLatex: "x=3",
+        answerPlain: "x=3",
+        solutions: [{ variable: "x", value: 3 }, { variable: "x", value: -1.3333333 }],
+      })
+    );
+    expect(p.verified).toBe(true);
+  });
+  it("f(x) is still a function application, not f×(x)", () => {
+    expect(classify("\\frac{d}{dx}(x^2)").problemType).toBe("derivative");
+  });
+});
+
 describe("solve — genuine single problems still solve (no over-routing)", () => {
   it("'Solve 2x+5=15' (leading directive stripped) → x=5", async () => {
     const p = await solve(classify("\\text{Solve } 2x + 5 = 15"), completerWith({}));

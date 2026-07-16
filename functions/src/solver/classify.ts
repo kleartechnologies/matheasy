@@ -328,7 +328,12 @@ export function classify(rawLatex: string): Classification {
   // equation and solves it; the gate then confirms the answer satisfies that
   // extracted equation (so the arithmetic is verified — though the reading is
   // not, which is why the interpretation is shown to the learner).
-  if (looksLikeWordProblem(rawLatex)) {
+  // …but only when the problem really IS prose. A printed exercise often labels
+  // its math with a directive ("iii. Simplify the algebraic expression below
+  // (4x²+…)²"), which reads as narrative yet leaves a COMPLETE expression outside
+  // the words. `ascii` has the prose dropped, so if a real expression survives
+  // there, this is directive+math — let the normal engines solve it.
+  if (looksLikeWordProblem(rawLatex) && !hasStandaloneMath(ascii)) {
     return base("word_problem", "llm_candidate", "x", false, "word_problem");
   }
 
@@ -604,6 +609,16 @@ const NON_NARRATIVE = new Set([
  * directive/function). Requires several such words AND a digit, so a directive
  * like "solve for the value of x" and any structured math stay OUT.
  */
+/**
+ * True when the prose-free ascii still holds a real math STATEMENT — an equation,
+ * or an expression combining a variable with an operator. A genuine word problem
+ * carries its numbers inside the sentence (its prose-free ascii is empty or a
+ * bare number), so this stays false for it.
+ */
+function hasStandaloneMath(ascii: string): boolean {
+  return /=/.test(ascii) || (/[a-zA-Z]/.test(ascii) && /[-+*/^]/.test(ascii));
+}
+
 function looksLikeWordProblem(rawLatex: string): boolean {
   const text = cleanLatex(rawLatex).replace(/\\[a-zA-Z]+/g, " ");
   if (!/\d/.test(text)) return false; // a computable word problem has numbers
@@ -792,12 +807,29 @@ function asksForDerivedQuantity(rawLatex: string): boolean {
  * has prose after the verb and is left untouched.
  */
 function stripLeadingDirective(rawLatex: string): string {
+  let s = rawLatex;
+  // A leading `\text{…}` block that IS the directive ("Solve the algebraic
+  // equation.", "iii. Simplify the expression below") — drop the whole block.
+  const block = /^\s*\\text(?:rm|it|bf|sf|tt)?\s*\{([^{}]*)\}\s*/.exec(s);
+  if (
+    block &&
+    /\b(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b/i.test(
+      block[1]
+    )
+  ) {
+    s = s.slice(block[0].length);
+  }
+  // The bare directive ("Solve 2x+5=15") when it isn't wrapped in \text.
   const m =
-    /^\s*(?:\\text\s*\{\s*)?(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b(?:\s+(?:for|the|exact|values?|of|roots?|solutions?))*(?:\s+[a-z](?=\s*[:.}]))?\s*[:.]?\s*\}?\s*/i.exec(
-      rawLatex
+    /^\s*(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b(?:\s+(?:for|the|exact|values?|of|roots?|solutions?))*(?:\s+[a-z](?=\s*[:.}]))?\s*[:.]?\s*\}?\s*/i.exec(
+      s
     );
-  if (!m) return rawLatex;
-  const rest = rawLatex.slice(m[0].length).trim();
+  if (m) s = s.slice(m[0].length);
+  // A leftover target from "find x: …" — the "x:" survives when the verb sat
+  // inside a \text block and the variable outside it.
+  s = s.replace(/^\s*[a-zA-Z]\s*:\s*/, "");
+  if (s === rawLatex) return rawLatex;
+  const rest = s.trim();
   // Keep the strip only if the remainder begins as a math expression, not more
   // prose — a number, a fraction/integral/function macro, a parenthesis, or a
   // variable next to an operator (`x =`, `2x`, `x^2`).

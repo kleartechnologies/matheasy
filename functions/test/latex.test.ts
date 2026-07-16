@@ -93,10 +93,14 @@ describe("normalizeMacros — scanner/rendered-LaTeX spelling variants", () => {
     expect(normalizeMacros("\\dfrac{1}{2}")).toBe("\\frac{1}{2}");
     expect(normalizeMacros("\\tfrac{d}{dx}")).toBe("\\frac{d}{dx}");
   });
-  it("keeps the content of styling wrappers (\\mathrm{d}x → dx, \\operatorname{sin} → sin)", () => {
+  it("keeps the content of MATH styling wrappers (\\mathrm{d}x → dx, \\operatorname{sin} → sin)", () => {
     expect(normalizeMacros("\\mathrm{d}x")).toBe("dx");
     expect(normalizeMacros("\\operatorname{sin} x")).toBe("sin x");
-    expect(normalizeMacros("\\text{if } x")).toBe("if  x");
+  });
+  it("leaves \\text{…} intact — it MARKS prose, which latexToAscii drops", () => {
+    // Unwrapping it here would merge "Solve the equation" into the math, and
+    // every letter would read as a variable.
+    expect(normalizeMacros("\\text{if } x")).toBe("\\text{if } x");
   });
   it("does NOT fold unicode operators (× stays for the raw cross-product detector)", () => {
     // Unicode ·×÷ are converted on the ascii path (latexToAscii), NOT here, so

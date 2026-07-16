@@ -45,10 +45,14 @@ export function normalizeMacros(s: string): string {
     s
       // \dfrac / \tfrac (display/text-style fractions) are just \frac.
       .replace(/\\[dt]frac\b/g, "\\frac")
-      // Upright/text styling wrappers carry no math — keep the CONTENT:
+      // Upright styling wrappers around MATH carry no meaning — keep the CONTENT:
       //   \mathrm{d}x → dx (the physics/EU differential), \operatorname{sin} → sin.
+      // `\text{…}` is deliberately NOT unwrapped: the OCR uses it to mark PROSE,
+      // and that marker is what lets latexToAscii drop the words before the
+      // engines see them (otherwise "Solve the equation" becomes the variables
+      // S,o,l,v,e… and a one-line problem misreads as a multi-variable system).
       .replace(
-        /\\(?:mathrm|mathit|mathbf|mathsf|mathtt|mathnormal|operatorname\*?|text(?:rm|it|bf|sf|tt)?|boldsymbol|mathchoice)\s*\{([^{}]*)\}/g,
+        /\\(?:mathrm|mathit|mathbf|mathsf|mathtt|mathnormal|operatorname\*?|boldsymbol|mathchoice)\s*\{([^{}]*)\}/g,
         "$1"
       )
       // …and a bare styling macro with no braces (e.g. `\mathrm dx`).
@@ -86,6 +90,15 @@ export function cleanLatex(latex: string): string {
  */
 export function latexToAscii(latex: string): string {
   let s = cleanLatex(latex);
+
+  // Drop PROSE. The OCR marks words with `\text{…}` ("Solve the equation.",
+  // "(i) Find …"), which is instruction — not math. The engines must never see
+  // it: `variablesIn` would read every letter of "Solve" as a variable, turning
+  // a one-line equation into a bogus multi-variable system. Display keeps the
+  // prose (cleanLatex leaves \text intact); only this solving path drops it.
+  // A pure word problem is all prose → this leaves nothing, and classify has
+  // already routed it by then (looksLikeWordProblem reads the raw text).
+  s = s.replace(/\\text(?:rm|it|bf|sf|tt)?\s*\{[^{}]*\}/g, " ");
 
   // A backslash is LaTeX's own token boundary: `x\ln x`, `x\cos x`, `x\sqrt{…}`,
   // `2\pi`, `\sin x\cos x` all mean an implicit MULTIPLY across the `\`. But the
@@ -172,6 +185,14 @@ export function latexToAscii(latex: string): string {
 
   s = s.replace(/[{}]/g, ""); // any braces the conversions left behind
   s = s.replace(/\\\\/g, " "); // row breaks
+
+  // Implicit multiply between a VARIABLE and a bracket: mathjs reads `x(x-1)` as
+  // a call of a function named x, so `3x(x-1)=…` evaluated to NaN and its own
+  // correct roots were rejected. Insert the `*`. Only for a STANDALONE letter
+  // (not one inside a name like `sin(`), and never f/g/h — those are the
+  // conventional function names, where `f(x)` really is an application.
+  s = s.replace(/(^|[^A-Za-z])([a-eijkm-rt-z])\s*\(/g, "$1$2*(");
+
   return s.replace(/\s+/g, " ").trim();
 }
 
