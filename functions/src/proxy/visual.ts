@@ -52,6 +52,34 @@ interface VisualPayload {
     labels?: Record<string, string>;
     points?: Array<[number, number]>;
   };
+  /**
+   * Optional structured facts for a "find the missing angle" geometry problem.
+   * The app draws the figure, COMPUTES the unknown and animates the steps — the
+   * model must NOT compute the answer here, only relay the givens.
+   */
+  geometry?: {
+    kind:
+      | "triangleAngles"
+      | "isoscelesTriangle"
+      | "quadrilateralAngles"
+      | "polygonAngles"
+      | "straightLineAngles"
+      | "anglesAroundPoint"
+      | "parallelLines"
+      | "circleAngle";
+    /** The angles the problem GIVES you, with a short label each. */
+    knownAngles: Array<{ label: string; value: number }>;
+    /** The label of the single angle being solved for, e.g. "x". */
+    unknown: string;
+    /** Number of sides — polygonAngles only. */
+    sides?: number;
+    /** How the unknown relates to a known — parallelLines / circleAngle only. */
+    relation?: "equal" | "supplementary" | "complementary" | "doubleOf" | "halfOf";
+    /** The label of the known angle the relation refers to. */
+    relationReference?: string;
+    /** Human name of the rule, e.g. "Angles in a triangle sum to 180°". */
+    ruleName?: string;
+  };
 }
 
 const SYSTEM_PROMPT = `You are Matheasy, the friendly math tutor inside the Matheasy app, generating a VISUAL learning experience.
@@ -84,6 +112,17 @@ Break the given problem into visual transformation steps and return ONLY a JSON 
 }
 Visualization tiers: use "animatedTransformation" for arithmetic, fractions, ratios, percentages and equation-solving algebra; "interactiveCards" for trigonometry, statistics, probability, matrices, vectors and advanced algebra; "conceptExplorer" for geometry, functions, graphs, calculus and university mathematics.
 Concept kinds and their params: linearGraph {slope, intercept}; parabolaGraph {a, b, c}; areaUnderCurve {a, b, c, from, to}; numberLine {value, min, max}; fractionBar {numerator, denominator}; unitCircle {angleDegrees}; barChart uses points as [position, value] pairs with labels {"0": "name", ...}; geometryShape uses points as polygon vertices. Use "generic" (or omit concept) when nothing drawable fits.
+GEOMETRY — when the problem is to find a single missing ANGLE (triangle, quadrilateral/polygon, angles on a line, angles around a point, isosceles, parallel lines cut by a transversal, or a circle centre/circumference angle), ALSO include a top-level "geometry" object so the app can draw and animate it:
+{
+  "kind": "triangleAngles|isoscelesTriangle|quadrilateralAngles|polygonAngles|straightLineAngles|anglesAroundPoint|parallelLines|circleAngle",
+  "knownAngles": [{"label": "A", "value": 60}, {"label": "B", "value": 40}],
+  "unknown": "x",
+  "sides": 5,
+  "relation": "equal|supplementary|complementary|doubleOf|halfOf",
+  "relationReference": "a",
+  "ruleName": "Angles in a triangle sum to 180°"
+}
+CRITICAL for geometry: put ONLY the angle measures the problem GIVES into knownAngles (as numbers, in degrees, no ° symbol) and name the single unknown — DO NOT compute or include the unknown's value; the app computes it deterministically and will discard your geometry object if the numbers are inconsistent. Use "sides" only for polygonAngles. Use "relation"+"relationReference" only for parallelLines (equal for alternate/corresponding, supplementary for co-interior) and circleAngle (doubleOf for the centre angle, halfOf for the circumference angle). Omit "geometry" for non-angle geometry (area, perimeter, Pythagoras) — those still use "concept".
 Rules: LaTeX must be valid and delimiter-free. Provide 2-6 steps; each step's beforeLatex MUST equal the previous step's afterLatex so the animation flows. If an answer is provided by the app, your steps MUST arrive at exactly that answer. Include concept only when it genuinely aids understanding. Keep language warm and age-appropriate for the difficulty level.`;
 
 export const generateVisualSolution = onCall(

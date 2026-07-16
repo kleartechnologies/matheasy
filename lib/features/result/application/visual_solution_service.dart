@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../domain/geometry_models.dart';
 import '../domain/visual_models.dart';
 import 'functions_visual_solution_service.dart';
 
@@ -48,7 +49,34 @@ class MockVisualSolutionService implements VisualSolutionService {
     if (hint == EquationKind.quadratic.name) return _quadratic;
     if (hint == EquationKind.fraction.name) return _fraction;
     if (hint == EquationKind.trigonometry.name) return _trigonometry;
+    if (hint == EquationKind.geometry.name) return _geometryTriangle();
     return _expression;
+  }
+
+  // ---- Geometry: triangle angle sum (diagram-first player) ----
+  //
+  // Built through the real [GeometryScene.tryBuild] path so the offline demo
+  // exercises the same deterministic solver + figure construction as the
+  // backend. Not `const` because the scene is computed at call time.
+  static VisualSolution _geometryTriangle() {
+    final scene = GeometryScene.tryBuild(
+      kind: GeometrySceneKind.triangleAngles,
+      knownAngles: const [
+        GeometryKnownAngle(label: 'A', value: 60),
+        GeometryKnownAngle(label: 'B', value: 40),
+      ],
+      unknownLabel: 'x',
+      expectedAnswerLatex: r'x = 80^\circ',
+    );
+    return VisualSolution(
+      category: ProblemCategory.geometry,
+      difficulty: ProblemDifficulty.secondary,
+      visualization: VisualizationType.conceptExplorer,
+      answerLatex: r'x = 80^\circ',
+      intro: 'Let the diagram do the talking — watch the missing angle appear.',
+      steps: const [],
+      geometryScene: scene,
+    );
   }
 
   // ---- Linear: 2x + 5 = 13 (Tier 1) ----

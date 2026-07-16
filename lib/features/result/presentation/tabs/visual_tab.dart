@@ -10,6 +10,7 @@ import '../../application/visual_solution_controller.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
+import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
 import '../widgets/visual/tier2_learning_cards.dart';
 import '../widgets/visual/tier3_concept_explorer.dart';
@@ -76,6 +77,16 @@ class VisualTab extends ConsumerWidget {
         return unavailable();
       },
       data: (visual) {
+        // Geometry with a solved, structured scene gets the diagram-first,
+        // step-animated player — the drawing leads, not the prose.
+        final scene = visual.geometryScene;
+        if (scene != null) {
+          return GeometryVisualPlayer(
+            visual: visual,
+            scene: scene,
+            onAskMatheasy: (step) => onAskMatheasy(visual, step),
+          );
+        }
         if (!visual.hasSteps) {
           return unavailable();
         }

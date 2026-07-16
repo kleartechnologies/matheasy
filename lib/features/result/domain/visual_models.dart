@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'geometry_models.dart';
+
 /// STAGE 14 — Visual Learning Engine domain models.
 ///
 /// The universal, AI-generated learning structure the Visual tab renders. The
@@ -270,6 +272,7 @@ class VisualSolution {
     this.explanation,
     this.method,
     this.concept,
+    this.geometryScene,
   });
 
   final ProblemCategory category;
@@ -296,7 +299,17 @@ class VisualSolution {
   /// Optional drawable metadata (Tier 3).
   final VisualConcept? concept;
 
+  /// Optional structured, deterministically-solved geometry walkthrough. When
+  /// present, the Visual tab renders the diagram-first, step-animated geometry
+  /// player instead of the generic concept explorer. Built on-device by
+  /// [GeometryScene.tryBuild] (the app computes the answer, not the LLM), so a
+  /// non-null value has already passed its consistency + verified-answer gate.
+  final GeometryScene? geometryScene;
+
   bool get hasSteps => steps.isNotEmpty;
+
+  /// Whether this solution should render the diagram-first geometry player.
+  bool get hasGeometryScene => geometryScene != null;
 }
 
 /// What the Visual Learning Engine needs to generate a [VisualSolution]:

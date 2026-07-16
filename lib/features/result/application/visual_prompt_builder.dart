@@ -1,4 +1,5 @@
 import '../../scan/domain/detected_equation.dart';
+import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/visual_models.dart';
 
@@ -51,6 +52,26 @@ class VisualPromptBuilder {
       ..write(operation == null ? '' : ' (operation: $operation)')
       ..write(': ${step.beforeLatex} becomes ${step.afterLatex}.')
       ..write(' Why: ${step.explanation}');
+    return buffer.toString();
+  }
+
+  /// The tutor context for a step of the **geometry** player. The player emits
+  /// an index into [GeometryScene.steps] (the four canonical beats), which is a
+  /// different list from [VisualSolution.steps] — so geometry needs its own
+  /// summariser rather than reusing [tutorStepContext] (which would read the
+  /// wrong list and hand the tutor mismatched or empty context).
+  static String tutorGeometryStepContext(GeometryScene scene, int stepIndex) {
+    final total = scene.steps.length;
+    if (stepIndex < 0 || stepIndex >= total) {
+      return 'The geometry problem, solved: ${scene.answerLatex}. '
+          'Rule: ${scene.ruleName}.';
+    }
+    final step = scene.steps[stepIndex];
+    final buffer = StringBuffer()
+      ..write('Step ${stepIndex + 1} of $total — "${step.title}"')
+      ..write(': ${step.detail}')
+      ..write(step.equationLatex == null ? '' : ' (${step.equationLatex})')
+      ..write(' Rule: ${scene.ruleName}. Answer: ${scene.answerLatex}.');
     return buffer.toString();
   }
 }

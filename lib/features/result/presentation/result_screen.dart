@@ -129,6 +129,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     VisualSolution visual,
     int stepIndex,
   ) {
+    // Geometry emits an index into its own 4-beat scene.steps; other tiers into
+    // visual.steps — summarise from whichever the player actually renders.
+    final scene = visual.geometryScene;
+    final stepSummary = scene != null
+        ? VisualPromptBuilder.tutorGeometryStepContext(scene, stepIndex)
+        : VisualPromptBuilder.tutorStepContext(visual, stepIndex);
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
@@ -136,10 +142,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         answerLatex: result.answerLatex,
         equationType: result.type.label,
         topicLabel: visual.category.label,
-        visualStepSummary: VisualPromptBuilder.tutorStepContext(
-          visual,
-          stepIndex,
-        ),
+        visualStepSummary: stepSummary,
       ),
     );
   }
