@@ -28,6 +28,7 @@ class DetectedEquation {
     required this.confidence,
     required this.source,
     required this.kind,
+    this.imageBytes,
   });
 
   final String latex;
@@ -37,6 +38,18 @@ class DetectedEquation {
 
   final ScanSource source;
   final EquationKind kind;
+
+  /// The cropped photo this problem was recognized from (camera / gallery),
+  /// kept so the result screen can show the student what they scanned —
+  /// especially valuable for figure-based problems (geometry) and the
+  /// couldn't-verify / tutor states.
+  ///
+  /// Deliberately TRANSIENT: it is excluded from [toJson]/[fromJson] (history
+  /// stays lightweight — no base64 blobs in the sync store) and from
+  /// [==]/[hashCode] (so provider/solve caching keys on the problem, not the
+  /// pixels). It therefore rides along only for the live scan, not history
+  /// re-opens.
+  final Uint8List? imageBytes;
 
   int get confidencePercent => (confidence * 100).round();
 
@@ -66,12 +79,15 @@ class DetectedEquation {
     double? confidence,
     ScanSource? source,
     EquationKind? kind,
+    Uint8List? imageBytes,
   }) {
     return DetectedEquation(
       latex: latex ?? this.latex,
       confidence: confidence ?? this.confidence,
       source: source ?? this.source,
       kind: kind ?? this.kind,
+      // Preserved through an in-place edit so a corrected read keeps its scan.
+      imageBytes: imageBytes ?? this.imageBytes,
     );
   }
 

@@ -66,6 +66,7 @@ class MockScannerService implements ScannerService {
       confidence: confidence,
       source: source,
       kind: kind,
+      imageBytes: imageBytes,
     );
   }
 }

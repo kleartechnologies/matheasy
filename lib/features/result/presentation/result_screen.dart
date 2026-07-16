@@ -27,6 +27,7 @@ import 'widgets/result_action_bar.dart';
 import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
+import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
@@ -230,6 +231,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   Widget _buildContent(ResultData result) {
+    // The photo the problem was scanned from (when present) — shown at the top
+    // of every state so a figure-based problem (geometry) is visible even when
+    // there's no computable answer.
+    final scanImage = ResultScanImageSlot(imageBytes: widget.equation?.imageBytes);
+
     // A proof / abstract-algebra / analysis prompt (spec §1): there's nothing to
     // compute-and-verify, so invite the student to reason it through in the tutor
     // rather than show a misleading "couldn't verify" error.
@@ -242,6 +248,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           AppSpacing.xl,
         ),
         children: [
+          scanImage,
           ResultTutorInvite(
             result: result,
             onDiscuss: () => _discussProblem(result),
@@ -265,6 +272,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           AppSpacing.xl,
         ),
         children: [
+          scanImage,
           ResultCouldntVerify(
             result: result,
             onRescan: () => context.push(AppRoutes.scan),
@@ -291,6 +299,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         AppSpacing.tabClearance, // clears the floating action bar
       ),
       children: [
+        scanImage,
         ResultHeader(
           result: result,
           onPlay: () => PlaySolutionOverlay.show(

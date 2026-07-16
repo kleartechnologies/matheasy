@@ -59,6 +59,8 @@ class FunctionsScannerService implements ScannerService {
       confidence: confidence is num ? confidence.toDouble().clamp(0.0, 1.0) : 0.9,
       source: source,
       kind: kindFromTopic(topic) ?? inferKind(latex),
+      // Keep the cropped scan so the result screen can show the figure.
+      imageBytes: imageBytes,
     );
   }
 
