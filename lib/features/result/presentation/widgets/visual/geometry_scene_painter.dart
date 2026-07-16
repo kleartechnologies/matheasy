@@ -133,10 +133,83 @@ class GeometryScenePainter extends CustomPainter {
 
     _paintBaseFigure(canvas, map, fit);
     _paintTicks(canvas, map);
+    _paintRightAngles(canvas, map);
 
-    // Angles last so their arcs and labels sit on top of the figure.
+    // Angles + sides last so their labels sit on top of the figure.
     for (final angle in scene.angles) {
       _paintAngle(canvas, size, map, angle);
+    }
+    for (final side in scene.sides) {
+      _paintSide(canvas, size, map, side);
+    }
+  }
+
+  // ---- Right-angle marks ----------------------------------------------------
+
+  void _paintRightAngles(Canvas canvas, Offset Function(int) map) {
+    final ring = scene.polygonRing;
+    if (ring.length < 3) return;
+    for (final v in scene.rightAngleVertices) {
+      final pos = ring.indexOf(v);
+      if (pos < 0) continue;
+      final a = ring[(pos - 1 + ring.length) % ring.length];
+      final b = ring[(pos + 1) % ring.length];
+      if (v >= scene.vertices.length ||
+          a >= scene.vertices.length ||
+          b >= scene.vertices.length) {
+        continue;
+      }
+      final vertex = map(v);
+      final u1 = _unit(map(a) - vertex);
+      final u2 = _unit(map(b) - vertex);
+      if (u1 == Offset.zero || u2 == Offset.zero) continue;
+      const s = 13.0;
+      final paint = _stroke(palette.figureStroke, 1.8);
+      canvas.drawLine(vertex + u1 * s, vertex + (u1 + u2) * s, paint);
+      canvas.drawLine(vertex + u2 * s, vertex + (u1 + u2) * s, paint);
+    }
+  }
+
+  // ---- Side-length labels ---------------------------------------------------
+
+  void _paintSide(
+    Canvas canvas,
+    Size size,
+    Offset Function(int) map,
+    GeometrySide side,
+  ) {
+    final ring = scene.polygonRing;
+    if (ring.length < 3 || side.edge < 0 || side.edge >= ring.length) return;
+    final ai = ring[side.edge];
+    final bi = ring[(side.edge + 1) % ring.length];
+    if (ai >= scene.vertices.length || bi >= scene.vertices.length) return;
+    final a = map(ai);
+    final b = map(bi);
+    final mid = (a + b) / 2;
+    // Push the label just OUTSIDE the edge (away from the figure centroid).
+    final centroid = _centroid(map);
+    final outward = _unit(mid - centroid);
+    final at = mid + (outward == Offset.zero ? const Offset(0, -1) : outward) * 16;
+
+    final focused = _highlighted.contains(side.label);
+    final dimmed = _highlighted.isNotEmpty && !focused;
+
+    if (side.isUnknown) {
+      if (_answerRevealed) {
+        // Only the chip on the answer beat — it already reads "x = 10"; drawing
+        // the bare value at the same anchor would double up during the fade.
+        final t = (revealStep == scene.steps.length - 1)
+            ? stepProgress.clamp(0.0, 1.0)
+            : 1.0;
+        _drawBadge(canvas, size, at, '${side.label} = ${_fmtLen(side.value)}', t);
+      } else {
+        _drawAngleValue(canvas, at, '${side.label} = ?', palette.highlightText, 1.0);
+      }
+    } else {
+      final color = dimmed ? palette.dim : palette.text;
+      final t = revealStep == 0 ? stepProgress.clamp(0.0, 1.0) : 1.0;
+      _drawAngleValue(
+          canvas, at, '${side.label} = ${_fmtLen(side.value)}', color, t);
     }
   }
 
@@ -364,17 +437,27 @@ class GeometryScenePainter extends CustomPainter {
     GeometryAngle angle,
     double t,
   ) {
-    if (t <= 0.01) return;
     final v = map(angle.vertex);
     final centroid = _centroid(map);
     final away = _unit(v - centroid);
     final dir = away == Offset.zero ? const Offset(0, -1) : away;
-    final anchor = v + dir * 46;
+    _drawBadge(
+        canvas, size, v + dir * 46, '${angle.label} = ${_fmt(angle.value)}°', t);
+  }
 
-    final label = '${angle.label} = ${_fmt(angle.value)}°';
+  /// A rounded answer chip [text] near [anchor], scaling/fading in with [t] and
+  /// clamped on-canvas. Shared by the angle and side reveals.
+  void _drawBadge(
+    Canvas canvas,
+    Size size,
+    Offset anchor,
+    String text,
+    double t,
+  ) {
+    if (t <= 0.01) return;
     final tp = TextPainter(
       text: TextSpan(
-        text: label,
+        text: text,
         style: AppTypography.caption.copyWith(
           color: palette.badgeText,
           fontWeight: FontWeight.w800,
@@ -521,6 +604,8 @@ class GeometryScenePainter extends CustomPainter {
     ..strokeJoin = StrokeJoin.round;
 
   String _fmt(double v) => GeometryScene.formatDegrees(v);
+
+  String _fmtLen(double v) => GeometryScene.formatLength(v);
 
   @override
   bool shouldRepaint(GeometryScenePainter old) =>

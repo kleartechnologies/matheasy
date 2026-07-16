@@ -58,6 +58,47 @@ void main() {
     });
   });
 
+  group('DetectedEquation.geometry is transient + edit-invalidated', () {
+    final facts = {
+      'kind': 'triangleAngles',
+      'unknown': 'x',
+      'knownAngles': [
+        {'label': 'A', 'value': 60},
+      ],
+    };
+    DetectedEquation eqWith() => DetectedEquation(
+          latex: r'\triangle ABC',
+          confidence: 0.9,
+          source: ScanSource.camera,
+          kind: EquationKind.geometry,
+          geometry: facts,
+        );
+
+    test('is excluded from JSON and equality', () {
+      final withFacts = eqWith();
+      final without = DetectedEquation(
+        latex: withFacts.latex,
+        confidence: withFacts.confidence,
+        source: withFacts.source,
+        kind: withFacts.kind,
+      );
+      expect(withFacts.toJson().containsKey('geometry'), isFalse);
+      expect(withFacts, equals(without)); // equality ignores the facts
+      expect(withFacts.hashCode, without.hashCode);
+    });
+
+    test('an in-place EDIT drops the facts (the recognizer read is now stale)', () {
+      // Correcting a misread must not keep the original figure's facts.
+      final edited = eqWith().copyWith(latex: r'\triangle XYZ');
+      expect(edited.geometry, isNull);
+    });
+
+    test('fresh facts can be supplied explicitly', () {
+      final other = {'kind': 'circleAngle'};
+      expect(eqWith().copyWith(geometry: other).geometry, same(other));
+    });
+  });
+
   group('ResultScanImageSlot', () {
     testWidgets('renders nothing when there is no scan image', (tester) async {
       await tester.pumpWidget(const MaterialApp(

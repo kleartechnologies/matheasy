@@ -29,6 +29,7 @@ class DetectedEquation {
     required this.source,
     required this.kind,
     this.imageBytes,
+    this.geometry,
   });
 
   final String latex;
@@ -50,6 +51,15 @@ class DetectedEquation {
   /// pixels). It therefore rides along only for the live scan, not history
   /// re-opens.
   final Uint8List? imageBytes;
+
+  /// Structured geometry facts the recognizer extracted from a solvable angle
+  /// or right-triangle problem (the raw `geometry` payload — see
+  /// `GeometryPayloadMapper`). Kept as an untyped map so the scan domain stays
+  /// decoupled from the result/visual layer; the result screen builds the scene.
+  ///
+  /// Also TRANSIENT (excluded from JSON + equality) for the same reasons as
+  /// [imageBytes] — it's a rendering hint for the live scan, not persisted state.
+  final Map<String, dynamic>? geometry;
 
   int get confidencePercent => (confidence * 100).round();
 
@@ -80,14 +90,19 @@ class DetectedEquation {
     ScanSource? source,
     EquationKind? kind,
     Uint8List? imageBytes,
+    Map<String, dynamic>? geometry,
   }) {
     return DetectedEquation(
       latex: latex ?? this.latex,
       confidence: confidence ?? this.confidence,
       source: source ?? this.source,
       kind: kind ?? this.kind,
-      // Preserved through an in-place edit so a corrected read keeps its scan.
+      // The photo is preserved through an in-place edit (same scan)…
       imageBytes: imageBytes ?? this.imageBytes,
+      // …but the structured geometry facts are NOT: an edit corrects a misread,
+      // so the recognizer's original extraction no longer applies. It's dropped
+      // unless a caller explicitly supplies fresh facts.
+      geometry: geometry,
     );
   }
 

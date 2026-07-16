@@ -53,6 +53,11 @@ enum GeometrySceneKind {
   /// A circle angle relation (angle at the centre is twice the angle at the
   /// circumference, and its inverse) — [GeometryRelation.doubleOf]/`halfOf`.
   circleAngle,
+
+  /// A right triangle where two SIDE LENGTHS are given and the third is found
+  /// by Pythagoras (a² + b² = c²). Unlike the other kinds, the unknown is a
+  /// length, not an angle.
+  rightTrianglePythagoras,
 }
 
 /// How a [GeometryScene] is drawn. Kept separate from [GeometrySceneKind] so
@@ -124,6 +129,49 @@ class GeometryAngle {
   final bool isUnknown;
 }
 
+/// A marked side length on the figure — an edge of [GeometryScene.polygonRing]
+/// carrying a length label. Used by the Pythagoras scene (the unknown side is
+/// blank until the answer beat).
+@immutable
+class GeometrySide {
+  const GeometrySide({
+    required this.label,
+    required this.edge,
+    required this.value,
+    this.isUnknown = false,
+  });
+
+  /// Display name, e.g. `a`, `x`.
+  final String label;
+
+  /// Edge index into [GeometryScene.polygonRing] (vertex i → i+1).
+  final int edge;
+
+  /// The length (computed by the app for the unknown, never the LLM).
+  final double value;
+
+  /// Whether this is the side being solved for.
+  final bool isUnknown;
+}
+
+/// The role of a side in a right triangle — which one is the hypotenuse.
+enum GeometrySideRole { leg, hypotenuse }
+
+/// A given side of a right-triangle Pythagoras problem: its label, its role,
+/// and its length (`null` marks the single unknown).
+@immutable
+class GeometryKnownSide {
+  const GeometryKnownSide({
+    required this.label,
+    required this.role,
+    this.value,
+  });
+
+  final String label;
+  final GeometrySideRole role;
+  final double? value;
+}
+
 /// Which part of the walkthrough a [GeometryStep] represents — drives what the
 /// painter highlights and reveals.
 enum GeometryStepFocus {
@@ -184,6 +232,8 @@ class GeometryScene {
     required this.caption,
     required this.semanticsLabel,
     required this.steps,
+    this.sides = const [],
+    this.unknownIsAngle = true,
     this.polygonRing = const [],
     this.segments = const [],
     this.tickEdges = const [],
@@ -199,13 +249,22 @@ class GeometryScene {
   /// Figure-space points (auto-scaled + centred by the painter). Y is up.
   final List<VisualPoint> vertices;
 
-  /// The marked angles (all knowns plus the single unknown).
+  /// The marked angles (all knowns plus the single unknown). Empty for a
+  /// length problem.
   final List<GeometryAngle> angles;
 
-  /// The unknown angle's display label (e.g. `x`).
+  /// The marked side lengths (all knowns plus the single unknown). Empty for an
+  /// angle problem; populated for [GeometrySceneKind.rightTrianglePythagoras].
+  final List<GeometrySide> sides;
+
+  /// Whether the unknown is an ANGLE (degrees, `x = 80°`) or a LENGTH (`x = 8`).
+  /// Controls answer formatting, the reveal text and screen-reader wording.
+  final bool unknownIsAngle;
+
+  /// The unknown's display label (e.g. `x`).
   final String unknownLabel;
 
-  /// The unknown angle's computed measure, in degrees.
+  /// The unknown's computed measure — degrees for an angle, a length otherwise.
   final double unknownValue;
 
   /// Human name of the rule applied, e.g. "Angles in a triangle sum to 180°".
@@ -249,9 +308,24 @@ class GeometryScene {
     return null;
   }
 
-  /// The final answer as delimiter-free LaTeX (e.g. `x = 80^\circ`).
-  String get answerLatex =>
-      '$unknownLabel = ${GeometryScene.formatDegrees(unknownValue)}^\\circ';
+  /// The unknown side, or `null` (angle scenes have none).
+  GeometrySide? get unknownSide {
+    for (final s in sides) {
+      if (s.isUnknown) return s;
+    }
+    return null;
+  }
+
+  /// The unknown value formatted for display: degrees (integer/1dp) for angles,
+  /// a length (integer/2dp) otherwise.
+  String get unknownDisplay => unknownIsAngle
+      ? formatDegrees(unknownValue)
+      : formatLength(unknownValue);
+
+  /// The final answer as delimiter-free LaTeX (`x = 80^\circ` or `x = 8`).
+  String get answerLatex => unknownIsAngle
+      ? '$unknownLabel = ${formatDegrees(unknownValue)}^\\circ'
+      : '$unknownLabel = ${formatLength(unknownValue)}';
 
   /// A screen-reader description that matches the visual reveal at [stepIndex]:
   /// it names the givens and the rule throughout, but only states the answer on
@@ -261,16 +335,23 @@ class GeometryScene {
     final revealed = stepIndex >= 0 &&
         stepIndex < steps.length &&
         steps[stepIndex].focus == GeometryStepFocus.answer;
-    final givens = angles
-        .where((a) => !a.isUnknown)
-        .map((a) => '${a.label} equals ${formatDegrees(a.value)} degrees')
-        .join(', ');
+    final noun = unknownIsAngle ? 'angle' : 'length';
+    final givens = unknownIsAngle
+        ? angles
+            .where((a) => !a.isUnknown)
+            .map((a) => '${a.label} equals ${formatDegrees(a.value)} degrees')
+            .join(', ')
+        : sides
+            .where((s) => !s.isUnknown)
+            .map((s) => '${s.label} equals ${formatLength(s.value)}')
+            .join(', ');
+    final answerText = unknownIsAngle
+        ? 'The missing angle $unknownLabel is ${formatDegrees(unknownValue)} degrees.'
+        : 'The missing length $unknownLabel is ${formatLength(unknownValue)}.';
     final buffer = StringBuffer('Geometry diagram. ');
     if (givens.isNotEmpty) buffer.write('Given $givens. ');
     if (ruleName.isNotEmpty) buffer.write('$ruleName. ');
-    buffer.write(revealed
-        ? 'The missing angle $unknownLabel is ${formatDegrees(unknownValue)} degrees.'
-        : 'Find the missing angle $unknownLabel.');
+    buffer.write(revealed ? answerText : 'Find the missing $noun $unknownLabel.');
     return buffer.toString();
   }
 
@@ -280,6 +361,15 @@ class GeometryScene {
       return '${value.round()}';
     }
     return value.toStringAsFixed(1);
+  }
+
+  /// Formats a length: whole numbers stay integers, else two decimals (a
+  /// Pythagoras answer is often irrational, e.g. √136 ≈ 11.66).
+  static String formatLength(double value) {
+    if ((value - value.roundToDouble()).abs() < 1e-6) {
+      return '${value.round()}';
+    }
+    return value.toStringAsFixed(2);
   }
 
   // ---- Construction ---------------------------------------------------------
@@ -386,6 +476,154 @@ class GeometryScene {
     );
   }
 
+  /// Builds a solved right-triangle **Pythagoras** scene from its given sides,
+  /// or `null` when the data is inconsistent (doesn't form a real right
+  /// triangle) or contradicts [expectedAnswerLatex]. The missing length is
+  /// computed here — never taken from the model.
+  static GeometryScene? tryBuildPythagoras({
+    required List<GeometryKnownSide> sides,
+    required String unknownLabel,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    // Exactly two known sides + one unknown, and exactly two legs + one
+    // hypotenuse — anything else isn't a determinate right triangle.
+    if (sides.length != 3) return null;
+    final knownSides = sides.where((s) => s.value != null).toList();
+    final unknowns = sides.where((s) => s.value == null).toList();
+    if (knownSides.length != 2 || unknowns.length != 1) return null;
+    final unknown = unknowns.first;
+    // The label comes from the unknown SIDE so the figure, equations and answer
+    // all agree; the param is only a fallback.
+    final label = unknown.label.trim().isNotEmpty
+        ? unknown.label.trim()
+        : (unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim());
+    for (final s in knownSides) {
+      if (!s.value!.isFinite || s.value! <= 0) return null;
+    }
+    final legs = sides.where((s) => s.role == GeometrySideRole.leg).toList();
+    final hyps =
+        sides.where((s) => s.role == GeometrySideRole.hypotenuse).toList();
+    if (legs.length != 2 || hyps.length != 1) return null;
+    final hyp = hyps.first;
+
+    // Compute the unknown length + the rule/rearrangement to show.
+    final double unknownValue;
+    final String ruleEq;
+    final String rearrange;
+    if (identical(unknown, hyp)) {
+      // Unknown is the hypotenuse: c = √(a² + b²).
+      final a = legs[0].value!, b = legs[1].value!;
+      unknownValue = math.sqrt(a * a + b * b);
+      ruleEq = '${legs[0].label}^2 + ${legs[1].label}^2 = $label^2';
+      rearrange =
+          '$label = \\sqrt{${formatLength(a)}^2 + ${formatLength(b)}^2}';
+    } else {
+      // Unknown is a leg: leg = √(c² − otherLeg²), needs c > otherLeg.
+      final otherLeg = legs.firstWhere((s) => !identical(s, unknown));
+      final c = hyp.value!, o = otherLeg.value!;
+      if (c <= o) return null; // no real right triangle
+      unknownValue = math.sqrt(c * c - o * o);
+      ruleEq = '$label^2 + ${otherLeg.label}^2 = ${hyp.label}^2';
+      rearrange =
+          '$label = \\sqrt{${formatLength(c)}^2 - ${formatLength(o)}^2}';
+    }
+    if (!unknownValue.isFinite || unknownValue <= 0) return null;
+
+    // Cross-check against the verified answer, when we have one.
+    final expected = _parseFirstNumber(expectedAnswerLatex);
+    if (expected != null && (expected - unknownValue).abs() > 0.5) return null;
+
+    double sideLen(GeometryKnownSide s) =>
+        identical(s, unknown) ? unknownValue : s.value!;
+
+    // Right angle at C = (0,0); legs along +x and +y, so |CA|,|CB| are the legs
+    // and |AB| the hypotenuse — correct by construction for either unknown.
+    final legX = sideLen(legs[0]);
+    final legY = sideLen(legs[1]);
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // C (right angle) — index 0
+      VisualPoint(legX, 0), // A — index 1
+      VisualPoint(0, legY), // B — index 2
+    ];
+
+    GeometrySide toSide(GeometryKnownSide s, int edge) => GeometrySide(
+          // The unknown side shows the resolved label so it matches the answer.
+          label: identical(s, unknown) ? label : s.label,
+          edge: edge,
+          value: sideLen(s),
+          isUnknown: identical(s, unknown),
+        );
+    // Edge 0: C→A (legs[0]); edge 1: A→B (hyp); edge 2: B→C (legs[1]).
+    final builtSides = [
+      toSide(legs[0], 0),
+      toSide(hyp, 1),
+      toSide(legs[1], 2),
+    ];
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : "Pythagoras' theorem: a² + b² = c²";
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final knownLabels = knownSides.map((s) => s.label).toSet();
+    final knownText =
+        knownSides.map((s) => '${s.label} = ${formatLength(s.value!)}').join(' and ');
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'The two sides given are $knownText.',
+        highlight: knownLabels,
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: "Pythagoras' theorem",
+        detail: 'In a right triangle, the squares of the two shorter sides add '
+            'up to the square of the longest (the hypotenuse).',
+        equationLatex: ruleEq,
+        highlight: {...knownLabels, label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing side',
+        detail: 'Rearrange for $label and take the square root.',
+        equationLatex: rearrange,
+        highlight: {label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing side is ${formatLength(unknownValue)}.',
+        equationLatex: '$label = ${formatLength(unknownValue)}',
+        highlight: {label},
+      ),
+    ];
+
+    final semantics = 'Right triangle diagram. Given $knownText. '
+        '$resolvedRule. The missing side $label is ${formatLength(unknownValue)}.';
+
+    return GeometryScene(
+      kind: GeometrySceneKind.rightTrianglePythagoras,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: const [],
+      sides: builtSides,
+      unknownIsAngle: false,
+      unknownLabel: label,
+      unknownValue: unknownValue,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+      rightAngleVertices: const [0],
+    );
+  }
+
   static bool _isSumKind(GeometrySceneKind kind) => switch (kind) {
         GeometrySceneKind.triangleAngles ||
         GeometrySceneKind.isoscelesTriangle ||
@@ -394,7 +632,9 @@ class GeometryScene {
         GeometrySceneKind.straightLineAngles ||
         GeometrySceneKind.anglesAroundPoint =>
           true,
-        GeometrySceneKind.parallelLines || GeometrySceneKind.circleAngle =>
+        GeometrySceneKind.parallelLines ||
+        GeometrySceneKind.circleAngle ||
+        GeometrySceneKind.rightTrianglePythagoras =>
           false,
       };
 
@@ -460,7 +700,10 @@ class GeometryScene {
           360,
         GeometrySceneKind.polygonAngles =>
           sides >= 3 && sides <= 20 ? (sides - 2) * 180.0 : null,
-        GeometrySceneKind.parallelLines || GeometrySceneKind.circleAngle => null,
+        GeometrySceneKind.parallelLines ||
+        GeometrySceneKind.circleAngle ||
+        GeometrySceneKind.rightTrianglePythagoras =>
+          null,
       };
 
   static int? _expectedAngleCount(GeometrySceneKind kind, int? sides) =>
@@ -475,7 +718,10 @@ class GeometryScene {
         GeometrySceneKind.straightLineAngles ||
         GeometrySceneKind.anglesAroundPoint =>
           null,
-        GeometrySceneKind.parallelLines || GeometrySceneKind.circleAngle => null,
+        GeometrySceneKind.parallelLines ||
+        GeometrySceneKind.circleAngle ||
+        GeometrySceneKind.rightTrianglePythagoras =>
+          null,
       };
 
   static String _sumRuleName(GeometrySceneKind kind, int sides, double target) =>
@@ -492,7 +738,10 @@ class GeometryScene {
           'Angles on a straight line sum to 180°',
         GeometrySceneKind.anglesAroundPoint =>
           'Angles around a point sum to 360°',
-        GeometrySceneKind.parallelLines || GeometrySceneKind.circleAngle => '',
+        GeometrySceneKind.parallelLines ||
+        GeometrySceneKind.circleAngle ||
+        GeometrySceneKind.rightTrianglePythagoras =>
+          '',
       };
 
   static String _polygonName(int sides) => switch (sides) {
@@ -596,6 +845,10 @@ class GeometryScene {
         return _buildParallelLines(knowns, label, unknownValue, computed);
       case GeometrySceneKind.circleAngle:
         return _buildCircle(knowns, label, unknownValue, computed);
+      case GeometrySceneKind.rightTrianglePythagoras:
+        // Pythagoras is length-based and built via [tryBuildPythagoras], never
+        // through the angle path — unreachable here.
+        return null;
     }
   }
 

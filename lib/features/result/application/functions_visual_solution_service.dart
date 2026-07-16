@@ -1,5 +1,6 @@
 import '../domain/geometry_models.dart';
 import '../domain/visual_models.dart';
+import 'geometry_payload_mapper.dart';
 import 'visual_prompt_builder.dart';
 import 'visual_solution_service.dart';
 
@@ -77,8 +78,9 @@ class VisualResponseMapper {
   }
 
   /// Parses the optional structured geometry object into a solved
-  /// [GeometryScene], or `null` when it's absent, malformed, unsupported, or
-  /// inconsistent (in which case the Visual tab uses the generic renderers).
+  /// [GeometryScene] via the shared [GeometryPayloadMapper], or `null` when it's
+  /// absent/malformed/inconsistent (the Visual tab then uses the generic
+  /// renderers).
   ///
   /// The cross-check prefers [verifiedAnswerLatex] — the SOLVER'S verified
   /// answer, ground truth — over the model's own echoed `answerLatex`, so the
@@ -90,84 +92,11 @@ class VisualResponseMapper {
     String echoedAnswerLatex,
     String? verifiedAnswerLatex,
   ) {
-    if (v is! Map) return null;
-    final m = Map<String, dynamic>.from(v);
-
-    final kind = _enumByName(GeometrySceneKind.values, m['kind']);
-    if (kind == null) return null;
-
-    final knowns = _knownAngles(m['knownAngles']);
-    if (knowns.isEmpty) return null;
-
     final expected = (verifiedAnswerLatex != null &&
             verifiedAnswerLatex.isNotEmpty)
         ? verifiedAnswerLatex
         : (echoedAnswerLatex.isEmpty ? null : echoedAnswerLatex);
-
-    return GeometryScene.tryBuild(
-      kind: kind,
-      knownAngles: knowns,
-      unknownLabel: _unknownLabel(m['unknown']),
-      sides: _int(m['sides']),
-      relation: _enumByName(GeometryRelation.values, m['relation']),
-      relationReference: _optional(m['relationReference']),
-      ruleName: _optional(m['ruleName']),
-      caption: _optional(m['caption']),
-      expectedAnswerLatex: expected,
-    );
-  }
-
-  /// `knownAngles` arrives as `[{label, value}, ...]`; entries without a finite
-  /// numeric value are skipped, and a missing label gets a sequential letter.
-  static List<GeometryKnownAngle> _knownAngles(Object? v) {
-    if (v is! List) return const [];
-    final out = <GeometryKnownAngle>[];
-    for (final e in v) {
-      if (e is! Map) continue;
-      final value = _num(e['value']);
-      if (value == null) continue;
-      final rawLabel = e['label'];
-      final label = rawLabel is String && rawLabel.trim().isNotEmpty
-          ? rawLabel.trim()
-          : String.fromCharCode('a'.codeUnitAt(0) + out.length);
-      out.add(GeometryKnownAngle(label: label, value: value));
-    }
-    return out;
-  }
-
-  /// `unknown` is a bare string, or `{label}` — default `x`. Capped to a short
-  /// length so an over-verbose model label can't blow out the on-canvas badge.
-  static String _unknownLabel(Object? v) {
-    String? raw;
-    if (v is String) {
-      raw = v.trim();
-    } else if (v is Map && v['label'] is String) {
-      raw = (v['label'] as String).trim();
-    }
-    if (raw == null || raw.isEmpty || raw.length > 12) return 'x';
-    return raw;
-  }
-
-  static int? _int(Object? v) {
-    if (v is int) return v;
-    if (v is num) return v.toInt();
-    if (v is String) return int.tryParse(v.trim());
-    return null;
-  }
-
-  /// Accepts a number or a numeric string (the model occasionally quotes them),
-  /// rejecting non-finite values.
-  static double? _num(Object? v) {
-    final double? d;
-    if (v is num) {
-      d = v.toDouble();
-    } else if (v is String) {
-      d = double.tryParse(v.trim());
-    } else {
-      d = null;
-    }
-    if (d == null || !d.isFinite) return null;
-    return d;
+    return GeometryPayloadMapper.parse(v, expectedAnswerLatex: expected);
   }
 
   /// A step needs both sides of the transformation to be renderable; anything

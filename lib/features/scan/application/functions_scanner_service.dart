@@ -54,6 +54,7 @@ class FunctionsScannerService implements ScannerService {
     }
     final confidence = json['confidence'];
     final topic = json['topic'] is String ? json['topic'] as String : null;
+    final geometry = json['geometry'];
     return DetectedEquation(
       latex: latex,
       confidence: confidence is num ? confidence.toDouble().clamp(0.0, 1.0) : 0.9,
@@ -61,6 +62,11 @@ class FunctionsScannerService implements ScannerService {
       kind: kindFromTopic(topic) ?? inferKind(latex),
       // Keep the cropped scan so the result screen can show the figure.
       imageBytes: imageBytes,
+      // Structured geometry facts (angle/Pythagoras) the recognizer extracted,
+      // used to render the diagram-first player — see GeometryPayloadMapper.
+      geometry: geometry is Map
+          ? Map<String, dynamic>.from(geometry)
+          : null,
     );
   }
 

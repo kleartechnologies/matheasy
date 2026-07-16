@@ -11,10 +11,13 @@ import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../../scan/presentation/manual_input_screen.dart';
+import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_models.dart';
+import '../application/geometry_payload_mapper.dart';
 import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
+import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/visual_models.dart';
 import 'tabs/explain_tab.dart';
@@ -29,6 +32,7 @@ import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
 import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
+import 'widgets/visual/geometry_visual_player.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
 /// answer, a step-by-step solution, explanations, methods, practice and the
@@ -57,6 +61,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   static const int _visualTabIndex = 4;
 
   bool _saved = false;
+
+  /// The scene built from the recognizer's structured geometry facts, computed
+  /// once (parsing + solving is deterministic and cheap, but a stable instance
+  /// keeps the player's repaint keyed on real changes, not identity churn).
+  GeometryScene? _scannedScene;
+  bool _sceneResolved = false;
+
+  GeometryScene? get _scannedGeometryScene {
+    if (!_sceneResolved) {
+      _sceneResolved = true;
+      _scannedScene = GeometryPayloadMapper.parse(widget.equation?.geometry);
+    }
+    return _scannedScene;
+  }
 
   @override
   void initState() {
@@ -158,6 +176,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final equation = widget.equation;
     if (equation == null) return _buildNoProblem(context);
 
+    // Scanned geometry (Pro): the recognizer extracted structured facts, so we
+    // render the diagram-first player DIRECTLY from them — the geometry-blind
+    // solver can't verify these, but the app computes the measure itself. No
+    // solve call needed. Free users fall through to the normal (couldn't-verify
+    // / tutor) flow, keeping the visual feature Pro-only.
+    final geoScene = _scannedGeometryScene;
+    if (geoScene != null && ref.watch(isProProvider)) {
+      return _buildGeometryScaffold(geoScene);
+    }
+
     final async = ref.watch(resultControllerProvider(equation));
     final result = switch (async) {
       AsyncData(:final value) => value,
@@ -204,6 +232,65 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 _toast(_saved ? 'Saved to your library' : 'Removed');
               },
             ),
+    );
+  }
+
+  /// The scanned-geometry experience: the diagram-first player built straight
+  /// from the recognizer's structured facts (no solver round-trip), with the
+  /// scanned photo above it.
+  Widget _buildGeometryScaffold(GeometryScene scene) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left_rounded),
+          iconSize: 28,
+          tooltip: 'Back',
+          onPressed: () => context.pop(),
+        ),
+        title: const Text('Solution'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenH,
+          AppSpacing.md,
+          AppSpacing.screenH,
+          AppSpacing.xl,
+        ),
+        children: [
+          ResultScanImageSlot(imageBytes: widget.equation?.imageBytes),
+          GeometryVisualPlayer(
+            visual: _geoVisual(scene),
+            scene: scene,
+            onAskMatheasy: (step) => _askMatheasyAboutGeometry(scene, step),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A minimal [VisualSolution] wrapping a scanned [GeometryScene] — the player
+  /// only reads the scene (plus optional method/key-ideas, absent here).
+  VisualSolution _geoVisual(GeometryScene scene) => VisualSolution(
+        category: ProblemCategory.geometry,
+        difficulty: ProblemDifficulty.secondary,
+        visualization: VisualizationType.conceptExplorer,
+        answerLatex: scene.answerLatex,
+        intro: '',
+        steps: const [],
+        geometryScene: scene,
+      );
+
+  void _askMatheasyAboutGeometry(GeometryScene scene, int stepIndex) {
+    context.push(
+      AppRoutes.tutorChat,
+      extra: TutorLaunchContext(
+        questionLatex: widget.equation?.latex ?? '',
+        answerLatex: scene.answerLatex,
+        equationType: 'Geometry',
+        topicLabel: ProblemCategory.geometry.label,
+        visualStepSummary:
+            VisualPromptBuilder.tutorGeometryStepContext(scene, stepIndex),
+      ),
     );
   }
 
