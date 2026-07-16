@@ -163,6 +163,36 @@ describe("solve — reported scans: prose-labelled problems still solve", () => 
   it("f(x) is still a function application, not f×(x)", () => {
     expect(classify("\\frac{d}{dx}(x^2)").problemType).toBe("derivative");
   });
+  it("a bare '\\\\' row-break splits a two-line simultaneous system", async () => {
+    // The OCR puts each line on its own row; the system used to run together
+    // ("5x-2y=17 \\ 6x+2y=16") and fall through to the tutor.
+    const cls = classify("5x - 2y = 17 \\\\ 6x + 2y = 16");
+    expect(cls.problemType).toBe("linear_system");
+    const p = await solve(cls, completerWith({}));
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("x = 3, y = -1");
+  });
+  it("simultaneous eqns with a prose directive + numbering still solve", async () => {
+    const cls = classify(
+      "\\text{Solve the following simultaneous equations.} \\\\ \\text{1.} 5x + 2y = 17 \\\\ 4x + y = 10"
+    );
+    expect(cls.problemType).toBe("linear_system");
+    expect((await solve(cls, completerWith({}))).finalAnswer?.plain).toBe("x = 1, y = 6");
+  });
+  it("(x+1)² = 4(x+4) solves deterministically when mathsteps declines", async () => {
+    // Falls back to the quadratic formula over sampled coefficients.
+    const cls = classify("(x+1)^2 = 4(x+4)");
+    expect(cls.problemType).toBe("quadratic_equation");
+    const p = await solve(cls, NEVER);
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("x = -3 or x = 5");
+  });
+  it("the quadratic fallback keeps EXACT irrational roots (x²−2=0 → ±√2)", async () => {
+    const p = await solve(classify("x^2 - 2 = 0"), NEVER);
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.latex).toContain("\\sqrt{2}");
+    expect(p.finalAnswer?.latex).not.toMatch(/1\.414/);
+  });
 });
 
 describe("solve — genuine single problems still solve (no over-routing)", () => {

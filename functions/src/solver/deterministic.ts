@@ -11,7 +11,7 @@ import * as mathsteps from "mathsteps";
 import { derivative, fraction, simplify } from "mathjs";
 
 import { equationParts } from "./classify";
-import { resymbolize } from "./exact";
+import { exactForm, resymbolize } from "./exact";
 import { asciiToLatex, variablesIn } from "./latex";
 import { solveLinalg, solveVectors } from "./linalg";
 import { solveLinearSystem } from "./linsystem";
@@ -59,7 +59,81 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
 function solveEquation(cls: Classification): SolveCandidate | null {
   const parts = equationParts(cls.ascii);
   if (parts.length !== 1) return null; // deterministic path is single-equation
+  // mathsteps is the primary engine, but it can't rearrange every quadratic
+  // (`(x+1)^2 = 4(x+4)` defeats it). Fall back to the formula over the sampled
+  // coefficients so such problems still solve deterministically + verified,
+  // rather than depending on the LLM to return a COMPLETE root set.
+  return solveViaMathsteps(cls, parts) ?? solveQuadraticDirect(cls, parts);
+}
 
+/**
+ * Solve a quadratic straight from its coefficients, recovered by sampling
+ * `lhs - rhs` (extractQuadratic). Used only when mathsteps declines. Real roots
+ * only; the substitution gate proves them like any other answer.
+ */
+function solveQuadraticDirect(
+  cls: Classification,
+  parts: { lhs: string; rhs: string }[]
+): SolveCandidate | null {
+  const quad = extractQuadratic(parts[0], cls.unknown);
+  if (!quad) return null;
+  const disc = quad.b * quad.b - 4 * quad.a * quad.c;
+  if (disc < 0) return null; // complex roots → decline honestly
+  const sq = Math.sqrt(disc);
+  const values = distinctSorted([
+    (-quad.b + sq) / (2 * quad.a),
+    (-quad.b - sq) / (2 * quad.a),
+  ]);
+  if (!verifyRoots(parts, cls.unknown, values)) return null;
+
+  const method = quadraticFormulaMethod(cls.unknown, quad);
+  return {
+    // Format each root by its EXACT symbolic form where recognizable (√2, a
+    // fraction) — same as the LLM path — so an irrational root shows √2, not
+    // 1.414. The gate still verifies the numeric values.
+    answer: exactRootsAnswer(cls.unknown, values),
+    methods: method ? [{ ...method, examPick: true }] : [],
+    roots: values,
+    quadratic: quad,
+    plotExpression: singleVarPolyPlot(parts[0], cls.unknown),
+    verify: () => verifyRoots(parts, cls.unknown, values),
+  };
+}
+
+/** A §4 answer from verified numeric roots, each in exact symbolic form. */
+function exactRootsAnswer(unknown: string, values: number[]): FinalAnswer {
+  const fmt = (n: number): { latex: string; plain: string } => {
+    if (Number.isInteger(n)) return { latex: String(n), plain: String(n) };
+    const exact = exactForm(n);
+    if (exact) return { latex: exact.latex, plain: exact.plain };
+    const s = trimNum(n);
+    return { latex: s, plain: s };
+  };
+  if (values.length === 1) {
+    const f = fmt(values[0]);
+    return { latex: `${unknown} = ${f.latex}`, plain: `${unknown} = ${f.plain}` };
+  }
+  return {
+    latex: values
+      .map((v, i) => `${unknown}_${i + 1} = ${fmt(v).latex}`)
+      .join(",\\; "),
+    plain: values.map((v) => `${unknown} = ${fmt(v).plain}`).join(" or "),
+  };
+}
+
+/** Dedupe near-equal roots, ascending. */
+function distinctSorted(values: number[]): number[] {
+  const out: number[] = [];
+  for (const v of values) {
+    if (!out.some((x) => Math.abs(x - v) < 1e-9)) out.push(v);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+function solveViaMathsteps(
+  cls: Classification,
+  parts: { lhs: string; rhs: string }[]
+): SolveCandidate | null {
   let steps: mathsteps.MsStep[];
   try {
     steps = mathsteps.solveEquation(cls.ascii);

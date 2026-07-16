@@ -75,18 +75,17 @@ export function classify(rawLatex: string): Classification {
     rawLatex = stripLeadingDirective(rawLatex);
   }
 
-  // A cases/aligned system writes its equations with `\\` row breaks; turn those
-  // into `;` (and drop the wrapper + `&` alignment tabs) so equationParts can
-  // split them. Only when such an environment is present — matrices (pmatrix,
-  // handled separately from rawLatex) are untouched.
-  const rawForAscii =
-    /\\begin\s*\{\s*(?:cases|aligned|split|gather)/i.test(rawLatex)
-      ? rawLatex
-          .replace(/\\begin\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
-          .replace(/\\end\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
-          .replace(/\\\\/g, " ; ")
-          .replace(/&/g, " ")
-      : rawLatex;
+  // A `\\` ROW BREAK separates statements — in a cases/aligned system, and also
+  // bare (the OCR puts each printed line on its own row, so a two-line system
+  // arrives as "5x-2y=17 \\ 6x+2y=16"). Turn every row break into `;` so
+  // equationParts can split them; otherwise the two equations ran together, the
+  // system never parsed, and it fell through to the tutor. Matrices are parsed
+  // from rawLatex (parseLinalg), so their `\\` rows are unaffected by this.
+  const rawForAscii = rawLatex
+    .replace(/\\begin\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
+    .replace(/\\end\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
+    .replace(/\\\\/g, " ; ")
+    .replace(/&/g, " ");
   const ascii = latexToAscii(rawForAscii);
 
   const base = (

@@ -70,7 +70,12 @@ export function cleanLatex(latex: string): string {
     normalizeMacros(latex)
       .replace(/\$\$?|\\\[|\\\]|\\\(|\\\)/g, "") // math delimiters
       .replace(/\\left|\\right/g, "")
-      .replace(/\\!|\\,|\\;|\\:|\\ |\\quad|\\qquad|\\displaystyle|\\;/g, " ")
+      // Spacing macros. `\ ` (escaped space) must NOT eat half of a `\\` ROW
+      // BREAK: in "17 \\ 6x" it would match the second backslash + the space and
+      // leave a stray "\", so the row break vanished and a two-line system never
+      // split into its equations. The lookbehind skips a backslash that is itself
+      // preceded by one.
+      .replace(/\\!|\\,|\\;|\\:|(?<!\\)\\ |\\quad|\\qquad|\\displaystyle/g, " ")
       .replace(/\s+/g, " ")
       // A scanned prompt often ends in an empty "= ?" / "= □" / bare "=" — the
       // "compute this" placeholder ("∫ … dx = ?", "d/dx(…) = ?"). It carries no
