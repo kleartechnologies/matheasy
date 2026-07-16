@@ -31,6 +31,8 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -51,8 +53,8 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
-                    const Icon(Icons.show_chart_rounded,
-                        size: 20, color: AppColors.primary),
+                    Icon(Icons.show_chart_rounded,
+                        size: 20, color: emeraldLabel),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       'Graph',
@@ -64,14 +66,14 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
                     const Spacer(),
                     Text(
                       _open ? 'Hide' : 'Show',
-                      style: AppTypography.caption
-                          .copyWith(color: AppColors.primary),
+                      style:
+                          AppTypography.caption.copyWith(color: emeraldLabel),
                     ),
                     AnimatedRotation(
                       turns: _open ? 0.5 : 0,
                       duration: AppDurations.fast,
-                      child: const Icon(Icons.keyboard_arrow_down_rounded,
-                          size: 20, color: AppColors.primary),
+                      child: Icon(Icons.keyboard_arrow_down_rounded,
+                          size: 20, color: emeraldLabel),
                     ),
                   ],
                 ),
@@ -98,6 +100,10 @@ class _GraphBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // The curve and its key points are non-text graphics that must stay legible
+    // against the plot surface — the logo tone is 2.97:1 there.
+    final curveColor =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -125,9 +131,9 @@ class _GraphBody extends StatelessWidget {
                   painter: _GraphPainter(
                     curve: graph.curve,
                     keyPoints: graph.keyPoints,
-                    line: AppColors.primary,
+                    line: curveColor,
                     axis: colors.border,
-                    point: AppColors.primary,
+                    point: curveColor,
                     label: colors.textSecondary,
                     surface: colors.surface,
                   ),

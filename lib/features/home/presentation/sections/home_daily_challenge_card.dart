@@ -3,13 +3,18 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/home_models.dart';
 
-/// A compact daily challenge card — not a hero. Just enough to nudge the streak.
+/// A compact daily challenge card — not a hero. Just enough to nudge the streak,
+/// and the quietest card on Home: it sits below Scan, Continue and Recommended.
+///
+/// The XP reward rides in the caption rather than its own gold pill — one gold
+/// element per card, so the chip reads as the badge and nothing competes.
 class HomeDailyChallengeCard extends StatelessWidget {
   const HomeDailyChallengeCard({super.key, required this.challenge});
 
@@ -18,6 +23,7 @@ class HomeDailyChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isDone = challenge.done >= challenge.target;
 
     return AppCard(
       onTap: () => context.go(AppRoutes.practice),
@@ -43,7 +49,7 @@ class HomeDailyChallengeCard extends StatelessWidget {
               children: [
                 Text(
                   "Today's challenge",
-                  style: AppTypography.label.copyWith(color: colors.textTertiary),
+                  style: AppTypography.label.copyWith(color: colors.textMuted),
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -54,29 +60,28 @@ class HomeDailyChallengeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${challenge.done} / ${challenge.target} complete',
-                  style: AppTypography.caption.copyWith(color: colors.textSecondary),
+                  isDone
+                      ? 'Completed today'
+                      : '${challenge.subtitle} · +${challenge.xpReward} XP',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xxs,
-            ),
-            decoration: BoxDecoration(
-              color: colors.xpContainer,
-              borderRadius: AppRadius.pillRadius,
-            ),
-            child: Text(
-              '+${challenge.xpReward} XP',
-              style: AppTypography.caption.copyWith(
-                color: colors.onXpContainer,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+          Icon(
+            isDone ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
+            // Emerald that holds up as a glyph on this theme's card — primaryDark
+            // is 6.83:1 on white but vanishes on a dark one.
+            color: isDone
+                ? (context.isDark
+                    ? AppColors.primaryLight
+                    : AppColors.primaryDark)
+                : colors.textMuted,
           ),
         ],
       ),

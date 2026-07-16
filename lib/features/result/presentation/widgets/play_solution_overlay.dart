@@ -153,8 +153,11 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                         Text(
                           _isLast ? 'SOLVED' : 'STEP ${_index + 1} OF '
                               '${widget.steps.length}',
-                          style: AppTypography.label
-                              .copyWith(color: AppColors.primary),
+                          style: AppTypography.label.copyWith(
+                            color: context.isDark
+                                ? AppColors.primaryLight
+                                : AppColors.primaryDark,
+                          ),
                         ),
                         const Spacer(),
                         _CircleButton(
@@ -302,6 +305,9 @@ class _Progress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The filled track must clear 3:1 as a non-text graphic against the surface
+    // it sits on, which the logo tone (2.97:1) does not.
+    final fill = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Row(
       children: [
         for (var i = 0; i < count; i++) ...[
@@ -311,9 +317,7 @@ class _Progress extends StatelessWidget {
               duration: AppDurations.medium,
               height: 6,
               decoration: BoxDecoration(
-                color: i <= current
-                    ? AppColors.primary
-                    : context.colors.surfaceMuted,
+                color: i <= current ? fill : context.colors.surfaceMuted,
                 borderRadius: AppRadius.pillRadius,
               ),
             ),
@@ -351,8 +355,8 @@ class _CircleButton extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            gradient: filled ? AppColors.primaryGradient : null,
-            color: filled ? null : colors.surfaceMuted,
+            // Solid: the filled variant carries a white icon (4.78:1).
+            color: filled ? AppColors.primaryAction : colors.surfaceMuted,
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -386,7 +390,9 @@ class _PrimaryPill extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          // Solid: this pill's label is white. The old gradient's top stop put
+          // it at 1.92:1; primaryAction is 4.78:1.
+          color: AppColors.primaryAction,
           borderRadius: AppRadius.pillRadius,
         ),
         child: Row(

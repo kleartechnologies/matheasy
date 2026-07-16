@@ -25,12 +25,12 @@ class SettingsNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: colors.textTertiary),
+          Icon(icon, size: 16, color: colors.textMuted),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
               text,
-              style: AppTypography.bodySmall.copyWith(color: colors.textTertiary),
+              style: AppTypography.bodySmall.copyWith(color: colors.textMuted),
             ),
           ),
         ],
@@ -52,7 +52,7 @@ class SettingsGroupLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.sm),
       child: Text(
         text.toUpperCase(),
-        style: AppTypography.label.copyWith(color: context.colors.textTertiary),
+        style: AppTypography.label.copyWith(color: context.colors.textMuted),
       ),
     );
   }

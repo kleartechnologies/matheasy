@@ -151,31 +151,39 @@ class _AppButton extends StatelessWidget {
     final colors = context.colors;
 
     // Resolve visuals per variant + enabled state.
-    Gradient? gradient;
     Color background = Colors.transparent;
     Color foreground;
     Border? border;
     List<BoxShadow> shadow = const [];
 
+    // Emerald that stays legible as *text* on this theme's surfaces:
+    // primaryDark is 6.83:1 on white but disappears on a dark card, so dark mode
+    // steps up the ramp instead. (AppColors.primary itself is only 2.97:1 — it
+    // is the logotype tone, never a label.)
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+
     switch (variant) {
       case _ButtonVariant.primary:
         if (enabled) {
-          gradient = AppColors.primaryGradient;
+          // Solid, not a gradient: the old primaryGradient's top stop put this
+          // white label at 1.92:1. primaryAction is 4.78:1.
+          background = AppColors.primaryAction;
           foreground = AppColors.white;
           shadow = context.elevation.button;
         } else {
           background = colors.surfaceMuted;
-          foreground = colors.textTertiary;
+          foreground = colors.textMuted;
         }
       case _ButtonVariant.secondary:
         background = colors.surface;
-        foreground = enabled ? AppColors.primary : colors.textTertiary;
+        foreground = enabled ? emeraldLabel : colors.textMuted;
         border = Border.all(
           color: enabled ? colors.border : colors.divider,
           width: 1.5,
         );
       case _ButtonVariant.ghost:
-        foreground = enabled ? AppColors.primary : colors.textTertiary;
+        foreground = enabled ? emeraldLabel : colors.textMuted;
     }
 
     final content = isLoading
@@ -221,8 +229,7 @@ class _AppButton extends StatelessWidget {
       ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        gradient: gradient,
-        color: gradient == null ? background : null,
+        color: background,
         borderRadius: AppRadius.pillRadius,
         border: border,
         boxShadow: shadow,

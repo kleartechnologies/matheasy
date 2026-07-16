@@ -103,8 +103,9 @@ class _LevelBadge extends StatelessWidget {
       width: 54,
       height: 54,
       alignment: Alignment.center,
+      // Solid interactive emerald — this badge carries white text (4.78:1 AA).
       decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        color: AppColors.primaryAction,
         shape: BoxShape.circle,
       ),
       child: Column(
@@ -113,7 +114,9 @@ class _LevelBadge extends StatelessWidget {
           Text(
             'LV',
             style: AppTypography.label.copyWith(
-              color: AppColors.white.withValues(alpha: 0.85),
+              // Full white: at 9px this is small text, so it needs the whole
+              // 4.78:1 the emerald affords — a 0.85 alpha drops it under AA.
+              color: AppColors.white,
               fontSize: 9,
             ),
           ),
@@ -153,13 +156,16 @@ class _StreakPill extends StatelessWidget {
             Icon(
               Icons.local_fire_department_rounded,
               size: 18,
-              color: active ? AppColors.streak : colors.textTertiary,
+              // onStreakContainer, not AppColors.streak: the raw hue is 4.18:1
+              // on the light container and 3.32:1 on the dark one. The
+              // container's paired on-colour is the only one that is AA on it.
+              color: active ? colors.onStreakContainer : colors.textMuted,
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
               '$days',
               style: AppTypography.caption.copyWith(
-                color: active ? AppColors.streak : colors.textTertiary,
+                color: active ? colors.onStreakContainer : colors.textMuted,
                 fontWeight: FontWeight.w800,
               ),
             ),

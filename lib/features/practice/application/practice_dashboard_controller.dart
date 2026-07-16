@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../history/application/history_controller.dart';
 import '../../history/domain/history_entry.dart';
 import '../../onboarding/application/onboarding_controller.dart';
+import '../../progress/application/achievement_service.dart' show clockProvider;
 import '../domain/practice_dashboard.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_session.dart';
@@ -20,6 +21,7 @@ PracticeDashboardData practiceDashboard(Ref ref) {
   final progress = ref.watch(practiceProgressControllerProvider);
   final onboarding = ref.watch(onboardingFlowControllerProvider);
   final history = ref.watch(historyControllerProvider);
+  final today = PracticeProgress.epochDay(ref.watch(clockProvider)());
 
   final recommended = onboarding.topics.isEmpty
       ? const [
@@ -46,16 +48,33 @@ PracticeDashboardData practiceDashboard(Ref ref) {
     continueRequest: progress.lastRequest,
     recommendedTopics: recommended,
     weakTopics: _weakTopics(history),
-    dailyChallenge: DailyChallengeView(
-      title: 'Daily Challenge',
-      subtitle: 'Solve 5 algebra questions',
-      done: 0,
-      target: 5,
-      bonusXp: XpReward.dailyChallengeBonus,
-      request: PracticeRequest.dailyChallenge(),
-    ),
+    dailyChallenge: _dailyChallenge(progress, today),
     categories: categories,
     tutorMessage: _tutorMessage(progress),
+  );
+}
+
+/// Today's challenge, reported from real persisted state rather than a
+/// placeholder.
+///
+/// The engine only records the challenge as a whole (`lastDailyChallengeEpochDay`
+/// is stamped when the bonus is awarded), so `done` is genuinely binary: the
+/// challenge is either untouched today or finished. It is NOT a per-question
+/// counter, and must not be rendered as one — [done] previously hardcoded `0`,
+/// so a learner who had finished today's challenge was still shown "0 of 5".
+DailyChallengeView _dailyChallenge(PracticeProgress progress, int today) {
+  final request = PracticeRequest.dailyChallenge();
+  final completedToday = progress.lastDailyChallengeEpochDay == today;
+  return DailyChallengeView(
+    title: 'Daily Challenge',
+    subtitle: completedToday
+        ? 'Done for today — come back tomorrow'
+        : 'Solve ${request.questionCount} '
+            '${request.topic.label.toLowerCase()} questions',
+    done: completedToday ? request.questionCount : 0,
+    target: request.questionCount,
+    bonusXp: XpReward.dailyChallengeBonus,
+    request: request,
   );
 }
 

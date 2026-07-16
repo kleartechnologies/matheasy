@@ -189,7 +189,13 @@ class _AvatarOption extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: selected ? AppColors.primary : Colors.transparent,
+              // The ring is the only thing marking selection — it has to clear
+              // 3:1 on the page, which the identity emerald doesn't in light.
+              color: selected
+                  ? (context.isDark
+                      ? AppColors.primaryLight
+                      : AppColors.primaryDark)
+                  : Colors.transparent,
               width: 2.5,
             ),
           ),
@@ -222,7 +228,7 @@ class _NameField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Your name',
         hintStyle:
-            AppTypography.bodyLarge.copyWith(color: colors.textTertiary),
+            AppTypography.bodyLarge.copyWith(color: colors.textMuted),
         counterText: '',
         filled: true,
         fillColor: colors.surface,
@@ -234,9 +240,13 @@ class _NameField extends StatelessWidget {
           borderRadius: AppRadius.mdRadius,
           borderSide: BorderSide(color: colors.border, width: 1.5),
         ),
-        focusedBorder: const OutlineInputBorder(
+        focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdRadius,
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(
+            color:
+                context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
+            width: 1.5,
+          ),
         ),
       ),
     );

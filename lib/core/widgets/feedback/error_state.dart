@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../brand/brand.dart';
 import '../../extensions/context_extensions.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../buttons/app_button.dart';
 
-/// Recoverable error placeholder with an icon, message and optional retry.
+/// Recoverable error placeholder with the Matheasy brand avatar, a message and
+/// an optional retry.
+///
+/// Deliberately branded rather than alarmed — this is the same calm placeholder
+/// shape as [EmptyState]. A red icon would read as *your fault / something
+/// broke*; the copy already says what happened, and the state is recoverable.
+/// Destructive red stays reserved for actions that actually destroy something.
 class ErrorState extends StatelessWidget {
   const ErrorState({
     super.key,
@@ -31,16 +36,7 @@ class ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: context.colors.errorContainer,
-                borderRadius: AppRadius.lgRadius,
-              ),
-              child: const Icon(Icons.error_outline_rounded,
-                  size: 32, color: AppColors.error),
-            ),
+            const MatheasyBrandAvatar(size: 120),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,

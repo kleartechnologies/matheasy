@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Emerald app-icon tile gradient (Emerald 500 -> 600), top to bottom. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <gradient
-        android:startColor="#10B981"
-        android:endColor="#059669"
-        android:angle="270" />
-</shape>

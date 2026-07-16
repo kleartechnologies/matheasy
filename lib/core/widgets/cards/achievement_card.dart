@@ -35,7 +35,7 @@ class AchievementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final badgeColor = unlocked ? accent : colors.textTertiary;
+    final badgeColor = unlocked ? accent : colors.textMuted;
 
     return AppCard(
       onTap: onTap,

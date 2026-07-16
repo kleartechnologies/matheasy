@@ -8,8 +8,8 @@ part of 'home_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Supplies the Home dashboard's data — derived entirely from REAL per-user
-/// state, never a mock.
+/// Supplies Home's data — derived entirely from REAL per-user state, never a
+/// mock.
 ///
 /// Identity comes from [profileControllerProvider] (the SAME source the greeting
 /// avatar reads, so name + avatar always agree). Because that provider
@@ -18,15 +18,15 @@ part of 'home_controller.dart';
 /// "Home shows the previous/demo user after signup".
 ///
 /// Learning state (streak, weak topics, daily-challenge completion, first-day)
-/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
-/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
-/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
+/// comes from [practiceProgressControllerProvider]. A brand-new account gets an
+/// HONEST first-day Home — 'Learner', zeros, hidden cards — never a fabricated
+/// streak or accuracy.
 
 @ProviderFor(HomeController)
 final homeControllerProvider = HomeControllerProvider._();
 
-/// Supplies the Home dashboard's data — derived entirely from REAL per-user
-/// state, never a mock.
+/// Supplies Home's data — derived entirely from REAL per-user state, never a
+/// mock.
 ///
 /// Identity comes from [profileControllerProvider] (the SAME source the greeting
 /// avatar reads, so name + avatar always agree). Because that provider
@@ -35,13 +35,13 @@ final homeControllerProvider = HomeControllerProvider._();
 /// "Home shows the previous/demo user after signup".
 ///
 /// Learning state (streak, weak topics, daily-challenge completion, first-day)
-/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
-/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
-/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
+/// comes from [practiceProgressControllerProvider]. A brand-new account gets an
+/// HONEST first-day Home — 'Learner', zeros, hidden cards — never a fabricated
+/// streak or accuracy.
 final class HomeControllerProvider
     extends $NotifierProvider<HomeController, HomeData> {
-  /// Supplies the Home dashboard's data — derived entirely from REAL per-user
-  /// state, never a mock.
+  /// Supplies Home's data — derived entirely from REAL per-user state, never a
+  /// mock.
   ///
   /// Identity comes from [profileControllerProvider] (the SAME source the greeting
   /// avatar reads, so name + avatar always agree). Because that provider
@@ -50,9 +50,9 @@ final class HomeControllerProvider
   /// "Home shows the previous/demo user after signup".
   ///
   /// Learning state (streak, weak topics, daily-challenge completion, first-day)
-  /// comes from [practiceProgressControllerProvider]; onboarding supplies only the
-  /// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
-  /// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
+  /// comes from [practiceProgressControllerProvider]. A brand-new account gets an
+  /// HONEST first-day Home — 'Learner', zeros, hidden cards — never a fabricated
+  /// streak or accuracy.
   HomeControllerProvider._()
     : super(
         from: null,
@@ -80,10 +80,10 @@ final class HomeControllerProvider
   }
 }
 
-String _$homeControllerHash() => r'd4257ddcbdd4c5850ba9710404b328e7820a90db';
+String _$homeControllerHash() => r'c54d19ab296ed33b95297c6becec90fa8e1f9043';
 
-/// Supplies the Home dashboard's data — derived entirely from REAL per-user
-/// state, never a mock.
+/// Supplies Home's data — derived entirely from REAL per-user state, never a
+/// mock.
 ///
 /// Identity comes from [profileControllerProvider] (the SAME source the greeting
 /// avatar reads, so name + avatar always agree). Because that provider
@@ -92,9 +92,9 @@ String _$homeControllerHash() => r'd4257ddcbdd4c5850ba9710404b328e7820a90db';
 /// "Home shows the previous/demo user after signup".
 ///
 /// Learning state (streak, weak topics, daily-challenge completion, first-day)
-/// comes from [practiceProgressControllerProvider]; onboarding supplies only the
-/// daily-goal target. A brand-new account gets an HONEST first-day dashboard —
-/// 'Learner', zeros, hidden cards — never a fabricated streak or accuracy.
+/// comes from [practiceProgressControllerProvider]. A brand-new account gets an
+/// HONEST first-day Home — 'Learner', zeros, hidden cards — never a fabricated
+/// streak or accuracy.
 
 abstract class _$HomeController extends $Notifier<HomeData> {
   HomeData build();

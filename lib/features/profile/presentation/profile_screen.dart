@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
@@ -58,7 +57,6 @@ class ProfileScreen extends ConsumerWidget {
     final proceed = await AppDialog.show<bool>(
       context,
       icon: Icons.warning_amber_rounded,
-      iconColor: AppColors.error,
       title: isGuest ? 'Delete guest data?' : 'Delete account?',
       message: 'This permanently removes your progress, achievements, learning '
           'preferences and settings from this device. This cannot be undone.',
@@ -72,7 +70,6 @@ class ProfileScreen extends ConsumerWidget {
     final confirmed = await AppDialog.show<bool>(
       context,
       icon: Icons.delete_forever_rounded,
-      iconColor: AppColors.error,
       title: 'Are you absolutely sure?',
       message: isGuest
           ? 'Your guest data will be erased immediately.'

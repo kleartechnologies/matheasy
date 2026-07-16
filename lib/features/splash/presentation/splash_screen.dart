@@ -11,7 +11,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/session/app_session.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../auth/application/auth_controller.dart';
@@ -89,31 +88,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // The official vertical logo lockup (mark above wordmark) is the
-            // hero identity, resting on the brand glow. Solid brand color, no
-            // gradient, per the brand system.
+            // hero identity, and it stands on its own: the emerald radial glow
+            // that used to sit behind it is gone. The brand does not glow — and
+            // the launch screen this dissolves out of is a flat brand colour, so
+            // a halo appearing only once Flutter boots read as a seam.
             AppTransitions.scaleIn(
-              child: Floaty(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 220,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            AppColors.primaryTint.withValues(alpha: 0.2),
-                            AppColors.primaryTint.withValues(alpha: 0.0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const MatheasyLogo(
-                      variant: MatheasyLogoVariant.vertical,
-                      markSize: 84,
-                    ),
-                  ],
+              child: const Floaty(
+                child: MatheasyLogo(
+                  variant: MatheasyLogoVariant.vertical,
+                  markSize: 84,
                 ),
               ),
             ),

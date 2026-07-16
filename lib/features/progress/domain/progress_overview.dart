@@ -20,7 +20,6 @@ class ProgressOverview {
     required this.sessionsCompleted,
     required this.topicsPracticed,
     required this.learningDays,
-    required this.estimatedMinutes,
     required this.mastery,
     required this.topicsMastered,
     required this.achievementsUnlocked,
@@ -39,13 +38,16 @@ class ProgressOverview {
   final int streakCurrent;
   final int streakBest;
 
-  // ---- Learning overview ----
+  // ---- Lifetime totals ----
+  // Counted, never estimated: every one of these is a real tally. (A
+  // `estimatedMinutes` "time learning" figure used to live here, extrapolated
+  // from a guessed 45s per question and rendered as if measured — it was
+  // removed rather than shown as fact. Reinstate only behind a real timer.)
   final int questionsSolved;
   final int correctAnswers;
   final int sessionsCompleted;
   final int topicsPracticed;
   final int learningDays;
-  final int estimatedMinutes;
 
   // ---- Mastery ----
   final List<CategoryView> mastery;
@@ -58,12 +60,4 @@ class ProgressOverview {
   // ---- Activity + Matheasy ----
   final List<LearningActivity> recentActivity;
   final String matheasyInsight;
-
-  /// A friendly, rounded "time learning" label.
-  String get timeLearningLabel {
-    if (estimatedMinutes < 60) return '${estimatedMinutes}m';
-    final hours = estimatedMinutes ~/ 60;
-    final minutes = estimatedMinutes % 60;
-    return minutes == 0 ? '${hours}h' : '${hours}h ${minutes}m';
-  }
 }

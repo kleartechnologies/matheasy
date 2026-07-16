@@ -7,20 +7,16 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// The Home hero — the single most prominent element on the screen. It answers
-/// "what should I do next?" the moment the app opens: solve a problem, by scan
-/// (primary) or by typing (secondary).
+/// The Home hero — Home's first priority and the single most prominent element
+/// on the screen. It answers "what should I do next?" the moment the app opens:
+/// solve a problem, by scan (primary) or by typing (secondary).
 ///
-/// Emerald-branded, but flat — a subtle gradient and strong typography carry it,
-/// no glow.
+/// The panel is a SOLID [AppColors.primaryAction]. The logo's tile is flat, so
+/// the brand does not gradient its emerald, and primaryAction is the only
+/// emerald that carries white content at AA (4.78:1) — the identity tone
+/// [AppColors.primary] is 2.97:1 and never sits under a white label.
 class HomeHero extends StatelessWidget {
   const HomeHero({super.key});
-
-  static const LinearGradient _gradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFF10B981), Color(0xFF047857)], // emerald 500 → 700
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +24,14 @@ class HomeHero extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xxl),
       decoration: const BoxDecoration(
-        gradient: _gradient,
-        borderRadius: BorderRadius.all(Radius.circular(AppRadius.hero)),
+        color: AppColors.primaryAction,
+        borderRadius: AppRadius.heroRadius,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What would you like\nto solve today?',
+            'What would you like to solve today?',
             style: AppTypography.headingLarge.copyWith(
               color: AppColors.white,
               height: 1.2,
@@ -71,6 +67,13 @@ class HomeHero extends StatelessWidget {
   }
 }
 
+/// An action on the emerald hero panel.
+///
+/// `filled` = a white surface carrying [AppColors.primaryDark] content (6.83:1).
+/// Otherwise the panel shows through a white hairline, with white content
+/// (4.78:1). The secondary action is outlined rather than tinted on purpose: any
+/// translucent white fill lightens the panel underneath and drops its own white
+/// label below 4.5:1.
 class _HeroAction extends StatelessWidget {
   const _HeroAction({
     required this.icon,
@@ -91,7 +94,7 @@ class _HeroAction extends StatelessWidget {
       button: true,
       label: label,
       child: Material(
-        color: filled ? AppColors.white : Colors.white.withValues(alpha: 0.14),
+        color: filled ? AppColors.white : Colors.transparent,
         borderRadius: AppRadius.mdRadius,
         child: InkWell(
           onTap: onTap,
@@ -103,7 +106,7 @@ class _HeroAction extends StatelessWidget {
               borderRadius: AppRadius.mdRadius,
               border: filled
                   ? null
-                  : Border.all(color: Colors.white.withValues(alpha: 0.35)),
+                  : Border.all(color: AppColors.white, width: 1.5),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -17,8 +17,15 @@ import '../widgets/step_diff.dart';
 const double _railWidth = 30;
 const double _railIndent = _railWidth + AppSpacing.md;
 
-/// The emerald accent used to highlight the changed span of a step (§5).
-const String _accentHex = '#10B981';
+/// The emerald that highlights the changed span of a step (§5), as the
+/// `#RRGGBB` literal `\textcolor` needs. Derived from the ramp so it cannot
+/// drift from the brand: the changed span is *text*, so it takes the emerald
+/// that stays legible as a label on each theme's card ([AppColors.primary]
+/// itself is 2.97:1 and would disappear).
+String _accentHex(BuildContext context) {
+  final accent = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+  return '#${(accent.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+}
 
 /// Tab 1 — the step-by-step worked solution (spec §4/§5).
 ///
@@ -181,6 +188,10 @@ class _MethodChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // The unselected chip's star is an emerald label on a card — it needs the
+    // tone that stays legible per theme, not the logo tile.
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       button: true,
       selected: isSelected,
@@ -196,10 +207,11 @@ class _MethodChip extends StatelessWidget {
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : colors.surface,
+            // Selected carries white content → the interactive emerald.
+            color: isSelected ? AppColors.primaryAction : colors.surface,
             borderRadius: AppRadius.pillRadius,
             border: Border.all(
-              color: isSelected ? AppColors.primary : colors.border,
+              color: isSelected ? AppColors.primaryAction : colors.border,
             ),
           ),
           child: Row(
@@ -209,7 +221,7 @@ class _MethodChip extends StatelessWidget {
                 Icon(
                   Icons.star_rounded,
                   size: 15,
-                  color: isSelected ? AppColors.white : AppColors.primary,
+                  color: isSelected ? AppColors.white : emeraldLabel,
                 ),
                 const SizedBox(width: AppSpacing.xxs),
               ],
@@ -275,7 +287,9 @@ class _RevealControls extends StatelessWidget {
                   'Reveal all',
                   style: AppTypography.button.copyWith(
                     fontSize: 14,
-                    color: AppColors.primary,
+                    color: context.isDark
+                        ? AppColors.primaryLight
+                        : AppColors.primaryDark,
                   ),
                 ),
               ),
@@ -324,6 +338,9 @@ class _StepCardState extends State<_StepCard> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isAnswer = widget.isLast;
+    // The "Why?" affordance is an emerald label on a card — per-theme tone.
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     // The reveal scale-pulse wraps the WHOLE card, OUTSIDE the IntrinsicHeight,
     // so the Transform never perturbs the intrinsic-height measurement (which
     // caused a sub-pixel overflow). Suppressed under reduce-motion (§5).
@@ -396,13 +413,13 @@ class _StepCardState extends State<_StepCard> {
                           Text(
                             _expanded ? 'Hide why' : 'Why?',
                             style: AppTypography.caption
-                                .copyWith(color: AppColors.primary),
+                                .copyWith(color: emeraldLabel),
                           ),
                           AnimatedRotation(
                             turns: _expanded ? 0.5 : 0,
                             duration: AppDurations.fast,
-                            child: const Icon(Icons.keyboard_arrow_down_rounded,
-                                size: 18, color: AppColors.primary),
+                            child: Icon(Icons.keyboard_arrow_down_rounded,
+                                size: 18, color: emeraldLabel),
                           ),
                         ],
                       ),
@@ -440,7 +457,7 @@ class _StepExpression extends StatelessWidget {
     final colors = context.colors;
     final emphasized = previousLatex == null
         ? null
-        : emphasizeChanged(previousLatex!, latex, colorHex: _accentHex);
+        : emphasizeChanged(previousLatex!, latex, colorHex: _accentHex(context));
 
     return MathText(
       emphasized ?? latex,
@@ -505,8 +522,9 @@ class _Bullet extends StatelessWidget {
       width: _railWidth,
       height: _railWidth,
       decoration: BoxDecoration(
-        gradient: highlight ? AppColors.primaryGradient : null,
-        color: highlight ? null : colors.primaryContainer,
+        // Solid: the number on the answer bullet is white, so this is the
+        // interactive emerald (4.78:1), never the 2.97:1 logo tone.
+        color: highlight ? AppColors.primaryAction : colors.primaryContainer,
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,

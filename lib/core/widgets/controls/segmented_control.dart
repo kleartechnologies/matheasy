@@ -99,7 +99,11 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : context.colors.textSecondary;
+    // The selected label sits on the raised [surface] pill, so it needs the
+    // emerald that clears AA as text there.
+    final color = selected
+        ? (context.isDark ? AppColors.primaryLight : AppColors.primaryDark)
+        : context.colors.textSecondary;
     return Semantics(
       button: true,
       selected: selected,

@@ -151,7 +151,7 @@ class _Dot extends StatelessWidget {
         width: 7,
         height: 7,
         decoration: BoxDecoration(
-          color: context.colors.textTertiary,
+          color: context.colors.textMuted,
           shape: BoxShape.circle,
         ),
       ),

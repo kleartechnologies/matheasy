@@ -99,19 +99,12 @@ class _FallbackScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.15),
-          radius: 1.1,
-          colors: [
-            Color(0xFF14203A),
-            Color(0xFF0B1220),
-            AppColors.scannerBackground,
-          ],
-          stops: [0, 0.55, 1],
-        ),
-      ),
+    return ColoredBox(
+      // Flat deep ink, identical to the live-preview backdrop so the fallback
+      // reads as the same surface. The old radial was a decorative blue-slate
+      // vignette from a palette the brand no longer has — an honest error state
+      // does not need scenery.
+      color: AppColors.scannerBackground,
       // A denied permission needs the Settings deep-link; any other camera
       // failure (restricted / no camera / busy) still gets an honest message and
       // a way forward — never an unexplained blank preview (spec §9).

@@ -36,7 +36,7 @@ class AppSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onChanged != null;
-    final trackOff = context.colors.textTertiary.withValues(alpha: 0.35);
+    final trackOff = context.colors.textMuted.withValues(alpha: 0.35);
     return Semantics(
       toggled: value,
       enabled: enabled,
@@ -57,7 +57,9 @@ class AppSwitch extends StatelessWidget {
               height: _height,
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: value ? AppColors.primary : trackOff,
+                // The interactive emerald, not the identity tone: the track
+                // carries the white thumb.
+                color: value ? AppColors.primaryAction : trackOff,
                 borderRadius: AppRadius.pillRadius,
               ),
               child: AnimatedAlign(
@@ -68,14 +70,17 @@ class AppSwitch extends StatelessWidget {
                 child: Container(
                   width: _thumb,
                   height: _thumb,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.white,
                     shape: BoxShape.circle,
+                    // Tighter than any [AppElevation] tier by design — the
+                    // elevation tokens blur at 14–30px and would spill the
+                    // thumb's shadow outside the 30px track.
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x33000000),
+                        color: AppColors.black.withValues(alpha: 0.2),
                         blurRadius: 4,
-                        offset: Offset(0, 1),
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),

@@ -157,7 +157,10 @@ lib; client just draws the polyline — added step 6]`.
 - **One-at-a-time stepper** ("Next step · n of N" + "Reveal all" toggle), expandable
   "why". `[was: showed all steps at once]`
 - **"What changed" emphasis** (`step_diff.dart`): atom-diff wraps the changed span in
-  `\textcolor{#10B981}{…}` (confirmed flutter_math renders it) + a scale-pulse on reveal
+  `\textcolor{…}{…}` (confirmed flutter_math renders it) + a scale-pulse on reveal
+  `[was: a hardcoded #10B981 — the retired brand, and 2.54:1 on a white card. The
+  hex is now derived per-theme from the brand ramp by `solution_tab.dart`:
+  primaryDark on light, primaryLight on dark. See docs/matheasy-brand-system.md]`
   (suppressed under `disableAnimations`; the color persists — pedagogy survives
   reduce-motion). **Faithful for single-contiguous changes; honest whole-line fallback**
   for two-site / whole-expression / deep-fraction changes (correctness over cleverness —

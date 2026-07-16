@@ -67,6 +67,12 @@ class Badge {
 
   final String emoji;
   final String name;
+
+  /// Decorative only — the medallion's tint and ring, both at low alpha.
+  ///
+  /// Never render it as text or as a meaning-bearing icon: the set spans
+  /// [AppColors.gold] (1.63:1 on a light surface) and [AppColors.primary]
+  /// (2.97:1), so it cannot carry contrast in both themes.
   final Color color;
 }
 

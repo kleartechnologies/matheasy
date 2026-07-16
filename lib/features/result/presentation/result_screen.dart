@@ -91,9 +91,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     );
   }
 
-  /// Opens the tutor for a proof/conceptual prompt, SEEDED so it auto-sends the
-  /// opening ask — the student lands mid-conversation, already working through it.
-  void _discussConceptual(ResultData result) {
+  /// Opens the tutor on a problem that has no verified answer to show — a
+  /// proof/conceptual prompt, or one whose answer failed the substitution check.
+  /// SEEDED so it auto-sends the opening ask, landing the student mid-
+  /// conversation. Passes no `answerLatex`: there is no answer to stand behind.
+  void _discussProblem(ResultData result) {
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
@@ -239,7 +241,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         children: [
           ResultTutorInvite(
             result: result,
-            onDiscuss: () => _discussConceptual(result),
+            onDiscuss: () => _discussProblem(result),
             onEdit: () => context.push(
               AppRoutes.manualInput,
               extra: ManualInputArgs(initialLatex: result.questionLatex),
@@ -269,6 +271,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
               AppRoutes.manualInput,
               extra: ManualInputArgs(initialLatex: result.questionLatex),
             ),
+            // The way forward when the read was right and the check still
+            // failed — the same seeded tutor hand-off the conceptual state uses.
+            onDiscuss: () => _discussProblem(result),
           ),
         ],
       );

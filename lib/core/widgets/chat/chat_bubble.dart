@@ -49,8 +49,9 @@ class ChatBubble extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            gradient: isUser ? AppColors.primaryGradient : null,
-            color: isUser ? null : colors.surface,
+            // Solid, never a gradient: the bubble carries white text, so the
+            // fill must hold 4.78:1 across its whole area.
+            color: isUser ? AppColors.primaryAction : colors.surface,
             borderRadius: radius,
             boxShadow: isUser ? null : context.elevation.card,
           ),

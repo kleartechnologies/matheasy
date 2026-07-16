@@ -86,10 +86,12 @@ class _SaveButton extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: saved ? AppColors.primary : colors.surface,
+            // Saved fills behind a white bookmark → the interactive emerald.
+            color: saved ? AppColors.primaryAction : colors.surface,
             shape: BoxShape.circle,
-            border:
-                Border.all(color: saved ? AppColors.primary : colors.border),
+            border: Border.all(
+              color: saved ? AppColors.primaryAction : colors.border,
+            ),
             boxShadow: context.elevation.card,
           ),
           child: Icon(

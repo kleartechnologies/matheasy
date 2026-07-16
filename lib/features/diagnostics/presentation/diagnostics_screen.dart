@@ -34,7 +34,7 @@ class DiagnosticsScreen extends ConsumerWidget {
           _OverallBanner(status: report.overall),
           const SizedBox(height: AppSpacing.section),
           Text('Subsystems',
-              style: AppTypography.label.copyWith(color: colors.textTertiary)),
+              style: AppTypography.label.copyWith(color: colors.textMuted)),
           const SizedBox(height: AppSpacing.sm),
           AppCard(
             child: Column(
@@ -49,7 +49,7 @@ class DiagnosticsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.section),
           Text('Build',
-              style: AppTypography.label.copyWith(color: colors.textTertiary)),
+              style: AppTypography.label.copyWith(color: colors.textMuted)),
           const SizedBox(height: AppSpacing.sm),
           AppCard(
             child: Column(
@@ -66,7 +66,7 @@ class DiagnosticsScreen extends ConsumerWidget {
           Text(
             'Developer tooling — excluded from release builds.',
             textAlign: TextAlign.center,
-            style: AppTypography.caption.copyWith(color: colors.textTertiary),
+            style: AppTypography.caption.copyWith(color: colors.textMuted),
           ),
         ],
       ),
@@ -79,7 +79,7 @@ Color _statusColor(DiagnosticStatus status) => switch (status) {
       DiagnosticStatus.degraded => AppColors.warning,
       DiagnosticStatus.down => AppColors.error,
       DiagnosticStatus.disabled => AppColors.primaryTint,
-      DiagnosticStatus.unknown => AppColors.amber,
+      DiagnosticStatus.unknown => AppColors.accentAmber,
     };
 
 class _OverallBanner extends StatelessWidget {

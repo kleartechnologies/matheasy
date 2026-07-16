@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -74,7 +73,7 @@ class PracticeTab extends StatelessWidget {
         child: Text(
           difficulty.label,
           style: AppTypography.label.copyWith(
-            color: context.colors.textTertiary,
+            color: context.colors.textMuted,
           ),
         ),
       ),
@@ -120,12 +119,14 @@ class _PracticeCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.bolt_rounded, size: 14, color: AppColors.xp),
+                // onXpContainer, not AppColors.xp: gold-on-pale-gold is
+                // 1.46:1 — the glyph all but vanishes on the light container.
+                Icon(Icons.bolt_rounded, size: 14, color: colors.onXpContainer),
                 const SizedBox(width: AppSpacing.xxs),
                 Text(
                   '+${question.xpReward}',
                   style:
-                      AppTypography.label.copyWith(color: AppColors.amber),
+                      AppTypography.label.copyWith(color: colors.onXpContainer),
                 ),
               ],
             ),
@@ -133,7 +134,7 @@ class _PracticeCard extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           DifficultyPill(question.difficulty),
           const SizedBox(width: AppSpacing.xs),
-          Icon(Icons.chevron_right_rounded, size: 22, color: colors.textTertiary),
+          Icon(Icons.chevron_right_rounded, size: 22, color: colors.textMuted),
         ],
       ),
     );

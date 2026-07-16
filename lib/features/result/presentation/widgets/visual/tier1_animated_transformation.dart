@@ -118,7 +118,7 @@ class _Tier1AnimatedTransformationState
                   Text(
                     'STEP ${_index + 1} OF ${_steps.length}',
                     style: AppTypography.label
-                        .copyWith(color: colors.textTertiary),
+                        .copyWith(color: colors.textMuted),
                   ),
                   const Spacer(),
                   if (!reduceMotion && _steps.length > 1)
@@ -249,10 +249,12 @@ class _StepStage extends StatelessWidget {
                     VisualOperationChip(label: step.operationLabel!),
                     const SizedBox(width: AppSpacing.sm),
                   ],
-                  const Icon(
+                  Icon(
                     Icons.arrow_downward_rounded,
                     size: 20,
-                    color: AppColors.primary,
+                    color: context.isDark
+                        ? AppColors.primaryLight
+                        : AppColors.primaryDark,
                   ),
                 ],
               ),
@@ -313,7 +315,8 @@ class _PlayPauseButton extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
       icon: Icon(
         playing ? Icons.pause_circle_rounded : Icons.play_circle_rounded,
-        color: AppColors.primary,
+        color:
+            context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
       ),
     );
   }
@@ -343,7 +346,11 @@ class _ProgressDots extends StatelessWidget {
                 margin:
                     const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
                 decoration: BoxDecoration(
-                  color: i == index ? AppColors.primary : colors.border,
+                  color: i == index
+                      ? (context.isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primaryDark)
+                      : colors.border,
                   borderRadius: AppRadius.pillRadius,
                 ),
               ),

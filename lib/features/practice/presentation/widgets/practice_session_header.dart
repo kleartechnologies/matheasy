@@ -76,12 +76,12 @@ class _TimerPlaceholder extends StatelessWidget {
             Icon(
               Icons.timer_outlined,
               size: 14,
-              color: colors.textTertiary,
+              color: colors.textMuted,
             ),
             const SizedBox(width: AppSpacing.xxs),
             Text(
               'No timer',
-              style: AppTypography.caption.copyWith(color: colors.textTertiary),
+              style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
           ],
         ),

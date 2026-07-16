@@ -153,7 +153,7 @@ class Achievements {
       description: 'Complete a daily challenge.',
       requirement: AchievementRequirement(AchievementMetric.dailyChallenges, 1),
       reward: AchievementReward(xp: 50),
-      badge: Badge(emoji: '⚡', name: 'Challenger', color: AppColors.amber),
+      badge: Badge(emoji: '⚡', name: 'Challenger', color: AppColors.accentAmber),
     ),
     Achievement(
       id: AchievementId.explore3Topics,

@@ -58,8 +58,6 @@ class ProgressController extends _$ProgressController {
       sessionsCompleted: progress.sessionsCompleted,
       topicsPracticed: distinct,
       learningDays: stats.learningDayCount,
-      // A light estimate (~45s per question) — the timer arrives in a later stage.
-      estimatedMinutes: (questionsSolved * 0.75).round(),
       mastery: mastery,
       topicsMastered: mastered,
       achievementsUnlocked: achievements.unlockedCount,

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../animations/pressable.dart';
+import '../../extensions/context_extensions.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
 /// The dark, gold-accented premium upsell banner used on Home and Profile.
-/// Reads identically in light and dark mode (it is always the deep navy card).
+/// Reads identically in light and dark mode (it is always the deep emerald
+/// card).
 class PremiumFeatureTile extends StatelessWidget {
   const PremiumFeatureTile({
     super.key,
@@ -31,16 +33,12 @@ class PremiumFeatureTile extends StatelessWidget {
           horizontal: AppSpacing.xl,
           vertical: AppSpacing.lg,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: AppColors.premiumGradient,
           borderRadius: AppRadius.cardRadius,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x52059669),
-              blurRadius: 34,
-              offset: Offset(0, 18),
-            ),
-          ],
+          // A neutral raise, not an emerald bloom: the tile is the darkest
+          // thing on the page and needs lift, not glow.
+          boxShadow: context.elevation.raised,
         ),
         child: Row(
           children: [
@@ -59,7 +57,7 @@ class PremiumFeatureTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: AppTypography.bodySmall
-                        .copyWith(color: const Color(0xFFD1FAE5)),
+                        .copyWith(color: AppColors.emerald100),
                   ),
                 ],
               ),

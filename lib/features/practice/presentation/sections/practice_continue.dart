@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_session.dart';
+import '../widgets/practice_chips.dart';
 
 /// "Continue practice" — resumes the topic from the last session.
 class PracticeContinue extends StatelessWidget {
@@ -26,15 +26,7 @@ class PracticeContinue extends StatelessWidget {
       onTap: () => onResume(request),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: request.topic.color.withValues(alpha: 0.14),
-              borderRadius: AppRadius.mdRadius,
-            ),
-            child: Icon(request.topic.icon, size: 24, color: request.topic.color),
-          ),
+          PracticeTopicIcon(topic: request.topic, size: 48),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -59,8 +51,9 @@ class PracticeContinue extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
+            // Solid interactive emerald — carries a white glyph (4.78:1 AA).
             decoration: const BoxDecoration(
-              gradient: AppColors.primaryGradient,
+              color: AppColors.primaryAction,
               shape: BoxShape.circle,
             ),
             child: const Icon(

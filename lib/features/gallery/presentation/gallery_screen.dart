@@ -71,26 +71,39 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   // ---- Colors ----
   Widget _colors(BuildContext context) {
     final c = context.colors;
+    // The emerald ramp leads: the identity / action / text split is the part of
+    // the system most likely to be misused, so the three roles sit side by side
+    // here where they can be compared.
     final swatches = <(String, Color)>[
       ('primary', AppColors.primary),
+      ('primaryAction', AppColors.primaryAction),
+      ('primaryDark', AppColors.primaryDark),
+      ('primaryLight', AppColors.primaryLight),
+      ('primaryDeep', AppColors.primaryDeep),
+      ('primaryTint', AppColors.primaryTint),
+      ('ink', AppColors.ink),
       ('secondary', AppColors.secondary),
       ('success', AppColors.success),
       ('warning', AppColors.warning),
-      ('gold', AppColors.gold),
       ('error', AppColors.error),
-      ('pink', AppColors.pink),
+      ('info', AppColors.info),
+      ('gold', AppColors.gold),
       ('xp', AppColors.xp),
       ('indigo', AppColors.accentIndigo),
       ('amber', AppColors.accentAmber),
       ('coral', AppColors.accentCoral),
+      ('premiumMid', AppColors.premiumMid),
+      ('premiumDeep', AppColors.premiumDeep),
       ('surface', c.surface),
       ('surfaceMuted', c.surfaceMuted),
       ('background', c.background),
       ('border', c.border),
       ('textPrimary', c.textPrimary),
       ('textSecondary', c.textSecondary),
+      ('textMuted', c.textMuted),
       ('primaryContainer', c.primaryContainer),
       ('successContainer', c.successContainer),
+      ('infoContainer', c.infoContainer),
     ];
     return GallerySection(
       title: 'Colors',
@@ -189,8 +202,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
+            // A flat brand-emerald plate standing in for the imagery a GlassCard
+            // is meant to sit on — nothing functional is painted directly on it.
             decoration: const BoxDecoration(
-              gradient: AppColors.primaryGradient,
+              color: AppColors.primary,
               borderRadius: AppRadius.cardRadius,
             ),
             child: GlassCard(
@@ -297,9 +312,11 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         children: [
           XPProgressBar(value: _progress, label: 'Lesson progress'),
           const SizedBox(height: AppSpacing.md),
+          // The opt-in [gradient] escape hatch, shown at its one real use: a bar
+          // that is deliberately not brand-emerald.
           const XPProgressBar(
             value: 0.4,
-            gradient: AppColors.successGradient,
+            gradient: AppColors.goldGradient,
           ),
           const SizedBox(height: AppSpacing.md),
           Slider(

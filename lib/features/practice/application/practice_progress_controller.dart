@@ -146,12 +146,7 @@ class PracticeProgressController extends _$PracticeProgressController {
     return (current, math.max(current, state.streakBest));
   }
 
-  // Anchor to a UTC calendar date so no timezone offset enters the division —
-  // otherwise DST transitions in GMT-crossing zones make consecutive days
-  // differ by 0 or 2 epoch-days and corrupt the streak.
-  static int _epochDay(DateTime dt) =>
-      DateTime.utc(dt.year, dt.month, dt.day).millisecondsSinceEpoch ~/
-          Duration.millisecondsPerDay;
+  static int _epochDay(DateTime dt) => PracticeProgress.epochDay(dt);
 }
 
 /// The learner's XP level, projected from [PracticeProgressController].

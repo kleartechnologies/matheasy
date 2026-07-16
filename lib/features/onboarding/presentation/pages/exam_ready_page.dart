@@ -24,15 +24,22 @@ class ExamReadyPage extends StatelessWidget {
 class _ExamArt extends StatelessWidget {
   const _ExamArt();
 
-  static const _exams = <(String, String, Color)>[
-    ('SPM', 'Malaysia', AppColors.primary),
-    ('IGCSE', 'Cambridge', AppColors.secondary),
-    ('GCSE', 'UK', AppColors.accentAmber),
-    ('SAT', 'College', AppColors.accentCoral),
-  ];
+  // Each colour is painted as the card's heading text, so the emerald entry
+  // resolves per theme — the identity emerald is 2.97:1 and would fail here.
+  static List<(String, String, Color)> _exams(BuildContext context) => [
+        (
+          'SPM',
+          'Malaysia',
+          context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
+        ),
+        ('IGCSE', 'Cambridge', AppColors.secondary),
+        ('GCSE', 'UK', AppColors.accentAmber),
+        ('SAT', 'College', AppColors.accentCoral),
+      ];
 
   @override
   Widget build(BuildContext context) {
+    final exams = _exams(context);
     return SizedBox(
       width: 280,
       child: Column(
@@ -42,9 +49,9 @@ class _ExamArt extends StatelessWidget {
             if (row > 0) const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                Expanded(child: _ExamCard(_exams[row * 2])),
+                Expanded(child: _ExamCard(exams[row * 2])),
                 const SizedBox(width: AppSpacing.md),
-                Expanded(child: _ExamCard(_exams[row * 2 + 1])),
+                Expanded(child: _ExamCard(exams[row * 2 + 1])),
               ],
             ),
           ],

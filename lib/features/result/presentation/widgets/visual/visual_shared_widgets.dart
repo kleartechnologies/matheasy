@@ -70,6 +70,9 @@ class _VisualStepCardState extends State<VisualStepCard> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final step = widget.step;
+    // Emerald content on a card — per-theme legible tone, not the logo tile.
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: AppCard(
@@ -120,10 +123,10 @@ class _VisualStepCardState extends State<VisualStepCard> {
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
-            const Icon(
+            Icon(
               Icons.arrow_downward_rounded,
               size: 16,
-              color: AppColors.primary,
+              color: emeraldLabel,
             ),
             const SizedBox(height: AppSpacing.xs),
             FittedBox(
@@ -172,16 +175,15 @@ class _VisualStepCardState extends State<VisualStepCard> {
               children: [
                 Text(
                   _expanded ? 'Hide why' : 'Tap to learn',
-                  style:
-                      AppTypography.caption.copyWith(color: AppColors.primary),
+                  style: AppTypography.caption.copyWith(color: emeraldLabel),
                 ),
                 AnimatedRotation(
                   turns: _expanded ? 0.5 : 0,
                   duration: AppDurations.fast,
-                  child: const Icon(
+                  child: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     size: 18,
-                    color: AppColors.primary,
+                    color: emeraldLabel,
                   ),
                 ),
               ],
@@ -321,7 +323,11 @@ class VisualMethodCard extends StatelessWidget {
     return AppCard(
       child: Row(
         children: [
-          const Icon(Icons.route_rounded, size: 20, color: AppColors.primary),
+          Icon(Icons.route_rounded,
+              size: 20,
+              color: context.isDark
+                  ? AppColors.primaryLight
+                  : AppColors.primaryDark),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -398,11 +404,15 @@ class _ConceptCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // The drawn concept is non-text graphics on a card: it needs the emerald
+    // that clears 3:1 on this theme's surface, which the logo tone does not.
+    final stroke =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     final palette = ConceptPalette(
       grid: colors.divider,
-      axis: colors.textTertiary,
-      stroke: AppColors.primary,
-      fill: AppColors.primary.withValues(alpha: 0.16),
+      axis: colors.textMuted,
+      stroke: stroke,
+      fill: stroke.withValues(alpha: 0.16),
       accent: AppColors.warning,
       textColor: colors.textPrimary,
     );
@@ -438,7 +448,7 @@ class _ConceptCanvas extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.pinch_rounded, size: 14, color: colors.textTertiary),
+            Icon(Icons.pinch_rounded, size: 14, color: colors.textMuted),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
@@ -479,10 +489,11 @@ class _ConceptCaptionCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.psychology_rounded,
             size: 20,
-            color: AppColors.primary,
+            color:
+                context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

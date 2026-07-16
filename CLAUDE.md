@@ -13,6 +13,12 @@ method switching, a graph, explanations, adaptive practice, and an AI tutor.
   build-order steps 1–9; where the old build spec drifted it records `[was: …]`.
   The earlier `matheasy-scanner-spec-flutter.md` was **stale and has been
   deleted** — do not resurrect it.
+- **Brand system (v2.0, logo-anchored):**
+  [`docs/matheasy-brand-system.md`](docs/matheasy-brand-system.md) — the source of
+  truth for colour and the mark. Every emerald is **measured from**
+  [`brand/matheasy-logo-source.png`](brand/matheasy-logo-source.png). The v1.0
+  system (Emerald `#10B981` + the "R8 two-check" mark) is **retired**; if a doc,
+  comment, or memory still says either, it is wrong.
 - **Deploy runbook:** [`docs/matheasy-deploy-runbook.md`](docs/matheasy-deploy-runbook.md).
 
 ## The real stack (do NOT assume otherwise)
@@ -59,6 +65,13 @@ verification may still compute numerically underneath.
 - **Additive by default.** Reuse the repo's widgets/theme tokens (`AppColors`,
   `AppTypography`, `AppSpacing`, `context.colors`) and the `MatheasyBrandAvatar`
   (there is no mascot / "NumiMascot"). Don't regress shipped features.
+- **The emerald splits by job — this is not optional.** White on the logo's
+  emerald is 2.97:1. `AppColors.primary` (#06AC60) is the **identity** and is for
+  brand art only (mark, icon tile, splash); it must never sit under functional
+  white content or be a text colour on a light surface. Filled controls use
+  `primaryAction` (#058446, white 4.78:1 ✓); emerald text uses `primaryDark` on
+  light / `primaryLight` on dark. Never put a gradient behind white label text.
+  `test/core/theme/brand_contrast_test.dart` enforces all of it.
 - **The `§4` solve schema** (`problemLatex`, `problemType`, `finalAnswer`,
   `verified`, `methods[]`, `graph`) is the contract between server and client —
   keep both sides in sync.

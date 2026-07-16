@@ -8,12 +8,16 @@ String greetingForHour(int hour) {
 }
 
 /// A course/topic the learner has in progress.
+///
+/// No real course/lesson-count source exists yet, so [HomeData.continueCourses]
+/// is always empty and the continue card stays hidden. Do NOT populate these
+/// fields with samples to make the card appear — a fabricated "8 / 11 lessons"
+/// is the exact bug this model's emptiness is protecting against.
 @immutable
 class CourseProgress {
   const CourseProgress({
     required this.title,
     required this.icon,
-    required this.color,
     required this.completed,
     required this.total,
     required this.estMinutes,
@@ -21,35 +25,12 @@ class CourseProgress {
 
   final String title;
   final IconData icon;
-  final Color color;
   final int completed;
   final int total;
   final int estMinutes;
 
   double get fraction => total == 0 ? 0 : completed / total;
   int get remaining => total - completed;
-}
-
-/// The daily study goal + today's progress toward it.
-@immutable
-class DailyGoalInfo {
-  const DailyGoalInfo({
-    required this.minutesStudied,
-    required this.minutesTarget,
-    required this.lessonsDone,
-    required this.lessonsTarget,
-  });
-
-  final int minutesStudied;
-  final int minutesTarget;
-  final int lessonsDone;
-  final int lessonsTarget;
-
-  double get minutesFraction =>
-      minutesTarget == 0 ? 0 : (minutesStudied / minutesTarget).clamp(0, 1);
-  double get lessonsFraction =>
-      lessonsTarget == 0 ? 0 : (lessonsDone / lessonsTarget).clamp(0, 1);
-  bool get isComplete => lessonsDone >= lessonsTarget && lessonsTarget > 0;
 }
 
 /// A featured daily challenge with an XP reward.
@@ -83,71 +64,44 @@ class StreakInfo {
   bool get isActive => current > 0;
 }
 
-/// A topic the learner is weak in.
+/// A topic the learner is weak in — measured, never assumed. [accuracy] is a
+/// real per-topic percentage; a learner with too few attempts produces no
+/// [WeakTopic] at all rather than a guessed one.
 @immutable
 class WeakTopic {
   const WeakTopic({
     required this.label,
     required this.icon,
     required this.accuracy,
-    required this.note,
-    required this.color,
   });
 
   final String label;
   final IconData icon;
   final int accuracy;
-  final String note;
-  final Color color;
 }
 
-/// Difficulty of a practice item. The widget maps this to theme-aware colors,
-/// so pills read correctly in both light and dark mode.
-enum Difficulty {
-  easy('Easy'),
-  medium('Medium'),
-  hard('Hard');
-
-  const Difficulty(this.label);
-
-  final String label;
-}
-
-/// A recommended practice question.
-@immutable
-class PracticeRecommendation {
-  const PracticeRecommendation({
-    required this.question,
-    required this.difficulty,
-  });
-
-  final String question;
-  final Difficulty difficulty;
-}
-
-/// Everything the Home dashboard renders. Assembled by the (mock) home
-/// controller — never empty: a first-day user still gets starter content.
+/// Everything the Home screen renders, assembled from REAL per-user state.
+///
+/// Every collection here can be empty and every card is hidden when its source
+/// is: a first-day learner sees the hero and the daily challenge, never a
+/// fabricated streak, course or accuracy. This type deliberately holds nothing
+/// Home cannot source honestly — if a field has no real provider behind it, it
+/// does not belong here.
 @immutable
 class HomeData {
   const HomeData({
     required this.userName,
     required this.streak,
-    required this.dailyGoal,
     required this.continueCourses,
     required this.todayChallenge,
     required this.weakTopics,
-    required this.recommendations,
-    required this.tutorMessage,
     required this.isFirstDay,
   });
 
   final String userName;
   final StreakInfo streak;
-  final DailyGoalInfo dailyGoal;
   final List<CourseProgress> continueCourses;
   final TodayChallenge? todayChallenge;
   final List<WeakTopic> weakTopics;
-  final List<PracticeRecommendation> recommendations;
-  final String tutorMessage;
   final bool isFirstDay;
 }

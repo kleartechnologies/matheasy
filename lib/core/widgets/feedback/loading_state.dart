@@ -30,12 +30,18 @@ class LoadingState extends StatelessWidget {
               child: MatheasyBrandAvatar(),
             )
           else
-            const SizedBox(
+            SizedBox(
               width: 34,
               height: 34,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                // A meaning-bearing graphic on the page background: the
+                // identity tone is 2.97:1 there and would fail the 3:1 floor.
+                valueColor: AlwaysStoppedAnimation(
+                  context.isDark
+                      ? AppColors.primaryLight
+                      : AppColors.primaryDark,
+                ),
               ),
             ),
           if (message != null) ...[

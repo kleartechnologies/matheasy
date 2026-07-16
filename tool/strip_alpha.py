@@ -2,9 +2,13 @@
 """Convert the raw-RGBA iOS icons emitted by generate_app_icons.dart into
 alpha-free RGB PNGs (App Store Connect rejects icons with an alpha channel).
 
-The Concept C iOS tile is fully opaque, so dropping the alpha channel is exact —
-no compositing needed. Uses only the Python standard library (zlib/struct), so
-there is no dependency on Pillow / ImageMagick.
+The iOS tile is a flat, fully opaque emerald square, so dropping the alpha
+channel is exact — no compositing needed. Uses only the Python standard library
+(zlib/struct), so there is no dependency on Pillow / ImageMagick.
+
+Only the AppIcon goes through here; the LaunchImage keeps its alpha (it is a
+bare mark composited over @color/LaunchBackground) and is written straight to
+the imageset by the generator.
 
 Run:  python3 tool/strip_alpha.py
 """

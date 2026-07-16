@@ -11,8 +11,8 @@ import '../../../../core/theme/app_typography.dart';
 ///
 /// Purely presentational — it takes display strings, not domain types — so it
 /// renders identically for the free and paid plans and stays trivial to test.
-/// The selected card gains a gold ring and glow; an optional [badge] flags the
-/// recommended plan.
+/// The selected card gains a gold ring and a tight gold lift; an optional
+/// [badge] flags the recommended plan.
 class PaywallPlanCard extends StatelessWidget {
   const PaywallPlanCard({
     super.key,
@@ -77,12 +77,15 @@ class PaywallPlanCard extends StatelessWidget {
                 : Colors.white.withValues(alpha: 0.05),
             borderRadius: AppRadius.cardRadius,
             border: Border.all(color: borderColor, width: selected ? 2 : 1.5),
+            // Selection is already carried by the 2px gold ring, the gold-tinted
+            // fill and the dot; the shadow only lifts the card off the backdrop.
+            // Kept tight and low-alpha so it never reads as a halo.
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: AppColors.gold.withValues(alpha: 0.28),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
+                      color: AppColors.gold.withValues(alpha: 0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,

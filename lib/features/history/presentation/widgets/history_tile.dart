@@ -42,13 +42,13 @@ class HistoryTile extends StatelessWidget {
                 Text(
                   relativeTimeLabel(entry.timestamp),
                   style:
-                      AppTypography.caption.copyWith(color: colors.textTertiary),
+                      AppTypography.caption.copyWith(color: colors.textMuted),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Icon(Icons.chevron_right_rounded, color: colors.textTertiary),
+          Icon(Icons.chevron_right_rounded, color: colors.textMuted),
         ],
       ),
     );

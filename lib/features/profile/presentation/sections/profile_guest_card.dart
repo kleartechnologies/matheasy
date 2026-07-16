@@ -36,7 +36,8 @@ class ProfileGuestCard extends StatelessWidget {
                 height: 48,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  // Solid interactive emerald — the icon on it is white.
+                  color: AppColors.primaryAction,
                   borderRadius: AppRadius.mdRadius,
                 ),
                 child: const Icon(

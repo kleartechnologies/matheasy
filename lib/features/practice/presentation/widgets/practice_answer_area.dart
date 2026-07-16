@@ -107,11 +107,11 @@ class PracticeAnswerArea extends StatelessWidget {
               ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9./x=+\- ]'))]
               : null,
           style: AppTypography.headingMedium.copyWith(color: colors.textPrimary),
-          cursorColor: AppColors.primary,
+          cursorColor: AppColors.primaryAction,
           decoration: InputDecoration(
             hintText: 'Type your answer',
             hintStyle: AppTypography.headingMedium.copyWith(
-              color: colors.textTertiary,
+              color: colors.textMuted,
             ),
             filled: true,
             fillColor: colors.surface,
@@ -125,7 +125,7 @@ class PracticeAnswerArea extends StatelessWidget {
             ),
             focusedBorder: const OutlineInputBorder(
               borderRadius: AppRadius.mdRadius,
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: BorderSide(color: AppColors.primaryAction, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: AppRadius.mdRadius,
@@ -169,7 +169,7 @@ class _OptionTile extends StatelessWidget {
       _OptionState.idle => (colors.surface, colors.border, colors.textPrimary),
       _OptionState.selected => (
           colors.primaryContainer,
-          AppColors.primary,
+          AppColors.primaryAction,
           colors.onPrimaryContainer,
         ),
       _OptionState.correct => (
@@ -185,7 +185,7 @@ class _OptionTile extends StatelessWidget {
       _OptionState.dimmed => (
           colors.surfaceMuted,
           colors.border,
-          colors.textTertiary,
+          colors.textMuted,
         ),
     };
 

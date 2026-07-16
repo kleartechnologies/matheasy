@@ -41,7 +41,11 @@ class SectionHeader extends StatelessWidget {
                   child: Text(
                     actionLabel!,
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.primary,
+                      // Emerald as text on a light surface — the identity tone
+                      // is 2.97:1 here.
+                      color: context.isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primaryDark,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

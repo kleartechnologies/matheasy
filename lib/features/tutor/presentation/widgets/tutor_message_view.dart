@@ -112,7 +112,7 @@ class _SystemNotice extends StatelessWidget {
             Icon(
               Icons.auto_awesome_rounded,
               size: 14,
-              color: colors.textTertiary,
+              color: colors.textMuted,
             ),
             const SizedBox(width: AppSpacing.xs),
             Flexible(

@@ -5,9 +5,12 @@ import '../../../../core/theme/app_durations.dart';
 
 /// The scanning frame: four rounded corner guides plus a sweeping scan line.
 ///
-/// The guides use the Matheasy primary accent (emerald) — never Photomath's red
-/// (spec §2). When [locked] (a candidate is detected) they brighten and the scan
-/// line stops.
+/// The guides use [AppColors.primaryAction] — the interactive emerald, never the
+/// identity [AppColors.primary] (brand art only) and never Photomath's red
+/// (spec §2). The reticle is a crisp 2px hairline with no glow: it must read as
+/// precise instrumentation over the page, not as an effect. When [locked] (a
+/// candidate is detected) the guides brighten to the dark-surface emerald and
+/// the scan line stops.
 class ScanFrame extends StatefulWidget {
   const ScanFrame({super.key, required this.locked});
 
@@ -32,7 +35,8 @@ class _ScanFrameState extends State<ScanFrame>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.locked ? AppColors.primaryLight : AppColors.primary;
+    final color =
+        widget.locked ? AppColors.primaryLight : AppColors.primaryAction;
     // Respect reduced-motion: drop the sweeping scan line, keep the guides.
     final animate = !widget.locked && !MediaQuery.disableAnimationsOf(context);
     if (animate && !_controller.isAnimating) {
@@ -58,23 +62,19 @@ class _ScanFrameState extends State<ScanFrame>
                     left: 10,
                     right: 10,
                     child: Container(
-                      height: 3,
+                      height: 2,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        gradient: const LinearGradient(
+                        borderRadius: BorderRadius.circular(2),
+                        // Fades out at both ends so the sweep reads as a
+                        // travelling edge rather than a bar. No shadow: a glow
+                        // would make the reticle imprecise.
+                        gradient: LinearGradient(
                           colors: [
-                            Color(0x0034D399),
-                            AppColors.primaryTint,
-                            Color(0x0034D399),
+                            AppColors.primaryAction.withValues(alpha: 0),
+                            AppColors.primaryAction,
+                            AppColors.primaryAction.withValues(alpha: 0),
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primaryTint.withValues(alpha: 0.7),
-                            blurRadius: 16,
-                            spreadRadius: 2,
-                          ),
-                        ],
                       ),
                     ),
                   );
@@ -96,12 +96,12 @@ class _ScanFrameState extends State<ScanFrame>
         height: 34,
         decoration: BoxDecoration(
           border: Border(
-            top: isTop ? BorderSide(color: color, width: 3) : BorderSide.none,
+            top: isTop ? BorderSide(color: color, width: 2) : BorderSide.none,
             bottom:
-                !isTop ? BorderSide(color: color, width: 3) : BorderSide.none,
-            left: isLeft ? BorderSide(color: color, width: 3) : BorderSide.none,
+                !isTop ? BorderSide(color: color, width: 2) : BorderSide.none,
+            left: isLeft ? BorderSide(color: color, width: 2) : BorderSide.none,
             right:
-                !isLeft ? BorderSide(color: color, width: 3) : BorderSide.none,
+                !isLeft ? BorderSide(color: color, width: 2) : BorderSide.none,
           ),
           borderRadius: BorderRadius.only(
             topLeft: isTop && isLeft ? const Radius.circular(14) : Radius.zero,

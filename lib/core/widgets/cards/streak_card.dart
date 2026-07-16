@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../extensions/context_extensions.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
@@ -33,9 +32,12 @@ class StreakCard extends StatelessWidget {
               color: context.colors.streakContainer,
               borderRadius: AppRadius.mdRadius,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.local_fire_department_rounded,
-              color: AppColors.streak,
+              // The container's paired on-colour. The raw AppColors.streak hue
+              // is 3.32:1 on the dark container — a hair over the icon floor
+              // and under it the moment anything nudges the tone.
+              color: context.colors.onStreakContainer,
               size: 26,
             ),
           ),

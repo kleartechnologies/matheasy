@@ -40,14 +40,14 @@ class ProfileStatsView extends StatelessWidget {
                       value: stats.xp,
                       suffix: ' XP',
                       style: AppTypography.title
-                          .copyWith(color: AppColors.amber),
+                          .copyWith(color: AppColors.accentAmber),
                     ),
                   ],
                 ),
               ),
               Text(
                 '${stats.xpToNext} XP to Level ${stats.level + 1}',
-                style: AppTypography.caption.copyWith(color: colors.textTertiary),
+                style: AppTypography.caption.copyWith(color: colors.textMuted),
               ),
             ],
           ),
@@ -71,7 +71,7 @@ class ProfileStatsView extends StatelessWidget {
                   value:
                       '${stats.achievementsUnlocked}/${stats.achievementsTotal}',
                   label: 'Badges',
-                  iconColor: AppColors.amber,
+                  iconColor: AppColors.accentAmber,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),

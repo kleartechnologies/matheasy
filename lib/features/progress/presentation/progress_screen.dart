@@ -8,15 +8,15 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../application/progress_controller.dart';
 import 'sections/progress_achievements.dart';
-import 'sections/progress_learning_overview.dart';
 import 'sections/progress_mastery.dart';
 import 'sections/progress_matheasy_insight.dart';
 import 'sections/progress_profile.dart';
 import 'sections/progress_recent_activity.dart';
 
-/// The Progress tab — profile summary, learning overview, achievements, mastery,
-/// recent activity and a Matheasy insight. Reads an assembled [ProgressOverview]
-/// that reacts to practice, achievement and analytics changes.
+/// The Progress tab — the XP / level / streak hero, mastery per topic, then
+/// achievements, recent activity and a Matheasy insight. Reads an assembled
+/// [ProgressOverview] that reacts to practice, achievement and analytics
+/// changes.
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
 
@@ -26,11 +26,10 @@ class ProgressScreen extends ConsumerWidget {
 
     final sections = <Widget>[
       ProgressProfile(overview: overview),
-      ProgressLearningOverview(overview: overview),
+      ProgressMastery(mastery: overview.mastery),
       ProgressAchievements(
         onSeeAll: () => context.push(AppRoutes.progressAchievements),
       ),
-      ProgressMastery(mastery: overview.mastery),
       ProgressRecentActivity(activity: overview.recentActivity),
       ProgressMatheasyInsight(message: overview.matheasyInsight),
     ];

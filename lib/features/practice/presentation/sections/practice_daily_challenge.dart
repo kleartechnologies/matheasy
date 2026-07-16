@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_dashboard.dart';
 import '../../domain/practice_session.dart';
+import '../widgets/practice_chips.dart';
 
 /// The daily challenge card — a featured session with a bonus XP reward.
 class PracticeDailyChallenge extends StatelessWidget {
@@ -37,10 +37,10 @@ class PracticeDailyChallenge extends StatelessWidget {
                   color: colors.xpContainer,
                   borderRadius: AppRadius.smRadius,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.emoji_events_rounded,
                   size: 24,
-                  color: AppColors.amber,
+                  color: colors.onXpContainer,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -64,18 +64,15 @@ class PracticeDailyChallenge extends StatelessWidget {
                   ],
                 ),
               ),
-              _BonusBadge(xp: challenge.bonusXp),
+              PracticeXpBadge(xp: challenge.bonusXp),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              Expanded(
-                child: XPProgressBar(
-                  value: challenge.progress,
-                  gradient: AppColors.goldGradient,
-                ),
-              ),
+              // Emerald like every other progress bar — the gold lives in the
+              // bonus badge, so completion reads the same everywhere.
+              Expanded(child: XPProgressBar(value: challenge.progress)),
               const SizedBox(width: AppSpacing.md),
               Text(
                 '${challenge.done} of ${challenge.target}',
@@ -87,40 +84,6 @@ class PracticeDailyChallenge extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _BonusBadge extends StatelessWidget {
-  const _BonusBadge({required this.xp});
-
-  final int xp;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Bonus $xp XP',
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: context.colors.xpContainer,
-          borderRadius: AppRadius.smRadius,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.bolt_rounded, size: 15, color: AppColors.xp),
-            const SizedBox(width: AppSpacing.xxs),
-            Text(
-              '+$xp',
-              style: AppTypography.label.copyWith(color: AppColors.amber),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -22,7 +22,7 @@ class GallerySection extends StatelessWidget {
           Text(
             title.toUpperCase(),
             style: AppTypography.label.copyWith(
-              color: context.colors.textTertiary,
+              color: context.colors.textMuted,
               letterSpacing: 1.2,
             ),
           ),

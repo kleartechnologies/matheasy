@@ -94,7 +94,7 @@ class _GuestUpgradeSheetState extends ConsumerState<_GuestUpgradeSheet> {
         Text(
           'Your progress stays on this device and links to your new account.',
           textAlign: TextAlign.center,
-          style: AppTypography.caption.copyWith(color: colors.textTertiary),
+          style: AppTypography.caption.copyWith(color: colors.textMuted),
         ),
       ],
     );

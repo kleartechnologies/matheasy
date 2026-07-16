@@ -273,7 +273,7 @@ class _RouteErrorScreen extends StatelessWidget {
               Icon(
                 Icons.error_outline_rounded,
                 size: 48,
-                color: context.colors.textTertiary,
+                color: context.colors.textMuted,
               ),
               const SizedBox(height: AppSpacing.md),
               Text(

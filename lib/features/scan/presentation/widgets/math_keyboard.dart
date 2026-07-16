@@ -205,11 +205,13 @@ class _MathKeyboardState extends State<MathKeyboard> {
               child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                // A selected chip is a filled control carrying white text —
+                // primaryAction (4.78:1), never the identity emerald (2.97:1).
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.primary : colors.surface,
+                  color: selected ? AppColors.primaryAction : colors.surface,
                   borderRadius: AppRadius.smRadius,
                   border: Border.all(
-                    color: selected ? AppColors.primary : colors.border,
+                    color: selected ? AppColors.primaryAction : colors.border,
                   ),
                 ),
                 child: Text(
@@ -265,17 +267,18 @@ class _MathKeyboardState extends State<MathKeyboard> {
         child: Container(
           height: 48,
           alignment: Alignment.center,
+          // An accent key is a primary container: the token pair flips with the
+          // theme, so the label keeps its contrast in dark mode too (primaryDark
+          // is a light-surface ink and went near-invisible on the dark surface).
           decoration: BoxDecoration(
-            color: key.accent
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : colors.surface,
+            color: key.accent ? colors.primaryContainer : colors.surface,
             borderRadius: AppRadius.smRadius,
             border: Border.all(color: colors.border),
           ),
           child: Text(
             key.label,
             style: AppTypography.title.copyWith(
-              color: key.accent ? AppColors.primaryDark : colors.textPrimary,
+              color: key.accent ? colors.onPrimaryContainer : colors.textPrimary,
               fontSize: 17,
             ),
           ),
@@ -320,8 +323,10 @@ class _MathKeyboardState extends State<MathKeyboard> {
                 height: 52,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: widget.onSolve != null ? AppColors.primaryGradient : null,
-                  color: widget.onSolve != null ? null : colors.surface,
+                  // Solid interactive emerald — white label at 4.78:1 AA.
+                  color: widget.onSolve != null
+                      ? AppColors.primaryAction
+                      : colors.surface,
                   borderRadius: AppRadius.smRadius,
                   border: widget.onSolve != null
                       ? null
@@ -332,7 +337,7 @@ class _MathKeyboardState extends State<MathKeyboard> {
                   style: AppTypography.button.copyWith(
                     color: widget.onSolve != null
                         ? AppColors.white
-                        : colors.textTertiary,
+                        : colors.textMuted,
                   ),
                 ),
               ),

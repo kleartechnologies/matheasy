@@ -151,7 +151,7 @@ class _XpChip extends StatelessWidget {
           const SizedBox(width: AppSpacing.xxs),
           Text(
             '$xp XP',
-            style: AppTypography.label.copyWith(color: AppColors.amber),
+            style: AppTypography.label.copyWith(color: AppColors.accentAmber),
           ),
         ],
       ),

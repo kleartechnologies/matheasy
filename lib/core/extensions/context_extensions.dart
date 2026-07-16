@@ -15,12 +15,26 @@ extension BuildContextX on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
 
   /// Semantic (theme-aware) color tokens. See [AppSemanticColors].
-  AppSemanticColors get colors =>
-      Theme.of(this).extension<AppSemanticColors>() ?? AppSemanticColors.light;
+  ///
+  /// The fallback follows the ambient brightness: a bare [Theme] (tests, a
+  /// widget scoped under `ThemeData.dark()`) must not silently hand back light
+  /// surfaces and light-on-light text.
+  AppSemanticColors get colors {
+    final theme = Theme.of(this);
+    return theme.extension<AppSemanticColors>() ??
+        (theme.brightness == Brightness.dark
+            ? AppSemanticColors.dark
+            : AppSemanticColors.light);
+  }
 
   /// Theme-aware elevation (shadow) tokens. See [AppElevation].
-  AppElevation get elevation =>
-      Theme.of(this).extension<AppElevation>() ?? AppElevation.light;
+  AppElevation get elevation {
+    final theme = Theme.of(this);
+    return theme.extension<AppElevation>() ??
+        (theme.brightness == Brightness.dark
+            ? AppElevation.dark
+            : AppElevation.light);
+  }
 
   // ---- Layout metrics ----
   Size get screenSize => MediaQuery.sizeOf(this);

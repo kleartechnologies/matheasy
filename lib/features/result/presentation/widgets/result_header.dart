@@ -147,6 +147,9 @@ class _PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Emerald content on a raised surface — per-theme legible tone.
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       button: true,
       label: 'Play solution walkthrough',
@@ -167,13 +170,13 @@ class _PlayButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.play_circle_fill_rounded,
-                  size: 20, color: AppColors.primary),
+              Icon(Icons.play_circle_fill_rounded,
+                  size: 20, color: emeraldLabel),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 'Play',
                 style: AppTypography.button
-                    .copyWith(color: AppColors.primary, fontSize: 14),
+                    .copyWith(color: emeraldLabel, fontSize: 14),
               ),
             ],
           ),

@@ -122,6 +122,8 @@ class _Glyph extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (provider) {
       AuthButtonProvider.apple => Icon(Icons.apple, size: 22, color: color),
+      // Google Blue — a third-party brand mark reproduced verbatim per Google's
+      // Sign-In branding guidelines. Deliberately not a token: it is not ours.
       AuthButtonProvider.google => Text(
           'G',
           style: AppTypography.headingSmall.copyWith(

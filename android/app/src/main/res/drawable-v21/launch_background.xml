@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Launch splash: the brand mark centred on the brand background. The mark is a
+     single-tone raster tinted at draw time, so @color/launch_mark alone flips it
+     for values-night — one PNG set, not two. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/launch_background" />
 
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@mipmap/launch_image"
+            android:tint="@color/launch_mark" />
+    </item>
 </layer-list>

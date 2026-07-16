@@ -7,8 +7,13 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../practice/domain/mastery.dart';
 import '../../../practice/domain/practice_dashboard.dart' show CategoryView;
+import '../../../practice/presentation/widgets/practice_chips.dart';
 
 /// "Mastery overview" — every topic with its mastery level and progress.
+///
+/// Topics carry no per-topic colour; the glyph separates them, and reusing
+/// [PracticeTopicIcon] keeps this list identical to the practice surfaces it
+/// mirrors.
 class ProgressMastery extends StatelessWidget {
   const ProgressMastery({super.key, required this.mastery});
 
@@ -52,9 +57,6 @@ class _MasteryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final topic = view.topic;
-    final gradient = LinearGradient(
-      colors: [topic.color, topic.color.withValues(alpha: 0.75)],
-    );
 
     return Semantics(
       label: '${topic.label} mastery: ${view.level.label}',
@@ -63,15 +65,7 @@ class _MasteryRow extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: topic.color.withValues(alpha: 0.14),
-                  borderRadius: AppRadius.smRadius,
-                ),
-                child: Icon(topic.icon, size: 22, color: topic.color),
-              ),
+              PracticeTopicIcon(topic: topic),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -88,15 +82,11 @@ class _MasteryRow extends StatelessWidget {
                             ),
                           ),
                         ),
-                        _LevelChip(level: view.level, color: topic.color),
+                        _LevelChip(level: view.level),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    XPProgressBar(
-                      value: view.progress,
-                      gradient: gradient,
-                      height: 6,
-                    ),
+                    XPProgressBar(value: view.progress, height: 6),
                   ],
                 ),
               ),
@@ -109,33 +99,39 @@ class _MasteryRow extends StatelessWidget {
 }
 
 class _LevelChip extends StatelessWidget {
-  const _LevelChip({required this.level, required this.color});
+  const _LevelChip({required this.level});
 
   final MasteryLevel level;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mastered = level == MasteryLevel.mastered;
+    // Mastered earns the brand emerald; every level below it stays neutral, so
+    // "mastered" is the only thing on the list that catches the eye.
+    final background = mastered ? colors.primaryContainer : colors.surfaceMuted;
+    final foreground =
+        mastered ? colors.onPrimaryContainer : colors.textSecondary;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: mastered ? 0.18 : 0.1),
+        color: background,
         borderRadius: AppRadius.pillRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (mastered) ...[
-            Icon(Icons.workspace_premium_rounded, size: 12, color: color),
+            Icon(Icons.workspace_premium_rounded, size: 12, color: foreground),
             const SizedBox(width: AppSpacing.xxs),
           ],
           Text(
             level.label,
-            style: AppTypography.label.copyWith(color: color),
+            style: AppTypography.label.copyWith(color: foreground),
           ),
         ],
       ),

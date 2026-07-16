@@ -55,7 +55,7 @@ class AchievementBadgeCard extends StatelessWidget {
                     Icon(
                       Icons.lock_rounded,
                       size: 16,
-                      color: colors.textTertiary,
+                      color: colors.textMuted,
                     ),
                 ],
               ),
@@ -96,7 +96,7 @@ class AchievementBadgeCard extends StatelessWidget {
                 Text(
                   '${view.progress.current} / ${view.progress.target}',
                   style: AppTypography.caption.copyWith(
-                    color: colors.textTertiary,
+                    color: colors.textMuted,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

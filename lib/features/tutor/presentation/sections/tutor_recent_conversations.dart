@@ -95,7 +95,7 @@ class _ConversationTile extends StatelessWidget {
           Icon(
             Icons.chevron_right_rounded,
             size: 22,
-            color: colors.textTertiary,
+            color: colors.textMuted,
           ),
         ],
       ),

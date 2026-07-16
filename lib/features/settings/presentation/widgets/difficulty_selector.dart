@@ -53,6 +53,11 @@ class _DifficultyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // The emerald that stays legible as a foreground on the active surface —
+    // the identity emerald is 2.97:1 and is brand art only.
+    final accent = context.isDark
+        ? AppColors.primaryLight
+        : AppColors.primaryDark;
     return Semantics(
       button: true,
       selected: selected,
@@ -63,7 +68,7 @@ class _DifficultyCard extends StatelessWidget {
         elevated: !selected,
         color: selected ? colors.primaryContainer : colors.surface,
         border: Border.all(
-          color: selected ? AppColors.primary : colors.border,
+          color: selected ? accent : colors.border,
           width: selected ? 2 : 1.5,
         ),
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -75,14 +80,14 @@ class _DifficultyCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.primary.withValues(alpha: 0.14)
+                    ? accent.withValues(alpha: 0.14)
                     : colors.surfaceMuted,
                 borderRadius: AppRadius.smRadius,
               ),
               child: Icon(
                 option.icon,
                 size: 23,
-                color: selected ? AppColors.primary : colors.textSecondary,
+                color: selected ? accent : colors.textSecondary,
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -128,11 +133,13 @@ class _SelectionDot extends StatelessWidget {
       curve: AppCurves.standard,
       width: 26,
       height: 26,
+      // A filled control carrying a white check — the interactive emerald, so
+      // the check clears AA (4.78:1) in both themes.
       decoration: BoxDecoration(
-        color: selected ? AppColors.primary : Colors.transparent,
+        color: selected ? AppColors.primaryAction : Colors.transparent,
         shape: BoxShape.circle,
         border: Border.all(
-          color: selected ? AppColors.primary : context.colors.textTertiary,
+          color: selected ? AppColors.primaryAction : context.colors.textMuted,
           width: 2,
         ),
       ),

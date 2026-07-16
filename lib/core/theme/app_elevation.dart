@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'app_shadows.dart';
 
 /// Theme-aware elevation delivered as a [ThemeExtension]. Selects the correct
-/// (blue-tinted vs. soft-black) shadow set for the active brightness.
+/// (ink vs. soft-black) shadow set for the active brightness. Both sets are
+/// neutral — the brand never glows emerald. See [AppShadows].
 ///
 /// Access via `context.elevation`.
 @immutable

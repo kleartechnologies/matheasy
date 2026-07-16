@@ -130,16 +130,12 @@ class _ProPlanCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: AppColors.premiumGradient,
         borderRadius: AppRadius.cardRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x52059669),
-            blurRadius: 34,
-            offset: Offset(0, 18),
-          ),
-        ],
+        // A neutral lift, not an emerald bloom — the card is already the
+        // heaviest thing on the screen.
+        boxShadow: context.elevation.raised,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,8 +157,7 @@ class _ProPlanCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             renewLine,
-            style: AppTypography.bodySmall
-                .copyWith(color: const Color(0xFFD1FAE5)),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.emerald100),
           ),
           if (status.hasBillingIssue) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -254,6 +249,10 @@ class _UsageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The meter's colour is a foreground (icon + bar), so the identity emerald
+    // (2.97:1 on a light card) can't carry it.
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +265,7 @@ class _UsageSection extends StatelessWidget {
           UsageMeter(
             icon: Icons.document_scanner_rounded,
             label: 'Scans',
-            color: AppColors.primary,
+            color: emerald,
             used: usage.counts.scansUsed,
             limit: usage.limit(UsageFeature.scan),
           ),

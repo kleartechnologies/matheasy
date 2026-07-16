@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
-import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_dashboard.dart';
 import '../../domain/practice_topic.dart';
+import '../widgets/practice_chips.dart';
 
 /// A two-column grid of every topic with its current mastery — the practice
 /// categories. Tapping a card starts a session for that topic.
@@ -61,9 +62,6 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final topic = category.topic;
-    final gradient = LinearGradient(
-      colors: [topic.color, topic.color.withValues(alpha: 0.75)],
-    );
 
     return AppCard(
       onTap: () => onTap(topic),
@@ -72,15 +70,7 @@ class _CategoryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: topic.color.withValues(alpha: 0.14),
-                  borderRadius: AppRadius.smRadius,
-                ),
-                child: Icon(topic.icon, size: 22, color: topic.color),
-              ),
+              PracticeTopicIcon(topic: topic),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -96,12 +86,15 @@ class _CategoryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          XPProgressBar(value: category.progress, gradient: gradient, height: 6),
+          XPProgressBar(value: category.progress, height: 6),
           const SizedBox(height: AppSpacing.xs),
           Text(
             category.level.label,
             style: AppTypography.caption.copyWith(
-              color: topic.color,
+              // Emerald that stays AA on the card in either theme.
+              color: context.isDark
+                  ? AppColors.primaryLight
+                  : AppColors.primaryDark,
               fontWeight: FontWeight.w700,
             ),
           ),

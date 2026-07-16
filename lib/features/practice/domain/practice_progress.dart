@@ -58,6 +58,16 @@ class PracticeProgress {
 
   static const PracticeProgress empty = PracticeProgress();
 
+  /// The calendar day [dt] falls on, as days since the Unix epoch — the unit
+  /// every `*EpochDay` field below is stored in.
+  ///
+  /// Anchored to a UTC calendar date so no timezone offset enters the division;
+  /// otherwise DST transitions in GMT-crossing zones make consecutive days
+  /// differ by 0 or 2 epoch-days and corrupt the streak.
+  static int epochDay(DateTime dt) =>
+      DateTime.utc(dt.year, dt.month, dt.day).millisecondsSinceEpoch ~/
+          Duration.millisecondsPerDay;
+
   final int totalXp;
   final int streakCurrent;
   final int streakBest;

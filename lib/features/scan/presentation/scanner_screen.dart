@@ -507,8 +507,10 @@ class _AutoCaptureToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // primaryLight is the emerald that survives on dark surfaces; primaryTint is
+    // decorative-only and must not carry the label.
     final color =
-        enabled ? AppColors.primaryTint : Colors.white.withValues(alpha: 0.7);
+        enabled ? AppColors.primaryLight : Colors.white.withValues(alpha: 0.7);
     return Semantics(
       button: true,
       toggled: enabled,
@@ -524,12 +526,12 @@ class _AutoCaptureToggle extends StatelessWidget {
               const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
           decoration: BoxDecoration(
             color: enabled
-                ? AppColors.primary.withValues(alpha: 0.18)
+                ? AppColors.primaryAction.withValues(alpha: 0.18)
                 : Colors.white.withValues(alpha: 0.1),
             borderRadius: AppRadius.pillRadius,
             border: Border.all(
               color: enabled
-                  ? AppColors.primaryTint.withValues(alpha: 0.5)
+                  ? AppColors.primaryLight.withValues(alpha: 0.5)
                   : Colors.white.withValues(alpha: 0.2),
             ),
           ),
@@ -706,10 +708,11 @@ class _ShutterButton extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(7),
               child: DecoratedBox(
+                // Solid interactive emerald, no halo — the ring carries the
+                // shutter's presence, not a glow.
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: enabled ? AppColors.primaryGradient : null,
-                  color: enabled ? null : AppColors.white,
+                  color: enabled ? AppColors.primaryAction : AppColors.white,
                 ),
               ),
             ),
@@ -824,6 +827,9 @@ class _CapturedView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Deliberately not a token: a neutral black scrim over the frozen camera
+        // frame. Any brand tint here would recolour the paper the user just
+        // photographed and misrepresent what was scanned.
         const Positioned.fill(child: ColoredBox(color: Color(0x99000000))),
         SafeArea(
           child: Align(
@@ -987,8 +993,9 @@ class _PillButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
-            gradient: filled ? AppColors.primaryGradient : null,
-            color: filled ? null : Colors.white.withValues(alpha: 0.12),
+            color: filled
+                ? AppColors.primaryAction
+                : Colors.white.withValues(alpha: 0.12),
             borderRadius: AppRadius.pillRadius,
             border: filled
                 ? null

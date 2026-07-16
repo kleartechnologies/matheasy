@@ -32,7 +32,9 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 900), (_) {
+    // Paced slowly enough to read as deliberate progress; a faster flip through
+    // three strings reads as a spinner of words rather than reassurance.
+    _timer = Timer.periodic(const Duration(milliseconds: 1600), (_) {
       if (!mounted) return;
       setState(() => _index = (_index + 1) % ProcessingOverlay.messages.length);
     });
@@ -56,12 +58,14 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
               child: MatheasyBrandAvatar(size: 128),
             ),
             const SizedBox(height: AppSpacing.xxl),
+            // A thin ring in the dark-surface emerald: one honest progress
+            // signal, no glow or pulse.
             const SizedBox(
-              width: 30,
-              height: 30,
+              width: 28,
+              height: 28,
               child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation(AppColors.primaryTint),
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(AppColors.primaryLight),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),

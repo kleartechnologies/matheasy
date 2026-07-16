@@ -143,7 +143,7 @@ class AboutScreen extends StatelessWidget {
           Center(
             child: Text(
               'Made with care for learners everywhere',
-              style: AppTypography.caption.copyWith(color: colors.textTertiary),
+              style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
           ),
         ],

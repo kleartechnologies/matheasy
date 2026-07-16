@@ -40,9 +40,16 @@ class SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tint =
-        destructive ? AppColors.error : (iconColor ?? AppColors.primary);
-    final titleColor = destructive ? AppColors.error : colors.textPrimary;
+    // [tint] is both the icon's fill and its 14% plate, so it has to clear AA as
+    // a foreground — the identity emerald (2.97:1) can't, and is brand art only.
+    final brandTint = context.isDark
+        ? AppColors.primaryLight
+        : AppColors.primaryDark;
+    // Destructive uses the theme-aware error TEXT tone, not raw AppColors.error:
+    // #BF271D is 5.96:1 on white but only 2.87:1 on the dark surface, so a
+    // "Delete account" title/icon was failing AA in dark mode.
+    final tint = destructive ? colors.errorText : (iconColor ?? brandTint);
+    final titleColor = destructive ? colors.errorText : colors.textPrimary;
 
     final row = Padding(
       padding: const EdgeInsets.symmetric(
@@ -94,7 +101,7 @@ class SettingsTile extends StatelessWidget {
             trailing!
           else if (onTap != null) ...[
             const SizedBox(width: AppSpacing.xs),
-            Icon(Icons.chevron_right_rounded, color: colors.textTertiary),
+            Icon(Icons.chevron_right_rounded, color: colors.textMuted),
           ],
         ],
       ),

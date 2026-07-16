@@ -12,6 +12,9 @@ import '../../../profile/presentation/widgets/profile_avatar_view.dart';
 import '../../domain/home_models.dart';
 
 /// A calm greeting line + avatar. No streak, no stats — Home is not a dashboard.
+///
+/// Sized one step below the hero's heading: Home's dominant headline is the
+/// question the hero asks, not who the learner is.
 class HomeGreeting extends ConsumerWidget {
   const HomeGreeting({super.key, required this.userName});
 
@@ -37,7 +40,9 @@ class HomeGreeting extends ConsumerWidget {
                 userName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.headingLarge.copyWith(color: colors.textPrimary),
+                style: AppTypography.headingMedium.copyWith(
+                  color: colors.textPrimary,
+                ),
               ),
             ],
           ),

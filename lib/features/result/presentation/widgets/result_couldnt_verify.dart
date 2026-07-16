@@ -11,18 +11,22 @@ import 'math_text.dart';
 /// The honest "couldn't verify" state (spec §1.1 / §9) — shown when `solve()`
 /// returns `verified:false` because the answer failed its substitution check.
 ///
-/// This is the deliberate face of the verify-gate architecture: when Matheasy
-/// can't stand behind an answer, it shows NONE — never a confident guess. The
-/// tone is calm and the failure is framed as the app being careful, NOT the
-/// student getting something wrong. It shows what was read (tappable to fix a
-/// misread, the likeliest cause) and two real ways forward — edit or rescan —
-/// so it's never a dead end.
+/// This is the deliberate face of the verify-gate architecture (spec §1), and it
+/// is NOT an error state: the gate holding is the product's integrity guarantee
+/// working as designed. So it carries no error semantics — no red, no amber, no
+/// alarm. It leads with what WAS understood (the problem, rendered large and
+/// tappable so a misread can be fixed in place), states the miss plainly in the
+/// calm `info` family, then offers three real ways forward.
+///
+/// The honesty stays explicit and unsoftened: no answer is shown or implied,
+/// because none passed the check.
 class ResultCouldntVerify extends StatelessWidget {
   const ResultCouldntVerify({
     super.key,
     required this.result,
     required this.onRescan,
     required this.onEdit,
+    this.onDiscuss,
   });
 
   final ResultData result;
@@ -34,71 +38,94 @@ class ResultCouldntVerify extends StatelessWidget {
   /// primary path (a wrong OCR read is the most common reason a check fails).
   final VoidCallback onEdit;
 
+  /// Open the AI tutor on this problem — the way forward when the read is
+  /// already right and the check still failed. Optional: the CTA renders only
+  /// where a tutor route is wired.
+  final VoidCallback? onDiscuss;
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final discuss = onDiscuss;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: AppSpacing.sm),
-        const Center(child: MatheasyBrandAvatar()),
-        const SizedBox(height: AppSpacing.xl),
-
-        // The honest explanation — reassuring, and explicit that this is the
-        // app being careful, not the student failing.
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: colors.warningContainer,
-            borderRadius: AppRadius.xlRadius,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.shield_outlined,
-                      size: 18, color: colors.onWarningContainer),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    "COULDN'T VERIFY",
-                    style: AppTypography.label
-                        .copyWith(color: colors.onWarningContainer),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                "I couldn't confirm a reliable answer for this one — so I won't "
-                'show a guess. That’s on me, not you: I only show answers I '
-                'can check by working them backwards. Fixing a misread usually '
-                'sorts it out.',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: colors.onWarningContainer),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // What we read — tapping it opens the editor to correct a misread.
+        // Lead with what I DID understand — it's both the reassurance and the
+        // likeliest thing to fix.
         _EditableProblem(latex: result.questionLatex, onEdit: onEdit),
+        const SizedBox(height: AppSpacing.md),
+        const _VerifyNotice(),
         const SizedBox(height: AppSpacing.xl),
 
-        // Two ways forward — editing the read is primary (most likely fix).
+        // Correcting the read is primary — a misread is the likeliest cause.
         PrimaryButton(
           label: 'Edit the problem',
           icon: Icons.edit_rounded,
           onPressed: onEdit,
         ),
-        const SizedBox(height: AppSpacing.md),
-        SecondaryButton(
+        if (discuss != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          SecondaryButton(
+            label: 'Work through it with the tutor',
+            icon: Icons.forum_rounded,
+            onPressed: discuss,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        GhostButton(
           label: 'Rescan',
           icon: Icons.center_focus_strong_rounded,
+          expand: true,
           onPressed: onRescan,
         ),
       ],
+    );
+  }
+}
+
+/// The plain statement that nothing passed the check.
+///
+/// Deliberately the calm `info` family, never `errorContainer`/`warningContainer`
+/// — this is considered honesty, not a failure, and the surface has to say so
+/// before the words do.
+class _VerifyNotice extends StatelessWidget {
+  const _VerifyNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: colors.infoContainer,
+        borderRadius: AppRadius.xlRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.shield_outlined,
+                  size: 18, color: colors.onInfoContainer),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                "COULDN'T VERIFY",
+                style:
+                    AppTypography.label.copyWith(color: colors.onInfoContainer),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'I check every answer by working it back through your problem. This '
+            "one didn't pass, so I'm not showing an answer at all — that check "
+            'is the whole point. If I misread anything above, correcting it '
+            'usually clears this up.',
+            style: AppTypography.bodyMedium
+                .copyWith(color: colors.onInfoContainer),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -123,15 +150,15 @@ class _EditableProblem extends StatelessWidget {
             children: [
               Text(
                 'WHAT I READ',
-                style: AppTypography.label.copyWith(color: colors.textTertiary),
+                style: AppTypography.label.copyWith(color: colors.textMuted),
               ),
               const Spacer(),
-              Icon(Icons.edit_rounded, size: 16, color: colors.textTertiary),
+              Icon(Icons.edit_rounded, size: 16, color: colors.textMuted),
               const SizedBox(width: 4),
               Text(
                 'tap to fix',
                 style:
-                    AppTypography.caption.copyWith(color: colors.textTertiary),
+                    AppTypography.caption.copyWith(color: colors.textMuted),
               ),
             ],
           ),

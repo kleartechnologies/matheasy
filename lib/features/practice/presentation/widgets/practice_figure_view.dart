@@ -19,11 +19,15 @@ class PracticeFigureView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // The figure is drawn over a card, so the stroke needs the emerald that
+    // survives the current theme — the identity emerald is 2.97:1 on white.
+    final stroke =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     final palette = ConceptPalette(
       grid: colors.divider,
-      axis: colors.textTertiary,
-      stroke: AppColors.primary,
-      fill: AppColors.primary.withValues(alpha: 0.16),
+      axis: colors.textMuted,
+      stroke: stroke,
+      fill: stroke.withValues(alpha: 0.16),
       accent: AppColors.warning,
       textColor: colors.textPrimary,
     );

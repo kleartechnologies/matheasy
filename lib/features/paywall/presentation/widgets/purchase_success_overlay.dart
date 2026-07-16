@@ -46,7 +46,7 @@ class _PurchaseSuccessOverlayState extends State<PurchaseSuccessOverlay>
     return FadeTransition(
       opacity: _fade,
       child: Container(
-        color: AppColors.paywallBottom.withValues(alpha: 0.96),
+        color: AppColors.premiumDeep.withValues(alpha: 0.96),
         child: Center(
           child: Semantics(
             liveRegion: true,

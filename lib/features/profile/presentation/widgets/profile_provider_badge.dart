@@ -16,6 +16,10 @@ class ProfileProviderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final leading = switch (provider) {
+      // Google Blue, deliberately hardcoded and deliberately not a token: this
+      // is Google's brand mark, not ours, and their guidelines fix the colour.
+      // A brand mark is exempt from our contrast floor (WCAG 1.4.11) — the
+      // adjacent label carries the meaning.
       AuthProviderType.google => Text(
           'G',
           style: AppTypography.caption.copyWith(

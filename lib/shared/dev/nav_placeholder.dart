@@ -105,7 +105,10 @@ class PlaceholderNote extends StatelessWidget {
     return Text(
       text,
       textAlign: TextAlign.center,
-      style: AppTypography.caption.copyWith(color: AppColors.primary),
+      style: AppTypography.caption.copyWith(
+        // Emerald as text — the identity emerald is 2.97:1 on a light surface.
+        color: context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
+      ),
     );
   }
 }

@@ -116,13 +116,15 @@ class _TutorChatInputState extends State<TutorChatInput> {
                       style: AppTypography.bodyMedium.copyWith(
                         color: colors.textPrimary,
                       ),
-                      cursorColor: AppColors.primary,
+                      cursorColor: context.isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primaryDark,
                       decoration: InputDecoration(
                         isCollapsed: true,
                         border: InputBorder.none,
                         hintText: 'Ask Matheasy anything…',
                         hintStyle: AppTypography.bodyMedium.copyWith(
-                          color: colors.textTertiary,
+                          color: colors.textMuted,
                         ),
                       ),
                     ),
@@ -211,15 +213,15 @@ class _SendButton extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            gradient: enabled ? AppColors.primaryGradient : null,
-            color: enabled ? null : colors.surfaceMuted,
+            // Solid interactive emerald — the white arrow needs 4.78:1.
+            color: enabled ? AppColors.primaryAction : colors.surfaceMuted,
             shape: BoxShape.circle,
             boxShadow: enabled ? context.elevation.button : null,
           ),
           child: Icon(
             Icons.arrow_upward_rounded,
             size: 22,
-            color: enabled ? AppColors.white : colors.textTertiary,
+            color: enabled ? AppColors.white : colors.textMuted,
           ),
         ),
       ),

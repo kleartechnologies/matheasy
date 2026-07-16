@@ -5,13 +5,17 @@ import 'package:flutter/widgets.dart';
 /// Restrained, neutral shadows — no emerald glow / bloom. Elevation is carried
 /// by surface colour, a hairline border and spacing; shadows are a soft, subtle
 /// hint only. Prefer reading these through `context.elevation` ([AppElevation]).
+///
+/// Light shadows are `AppColors.ink` (#0A1F16) at a low alpha; dark shadows are
+/// soft black. The alpha is baked into the literal because these lists are
+/// `const` — `AppColors.ink.withValues()` is not a compile-time constant.
 class AppShadows {
   const AppShadows._();
 
-  // ---- Light (soft neutral) — rgba(15,23,42,a) ----
+  // ---- Light (soft neutral ink) — rgba(10,31,22,a) ----
   static const List<BoxShadow> cardLight = [
     BoxShadow(
-      color: Color(0x0D0F172A), // rgba(15,23,42,0.05)
+      color: Color(0x0D0A1F16), // ink @ 5%
       blurRadius: 18,
       offset: Offset(0, 6),
     ),
@@ -19,7 +23,7 @@ class AppShadows {
 
   static const List<BoxShadow> raisedLight = [
     BoxShadow(
-      color: Color(0x140F172A), // rgba(15,23,42,0.08)
+      color: Color(0x140A1F16), // ink @ 8%
       blurRadius: 24,
       offset: Offset(0, 10),
     ),
@@ -27,7 +31,7 @@ class AppShadows {
 
   static const List<BoxShadow> floatingLight = [
     BoxShadow(
-      color: Color(0x1F0F172A), // rgba(15,23,42,0.12)
+      color: Color(0x1F0A1F16), // ink @ 12%
       blurRadius: 30,
       offset: Offset(0, 14),
     ),
@@ -35,7 +39,7 @@ class AppShadows {
 
   static const List<BoxShadow> buttonLight = [
     BoxShadow(
-      color: Color(0x140F172A),
+      color: Color(0x140A1F16), // ink @ 8%
       blurRadius: 14,
       offset: Offset(0, 6),
     ),

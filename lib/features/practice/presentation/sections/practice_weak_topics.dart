@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_dashboard.dart';
 import '../../domain/practice_topic.dart';
+import '../widgets/practice_chips.dart';
 
 /// "Strengthen these" — the learner's weaker topics, each starting a session.
 class PracticeWeakTopics extends StatelessWidget {
@@ -71,19 +72,7 @@ class _WeakRow extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: view.topic.color.withValues(alpha: 0.14),
-                  borderRadius: AppRadius.smRadius,
-                ),
-                child: Icon(
-                  view.topic.icon,
-                  size: 22,
-                  color: view.topic.color,
-                ),
-              ),
+              PracticeTopicIcon(topic: view.topic, size: 44),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -108,7 +97,7 @@ class _WeakRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 22,
-                color: colors.textTertiary,
+                color: colors.textMuted,
               ),
             ],
           ),

@@ -206,10 +206,13 @@ class TutorHomeContent {
       );
 
   static const List<TutorPrompt> _suggestedPrompts = [
+    // Every `color` here is painted as an icon on a 14% plate of itself, i.e. a
+    // foreground — so the emerald entries are [AppColors.primaryDark] (the
+    // documented emerald-on-light-surfaces tone), never the 2.97:1 identity one.
     TutorPrompt(
       label: 'Explain Algebra',
       icon: Icons.functions_rounded,
-      color: AppColors.primary,
+      color: AppColors.primaryDark,
       message: 'Can you explain algebra to me?',
     ),
     TutorPrompt(
@@ -242,7 +245,7 @@ class TutorHomeContent {
     TutorCategory(
       label: 'Algebra',
       icon: Icons.functions_rounded,
-      color: AppColors.primary,
+      color: AppColors.primaryDark,
       message: 'Can you explain algebra to me?',
     ),
     TutorCategory(
@@ -272,13 +275,16 @@ class TutorHomeContent {
     TutorCategory(
       label: 'Word Problems',
       icon: Icons.menu_book_rounded,
-      color: AppColors.accentCoralLight,
+      color: AppColors.accentCoral,
       message: 'Help me with word problems.',
     ),
+    // Statistics moves off the emerald ramp: Algebra now holds primaryDark, and
+    // two categories must not share a tile colour. Info-blue is the categorical
+    // hue that reads as "data" and clears AA on white (5.59:1).
     TutorCategory(
       label: 'Statistics',
       icon: Icons.bar_chart_rounded,
-      color: AppColors.primaryDark,
+      color: AppColors.info,
       message: 'Can you teach me statistics?',
     ),
   ];
@@ -287,7 +293,7 @@ class TutorHomeContent {
     TutorQuickAction(
       label: 'Ask Matheasy',
       icon: Icons.forum_rounded,
-      color: AppColors.primary,
+      color: AppColors.primaryDark,
       kind: TutorQuickActionKind.askMatheasy,
     ),
     TutorQuickAction(

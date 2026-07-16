@@ -12,7 +12,7 @@ class XPProgressBar extends StatelessWidget {
     super.key,
     required this.value,
     this.height = 9,
-    this.gradient = AppColors.primaryGradient,
+    this.gradient,
     this.trackColor,
     this.label,
   }) : assert(value >= 0 && value <= 1, 'value must be between 0 and 1');
@@ -20,7 +20,13 @@ class XPProgressBar extends StatelessWidget {
   /// Completion fraction in the range 0–1.
   final double value;
   final double height;
-  final Gradient gradient;
+
+  /// Opt-in fill for the bars that are deliberately *not* brand-emerald (a gold
+  /// daily challenge, a per-topic mastery bar). Left null, the fill is the solid
+  /// interactive emerald — progress is a brand moment, and the brand's emerald
+  /// does not gradient.
+  final Gradient? gradient;
+
   final Color? trackColor;
   final String? label;
 
@@ -45,6 +51,7 @@ class XPProgressBar extends StatelessWidget {
                 width: width * value.clamp(0.0, 1.0),
                 decoration: BoxDecoration(
                   gradient: gradient,
+                  color: gradient == null ? AppColors.primaryAction : null,
                   borderRadius: BorderRadius.circular(height),
                 ),
               ),

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Launch splash background — brand deep ink (dark). -->
-    <color name="launch_background">#0B1220</color>
+    <!-- Launch splash background — brand page background (AppSemanticColors.dark). -->
+    <color name="launch_background">#081410</color>
+    <!-- AppColors.primaryLight — the identity emerald is too dark to read here;
+         this is the emerald that survives on the dark surface. -->
+    <color name="launch_mark">#0CE483</color>
 </resources>

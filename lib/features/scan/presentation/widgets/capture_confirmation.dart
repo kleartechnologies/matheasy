@@ -174,7 +174,7 @@ class _EditableEquation extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Icon(Icons.edit_rounded, size: 18, color: colors.textTertiary),
+              Icon(Icons.edit_rounded, size: 18, color: colors.textMuted),
             ],
           ),
         ),

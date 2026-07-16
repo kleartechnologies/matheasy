@@ -3,13 +3,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/home_models.dart';
 
-/// A single "continue where you left off" card. One card only — no carousel.
+/// A single "continue where you left off" card — Home's second priority. One
+/// card only, no carousel. Rendered only when a real [CourseProgress] exists.
 class HomeContinueCard extends StatelessWidget {
   const HomeContinueCard({super.key, required this.course});
 
@@ -31,10 +33,14 @@ class HomeContinueCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: course.color.withValues(alpha: 0.14),
+                  color: colors.primaryContainer,
                   borderRadius: AppRadius.smRadius,
                 ),
-                child: Icon(course.icon, size: 22, color: course.color),
+                child: Icon(
+                  course.icon,
+                  size: 22,
+                  color: colors.onPrimaryContainer,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -43,7 +49,7 @@ class HomeContinueCard extends StatelessWidget {
                   children: [
                     Text(
                       'Continue learning',
-                      style: AppTypography.label.copyWith(color: colors.textTertiary),
+                      style: AppTypography.label.copyWith(color: colors.textMuted),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -57,11 +63,11 @@ class HomeContinueCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: colors.textTertiary),
+              Icon(Icons.chevron_right_rounded, color: colors.textMuted),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          _ProgressBar(fraction: course.fraction, color: course.color),
+          _ProgressBar(fraction: course.fraction),
           const SizedBox(height: AppSpacing.sm),
           Text(
             '$percent% complete · ${course.estMinutes} min left',
@@ -73,11 +79,13 @@ class HomeContinueCard extends StatelessWidget {
   }
 }
 
+/// The filled track is [AppColors.primaryAction] in both themes: it is a bar, not
+/// text, and the interactive emerald keeps progress reading as the same green as
+/// every other action on Home.
 class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.fraction, required this.color});
+  const _ProgressBar({required this.fraction});
 
   final double fraction;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +96,7 @@ class _ProgressBar extends StatelessWidget {
           Container(height: 6, color: context.colors.surfaceMuted),
           FractionallySizedBox(
             widthFactor: fraction.clamp(0.0, 1.0),
-            child: Container(height: 6, color: color),
+            child: Container(height: 6, color: AppColors.primaryAction),
           ),
         ],
       ),

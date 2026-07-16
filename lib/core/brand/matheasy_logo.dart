@@ -7,7 +7,7 @@ import 'matheasy_mark.dart';
 
 /// Which pieces of the logo to render.
 enum MatheasyLogoVariant {
-  /// The symbol only (the R8 two-check mark).
+  /// The symbol only (the M mark).
   mark,
 
   /// The "Matheasy" wordmark only.
@@ -25,7 +25,7 @@ enum MatheasyLogoVariant {
 enum MatheasyLogoSize { small, medium, large }
 
 /// The official Matheasy logo — a reusable lockup of the brand [MatheasyMark]
-/// (R8) and the Manrope wordmark.
+/// (the M) and the Manrope wordmark.
 ///
 /// One widget covers every configuration the brand system defines:
 /// mark-only, wordmark-only, horizontal and vertical lockups, at small / medium
@@ -87,21 +87,18 @@ class MatheasyLogo extends StatelessWidget {
     final dark = onDark ?? context.isDark;
     final mark = markColor ?? AppColors.primary;
     final word = wordmarkColor ?? (dark ? AppColors.white : AppColors.ink);
+    // The accent tints the "easy" half — that is wordmark TEXT, so it takes the
+    // legible-as-label emerald (primaryDark on light, 6.83:1), never the 2.97:1
+    // identity tone. The mark beside it still uses full [AppColors.primary]:
+    // there it is brand art, not text.
     final accent = wordmarkAccent
-        ? (dark ? AppColors.primaryLight : AppColors.primary)
+        ? (dark ? AppColors.primaryLight : AppColors.primaryDark)
         : null;
     final dim = _markDimension;
-    // Two-tone above 28px; single-tone at small sizes per the brand system.
-    final twoTone = dim >= 28;
 
     switch (variant) {
       case MatheasyLogoVariant.mark:
-        return MatheasyMark(
-          size: dim,
-          color: mark,
-          twoTone: twoTone,
-          semanticLabel: 'Matheasy',
-        );
+        return MatheasyMark(size: dim, color: mark, semanticLabel: 'Matheasy');
       case MatheasyLogoVariant.wordmark:
         return _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent);
       case MatheasyLogoVariant.horizontal:
@@ -111,8 +108,8 @@ class MatheasyLogo extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark, twoTone: twoTone),
-              SizedBox(width: dim * 0.34),
+              MatheasyMark(size: dim, color: mark),
+              SizedBox(width: dim * 0.16),
               _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent),
             ],
           ),
@@ -124,8 +121,8 @@ class MatheasyLogo extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark, twoTone: twoTone),
-              SizedBox(height: dim * 0.30),
+              MatheasyMark(size: dim, color: mark),
+              SizedBox(height: dim * 0.22),
               _Wordmark(fontSize: dim * 0.68, color: word, accentColor: accent),
             ],
           ),

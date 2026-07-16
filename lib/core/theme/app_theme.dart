@@ -32,26 +32,83 @@ class AppTheme {
     required AppSemanticColors colors,
     required AppElevation elevation,
   }) {
+    final isDark = brightness == Brightness.dark;
+
+    // Material's own widgets reach far past the roles the brand names:
+    // InputDecorator hints and ListTile subtitles read `onSurfaceVariant`,
+    // Chip/SegmentedButton read `secondaryContainer`, Switch reads the surface
+    // container tiers. Any role left to the seed comes back an off-brand tonal
+    // green that no token controls, so every role a shipped widget can reach is
+    // pinned below.
     final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      // Seed from the interactive tone, not the identity tone: the roles derived
+      // from the seed land *behind controls*, so they must descend from the
+      // emerald that is safe under white content.
+      seedColor: AppColors.primaryAction,
       brightness: brightness,
     ).copyWith(
-      primary: AppColors.primary,
+      // Material fills buttons and FABs with primary + onPrimary, so primary
+      // must be the action emerald (white 4.78:1 ✓ AA) and never the identity
+      // emerald (2.97:1).
+      primary: AppColors.primaryAction,
       onPrimary: AppColors.white,
       primaryContainer: colors.primaryContainer,
       onPrimaryContainer: colors.onPrimaryContainer,
       secondary: AppColors.secondary,
       onSecondary: AppColors.white,
-      error: AppColors.error,
-      onError: AppColors.white,
+      // [secondary] stays the indigo categorical accent, but the *container*
+      // role is what M3 paints selected chips and nav indicators with — those
+      // are brand states, so they take the emerald container. No indigo
+      // container token exists, and inventing one would add a second selected
+      // colour to the system.
+      secondaryContainer: colors.primaryContainer,
+      onSecondaryContainer: colors.onPrimaryContainer,
+      // Tertiary = the categorical accent [secondary] does not already spell.
+      tertiary: AppColors.accentCoral, // white 5.18:1 ✓ AA
+      onTertiary: AppColors.white,
+      // No coral container token exists; the warm container is its nearest
+      // tonal sibling (same orange family, hue 17 vs 28) and clears AA in both
+      // themes.
+      tertiaryContainer: colors.warningContainer,
+      onTertiaryContainer: colors.onWarningContainer,
+      // Material paints InputDecorator error text + the focused-error border
+      // with this role, so it must flip with the theme: AppColors.error is
+      // 2.87:1 on the dark surface. onError pairs with it as a FILL.
+      error: colors.errorText,
+      onError: isDark ? AppColors.ink : AppColors.white,
       errorContainer: colors.errorContainer,
       onErrorContainer: colors.onErrorContainer,
       surface: colors.surface,
       onSurface: colors.textPrimary,
+      onSurfaceVariant: colors.textSecondary,
+      // The palette defines three surface tiers, not five: the upper containers
+      // collapse onto [surfaceMuted] rather than fall back to seed greens. The
+      // ladder inverts with brightness — lowest is the brightest in light and
+      // the deepest in dark.
+      surfaceBright: isDark ? colors.surfaceMuted : colors.surface,
+      surfaceDim: isDark ? colors.background : colors.surfaceMuted,
+      surfaceContainerLowest: isDark ? colors.background : colors.surface,
+      surfaceContainerLow: isDark ? colors.surface : colors.background,
+      surfaceContainer: colors.surfaceMuted,
+      surfaceContainerHigh: colors.surfaceMuted,
       surfaceContainerHighest: colors.surfaceMuted,
       outline: colors.border,
       outlineVariant: colors.divider,
+      // Shadows stay neutral ink — no emerald bloom. See [AppShadows].
+      shadow: AppColors.ink,
       scrim: colors.scrim,
+      // The inverted pair snackbars and tooltips sit on — the same two tokens
+      // the SnackBar theme below already pairs by hand.
+      inverseSurface: colors.textPrimary,
+      onInverseSurface: colors.textInverse,
+      // The emerald that survives *on* that inverted surface, so it flips with
+      // the theme: 10.19:1 on light's inverse, 5.96:1 on dark's.
+      inversePrimary: isDark ? AppColors.primaryDark : AppColors.primaryLight,
+      // M3 tints elevated surfaces with this. The brand carries elevation with
+      // surface colour, a hairline border and a neutral shadow, and every
+      // component theme below already zeroes surfaceTintColor one by one —
+      // transparent makes that the default instead of the exception.
+      surfaceTint: Colors.transparent,
     );
 
     final textTheme = _textTheme(colors);
@@ -63,8 +120,9 @@ class AppTheme {
       scaffoldBackgroundColor: colors.background,
       canvasColor: colors.background,
       textTheme: textTheme,
-      splashColor: AppColors.primary.withValues(alpha: 0.08),
-      highlightColor: AppColors.primary.withValues(alpha: 0.04),
+      // Ripples belong to the interactive emerald, not the identity one.
+      splashColor: AppColors.primaryAction.withValues(alpha: 0.08),
+      highlightColor: AppColors.primaryAction.withValues(alpha: 0.04),
       extensions: <ThemeExtension<dynamic>>[colors, elevation],
       appBarTheme: AppBarTheme(
         backgroundColor: colors.background,

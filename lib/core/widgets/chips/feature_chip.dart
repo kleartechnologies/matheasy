@@ -27,7 +27,11 @@ class FeatureChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fg = selected ? AppColors.white : AppColors.primary;
+    // Unselected, the emerald is *text* on a light surface, so it takes the
+    // ramp step that clears AA there (the identity tone is only 2.97:1).
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    final fg = selected ? AppColors.white : emerald;
 
     final chip = Pressable(
       onTap: onTap,
@@ -40,10 +44,11 @@ class FeatureChip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : colors.surface,
+          // Selected is a filled control carrying white — [primaryAction].
+          color: selected ? AppColors.primaryAction : colors.surface,
           borderRadius: AppRadius.pillRadius,
           border: Border.all(
-            color: selected ? AppColors.primary : colors.border,
+            color: selected ? AppColors.primaryAction : colors.border,
           ),
         ),
         child: Row(

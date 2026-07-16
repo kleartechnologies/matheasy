@@ -182,7 +182,7 @@ class _OptionTile extends StatelessWidget {
       _OptionState.dimmed => (
           colors.surfaceMuted,
           colors.border,
-          colors.textTertiary,
+          colors.textMuted,
         ),
     };
 

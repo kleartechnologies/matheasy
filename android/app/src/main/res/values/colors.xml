@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matheasy Brand Emerald — adaptive app-icon background fallback. -->
-    <color name="ic_launcher_background">#10B981</color>
-    <!-- Launch splash background — brand page background (light). -->
-    <color name="launch_background">#F4F6F5</color>
+    <!-- The identity emerald (AppColors.primary) — the adaptive app-icon tile.
+         Flat: the logo's own background measures #06AD62 -> #06AB5F. -->
+    <color name="ic_launcher_background">#06AC60</color>
+    <!-- Launch splash background — brand page background (AppSemanticColors.light). -->
+    <color name="launch_background">#F4F7F5</color>
+    <!-- Launch mark tint — the identity emerald, i.e. brand art on brand bg. -->
+    <color name="launch_mark">#06AC60</color>
 </resources>

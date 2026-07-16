@@ -105,10 +105,19 @@ class AppTabBar extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Active hue reads brighter in the dark (Emerald 400) and richer on the
-    // light frosted surface (Emerald 500) — both stay in the brand family.
-    final activeColor = isDark ? AppColors.primaryLight : AppColors.primary;
-    final pillTint = activeColor.withValues(alpha: isDark ? 0.18 : 0.14);
+    // Active icon/label: the emerald that clears AA on the surface it lands on —
+    // primaryDark is 6.83:1 on the light frosted glass, primaryLight 10.13:1 on
+    // the dark. Inactive falls back to the muted text token.
+    final activeColor = isDark ? AppColors.primaryLight : AppColors.primaryDark;
+
+    // The pill (and the FAB) are the INTERACTIVE emerald, never the identity
+    // [AppColors.primary] — primary is the 2.97:1 logo tone and the FAB carries
+    // a white icon that must clear 3:1. primaryAction is the same logo green one
+    // ramp step down at 4.78:1 ✓. Do not "fix" this back to primary.
+    // primaryAction is a deep tone, so its tint needs more alpha to register on
+    // the dark glass than on the light one.
+    final pillTint =
+        AppColors.primaryAction.withValues(alpha: isDark ? 0.32 : 0.14);
 
     final safeBottom = context.viewPadding.bottom;
     final glassHeight =
@@ -136,7 +145,7 @@ class AppTabBar extends StatelessWidget {
                 currentIndex: currentIndex,
                 badges: badges,
                 activeColor: activeColor,
-                inactiveColor: colors.textTertiary,
+                inactiveColor: colors.textMuted,
                 pillTint: pillTint,
                 ringColor: colors.tabBar,
                 onTap: _handleTap,
@@ -383,9 +392,14 @@ class _ScanButton extends StatelessWidget {
           width: AppTabBar._fabSize,
           height: AppTabBar._fabSize,
           decoration: BoxDecoration(
-            // Priority comes from position, size and contrast — not a glow.
-            color: AppColors.primary,
+            // The interactive emerald, not the identity [AppColors.primary]:
+            // white on primary is 2.97:1, below the 3:1 floor this icon must
+            // clear. primaryAction is the same logo green at 4.78:1 ✓.
+            color: AppColors.primaryAction,
             borderRadius: BorderRadius.circular(14),
+            // The lift is a neutral shadow, never an emerald halo — priority
+            // comes from position, size and contrast, not a glow.
+            boxShadow: context.elevation.raised,
           ),
           child: const Icon(
             Icons.center_focus_strong_rounded,

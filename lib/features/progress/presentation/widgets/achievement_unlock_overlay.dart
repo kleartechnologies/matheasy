@@ -76,10 +76,13 @@ class AchievementUnlockOverlay extends StatelessWidget {
                         children: [
                           const _MatheasyCheer(),
                           const SizedBox(height: AppSpacing.md),
+                          // The badge accent stays on the medallion. As text it
+                          // was unreadable — gold badges land at 1.63:1 on a
+                          // light surface, emerald ones at 2.97:1.
                           Text(
                             'ACHIEVEMENT UNLOCKED',
                             style: AppTypography.label.copyWith(
-                              color: badge.color,
+                              color: colors.textMuted,
                             ),
                           ),
                           const SizedBox(height: AppSpacing.lg),
@@ -115,7 +118,7 @@ class AchievementUnlockOverlay extends StatelessWidget {
                             cheer,
                             textAlign: TextAlign.center,
                             style: AppTypography.bodySmall.copyWith(
-                              color: badge.color,
+                              color: colors.textSecondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -175,7 +178,7 @@ class _RewardChip extends StatelessWidget {
             value: xp,
             prefix: '+',
             suffix: ' XP',
-            style: AppTypography.title.copyWith(color: AppColors.amber),
+            style: AppTypography.title.copyWith(color: AppColors.accentAmber),
           ),
         ],
       ),

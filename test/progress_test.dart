@@ -346,7 +346,7 @@ void main() {
       expect(dismissed, isTrue);
     });
 
-    testWidgets('progress screen renders the header and overview', (tester) async {
+    testWidgets('progress screen renders the header and mastery', (tester) async {
       final container = await _container();
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -358,7 +358,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Progress'), findsOneWidget);
-      expect(find.text('Learning overview'), findsOneWidget);
+      expect(find.text('Mastery overview'), findsOneWidget);
     });
   });
 }

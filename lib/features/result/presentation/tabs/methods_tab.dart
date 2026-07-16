@@ -62,10 +62,14 @@ class _MethodCardState extends State<_MethodCard> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final method = widget.method;
+    // Emerald content on a card — the ring and the affordance both need the
+    // per-theme legible tone, not the 2.97:1 logo tile.
+    final emeraldLabel =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return AppCard(
       onTap: () => setState(() => _expanded = !_expanded),
       border: method.recommended
-          ? Border.all(color: AppColors.primary, width: 1.5)
+          ? Border.all(color: emeraldLabel, width: 1.5)
           : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,13 +110,13 @@ class _MethodCardState extends State<_MethodCard> {
             children: [
               Text(
                 _expanded ? 'Hide details' : 'See how it works',
-                style: AppTypography.caption.copyWith(color: AppColors.primary),
+                style: AppTypography.caption.copyWith(color: emeraldLabel),
               ),
               AnimatedRotation(
                 turns: _expanded ? 0.5 : 0,
                 duration: AppDurations.fast,
-                child: const Icon(Icons.keyboard_arrow_down_rounded,
-                    size: 18, color: AppColors.primary),
+                child: Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 18, color: emeraldLabel),
               ),
             ],
           ),
@@ -137,7 +141,7 @@ class _Details extends StatelessWidget {
         children: [
           Text(
             'STEPS',
-            style: AppTypography.label.copyWith(color: colors.textTertiary),
+            style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
           for (final step in method.steps)
@@ -146,8 +150,11 @@ class _Details extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.chevron_right_rounded,
-                      size: 20, color: AppColors.primary),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 20,
+                      color: context.isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primaryDark),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
@@ -162,7 +169,7 @@ class _Details extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             'GOOD FOR',
-            style: AppTypography.label.copyWith(color: colors.textTertiary),
+            style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
           Wrap(

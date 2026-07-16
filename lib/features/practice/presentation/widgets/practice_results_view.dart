@@ -98,12 +98,17 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    // Three semantic containers, one shape — no per-stat accent hues. XP keeps
+    // its gold, but as a tinted chip with ink on it rather than gold-on-card
+    // (1.63:1).
     return Row(
       children: [
         Expanded(
           child: _StatTile(
             icon: Icons.check_circle_rounded,
-            color: AppColors.success,
+            tint: colors.successContainer,
+            onTint: colors.onSuccessContainer,
             value: '${result.correct}/${result.total}',
             label: 'Correct',
           ),
@@ -112,7 +117,8 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatTile(
             icon: Icons.percent_rounded,
-            color: AppColors.accentIndigo,
+            tint: colors.infoContainer,
+            onTint: colors.onInfoContainer,
             value: '${result.accuracyPercent}%',
             label: 'Accuracy',
           ),
@@ -121,7 +127,8 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatTile(
             icon: Icons.bolt_rounded,
-            color: AppColors.xp,
+            tint: colors.xpContainer,
+            onTint: colors.onXpContainer,
             value: '+${result.xpEarned}',
             label: 'XP earned',
           ),
@@ -134,13 +141,18 @@ class _StatsRow extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.icon,
-    required this.color,
+    required this.tint,
+    required this.onTint,
     required this.value,
     required this.label,
   });
 
   final IconData icon;
-  final Color color;
+
+  /// The chip behind [icon], and the ink drawn on it.
+  final Color tint;
+  final Color onTint;
+
   final String value;
   final String label;
 
@@ -157,7 +169,15 @@ class _StatTile extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(icon, size: 24, color: color),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: tint,
+                  borderRadius: AppRadius.smRadius,
+                ),
+                child: Icon(icon, size: 20, color: onTint),
+              ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 value,
@@ -189,6 +209,9 @@ class _MasteryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // Emerald that stays AA on the card in either theme.
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return AppCard(
       child: Row(
         children: [
@@ -198,13 +221,11 @@ class _MasteryCard extends StatelessWidget {
                 ', ${(result.masteryProgress * 100).round()}% to next level',
             child: ProgressRing(
               value: result.masteryProgress,
-              progressColor: result.topic.color,
+              progressColor: AppColors.primaryAction,
               child: ExcludeSemantics(
                 child: Text(
                   result.masteryAfter.label.substring(0, 1),
-                  style: AppTypography.headingSmall.copyWith(
-                    color: result.topic.color,
-                  ),
+                  style: AppTypography.headingSmall.copyWith(color: emerald),
                 ),
               ),
             ),
@@ -222,7 +243,7 @@ class _MasteryCard extends StatelessWidget {
                 Text(
                   result.masteryAfter.label,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: result.topic.color,
+                    color: emerald,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

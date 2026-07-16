@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/practice_topic.dart';
+import '../widgets/practice_chips.dart';
 
 /// A horizontal rail of recommended topics (from the learner's onboarding
 /// choices). Tapping one starts a session for that topic.
@@ -62,15 +62,7 @@ class _TopicCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: topic.color.withValues(alpha: 0.14),
-                borderRadius: AppRadius.smRadius,
-              ),
-              child: Icon(topic.icon, size: 22, color: topic.color),
-            ),
+            PracticeTopicIcon(topic: topic),
             Text(
               topic.label,
               maxLines: 2,

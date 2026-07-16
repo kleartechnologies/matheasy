@@ -80,7 +80,7 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
                   Text(
                     'VISUAL LEARNING',
                     style: AppTypography.label
-                        .copyWith(color: colors.textTertiary),
+                        .copyWith(color: colors.textMuted),
                   ),
                   const Spacer(),
                   const _ProBadge(),
@@ -122,10 +122,12 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
                             ),
                             const SizedBox(width: AppSpacing.sm),
                           ],
-                          const Icon(
+                          Icon(
                             Icons.arrow_downward_rounded,
                             size: 20,
-                            color: AppColors.primary,
+                            color: context.isDark
+                                ? AppColors.primaryLight
+                                : AppColors.primaryDark,
                           ),
                         ],
                       ),
@@ -170,7 +172,7 @@ class _LockedStepRow extends StatelessWidget {
     return ExcludeSemantics(
       child: Row(
         children: [
-          Icon(Icons.lock_rounded, size: 16, color: colors.textTertiary),
+          Icon(Icons.lock_rounded, size: 16, color: colors.textMuted),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Container(

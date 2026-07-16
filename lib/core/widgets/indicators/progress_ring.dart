@@ -6,7 +6,8 @@ import '../../extensions/context_extensions.dart';
 import '../../theme/app_colors.dart';
 
 /// Circular progress indicator with an optional child in the middle (e.g. the
-/// completion percentage). Painted so the stroke uses the brand gradient.
+/// completion percentage). The stroke is a flat brand emerald unless a call
+/// site overrides it (a per-topic ring).
 class ProgressRing extends StatelessWidget {
   const ProgressRing({
     super.key,
@@ -15,7 +16,7 @@ class ProgressRing extends StatelessWidget {
     this.strokeWidth = 8,
     this.child,
     this.trackColor,
-    this.progressColor = AppColors.primary,
+    this.progressColor,
   }) : assert(value >= 0 && value <= 1, 'value must be between 0 and 1');
 
   final double value;
@@ -23,7 +24,10 @@ class ProgressRing extends StatelessWidget {
   final double strokeWidth;
   final Widget? child;
   final Color? trackColor;
-  final Color progressColor;
+
+  /// Defaults to the emerald that clears the 3:1 graphical floor on the active
+  /// theme's surface.
+  final Color? progressColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +38,8 @@ class ProgressRing extends StatelessWidget {
           value: value.clamp(0.0, 1.0),
           strokeWidth: strokeWidth,
           trackColor: trackColor ?? context.colors.surfaceMuted,
-          progressColor: progressColor,
+          progressColor: progressColor ??
+              (context.isDark ? AppColors.primaryLight : AppColors.primaryDark),
         ),
         child: Center(child: child),
       ),
@@ -67,15 +72,13 @@ class _RingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, radius, track);
 
+    // Flat, not a sweep: the old gradient faded the stroke to 70% alpha, which
+    // dropped the tail of the arc under the 3:1 graphical floor.
     final progress = Paint()
+      ..color = progressColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        startAngle: -math.pi / 2,
-        endAngle: 3 * math.pi / 2,
-        colors: [progressColor, progressColor.withValues(alpha: 0.7)],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      ..strokeCap = StrokeCap.round;
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),

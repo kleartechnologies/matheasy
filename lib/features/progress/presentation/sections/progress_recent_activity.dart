@@ -55,7 +55,7 @@ class _ActivityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final (icon, color) = _visualFor(activity.type);
+    final (icon, color) = _visualFor(context, activity.type);
 
     return Semantics(
       label: '${activity.title}. ${activity.subtitle}',
@@ -112,23 +112,23 @@ class _ActivityRow extends StatelessWidget {
     );
   }
 
-  (IconData, Color) _visualFor(LearningActivityType type) => switch (type) {
-        LearningActivityType.practice => (
-            Icons.fitness_center_rounded,
-            AppColors.secondary,
-          ),
-        LearningActivityType.achievement => (
-            Icons.emoji_events_rounded,
-            AppColors.gold,
-          ),
-        LearningActivityType.milestone => (
-            Icons.trending_up_rounded,
-            AppColors.primary,
-          ),
-        LearningActivityType.scan => (
-            Icons.center_focus_strong_rounded,
-            AppColors.primary,
-          ),
-        LearningActivityType.tutor => (Icons.forum_rounded, AppColors.secondary),
-      };
+  /// The emerald rows resolve per theme: the identity emerald is only 2.97:1 on
+  /// a light card, so it can't carry a meaning-bearing icon there.
+  (IconData, Color) _visualFor(BuildContext context, LearningActivityType type) {
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    return switch (type) {
+      LearningActivityType.practice => (
+          Icons.fitness_center_rounded,
+          AppColors.secondary,
+        ),
+      LearningActivityType.achievement => (
+          Icons.emoji_events_rounded,
+          AppColors.gold,
+        ),
+      LearningActivityType.milestone => (Icons.trending_up_rounded, emerald),
+      LearningActivityType.scan => (Icons.center_focus_strong_rounded, emerald),
+      LearningActivityType.tutor => (Icons.forum_rounded, AppColors.secondary),
+    };
+  }
 }

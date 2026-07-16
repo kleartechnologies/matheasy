@@ -74,13 +74,18 @@ class _CropScreenState extends State<CropScreen> {
                   controller: _controller,
                   onCropped: _onCropped,
                   baseColor: AppColors.scannerBackground,
-                  maskColor: Colors.black.withValues(alpha: 0.55),
+                  // Neutral, untinted mask: the area outside the crop is still
+                  // the user's photo, and a brand tint would misrepresent it.
+                  maskColor: AppColors.black.withValues(alpha: 0.55),
                   radius: AppRadius.md,
                   interactive: true,
+                  // The corner handles are an interactive control, not brand
+                  // art — primaryAction, never the identity emerald.
                   cornerDotBuilder: (size, edgeAlignment) =>
-                      const DotControl(color: AppColors.primary),
+                      const DotControl(color: AppColors.primaryAction),
                   progressIndicator: const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(AppColors.primaryTint),
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(AppColors.primaryLight),
                   ),
                 ),
               ),

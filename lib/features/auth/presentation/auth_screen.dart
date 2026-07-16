@@ -132,23 +132,27 @@ class _Benefits extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         AuthBenefitRow(
           icon: Icons.center_focus_strong_rounded,
-          color: AppColors.primary,
+          // The row paints its colour as an icon on a 14% plate, so this is a
+          // foreground: the identity emerald (2.97:1) doesn't hold here.
+          color: context.isDark
+              ? AppColors.primaryLight
+              : AppColors.primaryDark,
           title: 'Scan questions',
           subtitle: 'Snap any problem and get a clear, worked solution.',
         ),
-        SizedBox(height: AppSpacing.lg),
-        AuthBenefitRow(
+        const SizedBox(height: AppSpacing.lg),
+        const AuthBenefitRow(
           icon: Icons.auto_awesome_rounded,
           color: AppColors.secondary,
           title: 'Learn faster',
           subtitle: 'Matheasy explains the why, at your level, step by step.',
         ),
-        SizedBox(height: AppSpacing.lg),
-        AuthBenefitRow(
+        const SizedBox(height: AppSpacing.lg),
+        const AuthBenefitRow(
           icon: Icons.fitness_center_rounded,
           color: AppColors.accentAmber,
           title: 'Practice smarter',
@@ -199,7 +203,8 @@ class _LegalFootnote extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final linkStyle = AppTypography.caption.copyWith(
-      color: AppColors.primary,
+      // Link text on a light surface — needs AA, so not the identity emerald.
+      color: context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
       fontWeight: FontWeight.w700,
     );
     return Column(
@@ -207,7 +212,7 @@ class _LegalFootnote extends StatelessWidget {
         Text(
           'By continuing you agree to our',
           textAlign: TextAlign.center,
-          style: AppTypography.caption.copyWith(color: colors.textTertiary),
+          style: AppTypography.caption.copyWith(color: colors.textMuted),
         ),
         const SizedBox(height: AppSpacing.xxs),
         Row(
@@ -220,7 +225,7 @@ class _LegalFootnote extends StatelessWidget {
             ),
             Text(
               '  ·  ',
-              style: AppTypography.caption.copyWith(color: colors.textTertiary),
+              style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
             _LegalLink(
               label: 'Privacy Policy',

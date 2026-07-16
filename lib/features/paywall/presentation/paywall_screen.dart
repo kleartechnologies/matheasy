@@ -145,19 +145,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final state = ref.watch(paywallControllerProvider);
     final alreadyPro = ref.watch(isProProvider);
 
-    // The paywall is always the dark indigo gradient, so force light status-bar
-    // icons regardless of the OS/app theme it was opened from.
+    // The paywall is always the deep-emerald premium backdrop, so force light
+    // status-bar icons regardless of the OS/app theme it was opened from.
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColors.paywallBottom,
-        // A subtle vertical navy gradient for depth — no glow, no illustration.
+        backgroundColor: AppColors.premiumDeep,
+        // Two near-identical deep-emerald stops — depth, not a colour shift.
         // TODO(bg-watermark): OPTIONAL A/B test only — a faint (3–5% opacity),
         //   monochrome, static math-symbol watermark behind the hero icon area
         //   ONLY (never behind the pricing cards or CTA). Test against this plain
         //   gradient and keep whichever converts better; do not ship untested.
         body: DecoratedBox(
-          decoration: const BoxDecoration(gradient: AppColors.paywallGradient),
+          decoration: const BoxDecoration(gradient: AppColors.premiumGradient),
           child: Stack(
             children: [
               SafeArea(
@@ -580,7 +580,7 @@ class _FooterShell extends StatelessWidget {
         AppSpacing.md + MediaQuery.paddingOf(context).bottom,
       ),
       decoration: BoxDecoration(
-        color: AppColors.paywallBottom.withValues(alpha: 0.6),
+        color: AppColors.premiumDeep.withValues(alpha: 0.6),
         border: Border(
           top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
@@ -626,12 +626,14 @@ class _GoldButton extends StatelessWidget {
             border: filled
                 ? null
                 : Border.all(color: Colors.white.withValues(alpha: 0.24)),
+            // A tight gold-tinted lift, not a halo: the CTA must read as a
+            // raised surface on the deep backdrop, never as a glowing one.
             boxShadow: filled
                 ? [
                     BoxShadow(
-                      color: AppColors.gold.withValues(alpha: 0.35),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
+                      color: AppColors.gold.withValues(alpha: 0.16),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,

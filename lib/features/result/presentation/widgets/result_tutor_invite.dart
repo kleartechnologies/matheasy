@@ -117,7 +117,7 @@ class _ProblemCard extends StatelessWidget {
         children: [
           Text(
             'WHAT I READ',
-            style: AppTypography.label.copyWith(color: colors.textTertiary),
+            style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
           FittedBox(

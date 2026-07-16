@@ -5,7 +5,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../domain/profile_avatar.dart';
 
 /// Renders a learner's avatar: their photo when available, otherwise the chosen
-/// [ProfileAvatar] gradient behind their [initial].
+/// [ProfileAvatar] colour behind their [initial].
 class ProfileAvatarView extends StatelessWidget {
   const ProfileAvatarView({
     super.key,
@@ -26,7 +26,7 @@ class ProfileAvatarView extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(gradient: avatar.gradient, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: avatar.color, shape: BoxShape.circle),
       child: Text(
         initial,
         style: AppTypography.displaySmall.copyWith(
@@ -49,8 +49,8 @@ class ProfileAvatarView extends StatelessWidget {
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                // Show the gradient-initial fallback while the photo loads so
-                // there's no blank flash, then swap in the image once ready.
+                // Show the initial fallback while the photo loads so there's no
+                // blank flash, then swap in the image once ready.
                 loadingBuilder: (context, child, progress) =>
                     progress == null ? child : fallback,
                 errorBuilder: (_, _, _) => fallback,

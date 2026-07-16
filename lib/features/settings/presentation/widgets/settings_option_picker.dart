@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
 import 'settings_section.dart';
@@ -30,9 +31,12 @@ Future<void> showSettingsOptionPicker<T>(
               title: label(option),
               value: trailing?.call(option),
               trailing: option == selected
-                  ? const Icon(
+                  ? Icon(
                       Icons.check_circle_rounded,
-                      color: AppColors.primary,
+                      // A state-bearing icon on a light sheet — needs AA.
+                      color: context.isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primaryDark,
                     )
                   : const SizedBox(width: 24),
               onTap: () {

@@ -273,7 +273,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.functions_rounded, size: 44, color: colors.textTertiary),
+            Icon(Icons.functions_rounded, size: 44, color: colors.textMuted),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Build your problem with the math keyboard',
@@ -284,7 +284,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
             Text(
               'e.g.  2x + 5 = 13',
               style: AppTypography.mono.copyWith(
-                color: colors.textTertiary,
+                color: colors.textMuted,
                 letterSpacing: 0.5,
               ),
             ),
@@ -320,7 +320,10 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
         readOnly: true, // built only via the math keyboard — no OS keyboard
         showCursor: true,
         keyboardType: TextInputType.none,
-        cursorColor: AppColors.primary,
+        // Theme-aware emerald: the caret is load-bearing here (the keyboard has
+        // explicit move-left/right keys), and a fixed primaryAction would sit at
+        // ~2:1 on the dark surface.
+        cursorColor: colors.onPrimaryContainer,
         style: AppTypography.mono.copyWith(
           fontSize: 16,
           height: 1.4,
@@ -332,7 +335,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
           hintStyle: AppTypography.mono.copyWith(
             fontSize: 14,
             letterSpacing: 0.2,
-            color: colors.textTertiary,
+            color: colors.textMuted,
           ),
         ),
       ),
@@ -340,14 +343,15 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
   }
 
   Widget _errorRow(AppSemanticColors colors) {
+    // errorText, not AppColors.error: the raw hue is 2.87:1 on the dark surface.
     return Row(
       children: [
-        const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.error),
+        Icon(Icons.error_outline_rounded, size: 16, color: colors.errorText),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Text(
             _error!,
-            style: AppTypography.caption.copyWith(color: AppColors.error),
+            style: AppTypography.caption.copyWith(color: colors.errorText),
           ),
         ),
       ],

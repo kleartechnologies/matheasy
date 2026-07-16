@@ -68,7 +68,9 @@ class UsageMeter extends StatelessWidget {
               Text(
                 trailing,
                 style: AppTypography.caption.copyWith(
-                  color: _depleted ? AppColors.error : colors.textSecondary,
+                  // errorText, not AppColors.error: the "0 of N left" label is
+                  // TEXT, and the raw hue is 2.87:1 on the dark surface.
+                  color: _depleted ? colors.errorText : colors.textSecondary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

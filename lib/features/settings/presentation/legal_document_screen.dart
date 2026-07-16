@@ -39,7 +39,7 @@ class LegalDocumentScreen extends StatelessWidget {
         children: [
           Text(
             'Last updated 8 July 2026',
-            style: AppTypography.caption.copyWith(color: colors.textTertiary),
+            style: AppTypography.caption.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
           for (final section in _sections(document)) ...[
@@ -143,20 +143,23 @@ class _OnlineLink extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Icon(Icons.shield_moon_outlined, size: 20, color: colors.textTertiary),
+          Icon(Icons.shield_moon_outlined, size: 20, color: colors.textMuted),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'The current version is shown above. The always-up-to-date policy '
             'also lives online at',
             textAlign: TextAlign.center,
-            style: AppTypography.caption.copyWith(color: colors.textTertiary),
+            style: AppTypography.caption.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.xxs),
           SelectableText(
             document.url,
             textAlign: TextAlign.center,
             style: AppTypography.caption.copyWith(
-              color: AppColors.primary,
+              // Emerald as body text — the identity emerald is 2.97:1 here.
+              color: context.isDark
+                  ? AppColors.primaryLight
+                  : AppColors.primaryDark,
               fontWeight: FontWeight.w700,
             ),
           ),

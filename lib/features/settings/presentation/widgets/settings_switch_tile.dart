@@ -36,7 +36,11 @@ class SettingsSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tint = iconColor ?? AppColors.primary;
+    // [tint] is both the icon's fill and its 14% plate, so it has to clear AA as
+    // a foreground — the identity emerald (2.97:1) can't, and is brand art only.
+    final tint =
+        iconColor ??
+        (context.isDark ? AppColors.primaryLight : AppColors.primaryDark);
 
     return Semantics(
       toggled: value,

@@ -8,7 +8,11 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/progress_overview.dart';
 
-/// Profile summary: avatar, name, XP level with progress, and current streak.
+/// The Progress hero — identity, level + XP progress, streak, and the lifetime
+/// totals underneath.
+///
+/// One card carries all of it: the totals are a chrome-free row rather than
+/// their own grid of tiles, so the level/XP/streak headline keeps the emphasis.
 class ProgressProfile extends StatelessWidget {
   const ProgressProfile({super.key, required this.overview});
 
@@ -54,26 +58,74 @@ class ProgressProfile extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           XPProgressBar(value: xp.progress),
           const SizedBox(height: AppSpacing.xs),
+          // The level itself is already in the line above the bar — only the
+          // distance to the next one earns a second mention.
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${xp.xpToNext} XP to Level ${xp.level + 1}',
+              style: AppTypography.caption.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Divider(height: 1, color: colors.divider),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              Text(
-                'Level ${xp.level}',
-                style: AppTypography.caption.copyWith(
-                  color: colors.textTertiary,
-                  fontWeight: FontWeight.w700,
-                ),
+              _Total(
+                value: '${overview.questionsSolved}',
+                label: 'Questions',
               ),
-              const Spacer(),
-              Text(
-                '${xp.xpToNext} XP to Level ${xp.level + 1}',
-                style: AppTypography.caption.copyWith(
-                  color: colors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+              _Total(
+                value: '${overview.sessionsCompleted}',
+                label: 'Sessions',
+              ),
+              _Total(
+                value: '${overview.topicsPracticed}',
+                label: 'Topics',
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// One lifetime total — a number and its label, no tile chrome.
+class _Total extends StatelessWidget {
+  const _Total({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Expanded(
+      child: Semantics(
+        label: '$label: $value',
+        excludeSemantics: true,
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: AppTypography.headingSmall.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.caption.copyWith(color: colors.textMuted),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -94,7 +146,8 @@ class _Avatar extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        // Solid interactive emerald — the initial is white (4.78:1 ✓ AA).
+        color: AppColors.primaryAction,
         shape: BoxShape.circle,
       ),
       child: Text(
@@ -147,13 +200,13 @@ class _StreakPill extends StatelessWidget {
             Icon(
               Icons.local_fire_department_rounded,
               size: 18,
-              color: active ? AppColors.streak : colors.textTertiary,
+              color: active ? colors.onStreakContainer : colors.textMuted,
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
               '$days',
               style: AppTypography.caption.copyWith(
-                color: active ? AppColors.streak : colors.textTertiary,
+                color: active ? colors.onStreakContainer : colors.textMuted,
                 fontWeight: FontWeight.w800,
               ),
             ),

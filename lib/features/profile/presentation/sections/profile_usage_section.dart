@@ -22,6 +22,10 @@ class ProfileUsageSection extends ConsumerWidget {
 
     final usage = ref.watch(usageSnapshotProvider);
     final colors = context.colors;
+    // The meter's colour is a foreground (icon + bar), so the identity emerald
+    // (2.97:1 on a light card) can't carry it.
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
 
     return AppCard(
       child: Column(
@@ -29,13 +33,13 @@ class ProfileUsageSection extends ConsumerWidget {
         children: [
           Text(
             'Free plan usage',
-            style: AppTypography.label.copyWith(color: colors.textTertiary),
+            style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.document_scanner_rounded,
             label: 'Scans',
-            color: AppColors.primary,
+            color: emerald,
             used: usage.counts.scansUsed,
             limit: usage.limit(UsageFeature.scan),
           ),
