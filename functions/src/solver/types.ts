@@ -21,12 +21,26 @@ export interface FinalAnswer {
 }
 
 export interface StepData {
-  /** The resulting expression after this step, as delimiter-free LaTeX. */
+  /** The resulting expression after this step, as delimiter-free LaTeX.
+   * The ONLY math field — ENGINE-frozen, never authored by the LLM. */
   expression: string;
-  /** Short operation label, e.g. "Factor each group". */
+  /** Short operation label, e.g. "Factor each group". NARRATION. */
   operation: string;
-  /** Plain-language reason — the ONLY field the LLM authors. */
+  /** Plain-language reason this move is VALID (never what it equals). NARRATION. */
   why: string;
+  // --- v2 teaching narration (all optional; absent ⇒ today's thin step) ------
+  /** The transform chip, e.g. `− 5`, `×LCM`. NARRATION. */
+  operationSymbol?: string;
+  /** "What changed" in plain language, revealed on demand. NARRATION (Pro). */
+  explanation?: string;
+  /** The trap AT THIS STEP, revealed on demand. NARRATION (Pro). */
+  commonMistake?: string;
+  /** A named property label ≤6 words, e.g. "Zero-product property". NARRATION (Pro). */
+  rule?: string;
+  /** An ELICITED QUESTION for the pivotal step (student answers before `why`). NARRATION. */
+  selfExplainPrompt?: string;
+  /** ENGINE-set — the step the journey's `apply` stage points at. */
+  pivotal?: boolean;
 }
 
 export interface MethodData {
@@ -78,6 +92,175 @@ export interface SolvePayload {
    * we never fake a proof). Absent/false for every ordinary problem.
    */
   routeToTutor?: boolean;
+  // --- v2 teaching engine (additive; a v1 payload is a valid v2 payload) ------
+  /** = SOLVE_SCHEMA_VERSION. TELEMETRY ONLY — never a client render gate. */
+  schemaVersion?: number;
+  /** The additive teaching layer. Capability = `teaching != null` (see §2.3);
+   * absent ⇒ the client renders today's UI unchanged. */
+  teaching?: TeachingLayer;
+}
+
+// --- v2 teaching layer (spec: docs/matheasy-teaching-engine-spec.md §2, §4) --
+//
+// The teaching layer is an ADDITIVE, LLM-NARRATED wrap over the FROZEN verified
+// skeleton (spec §0.2). Only `expression` (above) carries math; every field here
+// is either engine-derived metadata or pure "why" narration that structurally
+// cannot assert a number the verify gate never saw (enforced by `validateTeaching`
+// in solver/teach.ts). A teaching failure degrades to the v1 payload — invisible
+// to correctness.
+
+/** Bumped when the SolvePayload wire shape changes. Telemetry only. */
+export const SOLVE_SCHEMA_VERSION = 2 as const;
+/** Bumped to invalidate the teaching cache (independent of the verified core). */
+export const TEACHING_SCHEMA_VERSION = "teach-v1";
+
+/** Coarse teaching category — a stable snake_case string (NOT the client's Dart
+ * `ProblemCategory` enum). The client parses it with a TOTAL, non-throwing map,
+ * so a new value here can never crash an old client (spec R2). */
+export type TeachingCategory =
+  | "arithmetic"
+  | "fractions"
+  | "algebra"
+  | "equations"
+  | "inequalities"
+  | "functions"
+  | "trigonometry"
+  | "calculus"
+  | "statistics"
+  | "probability"
+  | "linear_algebra"
+  | "geometry"
+  | "sequences"
+  | "word_problem"
+  | "differential_equations"
+  | "conceptual"
+  | "other";
+
+/** Schooling level a teaching layer is pitched at (steers tone/depth, not
+ * scoring — kept distinct from the practice-item `easy|medium|hard` axis, R3). */
+export type TeachingDifficulty =
+  | "primary"
+  | "secondary"
+  | "preUniversity"
+  | "university";
+
+export interface TeachingHeader {
+  /** ENGINE — from `deriveTeachingMeta`. */
+  category: TeachingCategory;
+  /** NARRATION — textbook-index topic, e.g. "Quadratic equation (integer roots)". */
+  subcategory: string;
+  /** ENGINE — from `deriveTeachingMeta`. */
+  difficulty: TeachingDifficulty;
+  /** NARRATION — a FORWARD goal, "you will be able to…" (≤14 words). */
+  learningObjective: string;
+  /** ENGINE-anchored — must equal the examPick method's name. */
+  methodChosen: string;
+  /** NARRATION — a PROPERTY of THIS problem (never a speed/quality comparison). */
+  whyMethodChosen: string;
+}
+
+export interface ProblemOverview {
+  asked: string;
+  goal: string;
+  /** LaTeX restatements of the givens. */
+  givens: string[];
+  /** NARRATION — a one-tap question gating the answer reveal (a QUESTION, so it
+   * is EXEMPT from the numeric firewall — it may use estimation anchors). */
+  predictionPrompt: string;
+}
+
+export interface DefinedTerm {
+  term: string;
+  plain: string;
+}
+
+export interface ConceptOverview {
+  /** First-principles, tier-pitched. NARRATION. */
+  body: string;
+  definedTerms: DefinedTerm[];
+}
+
+export interface MethodAlternative {
+  name: string;
+  whenBetter: string;
+}
+
+export interface MethodRationale {
+  alternatives: MethodAlternative[];
+}
+
+/** The fixed 6-stage learning journey. Stage LABELS are client constants; the
+ * wire carries only the (optional) summary + engine-computed step indices. */
+export type JourneyStageId =
+  | "understand"
+  | "chooseMethod"
+  | "apply"
+  | "simplify"
+  | "verify"
+  | "takeaway";
+
+export interface JourneyStage {
+  id: JourneyStageId;
+  summary?: string;
+  /** ENGINE — indices into the examPick method's steps (never model-supplied). */
+  stepIndices: number[];
+}
+
+/** A refutation triple — the trap, WHY it's tempting, and the fix. */
+export interface CommonMistake {
+  mistake: string;
+  whyTempting: string;
+  fix: string;
+}
+
+/** A retrieval cue — a rule to recall a week later (distinct from the objective). */
+export interface KeyTakeaway {
+  headline: string;
+  detail?: string;
+}
+
+/** One rung of the practice ladder — a PROBLEM, never an answer. Each rung is
+ * re-verified by `buildPracticeLadder` before display and re-enters the full
+ * `solve()` gate on tap. */
+export interface PracticeItem {
+  latex: string;
+  plain?: string;
+  rung: "easier" | "similar" | "harder";
+  skillHint?: string;
+}
+
+export interface PracticeLadder {
+  easier: PracticeItem;
+  similar: PracticeItem;
+  harder: PracticeItem;
+}
+
+export interface TeachingLayer {
+  /** `full` (Pro) · `lite` (Free) · `concept_only` (honest / unverified). */
+  depth: "full" | "lite" | "concept_only";
+  /** WHY the problem is unverified — governs how much is safe to teach.
+   * Present only when `depth === "concept_only"`. */
+  honestReason?: "read_failure" | "uncovered_type" | "proof" | "multi_part";
+  header: TeachingHeader;
+  overview: ProblemOverview;
+  concept: ConceptOverview;
+  methodRationale: MethodRationale;
+  journey: JourneyStage[];
+  /** word_problem ONLY — English → equation, referencing only the givens. */
+  translation?: string[];
+  /** multi_part ONLY — "first solve X, then compute Y". */
+  decompositionPlan?: string[];
+  commonMistakes: CommonMistake[];
+  keyTakeaway: KeyTakeaway;
+  /** Pro (`full`) only; omitted for `concept_only`. */
+  practiceLadder?: PracticeLadder;
+}
+
+/** What `deriveTeachingMeta` computes deterministically from the problem type —
+ * the ENGINE-owned header fields the LLM is forbidden to choose. */
+export interface TeachingMeta {
+  category: TeachingCategory;
+  difficulty: TeachingDifficulty;
 }
 
 // --- Internal pipeline types ------------------------------------------------

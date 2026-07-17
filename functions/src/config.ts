@@ -43,6 +43,23 @@ export const OPENAI_MODEL = defineString("OPENAI_MODEL", {
  */
 export const ADMIN_UID = defineString("ADMIN_UID", { default: "" });
 
+/**
+ * The kill switch for the v2 teaching engine (spec §10). OFF by default: the
+ * solver emits `schemaVersion:2` but attaches NO `teaching` layer, so the client
+ * renders today's UI. Flip to "true" at deploy time (or ramp in Phase 1) to turn
+ * on server-side teaching enrichment — the verified `solve→verify` path is
+ * untouched either way, so this only gates the ADDITIVE narration layer.
+ *   set TEACHING_ENABLED=true in .env or at deploy.
+ */
+export const TEACHING_ENABLED = defineString("TEACHING_ENABLED", {
+  default: "false",
+});
+
+/** Whether server-side teaching enrichment is on. Phase 0: always false. */
+export function teachingEnabled(): boolean {
+  return TEACHING_ENABLED.value() === "true";
+}
+
 // The region all functions run in. Keep it close to your users / Firestore.
 export const REGION = "us-central1";
 

@@ -12,7 +12,14 @@ import { parseSimultaneous } from "./simultaneous";
 import { parseOde } from "./ode";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
-import { Classification, Strategy, VerifyMode } from "./types";
+import {
+  Classification,
+  Strategy,
+  TeachingCategory,
+  TeachingDifficulty,
+  TeachingMeta,
+  VerifyMode,
+} from "./types";
 import {
   cleanLatex,
   latexToAscii,
@@ -482,6 +489,72 @@ export function classify(rawLatex: string): Classification {
 
   return base("linear_equation", "equation", unknown, true, "substitution");
 }
+
+/**
+ * Deterministically map a §4 `problemType` → the ENGINE-owned teaching header
+ * fields (spec §2, §4). The LLM is FORBIDDEN to choose these; `validateTeaching`
+ * re-derives them and rejects any enrichment that disagrees, so the category and
+ * difficulty a student sees can never be a model guess.
+ *
+ * Difficulty is a coarse schooling-level heuristic (steers tone/depth, not
+ * scoring). Takes the bare `problemType` string so it works from both a
+ * `Classification` (`cls.problemType`) and a returned `SolvePayload`
+ * (`payload.problemType`).
+ */
+export function deriveTeachingMeta(problemType: string): TeachingMeta {
+  const [category, difficulty] = TEACHING_META[problemType] ?? DEFAULT_META;
+  return { category, difficulty };
+}
+
+const DEFAULT_META: [TeachingCategory, TeachingDifficulty] = ["other", "secondary"];
+
+/** problemType → [category, difficulty]. Every value `classify()` can emit is
+ * listed; an unknown type falls back to [DEFAULT_META]. */
+const TEACHING_META: Record<string, [TeachingCategory, TeachingDifficulty]> = {
+  // arithmetic / expressions
+  arithmetic: ["arithmetic", "primary"],
+  expression: ["algebra", "secondary"],
+  // equations
+  linear_equation: ["equations", "secondary"],
+  quadratic_equation: ["equations", "secondary"],
+  polynomial_equation: ["equations", "preUniversity"],
+  exponential_equation: ["equations", "preUniversity"],
+  logarithmic_equation: ["equations", "preUniversity"],
+  linear_system: ["equations", "secondary"],
+  simultaneous_equations: ["equations", "preUniversity"],
+  system_of_equations: ["equations", "preUniversity"],
+  // inequalities
+  inequality: ["inequalities", "secondary"],
+  // trigonometry
+  trigonometric_equation: ["trigonometry", "preUniversity"],
+  // word problems
+  word_problem: ["word_problem", "secondary"],
+  // statistics — the common scan is mean/median/mode of a small set (primary);
+  // advanced descriptive stats still render, just pitched a touch simply.
+  statistics: ["statistics", "primary"],
+  // calculus
+  derivative: ["calculus", "preUniversity"],
+  partial_derivative: ["calculus", "university"],
+  integral: ["calculus", "preUniversity"],
+  definite_integral: ["calculus", "preUniversity"],
+  maclaurin_series: ["calculus", "university"],
+  taylor_series: ["calculus", "university"],
+  // differential equations
+  differential_equation: ["differential_equations", "university"],
+  // linear algebra
+  matrix_product: ["linear_algebra", "university"],
+  matrix_sum: ["linear_algebra", "university"],
+  matrix_difference: ["linear_algebra", "university"],
+  linalg: ["linear_algebra", "university"],
+  vector_dot: ["linear_algebra", "university"],
+  vector_cross: ["linear_algebra", "university"],
+  vector_magnitude: ["linear_algebra", "university"],
+  vector_independent: ["linear_algebra", "university"],
+  vector_spans: ["linear_algebra", "university"],
+  // conceptual (proofs / multi-part → tutor)
+  conceptual: ["conceptual", "university"],
+  multi_part: ["conceptual", "secondary"],
+};
 
 interface ParsedIntegral {
   definite: boolean;

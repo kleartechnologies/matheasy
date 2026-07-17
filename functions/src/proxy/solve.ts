@@ -47,6 +47,7 @@ import {
   FinalAnswer,
   MethodData,
   SolvePayload,
+  SOLVE_SCHEMA_VERSION,
 } from "../solver/types";
 import {
   closeEnough,
@@ -164,7 +165,11 @@ export const solveEquation = onCall(
     // not it was a cache hit: the user's allowance tracks solves they ask for.
     const quota = countAsScan ? await incrementUsage(uid, "scans") : null;
 
-    return { ...payload, usage: quota };
+    // Stamp the wire schema version on egress (spec §2.3) — TELEMETRY ONLY, never
+    // a client render gate. Covers both the cache-hit and fresh paths. Phase 1
+    // attaches the additive `teaching` layer here behind `teachingEnabled()`; for
+    // now the payload carries no teaching, so the client renders today's UI.
+    return { ...payload, schemaVersion: SOLVE_SCHEMA_VERSION, usage: quota };
   }
 );
 

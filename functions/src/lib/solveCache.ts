@@ -21,11 +21,24 @@ import { createHash } from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
 import { logger } from "firebase-functions/v2";
 
-import { SolvePayload } from "../solver/types";
+import {
+  SolvePayload,
+  TeachingLayer,
+  TEACHING_SCHEMA_VERSION,
+} from "../solver/types";
 import { db } from "./firestore";
 
 const COLLECTION = "solveCache";
+/** The teaching layer caches SEPARATELY from the verified core (spec §4.6), so
+ * old v1 cores stay valid (no cold-cache spike on the expensive verified math)
+ * and free/Pro depths never collide. DEPLOY PREREQUISITE (Phase 1): configure a
+ * Firestore TTL policy on this collection's `expiresAt` field — like `solveCache`,
+ * docs are NOT auto-purged without one. */
+const TEACHING_COLLECTION = "teachingCache";
 const TTL_DAYS = 30;
+
+/** A teaching layer's depth, used to namespace its cache entry. */
+export type TeachingDepth = "full" | "lite" | "concept_only";
 
 /**
  * The collision-safe cache key. Applies only transforms that preserve
@@ -75,5 +88,63 @@ export async function putCachedSolve(latex: string, payload: SolvePayload): Prom
     });
   } catch (err) {
     logger.warn("solveCache write failed — skipping", { err: String(err) });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Teaching-layer cache (spec §4.6). Namespaced by teaching schema version +
+// depth + language so the free (`lite`) and Pro (`full`) layers, and any future
+// language, never collide and both share the ONE verified core above. Wired into
+// solve.ts in Phase 1; the doc-id + read/write helpers land here in Phase 0.
+// ---------------------------------------------------------------------------
+
+/** Doc id for a teaching layer of the given depth + language over [latex]. */
+function teachingDocId(latex: string, depth: TeachingDepth, language: string): string {
+  return createHash("sha256")
+    .update(`${TEACHING_SCHEMA_VERSION}:${depth}:${language}:${solveCacheKey(latex)}`)
+    .digest("hex");
+}
+
+/** The cached teaching layer for [latex] at this depth/language, or null. */
+export async function getCachedTeaching(
+  latex: string,
+  depth: TeachingDepth,
+  language: string
+): Promise<TeachingLayer | null> {
+  try {
+    const snap = await db
+      .collection(TEACHING_COLLECTION)
+      .doc(teachingDocId(latex, depth, language))
+      .get();
+    if (!snap.exists) return null;
+    const teaching = snap.get("teaching");
+    return teaching ? (teaching as TeachingLayer) : null;
+  } catch (err) {
+    logger.warn("teachingCache read failed — treating as a miss", { err: String(err) });
+    return null;
+  }
+}
+
+/** Stores a teaching layer for [latex]. Only `full`/`lite` (verified-path) layers
+ * are cached — `concept_only` (honest) layers are never pinned. Best-effort. */
+export async function putCachedTeaching(
+  latex: string,
+  teaching: TeachingLayer,
+  depth: TeachingDepth,
+  language: string
+): Promise<void> {
+  if (depth === "concept_only") return;
+  try {
+    await db
+      .collection(TEACHING_COLLECTION)
+      .doc(teachingDocId(latex, depth, language))
+      .set({
+        key: solveCacheKey(latex),
+        teaching,
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt: new Date(Date.now() + TTL_DAYS * 86_400_000),
+      });
+  } catch (err) {
+    logger.warn("teachingCache write failed — skipping", { err: String(err) });
   }
 }
