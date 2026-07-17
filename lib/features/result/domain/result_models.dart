@@ -9,7 +9,8 @@ enum ResultType {
   fraction('Fraction Arithmetic'),
   expression('Arithmetic Expression'),
   trigonometry('Trigonometry'),
-  geometry('Geometry');
+  geometry('Geometry'),
+  system('Simultaneous Equations');
 
   const ResultType(this.label);
 
@@ -261,6 +262,22 @@ class PracticeQuestion {
       );
 }
 
+/// WHY a problem was routed to the tutor instead of the verify-gate solver.
+/// Drives honest copy on the invite — a solvable-looking system of equations
+/// must not be presented as "a proof-style problem".
+enum TutorRouteReason {
+  /// A proof / abstract-algebra / real-analysis prompt — nothing to compute.
+  proof,
+
+  /// A system of equations whose full solution set the engine can't prove
+  /// complete/unique (non-linear beyond the deterministic paths, or
+  /// under/over-determined).
+  system,
+
+  /// A multi-part / derived-quantity question — no single answer to check.
+  multiPart,
+}
+
 /// The full solved-problem payload rendered by the Scan Result screen.
 ///
 /// STAGE 5 fills this from [MockSolverService]. Because the UI depends only on
@@ -283,6 +300,7 @@ class ResultData {
     this.answerPlain = '',
     this.graph,
     this.routeToTutor = false,
+    this.tutorRouteReason = TutorRouteReason.proof,
   });
 
   final DetectedEquation equation;
@@ -315,6 +333,10 @@ class ResultData {
   /// it in the AI tutor instead of showing a "couldn't verify" error.
   final bool routeToTutor;
 
+  /// What KIND of problem was tutor-routed (meaningful only when
+  /// [routeToTutor] is true) — selects the invite's honest framing.
+  final TutorRouteReason tutorRouteReason;
+
   String get questionLatex => equation.latex;
 
   Map<String, dynamic> toJson() => {
@@ -331,6 +353,7 @@ class ResultData {
         'practice': practice.map((p) => p.toJson()).toList(),
         'tutorIntro': tutorIntro,
         if (routeToTutor) 'routeToTutor': true,
+        if (routeToTutor) 'tutorRouteReason': tutorRouteReason.name,
         if (graph != null) 'graph': graph!.toJson(),
       };
 
@@ -363,6 +386,10 @@ class ResultData {
             .toList(),
         tutorIntro: j['tutorIntro'] as String? ?? '',
         routeToTutor: j['routeToTutor'] as bool? ?? false,
+        tutorRouteReason: TutorRouteReason.values.firstWhere(
+          (r) => r.name == j['tutorRouteReason'],
+          orElse: () => TutorRouteReason.proof,
+        ),
         graph: j['graph'] == null
             ? null
             : GraphData.fromJson(j['graph'] as Map<String, dynamic>),

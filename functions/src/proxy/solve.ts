@@ -180,10 +180,13 @@ export async function solve(
 ): Promise<SolvePayload> {
   // 0) A proof / abstract-algebra / analysis prompt: there's nothing to compute
   // and substitution-verify. Hand it to the tutor instead of faking an answer.
+  // The HONEST problemType rides along ("conceptual", "multi_part",
+  // "system_of_equations") so the client can say what the problem actually is
+  // — a solvable-looking system must not be presented as "a proof".
   if (cls.strategy === "conceptual") {
     return {
       problemLatex: cls.latex,
-      problemType: "conceptual",
+      problemType: cls.problemType,
       finalAnswer: null,
       verified: false,
       methods: [],
@@ -209,6 +212,23 @@ export async function solve(
       verified: true,
       methods,
       graph,
+    };
+  }
+
+  // 1b) A simultaneous system the engine could NOT complete (composition not
+  // degree ≤ 2, a pole at a probe, no real intersection) is still a SYSTEM —
+  // before this strategy existed these inputs classified as
+  // system_of_equations → tutor, and that invite remains the honest outcome.
+  // A bare couldn't-verify here would regress the UX the tutor route fixed.
+  if (cls.strategy === "simultaneous") {
+    return {
+      problemLatex: cls.latex,
+      problemType: "system_of_equations",
+      finalAnswer: null,
+      verified: false,
+      methods: [],
+      graph: null,
+      routeToTutor: true,
     };
   }
 

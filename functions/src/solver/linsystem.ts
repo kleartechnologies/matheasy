@@ -26,7 +26,7 @@ export interface LinearSystem {
 }
 
 /** Preferred unknown ordering, then any extra letters alphabetically. */
-function orderVars(vars: string[]): string[] {
+export function orderVars(vars: string[]): string[] {
   const pref = ["x", "y", "z", "w", "t", "u", "v"];
   const known = pref.filter((p) => vars.includes(p));
   const rest = vars.filter((v) => !pref.includes(v)).sort();
@@ -43,7 +43,7 @@ function probeScope(vars: string[], seed: number): Record<string, number> {
 /** The (constant) coefficient of `v` in linear `f`, or null if `f` isn't linear
  * in `v` (the partial derivative isn't constant across THREE probe points — the
  * final verifySolution against the original equations is the real backstop). */
-function linearCoeff(f: string, v: string, vars: string[]): number | null {
+export function linearCoeff(f: string, v: string, vars: string[]): number | null {
   let d: string;
   try {
     d = derivative(f, v).toString();

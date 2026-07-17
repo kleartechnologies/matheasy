@@ -8,6 +8,7 @@
  */
 import { parseLinalg, parseVectors } from "./linalg";
 import { parseLinearSystem } from "./linsystem";
+import { parseSimultaneous } from "./simultaneous";
 import { parseOde } from "./ode";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
@@ -43,8 +44,24 @@ export function equationParts(ascii: string): { lhs: string; rhs: string }[] {
   }
   return chunks
     .filter((c) => c.includes("="))
-    .map((c) => splitEquation(c))
-    .map(({ lhs, rhs }) => ({ lhs, rhs }));
+    .flatMap((c) => {
+      // A CHAINED equality A = B = C (one printed statement, two relations —
+      // the exam form "2(x-y) = x+y-1 = 2x²-11y²") is really the equation
+      // pair {A = B, B = C}. splitEquation alone would bury "B = C" inside
+      // the rhs, where every verifier's evalReal chokes on the '='. Expand
+      // consecutive segments instead; a degenerate empty segment ("x = = 5")
+      // falls back to splitEquation's original first-'=' behavior.
+      const segs = c.split("=").map((s) => s.trim());
+      if (segs.length >= 3 && segs.every(Boolean)) {
+        const pairs: { lhs: string; rhs: string }[] = [];
+        for (let i = 0; i + 1 < segs.length; i++) {
+          pairs.push({ lhs: segs[i], rhs: segs[i + 1] });
+        }
+        return pairs;
+      }
+      const { lhs, rhs } = splitEquation(c);
+      return [{ lhs, rhs }];
+    });
 }
 
 export function classify(rawLatex: string): Classification {
@@ -341,8 +358,28 @@ export function classify(rawLatex: string): Classification {
   // --- Expressions (no '=') --------------------------------------------
   if (!isEquation) {
     const vars = variablesIn(ascii);
+    // Nothing computable survived the prose-drop: a scanned "Find X" arrives
+    // here as the bare ascii "X", a figure-only problem as "" or "y y.". A
+    // bare symbol "simplifies" to itself and passes the equality gate
+    // trivially — a verified echo of nothing, which is exactly the confident
+    // non-answer the golden rule forbids. Decline honestly instead: verifyMode
+    // "none" yields the couldn't-verify state without ever calling the LLM.
+    const hasOperation = /[+\-*/^(!]/.test(ascii);
+    // A LONE unknown — even signed or subscripted ("x", "-x", "x_1") — is
+    // still nothing to compute, though the sign/subscript smuggles in an
+    // operator/digit character the coarse checks below would accept.
+    const bareUnknown =
+      /^[+-]?\s*[A-Za-z](?:_\{?[A-Za-z0-9]+\}?)?\s*\.?\s*$/.test(ascii);
     if (vars.length === 0) {
+      // Constant arithmetic needs a number (or a bare constant like pi) to
+      // evaluate; an empty/prose-only ascii has nothing to compute.
+      if (!/\d/.test(ascii) && !/\b(?:pi|e)\b/.test(ascii)) {
+        return base("arithmetic", "llm_candidate", "x", false, "none");
+      }
       return base("arithmetic", "arithmetic", "x", false, "equality");
+    }
+    if (bareUnknown || (!/\d/.test(ascii) && !hasOperation)) {
+      return base("expression", "llm_candidate", pickUnknown(vars), false, "none");
     }
     return base("expression", "simplify", pickUnknown(vars), false, "equality");
   }
@@ -351,6 +388,12 @@ export function classify(rawLatex: string): Classification {
   const parts = equationParts(ascii);
   const vars = variablesIn(ascii);
   const multiEquation = parts.length > 1;
+
+  // A varless chain ("2+3 = 5 = 5") is an identity check, not a system —
+  // decline honestly rather than inviting the tutor to "solve a system".
+  if (multiEquation && vars.length === 0) {
+    return base("arithmetic", "llm_candidate", "x", true, "none");
+  }
 
   if (multiEquation || vars.length >= 2) {
     // A square LINEAR system solves deterministically (mathjs, verified A·x=b) and
@@ -361,6 +404,22 @@ export function classify(rawLatex: string): Classification {
         return base("linear_system", "linsystem", sys.vars[0], true, "none", {
           system: sys,
         });
+      }
+      // A 2-variable LINEAR + QUADRATIC pair (a line meeting a curve — the
+      // GCSE staple, including the chained exam form A=B=C split above)
+      // solves deterministically by substitution: the composed polynomial is
+      // PROVEN degree ≤ 2, so enumerating its roots is complete, and every
+      // (x, y) pair is substitution-verified against BOTH original equations.
+      const simul = parseSimultaneous(parts, vars);
+      if (simul) {
+        return base(
+          "simultaneous_equations",
+          "simultaneous",
+          simul.vars[0],
+          true,
+          "none",
+          { simul }
+        );
       }
     }
     // Anything else here is a NON-linear or NON-square/underdetermined system

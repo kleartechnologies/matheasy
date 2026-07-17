@@ -108,3 +108,54 @@ describe("coerceScanResult — preserves the full multi-line transcription", () 
     expect(coerceScanResult(null).isMath).toBe(false);
   });
 });
+
+describe("SYSTEM_PROMPT — geometry vocabulary lockstep with the client mapper", () => {
+  // Every kind the client's GeometrySceneKind enum can parse from a scan must
+  // be offered by the prompt, and vice versa — the payload contract is shared.
+  it("carries all nine angle/side kinds plus the three triangle kinds", () => {
+    for (const kind of [
+      "triangleAngles",
+      "isoscelesTriangle",
+      "quadrilateralAngles",
+      "polygonAngles",
+      "straightLineAngles",
+      "anglesAroundPoint",
+      "parallelLines",
+      "circleAngle",
+      "rightTrianglePythagoras",
+      "rightTriangleTrig",
+      "sineRuleAngle",
+      "sasArea",
+    ]) {
+      expect(SYSTEM_PROMPT).toContain(kind);
+    }
+  });
+
+  it("describes the trig-ratio contract (roles relative to the known angle)", () => {
+    expect(SYSTEM_PROMPT).toMatch(/opposite\|adjacent\|hypotenuse/);
+    expect(SYSTEM_PROMPT).toMatch(/knownAngle/);
+    expect(SYSTEM_PROMPT).toMatch(/RELATIVE TO the known angle/i);
+  });
+
+  it("describes the sine-rule contract incl. the acute/obtuse branch hint", () => {
+    expect(SYSTEM_PROMPT).toMatch(/sideOppositeKnown/);
+    expect(SYSTEM_PROMPT).toMatch(/sideOppositeUnknown/);
+    expect(SYSTEM_PROMPT).toMatch(/angleBranch/);
+    expect(SYSTEM_PROMPT).toMatch(/acute.*obtuse|obtuse.*acute/i);
+    // The hint comes only from the problem's own wording — never invented.
+    expect(SYSTEM_PROMPT).toMatch(/ONLY when the problem itself states it/i);
+  });
+
+  it("describes the SAS-area contract (included angle between the sides)", () => {
+    expect(SYSTEM_PROMPT).toMatch(/includedAngle/);
+    expect(SYSTEM_PROMPT).toMatch(/BETWEEN the two given sides/i);
+  });
+
+  it("still forbids computing the unknown and mandates the full transcription", () => {
+    expect(SYSTEM_PROMPT).toMatch(/DO NOT compute or include the unknown/i);
+    expect(SYSTEM_PROMPT).toMatch(/full transcription regardless/i);
+    // The figure's numbers must reach the transcription even when the printed
+    // text alone doesn't carry them (the sine-rule/area scans regression).
+    expect(SYSTEM_PROMPT).toMatch(/figure'?s given numbers/i);
+  });
+});

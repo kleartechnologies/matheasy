@@ -186,6 +186,7 @@ export function topicForProblemType(problemType: string): string {
     case "polynomial_equation":
     case "exponential_equation":
     case "system_of_equations":
+    case "simultaneous_equations":
       return "algebra";
     case "trigonometric_equation":
       return "trigonometry";

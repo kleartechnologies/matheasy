@@ -58,6 +58,21 @@ enum GeometrySceneKind {
   /// by Pythagoras (a² + b² = c²). Unlike the other kinds, the unknown is a
   /// length, not an angle.
   rightTrianglePythagoras,
+
+  /// A right triangle where ONE side and ONE acute angle are given and another
+  /// side is found by a trig ratio (SOH CAH TOA). The unknown is a length.
+  rightTriangleTrig,
+
+  /// Any triangle where two sides and a NON-included angle are given and the
+  /// angle opposite the other given side is found by the sine rule — including
+  /// the ambiguous (acute/obtuse) case, disambiguated by the problem's own
+  /// wording ([AngleBranchHint]), never by guessing.
+  sineRuleAngle,
+
+  /// Triangle area from two sides and the INCLUDED angle between them:
+  /// Area = ½·a·b·sin C. The unknown is an area (not drawn as a blank mark —
+  /// the whole interior is the answer).
+  sasArea,
 }
 
 /// How a [GeometryScene] is drawn. Kept separate from [GeometrySceneKind] so
@@ -172,6 +187,35 @@ class GeometryKnownSide {
   final double? value;
 }
 
+/// A side's position RELATIVE TO the known acute angle of a right triangle:
+/// across from it, touching it (the leg), or across from the right angle.
+enum GeometryTrigSideRole { opposite, adjacent, hypotenuse }
+
+/// A side of a right-triangle trig problem: its label, its role relative to
+/// the known angle, and its length (`null` marks the single unknown).
+@immutable
+class GeometryTrigSide {
+  const GeometryTrigSide({
+    required this.label,
+    required this.role,
+    this.value,
+  });
+
+  final String label;
+  final GeometryTrigSideRole role;
+  final double? value;
+}
+
+/// Which sine-rule branch the PROBLEM ITSELF selects ("angle y is obtuse").
+/// This never supplies a number — it only picks between two app-computed
+/// candidates; with no hint and both branches valid, the scene refuses to
+/// guess and returns null (golden rule).
+enum AngleBranchHint { acute, obtuse }
+
+/// What kind of quantity the scene's unknown is — drives answer formatting,
+/// reveal text and screen-reader wording.
+enum GeometryUnknownKind { angle, length, area }
+
 /// Which part of the walkthrough a [GeometryStep] represents — drives what the
 /// painter highlights and reveals.
 enum GeometryStepFocus {
@@ -233,7 +277,7 @@ class GeometryScene {
     required this.semanticsLabel,
     required this.steps,
     this.sides = const [],
-    this.unknownIsAngle = true,
+    this.unknownKind = GeometryUnknownKind.angle,
     this.polygonRing = const [],
     this.segments = const [],
     this.tickEdges = const [],
@@ -257,9 +301,18 @@ class GeometryScene {
   /// angle problem; populated for [GeometrySceneKind.rightTrianglePythagoras].
   final List<GeometrySide> sides;
 
-  /// Whether the unknown is an ANGLE (degrees, `x = 80°`) or a LENGTH (`x = 8`).
-  /// Controls answer formatting, the reveal text and screen-reader wording.
-  final bool unknownIsAngle;
+  /// Whether the unknown is an ANGLE (degrees, `x = 80°`), a LENGTH (`x = 8`)
+  /// or an AREA (`Area = 45`). Controls answer formatting, the reveal text and
+  /// screen-reader wording.
+  final GeometryUnknownKind unknownKind;
+
+  /// Back-compat convenience: true when the unknown is an angle.
+  bool get unknownIsAngle => unknownKind == GeometryUnknownKind.angle;
+
+  /// True when the unknown is the triangle's area (no blank mark on the
+  /// figure — the whole interior is the answer, so the painter emphasises the
+  /// fill and stamps the badge at the centroid).
+  bool get unknownIsArea => unknownKind == GeometryUnknownKind.area;
 
   /// The unknown's display label (e.g. `x`).
   final String unknownLabel;
@@ -317,15 +370,26 @@ class GeometryScene {
   }
 
   /// The unknown value formatted for display: degrees (integer/1dp) for angles,
-  /// a length (integer/2dp) otherwise.
+  /// a length/area (integer/2dp) otherwise.
   String get unknownDisplay => unknownIsAngle
       ? formatDegrees(unknownValue)
       : formatLength(unknownValue);
 
-  /// The final answer as delimiter-free LaTeX (`x = 80^\circ` or `x = 8`).
-  String get answerLatex => unknownIsAngle
-      ? '$unknownLabel = ${formatDegrees(unknownValue)}^\\circ'
-      : '$unknownLabel = ${formatLength(unknownValue)}';
+  /// The unknown's label as delimiter-free LaTeX — a word label ("Area") is
+  /// wrapped in `\text{}` so it doesn't render as a variable product.
+  String get _labelLatex =>
+      unknownLabel.length > 1 ? '\\text{$unknownLabel}' : unknownLabel;
+
+  /// The final answer as delimiter-free LaTeX
+  /// (`x = 80^\circ`, `x = 8`, or `\text{Area} = 45`).
+  String get answerLatex => switch (unknownKind) {
+        GeometryUnknownKind.angle =>
+          '$unknownLabel = ${formatDegrees(unknownValue)}^\\circ',
+        GeometryUnknownKind.length =>
+          '$unknownLabel = ${formatLength(unknownValue)}',
+        GeometryUnknownKind.area =>
+          '$_labelLatex = ${formatLength(unknownValue)}',
+      };
 
   /// A screen-reader description that matches the visual reveal at [stepIndex]:
   /// it names the givens and the rule throughout, but only states the answer on
@@ -335,23 +399,37 @@ class GeometryScene {
     final revealed = stepIndex >= 0 &&
         stepIndex < steps.length &&
         steps[stepIndex].focus == GeometryStepFocus.answer;
-    final noun = unknownIsAngle ? 'angle' : 'length';
-    final givens = unknownIsAngle
-        ? angles
-            .where((a) => !a.isUnknown)
-            .map((a) => '${a.label} equals ${formatDegrees(a.value)} degrees')
-            .join(', ')
-        : sides
-            .where((s) => !s.isUnknown)
-            .map((s) => '${s.label} equals ${formatLength(s.value)}')
-            .join(', ');
-    final answerText = unknownIsAngle
-        ? 'The missing angle $unknownLabel is ${formatDegrees(unknownValue)} degrees.'
-        : 'The missing length $unknownLabel is ${formatLength(unknownValue)}.';
+    final noun = switch (unknownKind) {
+      GeometryUnknownKind.angle => 'angle',
+      GeometryUnknownKind.length => 'length',
+      GeometryUnknownKind.area => 'area',
+    };
+    // Mixed-given scenes (trig / sine rule / area) carry BOTH known angles and
+    // known sides — list every given, whatever it is.
+    final givens = [
+      ...angles
+          .where((a) => !a.isUnknown)
+          .map((a) => '${a.label} equals ${formatDegrees(a.value)} degrees'),
+      ...sides
+          .where((s) => !s.isUnknown)
+          .map((s) => '${s.label} equals ${formatLength(s.value)}'),
+    ].join(', ');
+    final answerText = switch (unknownKind) {
+      GeometryUnknownKind.angle =>
+        'The missing angle $unknownLabel is ${formatDegrees(unknownValue)} degrees.',
+      GeometryUnknownKind.length =>
+        'The missing length $unknownLabel is ${formatLength(unknownValue)}.',
+      GeometryUnknownKind.area =>
+        'The area is ${formatLength(unknownValue)}.',
+    };
     final buffer = StringBuffer('Geometry diagram. ');
     if (givens.isNotEmpty) buffer.write('Given $givens. ');
     if (ruleName.isNotEmpty) buffer.write('$ruleName. ');
-    buffer.write(revealed ? answerText : 'Find the missing $noun $unknownLabel.');
+    buffer.write(revealed
+        ? answerText
+        : unknownIsArea
+            ? 'Find the area of the triangle.'
+            : 'Find the missing $noun $unknownLabel.');
     return buffer.toString();
   }
 
@@ -419,7 +497,7 @@ class GeometryScene {
 
     // Cross-check against the solver's verified answer, when we have one — never
     // show a diagram that disagrees with the Solution tab.
-    final expected = _parseFirstNumber(expectedAnswerLatex);
+    final expected = _parseExpectedValue(expectedAnswerLatex);
     if (expected != null && (expected - unknownValue).abs() > 0.5) {
       return null;
     }
@@ -532,7 +610,7 @@ class GeometryScene {
     if (!unknownValue.isFinite || unknownValue <= 0) return null;
 
     // Cross-check against the verified answer, when we have one.
-    final expected = _parseFirstNumber(expectedAnswerLatex);
+    final expected = _parseExpectedValue(expectedAnswerLatex);
     if (expected != null && (expected - unknownValue).abs() > 0.5) return null;
 
     double sideLen(GeometryKnownSide s) =>
@@ -612,7 +690,7 @@ class GeometryScene {
       vertices: vertices,
       angles: const [],
       sides: builtSides,
-      unknownIsAngle: false,
+      unknownKind: GeometryUnknownKind.length,
       unknownLabel: label,
       unknownValue: unknownValue,
       ruleName: resolvedRule,
@@ -621,6 +699,585 @@ class GeometryScene {
       steps: steps,
       polygonRing: const [0, 1, 2],
       rightAngleVertices: const [0],
+    );
+  }
+
+  /// Builds a solved right-triangle **trig-ratio** scene (one known side + one
+  /// known acute angle → another side via SOH CAH TOA), or `null` when the data
+  /// is inconsistent or contradicts [expectedAnswerLatex]. The missing length
+  /// is computed here — never taken from the model.
+  static GeometryScene? tryBuildRightTriangleTrig({
+    required double knownAngleDeg,
+    required String knownAngleLabel,
+    required List<GeometryTrigSide> sides,
+    required String unknownLabel,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    // The known angle must be genuinely acute (the right angle is implied).
+    if (!knownAngleDeg.isFinite || knownAngleDeg <= 0 || knownAngleDeg >= 90) {
+      return null;
+    }
+    // Exactly one known side, one asked side. Figures often label the third
+    // side too, so a 3-entry list is accepted when the ASKED unknown is
+    // identifiable by the problem's own unknown label — the leftover
+    // valueless side is simply not drawn. All roles must stay distinct.
+    if (sides.length < 2 || sides.length > 3) return null;
+    if (sides.map((s) => s.role).toSet().length != sides.length) return null;
+    final knowns = sides.where((s) => s.value != null).toList();
+    final unknowns = sides.where((s) => s.value == null).toList();
+    if (knowns.length != 1 || unknowns.isEmpty) return null;
+    final known = knowns.first;
+    final GeometryTrigSide unknown;
+    if (unknowns.length == 1) {
+      unknown = unknowns.first;
+    } else {
+      // Two valueless sides: only the one matching the asked label is the
+      // unknown; no match means we can't tell which is asked — refuse.
+      final asked = unknowns
+          .where((s) =>
+              s.label.trim().isNotEmpty && s.label.trim() == unknownLabel.trim())
+          .toList();
+      if (asked.length != 1) return null;
+      unknown = asked.first;
+    }
+    if (known.role == unknown.role) return null;
+    if (!known.value!.isFinite || known.value! <= 0) return null;
+
+    final angleLabel =
+        knownAngleLabel.trim().isEmpty ? 'θ' : knownAngleLabel.trim();
+    // The label comes from the unknown SIDE so the figure, equations and answer
+    // all agree; the param is only a fallback.
+    final label = unknown.label.trim().isNotEmpty
+        ? unknown.label.trim()
+        : (unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim());
+    // Label collisions would draw one name with two different values (and
+    // bleed step highlights across elements) — refuse the self-contradiction.
+    final knownSideName =
+        known.label.trim().isEmpty ? '' : known.label.trim();
+    if (label == angleLabel || label == knownSideName) return null;
+    if (knownSideName.isNotEmpty && knownSideName == angleLabel) return null;
+
+    // Derive ALL THREE side lengths from the known side + angle, then read the
+    // unknown off its role — the whole triangle is determined.
+    final t = _rad(knownAngleDeg);
+    final double opp, adj, hyp;
+    switch (known.role) {
+      case GeometryTrigSideRole.hypotenuse:
+        hyp = known.value!;
+        opp = hyp * math.sin(t);
+        adj = hyp * math.cos(t);
+      case GeometryTrigSideRole.opposite:
+        opp = known.value!;
+        hyp = opp / math.sin(t);
+        adj = opp / math.tan(t);
+      case GeometryTrigSideRole.adjacent:
+        adj = known.value!;
+        hyp = adj / math.cos(t);
+        opp = adj * math.tan(t);
+    }
+    if (![opp, adj, hyp].every((v) => v.isFinite && v > 0)) return null;
+    final unknownValue = switch (unknown.role) {
+      GeometryTrigSideRole.opposite => opp,
+      GeometryTrigSideRole.adjacent => adj,
+      GeometryTrigSideRole.hypotenuse => hyp,
+    };
+
+    // Cross-check against the solver's verified answer, when we have one.
+    // Lengths have arbitrary magnitude, so the tolerance is RELATIVE (a flat
+    // 0.5 would wave through a role-swapped figure at unit-sized values).
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    final lenTol = math.max(0.01, 0.01 * unknownValue.abs());
+    if (expected != null && (expected - unknownValue).abs() > lenTol) {
+      return null;
+    }
+
+    // Which ratio links the known and unknown roles: SOH / CAH / TOA. The
+    // numerator/denominator order is fixed by the ratio itself.
+    final roles = {known.role, unknown.role};
+    final String fnLatex, fnName;
+    final GeometryTrigSideRole numRole;
+    if (roles.containsAll(const {
+      GeometryTrigSideRole.opposite,
+      GeometryTrigSideRole.hypotenuse,
+    })) {
+      fnLatex = '\\sin';
+      fnName = 'sin';
+      numRole = GeometryTrigSideRole.opposite;
+    } else if (roles.containsAll(const {
+      GeometryTrigSideRole.adjacent,
+      GeometryTrigSideRole.hypotenuse,
+    })) {
+      fnLatex = '\\cos';
+      fnName = 'cos';
+      numRole = GeometryTrigSideRole.adjacent;
+    } else {
+      fnLatex = '\\tan';
+      fnName = 'tan';
+      numRole = GeometryTrigSideRole.opposite;
+    }
+    String roleName(GeometryTrigSideRole r) => switch (r) {
+          GeometryTrigSideRole.opposite => 'opposite',
+          GeometryTrigSideRole.adjacent => 'adjacent',
+          GeometryTrigSideRole.hypotenuse => 'hypotenuse',
+        };
+    final unknownIsNum = unknown.role == numRole;
+    final knownDisplay = formatLength(known.value!);
+    final numDisplay = unknownIsNum ? label : knownDisplay;
+    final denDisplay = unknownIsNum ? knownDisplay : label;
+    final denRole = numRole == GeometryTrigSideRole.opposite &&
+            roles.contains(GeometryTrigSideRole.adjacent)
+        ? GeometryTrigSideRole.adjacent
+        : GeometryTrigSideRole.hypotenuse;
+    final ruleEq =
+        '$fnLatex(${_deg(knownAngleDeg)}) = \\frac{$numDisplay}{$denDisplay}';
+    final rearrange = unknownIsNum
+        ? '$label = $knownDisplay \\times $fnLatex(${_deg(knownAngleDeg)})'
+        : '$label = \\frac{$knownDisplay}{$fnLatex(${_deg(knownAngleDeg)})}';
+
+    // Right angle at C = (0,0); adjacent leg along +x to A (where the known
+    // angle sits), opposite leg along +y to B — the drawn angle at A is
+    // exactly the given angle, correct by construction.
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // C (right angle) — index 0
+      VisualPoint(adj, 0), // A (the known angle) — index 1
+      VisualPoint(0, opp), // B — index 2
+    ];
+    // Edge 0: C→A (adjacent); edge 1: A→B (hypotenuse); edge 2: B→C (opposite).
+    int edgeFor(GeometryTrigSideRole r) => switch (r) {
+          GeometryTrigSideRole.adjacent => 0,
+          GeometryTrigSideRole.hypotenuse => 1,
+          GeometryTrigSideRole.opposite => 2,
+        };
+    final builtSides = [
+      GeometrySide(
+        label: known.label.trim().isEmpty ? roleName(known.role) : known.label.trim(),
+        edge: edgeFor(known.role),
+        value: known.value!,
+      ),
+      GeometrySide(
+        label: label,
+        edge: edgeFor(unknown.role),
+        value: unknownValue,
+        isUnknown: true,
+      ),
+    ];
+    final builtAngle = GeometryAngle(
+      label: angleLabel,
+      vertex: 1,
+      ray1: 0,
+      ray2: 2,
+      value: knownAngleDeg,
+    );
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'Trigonometric ratios: SOH CAH TOA';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final knownSideLabel = builtSides.first.label;
+    final knownText =
+        '$knownSideLabel = $knownDisplay and $angleLabel = ${_degPlain(knownAngleDeg)}';
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'One side and one angle are given: $knownText.',
+        highlight: {knownSideLabel, angleLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'Pick the trig ratio',
+        detail:
+            'The ${roleName(known.role)} and ${roleName(unknown.role)} sides '
+            'are linked by $fnName: $fnName of the angle = '
+            '${roleName(numRole)} ÷ ${roleName(denRole)} (SOH CAH TOA).',
+        equationLatex: ruleEq,
+        highlight: {knownSideLabel, label, angleLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing side',
+        detail: 'Rearrange to leave $label on its own.',
+        equationLatex: rearrange,
+        highlight: {label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing side is ${formatLength(unknownValue)}.',
+        equationLatex: '$label = ${formatLength(unknownValue)}',
+        highlight: {label},
+      ),
+    ];
+
+    final semantics = 'Right triangle diagram. Given $knownText. '
+        '$resolvedRule. The missing side $label is ${formatLength(unknownValue)}.';
+
+    return GeometryScene(
+      kind: GeometrySceneKind.rightTriangleTrig,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: [builtAngle],
+      sides: builtSides,
+      unknownKind: GeometryUnknownKind.length,
+      unknownLabel: label,
+      unknownValue: unknownValue,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+      rightAngleVertices: const [0],
+    );
+  }
+
+  /// Builds a solved **sine-rule angle** scene (two sides + a non-included
+  /// angle → the angle opposite the other given side), or `null` when the data
+  /// is inconsistent, genuinely ambiguous with no disambiguating signal, or
+  /// contradicts [expectedAnswerLatex]. The angle is computed here — never
+  /// taken from the model; [branch] only picks between the two app-computed
+  /// SSA candidates when the problem itself states acute/obtuse.
+  static GeometryScene? tryBuildSineRuleAngle({
+    required double knownAngleDeg,
+    required String knownAngleLabel,
+    required double sideOppositeKnown,
+    required String sideOppositeKnownLabel,
+    required double sideOppositeUnknown,
+    required String sideOppositeUnknownLabel,
+    required String unknownLabel,
+    AngleBranchHint? branch,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    if (!knownAngleDeg.isFinite || knownAngleDeg <= 0 || knownAngleDeg >= 180) {
+      return null;
+    }
+    if (!sideOppositeKnown.isFinite || sideOppositeKnown <= 0) return null;
+    if (!sideOppositeUnknown.isFinite || sideOppositeUnknown <= 0) return null;
+
+    final label = unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim();
+    final angleLabel =
+        knownAngleLabel.trim().isEmpty ? 'A' : knownAngleLabel.trim();
+    final skLabel = sideOppositeKnownLabel.trim().isEmpty
+        ? 'a'
+        : sideOppositeKnownLabel.trim();
+    final suLabel = sideOppositeUnknownLabel.trim().isEmpty
+        ? 'b'
+        : sideOppositeUnknownLabel.trim();
+    // Label collisions would draw one name with two different values (and
+    // bleed step highlights across elements) — refuse the self-contradiction.
+    if ({label, angleLabel, skLabel, suLabel}.length != 4) return null;
+
+    // sin(unknown) = (side opposite the unknown) · sin(known) / (side opposite
+    // the known). A ratio above 1 means no such triangle exists.
+    final ratio =
+        sideOppositeUnknown * math.sin(_rad(knownAngleDeg)) / sideOppositeKnown;
+    if (!ratio.isFinite || ratio <= 0 || ratio > 1 + 1e-9) return null;
+    final acuteDeg = _degrees(math.asin(math.min(1, ratio)));
+    final obtuseDeg = 180 - acuteDeg;
+    bool valid(double theta) =>
+        theta > 1e-9 && theta + knownAngleDeg < 180 - 1e-9;
+
+    // Select the branch — by the problem's own wording first, then the
+    // verified answer, then uniqueness. NEVER by guessing: a genuinely
+    // ambiguous SSA with no signal returns null (honest fallback).
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    double? theta;
+    var isObtuseBranch = false;
+    if (branch != null) {
+      final candidate =
+          branch == AngleBranchHint.obtuse ? obtuseDeg : acuteDeg;
+      if (!valid(candidate)) return null;
+      theta = candidate;
+      isObtuseBranch = branch == AngleBranchHint.obtuse;
+    } else {
+      final candidates = <(double, bool)>[
+        if (valid(acuteDeg)) (acuteDeg, false),
+        if (valid(obtuseDeg) && (obtuseDeg - acuteDeg).abs() > 0.5)
+          (obtuseDeg, true),
+      ];
+      if (candidates.isEmpty) return null;
+      if (expected != null) {
+        final matching = candidates
+            .where((c) => (c.$1 - expected).abs() <= 0.5)
+            .toList();
+        if (matching.length != 1) return null;
+        theta = matching.first.$1;
+        isObtuseBranch = matching.first.$2;
+      } else if (candidates.length == 1) {
+        theta = candidates.first.$1;
+        isObtuseBranch = candidates.first.$2;
+      } else {
+        return null; // ambiguous, no signal — refuse to guess
+      }
+    }
+
+    // Cross-check the chosen branch against the verified answer too.
+    if (expected != null && (expected - theta).abs() > 0.5) return null;
+    final thirdDeg = 180 - knownAngleDeg - theta;
+    if (thirdDeg <= 0) return null;
+
+    // Place the triangle from its REAL side lengths: the unknown angle at the
+    // origin, the third side along +x, so every drawn side/angle is true.
+    //   U (unknown angle) at (0,0); K (known angle) at (c, 0);
+    //   T at sideOppositeKnown away from U, at the unknown angle θ.
+    final c = sideOppositeKnown *
+        math.sin(_rad(thirdDeg)) /
+        math.sin(_rad(knownAngleDeg));
+    if (!c.isFinite || c <= 0) return null;
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // U — index 0
+      VisualPoint(c, 0), // K — index 1
+      VisualPoint(
+        sideOppositeKnown * math.cos(_rad(theta)),
+        sideOppositeKnown * math.sin(_rad(theta)),
+      ), // T — index 2
+    ];
+    // Defensive consistency: the drawn K→T edge must equal the given side
+    // opposite the unknown (the construction and the sine rule must agree).
+    final ktLen = math.sqrt(
+      math.pow(vertices[2].x - vertices[1].x, 2) +
+          math.pow(vertices[2].y - vertices[1].y, 2),
+    );
+    if ((ktLen - sideOppositeUnknown).abs() >
+        1e-6 * math.max(1, sideOppositeUnknown)) {
+      return null;
+    }
+
+    final builtAngles = [
+      GeometryAngle(
+        label: label,
+        vertex: 0,
+        ray1: 1,
+        ray2: 2,
+        value: theta,
+        isUnknown: true,
+      ),
+      GeometryAngle(
+        label: angleLabel,
+        vertex: 1,
+        ray1: 0,
+        ray2: 2,
+        value: knownAngleDeg,
+      ),
+    ];
+    // Consistency gate (same spirit as tryBuild): the drawn unknown wedge must
+    // carry exactly the computed measure.
+    final drawnTheta = _angleBetween(vertices[0], vertices[1], vertices[2]);
+    if ((drawnTheta - theta).abs() > 0.5) return null;
+
+    // Edge 0: U→K (third side, unlabeled); edge 1: K→T (side opposite the
+    // unknown); edge 2: T→U (side opposite the known angle).
+    final builtSides = [
+      GeometrySide(label: suLabel, edge: 1, value: sideOppositeUnknown),
+      GeometrySide(label: skLabel, edge: 2, value: sideOppositeKnown),
+    ];
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'The sine rule: a / sin A = b / sin B';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final skDisplay = formatLength(sideOppositeKnown);
+    final suDisplay = formatLength(sideOppositeUnknown);
+    final knownText = '$suLabel = $suDisplay, $skLabel = $skDisplay and '
+        '$angleLabel = ${_degPlain(knownAngleDeg)}';
+    final inverse =
+        '\\sin^{-1}(\\frac{$suDisplay \\times \\sin ${_deg(knownAngleDeg)}}{$skDisplay})';
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'Two sides and an angle are given: $knownText.',
+        highlight: {suLabel, skLabel, angleLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'The sine rule',
+        detail: 'In any triangle, each side divided by the sine of its '
+            'opposite angle gives the same value.',
+        equationLatex:
+            '\\frac{\\sin $label}{$suDisplay} = \\frac{\\sin ${_deg(knownAngleDeg)}}{$skDisplay}',
+        highlight: {suLabel, skLabel, angleLabel, label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing angle',
+        detail: isObtuseBranch
+            ? 'Take the inverse sine, then subtract from 180° — the problem '
+                'says $label is obtuse, and sin is the same for an angle and '
+                'its supplement.'
+            : 'Rearrange and take the inverse sine.',
+        equationLatex: isObtuseBranch
+            ? '$label = 180^\\circ - $inverse'
+            : '$label = $inverse',
+        highlight: {label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing angle is ${_degPlain(theta)}.',
+        equationLatex: '$label = ${_deg(theta)}',
+        highlight: {label},
+      ),
+    ];
+
+    final semantics = 'Triangle diagram. Given $knownText. $resolvedRule. '
+        'The missing angle $label is ${_degPlain(theta)}.';
+
+    return GeometryScene(
+      kind: GeometrySceneKind.sineRuleAngle,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: builtAngles,
+      sides: builtSides,
+      unknownLabel: label,
+      unknownValue: theta,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+    );
+  }
+
+  /// Builds a solved **SAS area** scene (two sides + the included angle →
+  /// Area = ½·a·b·sin C), or `null` when the data is inconsistent or
+  /// contradicts [expectedAnswerLatex]. The area is computed here — never
+  /// taken from the model.
+  static GeometryScene? tryBuildSasArea({
+    required double sideA,
+    required String sideALabel,
+    required double sideB,
+    required String sideBLabel,
+    required double includedAngleDeg,
+    required String angleLabel,
+    String unknownLabel = 'Area',
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    if (!sideA.isFinite || sideA <= 0) return null;
+    if (!sideB.isFinite || sideB <= 0) return null;
+    if (!includedAngleDeg.isFinite ||
+        includedAngleDeg <= 0 ||
+        includedAngleDeg >= 180) {
+      return null;
+    }
+
+    final label = unknownLabel.trim().isEmpty ? 'Area' : unknownLabel.trim();
+    final aLabel = sideALabel.trim().isEmpty ? 'a' : sideALabel.trim();
+    final bLabel = sideBLabel.trim().isEmpty ? 'b' : sideBLabel.trim();
+    final cLabel = angleLabel.trim().isEmpty ? 'C' : angleLabel.trim();
+    // Label collisions would draw one name with two different values (and
+    // bleed step highlights across elements) — refuse the self-contradiction.
+    if ({label, aLabel, bLabel, cLabel}.length != 4) return null;
+
+    final area = 0.5 * sideA * sideB * math.sin(_rad(includedAngleDeg));
+    if (!area.isFinite || area <= 0) return null;
+
+    // Cross-check against the solver's verified answer, when we have one.
+    // Areas have arbitrary magnitude, so the tolerance is RELATIVE (a flat
+    // 0.5 would wave through a wrong figure at unit-sized values).
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    final areaTol = math.max(0.01, 0.01 * area.abs());
+    if (expected != null && (expected - area).abs() > areaTol) return null;
+
+    // The included angle's vertex at the origin, side a along +x, side b at
+    // the given angle — the drawn wedge is the real angle between the real
+    // sides, correct by construction.
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // A (the included angle) — index 0
+      VisualPoint(sideA, 0), // B — index 1
+      VisualPoint(
+        sideB * math.cos(_rad(includedAngleDeg)),
+        sideB * math.sin(_rad(includedAngleDeg)),
+      ), // C — index 2
+    ];
+    // Edge 0: A→B (side a); edge 1: B→C (third side, unlabeled); edge 2: C→A
+    // (side b).
+    final builtSides = [
+      GeometrySide(label: aLabel, edge: 0, value: sideA),
+      GeometrySide(label: bLabel, edge: 2, value: sideB),
+    ];
+    final builtAngle = GeometryAngle(
+      label: cLabel,
+      vertex: 0,
+      ray1: 1,
+      ray2: 2,
+      value: includedAngleDeg,
+    );
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'Area of a triangle: ½ · a · b · sin C';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final aDisplay = formatLength(sideA);
+    final bDisplay = formatLength(sideB);
+    final knownText = '$aLabel = $aDisplay, $bLabel = $bDisplay and '
+        '$cLabel = ${_degPlain(includedAngleDeg)}';
+    final labelLatex = label.length > 1 ? '\\text{$label}' : label;
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail:
+            'Two sides and the angle between them are given: $knownText.',
+        highlight: {aLabel, bLabel, cLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'The area rule',
+        detail: 'Area = half × one side × the other side × sin of the angle '
+            'between them.',
+        equationLatex:
+            '$labelLatex = \\frac{1}{2} \\times $aLabel \\times $bLabel \\times \\sin $cLabel',
+        highlight: {aLabel, bLabel, cLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Work out the area',
+        detail: 'Substitute the numbers.',
+        equationLatex:
+            '$labelLatex = \\frac{1}{2} \\times $aDisplay \\times $bDisplay \\times \\sin(${_deg(includedAngleDeg)})',
+        highlight: {aLabel, bLabel, cLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The area is ${formatLength(area)}.',
+        equationLatex: '$labelLatex = ${formatLength(area)}',
+        highlight: {label},
+      ),
+    ];
+
+    final semantics = 'Triangle diagram. Given $knownText. $resolvedRule. '
+        'The area is ${formatLength(area)}.';
+
+    return GeometryScene(
+      kind: GeometrySceneKind.sasArea,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: [builtAngle],
+      sides: builtSides,
+      unknownKind: GeometryUnknownKind.area,
+      unknownLabel: label,
+      unknownValue: area,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
     );
   }
 
@@ -634,7 +1291,10 @@ class GeometryScene {
           true,
         GeometrySceneKind.parallelLines ||
         GeometrySceneKind.circleAngle ||
-        GeometrySceneKind.rightTrianglePythagoras =>
+        GeometrySceneKind.rightTrianglePythagoras ||
+        GeometrySceneKind.rightTriangleTrig ||
+        GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.sasArea =>
           false,
       };
 
@@ -702,7 +1362,10 @@ class GeometryScene {
           sides >= 3 && sides <= 20 ? (sides - 2) * 180.0 : null,
         GeometrySceneKind.parallelLines ||
         GeometrySceneKind.circleAngle ||
-        GeometrySceneKind.rightTrianglePythagoras =>
+        GeometrySceneKind.rightTrianglePythagoras ||
+        GeometrySceneKind.rightTriangleTrig ||
+        GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.sasArea =>
           null,
       };
 
@@ -720,7 +1383,10 @@ class GeometryScene {
           null,
         GeometrySceneKind.parallelLines ||
         GeometrySceneKind.circleAngle ||
-        GeometrySceneKind.rightTrianglePythagoras =>
+        GeometrySceneKind.rightTrianglePythagoras ||
+        GeometrySceneKind.rightTriangleTrig ||
+        GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.sasArea =>
           null,
       };
 
@@ -740,7 +1406,10 @@ class GeometryScene {
           'Angles around a point sum to 360°',
         GeometrySceneKind.parallelLines ||
         GeometrySceneKind.circleAngle ||
-        GeometrySceneKind.rightTrianglePythagoras =>
+        GeometrySceneKind.rightTrianglePythagoras ||
+        GeometrySceneKind.rightTriangleTrig ||
+        GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.sasArea =>
           '',
       };
 
@@ -846,8 +1515,12 @@ class GeometryScene {
       case GeometrySceneKind.circleAngle:
         return _buildCircle(knowns, label, unknownValue, computed);
       case GeometrySceneKind.rightTrianglePythagoras:
-        // Pythagoras is length-based and built via [tryBuildPythagoras], never
-        // through the angle path — unreachable here.
+      case GeometrySceneKind.rightTriangleTrig:
+      case GeometrySceneKind.sineRuleAngle:
+      case GeometrySceneKind.sasArea:
+        // These are side/mixed-given kinds built via their OWN builders
+        // (tryBuildPythagoras / tryBuildRightTriangleTrig / tryBuildSineRuleAngle
+        // / tryBuildSasArea), never through the angle path — unreachable here.
         return null;
     }
   }
@@ -1246,19 +1919,52 @@ class GeometryScene {
 
   static double _rad(double deg) => deg * math.pi / 180;
 
+  static double _degrees(double rad) => rad * 180 / math.pi;
+
+  /// The interior angle (degrees) at [v] between the rays toward [p] and [q].
+  static double _angleBetween(VisualPoint v, VisualPoint p, VisualPoint q) {
+    final a1 = math.atan2(p.y - v.y, p.x - v.x);
+    final a2 = math.atan2(q.y - v.y, q.x - v.x);
+    var d = (a2 - a1).abs();
+    if (d > math.pi) d = 2 * math.pi - d;
+    return _degrees(d);
+  }
+
   /// Delimiter-free LaTeX for a degree value, e.g. `80^\circ`.
   static String _deg(double value) => '${formatDegrees(value)}^\\circ';
 
   /// Plain-text degree value for prose/semantics, e.g. `80°`.
   static String _degPlain(double value) => '${formatDegrees(value)}°';
 
-  /// Extracts the first signed decimal number from a string (the solver's
-  /// answer often looks like `x = 80^\circ` or `80`).
-  static double? _parseFirstNumber(String? source) {
+  /// Extracts the VALUE of a verified-answer LaTeX string (`x = 80^\circ`,
+  /// `\frac{1}{2}`, `45`), or `null` when no single number can be read
+  /// reliably — a naive first-number grab would read `\frac{1}{2}` as 1 and
+  /// make the cross-check gate accept a wrong scene or reject a right one.
+  /// Unparseable (symbolic √/π forms, mixed expressions) skips the gate
+  /// rather than misparsing: a wrong gate is worse than no gate.
+  static double? _parseExpectedValue(String? source) {
     if (source == null) return null;
-    final match = RegExp(r'-?\d+(?:\.\d+)?').firstMatch(source);
-    if (match == null) return null;
-    return double.tryParse(match.group(0)!);
+    var s = source.trim();
+    if (s.isEmpty) return null;
+    // Answers read "x = 80^\circ" (or chains ending in the value): take the
+    // RHS of the LAST '='.
+    final eq = s.lastIndexOf('=');
+    if (eq >= 0) s = s.substring(eq + 1);
+    s = s
+        .replaceAll(RegExp(r'\^\{?\\circ\}?'), '')
+        .replaceAll('°', '')
+        .replaceAll(RegExp(r'\\text\{[^}]*\}'), '')
+        .trim();
+    final frac = RegExp(r'^\\[dt]?frac\{(-?\d+(?:\.\d+)?)\}\{(-?\d+(?:\.\d+)?)\}$')
+        .firstMatch(s);
+    if (frac != null) {
+      final num = double.tryParse(frac.group(1)!);
+      final den = double.tryParse(frac.group(2)!);
+      if (num == null || den == null || den == 0) return null;
+      return num / den;
+    }
+    if (RegExp(r'^-?\d+(?:\.\d+)?$').hasMatch(s)) return double.tryParse(s);
+    return null;
   }
 }
 

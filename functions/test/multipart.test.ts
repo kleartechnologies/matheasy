@@ -98,7 +98,8 @@ describe("integral with a leading coefficient/sign is not dropped", () => {
 
 describe("solve — non-unique systems + merged/multi-question → tutor", () => {
   const cases: [string, string][] = [
-    ["nonlinear system (2 solutions)", "\\begin{cases} y = x^2 \\\\ y = x + 2 \\end{cases}"],
+    // "y = x², y = x + 2" moved to simultaneous.test.ts — the linear+quadratic
+    // pair now solves DETERMINISTICALLY with both pairs verified.
     ["underdetermined system (3 unknowns, 2 eqns)", "\\begin{cases} x + y + z = 6 \\\\ x - y = 0 \\end{cases}"],
     ["merged trig 'given sin x=0.5, find cos x'", "\\sin x = 0.5 \\\\ \\cos x"],
     ["merged trig with newline", "\\sin x = 0.5\n\\cos x"],

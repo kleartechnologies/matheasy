@@ -91,6 +91,7 @@ export type Strategy =
   | "statistics" // a descriptive statistic over a data set (mean/median/…)
   | "linalg" // matrix/vector operation (det/inverse/eigenvalues) via mathjs
   | "linsystem" // a linear system Ax=b, solved via mathjs, verified by A·x=b
+  | "simultaneous" // 2-var linear+quadratic pair: substitution, verified per-pair
   | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
   | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
@@ -151,6 +152,18 @@ export interface Classification {
     a: number[][];
     b: number[];
     vars: string[];
+    parts: { lhs: string; rhs: string }[];
+  };
+  /** A 2-var LINEAR + QUADRATIC simultaneous pair: the linear member's
+   * coefficients (cu·vars[0] + cv·vars[1] + k = 0), the non-linear member, and
+   * BOTH original equations — every candidate pair is re-substituted into the
+   * originals, so a bad parse/composition can never self-verify. */
+  simul?: {
+    vars: [string, string];
+    cu: number;
+    cv: number;
+    k: number;
+    other: { lhs: string; rhs: string };
     parts: { lhs: string; rhs: string }[];
   };
   /** A Taylor/Maclaurin request: the function (ascii), center + its display, and

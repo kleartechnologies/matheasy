@@ -117,18 +117,23 @@ Transcription rules — capture the ENTIRE problem, never just one line:
 - Do NOT solve, simplify, evaluate, or answer anything — transcribe ONLY what is written.
 - Classify the topic using exactly one allowed value (use the topic of the main computation). Set isMath=false (and problem="") only when the image contains no math at all.
 - confidence reflects how legibly the WHOLE problem was read.
-GEOMETRY (optional) — if, AND ONLY IF, the image is a solvable problem that asks for ONE missing ANGLE or ONE missing SIDE of a right triangle, ALSO include a top-level "geometry" object so the app can draw and animate it:
-{
-  "kind": "triangleAngles|isoscelesTriangle|quadrilateralAngles|polygonAngles|straightLineAngles|anglesAroundPoint|parallelLines|circleAngle|rightTrianglePythagoras",
-  "unknown": "x",                                   // label of the single unknown
-  "knownAngles": [{"label":"A","value":60}],        // ANGLE kinds: the given angle measures (degrees, numbers only)
-  "sides": [{"label":"a","role":"leg","value":6},{"label":"c","role":"hypotenuse","value":10},{"label":"x","role":"leg"}],  // rightTrianglePythagoras ONLY: the three sides; OMIT "value" on the unknown; "role" is "leg" or "hypotenuse"
-  "polygonSides": 5,                                 // polygonAngles only: number of sides
-  "relation": "equal|supplementary|doubleOf|halfOf", // parallelLines / circleAngle only
-  "relationReference": "a",
-  "ruleName": "Angles in a triangle sum to 180°"
-}
-CRITICAL for geometry: read the GIVEN numbers off the figure/text and name the single unknown — DO NOT compute or include the unknown's value; the app computes it deterministically and discards your geometry object if the numbers are inconsistent. For rightTrianglePythagoras you MUST mark which side is the "hypotenuse" (opposite the right angle) — that is what makes the answer unambiguous. OMIT "geometry" entirely for anything else (proofs, area/perimeter, coordinate geometry, or any problem you're unsure about) — a wrong geometry object is worse than none. "problem" must ALWAYS still contain the full transcription regardless.
+GEOMETRY (optional) — if, AND ONLY IF, the image is a solvable problem matching exactly ONE of the shapes below, ALSO include a top-level "geometry" object so the app can draw and animate it. Pick one "kind" and use ONLY its fields:
+1. One missing ANGLE by an angle rule:
+{"kind":"triangleAngles|isoscelesTriangle|quadrilateralAngles|polygonAngles|straightLineAngles|anglesAroundPoint|parallelLines|circleAngle", "unknown":"x", "knownAngles":[{"label":"A","value":60}], "polygonSides":5, "relation":"equal|supplementary|doubleOf|halfOf", "relationReference":"a", "ruleName":"Angles in a triangle sum to 180°"}
+   (knownAngles values in degrees, numbers only; "polygonSides" only for polygonAngles; "relation"/"relationReference" only for parallelLines/circleAngle.)
+2. Right triangle, TWO sides given, third side unknown (Pythagoras):
+{"kind":"rightTrianglePythagoras", "unknown":"x", "sides":[{"label":"a","role":"leg","value":6},{"label":"c","role":"hypotenuse","value":10},{"label":"x","role":"leg"}]}
+   (exactly 3 sides; OMIT "value" on the unknown; "role" is "leg" or "hypotenuse" — you MUST mark which side is the hypotenuse, opposite the right angle.)
+3. Right triangle, ONE side + ONE acute angle given, another side unknown (trig ratio):
+{"kind":"rightTriangleTrig", "unknown":"x", "knownAngle":{"label":"θ","value":35}, "sides":[{"label":"a","role":"adjacent","value":40},{"label":"x","role":"hypotenuse"}]}
+   (EXACTLY 2 sides — the known one and the unknown one; OMIT "value" on the unknown. "role" is opposite|adjacent|hypotenuse RELATIVE TO the known angle: opposite = the side across from that angle, adjacent = the LEG touching it (never the hypotenuse), hypotenuse = the side across from the right angle.)
+4. Any triangle, TWO sides + one NON-included angle given, a missing ANGLE asked (sine rule):
+{"kind":"sineRuleAngle", "unknown":"y", "knownAngle":{"label":"C","value":34}, "sideOppositeKnown":{"label":"c","value":10}, "sideOppositeUnknown":{"label":"b","value":16}}
+   ("sideOppositeKnown" = the side directly ACROSS FROM the known angle; "sideOppositeUnknown" = the side across from the asked angle. ADD "angleBranch":"acute" or "angleBranch":"obtuse" ONLY when the problem itself states it (e.g. "angle y is obtuse" → "angleBranch":"obtuse"); NEVER include the key otherwise — the example above omits it on purpose.)
+5. Triangle AREA from two sides + the INCLUDED angle between them:
+{"kind":"sasArea", "unknown":"Area", "sides":[{"label":"a","value":11},{"label":"b","value":13}], "includedAngle":{"label":"C","value":39}}
+   (the angle must sit BETWEEN the two given sides, and "unknown" MUST be the literal string "Area" — if the problem asks for a SIDE of that triangle instead, that is the cosine rule: OMIT geometry.)
+CRITICAL for geometry: every "value" is a plain NUMBER — angle values in degrees WITHOUT the ° symbol, lengths without units. Read the GIVEN numbers off the figure/text and name the single unknown — DO NOT compute or include the unknown's value; the app computes it deterministically and discards your geometry object if the numbers are inconsistent. OMIT "geometry" entirely for anything else (proofs, perimeter, a missing SIDE of a non-right triangle (cosine rule), other area shapes, coordinate geometry, or any problem you're unsure about) — a wrong geometry object is worse than none. "problem" must ALWAYS still contain the full transcription regardless (including the figure's given numbers when the text alone doesn't carry them).
 Example of a well-formed multi-part transcription:
 "\\text{It is given that } \\tan\\theta = 2. \\\\ \\text{(i) Find the exact value of } \\tan A \\text{, given that } \\tan(A+\\theta)=4. \\\\ \\text{(ii) Find the exact value of } \\tan B \\text{, given that } \\sin(B+\\theta)=3\\cos(B-\\theta)."`;
 

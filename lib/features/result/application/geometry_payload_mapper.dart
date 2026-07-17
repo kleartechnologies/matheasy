@@ -28,6 +28,15 @@ class GeometryPayloadMapper {
     if (kind == GeometrySceneKind.rightTrianglePythagoras) {
       return _pythagoras(m, expected);
     }
+    if (kind == GeometrySceneKind.rightTriangleTrig) {
+      return _rightTriangleTrig(m, expected);
+    }
+    if (kind == GeometrySceneKind.sineRuleAngle) {
+      return _sineRuleAngle(m, expected);
+    }
+    if (kind == GeometrySceneKind.sasArea) {
+      return _sasArea(m, expected);
+    }
     return _angles(kind, m, expected);
   }
 
@@ -111,6 +120,120 @@ class GeometryPayloadMapper {
     return out;
   }
 
+  // ---- Right-triangle trig (side from a side + an acute angle) --------------
+
+  static GeometryScene? _rightTriangleTrig(
+    Map<String, dynamic> m,
+    String? expected,
+  ) {
+    final angle = _labeledValue(m['knownAngle']);
+    if (angle == null) return null;
+    final sides = _trigSides(m['sides']);
+    if (sides == null) return null;
+    return GeometryScene.tryBuildRightTriangleTrig(
+      knownAngleDeg: angle.value,
+      knownAngleLabel: angle.label,
+      sides: sides,
+      unknownLabel: _unknownLabel(m['unknown']),
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  /// `sides`: `[{label, role, value?}, ...]` with roles relative to the known
+  /// angle — a `null`/absent value marks the unknown. An unrecognised role
+  /// invalidates the whole set (the builder then rejects the short list).
+  static List<GeometryTrigSide>? _trigSides(Object? v) {
+    if (v is! List) return null;
+    final out = <GeometryTrigSide>[];
+    for (final e in v) {
+      if (e is! Map) continue;
+      final role = _enumByName(GeometryTrigSideRole.values, e['role']);
+      if (role == null) return null; // an unknown role invalidates the set
+      final rawLabel = e['label'];
+      final label = rawLabel is String && rawLabel.trim().isNotEmpty
+          ? rawLabel.trim()
+          : String.fromCharCode('a'.codeUnitAt(0) + out.length);
+      out.add(GeometryTrigSide(label: label, role: role, value: _num(e['value'])));
+    }
+    return out;
+  }
+
+  // ---- Sine rule (angle from two sides + a non-included angle) --------------
+
+  static GeometryScene? _sineRuleAngle(
+    Map<String, dynamic> m,
+    String? expected,
+  ) {
+    final knownAngle = _labeledValue(m['knownAngle']);
+    final sideOppositeKnown = _labeledValue(m['sideOppositeKnown']);
+    final sideOppositeUnknown = _labeledValue(m['sideOppositeUnknown']);
+    if (knownAngle == null ||
+        sideOppositeKnown == null ||
+        sideOppositeUnknown == null) {
+      return null;
+    }
+    return GeometryScene.tryBuildSineRuleAngle(
+      knownAngleDeg: knownAngle.value,
+      knownAngleLabel: knownAngle.label,
+      sideOppositeKnown: sideOppositeKnown.value,
+      sideOppositeKnownLabel: sideOppositeKnown.label,
+      sideOppositeUnknown: sideOppositeUnknown.value,
+      sideOppositeUnknownLabel: sideOppositeUnknown.label,
+      unknownLabel: _unknownLabel(m['unknown']),
+      branch: _enumByName(AngleBranchHint.values, m['angleBranch']),
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  // ---- SAS area (two sides + the included angle) ------------------------------
+
+  static GeometryScene? _sasArea(Map<String, dynamic> m, String? expected) {
+    final angle = _labeledValue(m['includedAngle']);
+    if (angle == null) return null;
+    final raw = m['sides'];
+    if (raw is! List || raw.length != 2) return null;
+    final a = raw[0] is Map ? _labeledValue(raw[0]) : null;
+    final b = raw[1] is Map ? _labeledValue(raw[1]) : null;
+    if (a == null || b == null) return null;
+    final unknown = m['unknown'];
+    final rawUnknown = unknown is String ? unknown.trim() : '';
+    // The unknown of this kind IS the area. A side-style unknown ("x") means
+    // the recognizer misfiled a cosine-rule "find the third side" problem —
+    // computing an AREA and labelling it x would be a confident wrong answer,
+    // so refuse the scene entirely (the normal solver flow takes over).
+    if (rawUnknown.isNotEmpty && rawUnknown.toLowerCase() != 'area') {
+      return null;
+    }
+    return GeometryScene.tryBuildSasArea(
+      sideA: a.value,
+      sideALabel: a.label,
+      sideB: b.value,
+      sideBLabel: b.label,
+      includedAngleDeg: angle.value,
+      angleLabel: angle.label,
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  /// `{label, value}` → a (label, value) pair; a missing/blank label becomes
+  /// `''` (the builders substitute their own defaults), a non-finite value
+  /// rejects the entry.
+  static ({String label, double value})? _labeledValue(Object? v) {
+    if (v is! Map) return null;
+    final value = _num(v['value']);
+    if (value == null) return null;
+    final rawLabel = v['label'];
+    final label =
+        rawLabel is String && rawLabel.trim().isNotEmpty ? rawLabel.trim() : '';
+    return (label: label, value: value);
+  }
+
   // ---- Shared coercions -----------------------------------------------------
 
   static String _unknownLabel(Object? v) {
@@ -142,7 +265,12 @@ class GeometryPayloadMapper {
     if (v is num) {
       d = v.toDouble();
     } else if (v is String) {
-      d = double.tryParse(v.trim());
+      // The prompt demands bare numbers, but a model reading "35°" off a
+      // figure sometimes keeps the mark — stripping it loses nothing (the
+      // value is still the GIVEN, in degrees) and saves the whole scene.
+      final cleaned =
+          v.replaceAll('°', '').replaceAll(RegExp(r'\^?\\circ'), '').trim();
+      d = double.tryParse(cleaned);
     } else {
       d = null;
     }

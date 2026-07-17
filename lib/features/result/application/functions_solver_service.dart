@@ -55,6 +55,14 @@ class SolveResponseMapper {
 
     final methods = _list(json['methods'], _method);
     final examMethod = _pickExamMethod(json['methods']);
+    // The server sends the honest problemType alongside routeToTutor, so the
+    // invite can say what the problem actually is — a system of equations must
+    // never be presented as "a proof".
+    final tutorReason = switch (_str(json['problemType'])) {
+      'system_of_equations' => TutorRouteReason.system,
+      'multi_part' => TutorRouteReason.multiPart,
+      _ => TutorRouteReason.proof,
+    };
 
     return ResultData(
       equation: equation,
@@ -64,17 +72,37 @@ class SolveResponseMapper {
       answerPlain: answerPlain,
       verified: verified,
       routeToTutor: routeToTutor,
+      tutorRouteReason: tutorReason,
       verifyText: verified
           ? 'Checked by substituting the answer back into the problem ✓'
           : routeToTutor
-              ? "This is a proof-style problem — there's no single answer to "
-                  'check, so let\'s reason through it together.'
+              ? switch (tutorReason) {
+                  TutorRouteReason.system =>
+                    'This system may have several solutions — there\'s no '
+                        'single answer to check, so let\'s work through it '
+                        'together.',
+                  TutorRouteReason.multiPart =>
+                    'This problem asks for more than one thing — there\'s no '
+                        'single answer to check, so let\'s work through it '
+                        'together.',
+                  TutorRouteReason.proof =>
+                    "This is a proof-style problem — there's no single answer "
+                        'to check, so let\'s reason through it together.',
+                }
               : "Matheasy couldn't verify this answer — try re-scanning or "
                   'typing it in.',
       tutorIntro: verified
           ? "Here's the solution — tap any step to see why it works."
           : routeToTutor
-              ? "I don't compute proofs — but I can walk you through one."
+              ? switch (tutorReason) {
+                  TutorRouteReason.system =>
+                    "I couldn't prove a complete solution to this system — "
+                        "let's solve it together.",
+                  TutorRouteReason.multiPart =>
+                    "Let's take this one part at a time.",
+                  TutorRouteReason.proof =>
+                    "I don't compute proofs — but I can walk you through one.",
+                }
               : "I couldn't fully check this one, so I'd rather not guess.",
       steps: examMethod == null ? const [] : _list(examMethod['steps'], _step),
       explanations: const [], // not in §4 — Explain tab shows its empty state
@@ -173,6 +201,9 @@ class SolveResponseMapper {
         return ResultType.quadratic;
       case 'trigonometric_equation':
         return ResultType.trigonometry;
+      case 'simultaneous_equations':
+      case 'linear_system':
+        return ResultType.system;
       case 'arithmetic':
       case 'expression':
         return kind == EquationKind.fraction

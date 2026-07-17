@@ -50,7 +50,8 @@ enum PracticeTopic {
   static PracticeTopic fromResultType(ResultType type) => switch (type) {
         ResultType.linear ||
         ResultType.quadratic ||
-        ResultType.expression =>
+        ResultType.expression ||
+        ResultType.system =>
           PracticeTopic.algebra,
         ResultType.fraction => PracticeTopic.fractions,
         ResultType.trigonometry => PracticeTopic.trigonometry,

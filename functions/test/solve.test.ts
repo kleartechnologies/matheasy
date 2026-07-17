@@ -114,15 +114,13 @@ describe("solve — the verification gate", () => {
     expect(p.finalAnswer?.plain).toBe("x = 3, y = 0");
   });
 
-  it("rejects a wrong candidate for a NON-linear system (LLM substitution gate)", async () => {
-    // x²+y=5, x-y=1 isn't linear → the LLM tier; a wrong candidate fails the gate.
-    const p = await run("x^2 + y = 5, x - y = 1", completerWith({
-      answerLatex: "x=1,\\; y=1",
-      answerPlain: "x=1, y=1",
-      solutions: [{ variable: "x", value: 1 }, { variable: "y", value: 1 }],
-      methods: [],
-    }));
-    expect(p.verified).toBe(false);
+  it("solves a LINEAR+QUADRATIC system deterministically (no LLM), both pairs verified", async () => {
+    // x²+y=5, x-y=1 → substitute y=x−1 → x²+x−6=0 → (2,1) and (−3,−4). The
+    // simultaneous strategy owns this now — the completer must never be hit.
+    const p = await run("x^2 + y = 5, x - y = 1", NEVER);
+    expect(p.verified).toBe(true);
+    expect(p.problemType).toBe("simultaneous_equations");
+    expect(p.finalAnswer?.plain).toBe("x = -3, y = -4 or x = 2, y = 1");
   });
 
   it("cubic: all three llm roots must check out", async () => {

@@ -10,13 +10,15 @@ import 'math_text.dart';
 
 /// The "let's work through it together" state (spec §1 golden rule) — shown when
 /// `solve()` returns `routeToTutor:true` for a proof / abstract-algebra /
-/// real-analysis prompt.
+/// real-analysis prompt, a multi-part question, or a system the engine can't
+/// prove a complete solution to.
 ///
 /// These problems have no single answer to compute-and-substitute-back, so
 /// Matheasy refuses to fake one. Instead of the (misleading) "couldn't verify"
-/// error, it honestly says "I don't compute proofs — but I can reason through
-/// one with you" and offers the AI tutor as the real way forward. The tone is
-/// inviting, not apologetic: this is the right tool for the job, not a failure.
+/// error, it honestly names what the problem is ([TutorRouteReason] — a proof
+/// must not be confused with a solvable-looking system) and offers the AI tutor
+/// as the real way forward. The tone is inviting, not apologetic: this is the
+/// right tool for the job, not a failure.
 class ResultTutorInvite extends StatelessWidget {
   const ResultTutorInvite({
     super.key,
@@ -69,10 +71,25 @@ class ResultTutorInvite extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                "This is a proof-style problem — there's no single answer I can "
-                'compute and check by working it backwards, so I won’t pretend '
-                'there is. But this is exactly what the tutor is for: we can '
-                'build the argument together, one step at a time.',
+                switch (result.tutorRouteReason) {
+                  TutorRouteReason.system =>
+                    'This system of equations may have several solutions — I '
+                        'only show an answer when I can prove it\'s complete, '
+                        'and I can\'t do that here, so I won\'t pretend to. '
+                        'But this is exactly what the tutor is for: we can '
+                        'solve it together and check every step.',
+                  TutorRouteReason.multiPart =>
+                    'This problem asks for more than one thing, so there\'s '
+                        'no single answer I can check by working it '
+                        'backwards — and I won\'t pretend there is. The tutor '
+                        'is the right tool: we can take it one part at a time.',
+                  TutorRouteReason.proof =>
+                    "This is a proof-style problem — there's no single answer "
+                        'I can compute and check by working it backwards, so '
+                        'I won’t pretend there is. But this is exactly what '
+                        'the tutor is for: we can build the argument '
+                        'together, one step at a time.',
+                },
                 style: AppTypography.bodyMedium
                     .copyWith(color: colors.onPrimaryContainer),
               ),

@@ -142,6 +142,21 @@ class GeometryScenePainter extends CustomPainter {
     for (final side in scene.sides) {
       _paintSide(canvas, size, map, side);
     }
+
+    // An AREA answer has no wedge or side to stamp — the whole interior is the
+    // answer, so its chip lands on the centroid.
+    if (scene.unknownIsArea && _answerRevealed) {
+      final t = (revealStep == scene.steps.length - 1)
+          ? stepProgress.clamp(0.0, 1.0)
+          : 1.0;
+      _drawBadge(
+        canvas,
+        size,
+        _centroid(map),
+        '${scene.unknownLabel} = ${_fmtLen(scene.unknownValue)}',
+        t,
+      );
+    }
   }
 
   // ---- Right-angle marks ----------------------------------------------------
@@ -232,7 +247,22 @@ class GeometryScenePainter extends CustomPainter {
       }
       if (started) {
         path.close();
-        canvas.drawPath(path, Paint()..color = palette.figureFill);
+        // For an AREA unknown the interior IS the answer: swell the fill on
+        // the find-it beat (pulsing) and hold it strong once revealed.
+        var fill = palette.figureFill;
+        if (scene.unknownIsArea) {
+          if (_focus == GeometryStepFocus.unknown) {
+            final boost =
+                1.0 + (1.2 + 0.8 * pulse) * stepProgress.clamp(0.0, 1.0);
+            fill = fill.withValues(alpha: (fill.a * boost).clamp(0.0, 1.0));
+          } else if (_answerRevealed) {
+            final t = (revealStep == scene.steps.length - 1)
+                ? stepProgress.clamp(0.0, 1.0)
+                : 1.0;
+            fill = fill.withValues(alpha: (fill.a * (1.0 + 2.0 * t)).clamp(0.0, 1.0));
+          }
+        }
+        canvas.drawPath(path, Paint()..color = fill);
         canvas.drawPath(path, _stroke(palette.figureStroke, 2.5));
       }
     }
