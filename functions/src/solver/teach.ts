@@ -14,26 +14,311 @@
  * enrichment OpenAI call; Phase 4 the practice ladder). The `teachingEnabled()`
  * flag is OFF, so no teaching is generated in production yet.
  */
+import { logger } from "firebase-functions/v2";
+
 import { deriveTeachingMeta } from "./classify";
+import { JsonCompleter } from "./narrate";
 import {
+  CommonMistake,
+  DefinedTerm,
+  JourneyStage,
+  MethodData,
   PracticeLadder,
   SolvePayload,
+  TeachingCacheDoc,
   TeachingLayer,
-  MethodData,
 } from "./types";
 
 // ---------------------------------------------------------------------------
 // Scaffolds (filled in later phases; kept here so solve.ts wiring is stable).
 // ---------------------------------------------------------------------------
 
+const ENRICH_MAX_TOKENS = 1600;
+
 /**
- * Produce the teaching layer for a verified (or honest) skeleton. PHASE 1 wires
- * the single `enrichTeaching` OpenAI call here (one JSON call, subsuming
- * narration, run AFTER verify on the frozen skeleton). Until then it returns
- * undefined and the client renders today's UI.
+ * Produce the (lite) teaching layer for a VERIFIED skeleton via ONE OpenAI call,
+ * validate it through the firewall, and return the cache doc to attach + store.
+ * Returns undefined on any failure → the caller ships the verified v1 payload.
+ *
+ * PHASE 1 scope (spec §10): verified path, `lite` depth only. Deliberately does
+ * NOT subsume narration (spec R12) — `operation`/`why` stay engine/narrate-owned
+ * on the frozen core, and this call adds ONLY the additive teaching layer plus
+ * per-step `operationSymbol`/`selfExplainPrompt`/`pivotal`. That keeps the
+ * verified+narrated core byte-unchanged (zero regression) and sidesteps the
+ * two-`why`-authors problem entirely. Pro `full` depth (rule/explanation/
+ * per-step mistake/methodRationale/practiceLadder) and honest-mode enrichment
+ * are later phases.
  */
-export async function generateTeaching(): Promise<TeachingLayer | undefined> {
-  return undefined;
+export async function generateTeaching(
+  complete: JsonCompleter,
+  payload: SolvePayload
+): Promise<TeachingCacheDoc | null> {
+  // Return contract:
+  //   • a doc  → attach + cache it;
+  //   • null   → a DETERMINISTIC no-teaching outcome (honest guard, no examPick, or
+  //              a firewall/viability rejection) — safe for the caller to NEGATIVE-
+  //              cache so a reliably-failing problem is not re-enriched every solve;
+  //   • throws → a TRANSIENT completer failure — the caller ships v1 and does NOT
+  //              negative-cache, so a later solve can still succeed.
+  if (payload.verified !== true || payload.routeToTutor === true) return null;
+  // Require a real exam-pick method — never silently anchor teaching to methods[0].
+  const pick = payload.methods.find((m) => m.examPick);
+  if (!pick || pick.steps.length === 0) return null;
+
+  const pivotalIndex = pickPivotalIndex(pick.steps.length);
+  const user = enrichUserMessage(payload, pick, pivotalIndex);
+
+  let json: Record<string, unknown> | undefined;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 2 && !json; attempt++) {
+    try {
+      json = await complete(TEACHING_ENRICH_SYSTEM, user, ENRICH_MAX_TOKENS);
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  if (!json) {
+    logger.warn("generateTeaching.enrichFailed", {
+      problemType: payload.problemType,
+      err: String(lastErr),
+    });
+    throw lastErr instanceof Error ? lastErr : new Error("teaching enrich failed");
+  }
+
+  const doc = assembleTeaching(payload, pick, pivotalIndex, json);
+  if (!doc) {
+    logger.info("generateTeaching.rejected", { problemType: payload.problemType });
+    return null;
+  }
+  return doc;
+}
+
+/** The pivotal step the journey's `apply` stage points at: the central
+ * transformation, chosen deterministically (never model-supplied). */
+function pickPivotalIndex(len: number): number {
+  return len > 0 ? Math.floor((len - 1) / 2) : -1;
+}
+
+/** The 6-stage journey with ENGINE-computed step indices (spec R13): `apply`
+ * points at the pivotal step, `simplify` at everything after it. Phase-1 lite
+ * ships LABEL-ONLY stages (no `summary`) — per-stage summaries are a `full`/Phase-3
+ * addition (they would be model-authored and scrubbed via `problemProse`). */
+function buildJourney(len: number, pivotal: number): JourneyStage[] {
+  const after: number[] = [];
+  for (let i = pivotal + 1; i < len; i++) after.push(i);
+  return [
+    { id: "understand", stepIndices: [] },
+    { id: "chooseMethod", stepIndices: [] },
+    { id: "apply", stepIndices: pivotal >= 0 ? [pivotal] : [] },
+    { id: "simplify", stepIndices: after },
+    { id: "verify", stepIndices: [] },
+    { id: "takeaway", stepIndices: [] },
+  ];
+}
+
+/** Build the enrichment user turn from the FROZEN skeleton (the examPick method).
+ * The model may reason about the `after` expressions but must never return them. */
+function enrichUserMessage(
+  payload: SolvePayload,
+  pick: MethodData,
+  pivotalIndex: number
+): string {
+  const meta = deriveTeachingMeta(payload.problemType);
+  const steps = pick.steps.map((s, i) => ({
+    stepId: `${pick.id}#${i}`,
+    after: s.expression,
+  }));
+  return [
+    `depth: lite   difficulty: ${meta.difficulty}   language: en`,
+    `Problem (LaTeX): ${payload.problemLatex}`,
+    `Problem type: ${payload.problemType}`,
+    payload.finalAnswer ? `Verified final answer: ${payload.finalAnswer.plain}` : "",
+    `Method chosen: ${pick.name}`,
+    pivotalIndex >= 0 ? `Pivotal stepId: ${pick.id}#${pivotalIndex}` : "",
+    `Solved steps (math is FINAL — narrate only, key by stepId):`,
+    JSON.stringify(steps),
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/**
+ * Merge the model's narration into the frozen skeleton and build + VALIDATE the
+ * teaching layer. Engine-owned fields (category/difficulty/methodChosen/journey/
+ * pivotal) are set here, never taken from the model. Per-step extras land INLINE
+ * on the examPick method's steps only (R5). Returns the cache doc, or undefined
+ * if the firewall rejects the result.
+ */
+function assembleTeaching(
+  payload: SolvePayload,
+  pick: MethodData,
+  pivotalIndex: number,
+  json: Record<string, unknown>
+): TeachingCacheDoc | undefined {
+  const meta = deriveTeachingMeta(payload.problemType);
+  const header = obj(json.header);
+  const overview = obj(json.overview);
+  const concept = obj(json.concept);
+  const takeaway = obj(json.keyTakeaway);
+  const stepExtras = parseStepExtras(json.steps);
+
+  // Deep-copy methods so the enriched inline fields never mutate the frozen core.
+  const methods = payload.methods.map((m) => ({
+    ...m,
+    steps: m.steps.map((s) => ({ ...s })),
+  }));
+  const pickClone = methods.find((m) => m.id === pick.id);
+  if (pickClone) {
+    pickClone.steps.forEach((s, i) => {
+      const extra = stepExtras.get(`${pick.id}#${i}`);
+      const symbol = str(extra?.operationSymbol);
+      if (symbol) s.operationSymbol = symbol;
+      if (i === pivotalIndex) {
+        s.pivotal = true;
+        const prompt = str(extra?.selfExplainPrompt);
+        if (prompt) s.selfExplainPrompt = prompt;
+      }
+    });
+  }
+
+  const teaching: TeachingLayer = {
+    depth: "lite",
+    header: {
+      category: meta.category, // ENGINE
+      subcategory: str(header.subcategory),
+      difficulty: meta.difficulty, // ENGINE
+      learningObjective: str(header.learningObjective),
+      methodChosen: pick.name, // ENGINE-anchored
+      whyMethodChosen: str(header.whyMethodChosen),
+    },
+    overview: {
+      asked: str(overview.asked),
+      goal: str(overview.goal),
+      givens: strArray(overview.givens),
+      predictionPrompt: str(overview.predictionPrompt),
+    },
+    concept: {
+      body: str(concept.body),
+      definedTerms: parseDefinedTerms(concept.definedTerms),
+    },
+    methodRationale: { alternatives: [] }, // Pro (`full`) fills this — Phase 4
+    journey: buildJourney(pick.steps.length, pivotalIndex),
+    commonMistakes: parseMistakes(json.commonMistakes),
+    keyTakeaway: {
+      headline: str(takeaway.headline),
+      ...(str(takeaway.detail) ? { detail: str(takeaway.detail) } : {}),
+    },
+    // No practiceLadder / translation / decompositionPlan in Phase-1 lite.
+  };
+
+  // Minimum viability (#2): a degenerate/blank model turn must NOT attach or get
+  // cached — require the two load-bearing narration fields, else ship v1.
+  if (!teaching.concept.body || !teaching.header.learningObjective) return undefined;
+
+  const candidate: SolvePayload = { ...payload, methods, teaching };
+  if (!validateTeaching(candidate, teaching)) return undefined;
+  return { teaching, methods };
+}
+
+/** True iff a cached teaching doc's step expressions still byte-match the LIVE
+ * verified core — guards the cross-cache-boundary overlay (#5): the teaching and
+ * core caches have independent TTLs, so a stale teaching doc must never replace a
+ * freshly re-solved core's methods with mismatched working. */
+export function methodsAlign(core: MethodData[], cached: MethodData[]): boolean {
+  if (core.length !== cached.length) return false;
+  for (let i = 0; i < core.length; i++) {
+    if (core[i].id !== cached[i].id) return false;
+    if (core[i].steps.length !== cached[i].steps.length) return false;
+    for (let j = 0; j < core[i].steps.length; j++) {
+      if (core[i].steps[j].expression !== cached[i].steps[j].expression) return false;
+    }
+  }
+  return true;
+}
+
+// --- enrichment prompt ------------------------------------------------------
+
+const TEACHING_ENRICH_SYSTEM = `You are Matheasy's teaching engine. You write the LEARNING LAYER around a math problem that has ALREADY been solved and mathematically VERIFIED by a separate engine. You TEACH — you never compute.
+
+ABSOLUTE RULES (a violation discards your whole output):
+1. The math is FINAL. Every expression and the final answer were proven by the engine. Do NOT recompute, change, reorder, or re-derive them. You author WORDS ONLY, keyed to the step ids I give you. NEVER output any LaTeX expression, answer, or root.
+2. NEVER restate a computed result. Your sentences say WHY a move is valid or WHAT a concept means — never WHAT SOMETHING EQUALS. Forbidden: "so x = 8", "the answer is 5", "66 ÷ 5 = 13.2", spelled-out results ("x becomes eight"). If you must mention a number, use only one that already appears in the problem or a step I gave you.
+3. Reading level: pitch the CONCEPT simply and define every 3+ syllable math term the moment you use it, in the same sentence. Short sentences. University ideas are pitched with intuition, not dumbed down.
+4. whyMethodChosen: state a PROPERTY OF THIS PROBLEM that makes the method fit ("the constant factors into small whole numbers"). NEVER a speed/quality comparison against another method.
+5. learningObjective is a FORWARD goal ("Solve a factorable quadratic…"). keyTakeaway.headline is a DIFFERENT sentence — a rule to recall a week later. They must NOT be paraphrases of each other.
+6. commonMistakes are refutation triples: the trap, WHY IT'S TEMPTING, and the fix. Give at most 3.
+7. selfExplainPrompt: ONLY for the one pivotal step id I flag, write a short QUESTION the student answers before they see the reasoning (e.g. "Which pair of numbers multiplies to 6 and adds to -5?"). A question only — never the answer. Leave it "" for every other step.
+8. operationSymbol: a tiny transform chip for a step ("− 5", "×2", "factor") or "" — never a full expression.
+9. givens: restate ONLY what the problem gives (its numbers/relations). Introduce NO new number.
+
+Return ONLY a JSON object (no prose, no markdown) of EXACTLY this shape:
+{
+  "header": { "subcategory": "...", "learningObjective": "...", "whyMethodChosen": "..." },
+  "overview": { "asked": "...", "goal": "...", "givens": ["restate each given"], "predictionPrompt": "a one-tap question inviting a guess before the answer" },
+  "concept": { "body": "first-principles explanation a newcomer could follow", "definedTerms": [ { "term": "...", "plain": "..." } ] },
+  "steps": [ { "stepId": "<echo the id>", "operationSymbol": "<chip or ''>", "selfExplainPrompt": "<question ONLY on the pivotal step, else ''>" } ],
+  "commonMistakes": [ { "mistake": "...", "whyTempting": "...", "fix": "..." } ],
+  "keyTakeaway": { "headline": "one memorable rule", "detail": "optional one-sentence expansion" }
+}
+Provide exactly one step object per input step, same order, same stepId.`;
+
+// --- coercion helpers -------------------------------------------------------
+
+interface StepExtra {
+  operationSymbol?: unknown;
+  selfExplainPrompt?: unknown;
+}
+
+function obj(v: unknown): Record<string, unknown> {
+  return v && typeof v === "object" && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : {};
+}
+
+function str(v: unknown): string {
+  return typeof v === "string" ? v.trim() : "";
+}
+
+function strArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.map(str).filter(Boolean);
+}
+
+function parseStepExtras(v: unknown): Map<string, StepExtra> {
+  const map = new Map<string, StepExtra>();
+  if (!Array.isArray(v)) return map;
+  for (const raw of v) {
+    const o = obj(raw);
+    const id = str(o.stepId);
+    if (id && !map.has(id)) map.set(id, o as StepExtra);
+  }
+  return map;
+}
+
+function parseDefinedTerms(v: unknown): DefinedTerm[] {
+  if (!Array.isArray(v)) return [];
+  const out: DefinedTerm[] = [];
+  for (const raw of v) {
+    const o = obj(raw);
+    const term = str(o.term);
+    const plain = str(o.plain);
+    if (term && plain) out.push({ term, plain });
+  }
+  return out;
+}
+
+function parseMistakes(v: unknown): CommonMistake[] {
+  if (!Array.isArray(v)) return [];
+  const out: CommonMistake[] = [];
+  for (const raw of v) {
+    const o = obj(raw);
+    const mistake = str(o.mistake);
+    const whyTempting = str(o.whyTempting);
+    const fix = str(o.fix);
+    if (mistake && fix) out.push({ mistake, whyTempting, fix });
+    if (out.length === 3) break;
+  }
+  return out;
 }
 
 /**
@@ -99,9 +384,14 @@ export function validateTeaching(payload: SolvePayload, t: TeachingLayer): boole
   if (pick && t.header.methodChosen !== pick.name) return false;
 
   // 4) Structural numeric gate — PER STEP (allow = this step's exprs + answer).
-  //    operationSymbol IS scrubbed (it renders as a numeric chip, e.g. "− 5").
-  //    predictionPrompt/selfExplainPrompt are QUESTIONS and are deliberately NOT
-  //    scrubbed (they may use estimation anchors).
+  //    The allow-set DELIBERATELY includes the true finalAnswer, so narration may
+  //    restate it — prompt rule 2 ("never restate a result") is model guidance the
+  //    firewall does not enforce; the firewall enforces "no FOREIGN number".
+  //    operationSymbol IS scrubbed (renders as a numeric chip, e.g. "− 5").
+  //    selfExplainPrompt IS scrubbed (a self-explain question references THIS step's
+  //    own numbers). The problem-level predictionPrompt is the ONLY exempt field —
+  //    it is an estimation question that may use round anchors not in the skeleton,
+  //    so the client MUST render it unmistakably as a question, never as narration.
   const answerStrings = [payload.finalAnswer?.plain, payload.finalAnswer?.latex];
   for (const m of payload.methods) {
     for (let i = 0; i < m.steps.length; i++) {
@@ -115,6 +405,7 @@ export function validateTeaching(payload: SolvePayload, t: TeachingLayer): boole
         s.explanation,
         s.commonMistake,
         s.rule,
+        s.selfExplainPrompt,
       ]) {
         if (field && hasNumberOutside(field, allow)) return false;
       }

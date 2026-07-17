@@ -263,6 +263,16 @@ export interface TeachingMeta {
   difficulty: TeachingDifficulty;
 }
 
+/** What the teaching cache stores (spec §4.6): the validated teaching layer PLUS
+ * the examPick method with its inline teaching narration applied. Cached SEPARATELY
+ * from the verified core (namespaced by depth+language), so the core stays
+ * depth-agnostic and a teaching failure never touches it. On a hit the caller
+ * overlays `methods` onto the core and attaches `teaching`. */
+export interface TeachingCacheDoc {
+  teaching: TeachingLayer;
+  methods: MethodData[];
+}
+
 // --- Internal pipeline types ------------------------------------------------
 
 /** How the problem will be solved deterministically (or not). */

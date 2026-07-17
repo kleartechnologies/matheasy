@@ -6,8 +6,14 @@
  */
 import { describe, it, expect } from "vitest";
 
-import { validateTeaching, extractNumbers } from "../src/solver/teach";
+import {
+  validateTeaching,
+  extractNumbers,
+  generateTeaching,
+  methodsAlign,
+} from "../src/solver/teach";
 import { deriveTeachingMeta } from "../src/solver/classify";
+import { JsonCompleter } from "../src/solver/narrate";
 import { SolvePayload, TeachingLayer } from "../src/solver/types";
 
 // ---------------------------------------------------------------------------
@@ -560,6 +566,170 @@ describe("validateTeaching — firewall bypasses closed by review", () => {
       t.concept.body = "A mean can be as large as 9,000 for big data.";
     });
     expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 1 — generateTeaching (LLM enrichment through the firewall)
+// ---------------------------------------------------------------------------
+
+/** A verified CORE payload (what solve() produces): baseline op/why, no teaching,
+ * no deeper step fields — the real input to generateTeaching. */
+function quadraticCore(): SolvePayload {
+  const p = quadraticFixture();
+  return {
+    ...p,
+    teaching: undefined,
+    methods: p.methods.map((m) => ({
+      ...m,
+      steps: m.steps.map((s) => ({
+        expression: s.expression,
+        operation: s.operation,
+        why: s.why,
+      })),
+    })),
+  };
+}
+
+/** A well-formed enrichment response for the quadratic core (pivotal = factoring#1). */
+function validEnrich(): Record<string, unknown> {
+  return {
+    header: {
+      subcategory: "Quadratic equation (factorable)",
+      learningObjective: "Solve a factorable quadratic using the zero-product rule.",
+      whyMethodChosen: "The constant factors into small whole numbers, so it splits by inspection.",
+    },
+    overview: {
+      asked: "Find every value of x that makes the expression equal zero.",
+      goal: "Rewrite the quadratic as a product of two factors, then set each to zero.",
+      givens: ["x^2 - 5x + 6 = 0"],
+      predictionPrompt: "Do you think this has one answer, two, or none?",
+    },
+    concept: {
+      body: "A quadratic is an equation where the variable is squared; its graph is a U-shaped curve, and the crossing points are the answers, called roots.",
+      definedTerms: [
+        { term: "quadratic", plain: "an equation whose highest power of x is 2" },
+        { term: "root", plain: "a value of x that makes the expression zero" },
+      ],
+    },
+    steps: [
+      { stepId: "factoring#0", operationSymbol: "", selfExplainPrompt: "" },
+      { stepId: "factoring#1", operationSymbol: "factor", selfExplainPrompt: "Which pair of numbers multiplies to 6 and adds to -5?" },
+      { stepId: "factoring#2", operationSymbol: "", selfExplainPrompt: "" },
+      { stepId: "factoring#3", operationSymbol: "", selfExplainPrompt: "" },
+    ],
+    commonMistakes: [
+      { mistake: "Getting the signs wrong.", whyTempting: "Both roots are positive, so students expect plus signs.", fix: "Expand the brackets back and check the middle term." },
+      { mistake: "Reporting only one root.", whyTempting: "You stop at the first value that works.", fix: "Two brackets means two equations." },
+    ],
+    keyTakeaway: {
+      headline: "See a factorable quadratic? Factor, then zero each bracket.",
+      detail: "When the numbers factor cleanly, the roots fall straight out.",
+    },
+  };
+}
+
+const completerOf = (json: Record<string, unknown>): JsonCompleter => async () => json;
+const throwingCompleter: JsonCompleter = async () => {
+  throw new Error("openai down");
+};
+
+describe("generateTeaching — Phase 1 enrichment", () => {
+  it("builds + validates a lite teaching doc from a well-formed response", async () => {
+    const doc = await generateTeaching(completerOf(validEnrich()), quadraticCore());
+    expect(doc).toBeDefined();
+    expect(doc!.teaching.depth).toBe("lite");
+    // Engine-owned header fields (never from the model).
+    expect(doc!.teaching.header.category).toBe("equations");
+    expect(doc!.teaching.header.difficulty).toBe("secondary");
+    expect(doc!.teaching.header.methodChosen).toBe("Factoring");
+    expect(doc!.teaching.concept.body.length).toBeGreaterThan(0);
+    // Engine-computed journey indices.
+    const apply = doc!.teaching.journey.find((j) => j.id === "apply");
+    const simplify = doc!.teaching.journey.find((j) => j.id === "simplify");
+    expect(apply!.stepIndices).toEqual([1]);
+    expect(simplify!.stepIndices).toEqual([2, 3]);
+    // Pivotal step got the self-explain prompt + operationSymbol inline.
+    const pick = doc!.methods.find((m) => m.examPick)!;
+    expect(pick.steps[1].pivotal).toBe(true);
+    expect(pick.steps[1].operationSymbol).toBe("factor");
+    expect((pick.steps[1].selfExplainPrompt ?? "").length).toBeGreaterThan(0);
+    // A non-pivotal step is NOT marked pivotal.
+    expect(pick.steps[0].pivotal).toBeFalsy();
+  });
+
+  it("rejects (null) an enrichment that smuggles a foreign number", async () => {
+    const bad = validEnrich();
+    (bad.concept as Record<string, unknown>).body =
+      "A quadratic like this always has a root at 8.";
+    expect(await generateTeaching(completerOf(bad), quadraticCore())).toBeNull();
+  });
+
+  it("rejects (null) a foreign number smuggled through givens", async () => {
+    const bad = validEnrich();
+    (bad.overview as Record<string, unknown>).givens = ["x = 999"];
+    expect(await generateTeaching(completerOf(bad), quadraticCore())).toBeNull();
+  });
+
+  it("rejects (null) a foreign number smuggled through selfExplainPrompt (#1)", async () => {
+    const bad = validEnrich();
+    (bad.steps as Array<Record<string, unknown>>)[1].selfExplainPrompt =
+      "Isn't the answer just 42?";
+    expect(await generateTeaching(completerOf(bad), quadraticCore())).toBeNull();
+  });
+
+  it("rejects (null) a degenerate/empty response — never a blank card (#2)", async () => {
+    expect(await generateTeaching(completerOf({}), quadraticCore())).toBeNull();
+  });
+
+  it("returns null for an honest (unverified) payload (verified-only in P1)", async () => {
+    expect(
+      await generateTeaching(completerOf(validEnrich()), honestFixture())
+    ).toBeNull();
+  });
+
+  it("THROWS (transient — not negative-cached) when the completer keeps failing", async () => {
+    await expect(
+      generateTeaching(throwingCompleter, quadraticCore())
+    ).rejects.toThrow();
+  });
+
+  it("succeeds after one transient failure (retry, #8)", async () => {
+    let calls = 0;
+    const flaky: JsonCompleter = async () => {
+      calls += 1;
+      if (calls === 1) throw new Error("transient");
+      return validEnrich();
+    };
+    const doc = await generateTeaching(flaky, quadraticCore());
+    expect(doc).toBeDefined();
+    expect(calls).toBe(2);
+  });
+
+  it("does not mutate the input core payload's steps", async () => {
+    const core = quadraticCore();
+    await generateTeaching(completerOf(validEnrich()), core);
+    // The enriched inline fields live on the returned doc's copy, not the core.
+    expect(core.methods[0].steps[1].operationSymbol).toBeUndefined();
+    expect(core.methods[0].steps[1].pivotal).toBeUndefined();
+    expect(core.teaching).toBeUndefined();
+  });
+});
+
+describe("methodsAlign — cross-cache staleness guard (#5)", () => {
+  it("accepts identical methods and rejects a diverged expression", () => {
+    const a = quadraticFixture().methods;
+    expect(methodsAlign(a, quadraticFixture().methods)).toBe(true);
+    const stale = quadraticFixture().methods;
+    stale[0].steps[1].expression = "(x - 9)(x - 9) = 0"; // solver drifted
+    expect(methodsAlign(a, stale)).toBe(false);
+  });
+
+  it("rejects a different step/method count", () => {
+    const a = quadraticFixture().methods;
+    const b = quadraticFixture().methods;
+    b[0].steps.pop();
+    expect(methodsAlign(a, b)).toBe(false);
   });
 });
 

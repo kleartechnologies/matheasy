@@ -17,7 +17,12 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { fraction } from "mathjs";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
+import {
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+  REVENUECAT_SECRET_KEY,
+  teachingEnabled,
+} from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -26,8 +31,15 @@ import {
   recordSolveFailure,
 } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
-import { getCachedSolve, putCachedSolve } from "../lib/solveCache";
+import {
+  getCachedSolve,
+  getCachedTeaching,
+  putCachedSolve,
+  putCachedTeaching,
+  putTeachingNegative,
+} from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { generateTeaching, methodsAlign } from "../solver/teach";
 
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
@@ -48,6 +60,7 @@ import {
   MethodData,
   SolvePayload,
   SOLVE_SCHEMA_VERSION,
+  TeachingCacheDoc,
 } from "../solver/types";
 import {
   closeEnough,
@@ -120,23 +133,26 @@ export const solveEquation = onCall(
     // returns the VERIFIED payload with no LLM call. Collision-safe key, so a
     // hit is always the same problem; we swap in the caller's own rendering of
     // the problem LaTeX for display.
+    // Shared OpenAI JSON completer — used by BOTH the solve narration and the
+    // teaching enrichment, so it's hoisted above the cache branch (a core cache
+    // hit still needs it to build/attach the teaching layer).
+    const complete: JsonCompleter = (system, user, maxTokens) => {
+      const client = createOpenAI(OPENAI_API_KEY.value());
+      return chatJson<Record<string, unknown>>(
+        client,
+        OPENAI_MODEL.value(),
+        system,
+        user,
+        { temperature: 0.2, maxTokens }
+      );
+    };
+
     const cached = await getCachedSolve(latex);
     let payload: SolvePayload;
     if (cached) {
       payload = { ...cached, problemLatex: latex };
     } else {
       const cls = classify(latex);
-      const complete: JsonCompleter = (system, user, maxTokens) => {
-        const client = createOpenAI(OPENAI_API_KEY.value());
-        return chatJson<Record<string, unknown>>(
-          client,
-          OPENAI_MODEL.value(),
-          system,
-          user,
-          { temperature: 0.2, maxTokens }
-        );
-      };
-
       try {
         payload = await solve(cls, complete, (reason) => {
           // Fire-and-forget: turn every unverified solve into analytics data
@@ -158,6 +174,43 @@ export const solveEquation = onCall(
       }
       // Cache verified answers only (putCachedSolve no-ops on couldn't-verify).
       await putCachedSolve(latex, payload);
+    }
+
+    // v2 teaching layer (spec §3, §4) — ADDITIVE, behind teachingEnabled(),
+    // verified-path only. Cached SEPARATELY from the verified core (depth-keyed),
+    // so a teaching failure never touches the answer. Any error → ship the
+    // verified payload unchanged. Everyone gets `lite` in Phase 1; Pro `full` is
+    // a later phase, so no entitlement branch here yet.
+    if (teachingEnabled() && payload.verified && payload.routeToTutor !== true) {
+      try {
+        const lang = "en";
+        const cachedTeaching = await getCachedTeaching(latex, "lite", lang);
+        let tdoc: TeachingCacheDoc | null =
+          cachedTeaching === "negative" ? null : cachedTeaching;
+        if (!cachedTeaching) {
+          // True miss → generate. A deterministic no-teaching (null) is pinned as a
+          // negative so we don't re-enrich a reliably-failing problem every solve; a
+          // transient failure throws → caught below → v1, NOT negative-cached.
+          const built = await generateTeaching(complete, payload);
+          if (built) {
+            tdoc = built;
+            await putCachedTeaching(latex, built, "lite", lang);
+          } else {
+            await putTeachingNegative(latex, "lite", lang);
+          }
+        }
+        // Overlay only when the cached working still byte-matches the live core —
+        // the two caches have independent TTLs, so a stale doc must never replace a
+        // freshly re-solved core's methods (#5).
+        if (tdoc && methodsAlign(payload.methods, tdoc.methods)) {
+          payload = { ...payload, methods: tdoc.methods, teaching: tdoc.teaching };
+        }
+      } catch (err) {
+        logger.warn("teaching attach failed — shipping verified payload", {
+          uid,
+          err: String(err),
+        });
+      }
     }
 
     // Meter ONLY the manual-entry path (a scan already paid for OCR-sourced

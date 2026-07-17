@@ -55,7 +55,15 @@ export const TEACHING_ENABLED = defineString("TEACHING_ENABLED", {
   default: "false",
 });
 
-/** Whether server-side teaching enrichment is on. Phase 0: always false. */
+/** Whether server-side teaching enrichment is on. Phase 0: always false.
+ *
+ * COST NOTE: when ON, a fresh (cache-miss) verified solve makes TWO OpenAI calls —
+ * `narrateDeterministic` AND the teaching enrichment — but `RATE_LIMITS.solve` is
+ * spent once per REQUEST, so the effective per-user OpenAI-call ceiling roughly
+ * doubles on cache-miss solves. Repeats are $0 (both the verified core and the
+ * teaching layer are cached; deterministic enrich rejections are negative-cached).
+ * The small-% flag rollout + the solve rate limit bound the exposure; a per-token
+ * daily circuit-breaker is a planned follow-up. */
 export function teachingEnabled(): boolean {
   return TEACHING_ENABLED.value() === "true";
 }

@@ -23,7 +23,7 @@ import { logger } from "firebase-functions/v2";
 
 import {
   SolvePayload,
-  TeachingLayer,
+  TeachingCacheDoc,
   TEACHING_SCHEMA_VERSION,
 } from "../solver/types";
 import { db } from "./firestore";
@@ -105,31 +105,40 @@ function teachingDocId(latex: string, depth: TeachingDepth, language: string): s
     .digest("hex");
 }
 
-/** The cached teaching layer for [latex] at this depth/language, or null. */
+/** The cached teaching for [latex] at this depth/language:
+ *   • a `TeachingCacheDoc` — a real hit (attach it);
+ *   • `"negative"` — a pinned DETERMINISTIC no-teaching marker (skip; do NOT
+ *     re-enrich, until the short negative TTL lapses);
+ *   • `null` — a true miss (generate). */
 export async function getCachedTeaching(
   latex: string,
   depth: TeachingDepth,
   language: string
-): Promise<TeachingLayer | null> {
+): Promise<TeachingCacheDoc | "negative" | null> {
   try {
     const snap = await db
       .collection(TEACHING_COLLECTION)
       .doc(teachingDocId(latex, depth, language))
       .get();
     if (!snap.exists) return null;
-    const teaching = snap.get("teaching");
-    return teaching ? (teaching as TeachingLayer) : null;
+    if (snap.get("negative") === true) return "negative";
+    const doc = snap.get("doc");
+    return doc ? (doc as TeachingCacheDoc) : null;
   } catch (err) {
     logger.warn("teachingCache read failed — treating as a miss", { err: String(err) });
     return null;
   }
 }
 
-/** Stores a teaching layer for [latex]. Only `full`/`lite` (verified-path) layers
- * are cached — `concept_only` (honest) layers are never pinned. Best-effort. */
-export async function putCachedTeaching(
+/** Negative TTL — shorter than a hit's, so a prompt fix propagates within a day
+ * rather than being pinned for a month. */
+const NEGATIVE_TTL_DAYS = 1;
+
+/** Pin a DETERMINISTIC no-teaching outcome (a firewall/viability rejection — never
+ * a transient failure) so the paid enrich call isn't repeated on every later solve
+ * of the same problem. Best-effort. */
+export async function putTeachingNegative(
   latex: string,
-  teaching: TeachingLayer,
   depth: TeachingDepth,
   language: string
 ): Promise<void> {
@@ -140,7 +149,31 @@ export async function putCachedTeaching(
       .doc(teachingDocId(latex, depth, language))
       .set({
         key: solveCacheKey(latex),
-        teaching,
+        negative: true,
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt: new Date(Date.now() + NEGATIVE_TTL_DAYS * 86_400_000),
+      });
+  } catch (err) {
+    logger.warn("teachingCache negative write failed — skipping", { err: String(err) });
+  }
+}
+
+/** Stores a teaching doc for [latex]. Only `full`/`lite` (verified-path) layers
+ * are cached — `concept_only` (honest) layers are never pinned. Best-effort. */
+export async function putCachedTeaching(
+  latex: string,
+  doc: TeachingCacheDoc,
+  depth: TeachingDepth,
+  language: string
+): Promise<void> {
+  if (depth === "concept_only") return;
+  try {
+    await db
+      .collection(TEACHING_COLLECTION)
+      .doc(teachingDocId(latex, depth, language))
+      .set({
+        key: solveCacheKey(latex),
+        doc,
         createdAt: FieldValue.serverTimestamp(),
         expiresAt: new Date(Date.now() + TTL_DAYS * 86_400_000),
       });
