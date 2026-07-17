@@ -3,6 +3,7 @@ import 'dart:ui' show Offset;
 import '../../scan/domain/detected_equation.dart';
 import '../../scan/domain/scan_source.dart';
 import '../domain/result_models.dart';
+import '../domain/teaching_models.dart';
 import 'solver_service.dart';
 
 /// Real solver — calls the `solveEquation` Cloud Function (OpenAI behind the
@@ -109,16 +110,31 @@ class SolveResponseMapper {
       methods: methods,
       practice: const [], // not in §4 — Practice tab shows its empty state
       graph: _graph(json['graph']),
+      // v2 teaching layer (spec §2) — null for a v1 payload; the UI renders it
+      // only when present + non-empty, so today's screens are unchanged.
+      teaching: _teaching(json['teaching']),
     );
   }
 
+  static TeachingLayer? _teaching(Object? t) =>
+      t is Map ? TeachingLayer.fromJson(Map<String, dynamic>.from(t)) : null;
+
   static SolutionStep _step(Map<String, dynamic> m) {
     final operation = _str(m['operation']);
+    final symbol = _str(m['operationSymbol']);
     return SolutionStep(
       title: operation.isEmpty ? 'Step' : operation,
       resultLatex: _str(m['expression']),
       detail: _str(m['why']),
-      operationLabel: operation.isEmpty ? null : operation,
+      // Prefer the enriched transform chip (e.g. "− 5") when present; else the
+      // operation label — v1 behaviour, byte-unchanged.
+      operationLabel:
+          symbol.isNotEmpty ? symbol : (operation.isEmpty ? null : operation),
+      explanation: _strOrNull(m['explanation']),
+      commonMistake: _strOrNull(m['commonMistake']),
+      rule: _strOrNull(m['rule']),
+      selfExplainPrompt: _strOrNull(m['selfExplainPrompt']),
+      pivotal: m['pivotal'] == true,
     );
   }
 
@@ -217,6 +233,12 @@ class SolveResponseMapper {
   // ---- Helpers ----
   static String _str(Object? v, {String fallback = ''}) =>
       v is String && v.trim().isNotEmpty ? v.trim() : fallback;
+
+  /// Trimmed string, or null when empty — for optional v2 teaching step fields.
+  static String? _strOrNull(Object? v) {
+    final s = _str(v);
+    return s.isEmpty ? null : s;
+  }
 
   static List<T> _list<T>(Object? v, T Function(Map<String, dynamic>) map) =>
       v is List

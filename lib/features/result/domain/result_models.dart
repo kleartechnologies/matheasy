@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../scan/domain/detected_equation.dart';
+import 'teaching_models.dart';
+
+/// Total string coercion — a non-String (number/list/null) degrades instead of
+/// throwing, so a foreign / hand-edited / older cached blob can't crash a
+/// `fromJson` (history round-trip). `_s` returns '', `_sn` returns null.
+String _s(Object? v) => v is String ? v : '';
+String? _sn(Object? v) => v is String ? v : null;
 
 /// High-level classification of a solved problem.
 enum ResultType {
@@ -41,6 +48,12 @@ enum ExplanationMode {
 }
 
 /// A single step in the worked solution.
+///
+/// The v1 fields ([title], [resultLatex], [detail], [operationLabel]) are always
+/// present. The v2 teaching fields ([explanation], [commonMistake], [rule],
+/// [selfExplainPrompt], [pivotal]) ride along ONLY when the server attached a
+/// teaching layer; they default to null/false so a v1 payload parses unchanged
+/// and the current UI is byte-identical until a renderer opts into them (Phase 3).
 @immutable
 class SolutionStep {
   const SolutionStep({
@@ -48,6 +61,11 @@ class SolutionStep {
     required this.resultLatex,
     required this.detail,
     this.operationLabel,
+    this.explanation,
+    this.commonMistake,
+    this.rule,
+    this.selfExplainPrompt,
+    this.pivotal = false,
   });
 
   /// Short instruction, e.g. "Subtract 5 from both sides".
@@ -59,21 +77,46 @@ class SolutionStep {
   /// The "why" shown when the step is expanded.
   final String detail;
 
-  /// Optional operation chip, e.g. `− 5`.
+  /// Optional operation chip, e.g. `− 5` (the transform symbol when enriched).
   final String? operationLabel;
+
+  /// v2 — plain "what changed" (Pro depth), revealed on demand.
+  final String? explanation;
+
+  /// v2 — the trap at this step (Pro depth), revealed on demand.
+  final String? commonMistake;
+
+  /// v2 — a named property label, e.g. "Zero-product property" (Pro depth).
+  final String? rule;
+
+  /// v2 — an elicited QUESTION for the pivotal step (answered before `why`).
+  final String? selfExplainPrompt;
+
+  /// v2 — the pivotal transformation the learning journey points at.
+  final bool pivotal;
 
   Map<String, dynamic> toJson() => {
         'title': title,
         'resultLatex': resultLatex,
         'detail': detail,
         if (operationLabel != null) 'operationLabel': operationLabel,
+        if (explanation != null) 'explanation': explanation,
+        if (commonMistake != null) 'commonMistake': commonMistake,
+        if (rule != null) 'rule': rule,
+        if (selfExplainPrompt != null) 'selfExplainPrompt': selfExplainPrompt,
+        if (pivotal) 'pivotal': true,
       };
 
   factory SolutionStep.fromJson(Map<String, dynamic> j) => SolutionStep(
-        title: j['title'] as String? ?? '',
-        resultLatex: j['resultLatex'] as String? ?? '',
-        detail: j['detail'] as String? ?? '',
-        operationLabel: j['operationLabel'] as String?,
+        title: _s(j['title']),
+        resultLatex: _s(j['resultLatex']),
+        detail: _s(j['detail']),
+        operationLabel: _sn(j['operationLabel']),
+        explanation: _sn(j['explanation']),
+        commonMistake: _sn(j['commonMistake']),
+        rule: _sn(j['rule']),
+        selfExplainPrompt: _sn(j['selfExplainPrompt']),
+        pivotal: j['pivotal'] == true,
       );
 }
 
@@ -301,6 +344,7 @@ class ResultData {
     this.graph,
     this.routeToTutor = false,
     this.tutorRouteReason = TutorRouteReason.proof,
+    this.teaching,
   });
 
   final DetectedEquation equation;
@@ -337,6 +381,11 @@ class ResultData {
   /// [routeToTutor] is true) — selects the invite's honest framing.
   final TutorRouteReason tutorRouteReason;
 
+  /// The v2 teaching layer (spec §2), or null for a v1 payload / when the server
+  /// couldn't attach one. Every renderer that reads it must treat null (and each
+  /// empty sub-model) as "show nothing" — the current UI is unchanged when absent.
+  final TeachingLayer? teaching;
+
   String get questionLatex => equation.latex;
 
   Map<String, dynamic> toJson() => {
@@ -355,6 +404,7 @@ class ResultData {
         if (routeToTutor) 'routeToTutor': true,
         if (routeToTutor) 'tutorRouteReason': tutorRouteReason.name,
         if (graph != null) 'graph': graph!.toJson(),
+        if (teaching != null) 'teaching': teaching!.toJson(),
       };
 
   factory ResultData.fromJson(Map<String, dynamic> j) => ResultData(
@@ -393,5 +443,9 @@ class ResultData {
         graph: j['graph'] == null
             ? null
             : GraphData.fromJson(j['graph'] as Map<String, dynamic>),
+        teaching: j['teaching'] is Map
+            ? TeachingLayer.fromJson(
+                Map<String, dynamic>.from(j['teaching'] as Map))
+            : null,
       );
 }
