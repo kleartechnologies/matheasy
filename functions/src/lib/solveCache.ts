@@ -27,6 +27,7 @@ import {
   TEACHING_SCHEMA_VERSION,
 } from "../solver/types";
 import { db } from "./firestore";
+import { contentLanguage } from "./language";
 
 const COLLECTION = "solveCache";
 /** The teaching layer caches SEPARATELY from the verified core (spec §4.6), so
@@ -59,14 +60,26 @@ export function solveCacheKey(latex: string): string {
     .replace(/\s+/g, "");
 }
 
-function docId(latex: string): string {
-  return createHash("sha256").update(solveCacheKey(latex)).digest("hex");
+// Namespaced by LANGUAGE: the verified math (answer/graph) is language-agnostic,
+// but the step narration in the payload is written in the learner's language, so
+// two languages must not share one entry (else an English user could be served
+// Malay narration). Each language keeps its own bucket; the answer re-computes
+// deterministically (cheap) per language.
+function docId(latex: string, language: string): string {
+  // Key on the EFFECTIVE content language: an unknown code renders English, so it
+  // must land in the "en" bucket (see contentLanguage), never its own.
+  return createHash("sha256")
+    .update(`${contentLanguage(language)}:${solveCacheKey(latex)}`)
+    .digest("hex");
 }
 
-/** The cached verified payload for [latex], or null on a miss / any error. */
-export async function getCachedSolve(latex: string): Promise<SolvePayload | null> {
+/** The cached verified payload for [latex] in [language], or null on a miss. */
+export async function getCachedSolve(
+  latex: string,
+  language = "en"
+): Promise<SolvePayload | null> {
   try {
-    const snap = await db.collection(COLLECTION).doc(docId(latex)).get();
+    const snap = await db.collection(COLLECTION).doc(docId(latex, language)).get();
     if (!snap.exists) return null;
     const payload = snap.get("payload");
     return payload ? (payload as SolvePayload) : null;
@@ -76,12 +89,16 @@ export async function getCachedSolve(latex: string): Promise<SolvePayload | null
   }
 }
 
-/** Stores a VERIFIED payload for [latex]. Best-effort; never throws. */
-export async function putCachedSolve(latex: string, payload: SolvePayload): Promise<void> {
+/** Stores a VERIFIED payload for [latex] in [language]. Best-effort; never throws. */
+export async function putCachedSolve(
+  latex: string,
+  payload: SolvePayload,
+  language = "en"
+): Promise<void> {
   if (!payload.verified) return;
   try {
-    await db.collection(COLLECTION).doc(docId(latex)).set({
-      key: solveCacheKey(latex),
+    await db.collection(COLLECTION).doc(docId(latex, language)).set({
+      key: `${contentLanguage(language)}:${solveCacheKey(latex)}`,
       payload,
       createdAt: FieldValue.serverTimestamp(),
       expiresAt: new Date(Date.now() + TTL_DAYS * 86_400_000),

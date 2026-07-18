@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../../settings/application/language_provider.dart';
 import '../domain/result_models.dart';
 import 'functions_solver_service.dart';
 
@@ -455,7 +456,10 @@ final Provider<SolverService> solverServiceProvider =
     Provider<SolverService>((ref) {
   if (!ref.watch(aiBackendReadyProvider)) return const MockSolverService();
   final functions = ref.watch(firebaseFunctionsProvider);
+  final ctx = ref.watch(aiRequestContextProvider);
   return FunctionsSolverService(
-    (name, data) => callFunction(functions, name, data),
+    // Every call carries the learner's language + grade so the AI narrates in
+    // the chosen language (math notation stays universal).
+    (name, data) => callFunction(functions, name, {...data, ...ctx}),
   );
 });

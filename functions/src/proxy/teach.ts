@@ -32,6 +32,7 @@ import {
   putTeachingNegative,
 } from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { contentLanguage, languageDirective } from "../lib/language";
 import { classify } from "../solver/classify";
 import { JsonCompleter } from "../solver/narrate";
 import {
@@ -45,13 +46,15 @@ interface EnrichRequest {
   /** True for a routeToTutor problem (proof/conceptual/multi-part): teach the
    * APPROACH (concept_only), since there's no verified core to enrich. */
   honest?: boolean;
+  /** BCP-47 language the teaching prose must be written in (math stays universal). */
+  language?: string;
 }
 
 export const enrichTeaching = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
-    const { latex, honest } = (request.data ?? {}) as EnrichRequest;
+    const { latex, honest, language } = (request.data ?? {}) as EnrichRequest;
     if (!latex || typeof latex !== "string") {
       throw new HttpsError(
         "invalid-argument",
@@ -69,7 +72,9 @@ export const enrichTeaching = onCall(
       return chatJson<Record<string, unknown>>(
         client,
         OPENAI_MODEL.value(),
-        system,
+        // Inject the language directive into every teaching LLM call so all
+        // narration is written in the learner's language (math stays universal).
+        system + languageDirective(language),
         user,
         { temperature: 0.2, maxTokens }
       );
@@ -95,15 +100,15 @@ export const enrichTeaching = onCall(
       return { teaching: null };
     }
 
-    // VERIFIED path: the core must already be cached by the preceding solveEquation.
-    // No cache → nothing to teach here (we never re-solve on the teaching path).
-    const core = await getCachedSolve(latex);
+    // VERIFIED path: the core must already be cached by the preceding solveEquation
+    // (in the SAME language — the client sends `language` on both calls). No cache
+    // → nothing to teach here (we never re-solve on the teaching path).
+    const lang = contentLanguage(language);
+    const core = await getCachedSolve(latex, lang);
     if (!core || core.verified !== true || core.routeToTutor === true) {
       return { teaching: null };
     }
     const payload = { ...core, problemLatex: latex };
-
-    const lang = "en";
     const depth: "lite" | "full" =
       (await getEntitlement(uid)) === PRO_ENTITLEMENT_ID ? "full" : "lite";
 

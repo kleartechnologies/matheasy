@@ -28,6 +28,7 @@ import {
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { getCachedSolve, putCachedSolve } from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { languageDirective } from "../lib/language";
 
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
@@ -66,6 +67,8 @@ import {
 interface SolveRequest {
   latex?: string;
   countAsScan?: boolean;
+  /** BCP-47 language the step narration must be written in (math stays universal). */
+  language?: string;
 }
 
 /** A `verified:false` payload — an honest "couldn't verify", never a guess. */
@@ -98,7 +101,8 @@ export const solveEquation = onCall(
   { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
-    const { latex, countAsScan = false } = (request.data ?? {}) as SolveRequest;
+    const { latex, countAsScan = false, language } = (request.data ??
+      {}) as SolveRequest;
 
     if (!latex || typeof latex !== "string") {
       throw new HttpsError(
@@ -120,7 +124,7 @@ export const solveEquation = onCall(
     // returns the VERIFIED payload with no LLM call. Collision-safe key, so a
     // hit is always the same problem; we swap in the caller's own rendering of
     // the problem LaTeX for display.
-    const cached = await getCachedSolve(latex);
+    const cached = await getCachedSolve(latex, language);
     let payload: SolvePayload;
     if (cached) {
       payload = { ...cached, problemLatex: latex };
@@ -134,7 +138,8 @@ export const solveEquation = onCall(
         return chatJson<Record<string, unknown>>(
           client,
           OPENAI_MODEL.value(),
-          system,
+          // Narrate the steps in the learner's language (math stays universal).
+          system + languageDirective(language),
           user,
           { temperature: 0.2, maxTokens }
         );
@@ -159,7 +164,7 @@ export const solveEquation = onCall(
         );
       }
       // Cache verified answers only (putCachedSolve no-ops on couldn't-verify).
-      await putCachedSolve(latex, payload);
+      await putCachedSolve(latex, payload, language);
     }
 
     // Meter ONLY the manual-entry path (a scan already paid for OCR-sourced

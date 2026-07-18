@@ -16,6 +16,7 @@ import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { languageDirective } from "../lib/language";
 
 interface VisualRequest {
   latex?: string;
@@ -23,6 +24,8 @@ interface VisualRequest {
   answerLatex?: string;
   /** Coarse problem-type hint from the solver (e.g. "linear"). */
   problemType?: string;
+  /** BCP-47 language the captions/steps/hints must be written in (math universal). */
+  language?: string;
 }
 
 /** The JSON contract the model must return — maps 1:1 to the Flutter domain. */
@@ -129,7 +132,7 @@ export const generateVisualSolution = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
-    const { latex, answerLatex, problemType } = (request.data ??
+    const { latex, answerLatex, problemType, language } = (request.data ??
       {}) as VisualRequest;
 
     if (!latex || typeof latex !== "string") {
@@ -167,7 +170,7 @@ export const generateVisualSolution = onCall(
       payload = await chatJson<VisualPayload>(
         client,
         OPENAI_MODEL.value(),
-        SYSTEM_PROMPT,
+        SYSTEM_PROMPT + languageDirective(language),
         userMessage,
         { temperature: 0.2, maxTokens: 3000 }
       );

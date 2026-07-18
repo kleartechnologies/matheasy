@@ -21,6 +21,7 @@ import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { languageDirective } from "../lib/language";
 
 interface PracticeRequest {
   topic?: string;
@@ -33,6 +34,8 @@ interface PracticeRequest {
   targetSteps?: number;
   /** The hard ceiling on solving steps — the model must not exceed it. */
   maxSteps?: number;
+  /** BCP-47 language the questions' prose must be written in (math stays universal). */
+  language?: string;
   count?: number;
 }
 
@@ -91,6 +94,7 @@ export const generatePracticeQuestion = onCall(
       grade,
       targetSteps,
       maxSteps,
+      language,
       count,
     } = (request.data ?? {}) as PracticeRequest;
 
@@ -150,7 +154,7 @@ export const generatePracticeQuestion = onCall(
         payload = await chatJson<PracticePayload>(
           client,
           OPENAI_MODEL.value(),
-          SYSTEM_PROMPT,
+          SYSTEM_PROMPT + languageDirective(language),
           buildUserMessage(need),
           { temperature: 0.7, maxTokens: 2500 }
         );

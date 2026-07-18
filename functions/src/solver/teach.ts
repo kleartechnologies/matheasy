@@ -122,7 +122,7 @@ export async function generateHonestTeaching(
 ): Promise<TeachingCacheDoc | null> {
   const meta = deriveTeachingMeta(problemType);
   const user = [
-    `difficulty: ${meta.difficulty}   language: en`,
+    `difficulty: ${meta.difficulty}`,
     `Problem (LaTeX): ${problemLatex}`,
     `Problem type: ${problemType}`,
   ].join("\n");
@@ -246,7 +246,7 @@ function enrichUserMessage(
   // produced (name only) — the model may add standard ones too.
   const others = payload.methods.filter((m) => m.id !== pick.id).map((m) => m.name);
   return [
-    `depth: ${depth}   difficulty: ${meta.difficulty}   language: en`,
+    `depth: ${depth}   difficulty: ${meta.difficulty}`,
     `Problem (LaTeX): ${payload.problemLatex}`,
     `Problem type: ${payload.problemType}`,
     payload.finalAnswer ? `Verified final answer: ${payload.finalAnswer.plain}` : "",

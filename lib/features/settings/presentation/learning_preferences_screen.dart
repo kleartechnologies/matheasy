@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_language.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../onboarding/domain/onboarding_models.dart';
@@ -35,6 +36,20 @@ class LearningPreferencesScreen extends ConsumerWidget {
           SettingsSection(
             title: 'Study profile',
             children: [
+              SettingsTile(
+                icon: Icons.language_rounded,
+                title: 'Language',
+                value: learning.language.nativeName,
+                onTap: () => showSettingsOptionPicker<AppLanguage>(
+                  context,
+                  title: 'Language',
+                  options: AppLanguage.values,
+                  selected: learning.language,
+                  label: (o) => o.nativeName,
+                  icon: (o) => Icons.translate_rounded,
+                  onSelected: controller.setLanguage,
+                ),
+              ),
               SettingsTile(
                 icon: Icons.school_rounded,
                 title: 'Grade level',

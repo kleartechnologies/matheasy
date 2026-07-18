@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../../settings/application/language_provider.dart';
 import '../domain/geometry_models.dart';
 import '../domain/visual_models.dart';
 import 'functions_visual_solution_service.dart';
@@ -303,7 +304,8 @@ final Provider<VisualSolutionService> visualSolutionServiceProvider =
     return const MockVisualSolutionService();
   }
   final functions = ref.watch(firebaseFunctionsProvider);
+  final ctx = ref.watch(aiRequestContextProvider);
   return FunctionsVisualSolutionService(
-    (name, data) => callFunction(functions, name, data),
+    (name, data) => callFunction(functions, name, {...data, ...ctx}),
   );
 });

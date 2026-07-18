@@ -18,6 +18,7 @@ import {
 } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { createOpenAI } from "../lib/openai";
+import { languageDirective } from "../lib/language";
 
 interface TutorTurn {
   role?: "user" | "assistant";
@@ -34,6 +35,8 @@ interface TutorRequest {
    * tapped (Stage 14), so Matheasy can explain that exact transformation.
    */
   visualStep?: string;
+  /** BCP-47 language the tutor must reply in (math stays universal). */
+  language?: string;
 }
 
 interface TutorPayload {
@@ -55,6 +58,7 @@ export const tutorReply = onCall(
       history = [],
       problemLatex,
       visualStep,
+      language,
     } = (request.data ?? {}) as TutorRequest;
 
     if (!userText || typeof userText !== "string") {
@@ -66,7 +70,9 @@ export const tutorReply = onCall(
     await assertWithinQuota(uid, "tutorMessages");
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      // The tutor replies in the learner's language by default (the student can
+      // still ask for another language in-chat, which the model honours).
+      { role: "system", content: SYSTEM_PROMPT + languageDirective(language) },
     ];
     if (problemLatex) {
       messages.push({

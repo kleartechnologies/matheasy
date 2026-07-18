@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
+import '../../settings/application/language_provider.dart';
 import '../domain/result_models.dart';
 import 'functions_solver_service.dart';
 
@@ -49,7 +50,8 @@ final Provider<TeachingService> teachingServiceProvider =
     Provider<TeachingService>((ref) {
   if (!ref.watch(aiBackendReadyProvider)) return const NoTeachingService();
   final functions = ref.watch(firebaseFunctionsProvider);
+  final ctx = ref.watch(aiRequestContextProvider);
   return FunctionsTeachingService(
-    (name, data) => callFunction(functions, name, data),
+    (name, data) => callFunction(functions, name, {...data, ...ctx}),
   );
 });

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/localization/app_language.dart';
 import '../../onboarding/domain/onboarding_models.dart';
 import '../../practice/domain/practice_difficulty.dart';
 import '../domain/learning_goal.dart';
@@ -51,6 +52,15 @@ class SettingsController extends _$SettingsController {
   void setDifficulty(PracticeDifficulty difficulty) => _update(
         state.copyWith(
           learning: state.learning.copyWith(difficulty: difficulty),
+        ),
+      );
+
+  /// Changes the learning language. Takes effect immediately (no restart): the
+  /// UI locale re-renders and every subsequent AI request carries the new
+  /// language, so future explanations, practice, tutor replies and hints follow.
+  void setLanguage(AppLanguage language) => _update(
+        state.copyWith(
+          learning: state.learning.copyWith(language: language),
         ),
       );
 

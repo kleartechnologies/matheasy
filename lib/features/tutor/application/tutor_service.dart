@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
+import '../../settings/application/language_provider.dart';
 import '../domain/tutor_models.dart';
 import 'functions_tutor_service.dart';
 import 'tutor_reply_engine.dart';
@@ -70,7 +71,8 @@ final Provider<TutorService> tutorServiceProvider =
     Provider<TutorService>((ref) {
   if (!ref.watch(aiBackendReadyProvider)) return const MockTutorService();
   final functions = ref.watch(firebaseFunctionsProvider);
+  final ctx = ref.watch(aiRequestContextProvider);
   return FunctionsTutorService(
-    (name, data) => callFunction(functions, name, data),
+    (name, data) => callFunction(functions, name, {...data, ...ctx}),
   );
 });

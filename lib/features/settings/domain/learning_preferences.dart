@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/localization/app_language.dart';
 import '../../onboarding/domain/onboarding_models.dart';
 import '../../practice/domain/practice_difficulty.dart';
 import 'learning_goal.dart';
@@ -18,6 +19,7 @@ class LearningPreferences {
     this.dailyGoal,
     this.topics = const <MathTopic>{},
     this.difficulty = PracticeDifficulty.medium,
+    this.language = AppLanguage.english,
   });
 
   static const LearningPreferences defaults = LearningPreferences();
@@ -38,6 +40,10 @@ class LearningPreferences {
   /// authority for practice generation (defaults to [PracticeDifficulty.medium]).
   final PracticeDifficulty difficulty;
 
+  /// The learner's language — controls the whole learning experience (UI + every
+  /// AI response). Math notation stays universal. Defaults to [AppLanguage.english].
+  final AppLanguage language;
+
   /// Whether the learner has set any preference beyond the defaults.
   bool get isConfigured =>
       gradeLevel != null ||
@@ -51,6 +57,7 @@ class LearningPreferences {
     DailyGoal? dailyGoal,
     Set<MathTopic>? topics,
     PracticeDifficulty? difficulty,
+    AppLanguage? language,
   }) {
     return LearningPreferences(
       gradeLevel: gradeLevel ?? this.gradeLevel,
@@ -58,6 +65,7 @@ class LearningPreferences {
       dailyGoal: dailyGoal ?? this.dailyGoal,
       topics: topics ?? this.topics,
       difficulty: difficulty ?? this.difficulty,
+      language: language ?? this.language,
     );
   }
 
@@ -68,7 +76,8 @@ class LearningPreferences {
       other.learningGoal == learningGoal &&
       other.dailyGoal == dailyGoal &&
       setEquals(other.topics, topics) &&
-      other.difficulty == difficulty;
+      other.difficulty == difficulty &&
+      other.language == language;
 
   @override
   int get hashCode => Object.hash(
@@ -77,5 +86,6 @@ class LearningPreferences {
         dailyGoal,
         Object.hashAllUnordered(topics),
         difficulty,
+        language,
       );
 }

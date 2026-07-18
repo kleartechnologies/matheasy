@@ -8,6 +8,7 @@ import 'features/analytics/application/analytics_controller.dart';
 import 'features/progress/presentation/widgets/achievement_celebration_host.dart';
 import 'features/settings/application/settings_controller.dart';
 import 'features/settings/domain/accessibility_settings.dart';
+import 'l10n/app_localizations.dart';
 
 /// Root application widget. Wires the router (with navigation guards) and the
 /// light/dark themes, reacting to the persisted appearance + accessibility
@@ -29,6 +30,12 @@ class MatheasyApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: settings.appearance.themeMode,
+      // Multilingual: the learner's chosen language drives the UI locale, so a
+      // change re-localizes instantly (settings is watched above). Material +
+      // Cupertino widgets localize too via the generated delegates.
+      locale: settings.learning.language.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
       // Apply accessibility overrides, then surface achievement-unlock
       // celebrations above every route.

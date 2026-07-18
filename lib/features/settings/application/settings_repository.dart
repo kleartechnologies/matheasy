@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_language.dart';
 import '../../../core/persistence/preferences_store.dart';
 import '../../onboarding/domain/onboarding_models.dart';
 import '../../practice/domain/practice_difficulty.dart';
@@ -74,6 +75,7 @@ class LocalSettingsRepository implements SettingsRepository {
         'dailyGoal': p.dailyGoal?.name,
         'topics': [for (final topic in p.topics) topic.name],
         'difficulty': p.difficulty.name,
+        'language': p.language.code,
       };
 
   LearningPreferences _learningFromJson(Object? value) {
@@ -88,6 +90,7 @@ class LocalSettingsRepository implements SettingsRepository {
       },
       difficulty: _byName(PracticeDifficulty.values, value['difficulty']) ??
           PracticeDifficulty.medium,
+      language: AppLanguage.fromCode(value['language'] as String?),
     );
   }
 

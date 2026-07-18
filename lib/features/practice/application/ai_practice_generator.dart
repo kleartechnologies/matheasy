@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/functions_client.dart';
+import '../../settings/application/language_provider.dart';
 import '../domain/practice_difficulty.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_skill.dart';
@@ -203,7 +204,8 @@ final Provider<AiPracticeGenerator?> aiPracticeGeneratorProvider =
     Provider<AiPracticeGenerator?>((ref) {
   if (!ref.watch(aiBackendReadyProvider)) return null;
   final functions = ref.watch(firebaseFunctionsProvider);
+  final ctx = ref.watch(aiRequestContextProvider);
   return FunctionsAiPracticeGenerator(
-    (name, data) => callFunction(functions, name, data),
+    (name, data) => callFunction(functions, name, {...data, ...ctx}),
   );
 });
