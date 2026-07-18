@@ -229,15 +229,13 @@ class _StepStage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: MathText(
-                  step.beforeLatex,
-                  style: AppTypography.headingSmall
-                      .copyWith(color: colors.textSecondary),
-                ),
-              ),
+            AdaptiveMath(
+              step.beforeLatex,
+              minFontSize: 24,
+              maxFontSize: 30,
+              alignment: Alignment.center,
+              style: AppTypography.headingSmall
+                  .copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.sm),
             _entrance(
@@ -271,15 +269,13 @@ class _StepStage extends StatelessWidget {
                   color: colors.primaryContainer,
                   borderRadius: AppRadius.mdRadius,
                 ),
-                child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: MathText(
-                      step.afterLatex,
-                      style: AppTypography.headingMedium
-                          .copyWith(color: colors.onPrimaryContainer),
-                    ),
-                  ),
+                child: AdaptiveMath(
+                  step.afterLatex,
+                  minFontSize: 28,
+                  maxFontSize: 36,
+                  alignment: Alignment.center,
+                  style: AppTypography.headingMedium
+                      .copyWith(color: colors.onPrimaryContainer),
                 ),
               ),
             ),

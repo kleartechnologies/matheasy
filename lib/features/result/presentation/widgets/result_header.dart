@@ -11,8 +11,10 @@ import '../../domain/result_models.dart';
 import 'difficulty_pill.dart';
 import 'math_text.dart';
 
-/// The top of the result screen: the detected question, then the big answer
-/// with a Play Solution button.
+/// The top of the result screen: the detected problem shown large, then the
+/// final answer as the single most prominent element on the page (Photomath
+/// principle — the mathematics leads, the chrome recedes). Both stay at full
+/// size and scroll horizontally when wide, so they never shrink to a squint.
 class ResultHeader extends StatelessWidget {
   const ResultHeader({
     super.key,
@@ -30,14 +32,23 @@ class ResultHeader extends StatelessWidget {
     final colors = context.colors;
     return Column(
       children: [
+        // --- The problem ---
         AppCard(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // A slim eyebrow — detection confidence and a rescan escape — kept
+              // small so the problem itself is the first thing the eye lands on.
               Row(
                 children: [
                   Icon(Icons.check_circle_rounded,
-                      size: 15, color: colors.onSuccessContainer),
+                      size: 14, color: colors.onSuccessContainer),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     'DETECTED · ${result.equation.confidencePercent}%',
@@ -72,15 +83,16 @@ class ResultHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: MathText(
-                  result.questionLatex,
-                  style: AppTypography.displaySmall
-                      .copyWith(color: colors.textPrimary),
-                ),
+              const SizedBox(height: AppSpacing.sm),
+              // The problem — large, but sized to the content: a short problem
+              // gets the full 40px, a long one shrinks to fit rather than
+              // scrolling sideways.
+              AdaptiveMath(
+                result.questionLatex,
+                minFontSize: 28,
+                maxFontSize: 40,
+                style: AppTypography.displaySmall
+                    .copyWith(color: colors.textPrimary),
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -98,9 +110,15 @@ class ResultHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
+        // --- The final answer: the hero of the screen ---
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
           decoration: BoxDecoration(
             color: colors.successContainer,
             borderRadius: AppRadius.xlRadius,
@@ -108,30 +126,33 @@ class ResultHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'FINAL ANSWER',
-                style: AppTypography.label
-                    .copyWith(color: colors.onSuccessContainer),
-              ),
-              const SizedBox(height: AppSpacing.sm),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: MathText(
-                        result.answerLatex,
-                        style: AppTypography.displayMedium
-                            .copyWith(color: colors.onSuccessContainer),
-                      ),
-                    ),
+                  Text(
+                    'FINAL ANSWER',
+                    style: AppTypography.label
+                        .copyWith(color: colors.onSuccessContainer),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  _PlayButton(onTap: onPlay),
+                  const Spacer(),
+                  Icon(Icons.verified_rounded,
+                      size: 16, color: colors.onSuccessContainer),
                 ],
               ),
+              const SizedBox(height: AppSpacing.sm),
+              // Adaptive so it stays readable without scrolling: a short answer
+              // fills at 56px, a medium one lands in the 40s, a long one settles
+              // near 34px — never a forced 60px, never a sideways scroll.
+              AdaptiveMath(
+                result.answerLatex,
+                minFontSize: 34,
+                maxFontSize: 56,
+                style: AppTypography.displayLarge.copyWith(
+                  color: colors.onSuccessContainer,
+                  height: 1.05,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _PlayButton(onTap: onPlay),
             ],
           ),
         ),
@@ -140,6 +161,8 @@ class ResultHeader extends StatelessWidget {
   }
 }
 
+/// A full-width "play the walkthrough" control — a big, easy target under the
+/// answer that reveals the steps one at a time at arm's length.
 class _PlayButton extends StatelessWidget {
   const _PlayButton({required this.onTap});
 
@@ -157,11 +180,9 @@ class _PlayButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: AppRadius.pillRadius,
         child: Container(
+          width: double.infinity,
           // md vertical padding keeps the pill at a ≥44px tap target.
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           decoration: BoxDecoration(
             color: context.colors.surface,
             borderRadius: AppRadius.pillRadius,
@@ -169,14 +190,15 @@ class _PlayButton extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.play_circle_fill_rounded,
-                  size: 20, color: emeraldLabel),
-              const SizedBox(width: AppSpacing.xs),
+                  size: 22, color: emeraldLabel),
+              const SizedBox(width: AppSpacing.sm),
               Text(
-                'Play',
+                'Play step-by-step',
                 style: AppTypography.button
-                    .copyWith(color: emeraldLabel, fontSize: 14),
+                    .copyWith(color: emeraldLabel, fontSize: 15),
               ),
             ],
           ),

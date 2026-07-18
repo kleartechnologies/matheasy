@@ -144,7 +144,12 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                   borderRadius: AppRadius.modalRadius,
                   boxShadow: context.elevation.floating,
                 ),
-                child: Column(
+                // This modal is the one surface in the flow that doesn't sit in
+                // a ListView, so bound it to the screen: the enlarged step math
+                // and any text-scaled narration scroll vertically here instead of
+                // painting an overflow stripe on a small device.
+                child: SingleChildScrollView(
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -240,9 +245,15 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                           AnimatedSwitcher(
                             duration: AppDurations.medium,
                             transitionBuilder: AppTransitions.fadeThrough,
-                            child: MathText(
+                            child: AdaptiveMath(
                               step.resultLatex,
                               key: ValueKey(_index),
+                              // Read at arm's length: keep the current step big
+                              // (up to 44px) but size it down to fit rather than
+                              // scroll sideways.
+                              minFontSize: 30,
+                              maxFontSize: 44,
+                              alignment: Alignment.center,
                               style: AppTypography.displaySmall
                                   .copyWith(color: colors.onPrimaryContainer),
                             ),
@@ -287,6 +298,7 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                       ],
                     ),
                   ],
+                  ),
                 ),
               ),
             ),

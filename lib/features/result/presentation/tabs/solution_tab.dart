@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
+import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
@@ -36,9 +37,13 @@ String _accentHex(BuildContext context) {
 /// a subtle scale on reveal unless reduce-motion is on), the "understand, don't
 /// just copy" moment.
 class SolutionTab extends StatefulWidget {
-  const SolutionTab({super.key, required this.result});
+  const SolutionTab({super.key, required this.result, this.onOpenVisual});
 
   final ResultData result;
+
+  /// Opens the Visual Learning tab — the flagship "understand it, don't just
+  /// read it" experience. Null in tests / previews (the hero is then omitted).
+  final VoidCallback? onOpenVisual;
 
   @override
   State<SolutionTab> createState() => _SolutionTabState();
@@ -91,16 +96,27 @@ class _SolutionTabState extends State<SolutionTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MatheasyBubble(text: widget.result.tutorIntro),
-        if (_methods.length > 1) ...[
+        // Visual Learning is the flagship — surfaced above the steps with more
+        // visual weight than the answer banner, so students reach for
+        // understanding, not just the final line.
+        if (widget.onOpenVisual != null) ...[
+          _VisualLearningHero(onTap: widget.onOpenVisual!),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        // A compact one-line intro keeps the brand voice without pushing the
+        // steps down the page — the maths, not the chatter, should lead.
+        if (widget.result.tutorIntro.isNotEmpty) ...[
+          MatheasyBubble(text: widget.result.tutorIntro, avatarSize: 28),
           const SizedBox(height: AppSpacing.md),
+        ],
+        if (_methods.length > 1) ...[
           _MethodSwitcher(
             methods: _methods,
             selected: _method,
             onSelect: _selectMethod,
           ),
+          const SizedBox(height: AppSpacing.lg),
         ],
-        const SizedBox(height: AppSpacing.lg),
         for (var i = 0; i < shown; i++)
           KeyedSubtree(
             // Key by method+step so switching methods rebuilds fresh cards (so
@@ -128,7 +144,7 @@ class _SolutionTabState extends State<SolutionTab> {
             onNext: _next,
             onRevealAll: _revealEverything,
           )
-        else
+        else if (widget.result.verifyText.isNotEmpty)
           _VerifyCard(text: widget.result.verifyText),
         // The graph (§7) — an expander, after the answer + steps. Omitted
         // entirely when the problem isn't a plottable function.
@@ -370,22 +386,32 @@ class _StepCardState extends State<_StepCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.step.title,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: colors.textSecondary,
-                              fontWeight: FontWeight.w700,
+                    // A compact eyebrow — what this step does, and the operation
+                    // applied — sits ABOVE the equation but is deliberately small.
+                    // The equation is the hero of the card (equation-first, not
+                    // prose-first). Skipped entirely when there's nothing to label.
+                    if (widget.step.title.isNotEmpty ||
+                        widget.step.operationLabel != null) ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.step.title,
+                              style: AppTypography.caption.copyWith(
+                                color: colors.textSecondary,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
-                        ),
-                        if (widget.step.operationLabel != null)
-                          _OperationChip(label: widget.step.operationLabel!),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
+                          if (widget.step.operationLabel != null) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            _OperationChip(label: widget.step.operationLabel!),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
                     _StepExpression(
                       latex: widget.step.resultLatex,
                       previousLatex: widget.previousLatex,
@@ -459,11 +485,16 @@ class _StepExpression extends StatelessWidget {
         ? null
         : emphasizeChanged(previousLatex!, latex, colorHex: _accentHex(context));
 
-    return MathText(
-      emphasized ?? latex,
+    // Sized to the content (max 30, down to 22 for a wide line) so a long step
+    // fits without scrolling sideways but a short one stays big. Measured from
+    // the plain expression; the coloured emphasis is what's actually drawn.
+    return AdaptiveMath(
+      latex,
+      renderLatex: emphasized,
+      minFontSize: 22,
+      maxFontSize: 30,
       style: AppTypography.headingSmall.copyWith(
         color: isAnswer ? colors.onSuccessContainer : colors.textPrimary,
-        fontSize: 23,
       ),
     );
   }
@@ -559,6 +590,80 @@ class _OperationChip extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.label.copyWith(color: colors.onWarningContainer),
+      ),
+    );
+  }
+}
+
+/// The flagship Visual Learning entry — a premium, gold-accented card that
+/// out-weighs the answer banner, nudging students toward the animated
+/// walkthrough (understand the solution, don't just read the final line). Taps
+/// jump to the Visual tab, where free users meet the unlock and Pro users the
+/// full experience — monetization is unchanged.
+class _VisualLearningHero extends StatelessWidget {
+  const _VisualLearningHero({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Open Visual Learning',
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: onTap,
+        borderRadius: AppRadius.cardRadius,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: const BoxDecoration(
+            gradient: AppColors.premiumGradient,
+            borderRadius: AppRadius.cardRadius,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.auto_awesome_rounded,
+                    size: 24, color: AppColors.goldLight),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'VISUAL LEARNING',
+                      style: AppTypography.label
+                          .copyWith(color: AppColors.goldLight),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      'Watch every step come alive',
+                      style: AppTypography.headingSmall
+                          .copyWith(color: AppColors.white),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      'Understand the solution — not just the final answer.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.78),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const Icon(Icons.arrow_forward_rounded,
+                  size: 22, color: AppColors.white),
+            ],
+          ),
+        ),
       ),
     );
   }

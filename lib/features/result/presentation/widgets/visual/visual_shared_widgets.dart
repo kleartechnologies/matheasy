@@ -113,14 +113,12 @@ class _VisualStepCardState extends State<VisualStepCard> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: MathText(
-                step.beforeLatex,
-                style: AppTypography.bodyLarge
-                    .copyWith(color: colors.textSecondary),
-              ),
+            AdaptiveMath(
+              step.beforeLatex,
+              minFontSize: 22,
+              maxFontSize: 28,
+              style: AppTypography.bodyLarge
+                  .copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Icon(
@@ -129,16 +127,12 @@ class _VisualStepCardState extends State<VisualStepCard> {
               color: emeraldLabel,
             ),
             const SizedBox(height: AppSpacing.xs),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: MathText(
-                step.afterLatex,
-                style: AppTypography.headingSmall.copyWith(
-                  color: colors.textPrimary,
-                  fontSize: 22,
-                ),
-              ),
+            AdaptiveMath(
+              step.afterLatex,
+              minFontSize: 26,
+              maxFontSize: 34,
+              style: AppTypography.headingSmall
+                  .copyWith(color: colors.textPrimary),
             ),
             AnimatedCrossFade(
               duration: AppDurations.fast,

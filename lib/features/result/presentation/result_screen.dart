@@ -396,7 +396,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           ),
           onRescan: () => context.push(AppRoutes.scan),
         ),
-        const SizedBox(height: AppSpacing.section),
+        const SizedBox(height: AppSpacing.lg),
         SegmentedControl(
           selectedIndex: tabIndex,
           onChanged: _selectTab,
@@ -455,7 +455,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         );
       case 0:
       default:
-        return SolutionTab(result: result);
+        return SolutionTab(
+          result: result,
+          onOpenVisual: () => _selectTab(_visualTabIndex),
+        );
     }
   }
 

@@ -102,15 +102,13 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: MathText(
-                            result.questionLatex,
-                            style: AppTypography.headingSmall
-                                .copyWith(color: colors.textSecondary),
-                          ),
-                        ),
+                      AdaptiveMath(
+                        result.questionLatex,
+                        minFontSize: 24,
+                        maxFontSize: 30,
+                        alignment: Alignment.center,
+                        style: AppTypography.headingSmall
+                            .copyWith(color: colors.textSecondary),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Row(
@@ -132,15 +130,13 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: MathText(
-                            afterLatex,
-                            style: AppTypography.headingMedium
-                                .copyWith(color: colors.textPrimary),
-                          ),
-                        ),
+                      AdaptiveMath(
+                        afterLatex,
+                        minFontSize: 28,
+                        maxFontSize: 36,
+                        alignment: Alignment.center,
+                        style: AppTypography.headingMedium
+                            .copyWith(color: colors.textPrimary),
                       ),
                     ],
                   ),
