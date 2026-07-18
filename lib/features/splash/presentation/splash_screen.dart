@@ -13,6 +13,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/indicators/matheasy_loader.dart';
 import '../../auth/application/auth_controller.dart';
 
 /// The launch screen — a premium first impression built around the official
@@ -107,6 +108,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 style: AppTypography.bodyLarge
                     .copyWith(color: colors.textSecondary),
               ),
+            ),
+            const SizedBox(height: AppSpacing.xxxl),
+            // A quiet "loading" pulse so the launch reads as working, not frozen
+            // — fades in after the logo so it never competes with the entrance.
+            AppTransitions.fadeIn(
+              delay: const Duration(milliseconds: 400),
+              child: const MatheasyLoader(),
             ),
           ],
         ),

@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/indicators/matheasy_loader.dart';
 
 /// Full-screen processing state: the Matheasy brand avatar + a rotating set of
 /// reassuring messages while the captured photo is recognized (OpenAI Vision
@@ -58,16 +59,9 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
               child: MatheasyBrandAvatar(size: 128),
             ),
             const SizedBox(height: AppSpacing.xxl),
-            // A thin ring in the dark-surface emerald: one honest progress
-            // signal, no glow or pulse.
-            const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(AppColors.primaryLight),
-              ),
-            ),
+            // The on-brand pulsing dots in the dark-surface emerald: an honest
+            // "working" signal that matches the rest of the app's loading.
+            const MatheasyLoader(color: AppColors.primaryLight, dotSize: 10),
             const SizedBox(height: AppSpacing.xl),
             AnimatedSwitcher(
               duration: AppDurations.medium,

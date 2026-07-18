@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import '../../animations/floaty.dart';
 import '../../brand/brand.dart';
 import '../../extensions/context_extensions.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../indicators/matheasy_loader.dart';
 
 /// Full-area loading placeholder. Optionally shows the Matheasy brand avatar
 /// for the warmer, on-brand loading moments (solving, generating practice).
+///
+/// Every variant animates: an on-brand [MatheasyLoader] (pulsing emerald dots)
+/// gives an honest "working" signal, so a loading screen is never just a static
+/// logo and a line of text.
 class LoadingState extends StatelessWidget {
   const LoadingState({
     super.key,
@@ -25,25 +29,11 @@ class LoadingState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showBrand)
-            const Floaty(
-              child: MatheasyBrandAvatar(),
-            )
-          else
-            SizedBox(
-              width: 34,
-              height: 34,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                // A meaning-bearing graphic on the page background: the
-                // identity tone is 2.97:1 there and would fail the 3:1 floor.
-                valueColor: AlwaysStoppedAnimation(
-                  context.isDark
-                      ? AppColors.primaryLight
-                      : AppColors.primaryDark,
-                ),
-              ),
-            ),
+          if (showBrand) ...[
+            const Floaty(child: MatheasyBrandAvatar()),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+          const MatheasyLoader(),
           if (message != null) ...[
             const SizedBox(height: AppSpacing.lg),
             Text(
