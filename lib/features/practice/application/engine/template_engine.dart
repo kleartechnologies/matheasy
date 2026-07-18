@@ -102,7 +102,7 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final maxVal = [8, 15, 30, 50][tier];
+    final maxVal = [5, 8, 15, 30, 50][tier];
     final form = rng.pick(['add', 'sub', 'mul']);
     final x = rng.between(2, maxVal);
 
@@ -112,7 +112,7 @@ class TemplateEngine {
 
     switch (form) {
       case 'mul':
-        final a = rng.between(2, [4, 6, 9, 12][tier]);
+        final a = rng.between(2, [3, 4, 6, 9, 12][tier]);
         final c = a * x;
         latex = '${a}x = $c';
         explanation = 'Divide both sides by $a: x = $c ÷ $a = $x.';
@@ -158,11 +158,11 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final a = rng.between(2, [4, 6, 8, 12][tier]);
-    final x = rng.between(2, [6, 9, 12, 20][tier]);
+    final a = rng.between(2, [3, 4, 6, 8, 12][tier]);
+    final x = rng.between(2, [4, 6, 9, 12, 20][tier]);
     // Allow subtraction (and negative constants) at higher tiers.
-    final subtract = tier >= 1 && rng.chance();
-    final b = rng.between(1, [9, 12, 20, 40][tier]);
+    final subtract = tier >= 2 && rng.chance();
+    final b = rng.between(1, [6, 9, 12, 20, 40][tier]);
     final c = subtract ? a * x - b : a * x + b;
     final op = subtract ? '-' : '+';
     final latex = '${a}x $op $b = $c';
@@ -198,10 +198,10 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final a = rng.between(2, [6, 9, 12, 20][tier]);
-    final b = rng.between(1, [9, 15, 25, 40][tier]);
-    final x = rng.between(2, [8, 12, 15, 25][tier]);
-    final withConstant = tier >= 1;
+    final a = rng.between(2, [4, 6, 9, 12, 20][tier]);
+    final b = rng.between(1, [6, 9, 15, 25, 40][tier]);
+    final x = rng.between(2, [5, 8, 12, 15, 25][tier]);
+    final withConstant = tier >= 2;
     final value = withConstant ? a * x + b : a * x;
     final latex = withConstant ? '${a}x + $b' : '${a}x';
     final explanation = withConstant
@@ -235,10 +235,10 @@ class TemplateEngine {
     // ax + b = cx + d with a > c and an integer solution x. Keeping a > c makes
     // the constant d = (a-c)x + b strictly positive, so the equation renders
     // cleanly (no "+ -6" / "+ 0") and "divide by (a-c)" is always by a positive.
-    final x = rng.between(2, [8, 10, 12, 20][tier]);
-    final c = rng.between(1, [4, 6, 8, 10][tier]);
-    final a = c + rng.between(1, [4, 6, 8, 10][tier]);
-    final b = rng.between(1, [9, 12, 20, 30][tier]);
+    final x = rng.between(2, [5, 8, 10, 12, 20][tier]);
+    final c = rng.between(1, [3, 4, 6, 8, 10][tier]);
+    final a = c + rng.between(1, [3, 4, 6, 8, 10][tier]);
+    final b = rng.between(1, [6, 9, 12, 20, 30][tier]);
     // d chosen so both sides equal at x: ax + b = cx + d  =>  d = (a-c)x + b.
     final d = (a - c) * x + b;
     final latex = '${a}x + $b = ${c}x + $d';
@@ -270,8 +270,8 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final x = rng.between(1, [8, 10, 14, 20][tier]);
-    final y = rng.between(1, [8, 10, 14, 20][tier]);
+    final x = rng.between(1, [5, 8, 10, 14, 20][tier]);
+    final y = rng.between(1, [5, 8, 10, 14, 20][tier]);
     final s = x + y;
     final diff = x - y;
     // x + y = s ; x - y = diff  =>  ask for x.
@@ -305,8 +305,8 @@ class TemplateEngine {
   ) {
     final tier = _tier(difficulty);
     // (x - r1)(x - r2) = 0  =>  x^2 - (r1+r2)x + r1*r2 = 0
-    final r1 = rng.between(1, [5, 7, 9, 12][tier]);
-    final r2 = rng.between(1, [5, 7, 9, 12][tier]);
+    final r1 = rng.between(1, [3, 5, 7, 9, 12][tier]);
+    final r2 = rng.between(1, [3, 5, 7, 9, 12][tier]);
     final sum = r1 + r2;
     final product = r1 * r2;
     final bTerm = sum == 0
@@ -344,7 +344,7 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final d = rng.between(3, [6, 9, 12, 15][tier]);
+    final d = rng.between(3, [4, 6, 9, 12, 15][tier]);
     final a = rng.between(1, d - 1);
     final b = rng.between(1, d - 1);
     final answer = PracticeMath.formatFraction(a + b, d);
@@ -386,8 +386,8 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final b = rng.between(2, [4, 6, 8, 10][tier]);
-    var d = rng.between(2, [5, 7, 9, 12][tier]);
+    final b = rng.between(2, [3, 4, 6, 8, 10][tier]);
+    var d = rng.between(2, [3, 5, 7, 9, 12][tier]);
     if (d == b) d += 1;
     final a = rng.between(1, b - 1 < 1 ? 1 : b - 1);
     final c = rng.between(1, d - 1 < 1 ? 1 : d - 1);
@@ -434,12 +434,12 @@ class TemplateEngine {
   ) {
     final tier = _tier(difficulty);
     // Build a reduced p/q, then scale by k so it needs simplifying.
-    var p = rng.between(1, [4, 6, 8, 10][tier]);
-    var q = rng.between(p + 1, [8, 12, 15, 20][tier]);
+    var p = rng.between(1, [3, 4, 6, 8, 10][tier]);
+    var q = rng.between(p + 1, [5, 8, 12, 15, 20][tier]);
     final g = PracticeMath.gcd(p, q);
     p = p ~/ g;
     q = q ~/ g;
-    final k = rng.between(2, [4, 5, 6, 8][tier]);
+    final k = rng.between(2, [3, 4, 5, 6, 8][tier]);
     final n = p * k;
     final den = q * k;
     final answer = PracticeMath.formatFraction(p, q);
@@ -469,9 +469,9 @@ class TemplateEngine {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final a = rng.between(2, [9, 15, 20, 30][tier]);
-    final b = rng.between(2, [6, 9, 12, 15][tier]);
-    final c = rng.between(2, [6, 9, 12, 15][tier]);
+    final a = rng.between(2, [6, 9, 15, 20, 30][tier]);
+    final b = rng.between(2, [4, 6, 9, 12, 15][tier]);
+    final c = rng.between(2, [4, 6, 9, 12, 15][tier]);
     // a + b × c  (multiplication first).
     final multFirst = rng.chance(0.6);
     late final int value;
@@ -514,6 +514,7 @@ class TemplateEngine {
     final tier = _tier(difficulty);
     final percent = rng.pick(
       [
+        [10, 25, 50],
         [10, 20, 25, 50],
         [10, 15, 20, 25, 40, 50],
         [5, 12, 15, 30, 60, 75],
@@ -522,7 +523,7 @@ class TemplateEngine {
     );
     // Choose n so percent% of n is an integer.
     final base = 100 ~/ PracticeMath.gcd(percent, 100);
-    final n = base * rng.between(1, [6, 8, 10, 12][tier]);
+    final n = base * rng.between(1, [4, 6, 8, 10, 12][tier]);
     final value = percent * n ~/ 100;
     final explanation = '$percent% of $n = ($percent ÷ 100) × $n = $value.';
     final signature = 'pct|$percent|$n';
@@ -550,12 +551,12 @@ class TemplateEngine {
   ) {
     final tier = _tier(difficulty);
     // Build a reduced p:q, scale by k.
-    var p = rng.between(1, [5, 7, 9, 12][tier]);
-    var q = rng.between(1, [5, 7, 9, 12][tier]);
+    var p = rng.between(1, [3, 5, 7, 9, 12][tier]);
+    var q = rng.between(1, [3, 5, 7, 9, 12][tier]);
     final g0 = PracticeMath.gcd(p, q);
     p = p ~/ g0;
     q = q ~/ g0;
-    final k = rng.between(2, [5, 6, 8, 10][tier]);
+    final k = rng.between(2, [3, 5, 6, 8, 10][tier]);
     final a = p * k;
     final b = q * k;
     final answer = '$p:$q';

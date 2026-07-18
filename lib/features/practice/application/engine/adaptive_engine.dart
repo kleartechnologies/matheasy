@@ -6,6 +6,7 @@ import '../../domain/practice_skill.dart';
 import '../../domain/practice_topic.dart';
 import '../../domain/weakness_profile.dart';
 import 'difficulty_engine.dart';
+import 'difficulty_validator.dart';
 
 /// The adaptive brain (Pro): turns a [PracticeRequest] + the learner's
 /// [PracticeProgress] into a concrete plan of `(skill, difficulty)` slots.
@@ -122,8 +123,29 @@ class AdaptiveEngine {
     }
     if (pool.isEmpty) pool = PracticeSkill.freeSkills;
 
+    // 2b. Concept ceiling — "no concepts above the selected difficulty". When the
+    //     user has chosen a difficulty, drop skills whose concept FLOOR is above
+    //     it (a quadratic never appears at Very Easy).
+    if (request.difficulty != null) {
+      final atLevel =
+          pool.where((s) => skillAllowedAt(s, request.difficulty!)).toList();
+      if (atLevel.isNotEmpty) {
+        pool = atLevel;
+      } else {
+        // Impossible combo: the chosen level is below EVERY skill's floor in
+        // this topic (e.g. Very Easy / Medium + Calculus). Keep the session
+        // CONSTANT and honest — restrict to the topic's LOWEST-floor skills so
+        // every slot lands on that one level, never a MIX of higher levels.
+        final floor = pool
+            .map(conceptFloor)
+            .reduce((a, b) => a.index <= b.index ? a : b);
+        pool = pool.where((s) => conceptFloor(s) == floor).toList();
+      }
+    }
+
     // 3. Adaptive (Pro): lead with the learner's weak skills, then cover the
-    //    rest of the pool for variety.
+    //    rest of the pool for variety. This reorders TOPICS/skills only — it
+    //    never changes the user's chosen difficulty.
     if (isPro && request.adaptive) {
       final weak = weaknessProfile(progress)
           .skills
@@ -146,14 +168,24 @@ class AdaptiveEngine {
     int slotIndex,
     int slots,
   ) {
-    if (request.difficulty != null) {
-      return difficulty.clampToTier(request.difficulty!, isPro: isPro);
-    }
-    return difficulty.targetFor(
-      mastery: progress.skill(skill),
+    final base = request.difficulty != null
+        // User's choice, held constant (never derived from mastery).
+        ? difficulty.clampToTier(request.difficulty!, isPro: isPro)
+        // No choice → adaptive-derived from mastery + a gentle session ramp.
+        : difficulty.targetFor(
+            mastery: progress.skill(skill),
+            isPro: isPro,
+            slotIndex: slotIndex,
+            slots: slots,
+          );
+    // A skill is never generated below its concept floor — a quadratic can't be
+    // a Very Easy question whatever the numbers. For a valid user-chosen combo
+    // this is a no-op (the pool was already filtered to floor <= chosen); it
+    // only bites the impossible edge (e.g. Calculus forced to Very Easy) and the
+    // adaptive ramp (so a two-step skill never rides the ramp below Easy).
+    return difficulty.clampToTier(
+      base.atLeast(conceptFloor(skill)),
       isPro: isPro,
-      slotIndex: slotIndex,
-      slots: slots,
     );
   }
 

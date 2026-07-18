@@ -63,11 +63,17 @@ class FunctionsAiPracticeGenerator implements AiPracticeGenerator {
     final need = count - result.length;
     final fetchCount = need < _batchSize ? _batchSize : need;
 
+    final spec = difficulty.spec;
     final json = await _call('generatePracticeQuestion', {
       'topic': skill.topic.name,
       'skill': skill.id,
       'skillLabel': skill.label,
       'difficulty': difficulty.name,
+      // The strict difficulty contract (spec §"Generation Rules"): the server
+      // gives the model the grade band, target complexity + max solving steps.
+      'grade': spec.gradeLabel,
+      'targetSteps': spec.targetSteps,
+      'maxSteps': spec.maxSteps,
       'count': fetchCount,
     });
 

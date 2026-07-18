@@ -27,6 +27,12 @@ interface PracticeRequest {
   skill?: string;
   skillLabel?: string;
   difficulty?: string;
+  /** Grade band for the level, e.g. "A-Level" / "University". */
+  grade?: string;
+  /** The ideal number of solving steps a question should take. */
+  targetSteps?: number;
+  /** The hard ceiling on solving steps — the model must not exceed it. */
+  maxSteps?: number;
   count?: number;
 }
 
@@ -44,6 +50,9 @@ interface PracticePayload {
 }
 
 const MAX_COUNT = 10;
+/** How many times we'll re-prompt to top up the batch after discarding invalid
+ * questions before returning what validated. */
+const MAX_ATTEMPTS = 3;
 
 const SYSTEM_PROMPT = `You are Matheasy, the friendly math tutor inside the Matheasy app, generating fresh PRACTICE questions.
 Generate the requested number of DISTINCT practice questions for the given skill and difficulty. Vary the numbers/scenario across questions so none are duplicates.
@@ -66,6 +75,8 @@ Rules:
 - For "input" and "equation" provide 1-3 "acceptedAnswers" (include equivalent forms) and OMIT "options".
 - LaTeX must be valid and delimiter-free (no surrounding $). Keep answer choices short and unambiguous.
 - Make every question solvable with a single, unambiguous answer at the stated difficulty. Keep language age-appropriate.
+- MATCH THE DIFFICULTY EXACTLY. Every question must sit at the requested level and grade — never easier, never harder. Use ONLY concepts appropriate at that level; do NOT use any concept above it (e.g. no calculus in a secondary-level set).
+- STAY WITHIN THE STEP BUDGET. A question should take about the target number of solving steps and MUST NOT exceed the stated maximum. If a draft is too involved, simplify it or replace it.
 - Do NOT reference a diagram, figure, picture or "the shape shown" — there is none. Every number the student needs must be stated in the text.`;
 
 export const generatePracticeQuestion = onCall(
@@ -77,6 +88,9 @@ export const generatePracticeQuestion = onCall(
       skill,
       skillLabel,
       difficulty,
+      grade,
+      targetSteps,
+      maxSteps,
       count,
     } = (request.data ?? {}) as PracticeRequest;
 
@@ -88,6 +102,12 @@ export const generatePracticeQuestion = onCall(
     }
 
     const requested = Math.max(1, Math.min(MAX_COUNT, Number(count) || 3));
+    // Step budget the model must respect (sanitized; maxSteps >= targetSteps).
+    const tSteps = Math.max(1, Math.min(20, Math.round(Number(targetSteps)) || 4));
+    const mSteps = Math.max(
+      tSteps,
+      Math.min(30, Math.round(Number(maxSteps)) || 8)
+    );
 
     await ensureUserDoc(uid);
     await assertWithinRateLimit(uid, "practice");
@@ -102,38 +122,97 @@ export const generatePracticeQuestion = onCall(
       );
     }
 
-    const userMessage = [
-      `Generate ${requested} distinct practice questions.`,
-      `Skill: ${skillLabel ?? skill}${topic ? ` (topic: ${topic})` : ""}.`,
-      `Difficulty: ${difficulty ?? "medium"}.`,
-    ].join("\n");
+    const buildUserMessage = (need: number) =>
+      [
+        `Generate ${need} distinct practice questions.`,
+        `Skill: ${skillLabel ?? skill}${topic ? ` (topic: ${topic})` : ""}.`,
+        `Difficulty: ${difficulty ?? "medium"}` +
+          (grade ? ` (grade level: ${grade})` : "") +
+          ".",
+        `Target about ${tSteps} solving steps; never more than ${mSteps}.`,
+        `Use ONLY concepts appropriate for "${difficulty ?? "medium"}" — nothing above it.`,
+      ].join("\n");
 
-    let payload: PracticePayload;
-    try {
-      const client = createOpenAI(OPENAI_API_KEY.value());
-      payload = await chatJson<PracticePayload>(
-        client,
-        OPENAI_MODEL.value(),
-        SYSTEM_PROMPT,
-        userMessage,
-        { temperature: 0.7, maxTokens: 2500 }
-      );
-    } catch (err) {
-      logger.error("generatePracticeQuestion failed", {
-        uid,
-        skill,
-        err: String(err),
-      });
-      throw new HttpsError(
-        "internal",
-        "Matheasy couldn't create those questions. Please try again."
-      );
+    const client = createOpenAI(OPENAI_API_KEY.value());
+    // Validate → discard → regenerate. Malformed / duplicate questions are
+    // dropped and the shortfall re-prompted (bounded), so we never return a
+    // question that doesn't fit the requested level's structure.
+    const collected: PracticePayload["questions"] = [];
+    const seen = new Set<string>();
+    for (
+      let attempt = 0;
+      attempt < MAX_ATTEMPTS && collected.length < requested;
+      attempt++
+    ) {
+      const need = requested - collected.length;
+      let payload: PracticePayload;
+      try {
+        payload = await chatJson<PracticePayload>(
+          client,
+          OPENAI_MODEL.value(),
+          SYSTEM_PROMPT,
+          buildUserMessage(need),
+          { temperature: 0.7, maxTokens: 2500 }
+        );
+      } catch (err) {
+        logger.error("generatePracticeQuestion failed", {
+          uid,
+          skill,
+          attempt,
+          err: String(err),
+        });
+        // A first-attempt failure is a hard error; a later one keeps what we
+        // already validated rather than losing the whole batch.
+        if (attempt === 0) {
+          throw new HttpsError(
+            "internal",
+            "Matheasy couldn't create those questions. Please try again."
+          );
+        }
+        break;
+      }
+
+      const batch = Array.isArray(payload.questions) ? payload.questions : [];
+      for (const q of batch) {
+        if (!isStructurallyValid(q)) continue; // discard malformed
+        const key = (q.promptLatex ?? q.prompt).trim().toLowerCase();
+        if (seen.has(key)) continue; // discard duplicates
+        seen.add(key);
+        collected.push(q);
+        if (collected.length >= requested) break;
+      }
     }
 
-    const questions = Array.isArray(payload.questions)
-      ? payload.questions.slice(0, MAX_COUNT)
-      : [];
-
-    return { questions, usage: null };
+    return { questions: collected.slice(0, MAX_COUNT), usage: null };
   }
 );
+
+/** Structural validation mirroring the client mapper — a malformed question is
+ * discarded (and regenerated) rather than shown. */
+function isStructurallyValid(
+  q: PracticePayload["questions"][number]
+): boolean {
+  if (!q || typeof q.prompt !== "string" || q.prompt.trim() === "") {
+    return false;
+  }
+  if (typeof q.explanation !== "string" || q.explanation.trim() === "") {
+    return false;
+  }
+  if (q.type === "multipleChoice" || q.type === "trueFalse") {
+    const opts = Array.isArray(q.options) ? q.options : [];
+    const correct = opts.filter((o) => o && o.isCorrect === true);
+    if (correct.length !== 1) return false;
+    if (q.type === "multipleChoice" && opts.length !== 4) return false;
+    if (q.type === "trueFalse" && opts.length !== 2) return false;
+    return true;
+  }
+  if (q.type === "input" || q.type === "equation") {
+    const answers = Array.isArray(q.acceptedAnswers)
+      ? q.acceptedAnswers.filter(
+          (a) => typeof a === "string" && a.trim() !== ""
+        )
+      : [];
+    return answers.length > 0;
+  }
+  return false; // unknown type
+}

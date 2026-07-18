@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'practice_difficulty.dart';
 import 'practice_figure.dart';
+import 'practice_skill.dart';
 import 'practice_topic.dart';
 
 /// How a practice question is answered. New types slot in without touching the
@@ -48,6 +49,10 @@ class PracticeQuestion {
     this.acceptedAnswers = const [],
     this.skillId,
     this.figure,
+    this.subtopic,
+    this.estimatedSteps,
+    this.estimatedSolveTimeSeconds,
+    this.gradeLevel,
   });
 
   final String id;
@@ -86,6 +91,39 @@ class PracticeQuestion {
   /// construction. `null` for every non-figure question (the vast majority).
   final PracticeFigure? figure;
 
+  // ---- Difficulty metadata (stored with every generated question) ----
+  // Additive, all optional; the getters below fall back to the difficulty's
+  // [DifficultySpec] so a question always exposes complete metadata even when a
+  // generator didn't stamp explicit values. Powers XP balancing, leaderboards,
+  // daily challenges, analytics and adaptive recommendations.
+
+  /// The fine-grained concept, e.g. the [PracticeSkill.label] ("Quadratics").
+  final String? subtopic;
+
+  /// Measured/estimated solving steps for THIS question. Falls back to the
+  /// level's target when a generator didn't count them ([steps]).
+  final int? estimatedSteps;
+
+  /// Estimated solve-time budget in seconds ([solveTimeSeconds] getter).
+  final int? estimatedSolveTimeSeconds;
+
+  /// Grade band, e.g. "A-Level". Falls back to the level's [gradeLabel] ([grade]).
+  final String? gradeLevel;
+
+  /// Solving steps, backed by the difficulty spec's target when unset.
+  int get steps => estimatedSteps ?? difficulty.spec.targetSteps;
+
+  /// Solve-time budget in seconds, backed by the difficulty spec when unset.
+  int get solveTimeSeconds =>
+      estimatedSolveTimeSeconds ?? difficulty.spec.estimatedSolveTimeSeconds;
+
+  /// Grade band, backed by the difficulty spec's grade label when unset.
+  String get grade => gradeLevel ?? difficulty.spec.gradeLabel;
+
+  /// The fine-grained concept label, backed by the skill's label when unset.
+  String? get subtopicLabel =>
+      subtopic ?? PracticeSkill.byId(skillId)?.label;
+
   /// A clone with a different [id] — used by the engine to stamp a unique
   /// per-slot id onto a cached / reused question.
   PracticeQuestion withId(String id) => PracticeQuestion(
@@ -105,6 +143,12 @@ class PracticeQuestion {
         // stamps every generated question via .withId(slotId)) — no error, no
         // log, figures just never appear. Covered by a survives-restamp test.
         figure: figure,
+        // Same trap for the difficulty metadata — must be re-copied here or it
+        // silently vanishes on restamp (survives-restamp test covers these too).
+        subtopic: subtopic,
+        estimatedSteps: estimatedSteps,
+        estimatedSolveTimeSeconds: estimatedSolveTimeSeconds,
+        gradeLevel: gradeLevel,
       );
 
   int get xpReward => difficulty.baseXp;

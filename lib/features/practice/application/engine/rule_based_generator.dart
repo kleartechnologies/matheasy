@@ -123,8 +123,8 @@ class RuleBasedGenerator {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final l = rng.between(3, [10, 15, 20, 30][tier]);
-    final w = rng.between(2, [8, 12, 16, 25][tier]);
+    final l = rng.between(3, [7, 10, 15, 20, 30][tier]);
+    final w = rng.between(2, [5, 8, 12, 16, 25][tier]);
     final askArea = rng.chance(0.6);
     final value = askArea ? l * w : 2 * (l + w);
     final explanation = askArea
@@ -170,7 +170,7 @@ class RuleBasedGenerator {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final pool = _triples.take([3, 5, 6, 7][tier].clamp(1, _triples.length));
+    final pool = _triples.take([2, 3, 5, 6, 7][tier].clamp(1, _triples.length));
     final triple = rng.pick(pool.toList());
     final a = triple[0];
     final b = triple[1];
@@ -335,7 +335,7 @@ class RuleBasedGenerator {
     ParameterGenerator rng,
     String id,
   ) {
-    final r = rng.between(3, [8, 12, 20, 40][_tier(difficulty)]);
+    final r = rng.between(3, [5, 8, 12, 20, 40][_tier(difficulty)]);
     final diameter = 2 * r;
     final question = PracticeQuestion(
       id: id,
@@ -363,8 +363,8 @@ class RuleBasedGenerator {
     ParameterGenerator rng,
     String id,
   ) {
-    final base = 2 * rng.between(2, [3, 5, 8, 12][_tier(difficulty)]); // even
-    final height = rng.between(3, [8, 12, 16, 24][_tier(difficulty)]);
+    final base = 2 * rng.between(2, [2, 3, 5, 8, 12][_tier(difficulty)]); // even
+    final height = rng.between(3, [5, 8, 12, 16, 24][_tier(difficulty)]);
     final area = base * height ~/ 2; // base even ⇒ integer
     final question = PracticeQuestion(
       id: id,
@@ -462,8 +462,8 @@ class RuleBasedGenerator {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final count = [3, 3, 4, 5][tier];
-    final mean = rng.between(4, [10, 15, 20, 30][tier]);
+    final count = [3, 3, 3, 4, 5][tier];
+    final mean = rng.between(4, [7, 10, 15, 20, 30][tier]);
     // Build `count` values around `mean` whose deltas sum to 0 (exact mean).
     final values = <int>[];
     var runningDelta = 0;
@@ -502,9 +502,9 @@ class RuleBasedGenerator {
   ) {
     final tier = _tier(difficulty);
     final askMedian = rng.chance();
-    final maxVal = [12, 20, 30, 50][tier];
+    final maxVal = [8, 12, 20, 30, 50][tier];
     if (askMedian) {
-      final count = [3, 5, 5, 7][tier];
+      final count = [3, 3, 5, 5, 7][tier];
       final values =
           [for (var i = 0; i < count; i++) rng.between(1, maxVal)];
       final sorted = [...values]..sort();
@@ -556,8 +556,8 @@ class RuleBasedGenerator {
     String id,
   ) {
     final tier = _tier(difficulty);
-    final red = rng.between(1, [4, 6, 8, 10][tier]);
-    final blue = rng.between(1, [4, 6, 8, 10][tier]);
+    final red = rng.between(1, [3, 4, 6, 8, 10][tier]);
+    final blue = rng.between(1, [3, 4, 6, 8, 10][tier]);
     final total = red + blue;
     final answer = PracticeMath.formatFraction(red, total);
     final explanation = 'P(red) = favourable ÷ total = $red/$total = $answer.';

@@ -18,6 +18,7 @@ import 'sections/practice_daily_challenge.dart';
 import 'sections/practice_header.dart';
 import 'sections/practice_recommended_topics.dart';
 import 'sections/practice_weak_topics.dart';
+import 'widgets/practice_difficulty_picker.dart';
 
 /// The Practice dashboard — the tab root. XP + streak header, continue, the
 /// daily challenge, recommended + weak topics, and every category. Each path
@@ -37,7 +38,13 @@ class PracticeScreen extends ConsumerWidget {
       context.push(AppRoutes.paywall, extra: PaywallTrigger.adaptivePractice);
       return;
     }
-    _start(context, PracticeRequest(topic: topic, adaptive: isPro));
+    // Difficulty is the user's explicit choice, held constant for the session;
+    // adaptive only reorders topics inside it, never the level.
+    final difficulty = ref.read(selectedPracticeDifficultyProvider);
+    _start(
+      context,
+      PracticeRequest(topic: topic, difficulty: difficulty, adaptive: isPro),
+    );
   }
 
   @override
@@ -50,6 +57,7 @@ class PracticeScreen extends ConsumerWidget {
         streakCurrent: data.streakCurrent,
         tutorMessage: data.tutorMessage,
       ),
+      const PracticeDifficultyPicker(),
       if (data.continueRequest != null)
         PracticeContinue(
           request: data.continueRequest!,

@@ -87,6 +87,10 @@ class PracticeDifficultyPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final (background, foreground) = switch (difficulty) {
+      PracticeDifficulty.veryEasy => (
+          colors.infoContainer,
+          colors.onInfoContainer,
+        ),
       PracticeDifficulty.easy => (
           colors.successContainer,
           colors.onSuccessContainer,

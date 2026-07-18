@@ -25,6 +25,7 @@ import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
 import 'package:matheasy/features/practice/presentation/practice_screen.dart';
 import 'package:matheasy/features/practice/presentation/practice_session_screen.dart';
+import 'package:matheasy/features/subscription/application/subscription_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _inputQ = PracticeQuestion(
@@ -77,6 +78,8 @@ Future<ProviderContainer> _container({PracticeService? service}) async {
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
+      // The Practice dashboard's difficulty picker reads isPro at build.
+      isProProvider.overrideWithValue(false),
       if (service != null)
         practiceServiceProvider.overrideWithValue(service),
     ],
@@ -426,6 +429,14 @@ void main() {
 
   group('Widget smoke', () {
     testWidgets('dashboard renders the header and a category', (tester) async {
+      // Tall viewport so every section (incl. the difficulty picker now above
+      // the topic lists) lays out at once — the scroll below then finds a
+      // category immediately without the zero-then-many finder race.
+      tester.view.physicalSize = const Size(1200, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final container = await _container();
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -438,8 +449,8 @@ void main() {
 
       expect(find.text('Practice'), findsOneWidget);
       await tester.scrollUntilVisible(
-        // 'Algebra' appears in both "Recommended" and "All topics"; scroll to
-        // the first and assert at least one category renders.
+        // 'Algebra' appears in both "Recommended" and "All topics"; the first is
+        // on-screen in the tall viewport, so this resolves immediately.
         find.text('Algebra').first,
         300,
         scrollable: find.byType(Scrollable).first,

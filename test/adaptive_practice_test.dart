@@ -95,16 +95,21 @@ AdaptivePracticeService _service({
 void main() {
   group('PracticeDifficulty (expert tier)', () {
     test('expert carries the spec XP and is Pro-only', () {
+      expect(PracticeDifficulty.veryEasy.baseXp, 5);
       expect(PracticeDifficulty.easy.baseXp, 10);
       expect(PracticeDifficulty.medium.baseXp, 20);
       expect(PracticeDifficulty.hard.baseXp, 40);
       expect(PracticeDifficulty.expert.baseXp, 75);
+      // Gating: Hard (A-Level) and Expert (university) are Pro; the free tier
+      // tops out at Medium.
       expect(PracticeDifficulty.expert.isPro, isTrue);
-      expect(PracticeDifficulty.hard.isPro, isFalse);
+      expect(PracticeDifficulty.hard.isPro, isTrue);
+      expect(PracticeDifficulty.medium.isPro, isFalse);
     });
 
     test('harder / easier navigate the ladder', () {
-      expect(PracticeDifficulty.easy.easier, isNull);
+      expect(PracticeDifficulty.veryEasy.easier, isNull);
+      expect(PracticeDifficulty.easy.easier, PracticeDifficulty.veryEasy);
       expect(PracticeDifficulty.easy.harder, PracticeDifficulty.medium);
       expect(PracticeDifficulty.expert.harder, isNull);
       expect(PracticeDifficulty.expert.easier, PracticeDifficulty.hard);
@@ -380,15 +385,16 @@ void main() {
       );
     });
 
-    test('free tier is clamped to hard; expert is Pro-only', () {
+    test('free tier is clamped to medium; hard + expert are Pro-only', () {
       // Mastered skill.
       final mastered = mastery(100);
-      expect(engine.centreFor(mastered, isPro: false), PracticeDifficulty.hard);
+      expect(
+          engine.centreFor(mastered, isPro: false), PracticeDifficulty.medium);
       expect(
           engine.centreFor(mastered, isPro: true), PracticeDifficulty.expert);
       expect(
         engine.clampToTier(PracticeDifficulty.expert, isPro: false),
-        PracticeDifficulty.hard,
+        PracticeDifficulty.medium,
       );
     });
 
@@ -523,6 +529,25 @@ void main() {
           isTrue);
     });
 
+    test('impossible combo (low level + Calculus) stays a CONSTANT level',
+        () async {
+      // Calculus floors at Hard/Expert; a Pro user choosing a lower level must
+      // get ONE constant level (the topic's floor), never a mix of Hard+Expert.
+      final ai = _FakeAiGenerator();
+      final service = _service(isPro: true, ai: ai);
+      final session = await service.createSession(
+        const PracticeRequest(
+          topic: PracticeTopic.calculus,
+          difficulty: PracticeDifficulty.medium, // below every calculus floor
+        ),
+      );
+      expect(session.questions.length, greaterThan(1));
+      final levels = session.questions.map((q) => q.difficulty).toSet();
+      expect(levels, hasLength(1), reason: 'levels present: $levels');
+      // Honest floor: calculus's lowest concept floor is Hard.
+      expect(levels.single, PracticeDifficulty.hard);
+    });
+
     test('Pro calculus falls back to the bank when AI is unavailable',
         () async {
       final service = _service(isPro: true); // no AI generator
@@ -545,7 +570,8 @@ void main() {
         ),
       );
       for (final q in session.questions) {
-        expect(q.difficulty, PracticeDifficulty.hard); // clamped down
+        // Free tops out at Medium now (Hard + Expert are Pro).
+        expect(q.difficulty, PracticeDifficulty.medium);
       }
     });
   });

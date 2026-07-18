@@ -11,6 +11,7 @@ import '../domain/practice_session.dart';
 import '../domain/question_fingerprint.dart';
 import 'ai_practice_generator.dart';
 import 'engine/adaptive_engine.dart';
+import 'engine/difficulty_validator.dart';
 import 'engine/generated_question.dart';
 import 'engine/parameter_generator.dart';
 import 'engine/rule_based_generator.dart';
@@ -45,6 +46,7 @@ class AdaptivePracticeService implements PracticeService {
     this.templateEngine = const TemplateEngine(),
     this.ruleEngine = const RuleBasedGenerator(),
     this.similarity = const SimilarityEngine(),
+    this.validator = const DifficultyValidator(),
     Random? random,
   })  : _readProgress = readProgress,
         _readIsPro = readIsPro,
@@ -58,6 +60,10 @@ class AdaptivePracticeService implements PracticeService {
   final TemplateEngine templateEngine;
   final RuleBasedGenerator ruleEngine;
   final SimilarityEngine similarity;
+
+  /// Rejects any candidate that doesn't fit the requested difficulty (concept
+  /// above the level, or over the step budget) so it is regenerated, never kept.
+  final DifficultyValidator validator;
   final Random _random;
 
   /// Attempts to re-generate a template/rule question before accepting a repeat.
@@ -184,6 +190,9 @@ class AdaptivePracticeService implements PracticeService {
       final queue = aiQuestions[key];
       while (queue != null && queue.isNotEmpty) {
         final question = queue.removeAt(0);
+        // Discard any AI question that doesn't fit the requested level (the
+        // server also golden-rule-verifies; this is the client's second gate).
+        if (!validator.isValid(question, rec.difficulty)) continue;
         final candidate = GeneratedQuestion.content(question.withId(id));
         if (!_tooSimilar(candidate, storedHistory, sessionValues,
             sessionAnswers)) {
@@ -199,6 +208,10 @@ class AdaptivePracticeService implements PracticeService {
     for (var attempt = 0; attempt < _maxAttempts; attempt++) {
       final candidate = _generateOnDevice(rec, slotIndex, slots, rng, id);
       if (candidate == null) break;
+      // Never keep a candidate that doesn't fit the requested level — discard
+      // and regenerate (bounded). `last` only tracks VALID candidates, so the
+      // fallback below never accepts a wrong-level question.
+      if (!validator.isValid(candidate.question, rec.difficulty)) continue;
       last = candidate;
       if (!_tooSimilar(candidate, storedHistory, sessionValues,
           sessionAnswers)) {
@@ -249,7 +262,12 @@ class AdaptivePracticeService implements PracticeService {
     Set<String> sessionAnswers,
     String id,
   ) {
-    final pool = PracticeQuestionBank.forTopic(rec.skill.topic);
+    // Never serve above the slot's (already clamped + floored) level — this is
+    // the free ceiling too, so a free user can't get a Hard bank question when
+    // on-device generation is exhausted.
+    final pool = PracticeQuestionBank.forTopic(rec.skill.topic)
+        .where((q) => q.difficulty.index <= rec.difficulty.index)
+        .toList();
     if (pool.isEmpty) return null;
     final ordered = [
       ...pool.where((q) => q.difficulty == rec.difficulty),
@@ -270,11 +288,21 @@ class AdaptivePracticeService implements PracticeService {
   /// A whole session's worth of bank questions for [request] — the last-resort
   /// path when the engine produced nothing.
   List<PracticeQuestion> _bankFallback(PracticeRequest request) {
-    final pool = [...PracticeQuestionBank.forTopic(request.topic)];
-    final filtered = request.difficulty == null
+    // Clamp the requested level to the tier ceiling so a persisted/daily-challenge
+    // request carrying Hard/Expert never leaks a Pro-level bank question to a free
+    // user.
+    final ceiling = request.difficulty == null
+        ? null
+        : adaptiveEngine.difficulty
+            .clampToTier(request.difficulty!, isPro: _readIsPro());
+    final pool = PracticeQuestionBank.forTopic(request.topic)
+        .where((q) => ceiling == null || q.difficulty.index <= ceiling.index)
+        .toList();
+    final filtered = ceiling == null
         ? pool
-        : pool.where((q) => q.difficulty == request.difficulty).toList();
+        : pool.where((q) => q.difficulty == ceiling).toList();
     final source = filtered.isEmpty ? pool : filtered;
+    if (source.isEmpty) return const []; // no bank question at/below the level
     source.sort((a, b) {
       final byDifficulty = a.difficulty.index.compareTo(b.difficulty.index);
       return byDifficulty != 0 ? byDifficulty : a.id.compareTo(b.id);

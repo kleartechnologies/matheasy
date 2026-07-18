@@ -11,31 +11,38 @@ import '../../domain/skill_mastery.dart';
 ///  * a gentle *within-session ramp* so a set opens a notch easier and closes a
 ///    notch harder rather than being monotone.
 ///
-/// The free tier is always clamped to [PracticeDifficulty.hard] — [expert] is
-/// Pro-only.
+/// This is the DERIVED (adaptive) difficulty — used ONLY when the user hasn't
+/// chosen a difficulty (`PracticeRequest.difficulty == null`). Once the user
+/// picks a level it is honoured verbatim (see [clampToTier]) and this engine is
+/// bypassed; adaptive then only reorders topics, never difficulty.
+///
+/// The free tier is clamped to [PracticeDifficulty.medium] — [hard] (A-Level)
+/// and [expert] (university) are Pro-only.
 class DifficultyEngine {
   const DifficultyEngine();
 
-  /// The hardest difficulty a tier may see.
+  /// The hardest difficulty a tier may see. Free tops out at [medium].
   PracticeDifficulty ceilingFor({required bool isPro}) =>
-      isPro ? PracticeDifficulty.expert : PracticeDifficulty.hard;
+      isPro ? PracticeDifficulty.expert : PracticeDifficulty.medium;
 
-  /// The centre difficulty implied by [mastery] (before any session ramp).
+  /// The centre difficulty implied by [mastery] (before any session ramp),
+  /// clamped to the tier ceiling.
   PracticeDifficulty centreFor(SkillMastery mastery, {required bool isPro}) {
-    if (!mastery.hasHistory) return PracticeDifficulty.easy; // cold start easy
+    if (!mastery.hasHistory) {
+      return clampToTier(PracticeDifficulty.easy, isPro: isPro); // cold start
+    }
     final base = switch (mastery.level) {
       MasteryLevel.beginner => PracticeDifficulty.easy,
       MasteryLevel.developing => PracticeDifficulty.medium,
       MasteryLevel.proficient => PracticeDifficulty.hard,
-      MasteryLevel.mastered =>
-        isPro ? PracticeDifficulty.expert : PracticeDifficulty.hard,
+      MasteryLevel.mastered => PracticeDifficulty.expert,
     };
     // A recently-shaky skill (low accuracy despite some mastery) is eased back
     // one notch so the learner rebuilds confidence.
-    if (mastery.attempts >= 3 && mastery.accuracy < 0.5) {
-      return base.easier ?? base;
-    }
-    return base;
+    final eased = (mastery.attempts >= 3 && mastery.accuracy < 0.5)
+        ? (base.easier ?? base)
+        : base;
+    return clampToTier(eased, isPro: isPro);
   }
 
   /// The adaptive target for question [slotIndex] of [slots], for [mastery].
