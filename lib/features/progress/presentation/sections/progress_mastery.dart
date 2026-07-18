@@ -60,7 +60,7 @@ class _MasteryRow extends StatelessWidget {
     final topic = view.topic;
 
     return Semantics(
-      label: '${topic.label} mastery: ${view.level.label}',
+      label: context.l10n.progressTopicMastery(topic.label, view.level.label),
       child: ExcludeSemantics(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),

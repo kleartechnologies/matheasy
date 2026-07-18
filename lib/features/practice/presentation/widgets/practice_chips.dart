@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -22,7 +23,9 @@ class PracticeXpBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final onXp = context.colors.onXpContainer;
     return Semantics(
-      label: '${showPlus ? 'Reward ' : ''}$xp XP',
+      label: showPlus
+          ? context.l10n.practiceRewardXp(xp)
+          : context.l10n.practiceXpAmount(xp),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
@@ -38,7 +41,9 @@ class PracticeXpBadge extends StatelessWidget {
             Icon(Icons.bolt_rounded, size: 13, color: onXp),
             const SizedBox(width: AppSpacing.xxs),
             Text(
-              '${showPlus ? '+' : ''}$xp XP',
+              showPlus
+                  ? context.l10n.practiceXpAmountPlus(xp)
+                  : context.l10n.practiceXpAmount(xp),
               style: AppTypography.label.copyWith(color: onXp),
             ),
           ],

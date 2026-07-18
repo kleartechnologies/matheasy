@@ -508,5 +508,439 @@
     }
   },
   "profileAvatarSection": "Avatar",
+  "homeTopicAccuracy": "{accuracy}% accuracy",
+  "@homeTopicAccuracy": {
+    "placeholders": {
+      "accuracy": {
+        "type": "int"
+      }
+    }
+  },
+  "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
+  "@homeChallengeSubtitleXp": {
+    "placeholders": {
+      "subtitle": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContinueProgress": "{percent}% complete · {minutes} min left",
+  "@homeContinueProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallAutoRenewDisclosure": "Auto-renews at {price}/{period} until cancelled. Cancel anytime in your store account; payment is charged at confirmation.",
+  "@paywallAutoRenewDisclosure": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallNowOnPlan": "You're now on {plan}. Enjoy unlimited learning!",
+  "@paywallNowOnPlan": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallWelcomeToPlan": "Welcome to {plan} — enjoy unlimited learning.",
+  "@paywallWelcomeToPlan": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceLevelWithNumber": "Level {level}",
+  "@practiceLevelWithNumber": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceXpToNextLevel": "{xp} XP to Level {level}",
+  "@practiceXpToNextLevel": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceDayStreak": "{count, plural, =1{1 day streak} other{{count} day streak}}",
+  "@practiceDayStreak": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceSolvedProblems": "{count, plural, =1{Solved 1 problem} other{Solved {count} problems}}",
+  "@practiceSolvedProblems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceDoneOfTarget": "{done} of {target}",
+  "@practiceDoneOfTarget": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceQuestionOfTotal": "Question {number} of {total}",
+  "@practiceQuestionOfTotal": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceRewardXp": "Reward {xp} XP",
+  "@practiceRewardXp": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceXpAmount": "{xp} XP",
+  "@practiceXpAmount": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceXpAmountPlus": "+{xp} XP",
+  "@practiceXpAmountPlus": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceCorrectAnswer": "Correct answer: {answer}",
+  "@practiceCorrectAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceSummaryPerfect": "A flawless run on {topic}. Matheasy is impressed!",
+  "@practiceSummaryPerfect": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceSummaryGood": "Solid work on {topic} — you're getting stronger!",
+  "@practiceSummaryGood": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceSummaryKeepGoing": "Every attempt builds mastery. Let's keep going on {topic}!",
+  "@practiceSummaryKeepGoing": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceMasterySemantics": "{topic} mastery: {level}, {percent}% to next level",
+  "@practiceMasterySemantics": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceTopicMastery": "{topic} mastery",
+  "@practiceTopicMastery": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceLevelUp": "Level up! {before} → {after}",
+  "@practiceLevelUp": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLevelXp": "Level {level} · {totalXp} XP",
+  "@progressLevelXp": {
+    "description": "Profile line showing the learner's current level and lifetime XP.",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "totalXp": {
+        "type": "int"
+      }
+    }
+  },
+  "progressXpToNextLevel": "{xpToNext} XP to Level {level}",
+  "@progressXpToNextLevel": {
+    "description": "Caption above the XP bar: how much XP remains until the next level.",
+    "placeholders": {
+      "xpToNext": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "progressStreakDays": "{count, plural, =0{No streak yet} =1{1 day streak} other{{count} day streak}}",
+  "@progressStreakDays": {
+    "description": "Accessibility label for the streak pill: the current day-streak count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressOfTotalUnlocked": "of {total} unlocked",
+  "@progressOfTotalUnlocked": {
+    "description": "Achievements summary suffix following the unlocked count, e.g. '5 of 24 unlocked'.",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "progressTopicMastery": "{topic} mastery: {level}",
+  "@progressTopicMastery": {
+    "description": "Accessibility label for a mastery row: the topic and its mastery level.",
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "progressBadgeRewardStatus": "Unlocked, reward {xp} XP",
+  "@progressBadgeRewardStatus": {
+    "description": "Accessibility status for an unlocked achievement badge and its XP reward.",
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "progressBadgeLockedStatus": "Locked, {current} of {target}",
+  "@progressBadgeLockedStatus": {
+    "description": "Accessibility status for a locked achievement badge and its progress toward the target.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "progressXpReward": "+{xp} XP",
+  "@progressXpReward": {
+    "description": "The XP reward chip shown on an unlocked achievement badge card.",
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "progressAchievementUnlockedSemantics": "Achievement unlocked: {name}. {description} Reward {xp} XP.",
+  "@progressAchievementUnlockedSemantics": {
+    "description": "Accessibility announcement for the achievement-unlock celebration overlay.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "description": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "progressAchievementsCount": "Achievements · {unlocked}/{total}",
+  "@progressAchievementsCount": {
+    "description": "Section header for the achievements rail with unlocked/total counts.",
+    "placeholders": {
+      "unlocked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultDiscussSeedMessage": "Can you help me work through this step by step? {problem}",
+  "@resultDiscussSeedMessage": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "methodsWhenToUse": "When to use: {usage}",
+  "@methodsWhenToUse": {
+    "placeholders": {
+      "usage": {
+        "type": "String"
+      }
+    }
+  },
+  "solutionNextStepOf": "Next step · {current} of {total}",
+  "@solutionNextStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultDetectedConfidence": "DETECTED · {percent}%",
+  "@resultDetectedConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStepOfUpper": "STEP {step} OF {total}",
+  "@resultStepOfUpper": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStepOfTotal": "Step {step} of {total}",
+  "@resultStepOfTotal": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "geometryStepOfLabel": "Step {step} of {total}. {label}",
+  "@geometryStepOfLabel": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "geometryStepOfTitle": "STEP {step} OF {total} · {title}",
+  "@geometryStepOfTitle": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "teachingLearningJourney": "Learning journey: {stages}",
+  "@teachingLearningJourney": {
+    "placeholders": {
+      "stages": {
+        "type": "String"
+      }
+    }
+  },
+  "teachingTemptingBecause": "Tempting because: {reason}",
+  "@teachingTemptingBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "teachingPracticeQuestionLabel": "{label} practice question",
+  "@teachingPracticeQuestionLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "visualTeaserBecomes": "{before} becomes {after}. Unlock Pro to watch every step unfold.",
+  "@visualTeaserBecomes": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
   "@_comment": "Math notation (x², sin, cos, π, ∫, Σ, dx, log) must NEVER be translated — only the surrounding instructional words. Placeholders {name} keep their braces."
 }

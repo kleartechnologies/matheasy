@@ -2677,6 +2677,274 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avatar'**
   String get profileAvatarSection;
+
+  /// No description provided for @homeTopicAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'{accuracy}% accuracy'**
+  String homeTopicAccuracy(int accuracy);
+
+  /// No description provided for @homeChallengeSubtitleXp.
+  ///
+  /// In en, this message translates to:
+  /// **'{subtitle} · +{xp} XP'**
+  String homeChallengeSubtitleXp(String subtitle, int xp);
+
+  /// No description provided for @homeContinueProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete · {minutes} min left'**
+  String homeContinueProgress(int percent, int minutes);
+
+  /// No description provided for @paywallAutoRenewDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-renews at {price}/{period} until cancelled. Cancel anytime in your store account; payment is charged at confirmation.'**
+  String paywallAutoRenewDisclosure(String price, String period);
+
+  /// No description provided for @paywallNowOnPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re now on {plan}. Enjoy unlimited learning!'**
+  String paywallNowOnPlan(String plan);
+
+  /// No description provided for @paywallWelcomeToPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to {plan} — enjoy unlimited learning.'**
+  String paywallWelcomeToPlan(String plan);
+
+  /// No description provided for @practiceLevelWithNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String practiceLevelWithNumber(int level);
+
+  /// No description provided for @practiceXpToNextLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to Level {level}'**
+  String practiceXpToNextLevel(int xp, int level);
+
+  /// No description provided for @practiceDayStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day streak} other{{count} day streak}}'**
+  String practiceDayStreak(int count);
+
+  /// No description provided for @practiceSolvedProblems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Solved 1 problem} other{Solved {count} problems}}'**
+  String practiceSolvedProblems(int count);
+
+  /// No description provided for @practiceDoneOfTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {target}'**
+  String practiceDoneOfTarget(int done, int target);
+
+  /// No description provided for @practiceQuestionOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} of {total}'**
+  String practiceQuestionOfTotal(int number, int total);
+
+  /// No description provided for @practiceRewardXp.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward {xp} XP'**
+  String practiceRewardXp(int xp);
+
+  /// No description provided for @practiceXpAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP'**
+  String practiceXpAmount(int xp);
+
+  /// No description provided for @practiceXpAmountPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'+{xp} XP'**
+  String practiceXpAmountPlus(int xp);
+
+  /// No description provided for @practiceCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer: {answer}'**
+  String practiceCorrectAnswer(String answer);
+
+  /// No description provided for @practiceSummaryPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'A flawless run on {topic}. Matheasy is impressed!'**
+  String practiceSummaryPerfect(String topic);
+
+  /// No description provided for @practiceSummaryGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid work on {topic} — you\'re getting stronger!'**
+  String practiceSummaryGood(String topic);
+
+  /// No description provided for @practiceSummaryKeepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Every attempt builds mastery. Let\'s keep going on {topic}!'**
+  String practiceSummaryKeepGoing(String topic);
+
+  /// No description provided for @practiceMasterySemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{topic} mastery: {level}, {percent}% to next level'**
+  String practiceMasterySemantics(String topic, String level, int percent);
+
+  /// No description provided for @practiceTopicMastery.
+  ///
+  /// In en, this message translates to:
+  /// **'{topic} mastery'**
+  String practiceTopicMastery(String topic);
+
+  /// No description provided for @practiceLevelUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Level up! {before} → {after}'**
+  String practiceLevelUp(String before, String after);
+
+  /// Profile line showing the learner's current level and lifetime XP.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level} · {totalXp} XP'**
+  String progressLevelXp(int level, int totalXp);
+
+  /// Caption above the XP bar: how much XP remains until the next level.
+  ///
+  /// In en, this message translates to:
+  /// **'{xpToNext} XP to Level {level}'**
+  String progressXpToNextLevel(int xpToNext, int level);
+
+  /// Accessibility label for the streak pill: the current day-streak count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No streak yet} =1{1 day streak} other{{count} day streak}}'**
+  String progressStreakDays(int count);
+
+  /// Achievements summary suffix following the unlocked count, e.g. '5 of 24 unlocked'.
+  ///
+  /// In en, this message translates to:
+  /// **'of {total} unlocked'**
+  String progressOfTotalUnlocked(int total);
+
+  /// Accessibility label for a mastery row: the topic and its mastery level.
+  ///
+  /// In en, this message translates to:
+  /// **'{topic} mastery: {level}'**
+  String progressTopicMastery(String topic, String level);
+
+  /// Accessibility status for an unlocked achievement badge and its XP reward.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked, reward {xp} XP'**
+  String progressBadgeRewardStatus(int xp);
+
+  /// Accessibility status for a locked achievement badge and its progress toward the target.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked, {current} of {target}'**
+  String progressBadgeLockedStatus(int current, int target);
+
+  /// The XP reward chip shown on an unlocked achievement badge card.
+  ///
+  /// In en, this message translates to:
+  /// **'+{xp} XP'**
+  String progressXpReward(int xp);
+
+  /// Accessibility announcement for the achievement-unlock celebration overlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked: {name}. {description} Reward {xp} XP.'**
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  );
+
+  /// Section header for the achievements rail with unlocked/total counts.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements · {unlocked}/{total}'**
+  String progressAchievementsCount(int unlocked, int total);
+
+  /// No description provided for @resultDiscussSeedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you help me work through this step by step? {problem}'**
+  String resultDiscussSeedMessage(String problem);
+
+  /// No description provided for @methodsWhenToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'When to use: {usage}'**
+  String methodsWhenToUse(String usage);
+
+  /// No description provided for @solutionNextStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step · {current} of {total}'**
+  String solutionNextStepOf(int current, int total);
+
+  /// No description provided for @resultDetectedConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'DETECTED · {percent}%'**
+  String resultDetectedConfidence(int percent);
+
+  /// No description provided for @resultStepOfUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP {step} OF {total}'**
+  String resultStepOfUpper(int step, int total);
+
+  /// No description provided for @resultStepOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String resultStepOfTotal(int step, int total);
+
+  /// No description provided for @geometryStepOfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}. {label}'**
+  String geometryStepOfLabel(int step, int total, String label);
+
+  /// No description provided for @geometryStepOfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP {step} OF {total} · {title}'**
+  String geometryStepOfTitle(int step, int total, String title);
+
+  /// No description provided for @teachingLearningJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning journey: {stages}'**
+  String teachingLearningJourney(String stages);
+
+  /// No description provided for @teachingTemptingBecause.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempting because: {reason}'**
+  String teachingTemptingBecause(String reason);
+
+  /// No description provided for @teachingPracticeQuestionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} practice question'**
+  String teachingPracticeQuestionLabel(String label);
+
+  /// No description provided for @visualTeaserBecomes.
+  ///
+  /// In en, this message translates to:
+  /// **'{before} becomes {after}. Unlock Pro to watch every step unfold.'**
+  String visualTeaserBecomes(String before, String after);
 }
 
 class _AppLocalizationsDelegate

@@ -45,7 +45,7 @@ class ProgressProfile extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Level ${xp.level} · ${xp.totalXp} XP',
+                      context.l10n.progressLevelXp(xp.level, xp.totalXp),
                       style: AppTypography.bodyMedium.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -64,7 +64,7 @@ class ProgressProfile extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              '${xp.xpToNext} XP to Level ${xp.level + 1}',
+              context.l10n.progressXpToNextLevel(xp.xpToNext, xp.level + 1),
               style: AppTypography.caption.copyWith(
                 color: colors.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -185,7 +185,7 @@ class _StreakPill extends StatelessWidget {
     final active = days > 0;
     final colors = context.colors;
     return Semantics(
-      label: active ? '$days day streak' : 'No streak yet',
+      label: context.l10n.progressStreakDays(days),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

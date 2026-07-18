@@ -24,7 +24,10 @@ class ProgressAchievements extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: 'Achievements · ${state.unlockedCount}/${state.total}',
+          title: context.l10n.progressAchievementsCount(
+            state.unlockedCount,
+            state.total,
+          ),
           actionLabel: context.l10n.progressSeeAll,
           onAction: onSeeAll,
         ),

@@ -135,7 +135,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         equationType: result.type.label,
         topicLabel: result.type.label,
         seedMessage:
-            'Can you help me work through this step by step? ${result.questionLatex}',
+            context.l10n.resultDiscussSeedMessage(result.questionLatex),
       ),
     );
   }

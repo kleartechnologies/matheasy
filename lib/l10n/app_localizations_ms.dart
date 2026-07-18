@@ -1395,4 +1395,247 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get profileAvatarSection => 'Avatar';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '$accuracy% ketepatan';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '$percent% selesai · $minutes min lagi';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return 'Diperbaharui secara automatik pada $price/$period sehingga dibatalkan. Batalkan bila-bila masa dalam akaun kedai anda; bayaran dikenakan semasa pengesahan.';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return 'Anda kini menggunakan $plan. Nikmati pembelajaran tanpa had!';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return 'Selamat datang ke $plan — nikmati pembelajaran tanpa had.';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Tahap $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return '$xp XP ke Tahap $level';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rentetan $count hari',
+      one: 'Rentetan 1 hari',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Selesai $count masalah',
+      one: 'Selesai 1 masalah',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$done daripada $target';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return 'Soalan $number daripada $total';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return 'Ganjaran $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return 'Jawapan betul: $answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return 'Percubaan yang sempurna dalam $topic. Matheasy kagum!';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return 'Kerja yang mantap dalam $topic — anda semakin hebat!';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return 'Setiap percubaan membina penguasaan. Mari teruskan dengan $topic!';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return 'Penguasaan $topic: $level, $percent% ke tahap seterusnya';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return 'Penguasaan $topic';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return 'Naik tahap! $before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Tahap $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return '$xpToNext XP ke Tahap $level';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rentetan $count hari',
+      one: 'Rentetan 1 hari',
+      zero: 'Belum ada rentetan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return 'daripada $total dibuka';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return 'Penguasaan $topic: $level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return 'Dibuka, ganjaran $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return 'Berkunci, $current daripada $target';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return 'Pencapaian dibuka: $name. $description Ganjaran $xp XP.';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return 'Pencapaian · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return 'Bolehkah anda bantu saya selesaikan ini langkah demi langkah? $problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return 'Bila hendak guna: $usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return 'Langkah seterusnya · $current daripada $total';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return 'DIKESAN · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return 'LANGKAH $step DARIPADA $total';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return 'Langkah $step daripada $total';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return 'Langkah $step daripada $total. $label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return 'LANGKAH $step DARIPADA $total · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return 'Perjalanan pembelajaran: $stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return 'Menggoda kerana: $reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return 'Soalan latihan $label';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before menjadi $after. Buka kunci Pro untuk menonton setiap langkah terungkai.';
+  }
 }

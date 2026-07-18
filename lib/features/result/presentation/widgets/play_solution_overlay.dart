@@ -159,8 +159,8 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                         Text(
                           _isLast
                               ? context.l10n.resultSolved
-                              : 'STEP ${_index + 1} OF '
-                                  '${widget.steps.length}',
+                              : context.l10n.resultStepOfUpper(
+                                  _index + 1, widget.steps.length),
                           style: AppTypography.label.copyWith(
                             color: context.isDark
                                 ? AppColors.primaryLight

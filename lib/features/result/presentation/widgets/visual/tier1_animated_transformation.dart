@@ -117,7 +117,7 @@ class _Tier1AnimatedTransformationState
               Row(
                 children: [
                   Text(
-                    'STEP ${_index + 1} OF ${_steps.length}',
+                    context.l10n.resultStepOfUpper(_index + 1, _steps.length),
                     style: AppTypography.label
                         .copyWith(color: colors.textMuted),
                   ),
@@ -331,7 +331,7 @@ class _ProgressDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Semantics(
-      label: 'Step ${index + 1} of $count',
+      label: context.l10n.resultStepOfTotal(index + 1, count),
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,

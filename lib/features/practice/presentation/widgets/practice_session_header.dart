@@ -28,7 +28,10 @@ class PracticeSessionHeader extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Question ${session.questionNumber} of ${session.total}',
+              context.l10n.practiceQuestionOfTotal(
+                session.questionNumber,
+                session.total,
+              ),
               style: AppTypography.caption.copyWith(
                 color: colors.textSecondary,
                 fontWeight: FontWeight.w700,

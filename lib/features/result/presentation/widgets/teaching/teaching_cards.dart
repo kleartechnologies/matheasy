@@ -328,7 +328,8 @@ class LearningJourneyRail extends StatelessWidget {
         .toList();
     if (stages.isEmpty) return const SizedBox.shrink();
     return Semantics(
-      label: 'Learning journey: ${stages.map((s) => s.stage.id.label).join(", ")}',
+      label: context.l10n.teachingLearningJourney(
+          stages.map((s) => s.stage.id.label).join(', ')),
       excludeSemantics: true,
       child: SizedBox(
         height: 58,
@@ -556,7 +557,7 @@ class _MistakeRow extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.lg),
             child: Text(
-              'Tempting because: ${mistake.whyTempting}',
+              context.l10n.teachingTemptingBecause(mistake.whyTempting),
               style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
           ),
@@ -784,7 +785,7 @@ class _RungRow extends StatelessWidget {
     if (onTap == null) return row;
     return Semantics(
       button: true,
-      label: '${r.label} practice question',
+      label: context.l10n.teachingPracticeQuestionLabel(r.label),
       excludeSemantics: true,
       child: Pressable(
         onTap: () => onTap!(item),

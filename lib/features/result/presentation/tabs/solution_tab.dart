@@ -354,7 +354,7 @@ class _RevealControls extends StatelessWidget {
         children: [
           Expanded(
             child: PrimaryButton(
-              label: 'Next step · $current of $total',
+              label: context.l10n.solutionNextStepOf(current, total),
               trailingIcon: Icons.arrow_downward_rounded,
               onPressed: onNext,
             ),

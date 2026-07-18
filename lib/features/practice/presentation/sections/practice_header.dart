@@ -53,7 +53,7 @@ class PracticeHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Level ${xpLevel.level}',
+                      context.l10n.practiceLevelWithNumber(xpLevel.level),
                       style: AppTypography.title.copyWith(
                         color: colors.textPrimary,
                       ),
@@ -62,7 +62,11 @@ class PracticeHeader extends StatelessWidget {
                     XPProgressBar(value: xpLevel.progress),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${xpLevel.xpToNext} XP to Level ${xpLevel.level + 1}',
+                      context.l10n
+                          .practiceXpToNextLevel(
+                        xpLevel.xpToNext,
+                        xpLevel.level + 1,
+                      ),
                       style: AppTypography.caption.copyWith(
                         color: colors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -141,7 +145,9 @@ class _StreakPill extends StatelessWidget {
     final active = days > 0;
     final colors = context.colors;
     return Semantics(
-      label: active ? '$days day streak' : context.l10n.practiceNoStreak,
+      label: active
+          ? context.l10n.practiceDayStreak(days)
+          : context.l10n.practiceNoStreak,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

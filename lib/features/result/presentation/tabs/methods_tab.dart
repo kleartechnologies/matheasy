@@ -211,7 +211,7 @@ class _Details extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    'When to use: ${method.whenToUse}',
+                    context.l10n.methodsWhenToUse(method.whenToUse),
                     style: AppTypography.bodySmall
                         .copyWith(color: colors.onPrimaryContainer),
                   ),

@@ -69,7 +69,7 @@ class HomeRecommendedCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${topic.accuracy}% accuracy',
+                      context.l10n.homeTopicAccuracy(topic.accuracy),
                       style: AppTypography.caption.copyWith(
                         color: colors.textSecondary,
                       ),

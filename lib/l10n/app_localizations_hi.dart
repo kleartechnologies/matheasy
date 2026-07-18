@@ -1389,4 +1389,247 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get profileAvatarSection => 'अवतार';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '$accuracy% सटीकता';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '$percent% पूर्ण · $minutes min शेष';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return 'रद्द किए जाने तक $price/$period पर स्वतः नवीनीकृत होता है। अपने स्टोर खाते में कभी भी रद्द करें; पुष्टि के समय भुगतान लिया जाता है।';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return 'अब आप $plan पर हैं। असीमित सीखने का आनंद लें!';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return '$plan में आपका स्वागत है — असीमित सीखने का आनंद लें।';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return 'Level $level तक $xp XP';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count दिन की स्ट्रीक',
+      one: '1 दिन की स्ट्रीक',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count समस्याएँ हल कीं',
+      one: '1 समस्या हल की',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$target में से $done';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return 'प्रश्न $total में से $number';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return 'इनाम $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return 'सही उत्तर: $answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return '$topic पर एक निर्दोष प्रदर्शन। Matheasy प्रभावित है!';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return '$topic पर बढ़िया काम — आप और मजबूत हो रहे हैं!';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return 'हर प्रयास महारत बढ़ाता है। चलिए $topic पर आगे बढ़ते रहें!';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return '$topic में महारत: $level, अगले स्तर तक $percent%';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return '$topic में महारत';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return 'Level बढ़ा! $before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Level $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return 'Level $level तक $xpToNext XP';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count दिन की स्ट्रीक',
+      one: '1 दिन की स्ट्रीक',
+      zero: 'अभी कोई स्ट्रीक नहीं',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return 'में से $total अनलॉक हुए';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return '$topic में महारत: $level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return 'अनलॉक्ड, इनाम $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return 'लॉक्ड, $target में से $current';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return 'उपलब्धि अनलॉक हुई: $name। $description इनाम $xp XP।';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return 'उपलब्धियाँ · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return 'क्या आप इसे चरण-दर-चरण हल करने में मेरी मदद कर सकते हैं? $problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return 'कब उपयोग करें: $usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return 'अगला चरण · $total में से $current';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return 'पहचाना गया · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return 'चरण $step / $total';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return 'चरण $total में से $step';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return 'चरण $total में से $step। $label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return 'चरण $step / $total · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return 'सीखने की यात्रा: $stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return 'आकर्षक क्योंकि: $reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return '$label अभ्यास प्रश्न';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before बन जाता है $after। हर चरण को खुलते देखने के लिए Pro अनलॉक करें।';
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -75,7 +76,8 @@ class PracticeDailyChallenge extends StatelessWidget {
               Expanded(child: XPProgressBar(value: challenge.progress)),
               const SizedBox(width: AppSpacing.md),
               Text(
-                '${challenge.done} of ${challenge.target}',
+                context.l10n
+                    .practiceDoneOfTarget(challenge.done, challenge.target),
                 style: AppTypography.caption.copyWith(
                   color: colors.textSecondary,
                   fontWeight: FontWeight.w700,

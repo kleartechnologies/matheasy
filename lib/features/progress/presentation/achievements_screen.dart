@@ -82,7 +82,7 @@ class _SummaryCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  'of $total unlocked',
+                  context.l10n.progressOfTotalUnlocked(total),
                   style: AppTypography.bodyLarge.copyWith(
                     color: colors.textSecondary,
                   ),

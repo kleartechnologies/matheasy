@@ -51,7 +51,7 @@ class _PurchaseSuccessOverlayState extends State<PurchaseSuccessOverlay>
         child: Center(
           child: Semantics(
             liveRegion: true,
-            label: "You're now on ${widget.planName}. Enjoy unlimited learning!",
+            label: context.l10n.paywallNowOnPlan(widget.planName),
             child: ScaleTransition(
               scale: Tween<double>(begin: 0.6, end: 1).animate(_pop),
               child: Column(
@@ -78,7 +78,7 @@ class _PurchaseSuccessOverlayState extends State<PurchaseSuccessOverlay>
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Welcome to ${widget.planName} — enjoy unlimited learning.',
+                    context.l10n.paywallWelcomeToPlan(widget.planName),
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Colors.white.withValues(alpha: 0.8),

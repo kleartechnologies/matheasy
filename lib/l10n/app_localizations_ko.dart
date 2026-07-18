@@ -1342,4 +1342,247 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get profileAvatarSection => '아바타';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '정답률 $accuracy%';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '$percent% 완료 · $minutes분 남음';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return '취소할 때까지 $period마다 $price에 자동 갱신됩니다. 스토어 계정에서 언제든지 취소할 수 있으며, 결제는 확인 시점에 청구됩니다.';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return '이제 $plan을(를) 사용 중입니다. 무제한 학습을 즐기세요!';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return '$plan에 오신 것을 환영합니다 — 무제한 학습을 즐기세요.';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return 'Level $level까지 $xp XP';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속',
+      one: '1일 연속',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count문제 해결',
+      one: '1문제 해결',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$target 중 $done';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return '$total문제 중 $number번';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return '보상 $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return '정답: $answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return '$topic 완벽하게 풀었어요. Matheasy가 감탄했어요!';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return '$topic 훌륭해요 — 점점 실력이 늘고 있어요!';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return '모든 시도가 숙련도를 쌓아줍니다. $topic을(를) 계속 이어가요!';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return '$topic 숙련도: $level, 다음 레벨까지 $percent%';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return '$topic 숙련도';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return '레벨 업! $before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Level $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return 'Level $level까지 $xpToNext XP';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일 연속',
+      one: '1일 연속',
+      zero: '아직 연속 기록 없음',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return '$total 중 잠금 해제됨';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return '$topic 숙련도: $level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return '잠금 해제됨, 보상 $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return '잠김, $target 중 $current';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return '업적 달성: $name. $description 보상 $xp XP.';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return '업적 · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return '이 문제를 단계별로 함께 풀어봐 주시겠어요? $problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return '사용 시점: $usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return '다음 단계 · $total 중 $current';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return '감지됨 · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return '$total 중 $step단계';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return '$total 중 $step단계';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return '$total 중 $step단계. $label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return '$total 중 $step단계 · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return '학습 여정: $stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return '함정 이유: $reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return '$label 연습 문제';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before이(가) $after이(가) 됩니다. Pro를 잠금 해제하고 모든 단계를 확인하세요.';
+  }
 }

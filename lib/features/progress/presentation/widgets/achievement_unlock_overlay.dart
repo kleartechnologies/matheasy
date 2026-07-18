@@ -45,8 +45,11 @@ class AchievementUnlockOverlay extends StatelessWidget {
         scopesRoute: true,
         explicitChildNodes: true,
         liveRegion: true,
-        label: 'Achievement unlocked: ${badge.name}. '
-            '${achievement.description} Reward ${achievement.reward.xp} XP.',
+        label: context.l10n.progressAchievementUnlockedSemantics(
+          badge.name,
+          achievement.description,
+          achievement.reward.xp,
+        ),
         child: Stack(
           children: [
             // Dimmed, tappable backdrop.

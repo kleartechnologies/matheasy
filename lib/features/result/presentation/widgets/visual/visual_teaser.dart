@@ -97,8 +97,8 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
               // The preview transformation, announced as one sentence.
               Semantics(
                 container: true,
-                label: '${result.questionLatex} becomes $afterLatex. '
-                    'Unlock Pro to watch every step unfold.',
+                label: context.l10n.visualTeaserBecomes(
+                    result.questionLatex, afterLatex),
                 child: ExcludeSemantics(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

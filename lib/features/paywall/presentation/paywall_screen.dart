@@ -487,9 +487,8 @@ class _Footer extends StatelessWidget {
         Text(
           isFree
               ? context.l10n.paywallFreeDisclosure
-              : 'Auto-renews at $priceString/${plan.period} until cancelled. '
-                    'Cancel anytime in your store account; payment is charged at '
-                    'confirmation.',
+              : context.l10n
+                    .paywallAutoRenewDisclosure(priceString, plan.period),
           textAlign: TextAlign.center,
           style: AppTypography.caption.copyWith(
             color: Colors.white.withValues(alpha: 0.5),

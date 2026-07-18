@@ -1321,6 +1321,249 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileAvatarSection => '头像';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '正确率 $accuracy%';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '已完成 $percent% · 还剩 $minutes min';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return '在取消前将按 $price/$period 自动续订。可随时在你的商店账户中取消；确认时即扣款。';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return '你现在是 $plan 会员。尽情享受无限学习！';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return '欢迎加入 $plan——尽情享受无限学习。';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return '还差 $xp XP 升到 Level $level';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续 $count 天',
+      one: '连续 1 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已解 $count 道题',
+      one: '已解 1 道题',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$done／$target';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return '第 $number／$total 题';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return '奖励 $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return '正确答案：$answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return '$topic 全对通关。Matheasy 为你点赞！';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return '$topic 做得扎实——你越来越强了！';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return '每一次尝试都在积累掌握度。我们继续攻克 $topic 吧！';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return '$topic掌握度：$level，距下一等级还差 $percent%';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return '$topic掌握度';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return '升级啦！$before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Level $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return '还差 $xpToNext XP 升到 Level $level';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续 $count 天',
+      one: '连续 1 天',
+      zero: '还没有连续记录',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return '已解锁，共 $total 个';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return '$topic掌握度：$level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return '已解锁，奖励 $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return '未解锁，$current／$target';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return '成就已解锁：$name。$description 奖励 $xp XP。';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return '成就 · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return '你能一步一步帮我解这道题吗？$problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return '适用场景：$usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return '下一步 · 第 $current／$total 步';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return '已识别 · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return '第 $step／$total 步';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return '第 $step／$total 步';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return '第 $step／$total 步。$label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return '第 $step／$total 步 · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return '学习旅程：$stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return '容易被误选的原因：$reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return '$label练习题';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before 变为 $after。解锁 Pro，观看每一步的展开。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2640,6 +2883,249 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get profileAvatarSection => '头像';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '正确率 $accuracy%';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '已完成 $percent% · 还剩 $minutes min';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return '在取消前将按 $price/$period 自动续订。可随时在你的商店账户中取消；确认时即扣款。';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return '你现在是 $plan 会员。尽情享受无限学习！';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return '欢迎加入 $plan——尽情享受无限学习。';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return '还差 $xp XP 升到 Level $level';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续 $count 天',
+      one: '连续 1 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已解 $count 道题',
+      one: '已解 1 道题',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$done／$target';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return '第 $number／$total 题';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return '奖励 $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return '正确答案：$answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return '$topic 全对通关。Matheasy 为你点赞！';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return '$topic 做得扎实——你越来越强了！';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return '每一次尝试都在积累掌握度。我们继续攻克 $topic 吧！';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return '$topic掌握度：$level，距下一等级还差 $percent%';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return '$topic掌握度';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return '升级啦！$before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Level $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return '还差 $xpToNext XP 升到 Level $level';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '连续 $count 天',
+      one: '连续 1 天',
+      zero: '还没有连续记录',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return '已解锁，共 $total 个';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return '$topic掌握度：$level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return '已解锁，奖励 $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return '未解锁，$current／$target';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return '成就已解锁：$name。$description 奖励 $xp XP。';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return '成就 · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return '你能一步一步帮我解这道题吗？$problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return '适用场景：$usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return '下一步 · 第 $current／$total 步';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return '已识别 · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return '第 $step／$total 步';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return '第 $step／$total 步';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return '第 $step／$total 步。$label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return '第 $step／$total 步 · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return '学习旅程：$stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return '容易被误选的原因：$reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return '$label练习题';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before 变为 $after。解锁 Pro，观看每一步的展开。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3959,4 +4445,247 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get profileAvatarSection => '頭像';
+
+  @override
+  String homeTopicAccuracy(int accuracy) {
+    return '$accuracy% 正確率';
+  }
+
+  @override
+  String homeChallengeSubtitleXp(String subtitle, int xp) {
+    return '$subtitle · +$xp XP';
+  }
+
+  @override
+  String homeContinueProgress(int percent, int minutes) {
+    return '已完成 $percent% · 剩 $minutes min';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period) {
+    return '每 $period 以 $price 自動續訂，直到取消為止。可隨時於你的商店帳戶取消；款項將於確認時收取。';
+  }
+
+  @override
+  String paywallNowOnPlan(String plan) {
+    return '你現在是 $plan 會員了。盡情享受無限學習！';
+  }
+
+  @override
+  String paywallWelcomeToPlan(String plan) {
+    return '歡迎加入 $plan——盡情享受無限學習。';
+  }
+
+  @override
+  String practiceLevelWithNumber(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String practiceXpToNextLevel(int xp, int level) {
+    return '還差 $xp XP 升到 Level $level';
+  }
+
+  @override
+  String practiceDayStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '連續 $count 天',
+      one: '連續 1 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceSolvedProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已解 $count 題',
+      one: '已解 1 題',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String practiceDoneOfTarget(int done, int target) {
+    return '$done／$target';
+  }
+
+  @override
+  String practiceQuestionOfTotal(int number, int total) {
+    return '第 $number 題，共 $total 題';
+  }
+
+  @override
+  String practiceRewardXp(int xp) {
+    return '獎勵 $xp XP';
+  }
+
+  @override
+  String practiceXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String practiceXpAmountPlus(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String practiceCorrectAnswer(String answer) {
+    return '正確答案：$answer';
+  }
+
+  @override
+  String practiceSummaryPerfect(String topic) {
+    return '在 $topic 上完美無誤。Matheasy 對你刮目相看！';
+  }
+
+  @override
+  String practiceSummaryGood(String topic) {
+    return '在 $topic 上表現扎實——你越來越強了！';
+  }
+
+  @override
+  String practiceSummaryKeepGoing(String topic) {
+    return '每一次嘗試都能累積精熟度。我們繼續攻克 $topic 吧！';
+  }
+
+  @override
+  String practiceMasterySemantics(String topic, String level, int percent) {
+    return '$topic 精熟度：$level，距下一級還有 $percent%';
+  }
+
+  @override
+  String practiceTopicMastery(String topic) {
+    return '$topic 精熟度';
+  }
+
+  @override
+  String practiceLevelUp(String before, String after) {
+    return '升級了！$before → $after';
+  }
+
+  @override
+  String progressLevelXp(int level, int totalXp) {
+    return 'Level $level · $totalXp XP';
+  }
+
+  @override
+  String progressXpToNextLevel(int xpToNext, int level) {
+    return '還差 $xpToNext XP 升到 Level $level';
+  }
+
+  @override
+  String progressStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '連續 $count 天',
+      one: '連續 1 天',
+      zero: '尚無連續紀錄',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressOfTotalUnlocked(int total) {
+    return '已解鎖，共 $total 項';
+  }
+
+  @override
+  String progressTopicMastery(String topic, String level) {
+    return '$topic 精熟度：$level';
+  }
+
+  @override
+  String progressBadgeRewardStatus(int xp) {
+    return '已解鎖，獎勵 $xp XP';
+  }
+
+  @override
+  String progressBadgeLockedStatus(int current, int target) {
+    return '未解鎖，$current／$target';
+  }
+
+  @override
+  String progressXpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressAchievementUnlockedSemantics(
+    String name,
+    String description,
+    int xp,
+  ) {
+    return '成就解鎖：$name。$description 獎勵 $xp XP。';
+  }
+
+  @override
+  String progressAchievementsCount(int unlocked, int total) {
+    return '成就 · $unlocked/$total';
+  }
+
+  @override
+  String resultDiscussSeedMessage(String problem) {
+    return '可以幫我一步一步解這題嗎？$problem';
+  }
+
+  @override
+  String methodsWhenToUse(String usage) {
+    return '適用時機：$usage';
+  }
+
+  @override
+  String solutionNextStepOf(int current, int total) {
+    return '下一步 · 第 $current 步，共 $total 步';
+  }
+
+  @override
+  String resultDetectedConfidence(int percent) {
+    return '已辨識 · $percent%';
+  }
+
+  @override
+  String resultStepOfUpper(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String resultStepOfTotal(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String geometryStepOfLabel(int step, int total, String label) {
+    return '第 $step 步，共 $total 步。$label';
+  }
+
+  @override
+  String geometryStepOfTitle(int step, int total, String title) {
+    return '第 $step 步，共 $total 步 · $title';
+  }
+
+  @override
+  String teachingLearningJourney(String stages) {
+    return '學習旅程：$stages';
+  }
+
+  @override
+  String teachingTemptingBecause(String reason) {
+    return '容易誤選的原因：$reason';
+  }
+
+  @override
+  String teachingPracticeQuestionLabel(String label) {
+    return '$label 練習題';
+  }
+
+  @override
+  String visualTeaserBecomes(String before, String after) {
+    return '$before 變成 $after。解鎖 Pro 觀看每一步的展開。';
+  }
 }

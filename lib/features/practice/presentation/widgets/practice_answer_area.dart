@@ -137,7 +137,7 @@ class PracticeAnswerArea extends StatelessWidget {
         if (revealed && !wasCorrect) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Correct answer: ${question.correctAnswerText}',
+            context.l10n.practiceCorrectAnswer(question.correctAnswerText),
             style: AppTypography.bodySmall.copyWith(
               color: colors.onSuccessContainer,
               fontWeight: FontWeight.w700,

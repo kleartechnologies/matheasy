@@ -71,7 +71,7 @@ class HomeContinueCard extends StatelessWidget {
           _ProgressBar(fraction: course.fraction),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            '$percent% complete · ${course.estMinutes} min left',
+            context.l10n.homeContinueProgress(percent, course.estMinutes),
             style: AppTypography.caption.copyWith(color: colors.textSecondary),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -28,8 +29,7 @@ class AchievementBadgeCard extends StatelessWidget {
       // gesture semantics, so without this the announced button is inert to AT.
       onTap: onTap,
       label: '${badge.name}. ${achievement.description} '
-          '${unlocked ? 'Unlocked, reward ${achievement.reward.xp} XP' : 'Locked, '
-              '${view.progress.current} of ${view.progress.target}'}',
+          '${unlocked ? context.l10n.progressBadgeRewardStatus(achievement.reward.xp) : context.l10n.progressBadgeLockedStatus(view.progress.current, view.progress.target)}',
       child: ExcludeSemantics(
         child: AppCard(
           onTap: onTap,
@@ -85,7 +85,7 @@ class AchievementBadgeCard extends StatelessWidget {
                     const Icon(Icons.bolt_rounded, size: 14, color: AppColors.xp),
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
-                      '+${achievement.reward.xp} XP',
+                      context.l10n.progressXpReward(achievement.reward.xp),
                       style: AppTypography.label.copyWith(color: AppColors.xp),
                     ),
                   ],

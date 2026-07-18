@@ -314,7 +314,8 @@ class _StepStrip extends StatelessWidget {
         context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       liveRegion: true,
-      label: 'Step ${index + 1} of $total. ${step.semanticLabel}',
+      label: context.l10n.geometryStepOfLabel(
+          index + 1, total, step.semanticLabel),
       child: ExcludeSemantics(
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
@@ -322,7 +323,8 @@ class _StepStrip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'STEP ${index + 1} OF $total · ${step.title.toUpperCase()}',
+                context.l10n.geometryStepOfTitle(
+                    index + 1, total, step.title.toUpperCase()),
                 textAlign: TextAlign.center,
                 style: AppTypography.label.copyWith(color: emerald),
               ),

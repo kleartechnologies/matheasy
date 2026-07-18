@@ -63,7 +63,8 @@ class HomeDailyChallengeCard extends StatelessWidget {
                 Text(
                   isDone
                       ? context.l10n.homeCompletedToday
-                      : '${challenge.subtitle} · +${challenge.xpReward} XP',
+                      : context.l10n.homeChallengeSubtitleXp(
+                          challenge.subtitle, challenge.xpReward),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.caption.copyWith(

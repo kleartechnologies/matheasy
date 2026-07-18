@@ -52,7 +52,8 @@ class ResultHeader extends StatelessWidget {
                       size: 14, color: colors.onSuccessContainer),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'DETECTED · ${result.equation.confidencePercent}%',
+                    context.l10n.resultDetectedConfidence(
+                        result.equation.confidencePercent),
                     style: AppTypography.label
                         .copyWith(color: colors.onSuccessContainer),
                   ),

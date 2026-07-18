@@ -52,7 +52,7 @@ class PracticeResultsView extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          _summary(result),
+          _summary(context, result),
           textAlign: TextAlign.center,
           style: AppTypography.bodyLarge.copyWith(color: colors.textSecondary),
         ),
@@ -82,15 +82,14 @@ class PracticeResultsView extends StatelessWidget {
     );
   }
 
-  String _summary(PracticeResult result) {
+  String _summary(BuildContext context, PracticeResult result) {
     if (result.isPerfect) {
-      return 'A flawless run on ${result.topic.label}. Matheasy is impressed!';
+      return context.l10n.practiceSummaryPerfect(result.topic.label);
     }
     if (result.accuracy >= 0.6) {
-      return "Solid work on ${result.topic.label} — you're getting stronger!";
+      return context.l10n.practiceSummaryGood(result.topic.label);
     }
-    return "Every attempt builds mastery. Let's keep going on "
-        '${result.topic.label}!';
+    return context.l10n.practiceSummaryKeepGoing(result.topic.label);
   }
 }
 
@@ -220,8 +219,11 @@ class _MasteryCard extends StatelessWidget {
         children: [
           Semantics(
             container: true,
-            label: '${result.topic.label} mastery: ${result.masteryAfter.label}'
-                ', ${(result.masteryProgress * 100).round()}% to next level',
+            label: context.l10n.practiceMasterySemantics(
+              result.topic.label,
+              result.masteryAfter.label,
+              (result.masteryProgress * 100).round(),
+            ),
             child: ProgressRing(
               value: result.masteryProgress,
               progressColor: AppColors.primaryAction,
@@ -239,7 +241,7 @@ class _MasteryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${result.topic.label} mastery',
+                  context.l10n.practiceTopicMastery(result.topic.label),
                   style: AppTypography.title.copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
@@ -262,8 +264,10 @@ class _MasteryCard extends StatelessWidget {
                       borderRadius: AppRadius.pillRadius,
                     ),
                     child: Text(
-                      'Level up! ${result.masteryBefore.label} → '
-                      '${result.masteryAfter.label}',
+                      context.l10n.practiceLevelUp(
+                        result.masteryBefore.label,
+                        result.masteryAfter.label,
+                      ),
                       style: AppTypography.label.copyWith(
                         color: colors.onSuccessContainer,
                       ),
