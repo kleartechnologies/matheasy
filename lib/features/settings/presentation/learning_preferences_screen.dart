@@ -6,7 +6,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../onboarding/domain/onboarding_models.dart';
 import '../application/settings_controller.dart';
 import '../domain/learning_goal.dart';
-import 'widgets/difficulty_selector.dart';
+import 'widgets/practice_difficulty_selector.dart';
 import 'widgets/settings_option_picker.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/settings_tile.dart';
@@ -82,7 +82,7 @@ class LearningPreferencesScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.section),
           const SettingsGroupLabel('Practice difficulty'),
-          DifficultySelector(
+          PracticeDifficultySelector(
             selected: learning.difficulty,
             onChanged: controller.setDifficulty,
           ),

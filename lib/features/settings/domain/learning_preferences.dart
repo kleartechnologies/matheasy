@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../onboarding/domain/onboarding_models.dart';
-import 'difficulty_preference.dart';
+import '../../practice/domain/practice_difficulty.dart';
 import 'learning_goal.dart';
 
 /// The learner's editable, locally-persisted study preferences.
@@ -17,7 +17,7 @@ class LearningPreferences {
     this.learningGoal,
     this.dailyGoal,
     this.topics = const <MathTopic>{},
-    this.difficulty = DifficultyPreference.adaptive,
+    this.difficulty = PracticeDifficulty.medium,
   });
 
   static const LearningPreferences defaults = LearningPreferences();
@@ -34,8 +34,9 @@ class LearningPreferences {
   /// Topics the learner wants to focus on.
   final Set<MathTopic> topics;
 
-  /// Preferred practice difficulty (defaults to [DifficultyPreference.adaptive]).
-  final DifficultyPreference difficulty;
+  /// Preferred practice difficulty — the engine level the learner picks; the
+  /// authority for practice generation (defaults to [PracticeDifficulty.medium]).
+  final PracticeDifficulty difficulty;
 
   /// Whether the learner has set any preference beyond the defaults.
   bool get isConfigured =>
@@ -49,7 +50,7 @@ class LearningPreferences {
     LearningGoal? learningGoal,
     DailyGoal? dailyGoal,
     Set<MathTopic>? topics,
-    DifficultyPreference? difficulty,
+    PracticeDifficulty? difficulty,
   }) {
     return LearningPreferences(
       gradeLevel: gradeLevel ?? this.gradeLevel,

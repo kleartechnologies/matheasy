@@ -1,37 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../domain/difficulty_preference.dart';
+import '../../../practice/domain/practice_difficulty.dart';
+import '../../../subscription/application/subscription_controller.dart';
+import '../../../subscription/domain/paywall_trigger.dart';
 
-/// A stacked single-select for the practice [DifficultyPreference], showing each
-/// option's icon, label and description with an animated selection state.
-class DifficultySelector extends StatelessWidget {
-  const DifficultySelector({
+/// A stacked single-select over the 5 engine difficulty levels
+/// ([PracticeDifficulty]), in the same card style as the other learning-pref
+/// selectors. [PracticeDifficulty.hard] (A-Level) and [PracticeDifficulty.expert]
+/// (university) are Pro — a free learner who taps them is routed to the paywall,
+/// never silently downgraded.
+class PracticeDifficultySelector extends ConsumerWidget {
+  const PracticeDifficultySelector({
     super.key,
     required this.selected,
     required this.onChanged,
   });
 
-  final DifficultyPreference selected;
-  final ValueChanged<DifficultyPreference> onChanged;
+  final PracticeDifficulty selected;
+  final ValueChanged<PracticeDifficulty> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPro = ref.watch(isProProvider);
     return Column(
       children: [
-        for (final option in DifficultyPreference.values) ...[
-          if (option != DifficultyPreference.values.first)
+        for (final option in PracticeDifficulty.values) ...[
+          if (option != PracticeDifficulty.values.first)
             const SizedBox(height: AppSpacing.md),
           _DifficultyCard(
             option: option,
             selected: option == selected,
-            onTap: () => onChanged(option),
+            locked: option.isPro && !isPro,
+            onTap: () {
+              if (option.isPro && !isPro) {
+                context.push(
+                  AppRoutes.paywall,
+                  extra: PaywallTrigger.adaptivePractice,
+                );
+                return;
+              }
+              onChanged(option);
+            },
           ),
         ],
       ],
@@ -39,29 +58,56 @@ class DifficultySelector extends StatelessWidget {
   }
 }
 
+/// Per-level presentation: an icon + a one-line, grade-anchored blurb.
+({IconData icon, String description}) _meta(PracticeDifficulty d) =>
+    switch (d) {
+      PracticeDifficulty.veryEasy => (
+          icon: Icons.spa_rounded,
+          description: 'Primary — small numbers, one step at a time',
+        ),
+      PracticeDifficulty.easy => (
+          icon: Icons.eco_rounded,
+          description: 'Upper primary — basic fractions & simple geometry',
+        ),
+      PracticeDifficulty.medium => (
+          icon: Icons.auto_stories_rounded,
+          description: 'Secondary / SPM / GCSE — multi-step problems',
+        ),
+      PracticeDifficulty.hard => (
+          icon: Icons.bolt_rounded,
+          description: 'A-Level — functions, logs, calculus, proofs',
+        ),
+      PracticeDifficulty.expert => (
+          icon: Icons.workspace_premium_rounded,
+          description: 'University — advanced, long derivations',
+        ),
+    };
+
 class _DifficultyCard extends StatelessWidget {
   const _DifficultyCard({
     required this.option,
     required this.selected,
+    required this.locked,
     required this.onTap,
   });
 
-  final DifficultyPreference option;
+  final PracticeDifficulty option;
   final bool selected;
+  final bool locked;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final meta = _meta(option);
     // The emerald that stays legible as a foreground on the active surface —
     // the identity emerald is 2.97:1 and is brand art only.
-    final accent = context.isDark
-        ? AppColors.primaryLight
-        : AppColors.primaryDark;
+    final accent =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       button: true,
       selected: selected,
-      label: '${option.label}. ${option.description}',
+      label: '${option.label}. ${meta.description}${locked ? '. Pro' : ''}',
       excludeSemantics: true,
       child: AppCard(
         onTap: onTap,
@@ -85,7 +131,7 @@ class _DifficultyCard extends StatelessWidget {
                 borderRadius: AppRadius.smRadius,
               ),
               child: Icon(
-                option.icon,
+                meta.icon,
                 size: 23,
                 color: selected ? accent : colors.textSecondary,
               ),
@@ -105,7 +151,7 @@ class _DifficultyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    option.description,
+                    meta.description,
                     style: AppTypography.bodySmall
                         .copyWith(color: colors.textSecondary),
                   ),
@@ -113,7 +159,10 @@ class _DifficultyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            _SelectionDot(selected: selected),
+            if (locked)
+              Icon(Icons.lock_rounded, size: 22, color: colors.textMuted)
+            else
+              _SelectionDot(selected: selected),
           ],
         ),
       ),

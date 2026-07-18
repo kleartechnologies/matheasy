@@ -11,11 +11,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/features/onboarding/domain/onboarding_models.dart';
+import 'package:matheasy/features/practice/domain/practice_difficulty.dart';
 import 'package:matheasy/features/settings/application/settings_controller.dart';
 import 'package:matheasy/features/settings/application/settings_repository.dart';
 import 'package:matheasy/features/settings/domain/accessibility_settings.dart';
 import 'package:matheasy/features/settings/domain/appearance_settings.dart';
-import 'package:matheasy/features/settings/domain/difficulty_preference.dart';
 import 'package:matheasy/features/settings/domain/learning_goal.dart';
 import 'package:matheasy/features/settings/domain/learning_preferences.dart';
 import 'package:matheasy/features/settings/domain/notification_settings.dart';
@@ -66,7 +66,7 @@ void main() {
           learningGoal: LearningGoal.examPrep,
           dailyGoal: DailyGoal.min15,
           topics: {MathTopic.algebra, MathTopic.geometry},
-          difficulty: DifficultyPreference.challenging,
+          difficulty: PracticeDifficulty.hard,
         ),
         notifications: NotificationSettings(practiceReminder: false),
         appearance: AppearanceSettings(themeMode: ThemeMode.dark),
@@ -80,7 +80,7 @@ void main() {
       expect(loaded.learning.dailyGoal, DailyGoal.min15);
       expect(loaded.learning.topics,
           {MathTopic.algebra, MathTopic.geometry});
-      expect(loaded.learning.difficulty, DifficultyPreference.challenging);
+      expect(loaded.learning.difficulty, PracticeDifficulty.hard);
       expect(loaded.notifications.practiceReminder, isFalse);
       expect(loaded.notifications.streakReminder, isTrue); // untouched default
       expect(loaded.appearance.themeMode, ThemeMode.dark);
@@ -131,7 +131,7 @@ void main() {
         ..setGradeLevel(StudyLevel.igcse)
         ..setLearningGoal(LearningGoal.getAhead)
         ..setDailyGoal(DailyGoal.min30)
-        ..setDifficulty(DifficultyPreference.easy)
+        ..setDifficulty(PracticeDifficulty.easy)
         ..toggleTopic(MathTopic.calculus)
         ..toggleTopic(MathTopic.algebra)
         ..toggleTopic(MathTopic.calculus); // toggles calculus back off
@@ -141,7 +141,7 @@ void main() {
       expect(learning.gradeLevel, StudyLevel.igcse);
       expect(learning.learningGoal, LearningGoal.getAhead);
       expect(learning.dailyGoal, DailyGoal.min30);
-      expect(learning.difficulty, DifficultyPreference.easy);
+      expect(learning.difficulty, PracticeDifficulty.easy);
       expect(learning.topics, {MathTopic.algebra});
     });
   });

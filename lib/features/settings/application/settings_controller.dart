@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../onboarding/domain/onboarding_models.dart';
-import '../domain/difficulty_preference.dart';
+import '../../practice/domain/practice_difficulty.dart';
 import '../domain/learning_goal.dart';
 import '../domain/profile_settings.dart';
 import 'settings_repository.dart';
@@ -48,7 +48,7 @@ class SettingsController extends _$SettingsController {
     _update(state.copyWith(learning: state.learning.copyWith(topics: next)));
   }
 
-  void setDifficulty(DifficultyPreference difficulty) => _update(
+  void setDifficulty(PracticeDifficulty difficulty) => _update(
         state.copyWith(
           learning: state.learning.copyWith(difficulty: difficulty),
         ),

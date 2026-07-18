@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../application/practice_dashboard_controller.dart';
+import '../application/practice_difficulty_preference.dart';
 import '../domain/practice_session.dart';
 import '../domain/practice_skill.dart';
 import '../domain/practice_topic.dart';
@@ -18,7 +19,6 @@ import 'sections/practice_daily_challenge.dart';
 import 'sections/practice_header.dart';
 import 'sections/practice_recommended_topics.dart';
 import 'sections/practice_weak_topics.dart';
-import 'widgets/practice_difficulty_picker.dart';
 
 /// The Practice dashboard — the tab root. XP + streak header, continue, the
 /// daily challenge, recommended + weak topics, and every category. Each path
@@ -57,7 +57,6 @@ class PracticeScreen extends ConsumerWidget {
         streakCurrent: data.streakCurrent,
         tutorMessage: data.tutorMessage,
       ),
-      const PracticeDifficultyPicker(),
       if (data.continueRequest != null)
         PracticeContinue(
           request: data.continueRequest!,

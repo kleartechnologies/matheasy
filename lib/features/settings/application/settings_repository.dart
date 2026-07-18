@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/persistence/preferences_store.dart';
 import '../../onboarding/domain/onboarding_models.dart';
+import '../../practice/domain/practice_difficulty.dart';
 import '../domain/accessibility_settings.dart';
 import '../domain/appearance_settings.dart';
-import '../domain/difficulty_preference.dart';
 import '../domain/learning_goal.dart';
 import '../domain/learning_preferences.dart';
 import '../domain/notification_settings.dart';
@@ -86,8 +86,8 @@ class LocalSettingsRepository implements SettingsRepository {
         for (final name in (value['topics'] as List? ?? const []))
           ?_byName(MathTopic.values, name),
       },
-      difficulty: _byName(DifficultyPreference.values, value['difficulty']) ??
-          DifficultyPreference.adaptive,
+      difficulty: _byName(PracticeDifficulty.values, value['difficulty']) ??
+          PracticeDifficulty.medium,
     );
   }
 
