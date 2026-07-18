@@ -6,6 +6,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matheasy/features/result/application/functions_solver_service.dart';
+import 'package:matheasy/features/result/application/functions_teaching_service.dart';
 import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/result/domain/teaching_models.dart';
 import 'package:matheasy/features/result/domain/visual_models.dart'
@@ -261,6 +262,49 @@ void main() {
         },
       });
       expect(t.practiceLadder, isNull);
+    });
+  });
+
+  group('progressive teaching fetch (enrichTeaching)', () {
+    // The base result as `solve` now returns it — fast, no teaching.
+    ResultData base() => SolveResponseMapper.toResultData(_equation, _v1Payload());
+
+    // What the separate `enrichTeaching` callable returns: { teaching, methods }.
+    Map<String, dynamic> enrichResponse() => {
+          'teaching': _teachedPayload()['teaching'],
+          'methods': _teachedPayload()['methods'],
+        };
+
+    test('mergeTeaching attaches the layer + the enriched steps', () {
+      final merged = SolveResponseMapper.mergeTeaching(base(), enrichResponse());
+      expect(merged, isNotNull);
+      expect(merged!.teaching, isNotNull);
+      expect(merged.teaching!.header.methodChosen, 'Factoring');
+      // Steps are replaced by the enriched ones (pivotal + rule now present).
+      expect(merged.steps[1].pivotal, isTrue);
+      expect(merged.steps[1].rule, 'Sum-product factoring');
+    });
+
+    test('mergeTeaching returns null when the response has no teaching', () {
+      expect(
+        SolveResponseMapper.mergeTeaching(base(), const {'teaching': null}),
+        isNull,
+      );
+    });
+
+    test('FunctionsTeachingService.enrich merges via the callable', () async {
+      final service = FunctionsTeachingService((name, data) async {
+        expect(name, 'enrichTeaching');
+        expect(data['latex'], _equation.latex);
+        return enrichResponse();
+      });
+      final merged = await service.enrich(base());
+      expect(merged?.teaching, isNotNull);
+      expect(merged!.steps[1].rule, 'Sum-product factoring');
+    });
+
+    test('NoTeachingService yields no teaching (guests / offline)', () async {
+      expect(await const NoTeachingService().enrich(base()), isNull);
     });
   });
 }

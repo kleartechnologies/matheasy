@@ -121,6 +121,10 @@ export const RATE_LIMITS = {
   tutor: { perMinute: 30, perDay: 300 },
   visual: { perMinute: 15, perDay: 100 },
   practice: { perMinute: 20, perDay: 200 },
+  // Teaching enrichment — a separate on-demand call per result view (decoupled
+  // from solve so it never adds latency to the answer). Cache-first, so most
+  // views cost nothing; the ceiling caps a retry loop / cold-cache burst.
+  teach: { perMinute: 30, perDay: 400 },
 } as const;
 
 /** The paid endpoints the server rate-limits per user. */

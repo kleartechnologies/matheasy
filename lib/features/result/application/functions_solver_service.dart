@@ -119,6 +119,24 @@ class SolveResponseMapper {
   static TeachingLayer? _teaching(Object? t) =>
       t is Map ? TeachingLayer.fromJson(Map<String, dynamic>.from(t)) : null;
 
+  /// Merge a progressive `enrichTeaching` response into an already-shown [base]
+  /// result: parse the teaching layer + the examPick's enriched steps/methods
+  /// (with the deeper inline fields) and return the enriched [ResultData], or
+  /// null when the response carries no teaching (the base is then kept as-is).
+  static ResultData? mergeTeaching(ResultData base, Map<String, dynamic> json) {
+    final teaching = _teaching(json['teaching']);
+    if (teaching == null) return null;
+    final methods = _list(json['methods'], _method);
+    final examMethod = _pickExamMethod(json['methods']);
+    final steps =
+        examMethod == null ? base.steps : _list(examMethod['steps'], _step);
+    return base.withTeaching(
+      teaching: teaching,
+      steps: steps.isEmpty ? base.steps : steps,
+      methods: methods.isEmpty ? base.methods : methods,
+    );
+  }
+
   static SolutionStep _step(Map<String, dynamic> m) {
     final operation = _str(m['operation']);
     final symbol = _str(m['operationSymbol']);

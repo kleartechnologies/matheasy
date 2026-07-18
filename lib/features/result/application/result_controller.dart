@@ -10,6 +10,7 @@ import '../../history/application/history_repository.dart';
 import '../../history/domain/history_entry.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../domain/result_models.dart';
+import 'functions_teaching_service.dart';
 import 'solver_service.dart';
 
 part 'result_controller.g.dart';
@@ -48,6 +49,15 @@ class ResultController extends _$ResultController {
     if (cached != null) {
       unawaited(analytics.logEvent(
           AnalyticsEvent.resultViewed(problemType: cached.result.type.name)));
+      // Progressive teaching for a RE-OPENED problem too (the common case): the
+      // cached entry may predate teaching, or its first fetch never completed.
+      // The teaching==null guard fetches once; _recordCache(merged) then upserts
+      // the enriched entry so subsequent opens skip it.
+      if (cached.result.verified &&
+          !cached.result.routeToTutor &&
+          cached.result.teaching == null) {
+        unawaited(_attachTeaching(cached.result));
+      }
       return cached.result;
     }
 
@@ -65,7 +75,30 @@ class ResultController extends _$ResultController {
     if (data.verified) await _recordCache(data);
     unawaited(analytics
         .logEvent(AnalyticsEvent.resultViewed(problemType: data.type.name)));
+    // Progressive teaching (spec §5): the answer is already computed — fetch the
+    // teaching layer on a SEPARATE call so it never delays the solution, then pop
+    // it in. Best-effort; a failure just leaves the plain solution. Honest /
+    // unverified problems have no teaching to fetch.
+    if (data.verified && !data.routeToTutor && data.teaching == null) {
+      unawaited(_attachTeaching(data));
+    }
     return data;
+  }
+
+  /// Fetches the teaching layer for [base] and, if present, re-emits the enriched
+  /// result + refreshes the cache. Best-effort: swallows failures (including a
+  /// set-after-dispose if the user navigated away mid-fetch).
+  Future<void> _attachTeaching(ResultData base) async {
+    try {
+      final merged = await ref.read(teachingServiceProvider).enrich(base);
+      // Bail if there's no layer, or if the provider was disposed / rebuilt while
+      // the fetch was in flight (don't stomp a newer state — review #3).
+      if (merged == null || !ref.mounted) return;
+      state = AsyncData(merged);
+      if (merged.verified) await _recordCache(merged);
+    } catch (_) {
+      // Teaching is an enhancement — never surface its failure over the answer.
+    }
   }
 
   /// Looks up the local cache, degrading to a miss if the store is unavailable

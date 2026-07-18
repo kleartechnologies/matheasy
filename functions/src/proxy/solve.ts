@@ -17,31 +17,17 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { fraction } from "mathjs";
 
-import {
-  OPENAI_API_KEY,
-  OPENAI_MODEL,
-  PRO_ENTITLEMENT_ID,
-  REVENUECAT_SECRET_KEY,
-  teachingEnabled,
-} from "../config";
+import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
   ensureUserDoc,
-  getEntitlement,
   incrementUsage,
   recordSolveFailure,
 } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
-import {
-  getCachedSolve,
-  getCachedTeaching,
-  putCachedSolve,
-  putCachedTeaching,
-  putTeachingNegative,
-} from "../lib/solveCache";
+import { getCachedSolve, putCachedSolve } from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
-import { generateTeaching, methodsAlign } from "../solver/teach";
 
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
@@ -62,7 +48,6 @@ import {
   MethodData,
   SolvePayload,
   SOLVE_SCHEMA_VERSION,
-  TeachingCacheDoc,
 } from "../solver/types";
 import {
   closeEnough,
@@ -135,26 +120,25 @@ export const solveEquation = onCall(
     // returns the VERIFIED payload with no LLM call. Collision-safe key, so a
     // hit is always the same problem; we swap in the caller's own rendering of
     // the problem LaTeX for display.
-    // Shared OpenAI JSON completer — used by BOTH the solve narration and the
-    // teaching enrichment, so it's hoisted above the cache branch (a core cache
-    // hit still needs it to build/attach the teaching layer).
-    const complete: JsonCompleter = (system, user, maxTokens) => {
-      const client = createOpenAI(OPENAI_API_KEY.value());
-      return chatJson<Record<string, unknown>>(
-        client,
-        OPENAI_MODEL.value(),
-        system,
-        user,
-        { temperature: 0.2, maxTokens }
-      );
-    };
-
     const cached = await getCachedSolve(latex);
     let payload: SolvePayload;
     if (cached) {
       payload = { ...cached, problemLatex: latex };
     } else {
       const cls = classify(latex);
+      // OpenAI JSON completer for the solve narration + any LLM-candidate solve.
+      // Only the fresh-solve branch calls OpenAI (a cache hit does not), so it's
+      // allocated here — teaching moved to its own `enrichTeaching` callable.
+      const complete: JsonCompleter = (system, user, maxTokens) => {
+        const client = createOpenAI(OPENAI_API_KEY.value());
+        return chatJson<Record<string, unknown>>(
+          client,
+          OPENAI_MODEL.value(),
+          system,
+          user,
+          { temperature: 0.2, maxTokens }
+        );
+      };
       try {
         payload = await solve(cls, complete, (reason) => {
           // Fire-and-forget: turn every unverified solve into analytics data
@@ -175,60 +159,7 @@ export const solveEquation = onCall(
         );
       }
       // Cache verified answers only (putCachedSolve no-ops on couldn't-verify).
-      // INVARIANT (review #6): the shared core cache is depth-AGNOSTIC, so it must
-      // be written HERE — before the depth-gated teaching overlay reassigns
-      // `payload` below. Never move this after the overlay, or a Pro user's
-      // full-depth methods would be written to the core and served to every tier.
       await putCachedSolve(latex, payload);
-    }
-
-    // v2 teaching layer (spec §3, §4) — ADDITIVE, behind teachingEnabled(),
-    // verified-path only. Cached SEPARATELY from the verified core (depth-keyed),
-    // so a teaching failure never touches the answer. Any error → ship the
-    // verified payload unchanged. Everyone gets `lite` in Phase 1; Pro `full` is
-    // a later phase, so no entitlement branch here yet.
-    if (teachingEnabled() && payload.verified && payload.routeToTutor !== true) {
-      try {
-        const lang = "en";
-        // Server-authoritative depth (spec §9): Pro users get the deeper `full`
-        // teaching layer, free users `lite`. Cached separately per depth, so a
-        // free user can never be served Pro-depth content.
-        const depth: "lite" | "full" =
-          (await getEntitlement(uid)) === PRO_ENTITLEMENT_ID ? "full" : "lite";
-        const cachedTeaching = await getCachedTeaching(latex, depth, lang);
-        let tdoc: TeachingCacheDoc | null =
-          cachedTeaching === "negative" ? null : cachedTeaching;
-        if (!cachedTeaching) {
-          // True miss → generate. A deterministic no-teaching (null) is pinned as a
-          // negative so we don't re-enrich a reliably-failing problem every solve; a
-          // transient failure throws → caught below → v1, NOT negative-cached.
-          let built = await generateTeaching(complete, payload, depth);
-          // Pro `full` fails the (stricter, more fields) firewall more often than
-          // `lite`, so a paying user could get LESS teaching than a free one. On a
-          // deterministic full rejection, fall back to a lite layer — cached under
-          // the full key so future Pro solves hit it (not a negative). Review #1.
-          if (!built && depth === "full") {
-            built = await generateTeaching(complete, payload, "lite");
-          }
-          if (built) {
-            tdoc = built;
-            await putCachedTeaching(latex, built, depth, lang);
-          } else {
-            await putTeachingNegative(latex, depth, lang);
-          }
-        }
-        // Overlay only when the cached working still byte-matches the live core —
-        // the two caches have independent TTLs, so a stale doc must never replace a
-        // freshly re-solved core's methods (#5).
-        if (tdoc && methodsAlign(payload.methods, tdoc.methods)) {
-          payload = { ...payload, methods: tdoc.methods, teaching: tdoc.teaching };
-        }
-      } catch (err) {
-        logger.warn("teaching attach failed — shipping verified payload", {
-          uid,
-          err: String(err),
-        });
-      }
     }
 
     // Meter ONLY the manual-entry path (a scan already paid for OCR-sourced
@@ -236,10 +167,10 @@ export const solveEquation = onCall(
     // not it was a cache hit: the user's allowance tracks solves they ask for.
     const quota = countAsScan ? await incrementUsage(uid, "scans") : null;
 
-    // Stamp the wire schema version on egress (spec §2.3) — TELEMETRY ONLY, never
-    // a client render gate. Covers both the cache-hit and fresh paths. Phase 1
-    // attaches the additive `teaching` layer here behind `teachingEnabled()`; for
-    // now the payload carries no teaching, so the client renders today's UI.
+    // Stamp the wire schema version on egress (spec §2.3) — TELEMETRY ONLY, never a
+    // client render gate. The v2 teaching layer is fetched SEPARATELY by the client
+    // (the `enrichTeaching` callable) so solving stays instant — this fast response
+    // carries no teaching; the client loads it progressively.
     return { ...payload, schemaVersion: SOLVE_SCHEMA_VERSION, usage: quota };
   }
 );

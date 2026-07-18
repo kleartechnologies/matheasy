@@ -388,6 +388,34 @@ class ResultData {
 
   String get questionLatex => equation.latex;
 
+  /// A copy with the v2 teaching layer merged in — the enriched [steps] +
+  /// [methods] (carrying the deeper inline fields) replace the plain ones and
+  /// [teaching] is attached; everything else is preserved. Used by the
+  /// progressive teaching fetch (`enrichTeaching`) after the answer is shown.
+  ResultData withTeaching({
+    required TeachingLayer teaching,
+    required List<SolutionStep> steps,
+    required List<MethodSolution> methods,
+  }) =>
+      ResultData(
+        equation: equation,
+        type: type,
+        difficulty: difficulty,
+        answerLatex: answerLatex,
+        answerPlain: answerPlain,
+        steps: steps,
+        verifyText: verifyText,
+        verified: verified,
+        explanations: explanations,
+        methods: methods,
+        practice: practice,
+        tutorIntro: tutorIntro,
+        graph: graph,
+        routeToTutor: routeToTutor,
+        tutorRouteReason: tutorRouteReason,
+        teaching: teaching,
+      );
+
   Map<String, dynamic> toJson() => {
         'equation': equation.toJson(),
         'type': type.name,

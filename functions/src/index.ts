@@ -14,6 +14,7 @@ import "./config";
 // --- Secure AI proxy (OpenAI, keys stay server-side) ------------------------
 export { recognizeEquation } from "./proxy/scan";
 export { solveEquation } from "./proxy/solve";
+export { enrichTeaching } from "./proxy/teach";
 export { tutorReply } from "./proxy/tutor";
 export { generateVisualSolution } from "./proxy/visual";
 export { generatePracticeQuestion } from "./proxy/practice";
