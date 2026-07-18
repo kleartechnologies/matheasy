@@ -525,6 +525,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallTestimonialsTitle => 'शिक्षार्थी क्या कहते हैं';
 
   @override
+  String get paywallSuccessPerkScans => 'असीमित स्कैन और समाधान';
+
+  @override
+  String get paywallSuccessPerkVisual => 'दृश्य चरण-दर-चरण सीखना';
+
+  @override
+  String get paywallSuccessPerkPractice => 'अनुकूली अभ्यास और AI ट्यूटर';
+
+  @override
   String get profileTitle => 'प्रोफ़ाइल';
 
   @override

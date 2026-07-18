@@ -511,6 +511,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallTestimonialsTitle => '学習者の声';
 
   @override
+  String get paywallSuccessPerkScans => '無制限のスキャンと解答';
+
+  @override
+  String get paywallSuccessPerkVisual => 'ビジュアルなステップ解説';
+
+  @override
+  String get paywallSuccessPerkPractice => '適応型の練習とAIチューター';
+
+  @override
   String get profileTitle => 'プロフィール';
 
   @override

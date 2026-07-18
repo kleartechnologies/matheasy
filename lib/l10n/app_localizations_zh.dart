@@ -506,6 +506,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallTestimonialsTitle => '学习者怎么说';
 
   @override
+  String get paywallSuccessPerkScans => '无限扫描与解答';
+
+  @override
+  String get paywallSuccessPerkVisual => '可视化分步学习';
+
+  @override
+  String get paywallSuccessPerkPractice => '自适应练习与 AI 导师';
+
+  @override
   String get profileTitle => '个人资料';
 
   @override
@@ -2071,6 +2080,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get paywallTestimonialsTitle => '学习者怎么说';
 
   @override
+  String get paywallSuccessPerkScans => '无限扫描与解答';
+
+  @override
+  String get paywallSuccessPerkVisual => '可视化分步学习';
+
+  @override
+  String get paywallSuccessPerkPractice => '自适应练习与 AI 导师';
+
+  @override
   String get profileTitle => '个人资料';
 
   @override
@@ -3634,6 +3652,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get paywallTestimonialsTitle => '學習者怎麼說';
+
+  @override
+  String get paywallSuccessPerkScans => '無限掃描與解答';
+
+  @override
+  String get paywallSuccessPerkVisual => '視覺化分步學習';
+
+  @override
+  String get paywallSuccessPerkPractice => '自適應練習與 AI 導師';
 
   @override
   String get profileTitle => '個人檔案';

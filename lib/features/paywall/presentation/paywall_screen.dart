@@ -98,8 +98,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       _celebrating = true;
       _celebrationPlanName = planName;
     });
-    // Let the celebration play, then dismiss the paywall.
-    Timer(const Duration(milliseconds: 1700), () {
+    // Let the full celebration sequence play, then dismiss the paywall. The
+    // window is owned by the overlay so the two never drift apart.
+    Timer(PurchaseSuccessOverlay.duration, () {
       if (mounted) Navigator.of(context).maybePop();
     });
   }

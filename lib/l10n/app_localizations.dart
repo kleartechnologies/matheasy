@@ -1100,6 +1100,24 @@ abstract class AppLocalizations {
   /// **'What learners say'**
   String get paywallTestimonialsTitle;
 
+  /// No description provided for @paywallSuccessPerkScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited scans & solutions'**
+  String get paywallSuccessPerkScans;
+
+  /// No description provided for @paywallSuccessPerkVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual step-by-step learning'**
+  String get paywallSuccessPerkVisual;
+
+  /// No description provided for @paywallSuccessPerkPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptive practice & AI tutor'**
+  String get paywallSuccessPerkPractice;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:

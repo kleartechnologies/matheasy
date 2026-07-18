@@ -513,6 +513,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallTestimonialsTitle => '학습자의 후기';
 
   @override
+  String get paywallSuccessPerkScans => '무제한 스캔 및 풀이';
+
+  @override
+  String get paywallSuccessPerkVisual => '시각적 단계별 학습';
+
+  @override
+  String get paywallSuccessPerkPractice => '맞춤 연습과 AI 튜터';
+
+  @override
   String get profileTitle => '프로필';
 
   @override

@@ -529,6 +529,16 @@ class AppLocalizationsMs extends AppLocalizations {
   String get paywallTestimonialsTitle => 'Kata pelajar';
 
   @override
+  String get paywallSuccessPerkScans => 'Imbasan & penyelesaian tanpa had';
+
+  @override
+  String get paywallSuccessPerkVisual =>
+      'Pembelajaran visual langkah demi langkah';
+
+  @override
+  String get paywallSuccessPerkPractice => 'Latihan adaptif & tutor AI';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

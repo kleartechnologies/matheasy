@@ -20,6 +20,7 @@ import 'package:matheasy/features/paywall/application/paywall_controller.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_copy.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_screen.dart';
 import 'package:matheasy/features/paywall/presentation/sections/paywall_testimonials.dart';
+import 'package:matheasy/features/paywall/presentation/widgets/purchase_success_overlay.dart';
 import 'package:matheasy/features/practice/application/practice_controller.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
@@ -534,8 +535,9 @@ void main() {
       await tester.pump(); // settle result listener
       expect(find.text("You're all set!"), findsOneWidget);
       expect(container.read(isProProvider), isTrue);
-      // Flush the auto-dismiss timer so none stays pending.
-      await tester.pump(const Duration(seconds: 2));
+      // Flush the celebration + auto-dismiss timer so none stays pending.
+      await tester.pump(
+          PurchaseSuccessOverlay.duration + const Duration(seconds: 1));
     });
 
     testWidgets('a PENDING purchase that activates later still celebrates + '
@@ -576,7 +578,37 @@ void main() {
       await tester.pump(); // celebration setState
       expect(container.read(isProProvider), isTrue);
       expect(find.text("You're all set!"), findsOneWidget);
-      await tester.pump(const Duration(seconds: 2)); // flush the dismiss timer
+      // flush the celebration + dismiss timer
+      await tester.pump(
+          PurchaseSuccessOverlay.duration + const Duration(seconds: 1));
+    });
+
+    testWidgets('success celebration never overflows on a tiny screen at large '
+        'accessibility text', (tester) async {
+      // Smallest realistic phone + a large Dynamic-Type scale: the celebration
+      // must scroll rather than throw a RenderFlex overflow.
+      await tester.binding.setSurfaceSize(const Size(320, 568));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(2.0)),
+              child: const Scaffold(
+                body: PurchaseSuccessOverlay(planName: 'Annual Pro'),
+              ),
+            ),
+          ),
+        ),
+      );
+      // Let the entrance play so every element is laid out at full size.
+      await tester.pump(const Duration(milliseconds: 1700));
+      expect(tester.takeException(), isNull);
+      // All three perks are reachable (scrollable), not clipped away.
+      expect(find.text('Unlimited scans & solutions'), findsOneWidget);
+      expect(find.text('Adaptive practice & AI tutor'), findsOneWidget);
     });
   });
 

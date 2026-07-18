@@ -525,6 +525,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTestimonialsTitle => 'What learners say';
 
   @override
+  String get paywallSuccessPerkScans => 'Unlimited scans & solutions';
+
+  @override
+  String get paywallSuccessPerkVisual => 'Visual step-by-step learning';
+
+  @override
+  String get paywallSuccessPerkPractice => 'Adaptive practice & AI tutor';
+
+  @override
   String get profileTitle => 'Profile';
 
   @override
