@@ -566,7 +566,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileEditTitle => '编辑个人资料';
 
   @override
-  String get profileAvatarLabel => '头像';
+  String profileAvatarLabel(String label) {
+    return '$label 头像';
+  }
 
   @override
   String get profileDisplayNameLabel => '显示名称';
@@ -1266,6 +1268,59 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get authSigningIn => '正在登录…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '可使用至 $date · 自动续订已关闭';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date 续订';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '通过 $provider 登录';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return '等级 $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return '距离等级 $level 还差 $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '剩余 $count 次免费扫描 · 解锁无限';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return '请检查 · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return '已识别 · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category 按键';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => '头像';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1830,7 +1885,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get profileEditTitle => '编辑个人资料';
 
   @override
-  String get profileAvatarLabel => '头像';
+  String profileAvatarLabel(String label) {
+    return '$label 头像';
+  }
 
   @override
   String get profileDisplayNameLabel => '显示名称';
@@ -2530,6 +2587,59 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get authSigningIn => '正在登录…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '可使用至 $date · 自动续订已关闭';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date 续订';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '通过 $provider 登录';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return '等级 $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return '距离等级 $level 还差 $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '剩余 $count 次免费扫描 · 解锁无限';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return '请检查 · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return '已识别 · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category 按键';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => '头像';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3094,7 +3204,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get profileEditTitle => '編輯個人檔案';
 
   @override
-  String get profileAvatarLabel => '頭像';
+  String profileAvatarLabel(String label) {
+    return '$label 頭像';
+  }
 
   @override
   String get profileDisplayNameLabel => '顯示名稱';
@@ -3794,4 +3906,57 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get authSigningIn => '登入中…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '可使用至 $date · 自動續訂已關閉';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date 續訂';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '透過 $provider 登入';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return '等級 $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return '距離等級 $level 還差 $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '剩餘 $count 次免費掃描 · 解鎖無限';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return '請檢查 · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return '已辨識 · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category 按鍵';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => '頭像';
 }

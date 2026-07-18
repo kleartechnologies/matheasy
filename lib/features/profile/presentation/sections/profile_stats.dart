@@ -32,7 +32,7 @@ class ProfileStatsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Level ${stats.level}',
+                      context.l10n.profileStatsLevel(stats.level),
                       style: AppTypography.headingMedium
                           .copyWith(color: colors.textPrimary),
                     ),
@@ -47,7 +47,8 @@ class ProfileStatsView extends StatelessWidget {
                 ),
               ),
               Text(
-                '${stats.xpToNext} XP to Level ${stats.level + 1}',
+                context.l10n
+                    .profileStatsXpToNextLevel(stats.xpToNext, stats.level + 1),
                 style: AppTypography.caption.copyWith(color: colors.textMuted),
               ),
             ],

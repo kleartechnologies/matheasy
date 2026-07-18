@@ -121,10 +121,10 @@ class _ProPlanCard extends StatelessWidget {
       null => context.l10n.profileMatheasyPro,
     };
     final renewLine = status.isCancelledButActive
-        ? 'Access until ${_formatDate(status.expiresAt)} · auto-renew off'
+        ? context.l10n.profileAccessUntil(_formatDate(status.expiresAt))
         : status.expiresAt == null
             ? context.l10n.profileActive
-            : 'Renews on ${_formatDate(status.expiresAt)}';
+            : context.l10n.profileRenewsOn(_formatDate(status.expiresAt));
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),

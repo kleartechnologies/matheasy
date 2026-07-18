@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "删除访客数据",
   "profileUpdatedToast": "个人资料已更新",
   "profileEditTitle": "编辑个人资料",
-  "profileAvatarLabel": "头像",
+  "profileAvatarLabel": "{label} 头像",
   "profileDisplayNameLabel": "显示名称",
   "profileLearningSection": "学习",
   "profileLearningPreferences": "学习偏好",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "隐私政策",
   "authContinueApple": "使用 Apple 继续",
   "authContinueGoogle": "使用 Google 继续",
-  "authSigningIn": "正在登录…"
+  "authSigningIn": "正在登录…",
+  "profileAccessUntil": "可使用至 {date} · 自动续订已关闭",
+  "profileRenewsOn": "{date} 续订",
+  "profileSignedInWith": "通过 {provider} 登录",
+  "profileStatsLevel": "等级 {level}",
+  "profileStatsXpToNextLevel": "距离等级 {level} 还差 {xp} XP",
+  "profileFreeScansLeft": "剩余 {count} 次免费扫描 · 解锁无限",
+  "scanConfirmCheckThisPercent": "请检查 · {percent}%",
+  "scanConfirmDetectedPercent": "已识别 · {percent}%",
+  "scanKeyboardCategoryKeys": "{category} 按键",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "头像"
 }

@@ -37,7 +37,7 @@ class ProfileAccountSection extends StatelessWidget {
       children: [
         SettingsTile(
           icon: _providerIcon,
-          title: 'Signed in with ${profile.provider.label}',
+          title: context.l10n.profileSignedInWith(profile.provider.label),
           value: profile.email,
         ),
         SettingsTile(

@@ -1223,8 +1223,8 @@ abstract class AppLocalizations {
   /// No description provided for @profileAvatarLabel.
   ///
   /// In en, this message translates to:
-  /// **'Avatar'**
-  String get profileAvatarLabel;
+  /// **'{label} avatar'**
+  String profileAvatarLabel(String label);
 
   /// No description provided for @profileDisplayNameLabel.
   ///
@@ -2611,6 +2611,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signing in…'**
   String get authSigningIn;
+
+  /// No description provided for @profileAccessUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Access until {date} · auto-renew off'**
+  String profileAccessUntil(String date);
+
+  /// No description provided for @profileRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String profileRenewsOn(String date);
+
+  /// No description provided for @profileSignedInWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with {provider}'**
+  String profileSignedInWith(String provider);
+
+  /// No description provided for @profileStatsLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String profileStatsLevel(int level);
+
+  /// No description provided for @profileStatsXpToNextLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to Level {level}'**
+  String profileStatsXpToNextLevel(int xp, int level);
+
+  /// No description provided for @profileFreeScansLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free scans left · unlock unlimited'**
+  String profileFreeScansLeft(int count);
+
+  /// No description provided for @scanConfirmCheckThisPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'CHECK THIS · {percent}%'**
+  String scanConfirmCheckThisPercent(int percent);
+
+  /// No description provided for @scanConfirmDetectedPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'DETECTED · {percent}%'**
+  String scanConfirmDetectedPercent(int percent);
+
+  /// No description provided for @scanKeyboardCategoryKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} keys'**
+  String scanKeyboardCategoryKeys(String category);
+
+  /// No description provided for @tutorXpAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP'**
+  String tutorXpAmount(int xp);
+
+  /// No description provided for @profileAvatarSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get profileAvatarSection;
 }
 
 class _AppLocalizationsDelegate

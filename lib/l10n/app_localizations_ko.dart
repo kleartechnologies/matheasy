@@ -575,7 +575,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileEditTitle => '프로필 편집';
 
   @override
-  String get profileAvatarLabel => '아바타';
+  String profileAvatarLabel(String label) {
+    return '$label 아바타';
+  }
 
   @override
   String get profileDisplayNameLabel => '표시 이름';
@@ -1287,4 +1289,57 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get authSigningIn => '로그인 중…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '$date까지 이용 가능 · 자동 갱신 꺼짐';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date에 갱신';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '$provider(으)로 로그인됨';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return '레벨 $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return '레벨 $level까지 $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '무료 스캔 $count회 남음 · 무제한 잠금 해제';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return '확인 필요 · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return '인식됨 · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category 키';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => '아바타';
 }

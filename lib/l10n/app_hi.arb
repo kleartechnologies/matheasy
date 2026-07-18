@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "गेस्ट डेटा हटाएँ",
   "profileUpdatedToast": "प्रोफ़ाइल अपडेट हुई",
   "profileEditTitle": "प्रोफ़ाइल संपादित करें",
-  "profileAvatarLabel": "अवतार",
+  "profileAvatarLabel": "{label} अवतार",
   "profileDisplayNameLabel": "प्रदर्शित नाम",
   "profileLearningSection": "सीखना",
   "profileLearningPreferences": "सीखने की प्राथमिकताएँ",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "गोपनीयता नीति",
   "authContinueApple": "Apple के साथ जारी रखें",
   "authContinueGoogle": "Google के साथ जारी रखें",
-  "authSigningIn": "साइन इन हो रहा है…"
+  "authSigningIn": "साइन इन हो रहा है…",
+  "profileAccessUntil": "{date} तक पहुँच · ऑटो-रिन्यू बंद",
+  "profileRenewsOn": "{date} को नवीनीकृत",
+  "profileSignedInWith": "{provider} से साइन इन",
+  "profileStatsLevel": "लेवल {level}",
+  "profileStatsXpToNextLevel": "लेवल {level} तक {xp} XP",
+  "profileFreeScansLeft": "{count} मुफ़्त स्कैन बाकी · अनलिमिटेड अनलॉक करें",
+  "scanConfirmCheckThisPercent": "इसे जाँचें · {percent}%",
+  "scanConfirmDetectedPercent": "पहचाना गया · {percent}%",
+  "scanKeyboardCategoryKeys": "{category} कुंजियाँ",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "अवतार"
 }

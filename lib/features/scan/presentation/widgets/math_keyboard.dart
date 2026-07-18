@@ -196,7 +196,8 @@ class _MathKeyboardState extends State<MathKeyboard> {
             button: true,
             selected: selected,
             excludeSemantics: true,
-            label: '${MathKeyboard.categories[i].label} keys',
+            label: context.l10n
+                .scanKeyboardCategoryKeys(MathKeyboard.categories[i].label),
             child: Pressable(
               onTap: () {
                 HapticsService.selection();

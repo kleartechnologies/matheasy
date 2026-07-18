@@ -30,7 +30,7 @@ class ProfileSubscriptionSection extends ConsumerWidget {
     final remaining = usage.remainingScans;
     final subtitle = remaining <= 0
         ? context.l10n.profileNoScansLeft
-        : '$remaining free scans left · unlock unlimited';
+        : context.l10n.profileFreeScansLeft(remaining);
 
     return PremiumFeatureTile(
       title: context.l10n.profileUpgradeMatheasyPro,

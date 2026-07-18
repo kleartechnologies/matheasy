@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "ゲストデータを削除",
   "profileUpdatedToast": "プロフィールを更新しました",
   "profileEditTitle": "プロフィールを編集",
-  "profileAvatarLabel": "アバター",
+  "profileAvatarLabel": "{label} アバター",
   "profileDisplayNameLabel": "表示名",
   "profileLearningSection": "学習",
   "profileLearningPreferences": "学習設定",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "プライバシーポリシー",
   "authContinueApple": "Appleで続ける",
   "authContinueGoogle": "Googleで続ける",
-  "authSigningIn": "サインイン中…"
+  "authSigningIn": "サインイン中…",
+  "profileAccessUntil": "{date} まで利用可能・自動更新オフ",
+  "profileRenewsOn": "{date} に更新",
+  "profileSignedInWith": "{provider} でログイン中",
+  "profileStatsLevel": "レベル {level}",
+  "profileStatsXpToNextLevel": "レベル {level} まで {xp} XP",
+  "profileFreeScansLeft": "無料スキャン残り {count} 回・無制限を解除",
+  "scanConfirmCheckThisPercent": "要確認 · {percent}%",
+  "scanConfirmDetectedPercent": "認識済み · {percent}%",
+  "scanKeyboardCategoryKeys": "{category} キー",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "アバター"
 }

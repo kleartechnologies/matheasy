@@ -590,7 +590,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get profileEditTitle => 'प्रोफ़ाइल संपादित करें';
 
   @override
-  String get profileAvatarLabel => 'अवतार';
+  String profileAvatarLabel(String label) {
+    return '$label अवतार';
+  }
 
   @override
   String get profileDisplayNameLabel => 'प्रदर्शित नाम';
@@ -1334,4 +1336,57 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get authSigningIn => 'साइन इन हो रहा है…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '$date तक पहुँच · ऑटो-रिन्यू बंद';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date को नवीनीकृत';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '$provider से साइन इन';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return 'लेवल $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return 'लेवल $level तक $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '$count मुफ़्त स्कैन बाकी · अनलिमिटेड अनलॉक करें';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return 'इसे जाँचें · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return 'पहचाना गया · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category कुंजियाँ';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => 'अवतार';
 }

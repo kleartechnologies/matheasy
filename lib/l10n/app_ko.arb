@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "게스트 데이터 삭제",
   "profileUpdatedToast": "프로필이 업데이트됐어요",
   "profileEditTitle": "프로필 편집",
-  "profileAvatarLabel": "아바타",
+  "profileAvatarLabel": "{label} 아바타",
   "profileDisplayNameLabel": "표시 이름",
   "profileLearningSection": "학습",
   "profileLearningPreferences": "학습 설정",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "개인정보 처리방침",
   "authContinueApple": "Apple로 계속하기",
   "authContinueGoogle": "Google로 계속하기",
-  "authSigningIn": "로그인 중…"
+  "authSigningIn": "로그인 중…",
+  "profileAccessUntil": "{date}까지 이용 가능 · 자동 갱신 꺼짐",
+  "profileRenewsOn": "{date}에 갱신",
+  "profileSignedInWith": "{provider}(으)로 로그인됨",
+  "profileStatsLevel": "레벨 {level}",
+  "profileStatsXpToNextLevel": "레벨 {level}까지 {xp} XP",
+  "profileFreeScansLeft": "무료 스캔 {count}회 남음 · 무제한 잠금 해제",
+  "scanConfirmCheckThisPercent": "확인 필요 · {percent}%",
+  "scanConfirmDetectedPercent": "인식됨 · {percent}%",
+  "scanKeyboardCategoryKeys": "{category} 키",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "아바타"
 }

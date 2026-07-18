@@ -595,7 +595,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get profileEditTitle => 'Edit profil';
 
   @override
-  String get profileAvatarLabel => 'Avatar';
+  String profileAvatarLabel(String label) {
+    return 'avatar $label';
+  }
 
   @override
   String get profileDisplayNameLabel => 'Nama paparan';
@@ -1340,4 +1342,57 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get authSigningIn => 'Sedang log masuk…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return 'Akses sehingga $date · auto-perbaharui dimatikan';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return 'Diperbaharui pada $date';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return 'Log masuk dengan $provider';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return 'Tahap $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return '$xp XP ke Tahap $level';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '$count imbasan percuma lagi · buka tanpa had';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return 'SEMAK INI · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return 'DIKESAN · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return 'kekunci $category';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => 'Avatar';
 }

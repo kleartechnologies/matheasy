@@ -67,8 +67,11 @@ class CaptureConfirmation extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                '${lowConfidence ? 'CHECK THIS' : 'DETECTED'} · '
-                '${equation.confidencePercent}%',
+                lowConfidence
+                    ? context.l10n
+                        .scanConfirmCheckThisPercent(equation.confidencePercent)
+                    : context.l10n
+                        .scanConfirmDetectedPercent(equation.confidencePercent),
                 style: AppTypography.label.copyWith(color: accent),
               ),
             ],

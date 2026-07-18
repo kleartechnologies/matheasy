@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "刪除訪客資料",
   "profileUpdatedToast": "個人檔案已更新",
   "profileEditTitle": "編輯個人檔案",
-  "profileAvatarLabel": "頭像",
+  "profileAvatarLabel": "{label} 頭像",
   "profileDisplayNameLabel": "顯示名稱",
   "profileLearningSection": "學習",
   "profileLearningPreferences": "學習偏好",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "隱私權政策",
   "authContinueApple": "以 Apple 帳號繼續",
   "authContinueGoogle": "以 Google 帳號繼續",
-  "authSigningIn": "登入中…"
+  "authSigningIn": "登入中…",
+  "profileAccessUntil": "可使用至 {date} · 自動續訂已關閉",
+  "profileRenewsOn": "{date} 續訂",
+  "profileSignedInWith": "透過 {provider} 登入",
+  "profileStatsLevel": "等級 {level}",
+  "profileStatsXpToNextLevel": "距離等級 {level} 還差 {xp} XP",
+  "profileFreeScansLeft": "剩餘 {count} 次免費掃描 · 解鎖無限",
+  "scanConfirmCheckThisPercent": "請檢查 · {percent}%",
+  "scanConfirmDetectedPercent": "已辨識 · {percent}%",
+  "scanKeyboardCategoryKeys": "{category} 按鍵",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "頭像"
 }

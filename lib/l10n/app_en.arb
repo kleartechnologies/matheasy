@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "Delete guest data",
   "profileUpdatedToast": "Profile updated",
   "profileEditTitle": "Edit profile",
-  "profileAvatarLabel": "Avatar",
+  "profileAvatarLabel": "{label} avatar",
   "profileDisplayNameLabel": "Display name",
   "profileLearningSection": "Learning",
   "profileLearningPreferences": "Learning preferences",
@@ -417,5 +417,96 @@
   "authContinueApple": "Continue with Apple",
   "authContinueGoogle": "Continue with Google",
   "authSigningIn": "Signing in…",
+  "@profileAvatarLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "profileAccessUntil": "Access until {date} · auto-renew off",
+  "@profileAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileRenewsOn": "Renews on {date}",
+  "@profileRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSignedInWith": "Signed in with {provider}",
+  "@profileSignedInWith": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "profileStatsLevel": "Level {level}",
+  "@profileStatsLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "profileStatsXpToNextLevel": "{xp} XP to Level {level}",
+  "@profileStatsXpToNextLevel": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "profileFreeScansLeft": "{count} free scans left · unlock unlimited",
+  "@profileFreeScansLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanConfirmCheckThisPercent": "CHECK THIS · {percent}%",
+  "@scanConfirmCheckThisPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "scanConfirmDetectedPercent": "DETECTED · {percent}%",
+  "@scanConfirmDetectedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "scanKeyboardCategoryKeys": "{category} keys",
+  "@scanKeyboardCategoryKeys": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "tutorXpAmount": "{xp} XP",
+  "@tutorXpAmount": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "profileAvatarSection": "Avatar",
   "@_comment": "Math notation (x², sin, cos, π, ∫, Σ, dx, log) must NEVER be translated — only the surrounding instructional words. Placeholders {name} keep their braces."
 }

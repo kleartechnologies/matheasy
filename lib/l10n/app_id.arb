@@ -185,7 +185,7 @@
   "profileDeleteGuestData": "Hapus data tamu",
   "profileUpdatedToast": "Profil diperbarui",
   "profileEditTitle": "Edit profil",
-  "profileAvatarLabel": "Avatar",
+  "profileAvatarLabel": "avatar {label}",
   "profileDisplayNameLabel": "Nama tampilan",
   "profileLearningSection": "Belajar",
   "profileLearningPreferences": "Preferensi belajar",
@@ -416,5 +416,16 @@
   "authLegalPrivacy": "Kebijakan Privasi",
   "authContinueApple": "Lanjut dengan Apple",
   "authContinueGoogle": "Lanjut dengan Google",
-  "authSigningIn": "Sedang masuk…"
+  "authSigningIn": "Sedang masuk…",
+  "profileAccessUntil": "Akses hingga {date} · perpanjangan otomatis nonaktif",
+  "profileRenewsOn": "Diperpanjang pada {date}",
+  "profileSignedInWith": "Masuk dengan {provider}",
+  "profileStatsLevel": "Level {level}",
+  "profileStatsXpToNextLevel": "{xp} XP ke Level {level}",
+  "profileFreeScansLeft": "{count} pindaian gratis tersisa · buka tanpa batas",
+  "scanConfirmCheckThisPercent": "PERIKSA INI · {percent}%",
+  "scanConfirmDetectedPercent": "TERDETEKSI · {percent}%",
+  "scanKeyboardCategoryKeys": "tombol {category}",
+  "tutorXpAmount": "{xp} XP",
+  "profileAvatarSection": "Avatar"
 }

@@ -88,7 +88,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          SettingsGroupLabel(context.l10n.profileAvatarLabel),
+          SettingsGroupLabel(context.l10n.profileAvatarSection),
           _AvatarPicker(
             selected: _avatar,
             initial: initial,
@@ -182,7 +182,7 @@ class _AvatarOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${avatar.label} avatar',
+      label: context.l10n.profileAvatarLabel(avatar.label),
       excludeSemantics: true,
       child: Pressable(
         onTap: onTap,

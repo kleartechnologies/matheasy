@@ -573,7 +573,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileEditTitle => 'プロフィールを編集';
 
   @override
-  String get profileAvatarLabel => 'アバター';
+  String profileAvatarLabel(String label) {
+    return '$label アバター';
+  }
 
   @override
   String get profileDisplayNameLabel => '表示名';
@@ -1281,4 +1283,57 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get authSigningIn => 'サインイン中…';
+
+  @override
+  String profileAccessUntil(String date) {
+    return '$date まで利用可能・自動更新オフ';
+  }
+
+  @override
+  String profileRenewsOn(String date) {
+    return '$date に更新';
+  }
+
+  @override
+  String profileSignedInWith(String provider) {
+    return '$provider でログイン中';
+  }
+
+  @override
+  String profileStatsLevel(int level) {
+    return 'レベル $level';
+  }
+
+  @override
+  String profileStatsXpToNextLevel(int xp, int level) {
+    return 'レベル $level まで $xp XP';
+  }
+
+  @override
+  String profileFreeScansLeft(int count) {
+    return '無料スキャン残り $count 回・無制限を解除';
+  }
+
+  @override
+  String scanConfirmCheckThisPercent(int percent) {
+    return '要確認 · $percent%';
+  }
+
+  @override
+  String scanConfirmDetectedPercent(int percent) {
+    return '認識済み · $percent%';
+  }
+
+  @override
+  String scanKeyboardCategoryKeys(String category) {
+    return '$category キー';
+  }
+
+  @override
+  String tutorXpAmount(int xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String get profileAvatarSection => 'アバター';
 }

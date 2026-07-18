@@ -151,7 +151,7 @@ class _XpChip extends StatelessWidget {
           const Icon(Icons.bolt_rounded, size: 13, color: AppColors.xp),
           const SizedBox(width: AppSpacing.xxs),
           Text(
-            '$xp XP',
+            context.l10n.tutorXpAmount(xp),
             style: AppTypography.label.copyWith(color: AppColors.accentAmber),
           ),
         ],
