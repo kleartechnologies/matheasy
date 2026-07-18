@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../animations/pressable.dart';
 import '../../extensions/context_extensions.dart';
+import '../../localization/l10n_extension.dart';
 import '../../services/haptics_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_durations.dart';
@@ -300,6 +301,16 @@ class _TabRow extends StatelessWidget {
   }
 }
 
+/// The localized label for a nav tab, resolved by its branch [AppTabItem.index]
+/// so the const item list stays const while the display text follows the locale.
+String _navLabel(BuildContext context, AppTabItem item) => switch (item.index) {
+      0 => context.l10n.navHome,
+      1 => context.l10n.navPractice,
+      2 => context.l10n.navProfile,
+      3 => context.l10n.navProgress,
+      _ => item.label,
+    };
+
 class _SideTab extends StatelessWidget {
   const _SideTab({
     required this.item,
@@ -323,12 +334,11 @@ class _SideTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = selected ? activeColor : inactiveColor;
     final count = badge;
+    final label = _navLabel(context, item);
     return Semantics(
       button: true,
       selected: selected,
-      label: count != null && count > 0
-          ? '${item.label}, $count new'
-          : item.label,
+      label: count != null && count > 0 ? '$label, $count new' : label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -358,7 +368,7 @@ class _SideTab extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                     child: Text(
-                      item.label,
+                      label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

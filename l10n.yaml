@@ -4,4 +4,6 @@ arb-dir: lib/l10n
 template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
 output-class: AppLocalizations
-nullable-getter: false
+# Nullable so `context.l10n` can fall back to English when the delegate isn't in
+# the tree (widget tests pump a bare MaterialApp) — see L10nExtension.
+nullable-getter: true

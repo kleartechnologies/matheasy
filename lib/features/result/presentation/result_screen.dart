@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -57,6 +58,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     'Practice',
     'Visual',
   ];
+
+  /// The localized label for tab [i] — the result tabs follow the learner's
+  /// language (the math inside each tab stays universal).
+  String _tabLabel(BuildContext context, int i) => switch (i) {
+        0 => context.l10n.resultTabSolution,
+        1 => context.l10n.resultTabExplain,
+        2 => context.l10n.resultTabMethods,
+        3 => context.l10n.resultTabPractice,
+        _ => context.l10n.resultTabVisual,
+      };
 
   /// The Visual tab's position — appended last so the practice jump in
   /// [ResultActionBar] (`_selectTab(3)`) keeps its index.
@@ -442,7 +453,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           items: [
             for (var i = 0; i < _tabLabels.length; i++)
               SegmentItem(
-                label: _tabLabels[i],
+                label: _tabLabel(context, i),
                 // The Pro star on the Visual segment (the "Visual ⭐" tab).
                 icon: i == _visualTabIndex ? Icons.auto_awesome_rounded : null,
               ),

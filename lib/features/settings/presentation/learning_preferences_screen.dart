@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_language.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../onboarding/domain/onboarding_models.dart';
@@ -24,7 +25,7 @@ class LearningPreferencesScreen extends ConsumerWidget {
     final controller = ref.read(settingsControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Learning preferences')),
+      appBar: AppBar(title: Text(context.l10n.settingsLearningPreferences)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenH,
@@ -34,15 +35,15 @@ class LearningPreferencesScreen extends ConsumerWidget {
         ),
         children: [
           SettingsSection(
-            title: 'Study profile',
+            title: context.l10n.settingsStudyProfile,
             children: [
               SettingsTile(
                 icon: Icons.language_rounded,
-                title: 'Language',
+                title: context.l10n.settingsLanguage,
                 value: learning.language.nativeName,
                 onTap: () => showSettingsOptionPicker<AppLanguage>(
                   context,
-                  title: 'Language',
+                  title: context.l10n.settingsLanguage,
                   options: AppLanguage.values,
                   selected: learning.language,
                   label: (o) => o.nativeName,
@@ -52,11 +53,11 @@ class LearningPreferencesScreen extends ConsumerWidget {
               ),
               SettingsTile(
                 icon: Icons.school_rounded,
-                title: 'Grade level',
-                value: learning.gradeLevel?.label ?? 'Not set',
+                title: context.l10n.settingsGradeLevel,
+                value: learning.gradeLevel?.label ?? context.l10n.commonNotSet,
                 onTap: () => showSettingsOptionPicker<StudyLevel>(
                   context,
-                  title: 'Grade level',
+                  title: context.l10n.settingsGradeLevel,
                   options: StudyLevel.values,
                   selected: learning.gradeLevel,
                   label: (o) => o.label,
@@ -66,11 +67,11 @@ class LearningPreferencesScreen extends ConsumerWidget {
               ),
               SettingsTile(
                 icon: Icons.emoji_objects_rounded,
-                title: 'Learning goal',
-                value: learning.learningGoal?.label ?? 'Not set',
+                title: context.l10n.settingsLearningGoal,
+                value: learning.learningGoal?.label ?? context.l10n.commonNotSet,
                 onTap: () => showSettingsOptionPicker<LearningGoal>(
                   context,
-                  title: 'Learning goal',
+                  title: context.l10n.settingsLearningGoal,
                   options: LearningGoal.values,
                   selected: learning.learningGoal,
                   label: (o) => o.label,
@@ -80,11 +81,11 @@ class LearningPreferencesScreen extends ConsumerWidget {
               ),
               SettingsTile(
                 icon: Icons.timer_rounded,
-                title: 'Daily goal',
-                value: learning.dailyGoal?.label ?? 'Not set',
+                title: context.l10n.settingsDailyGoal,
+                value: learning.dailyGoal?.label ?? context.l10n.commonNotSet,
                 onTap: () => showSettingsOptionPicker<DailyGoal>(
                   context,
-                  title: 'Daily goal',
+                  title: context.l10n.settingsDailyGoal,
                   options: DailyGoal.values,
                   selected: learning.dailyGoal,
                   label: (o) => o.label,
@@ -96,13 +97,13 @@ class LearningPreferencesScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.section),
-          const SettingsGroupLabel('Practice difficulty'),
+          SettingsGroupLabel(context.l10n.settingsPracticeDifficulty),
           PracticeDifficultySelector(
             selected: learning.difficulty,
             onChanged: controller.setDifficulty,
           ),
           const SizedBox(height: AppSpacing.section),
-          const SettingsGroupLabel('Focus topics'),
+          SettingsGroupLabel(context.l10n.settingsFocusTopics),
           _TopicPicker(
             selected: learning.topics,
             onToggle: controller.toggleTopic,
