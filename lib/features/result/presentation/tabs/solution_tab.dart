@@ -10,9 +10,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/result_models.dart';
+import '../../domain/teaching_models.dart';
 import '../widgets/math_text.dart';
 import '../widgets/result_graph.dart';
 import '../widgets/step_diff.dart';
+import '../widgets/teaching/teaching_cards.dart';
 
 /// Diameter of the numbered rail bullets; trailing content indents past it.
 const double _railWidth = 30;
@@ -37,13 +39,29 @@ String _accentHex(BuildContext context) {
 /// a subtle scale on reveal unless reduce-motion is on), the "understand, don't
 /// just copy" moment.
 class SolutionTab extends StatefulWidget {
-  const SolutionTab({super.key, required this.result, this.onOpenVisual});
+  const SolutionTab({
+    super.key,
+    required this.result,
+    this.onOpenVisual,
+    this.onOpenMethods,
+    this.onAskMatheasy,
+    this.onAttemptPractice,
+  });
 
   final ResultData result;
 
   /// Opens the Visual Learning tab — the flagship "understand it, don't just
   /// read it" experience. Null in tests / previews (the hero is then omitted).
   final VoidCallback? onOpenVisual;
+
+  /// Opens the Methods tab from the "compare methods" link (§5). Null → hidden.
+  final VoidCallback? onOpenMethods;
+
+  /// Opens Numi from the teaching hand-off strip. Null → the strip is hidden.
+  final VoidCallback? onAskMatheasy;
+
+  /// Attempts a practice-ladder rung. Null → the ladder renders read-only.
+  final ValueChanged<PracticeItem>? onAttemptPractice;
 
   @override
   State<SolutionTab> createState() => _SolutionTabState();
@@ -92,6 +110,10 @@ class _SolutionTabState extends State<SolutionTab> {
     final steps = _steps;
     final shown = _revealAll ? steps.length : _revealed.clamp(1, steps.length);
     final more = shown < steps.length;
+    // The additive teaching layer (spec §5). Null for a v1 payload / when the
+    // server attached none → the whole block below is skipped and this tab is
+    // byte-identical to today's. Each card also guards its own emptiness.
+    final teaching = widget.result.teaching;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,6 +124,34 @@ class _SolutionTabState extends State<SolutionTab> {
         if (widget.onOpenVisual != null) ...[
           _VisualLearningHero(onTap: widget.onOpenVisual!),
           const SizedBox(height: AppSpacing.lg),
+        ],
+        // --- Teaching: orient BEFORE the steps (concept → why → journey). ---
+        if (teaching != null) ...[
+          TeachingHeaderCard(header: teaching.header),
+          const SizedBox(height: AppSpacing.md),
+          if (!teaching.concept.isEmpty || !teaching.overview.isEmpty) ...[
+            ConceptOverviewCard(
+              concept: teaching.concept,
+              overview: teaching.overview,
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (teaching.journey.isNotEmpty) ...[
+            LearningJourneyRail(
+              journey: teaching.journey,
+              stepCount: steps.length,
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (teaching.header.whyMethodChosen.isNotEmpty ||
+              !teaching.methodRationale.isEmpty) ...[
+            WhyThisMethodCard(
+              header: teaching.header,
+              rationale: teaching.methodRationale,
+              onCompare: widget.onOpenMethods,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
         ],
         // A compact one-line intro keeps the brand voice without pushing the
         // steps down the page — the maths, not the chatter, should lead.
@@ -146,11 +196,33 @@ class _SolutionTabState extends State<SolutionTab> {
           )
         else if (widget.result.verifyText.isNotEmpty)
           _VerifyCard(text: widget.result.verifyText),
+        // --- Teaching: consolidate AFTER the steps (mistakes → takeaway → practice). ---
+        if (teaching != null) ...[
+          if (teaching.commonMistakes.any((m) => m.mistake.isNotEmpty)) ...[
+            const SizedBox(height: AppSpacing.lg),
+            CommonMistakesCard(mistakes: teaching.commonMistakes),
+          ],
+          if (!teaching.keyTakeaway.isEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            KeyTakeawayCard(takeaway: teaching.keyTakeaway),
+          ],
+          if (teaching.practiceLadder != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            PracticeLadderCard(
+              ladder: teaching.practiceLadder!,
+              onAttempt: widget.onAttemptPractice,
+            ),
+          ],
+        ],
         // The graph (§7) — an expander, after the answer + steps. Omitted
         // entirely when the problem isn't a plottable function.
         if (widget.result.graph != null) ...[
           const SizedBox(height: AppSpacing.lg),
           ResultGraphSection(graph: widget.result.graph!),
+        ],
+        if (teaching != null && widget.onAskMatheasy != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          NumiInviteStrip(onAsk: widget.onAskMatheasy),
         ],
       ],
     );
@@ -361,6 +433,13 @@ class _StepCardState extends State<_StepCard> {
     // so the Transform never perturbs the intrinsic-height measurement (which
     // caused a sub-pixel overflow). Suppressed under reduce-motion (§5).
     final pulse = widget.pulse && !MediaQuery.disableAnimationsOf(context);
+    // The step has expandable "why" content if it carries the reasoning OR any of
+    // the deeper (Pro/full) teaching fields.
+    final s = widget.step;
+    final hasWhy = s.detail.isNotEmpty ||
+        (s.rule?.isNotEmpty ?? false) ||
+        (s.explanation?.isNotEmpty ?? false) ||
+        (s.commonMistake?.isNotEmpty ?? false);
     // The timeline connector is a positioned line behind the row (not an
     // IntrinsicHeight-stretched Expanded), so the card takes its natural height
     // and can't cause a sub-pixel intrinsic-height overflow.
@@ -417,22 +496,23 @@ class _StepCardState extends State<_StepCard> {
                       previousLatex: widget.previousLatex,
                       isAnswer: isAnswer,
                     ),
+                    // Pivotal step: an elicited "your turn" question BEFORE the
+                    // reasoning — the generation moment (spec §0.4). A soft nudge:
+                    // the "Why?" reveal below is still one tap away.
+                    if (widget.step.pivotal &&
+                        (widget.step.selfExplainPrompt?.isNotEmpty ?? false)) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _SelfExplainBox(prompt: widget.step.selfExplainPrompt!),
+                    ],
                     AnimatedCrossFade(
                       duration: AppDurations.fast,
                       crossFadeState: _expanded
                           ? CrossFadeState.showFirst
                           : CrossFadeState.showSecond,
-                      firstChild: Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.md),
-                        child: Text(
-                          widget.step.detail,
-                          style: AppTypography.bodySmall
-                              .copyWith(color: colors.textSecondary),
-                        ),
-                      ),
+                      firstChild: _StepDetail(step: widget.step),
                       secondChild: const SizedBox(width: double.infinity),
                     ),
-                    if (widget.step.detail.isNotEmpty) ...[
+                    if (hasWhy) ...[
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         children: [
@@ -590,6 +670,146 @@ class _OperationChip extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.label.copyWith(color: colors.onWarningContainer),
+      ),
+    );
+  }
+}
+
+/// The pivotal-step "your turn" prompt — an elicited question shown before the
+/// reasoning (spec §0.4). A generation nudge (a QUESTION, never an assertion),
+/// not a hard gate: the "Why?" reveal is still one tap away.
+class _SelfExplainBox extends StatelessWidget {
+  const _SelfExplainBox({required this.prompt});
+
+  final String prompt;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: AppRadius.smRadius,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.edit_rounded, size: 15, color: emerald),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: AppTypography.bodySmall
+                    .copyWith(color: colors.onPrimaryContainer),
+                children: [
+                  const TextSpan(
+                    text: 'Your turn — ',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(text: prompt),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The expandable reasoning for a step: the "why" plus the deeper (Pro) fields —
+/// the named rule, the plain explanation, and the common slip at this step —
+/// each shown only when present, so a v1 / lite step shows just the "why".
+/// (An empty-detail step renders no stray blank line — a benign layout delta
+/// from the pre-Phase-3 offline-mock rendering; the real solver always sets why.)
+class _StepDetail extends StatelessWidget {
+  const _StepDetail({required this.step});
+
+  final SolutionStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final rule = step.rule;
+    final explanation = step.explanation;
+    final mistake = step.commonMistake;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (step.detail.isNotEmpty)
+            Text(
+              step.detail,
+              style: AppTypography.bodySmall
+                  .copyWith(color: colors.textSecondary),
+            ),
+          if (rule != null && rule.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: AppRadius.smRadius,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.straighten_rounded,
+                      size: 13, color: colors.onPrimaryContainer),
+                  const SizedBox(width: AppSpacing.xxs),
+                  Flexible(
+                    child: Text(
+                      rule,
+                      style: AppTypography.caption.copyWith(
+                        color: colors.onPrimaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (explanation != null && explanation.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              explanation,
+              style: AppTypography.caption.copyWith(color: colors.textSecondary),
+            ),
+          ],
+          if (mistake != null && mistake.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: colors.warningContainer,
+                borderRadius: AppRadius.smRadius,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded,
+                      size: 14, color: colors.onWarningContainer),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      mistake,
+                      style: AppTypography.caption
+                          .copyWith(color: colors.onWarningContainer),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

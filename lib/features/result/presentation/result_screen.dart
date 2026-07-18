@@ -458,6 +458,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         return SolutionTab(
           result: result,
           onOpenVisual: () => _selectTab(_visualTabIndex),
+          onOpenMethods: () => _selectTab(2),
+          onAskMatheasy: () => _askMatheasy(result),
+          // A practice-ladder rung re-enters the solve pipeline as a fresh
+          // problem (it ships as a PROBLEM, never an answer) via the editor.
+          onAttemptPractice: (item) => context.push(
+            AppRoutes.manualInput,
+            extra: ManualInputArgs(initialLatex: item.latex),
+          ),
         );
     }
   }

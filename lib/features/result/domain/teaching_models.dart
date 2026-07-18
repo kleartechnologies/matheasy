@@ -181,7 +181,7 @@ class ConceptOverview {
   final String body;
   final List<DefinedTerm> definedTerms;
 
-  bool get isEmpty => body.isEmpty;
+  bool get isEmpty => body.isEmpty && definedTerms.isEmpty;
 
   Map<String, dynamic> toJson() => {
         'body': body,

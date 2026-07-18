@@ -239,6 +239,20 @@ void main() {
       expect(s.rule, isNull);
     });
 
+    test('a concept with only definedTerms (no body) is NOT empty', () {
+      // The jargon chips must not be silently dropped (review #3).
+      final t = TeachingLayer.fromJson(const {
+        'concept': {
+          'definedTerms': [
+            {'term': 'root', 'plain': 'a value that makes it zero'},
+          ],
+        },
+      });
+      expect(t.concept.body, isEmpty);
+      expect(t.concept.definedTerms, hasLength(1));
+      expect(t.concept.isEmpty, isFalse);
+    });
+
     test('a partial practice ladder (missing a rung) is dropped', () {
       final t = TeachingLayer.fromJson(const {
         'practiceLadder': {
