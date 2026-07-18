@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/backend/functions_client.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/security/rate_limit_result.dart';
 import '../../../core/security/rate_limit_service.dart';
@@ -100,25 +101,27 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
-          tooltip: 'Close',
+          tooltip: context.l10n.actionClose,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Visual walkthrough'),
+        title: Text(context.l10n.practiceVisualTitle),
       ),
       body: SafeArea(
         top: false,
         child: future == null
-            ? const ResultEmpty(
-                message: 'Nothing to visualize right now.',
+            ? ResultEmpty(
+                message: context.l10n.practiceVisualNothing,
               )
             : FutureBuilder<VisualSolution>(
                 future: future,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xxl,
+                      ),
                       child: LoadingState(
-                        message: 'Matheasy is sketching your visual walkthrough…',
+                        message: context.l10n.practiceVisualLoading,
                         showBrand: true,
                       ),
                     );
@@ -166,12 +169,12 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const ResultEmpty(
-              message: 'Visual Learning is a Matheasy Pro feature.',
+            ResultEmpty(
+              message: context.l10n.practiceVisualProFeature,
             ),
             const SizedBox(height: AppSpacing.md),
             PrimaryButton(
-              label: 'See Pro plans',
+              label: context.l10n.practiceSeeProPlans,
               icon: Icons.workspace_premium_rounded,
               onPressed: () => context.pushReplacement(AppRoutes.paywall),
             ),
@@ -184,13 +187,12 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const ResultEmpty(
-            message: "The visual walkthrough isn't available right now. "
-                'Give it another try in a moment.',
+          ResultEmpty(
+            message: context.l10n.practiceVisualUnavailable,
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: 'Back to practice',
+            label: context.l10n.practiceBackToPractice,
             icon: Icons.arrow_back_rounded,
             onPressed: () => Navigator.of(context).maybePop(),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -37,7 +38,7 @@ class TutorPracticeCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                'PRACTICE',
+                context.l10n.tutorPracticeLabel,
                 style: AppTypography.label.copyWith(color: AppColors.success),
               ),
               const Spacer(),
@@ -87,7 +88,7 @@ class TutorPracticeCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
-            label: 'Try it',
+            label: context.l10n.tutorTryIt,
             icon: Icons.play_arrow_rounded,
             size: AppButtonSize.medium,
             onPressed: onStart,

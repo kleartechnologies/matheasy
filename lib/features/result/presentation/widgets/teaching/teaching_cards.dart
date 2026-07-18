@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/animations/pressable.dart';
 import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -123,7 +124,7 @@ class ConceptOverviewCard extends StatelessWidget {
               const Text('🧠', style: TextStyle(fontSize: 16)),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'THE IDEA',
+                context.l10n.teachingTheIdea,
                 style: AppTypography.label.copyWith(color: _emerald(context)),
               ),
             ],
@@ -153,10 +154,13 @@ class ConceptOverviewCard extends StatelessWidget {
             Divider(height: 1, color: colors.divider),
             const SizedBox(height: AppSpacing.md),
             if (overview.asked.isNotEmpty)
-              _OverviewRow(label: 'What it asks', value: overview.asked),
+              _OverviewRow(
+                  label: context.l10n.teachingWhatItAsks,
+                  value: overview.asked),
             if (overview.goal.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
-              _OverviewRow(label: 'The plan', value: overview.goal),
+              _OverviewRow(
+                  label: context.l10n.teachingThePlan, value: overview.goal),
             ],
             if (overview.predictionPrompt.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
@@ -420,7 +424,7 @@ class WhyThisMethodCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   header.methodChosen.isEmpty
-                      ? 'Why this method'
+                      ? context.l10n.teachingWhyThisMethod
                       : header.methodChosen,
                   style: AppTypography.bodyMedium.copyWith(
                     color: colors.textPrimary,
@@ -470,7 +474,9 @@ class WhyThisMethodCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
             ],
             if (onCompare != null)
-              _TextLink(label: 'Compare methods', onTap: onCompare!),
+              _TextLink(
+                  label: context.l10n.teachingCompareMethods,
+                  onTap: onCompare!),
           ],
         ],
       ),
@@ -503,7 +509,7 @@ class CommonMistakesCard extends StatelessWidget {
               const Text('⚠️', style: TextStyle(fontSize: 15)),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'WATCH OUT FOR',
+                context.l10n.teachingWatchOutFor,
                 style: AppTypography.label.copyWith(color: colors.textSecondary),
               ),
             ],
@@ -625,7 +631,7 @@ class KeyTakeawayCard extends StatelessWidget {
                     size: 16, color: AppColors.gold),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'REMEMBER THIS',
+                  context.l10n.teachingRememberThis,
                   style: AppTypography.label.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -682,14 +688,14 @@ class PracticeLadderCard extends StatelessWidget {
                   size: 16, color: AppColors.primaryAction),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'YOUR TURN',
+                context.l10n.teachingYourTurn,
                 style: AppTypography.label.copyWith(color: _emerald(context)),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Try these — a gentle warm-up, one just like it, then a stretch.',
+            context.l10n.teachingPracticeLadderIntro,
             style: AppTypography.caption.copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -716,17 +722,17 @@ class _RungRow extends StatelessWidget {
     final colors = context.colors;
     return switch (item.rung) {
       'easier' => (
-          label: 'Easier',
+          label: context.l10n.teachingRungEasier,
           fill: colors.successContainer,
           ink: colors.onSuccessContainer
         ),
       'harder' => (
-          label: 'Harder',
+          label: context.l10n.teachingRungHarder,
           fill: colors.warningContainer,
           ink: colors.onWarningContainer
         ),
       _ => (
-          label: 'Similar',
+          label: context.l10n.teachingRungSimilar,
           fill: colors.infoContainer,
           ink: colors.onInfoContainer
         ),
@@ -805,14 +811,13 @@ class NumiInviteStrip extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const MatheasyBubble(
-          text: 'Still fuzzy on a step, or want to try the next one yourself? '
-              'I can talk you through it.',
+        MatheasyBubble(
+          text: context.l10n.teachingAskPrompt,
           avatarSize: 28,
         ),
         const SizedBox(height: AppSpacing.sm),
         SecondaryButton(
-          label: 'Ask Numi',
+          label: context.l10n.teachingAskNumi,
           icon: Icons.forum_rounded,
           onPressed: onAsk,
         ),
@@ -844,7 +849,7 @@ class ApproachCard extends StatelessWidget {
               const Text('🧭', style: TextStyle(fontSize: 15)),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'HOW TO APPROACH IT',
+                context.l10n.teachingHowToApproach,
                 style: AppTypography.label.copyWith(color: _emerald(context)),
               ),
             ],

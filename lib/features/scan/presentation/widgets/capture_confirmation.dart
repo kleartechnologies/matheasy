@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -81,8 +82,7 @@ class CaptureConfirmation extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             lowConfidence
-                ? 'This might be misread — tap the problem to fix it before '
-                    'solving.'
+                ? context.l10n.scanConfirmLowConfidence
                 : equation.kind.label,
             style: AppTypography.bodySmall.copyWith(
               color: lowConfidence
@@ -95,7 +95,7 @@ class CaptureConfirmation extends StatelessWidget {
             children: [
               Expanded(
                 child: SecondaryButton(
-                  label: 'Retake',
+                  label: context.l10n.scanRetake,
                   icon: Icons.refresh_rounded,
                   onPressed: onRetake,
                 ),
@@ -104,7 +104,7 @@ class CaptureConfirmation extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: PrimaryButton(
-                  label: 'Solve',
+                  label: context.l10n.scanSolve,
                   trailingIcon: Icons.arrow_forward_rounded,
                   onPressed: onContinue,
                 ),
@@ -136,7 +136,7 @@ class _EditableEquation extends StatelessWidget {
     final colors = context.colors;
     return Semantics(
       button: true,
-      label: 'Edit the detected equation',
+      label: context.l10n.scanEditEquation,
       excludeSemantics: true,
       child: InkWell(
         onTap: onEdit,

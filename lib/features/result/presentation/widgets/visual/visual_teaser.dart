@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/animations/pressable.dart';
 import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -78,7 +79,7 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'VISUAL LEARNING',
+                    context.l10n.resultVisualLearningLabel,
                     style: AppTypography.label
                         .copyWith(color: colors.textMuted),
                   ),
@@ -88,7 +89,7 @@ class _VisualTeaserState extends ConsumerState<VisualTeaser> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Step 1 preview',
+                context.l10n.visualStep1Preview,
                 style: AppTypography.caption
                     .copyWith(color: colors.textSecondary),
               ),
@@ -211,13 +212,13 @@ class _UnlockCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Unlock Pro to continue',
+            context.l10n.visualUnlockToContinue,
             style:
                 AppTypography.headingSmall.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Understand math visually — watch every step unfold.',
+            context.l10n.visualUnlockSubtitle,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.white.withValues(alpha: 0.75),
             ),
@@ -246,7 +247,7 @@ class _UnlockCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Semantics(
             button: true,
-            label: 'Unlock Pro',
+            label: context.l10n.actionUnlockPro,
             child: ExcludeSemantics(
               child: Pressable(
                 onTap: onUnlock,
@@ -259,7 +260,7 @@ class _UnlockCard extends StatelessWidget {
                     borderRadius: AppRadius.pillRadius,
                   ),
                   child: Text(
-                    'Unlock Pro',
+                    context.l10n.actionUnlockPro,
                     style: AppTypography.button
                         .copyWith(color: AppColors.onGold),
                   ),
@@ -270,7 +271,7 @@ class _UnlockCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Center(
             child: Text(
-              'Unlocks every Pro feature · Cancel anytime',
+              context.l10n.visualUnlockDisclaimer,
               style: AppTypography.caption.copyWith(
                 color: AppColors.white.withValues(alpha: 0.72),
               ),
@@ -298,7 +299,7 @@ class _ProBadge extends StatelessWidget {
         borderRadius: AppRadius.smRadius,
       ),
       child: Text(
-        'PRO',
+        context.l10n.visualProBadge,
         style: AppTypography.label.copyWith(color: AppColors.onGold),
       ),
     );

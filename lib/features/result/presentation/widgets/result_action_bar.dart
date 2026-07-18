@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -46,7 +47,7 @@ class ResultActionBar extends StatelessWidget {
           // Balanced paired CTAs — the secondary action stays fully readable.
           Expanded(
             child: SecondaryButton(
-              label: 'Ask Matheasy',
+              label: context.l10n.resultAskMatheasy,
               icon: Icons.smart_toy_rounded,
               onPressed: onAskMatheasy,
             ),
@@ -54,7 +55,7 @@ class ResultActionBar extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: PrimaryButton(
-              label: 'Practice',
+              label: context.l10n.navPractice,
               icon: Icons.auto_awesome_rounded,
               onPressed: onGeneratePractice,
             ),
@@ -78,7 +79,9 @@ class _SaveButton extends StatelessWidget {
     final colors = context.colors;
     return Semantics(
       button: true,
-      label: saved ? 'Remove from saved' : 'Save solution',
+      label: saved
+          ? context.l10n.resultRemoveFromSaved
+          : context.l10n.resultSaveSolution,
       child: Pressable(
         onTap: onTap,
         borderRadius: AppRadius.pillRadius,

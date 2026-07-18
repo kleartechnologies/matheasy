@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -58,7 +59,7 @@ class ResultHeader extends StatelessWidget {
                   const Spacer(),
                   Semantics(
                     button: true,
-                    label: 'Rescan the problem',
+                    label: context.l10n.resultRescanProblem,
                     child: GestureDetector(
                       onTap: onRescan,
                       behavior: HitTestBehavior.opaque,
@@ -73,7 +74,7 @@ class ResultHeader extends StatelessWidget {
                             Icon(Icons.crop_free_rounded,
                                 size: 15, color: colors.textSecondary),
                             const SizedBox(width: AppSpacing.xs),
-                            Text('Rescan',
+                            Text(context.l10n.actionRescan,
                                 style: AppTypography.caption
                                     .copyWith(color: colors.textSecondary)),
                           ],
@@ -129,7 +130,7 @@ class ResultHeader extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'FINAL ANSWER',
+                    context.l10n.resultFinalAnswer,
                     style: AppTypography.label
                         .copyWith(color: colors.onSuccessContainer),
                   ),
@@ -175,7 +176,7 @@ class _PlayButton extends StatelessWidget {
         context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       button: true,
-      label: 'Play solution walkthrough',
+      label: context.l10n.resultPlayWalkthrough,
       child: Pressable(
         onTap: onTap,
         borderRadius: AppRadius.pillRadius,
@@ -196,7 +197,7 @@ class _PlayButton extends StatelessWidget {
                   size: 22, color: emeraldLabel),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Play step-by-step',
+                context.l10n.resultPlayStepByStep,
                 style: AppTypography.button
                     .copyWith(color: emeraldLabel, fontSize: 15),
               ),

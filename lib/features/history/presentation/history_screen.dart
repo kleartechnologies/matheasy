@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -27,25 +28,23 @@ class HistoryScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.historyBack,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('History'),
+        title: Text(context.l10n.historyTitle),
         actions: [
           if (entries.isNotEmpty)
             TextButton(
               onPressed: () => _confirmClear(context, ref),
-              child: const Text('Clear'),
+              child: Text(context.l10n.historyClear),
             ),
         ],
       ),
       body: entries.isEmpty
           ? EmptyState(
-              title: 'No history yet',
-              message:
-                  'Problems you solve appear here — tap any to re-open the full '
-                  'solution instantly, even offline.',
-              actionLabel: 'Scan a problem',
+              title: context.l10n.historyEmptyTitle,
+              message: context.l10n.historyEmptyMessage,
+              actionLabel: context.l10n.historyEmptyAction,
               onAction: () => context.push(AppRoutes.scan),
             )
           : ListView.separated(
@@ -85,12 +84,10 @@ class HistoryScreen extends ConsumerWidget {
       context,
       icon: Icons.delete_sweep_rounded,
       iconColor: AppColors.error,
-      title: 'Clear history?',
-      message:
-          'This removes every saved solution from this device. It can’t be '
-          'undone.',
-      primaryLabel: 'Clear all',
-      secondaryLabel: 'Cancel',
+      title: context.l10n.historyClearTitle,
+      message: context.l10n.historyClearMessage,
+      primaryLabel: context.l10n.historyClearConfirm,
+      secondaryLabel: context.l10n.actionCancel,
       destructive: true,
     );
     if (confirmed == true) {

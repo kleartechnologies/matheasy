@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../application/onboarding_controller.dart';
 import '../../domain/onboarding_models.dart';
@@ -15,8 +16,8 @@ class ChallengePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(onboardingFlowControllerProvider).topics;
     return OnboardingQuestionLayout(
-      question: 'What do you find hardest?',
-      subtitle: "Pick as many as you like — we'll help you strengthen them.",
+      question: context.l10n.onboardingChallengeQuestion,
+      subtitle: context.l10n.onboardingChallengeSubtitle,
       options: [
         for (final topic in MathTopic.values)
           OnboardingOptionTile(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -58,21 +59,21 @@ class ResultCouldntVerify extends StatelessWidget {
 
         // Correcting the read is primary — a misread is the likeliest cause.
         PrimaryButton(
-          label: 'Edit the problem',
+          label: context.l10n.resultEditProblem,
           icon: Icons.edit_rounded,
           onPressed: onEdit,
         ),
         if (discuss != null) ...[
           const SizedBox(height: AppSpacing.md),
           SecondaryButton(
-            label: 'Work through it with the tutor',
+            label: context.l10n.resultWorkThroughTutor,
             icon: Icons.forum_rounded,
             onPressed: discuss,
           ),
         ],
         const SizedBox(height: AppSpacing.sm),
         GhostButton(
-          label: 'Rescan',
+          label: context.l10n.actionRescan,
           icon: Icons.center_focus_strong_rounded,
           expand: true,
           onPressed: onRescan,
@@ -109,7 +110,7 @@ class _VerifyNotice extends StatelessWidget {
                   size: 18, color: colors.onInfoContainer),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                "COULDN'T VERIFY",
+                context.l10n.resultCouldntVerify,
                 style:
                     AppTypography.label.copyWith(color: colors.onInfoContainer),
               ),
@@ -117,10 +118,7 @@ class _VerifyNotice extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'I check every answer by working it back through your problem. This '
-            "one didn't pass, so I'm not showing an answer at all — that check "
-            'is the whole point. If I misread anything above, correcting it '
-            'usually clears this up.',
+            context.l10n.resultCouldntVerifyMessage,
             style: AppTypography.bodyMedium
                 .copyWith(color: colors.onInfoContainer),
           ),
@@ -149,14 +147,14 @@ class _EditableProblem extends StatelessWidget {
           Row(
             children: [
               Text(
-                'WHAT I READ',
+                context.l10n.resultWhatIRead,
                 style: AppTypography.label.copyWith(color: colors.textMuted),
               ),
               const Spacer(),
               Icon(Icons.edit_rounded, size: 16, color: colors.textMuted),
               const SizedBox(width: 4),
               Text(
-                'tap to fix',
+                context.l10n.resultTapToFix,
                 style:
                     AppTypography.caption.copyWith(color: colors.textMuted),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/animations/pressable.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -56,10 +57,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           avatar: _avatar,
         );
     final messenger = ScaffoldMessenger.of(context);
+    final message = context.l10n.profileUpdatedToast;
     Navigator.of(context).pop();
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Profile updated')));
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -68,7 +70,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final initial = _previewInitial(profile);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit profile')),
+      appBar: AppBar(title: Text(context.l10n.profileEditTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenH,
@@ -86,26 +88,26 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const SettingsGroupLabel('Avatar'),
+          SettingsGroupLabel(context.l10n.profileAvatarLabel),
           _AvatarPicker(
             selected: _avatar,
             initial: initial,
             onSelected: (avatar) => setState(() => _avatar = avatar),
           ),
           const SizedBox(height: AppSpacing.section),
-          const SettingsGroupLabel('Display name'),
+          SettingsGroupLabel(context.l10n.profileDisplayNameLabel),
           _NameField(
             controller: _nameController,
             onChanged: () => setState(() {}),
           ),
           const SizedBox(height: AppSpacing.section),
           SettingsSection(
-            title: 'Learning',
+            title: context.l10n.profileLearningSection,
             children: [
               SettingsTile(
                 icon: Icons.tune_rounded,
-                title: 'Learning preferences',
-                subtitle: 'Grade, goal, topics & difficulty',
+                title: context.l10n.profileLearningPreferences,
+                subtitle: context.l10n.profileLearningPreferencesSubtitle,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const LearningPreferencesScreen(),
@@ -124,7 +126,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           AppSpacing.md,
         ),
         child: PrimaryButton(
-          label: 'Save profile',
+          label: context.l10n.profileSaveButton,
           icon: Icons.check_rounded,
           onPressed: _save,
         ),
@@ -226,7 +228,7 @@ class _NameField extends StatelessWidget {
       maxLength: 30,
       style: AppTypography.bodyLarge.copyWith(color: colors.textPrimary),
       decoration: InputDecoration(
-        hintText: 'Your name',
+        hintText: context.l10n.profileNameHint,
         hintStyle:
             AppTypography.bodyLarge.copyWith(color: colors.textMuted),
         counterText: '',

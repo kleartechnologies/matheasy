@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -25,7 +26,7 @@ class PracticeRecommendedTopics extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'Recommended for you'),
+        SectionHeader(title: context.l10n.practiceRecommendedForYou),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 116,

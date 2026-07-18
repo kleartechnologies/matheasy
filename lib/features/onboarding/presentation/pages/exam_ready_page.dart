@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -13,10 +14,10 @@ class ExamReadyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: 'Built For Your Exams',
-      subtitle: 'Personalized help tuned to SPM, IGCSE, GCSE, SAT and more.',
-      illustration: _ExamArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingExamHeadline,
+      subtitle: context.l10n.onboardingExamSubtitle,
+      illustration: const _ExamArt(),
     );
   }
 }

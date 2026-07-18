@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -35,13 +36,15 @@ class ProfileScreen extends ConsumerWidget {
     final confirmed = await AppDialog.show<bool>(
       context,
       icon: Icons.logout_rounded,
-      title: isGuest ? 'Exit guest session?' : 'Sign out?',
+      title: isGuest
+          ? context.l10n.profileExitGuestTitle
+          : context.l10n.profileSignOutTitle,
       message: isGuest
-          ? 'Your guest progress stays on this device — you can continue as a '
-              'guest again anytime.'
-          : 'You can sign back in anytime to pick up where you left off.',
-      primaryLabel: isGuest ? 'Exit' : 'Sign out',
-      secondaryLabel: 'Cancel',
+          ? context.l10n.profileExitGuestMessage
+          : context.l10n.profileSignOutMessage,
+      primaryLabel:
+          isGuest ? context.l10n.profileExit : context.l10n.profileSignOut,
+      secondaryLabel: context.l10n.actionCancel,
     );
     if ((confirmed ?? false) && context.mounted) {
       await ref.read(profileControllerProvider.notifier).signOut();
@@ -57,11 +60,12 @@ class ProfileScreen extends ConsumerWidget {
     final proceed = await AppDialog.show<bool>(
       context,
       icon: Icons.warning_amber_rounded,
-      title: isGuest ? 'Delete guest data?' : 'Delete account?',
-      message: 'This permanently removes your progress, achievements, learning '
-          'preferences and settings from this device. This cannot be undone.',
-      primaryLabel: 'Continue',
-      secondaryLabel: 'Cancel',
+      title: isGuest
+          ? context.l10n.profileDeleteGuestTitle
+          : context.l10n.profileDeleteAccountTitle,
+      message: context.l10n.profileDeleteWarning,
+      primaryLabel: context.l10n.actionContinue,
+      secondaryLabel: context.l10n.actionCancel,
       destructive: true,
     );
     if (!(proceed ?? false) || !context.mounted) return;
@@ -70,12 +74,14 @@ class ProfileScreen extends ConsumerWidget {
     final confirmed = await AppDialog.show<bool>(
       context,
       icon: Icons.delete_forever_rounded,
-      title: 'Are you absolutely sure?',
+      title: context.l10n.profileDeleteConfirmTitle,
       message: isGuest
-          ? 'Your guest data will be erased immediately.'
-          : 'Your account and all learning data will be erased immediately.',
-      primaryLabel: isGuest ? 'Delete data' : 'Delete account',
-      secondaryLabel: 'Keep it',
+          ? context.l10n.profileDeleteGuestConfirmMessage
+          : context.l10n.profileDeleteAccountConfirmMessage,
+      primaryLabel: isGuest
+          ? context.l10n.profileDeleteData
+          : context.l10n.profileDeleteAccount,
+      secondaryLabel: context.l10n.profileKeepIt,
       destructive: true,
     );
     if (!(confirmed ?? false) || !context.mounted) return;
@@ -109,8 +115,8 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           SettingsTile(
             icon: Icons.settings_rounded,
-            title: 'Settings',
-            subtitle: 'Notifications, appearance, accessibility',
+            title: context.l10n.settingsTitle,
+            subtitle: context.l10n.profileSettingsSubtitle,
             onTap: () => context.push(AppRoutes.profileSettings),
           ),
         ],
@@ -119,13 +125,17 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           SettingsTile(
             icon: Icons.logout_rounded,
-            title: isGuest ? 'Exit guest session' : 'Sign out',
+            title: isGuest
+                ? context.l10n.profileExitGuestSession
+                : context.l10n.profileSignOut,
             onTap: () =>
                 unawaited(_confirmSignOut(context, ref, isGuest: isGuest)),
           ),
           SettingsTile(
             icon: Icons.delete_outline_rounded,
-            title: isGuest ? 'Delete guest data' : 'Delete account',
+            title: isGuest
+                ? context.l10n.profileDeleteGuestData
+                : context.l10n.profileDeleteAccount,
             destructive: true,
             onTap: () =>
                 unawaited(_confirmDelete(context, ref, isGuest: isGuest)),
@@ -186,10 +196,11 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text('Profile', style: Theme.of(context).textTheme.displaySmall),
+            child: Text(context.l10n.profileTitle,
+                style: Theme.of(context).textTheme.displaySmall),
           ),
           IconButton(
-            tooltip: 'Settings',
+            tooltip: context.l10n.settingsTitle,
             onPressed: onSettings,
             icon: Icon(Icons.settings_outlined, color: context.colors.textSecondary),
           ),

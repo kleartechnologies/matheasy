@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -31,13 +32,12 @@ class PracticeTab extends StatelessWidget {
       // copy tells the user to "tap Generate" with no button to tap (spec §9).
       return Column(
         children: [
-          const ResultEmpty(
-            message: 'No practice yet — want a few problems just like this '
-                "one? I'll build them for you.",
+          ResultEmpty(
+            message: context.l10n.practiceEmptyMessage,
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: 'Generate practice',
+            label: context.l10n.practiceGeneratePractice,
             icon: Icons.auto_awesome_rounded,
             expand: false,
             onPressed: onGenerateMore,
@@ -48,15 +48,15 @@ class PracticeTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const MatheasyBubble(
-          text: 'Master it! Here are similar questions tuned to your level.',
+        MatheasyBubble(
+          text: context.l10n.practiceMasterItIntro,
         ),
         const SizedBox(height: AppSpacing.lg),
         for (final difficulty in Difficulty.values)
           ..._group(context, difficulty),
         const SizedBox(height: AppSpacing.xs),
         PrimaryButton(
-          label: 'Generate more like this',
+          label: context.l10n.practiceGenerateMore,
           icon: Icons.auto_awesome_rounded,
           onPressed: onGenerateMore,
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -63,7 +64,7 @@ class ResultTutorInvite extends StatelessWidget {
                       size: 18, color: colors.onPrimaryContainer),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    "LET'S REASON IT THROUGH",
+                    context.l10n.resultLetsReason,
                     style: AppTypography.label
                         .copyWith(color: colors.onPrimaryContainer),
                   ),
@@ -73,22 +74,11 @@ class ResultTutorInvite extends StatelessWidget {
               Text(
                 switch (result.tutorRouteReason) {
                   TutorRouteReason.system =>
-                    'This system of equations may have several solutions — I '
-                        'only show an answer when I can prove it\'s complete, '
-                        'and I can\'t do that here, so I won\'t pretend to. '
-                        'But this is exactly what the tutor is for: we can '
-                        'solve it together and check every step.',
+                    context.l10n.resultTutorReasonSystem,
                   TutorRouteReason.multiPart =>
-                    'This problem asks for more than one thing, so there\'s '
-                        'no single answer I can check by working it '
-                        'backwards — and I won\'t pretend there is. The tutor '
-                        'is the right tool: we can take it one part at a time.',
+                    context.l10n.resultTutorReasonMultiPart,
                   TutorRouteReason.proof =>
-                    "This is a proof-style problem — there's no single answer "
-                        'I can compute and check by working it backwards, so '
-                        'I won’t pretend there is. But this is exactly what '
-                        'the tutor is for: we can build the argument '
-                        'together, one step at a time.',
+                    context.l10n.resultTutorReasonProof,
                 },
                 style: AppTypography.bodyMedium
                     .copyWith(color: colors.onPrimaryContainer),
@@ -103,13 +93,13 @@ class ResultTutorInvite extends StatelessWidget {
 
         // Discussing it with the tutor is the real way forward — make it primary.
         PrimaryButton(
-          label: 'Work through it with the tutor',
+          label: context.l10n.resultWorkThroughTutor,
           icon: Icons.forum_rounded,
           onPressed: onDiscuss,
         ),
         const SizedBox(height: AppSpacing.md),
         SecondaryButton(
-          label: 'Edit the problem',
+          label: context.l10n.resultEditProblem,
           icon: Icons.edit_rounded,
           onPressed: onEdit,
         ),
@@ -133,7 +123,7 @@ class _ProblemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'WHAT I READ',
+            context.l10n.resultWhatIRead,
             style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),

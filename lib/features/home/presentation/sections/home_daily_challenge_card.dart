@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -48,7 +49,7 @@ class HomeDailyChallengeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Today's challenge",
+                  context.l10n.homeTodaysChallenge,
                   style: AppTypography.label.copyWith(color: colors.textMuted),
                 ),
                 const SizedBox(height: 3),
@@ -61,7 +62,7 @@ class HomeDailyChallengeCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   isDone
-                      ? 'Completed today'
+                      ? context.l10n.homeCompletedToday
                       : '${challenge.subtitle} · +${challenge.xpReward} XP',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

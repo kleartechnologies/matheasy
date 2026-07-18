@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -32,13 +33,13 @@ class ProfileUsageSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Free plan usage',
+            context.l10n.profileFreePlanUsage,
             style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.document_scanner_rounded,
-            label: 'Scans',
+            label: context.l10n.profileUsageScans,
             color: emerald,
             used: usage.counts.scansUsed,
             limit: usage.limit(UsageFeature.scan),
@@ -46,7 +47,7 @@ class ProfileUsageSection extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           UsageMeter(
             icon: Icons.forum_rounded,
-            label: 'AI tutor messages',
+            label: context.l10n.profileUsageTutor,
             color: AppColors.secondary,
             used: usage.counts.tutorMessagesUsed,
             limit: usage.limit(UsageFeature.tutorMessage),
@@ -54,7 +55,7 @@ class ProfileUsageSection extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           UsageMeter(
             icon: Icons.fitness_center_rounded,
-            label: 'Practice questions',
+            label: context.l10n.profileUsagePractice,
             color: AppColors.accentAmber,
             used: usage.counts.practiceQuestionsGenerated,
             limit: usage.limit(UsageFeature.practiceQuestion),

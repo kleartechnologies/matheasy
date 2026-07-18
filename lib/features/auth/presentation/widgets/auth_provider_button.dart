@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -40,13 +41,13 @@ class AuthProviderButton extends StatelessWidget {
           context.isDark ? AppColors.white : AppColors.black,
           context.isDark ? AppColors.black : AppColors.white,
           null,
-          'Continue with Apple',
+          context.l10n.authContinueApple,
         ),
       AuthButtonProvider.google => (
           colors.surface,
           colors.textPrimary,
           Border.all(color: colors.border, width: 1.5),
-          'Continue with Google',
+          context.l10n.authContinueGoogle,
         ),
     };
 
@@ -56,7 +57,7 @@ class AuthProviderButton extends StatelessWidget {
       // Announce the in-progress state to assistive tech (the spinner has no
       // text); liveRegion re-reads the label when it flips to loading.
       liveRegion: isLoading,
-      label: isLoading ? 'Signing in…' : label,
+      label: isLoading ? context.l10n.authSigningIn : label,
       child: Pressable(
         onTap: enabled ? onPressed : null,
         borderRadius: AppRadius.pillRadius,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -47,16 +48,17 @@ class _HeaderRow extends StatelessWidget {
       children: [
         Expanded(
           flex: 5,
-          child: Text('COMPARE PLANS', style: labelStyle),
+          child: Text(context.l10n.paywallComparePlans, style: labelStyle),
         ),
         Expanded(
           flex: 3,
-          child: Text('FREE', textAlign: TextAlign.center, style: labelStyle),
+          child: Text(context.l10n.paywallColumnFree,
+              textAlign: TextAlign.center, style: labelStyle),
         ),
         Expanded(
           flex: 3,
           child: Text(
-            'PRO',
+            context.l10n.paywallColumnPro,
             textAlign: TextAlign.center,
             style: AppTypography.label.copyWith(color: AppColors.gold),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/animations/floaty.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../widgets/onboarding_layouts.dart';
 
@@ -10,11 +11,10 @@ class SnapSolvePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: 'Snap Any Math Question',
-      subtitle: 'Point your camera at any problem and get a clear, '
-          'step-by-step answer in seconds.',
-      illustration: _SnapArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingSnapHeadline,
+      subtitle: context.l10n.onboardingSnapSubtitle,
+      illustration: const _SnapArt(),
     );
   }
 }
@@ -33,10 +33,10 @@ class _SnapArt extends StatelessWidget {
         children: [
           Transform.rotate(
             angle: -0.04,
-            child: const MathSolutionCard(
+            child: MathSolutionCard(
               equationTex: r'2x + 5 = 13',
               label: 'DETECTED · 99%',
-              caption: 'Linear equation · one unknown',
+              caption: context.l10n.onboardingSnapCaption,
               answerTex: r'x = 4',
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -52,7 +53,7 @@ class HomeGreeting extends ConsumerWidget {
           borderRadius: AppRadius.pillRadius,
           child: Semantics(
             button: true,
-            label: 'Open profile',
+            label: context.l10n.homeOpenProfile,
             child: SizedBox(
               width: 48,
               height: 48,

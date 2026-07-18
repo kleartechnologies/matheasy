@@ -4,6 +4,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
@@ -63,7 +64,7 @@ class _TutorQuizCardState extends State<TutorQuizCard> {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                'QUICK QUIZ',
+                context.l10n.tutorQuickQuiz,
                 style: AppTypography.label.copyWith(color: AppColors.secondary),
               ),
             ],
@@ -283,7 +284,9 @@ class _Explanation extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  correct ? 'Correct — well done! 🎉' : 'Not quite — but close!',
+                  correct
+                      ? context.l10n.tutorQuizCorrect
+                      : context.l10n.tutorQuizNotQuite,
                   style: AppTypography.caption.copyWith(
                     // Theme-aware "on container" tokens: identical to
                     // successDeep/warningDeep in light mode, but legible on the

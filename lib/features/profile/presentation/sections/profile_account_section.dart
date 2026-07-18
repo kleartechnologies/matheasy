@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../auth/domain/app_user.dart';
 import '../../../settings/presentation/widgets/settings_section.dart';
 import '../../../settings/presentation/widgets/settings_tile.dart';
@@ -23,16 +24,16 @@ class ProfileAccountSection extends StatelessWidget {
         AuthProviderType.guest => Icons.person_outline_rounded,
       };
 
-  String get _memberSince {
+  String _memberSince(BuildContext context) {
     final created = profile.createdAt;
-    if (created == null) return 'Recently';
+    if (created == null) return context.l10n.profileMemberRecently;
     return '${_months[created.month - 1]} ${created.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     return SettingsSection(
-      title: 'Account',
+      title: context.l10n.profileAccountSection,
       children: [
         SettingsTile(
           icon: _providerIcon,
@@ -41,8 +42,8 @@ class ProfileAccountSection extends StatelessWidget {
         ),
         SettingsTile(
           icon: Icons.calendar_month_rounded,
-          title: 'Member since',
-          value: _memberSince,
+          title: context.l10n.profileMemberSince,
+          value: _memberSince(context),
         ),
       ],
     );

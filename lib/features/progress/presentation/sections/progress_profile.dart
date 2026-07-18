@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -77,15 +78,15 @@ class ProgressProfile extends StatelessWidget {
             children: [
               _Total(
                 value: '${overview.questionsSolved}',
-                label: 'Questions',
+                label: context.l10n.progressQuestions,
               ),
               _Total(
                 value: '${overview.sessionsCompleted}',
-                label: 'Sessions',
+                label: context.l10n.progressSessions,
               ),
               _Total(
                 value: '${overview.topicsPracticed}',
-                label: 'Topics',
+                label: context.l10n.progressTopics,
               ),
             ],
           ),
@@ -158,7 +159,7 @@ class _Avatar extends StatelessWidget {
 
     final url = photoUrl;
     return Semantics(
-      label: 'Profile',
+      label: context.l10n.navProfile,
       child: url == null
           ? fallback
           : ClipOval(

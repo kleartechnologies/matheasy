@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -168,7 +169,9 @@ class _VisualStepCardState extends State<VisualStepCard> {
             Row(
               children: [
                 Text(
-                  _expanded ? 'Hide why' : 'Tap to learn',
+                  _expanded
+                      ? context.l10n.solutionHideWhy
+                      : context.l10n.visualTapToLearn,
                   style: AppTypography.caption.copyWith(color: emeraldLabel),
                 ),
                 AnimatedRotation(
@@ -208,7 +211,7 @@ class _HintReveal extends StatelessWidget {
     if (!revealed) {
       return Semantics(
         button: true,
-        label: 'Show hint',
+        label: context.l10n.visualShowHint,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onReveal,
@@ -221,7 +224,7 @@ class _HintReveal extends StatelessWidget {
                     size: 16, color: colors.onWarningContainer),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
-                  'Show hint',
+                  context.l10n.visualShowHint,
                   style: AppTypography.caption
                       .copyWith(color: colors.onWarningContainer),
                 ),
@@ -267,7 +270,7 @@ class VisualKeyIdeasCard extends StatelessWidget {
                   size: 16, color: colors.onPrimaryContainer),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                'KEY IDEAS',
+                context.l10n.visualKeyIdeas,
                 style: AppTypography.label
                     .copyWith(color: colors.onPrimaryContainer),
               ),
@@ -359,7 +362,7 @@ class AskMatheasyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GhostButton(
-      label: 'Ask Matheasy about this step',
+      label: context.l10n.visualAskAboutStep,
       icon: Icons.chat_bubble_outline_rounded,
       expand: true,
       onPressed: onPressed,

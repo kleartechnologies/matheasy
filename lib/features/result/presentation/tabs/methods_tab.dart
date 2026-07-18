@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -21,16 +22,15 @@ class MethodsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (methods.isEmpty) {
-      return const ResultEmpty(
-        message: 'Only one clean method here — sometimes simple is best!',
+      return ResultEmpty(
+        message: context.l10n.methodsEmptyMessage,
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const MatheasyBubble(
-          text: 'Three ways to reach the same answer. Tap one to compare — '
-              'the badge is my exam pick.',
+        MatheasyBubble(
+          text: context.l10n.methodsIntro,
         ),
         const SizedBox(height: AppSpacing.lg),
         for (var i = 0; i < methods.length; i++)
@@ -109,7 +109,9 @@ class _MethodCardState extends State<_MethodCard> {
           Row(
             children: [
               Text(
-                _expanded ? 'Hide details' : 'See how it works',
+                _expanded
+                    ? context.l10n.methodsHideDetails
+                    : context.l10n.methodsSeeHowItWorks,
                 style: AppTypography.caption.copyWith(color: emeraldLabel),
               ),
               AnimatedRotation(
@@ -140,7 +142,7 @@ class _Details extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'STEPS',
+            context.l10n.methodsStepsLabel,
             style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -168,7 +170,7 @@ class _Details extends StatelessWidget {
             ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'GOOD FOR',
+            context.l10n.methodsGoodFor,
             style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -243,7 +245,7 @@ class _RecommendedBadge extends StatelessWidget {
           const Icon(Icons.star_rounded, size: 14, color: AppColors.onGold),
           const SizedBox(width: AppSpacing.xxs),
           Text(
-            'RECOMMENDED',
+            context.l10n.methodsRecommended,
             style: AppTypography.label.copyWith(
               color: AppColors.onGold,
               fontSize: 10,

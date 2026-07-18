@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/widgets/auth_benefit_row.dart';
@@ -22,20 +23,20 @@ class AccountUpgradeBenefits extends StatelessWidget {
           icon: Icons.cloud_done_rounded,
           color:
               context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
-          title: 'Preserve your progress',
-          subtitle: 'Keep your XP, streak and achievements.',
+          title: context.l10n.profileBenefitProgressTitle,
+          subtitle: context.l10n.profileBenefitProgressSubtitle,
         ),
-        const AuthBenefitRow(
+        AuthBenefitRow(
           icon: Icons.sync_rounded,
           color: AppColors.secondary,
-          title: 'Sync future data',
-          subtitle: 'Pick up on any device once sync arrives.',
+          title: context.l10n.profileBenefitSyncTitle,
+          subtitle: context.l10n.profileBenefitSyncSubtitle,
         ),
-        const AuthBenefitRow(
+        AuthBenefitRow(
           icon: Icons.lock_open_rounded,
           color: AppColors.accentAmber,
-          title: 'Unlock future features',
-          subtitle: 'Be first to try new tools as they launch.',
+          title: context.l10n.profileBenefitFeaturesTitle,
+          subtitle: context.l10n.profileBenefitFeaturesSubtitle,
         ),
       ];
 

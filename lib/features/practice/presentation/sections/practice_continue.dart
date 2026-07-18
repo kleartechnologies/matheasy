@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -33,7 +34,7 @@ class PracticeContinue extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Continue practice',
+                  context.l10n.practiceContinueTitle,
                   style: AppTypography.caption.copyWith(
                     color: colors.textSecondary,
                     fontWeight: FontWeight.w700,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../application/onboarding_controller.dart';
 import '../../domain/onboarding_models.dart';
@@ -15,8 +16,8 @@ class DailyGoalPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(onboardingFlowControllerProvider).goal;
     return OnboardingQuestionLayout(
-      question: 'How much would you like to study each day?',
-      subtitle: 'Little and often beats cramming. You can change this anytime.',
+      question: context.l10n.onboardingDailyGoalQuestion,
+      subtitle: context.l10n.onboardingDailyGoalSubtitle,
       options: [
         for (final goal in DailyGoal.values)
           OnboardingOptionTile(

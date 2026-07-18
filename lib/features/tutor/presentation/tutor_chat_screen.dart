@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -105,7 +106,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
 
   void _newChat() {
     ref.read(tutorChatControllerProvider.notifier).reset();
-    _toast('Started a new conversation');
+    _toast(context.l10n.tutorNewConversationStarted);
   }
 
   void _toast(String message) {
@@ -143,14 +144,14 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.tutorBack,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: const _MatheasyAppBarTitle(),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_comment_outlined),
-            tooltip: 'New conversation',
+            tooltip: context.l10n.tutorNewConversation,
             onPressed: _newChat,
           ),
         ],
@@ -163,8 +164,8 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
             TutorChatInput(
               enabled: !session.isTyping,
               onSend: _send,
-              onAttach: () => _toast('Image upload arrives soon.'),
-              onVoice: () => _toast('Voice chat arrives soon.'),
+              onAttach: () => _toast(context.l10n.tutorImageUploadSoon),
+              onVoice: () => _toast(context.l10n.tutorVoiceChatSoon),
             ),
           ],
         ),
@@ -174,10 +175,9 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
 
   Widget _buildThread(TutorSession session) {
     if (session.isEmpty) {
-      return const EmptyState(
-        title: 'Ask Matheasy anything',
-        message:
-            'Snap a photo or type a question and get a clear, step-by-step explanation.',
+      return EmptyState(
+        title: context.l10n.tutorEmptyTitle,
+        message: context.l10n.tutorEmptyMessage,
       );
     }
 
@@ -200,7 +200,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
             padding: const EdgeInsets.only(top: AppSpacing.md),
             child: Semantics(
               liveRegion: true,
-              label: 'Matheasy is typing',
+              label: context.l10n.tutorTyping,
               child: const MatheasyTypingIndicator(),
             ),
           );
@@ -250,7 +250,7 @@ class _MatheasyAppBarTitle extends StatelessWidget {
                 style: AppTypography.title.copyWith(color: colors.textPrimary),
               ),
               Text(
-                'Your AI math tutor',
+                context.l10n.tutorTagline,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.caption.copyWith(

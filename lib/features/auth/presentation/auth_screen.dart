@@ -7,6 +7,7 @@ import '../../../core/animations/app_transitions.dart';
 import '../../../core/animations/floaty.dart';
 import '../../../core/brand/brand.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -94,14 +95,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(
-                    'Learn math with AI',
+                    context.l10n.authTagline,
                     textAlign: TextAlign.center,
                     style: AppTypography.displaySmall
                         .copyWith(color: colors.textPrimary),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    "Welcome to Matheasy! Let's start learning together.",
+                    context.l10n.authWelcome,
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyLarge
                         .copyWith(color: colors.textSecondary),
@@ -141,22 +142,22 @@ class _Benefits extends StatelessWidget {
           color: context.isDark
               ? AppColors.primaryLight
               : AppColors.primaryDark,
-          title: 'Scan questions',
-          subtitle: 'Snap any problem and get a clear, worked solution.',
+          title: context.l10n.authBenefitScanTitle,
+          subtitle: context.l10n.authBenefitScanSubtitle,
         ),
         const SizedBox(height: AppSpacing.lg),
-        const AuthBenefitRow(
+        AuthBenefitRow(
           icon: Icons.auto_awesome_rounded,
           color: AppColors.secondary,
-          title: 'Learn faster',
-          subtitle: 'Matheasy explains the why, at your level, step by step.',
+          title: context.l10n.authBenefitLearnTitle,
+          subtitle: context.l10n.authBenefitLearnSubtitle,
         ),
         const SizedBox(height: AppSpacing.lg),
-        const AuthBenefitRow(
+        AuthBenefitRow(
           icon: Icons.fitness_center_rounded,
           color: AppColors.accentAmber,
-          title: 'Practice smarter',
-          subtitle: 'Targeted practice that adapts as you improve.',
+          title: context.l10n.authBenefitPracticeTitle,
+          subtitle: context.l10n.authBenefitPracticeSubtitle,
         ),
       ],
     );
@@ -210,7 +211,7 @@ class _LegalFootnote extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'By continuing you agree to our',
+          context.l10n.authLegalPrefix,
           textAlign: TextAlign.center,
           style: AppTypography.caption.copyWith(color: colors.textMuted),
         ),
@@ -219,7 +220,7 @@ class _LegalFootnote extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _LegalLink(
-              label: 'Terms',
+              label: context.l10n.authLegalTerms,
               document: LegalDocument.terms,
               style: linkStyle,
             ),
@@ -228,7 +229,7 @@ class _LegalFootnote extends StatelessWidget {
               style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
             _LegalLink(
-              label: 'Privacy Policy',
+              label: context.l10n.authLegalPrivacy,
               document: LegalDocument.privacy,
               style: linkStyle,
             ),

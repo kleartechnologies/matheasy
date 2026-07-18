@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 
@@ -26,7 +27,7 @@ class PracticeMistakeActions extends StatelessWidget {
       children: [
         Expanded(
           child: SecondaryButton(
-            label: 'Ask Matheasy why',
+            label: context.l10n.practiceAskMatheasyWhy,
             icon: Icons.chat_bubble_outline_rounded,
             size: AppButtonSize.medium,
             onPressed: onAskMatheasy,
@@ -35,7 +36,7 @@ class PracticeMistakeActions extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: SecondaryButton(
-            label: 'Show me visually',
+            label: context.l10n.practiceShowVisually,
             icon: Icons.auto_awesome_rounded,
             size: AppButtonSize.medium,
             onPressed: onShowVisual,

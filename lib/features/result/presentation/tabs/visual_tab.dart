@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/backend/functions_client.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../scan/domain/detected_equation.dart';
@@ -59,10 +60,10 @@ class VisualTab extends ConsumerWidget {
           onOpenExplain: onOpenExplain,
         );
     return async.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+      loading: () => Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
         child: LoadingState(
-          message: 'Matheasy is sketching your visual walkthrough…',
+          message: context.l10n.visualLoadingMessage,
           showBrand: true,
         ),
       ),
@@ -125,16 +126,15 @@ class _VisualUnavailable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const ResultEmpty(
-          message: "The visual walkthrough isn't available right now — "
-              'the Explain tab has the full story in the meantime.',
+        ResultEmpty(
+          message: context.l10n.visualUnavailableMessage,
         ),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
               child: SecondaryButton(
-                label: 'Try again',
+                label: context.l10n.visualTryAgain,
                 icon: Icons.refresh_rounded,
                 size: AppButtonSize.medium,
                 onPressed: onRetry,
@@ -143,7 +143,7 @@ class _VisualUnavailable extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: PrimaryButton(
-                label: 'Open Explain',
+                label: context.l10n.visualOpenExplain,
                 icon: Icons.menu_book_rounded,
                 size: AppButtonSize.medium,
                 onPressed: onOpenExplain,

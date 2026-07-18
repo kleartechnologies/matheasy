@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../application/achievement_controller.dart';
@@ -24,7 +25,7 @@ class ProgressAchievements extends ConsumerWidget {
       children: [
         SectionHeader(
           title: 'Achievements · ${state.unlockedCount}/${state.total}',
-          actionLabel: 'See all',
+          actionLabel: context.l10n.progressSeeAll,
           onAction: onSeeAll,
         ),
         const SizedBox(height: AppSpacing.md),

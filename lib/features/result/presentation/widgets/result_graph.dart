@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -45,7 +46,9 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
         children: [
           Semantics(
             button: true,
-            label: _open ? 'Hide graph' : 'Show graph',
+            label: _open
+                ? context.l10n.resultGraphHideLabel
+                : context.l10n.resultGraphShowLabel,
             excludeSemantics: true,
             child: InkWell(
               onTap: () => setState(() => _open = !_open),
@@ -57,7 +60,7 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
                         size: 20, color: emeraldLabel),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      'Graph',
+                      context.l10n.resultGraphTitle,
                       style: AppTypography.bodyMedium.copyWith(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -65,7 +68,9 @@ class _ResultGraphSectionState extends State<ResultGraphSection> {
                     ),
                     const Spacer(),
                     Text(
-                      _open ? 'Hide' : 'Show',
+                      _open
+                          ? context.l10n.resultGraphHide
+                          : context.l10n.resultGraphShow,
                       style:
                           AppTypography.caption.copyWith(color: emeraldLabel),
                     ),

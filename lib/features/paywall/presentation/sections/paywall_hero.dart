@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -44,7 +45,7 @@ class PaywallHero extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          PaywallCopy.headline,
+          context.l10n.paywallHeadline,
           textAlign: TextAlign.center,
           style: AppTypography.displaySmall.copyWith(color: AppColors.white),
         ),

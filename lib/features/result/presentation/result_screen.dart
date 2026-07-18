@@ -211,21 +211,21 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.resultBack,
           onPressed: () => context.pop(),
         ),
-        title: const Text('Solution'),
+        title: Text(context.l10n.resultTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share_rounded),
-            tooltip: 'Share',
-            onPressed: () => _toast('Sharing arrives soon.'),
+            tooltip: context.l10n.resultShare,
+            onPressed: () => _toast(context.l10n.resultSharingSoon),
           ),
         ],
       ),
       body: async.when(
-        loading: () => const LoadingState(
-          message: 'Matheasy is solving your problem…',
+        loading: () => LoadingState(
+          message: context.l10n.resultSolvingMessage,
           showBrand: true,
         ),
         error: (error, _) => _buildSolveError(error),
@@ -238,11 +238,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
               onAskMatheasy: () => _askMatheasy(result),
               onGeneratePractice: () {
                 _selectTab(3);
-                _toast('Fresh practice ready below 👇');
+                _toast(context.l10n.resultPracticeReady);
               },
               onToggleSave: () {
                 setState(() => _saved = !_saved);
-                _toast(_saved ? 'Saved to your library' : 'Removed');
+                _toast(_saved
+                    ? context.l10n.resultSavedToLibrary
+                    : context.l10n.resultRemoved);
               },
             ),
     );
@@ -257,10 +259,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.resultBack,
           onPressed: () => context.pop(),
         ),
-        title: const Text('Solution'),
+        title: Text(context.l10n.resultTitle),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -316,16 +318,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     void retry() => ref.invalidate(resultControllerProvider(widget.equation!));
     return offline
         ? ErrorState(
-            title: "You're offline",
-            message: 'I need a connection to work out a new solution. Your '
-                'saved solutions still open offline — reconnect and try again.',
-            retryLabel: 'Retry',
+            title: context.l10n.resultOfflineTitle,
+            message: context.l10n.resultOfflineMessage,
+            retryLabel: context.l10n.actionRetry,
             onRetry: retry,
           )
         : ErrorState(
-            title: "That one didn't go through",
-            message: "I couldn't work that solution out just now. Give it "
-                'another try.',
+            title: context.l10n.resultSolveErrorTitle,
+            message: context.l10n.resultSolveErrorMessage,
             onRetry: retry,
           );
   }
@@ -526,10 +526,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.resultBack,
           onPressed: () => context.pop(),
         ),
-        title: const Text('Solution'),
+        title: Text(context.l10n.resultTitle),
       ),
       body: Center(
         child: Padding(
@@ -537,13 +537,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const ResultEmpty(
-                message: 'Nothing to solve yet — scan a problem and I will '
-                    'walk you through it.',
+              ResultEmpty(
+                message: context.l10n.resultNoProblemMessage,
               ),
               const SizedBox(height: AppSpacing.md),
               PrimaryButton(
-                label: 'Scan a problem',
+                label: context.l10n.resultScanAProblem,
                 icon: Icons.center_focus_strong_rounded,
                 expand: false,
                 onPressed: () => context.push(AppRoutes.scan),

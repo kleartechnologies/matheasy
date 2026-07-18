@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -71,7 +72,7 @@ class _PurchaseSuccessOverlayState extends State<PurchaseSuccessOverlay>
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    "You're all set!",
+                    context.l10n.paywallAllSet,
                     style: AppTypography.displaySmall
                         .copyWith(color: AppColors.white),
                   ),

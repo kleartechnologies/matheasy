@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -383,7 +384,7 @@ class _Controls extends StatelessWidget {
       children: [
         _RoundIcon(
           icon: Icons.chevron_left_rounded,
-          tooltip: 'Previous step',
+          tooltip: context.l10n.resultPreviousStep,
           onPressed: onBack,
           color: colors.textSecondary,
         ),
@@ -391,7 +392,7 @@ class _Controls extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           _RoundIcon(
             icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            tooltip: playing ? 'Pause' : 'Play',
+            tooltip: playing ? context.l10n.visualPause : context.l10n.visualPlay,
             onPressed: onPlayPause,
             color: emerald,
             filled: true,
@@ -405,7 +406,7 @@ class _Controls extends StatelessWidget {
         ),
         _RoundIcon(
           icon: isLast ? Icons.replay_rounded : Icons.chevron_right_rounded,
-          tooltip: isLast ? 'Replay' : 'Next step',
+          tooltip: isLast ? context.l10n.visualReplay : context.l10n.resultNextStep,
           onPressed: onNext,
           color: emerald,
         ),

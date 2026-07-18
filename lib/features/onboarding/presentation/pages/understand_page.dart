@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../widgets/onboarding_layouts.dart';
@@ -10,11 +11,10 @@ class UnderstandPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: 'Understand Every Step',
-      subtitle: 'Matheasy explains the why behind each step — so it actually '
-          'sticks, not just copies.',
-      illustration: _UnderstandArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingUnderstandHeadline,
+      subtitle: context.l10n.onboardingUnderstandSubtitle,
+      illustration: const _UnderstandArt(),
     );
   }
 }
@@ -24,16 +24,15 @@ class _UnderstandArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: 300,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ChatBubble(text: 'Why do we subtract 5?', isUser: true),
-          SizedBox(height: AppSpacing.md),
+          ChatBubble(text: context.l10n.onboardingUnderstandQuestion, isUser: true),
+          const SizedBox(height: AppSpacing.md),
           MatheasyBubble(
-            text: 'To get 2x on its own we undo the +5 first. Whatever we do '
-                'to one side, we do to the other. 👍',
+            text: context.l10n.onboardingUnderstandAnswer,
           ),
         ],
       ),

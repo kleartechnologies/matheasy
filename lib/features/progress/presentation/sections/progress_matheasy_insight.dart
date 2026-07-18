@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -31,7 +32,7 @@ class ProgressMatheasyInsight extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Matheasy says',
+                  context.l10n.progressMatheasySays,
                   style: AppTypography.label.copyWith(
                     color: colors.onPrimaryContainer,
                   ),

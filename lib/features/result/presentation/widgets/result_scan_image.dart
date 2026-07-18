@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -41,7 +42,7 @@ class ResultScanImage extends StatelessWidget {
                 Icon(Icons.image_outlined, size: 16, color: colors.textMuted),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
-                  'SCANNED PROBLEM',
+                  context.l10n.resultScannedProblem,
                   style: AppTypography.label.copyWith(color: colors.textMuted),
                 ),
                 const Spacer(),
@@ -54,7 +55,7 @@ class ResultScanImage extends StatelessWidget {
             constraints: const BoxConstraints(maxHeight: 260),
             child: Semantics(
               image: true,
-              label: 'The problem you scanned',
+              label: context.l10n.resultScannedImageLabel,
               child: Container(
                 width: double.infinity,
                 color: colors.surfaceMuted,
@@ -118,7 +119,7 @@ class _FullScreenImage extends StatelessWidget {
               shape: const CircleBorder(),
               child: IconButton(
                 icon: const Icon(Icons.close_rounded, color: Colors.white),
-                tooltip: 'Close',
+                tooltip: context.l10n.actionClose,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),

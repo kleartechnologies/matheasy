@@ -8,6 +8,7 @@ import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -44,7 +45,7 @@ class PlaySolutionOverlay extends StatefulWidget {
     return showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Play Solution',
+      barrierLabel: context.l10n.resultPlaySolution,
       barrierColor: context.colors.scrim,
       transitionDuration: AppDurations.medium,
       pageBuilder: (_, _, _) =>
@@ -156,8 +157,10 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                     Row(
                       children: [
                         Text(
-                          _isLast ? 'SOLVED' : 'STEP ${_index + 1} OF '
-                              '${widget.steps.length}',
+                          _isLast
+                              ? context.l10n.resultSolved
+                              : 'STEP ${_index + 1} OF '
+                                  '${widget.steps.length}',
                           style: AppTypography.label.copyWith(
                             color: context.isDark
                                 ? AppColors.primaryLight
@@ -167,7 +170,7 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                         const Spacer(),
                         _CircleButton(
                           icon: Icons.close_rounded,
-                          semanticLabel: 'Close walkthrough',
+                          semanticLabel: context.l10n.resultCloseWalkthrough,
                           onTap: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -269,7 +272,7 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                         if (_index > 0) ...[
                           _CircleButton(
                             icon: Icons.arrow_back_rounded,
-                            semanticLabel: 'Previous step',
+                            semanticLabel: context.l10n.resultPreviousStep,
                             onTap: () => _go(_index - 1),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -278,15 +281,18 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                           icon: _playing
                               ? Icons.pause_rounded
                               : Icons.play_arrow_rounded,
-                          semanticLabel:
-                              _playing ? 'Pause walkthrough' : 'Play walkthrough',
+                          semanticLabel: _playing
+                              ? context.l10n.resultPauseWalkthrough
+                              : context.l10n.resultPlayWalkthroughShort,
                           onTap: _togglePlay,
                           filled: true,
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: _PrimaryPill(
-                            label: _isLast ? 'Got it!' : 'Next step',
+                            label: _isLast
+                                ? context.l10n.resultGotIt
+                                : context.l10n.resultNextStep,
                             icon: _isLast
                                 ? Icons.check_circle_rounded
                                 : Icons.arrow_forward_rounded,

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -197,7 +198,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
       if (!mounted) return;
       setState(() {
         _submitting = false;
-        _error = 'Something went wrong. Please try again.';
+        _error = context.l10n.manualErrorGeneric;
       });
       return;
     }
@@ -225,9 +226,11 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(editMode ? 'Fix the problem' : 'Type a problem'),
+        title: Text(editMode
+            ? context.l10n.manualFixProblem
+            : context.l10n.manualTypeProblem),
         leading: IconButton(
-          tooltip: 'Close',
+          tooltip: context.l10n.actionClose,
           icon: const Icon(Icons.close_rounded),
           onPressed: () => context.pop(),
         ),
@@ -256,7 +259,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
             onBackspace: _backspace,
             onMoveLeft: () => _move(-1),
             onMoveRight: () => _move(1),
-            solveLabel: editMode ? 'Use this' : 'Solve',
+            solveLabel: editMode ? context.l10n.manualUseThis : context.l10n.scanSolve,
             onSolve: canSolve
                 ? (editMode ? _useCorrected : () => unawaited(_solve()))
                 : null,
@@ -276,7 +279,7 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
             Icon(Icons.functions_rounded, size: 44, color: colors.textMuted),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Build your problem with the math keyboard',
+              context.l10n.manualPreviewEmpty,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -290,17 +291,17 @@ class _MathKeyboardState extends State<MathKeyboard> {
   Widget _actionRow(AppSemanticColors colors) {
     return Row(
       children: [
-        _iconKey(Icons.chevron_left_rounded, 'Move left', () {
+        _iconKey(Icons.chevron_left_rounded, context.l10n.keyboardMoveLeft, () {
           HapticsService.selection();
           widget.onMoveLeft();
         }, colors),
         const SizedBox(width: AppSpacing.xs),
-        _iconKey(Icons.chevron_right_rounded, 'Move right', () {
+        _iconKey(Icons.chevron_right_rounded, context.l10n.keyboardMoveRight, () {
           HapticsService.selection();
           widget.onMoveRight();
         }, colors),
         const SizedBox(width: AppSpacing.xs),
-        _iconKey(Icons.backspace_outlined, 'Delete', () {
+        _iconKey(Icons.backspace_outlined, context.l10n.keyboardDelete, () {
           HapticsService.selection();
           widget.onBackspace();
         }, colors),

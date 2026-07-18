@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/pressable.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/haptics_service.dart';
 import '../../../core/session/app_session.dart';
@@ -122,7 +123,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   bottom: AppSpacing.xl,
                 ),
                 child: PrimaryButton(
-                  label: _page == 0 ? 'Get Started' : 'Continue',
+                  label: _page == 0
+                      ? context.l10n.onboardingGetStarted
+                      : context.l10n.actionContinue,
                   trailingIcon: _isLast
                       ? Icons.check_circle_rounded
                       : Icons.arrow_forward_rounded,
@@ -164,7 +167,7 @@ class _TopBar extends StatelessWidget {
           child: skip == null
               ? null
               : GhostButton(
-                  label: 'Skip',
+                  label: context.l10n.onboardingSkip,
                   size: AppButtonSize.small,
                   onPressed: skip,
                 ),
@@ -186,7 +189,7 @@ class _NavIconButton extends StatelessWidget {
     final isBack = icon == Icons.arrow_back_rounded;
     return Semantics(
       button: true,
-      label: isBack ? 'Back' : 'Next',
+      label: isBack ? context.l10n.onboardingBack : context.l10n.actionNext,
       child: Pressable(
         onTap: onTap,
         scale: 0.94,

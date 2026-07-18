@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -111,10 +112,9 @@ class _FallbackScene extends StatelessWidget {
       child: permissionDenied
           ? _CameraUnavailable(
               icon: Icons.no_photography_rounded,
-              title: 'Matheasy needs the camera to scan problems',
-              body: "It's turned off right now. Turn it on in Settings, or "
-                  'pick a photo or type the problem instead.',
-              primaryLabel: 'Open Settings',
+              title: context.l10n.scanCameraDeniedTitle,
+              body: context.l10n.scanCameraDeniedBody,
+              primaryLabel: context.l10n.scanOpenSettings,
               onPrimary: onOpenSettings,
               onRetry: onEnableCamera,
               onType: onType,
@@ -122,9 +122,8 @@ class _FallbackScene extends StatelessWidget {
           : hasError
               ? _CameraUnavailable(
                   icon: Icons.videocam_off_rounded,
-                  title: 'Your camera isn’t available',
-                  body: 'Something’s blocking it on this device. You can still '
-                      'pick a photo or type the problem in.',
+                  title: context.l10n.scanCameraUnavailableTitle,
+                  body: context.l10n.scanCameraUnavailableBody,
                   onRetry: onEnableCamera,
                   onType: onType,
                 )
@@ -193,13 +192,13 @@ class _CameraUnavailable extends StatelessWidget {
                   if (onType != null)
                     _GlassPill(
                       icon: Icons.keyboard_rounded,
-                      label: 'Type it in',
+                      label: context.l10n.scanTypeItIn,
                       onTap: onType!,
                     ),
                   if (onRetry != null)
                     _GlassPill(
                       icon: Icons.refresh_rounded,
-                      label: 'Try again',
+                      label: context.l10n.scanTryAgain,
                       onTap: onRetry!,
                     ),
                 ],

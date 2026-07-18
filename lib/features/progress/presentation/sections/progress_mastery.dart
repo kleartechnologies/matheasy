@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -24,7 +25,7 @@ class ProgressMastery extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'Mastery overview'),
+        SectionHeader(title: context.l10n.progressMasteryOverview),
         const SizedBox(height: AppSpacing.md),
         AppCard(
           padding: const EdgeInsets.all(AppSpacing.sm),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -37,13 +38,12 @@ class _ExplainTabState extends State<ExplainTab> {
       // pretending something is loading (spec §9 — a way forward, not a mood).
       return Column(
         children: [
-          const ResultEmpty(
-            message: 'No write-up for this one — but I can talk you through '
-                'it step by step.',
+          ResultEmpty(
+            message: context.l10n.explainEmptyMessage,
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: 'Ask Matheasy',
+            label: context.l10n.resultAskMatheasy,
             icon: Icons.forum_rounded,
             expand: false,
             onPressed: widget.onAskMatheasy,
@@ -75,7 +75,7 @@ class _ExplainTabState extends State<ExplainTab> {
         ),
         const SizedBox(height: AppSpacing.lg),
         SecondaryButton(
-          label: 'Still stuck? Ask Matheasy',
+          label: context.l10n.explainStillStuck,
           icon: Icons.smart_toy_rounded,
           onPressed: widget.onAskMatheasy,
         ),

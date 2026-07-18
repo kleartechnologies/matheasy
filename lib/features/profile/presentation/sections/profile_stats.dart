@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -60,7 +61,7 @@ class ProfileStatsView extends StatelessWidget {
                 child: StatCard(
                   icon: Icons.local_fire_department_rounded,
                   value: '${stats.streak}',
-                  label: 'Day streak',
+                  label: context.l10n.profileStatStreak,
                   iconColor: AppColors.streak,
                 ),
               ),
@@ -70,7 +71,7 @@ class ProfileStatsView extends StatelessWidget {
                   icon: Icons.emoji_events_rounded,
                   value:
                       '${stats.achievementsUnlocked}/${stats.achievementsTotal}',
-                  label: 'Badges',
+                  label: context.l10n.profileStatBadges,
                   iconColor: AppColors.accentAmber,
                 ),
               ),
@@ -79,7 +80,7 @@ class ProfileStatsView extends StatelessWidget {
                 child: StatCard(
                   icon: Icons.verified_rounded,
                   value: '${stats.topicsMastered}',
-                  label: 'Mastered',
+                  label: context.l10n.profileStatMastered,
                   iconColor: AppColors.success,
                 ),
               ),

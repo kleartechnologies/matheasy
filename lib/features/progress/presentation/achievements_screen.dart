@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
@@ -28,10 +29,10 @@ class AchievementsScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           iconSize: 28,
-          tooltip: 'Back',
+          tooltip: context.l10n.progressBack,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Achievements'),
+        title: Text(context.l10n.progressAchievementsTitle),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(

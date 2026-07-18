@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -361,7 +362,7 @@ class _RevealControls extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Semantics(
             button: true,
-            label: 'Reveal all steps',
+            label: context.l10n.solutionRevealAllSteps,
             excludeSemantics: true,
             child: GestureDetector(
               onTap: onRevealAll,
@@ -372,7 +373,7 @@ class _RevealControls extends StatelessWidget {
                   vertical: AppSpacing.md,
                 ),
                 child: Text(
-                  'Reveal all',
+                  context.l10n.solutionRevealAll,
                   style: AppTypography.button.copyWith(
                     fontSize: 14,
                     color: context.isDark
@@ -517,7 +518,9 @@ class _StepCardState extends State<_StepCard> {
                       Row(
                         children: [
                           Text(
-                            _expanded ? 'Hide why' : 'Why?',
+                            _expanded
+                                ? context.l10n.solutionHideWhy
+                                : context.l10n.solutionWhy,
                             style: AppTypography.caption
                                 .copyWith(color: emeraldLabel),
                           ),
@@ -705,9 +708,9 @@ class _SelfExplainBox extends StatelessWidget {
                 style: AppTypography.bodySmall
                     .copyWith(color: colors.onPrimaryContainer),
                 children: [
-                  const TextSpan(
-                    text: 'Your turn — ',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  TextSpan(
+                    text: context.l10n.solutionYourTurn,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   TextSpan(text: prompt),
                 ],
@@ -829,7 +832,7 @@ class _VisualLearningHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Open Visual Learning',
+      label: context.l10n.solutionOpenVisualLearning,
       excludeSemantics: true,
       child: Pressable(
         onTap: onTap,
@@ -858,19 +861,19 @@ class _VisualLearningHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'VISUAL LEARNING',
+                      context.l10n.resultVisualLearningLabel,
                       style: AppTypography.label
                           .copyWith(color: AppColors.goldLight),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Watch every step come alive',
+                      context.l10n.solutionVisualHeroTitle,
                       style: AppTypography.headingSmall
                           .copyWith(color: AppColors.white),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Understand the solution — not just the final answer.',
+                      context.l10n.solutionVisualHeroSubtitle,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.white.withValues(alpha: 0.78),
                       ),

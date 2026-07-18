@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -80,7 +81,7 @@ class AchievementUnlockOverlay extends StatelessWidget {
                           // was unreadable — gold badges land at 1.63:1 on a
                           // light surface, emerald ones at 2.97:1.
                           Text(
-                            'ACHIEVEMENT UNLOCKED',
+                            context.l10n.progressAchievementUnlocked,
                             style: AppTypography.label.copyWith(
                               color: colors.textMuted,
                             ),
@@ -124,7 +125,7 @@ class AchievementUnlockOverlay extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSpacing.lg),
                           PrimaryButton(
-                            label: 'Awesome!',
+                            label: context.l10n.progressAwesome,
                             onPressed: onDismiss,
                           ),
                         ],

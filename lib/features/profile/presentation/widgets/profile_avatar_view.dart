@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/profile_avatar.dart';
@@ -38,7 +39,7 @@ class ProfileAvatarView extends StatelessWidget {
 
     final url = photoUrl;
     return Semantics(
-      label: 'Profile avatar',
+      label: context.l10n.profileAvatarSemantics,
       image: true,
       excludeSemantics: true,
       child: url == null || url.isEmpty

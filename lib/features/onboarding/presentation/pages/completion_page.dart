@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/onboarding_layouts.dart';
 
@@ -11,10 +12,10 @@ class CompletionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: "You're Ready To Start Learning.",
-      subtitle: 'Matheasy will guide you every step of the way.',
-      illustration: _CompletionArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingCompletionHeadline,
+      subtitle: context.l10n.onboardingCompletionSubtitle,
+      illustration: const _CompletionArt(),
     );
   }
 }

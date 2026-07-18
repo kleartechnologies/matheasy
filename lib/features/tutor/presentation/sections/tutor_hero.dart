@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/floaty.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -23,19 +24,19 @@ class TutorHero extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'How can I help today?',
+          context.l10n.tutorHeroTitle,
           textAlign: TextAlign.center,
           style: AppTypography.displaySmall.copyWith(color: colors.textPrimary),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Ask me anything about math.',
+          context.l10n.tutorHeroSubtitle,
           textAlign: TextAlign.center,
           style: AppTypography.bodyLarge.copyWith(color: colors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xl),
         PrimaryButton(
-          label: 'Ask Matheasy',
+          label: context.l10n.tutorAskMatheasy,
           icon: Icons.forum_rounded,
           expand: false,
           onPressed: onAskMatheasy,

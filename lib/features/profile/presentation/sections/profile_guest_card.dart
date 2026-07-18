@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -53,13 +54,13 @@ class ProfileGuestCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "You're learning as a guest",
+                      context.l10n.profileGuestTitle,
                       style: AppTypography.headingSmall
                           .copyWith(color: colors.textPrimary),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Create a free account to keep your progress safe.',
+                      context.l10n.profileGuestSubtitle,
                       style: AppTypography.bodySmall
                           .copyWith(color: colors.textSecondary),
                     ),
@@ -72,13 +73,13 @@ class ProfileGuestCard extends StatelessWidget {
           const AccountUpgradeBenefits(),
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
-            label: 'Create free account',
+            label: context.l10n.profileCreateFreeAccount,
             icon: Icons.person_add_alt_1_rounded,
             onPressed: onCreateAccount,
           ),
           const SizedBox(height: AppSpacing.sm),
           GhostButton(
-            label: 'Continue learning',
+            label: context.l10n.profileContinueLearning,
             expand: true,
             onPressed: onContinue,
           ),

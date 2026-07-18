@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -32,7 +33,7 @@ class PracticeHeader extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Practice',
+                context.l10n.practiceTitle,
                 style: AppTypography.displaySmall.copyWith(
                   color: colors.textPrimary,
                 ),
@@ -112,7 +113,7 @@ class _LevelBadge extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'LV',
+            context.l10n.practiceLevelShort,
             style: AppTypography.label.copyWith(
               // Full white: at 9px this is small text, so it needs the whole
               // 4.78:1 the emerald affords — a 0.85 alpha drops it under AA.
@@ -140,7 +141,7 @@ class _StreakPill extends StatelessWidget {
     final active = days > 0;
     final colors = context.colors;
     return Semantics(
-      label: active ? '$days day streak' : 'No streak yet',
+      label: active ? '$days day streak' : context.l10n.practiceNoStreak,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

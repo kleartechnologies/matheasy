@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/animations/app_transitions.dart';
 import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -152,7 +153,7 @@ class _Tier1AnimatedTransformationState
           children: [
             Expanded(
               child: SecondaryButton(
-                label: 'Back',
+                label: context.l10n.resultBack,
                 icon: Icons.chevron_left_rounded,
                 size: AppButtonSize.medium,
                 onPressed: _index == 0 ? null : () => _goTo(_index - 1),
@@ -161,7 +162,7 @@ class _Tier1AnimatedTransformationState
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: PrimaryButton(
-                label: _isLast ? 'Replay' : 'Next',
+                label: _isLast ? context.l10n.visualReplay : context.l10n.actionNext,
                 trailingIcon: _isLast
                     ? Icons.replay_rounded
                     : Icons.chevron_right_rounded,
@@ -305,7 +306,9 @@ class _PlayPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: onPressed,
-      tooltip: playing ? 'Pause walkthrough' : 'Play walkthrough',
+      tooltip: playing
+          ? context.l10n.resultPauseWalkthrough
+          : context.l10n.resultPlayWalkthroughShort,
       iconSize: 22,
       // 44px minimum tap target.
       constraints: const BoxConstraints(minWidth: 44, minHeight: 44),

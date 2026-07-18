@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/animations/pressable.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/services/haptics_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -73,9 +74,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         // entitlement isn't on the returned customerInfo. Don't strand the
         // paywall — the isProProvider listener dismisses it the moment the
         // entitlement propagates via RevenueCat's customer-info update.
-        _toast('Confirming your purchase — this can take a moment…');
+        _toast(context.l10n.paywallConfirmingPurchase);
       case PurchaseNothingToRestore():
-        _toast('No previous purchases found to restore.');
+        _toast(context.l10n.paywallNothingToRestore);
       case PurchaseFailure(:final message):
         _toast(message);
       case PurchaseCancelled():
@@ -231,7 +232,7 @@ class _CloseBar extends StatelessWidget {
             borderRadius: AppRadius.pillRadius,
             child: Semantics(
               button: true,
-              label: 'Close',
+              label: context.l10n.actionClose,
               // 48x48 accessible hit area around the 40x40 visual circle.
               child: SizedBox(
                 width: 48,
@@ -287,33 +288,35 @@ class _PlanCards extends ConsumerWidget {
     return Column(
       children: [
         PaywallPlanCard(
-          title: 'Annual Pro',
+          title: context.l10n.paywallPlanAnnual,
           priceString: hasPerMonth
               ? annualPerMonth
               : (annual?.priceString ??
                     SubscriptionPlan.proAnnual.fallbackPrice),
-          periodLabel: hasPerMonth ? '/month' : '/year',
+          periodLabel: hasPerMonth
+              ? context.l10n.paywallPerMonth
+              : context.l10n.paywallPerYear,
           subtitle: PaywallCopy.annualValueLine(annual, monthly),
-          badge: 'BEST VALUE',
+          badge: context.l10n.paywallBadgeBestValue,
           selected: state.selectedPlan == SubscriptionPlan.proAnnual,
           onTap: () => select(SubscriptionPlan.proAnnual),
         ),
         const SizedBox(height: AppSpacing.md),
         PaywallPlanCard(
-          title: 'Monthly Pro',
+          title: context.l10n.paywallPlanMonthly,
           priceString:
               monthly?.priceString ?? SubscriptionPlan.proMonthly.fallbackPrice,
-          periodLabel: '/month',
-          subtitle: 'Everything unlimited, billed monthly',
+          periodLabel: context.l10n.paywallPerMonth,
+          subtitle: context.l10n.paywallMonthlySubtitle,
           selected: state.selectedPlan == SubscriptionPlan.proMonthly,
           onTap: () => select(SubscriptionPlan.proMonthly),
         ),
         const SizedBox(height: AppSpacing.md),
         PaywallPlanCard(
-          title: 'Free',
+          title: context.l10n.paywallPlanFree,
           priceString: 'RM0',
-          periodLabel: 'forever',
-          subtitle: '5 scans · 20 AI tutor messages · 10 practice',
+          periodLabel: context.l10n.paywallForever,
+          subtitle: context.l10n.paywallFreePlanSubtitle,
           selected: state.selectedPlan == SubscriptionPlan.free,
           onTap: () => select(SubscriptionPlan.free),
         ),
@@ -355,7 +358,7 @@ class _ProBenefits extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'What you get with Pro',
+          context.l10n.paywallWhatYouGet,
           style: AppTypography.label.copyWith(
             color: Colors.white.withValues(alpha: 0.6),
           ),
@@ -444,12 +447,12 @@ class _Footer extends StatelessWidget {
       return _FooterShell(
         children: [
           Text(
-            "You're on Matheasy Pro 🎉",
+            context.l10n.paywallAlreadyPro,
             textAlign: TextAlign.center,
             style: AppTypography.title.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: AppSpacing.md),
-          _GoldButton(label: 'Done', onTap: onDone),
+          _GoldButton(label: context.l10n.actionDone, onTap: onDone),
         ],
       );
     }
@@ -463,7 +466,9 @@ class _Footer extends StatelessWidget {
     // TODO(trial): when an intro free-trial offer is added (RevenueCat intro
     //   pricing + eligibility check), switch this to 'Start free trial' and the
     //   headline to trial framing for eligible users.
-    final ctaLabel = isFree ? 'Continue with Free' : 'Unlock Unlimited';
+    final ctaLabel = isFree
+        ? context.l10n.paywallContinueFree
+        : context.l10n.paywallUnlockUnlimited;
 
     return _FooterShell(
       children: [
@@ -481,8 +486,7 @@ class _Footer extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(
           isFree
-              ? 'You can upgrade anytime. Free includes limited scans, AI tutor '
-                    'and practice.'
+              ? context.l10n.paywallFreeDisclosure
               : 'Auto-renews at $priceString/${plan.period} until cancelled. '
                     'Cancel anytime in your store account; payment is charged at '
                     'confirmation.',
@@ -671,7 +675,7 @@ class _RestoreButton extends StatelessWidget {
     return TextButton(
       onPressed: onTap,
       child: Text(
-        loading ? 'Restoring…' : 'Restore purchases',
+        loading ? context.l10n.paywallRestoring : context.l10n.paywallRestore,
         style: AppTypography.bodyMedium.copyWith(
           fontWeight: FontWeight.w700,
           color: Colors.white.withValues(alpha: 0.82),

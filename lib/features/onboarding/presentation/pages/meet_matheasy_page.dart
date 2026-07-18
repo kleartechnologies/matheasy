@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/floaty.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/onboarding_layouts.dart';
 
@@ -11,10 +12,10 @@ class MeetMatheasyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: 'Meet Matheasy',
-      subtitle: 'Your AI Math Coach.',
-      illustration: _MeetMatheasyArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingMeetHeadline,
+      subtitle: context.l10n.onboardingMeetSubtitle,
+      illustration: const _MeetMatheasyArt(),
     );
   }
 }

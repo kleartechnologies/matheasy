@@ -13,6 +13,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/monitoring/logging_service.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -253,6 +254,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       return;
     }
     if (!_allowScanOrPaywall()) return;
+    final captureFailed = context.l10n.scanCaptureFailed;
     setState(() => _capturing = true);
     Uint8List bytes;
     try {
@@ -260,7 +262,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       bytes = await file.readAsBytes();
     } catch (error) {
       LoggingService.warning('Capture failed: $error');
-      _toast("Couldn't take the photo. Try again.");
+      _toast(captureFailed);
       return;
     } finally {
       if (mounted) setState(() => _capturing = false);
@@ -272,6 +274,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   Future<void> _gallery() async {
     if (_capturing || _busy) return;
     if (!_allowScanOrPaywall()) return;
+    final galleryFailed = context.l10n.scanGalleryFailed;
     Uint8List bytes;
     try {
       final file = await _picker.pickImage(
@@ -283,7 +286,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       bytes = await file.readAsBytes();
     } catch (error) {
       LoggingService.warning('Gallery pick failed: $error');
-      _toast("Couldn't open your photos.");
+      _toast(galleryFailed);
       return;
     }
     await _cropAndRecognize(ScanSource.gallery, bytes);
@@ -464,8 +467,8 @@ class _ScanningChrome extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             autoCapture
-                ? 'Hold steady on the question — I’ll capture it'
-                : 'Line up the whole question, then tap to capture',
+                ? context.l10n.scanHintHoldSteady
+                : context.l10n.scanHintLineUp,
             style: AppTypography.bodySmall
                 .copyWith(color: Colors.white.withValues(alpha: 0.75)),
           ),
@@ -514,7 +517,9 @@ class _AutoCaptureToggle extends StatelessWidget {
     return Semantics(
       button: true,
       toggled: enabled,
-      label: enabled ? 'Auto capture on' : 'Auto capture off',
+      label: enabled
+          ? context.l10n.scanAutoCaptureOn
+          : context.l10n.scanAutoCaptureOff,
       excludeSemantics: true,
       child: Pressable(
         onTap: onTap,
@@ -542,7 +547,7 @@ class _AutoCaptureToggle extends StatelessWidget {
                   size: 16, color: color),
               const SizedBox(width: 4),
               Text(
-                enabled ? 'Auto on' : 'Auto off',
+                enabled ? context.l10n.scanAutoOn : context.l10n.scanAutoOff,
                 style: AppTypography.caption
                     .copyWith(color: color, fontWeight: FontWeight.w700),
               ),
@@ -577,18 +582,18 @@ class _TopBar extends StatelessWidget {
           _GlassButton(
             icon: Icons.close_rounded,
             onTap: onClose,
-            label: 'Close scanner',
+            label: context.l10n.scanCloseScanner,
           ),
           const Spacer(),
           Text(
-            'Scan a problem',
+            context.l10n.scanTitle,
             style: AppTypography.title.copyWith(color: AppColors.white),
           ),
           const Spacer(),
           _GlassButton(
             icon: flashOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
             onTap: onFlash,
-            label: flashOn ? 'Turn flash off' : 'Turn flash on',
+            label: flashOn ? context.l10n.scanFlashOff : context.l10n.scanFlashOn,
           ),
         ],
       ),
@@ -623,7 +628,7 @@ class _MatheasyHint extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Point at a whole question — I’ll read it for you.',
+              context.l10n.scanBrandHint,
               style: AppTypography.caption
                   .copyWith(color: AppColors.scannerBackground),
             ),
@@ -658,13 +663,13 @@ class _BottomControls extends StatelessWidget {
         children: [
           _LabeledControl(
             icon: Icons.photo_library_rounded,
-            label: 'Gallery',
+            label: context.l10n.scanGallery,
             onTap: onGallery,
           ),
           _ShutterButton(enabled: canCapture, onTap: onShutter),
           _LabeledControl(
             icon: Icons.keyboard_rounded,
-            label: 'Type it',
+            label: context.l10n.actionTypeIt,
             onTap: onType,
           ),
         ],
@@ -684,7 +689,7 @@ class _ShutterButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: 'Take photo',
+      label: context.l10n.scanTakePhoto,
       excludeSemantics: true,
       child: Opacity(
         opacity: enabled ? 1 : 0.5,
@@ -881,34 +886,32 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onTypeItIn;
 
-  ({IconData icon, String title, String body, String retryLabel}) get _copy =>
+  ({IconData icon, String title, String body, String retryLabel}) _copy(
+          BuildContext context) =>
       switch (kind) {
         ScanErrorKind.couldntRecognize => (
             icon: Icons.image_search_rounded,
-            title: 'That was hard to read',
-            body: 'Line the whole problem up in good light and try again — or '
-                'type it in and I’ll take it from there.',
-            retryLabel: 'Try again',
+            title: context.l10n.scanErrorRecognizeTitle,
+            body: context.l10n.scanErrorRecognizeBody,
+            retryLabel: context.l10n.scanTryAgain,
           ),
         ScanErrorKind.offline => (
             icon: Icons.wifi_off_rounded,
-            title: "You're offline",
-            body: 'Reading a new problem needs a connection. Your saved '
-                'solutions still open offline — reconnect and try again.',
-            retryLabel: 'Retry',
+            title: context.l10n.scanErrorOfflineTitle,
+            body: context.l10n.scanErrorOfflineBody,
+            retryLabel: context.l10n.actionRetry,
           ),
         ScanErrorKind.generic => (
             icon: Icons.refresh_rounded,
-            title: 'That scan didn’t go through',
-            body: 'Something interrupted it. Give it another try, or type the '
-                'problem in instead.',
-            retryLabel: 'Try again',
+            title: context.l10n.scanErrorGenericTitle,
+            body: context.l10n.scanErrorGenericBody,
+            retryLabel: context.l10n.scanTryAgain,
           ),
       };
 
   @override
   Widget build(BuildContext context) {
-    final copy = _copy;
+    final copy = _copy(context);
     return ColoredBox(
       color: AppColors.scannerBackground.withValues(alpha: 0.95),
       child: SafeArea(
@@ -941,7 +944,7 @@ class _ErrorView extends StatelessWidget {
                   children: [
                     _PillButton(
                       icon: Icons.keyboard_rounded,
-                      label: 'Type it in',
+                      label: context.l10n.scanTypeItIn,
                       onTap: onTypeItIn,
                       filled: false,
                     ),

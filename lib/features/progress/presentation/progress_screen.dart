@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -90,7 +91,7 @@ class _Title extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        'Progress',
+        context.l10n.navProgress,
         style: Theme.of(context).textTheme.displaySmall,
       ),
     );

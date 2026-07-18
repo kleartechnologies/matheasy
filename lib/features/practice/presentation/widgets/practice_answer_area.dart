@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -109,7 +110,7 @@ class PracticeAnswerArea extends StatelessWidget {
           style: AppTypography.headingMedium.copyWith(color: colors.textPrimary),
           cursorColor: AppColors.primaryAction,
           decoration: InputDecoration(
-            hintText: 'Type your answer',
+            hintText: context.l10n.practiceTypeAnswer,
             hintStyle: AppTypography.headingMedium.copyWith(
               color: colors.textMuted,
             ),
@@ -196,8 +197,8 @@ class _OptionTile extends StatelessWidget {
     };
 
     final resultSuffix = switch (state) {
-      _OptionState.correct => ', correct answer',
-      _OptionState.wrong => ', your answer, incorrect',
+      _OptionState.correct => context.l10n.practiceOptionCorrectSuffix,
+      _OptionState.wrong => context.l10n.practiceOptionWrongSuffix,
       _ => '',
     };
 

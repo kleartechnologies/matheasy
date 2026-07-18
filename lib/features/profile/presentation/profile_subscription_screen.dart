@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -33,10 +34,10 @@ class ProfileSubscriptionScreen extends ConsumerWidget {
         await ref.read(subscriptionControllerProvider.notifier).restore();
     if (!context.mounted) return;
     final message = switch (result) {
-      PurchaseSuccess() => 'Your Pro subscription has been restored.',
-      PurchaseNothingToRestore() => 'No previous purchases found to restore.',
+      PurchaseSuccess() => context.l10n.profileRestoreSuccess,
+      PurchaseNothingToRestore() => context.l10n.profileRestoreNothing,
       PurchaseFailure(:final message) => message,
-      _ => 'Restore finished.',
+      _ => context.l10n.profileRestoreFinished,
     };
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -46,14 +47,11 @@ class ProfileSubscriptionScreen extends ConsumerWidget {
   Future<void> _manage(BuildContext context) => AppDialog.show<void>(
         context,
         icon: Icons.settings_rounded,
-        title: 'Manage subscription',
+        title: context.l10n.profileManageSubscription,
         message: Theme.of(context).platform == TargetPlatform.iOS
-            ? 'Open the App Store app → tap your profile → Subscriptions to '
-                'change or cancel your plan. Changes sync back automatically.'
-            : 'Open the Play Store app → Menu → Payments & subscriptions → '
-                'Subscriptions to change or cancel your plan. Changes sync back '
-                'automatically.',
-        primaryLabel: 'Got it',
+            ? context.l10n.profileManageIosMessage
+            : context.l10n.profileManageAndroidMessage,
+        primaryLabel: context.l10n.profileGotIt,
       );
 
   @override
@@ -63,7 +61,7 @@ class ProfileSubscriptionScreen extends ConsumerWidget {
     final isPro = status.isPro;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Subscription')),
+      appBar: AppBar(title: Text(context.l10n.profileSubscriptionTitle)),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -91,14 +89,14 @@ class ProfileSubscriptionScreen extends ConsumerWidget {
                 if (isPro)
                   SettingsTile(
                     icon: Icons.tune_rounded,
-                    title: 'Manage subscription',
-                    subtitle: 'Change plan or cancel',
+                    title: context.l10n.profileManageSubscription,
+                    subtitle: context.l10n.profileManageSubtitle,
                     onTap: () => unawaited(_manage(context)),
                   ),
                 SettingsTile(
                   icon: Icons.restore_rounded,
-                  title: 'Restore purchases',
-                  subtitle: 'Recover a subscription bought before',
+                  title: context.l10n.profileRestorePurchases,
+                  subtitle: context.l10n.profileRestoreSubtitle,
                   onTap: () => unawaited(_restore(context, ref)),
                 ),
               ],
@@ -118,14 +116,14 @@ class _ProPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final planName = switch (status.activePlan?.isAnnual) {
-      true => 'Annual Pro',
-      false => 'Monthly Pro',
-      null => 'Matheasy Pro',
+      true => context.l10n.profileAnnualPro,
+      false => context.l10n.profileMonthlyPro,
+      null => context.l10n.profileMatheasyPro,
     };
     final renewLine = status.isCancelledButActive
         ? 'Access until ${_formatDate(status.expiresAt)} · auto-renew off'
         : status.expiresAt == null
-            ? 'Active'
+            ? context.l10n.profileActive
             : 'Renews on ${_formatDate(status.expiresAt)}';
 
     return Container(
@@ -168,8 +166,7 @@ class _ProPlanCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    'There is a billing issue — update your payment method to '
-                    'keep Pro.',
+                    context.l10n.profileBillingIssue,
                     style: AppTypography.caption
                         .copyWith(color: AppColors.goldLight),
                   ),
@@ -220,19 +217,19 @@ class _FreePlanCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Free plan',
+            context.l10n.profileFreePlan,
             style:
                 AppTypography.headingSmall.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Upgrade to Pro for unlimited scans, AI tutor and practice.',
+            context.l10n.profileFreePlanSubtitle,
             style: AppTypography.bodySmall
                 .copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
-            label: 'Upgrade to Pro',
+            label: context.l10n.profileUpgradeToPro,
             icon: Icons.workspace_premium_rounded,
             onPressed: onUpgrade,
           ),
@@ -258,13 +255,13 @@ class _UsageSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your usage',
+            context.l10n.profileYourUsage,
             style: AppTypography.title.copyWith(color: context.colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.document_scanner_rounded,
-            label: 'Scans',
+            label: context.l10n.profileUsageScans,
             color: emerald,
             used: usage.counts.scansUsed,
             limit: usage.limit(UsageFeature.scan),
@@ -272,7 +269,7 @@ class _UsageSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.forum_rounded,
-            label: 'AI tutor messages',
+            label: context.l10n.profileUsageTutor,
             color: AppColors.secondary,
             used: usage.counts.tutorMessagesUsed,
             limit: usage.limit(UsageFeature.tutorMessage),
@@ -280,7 +277,7 @@ class _UsageSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           UsageMeter(
             icon: Icons.fitness_center_rounded,
-            label: 'Practice questions',
+            label: context.l10n.profileUsagePractice,
             color: AppColors.accentAmber,
             used: usage.counts.practiceQuestionsGenerated,
             limit: usage.limit(UsageFeature.practiceQuestion),

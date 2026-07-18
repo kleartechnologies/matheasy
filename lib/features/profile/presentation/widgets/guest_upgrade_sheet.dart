@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -17,7 +18,7 @@ import 'account_upgrade_benefits.dart';
 Future<void> showGuestUpgradeSheet(BuildContext context) {
   return AppBottomSheet.show<void>(
     context,
-    title: 'Create your free account',
+    title: context.l10n.profileCreateAccountSheetTitle,
     child: const _GuestUpgradeSheet(),
   );
 }
@@ -65,7 +66,7 @@ class _GuestUpgradeSheetState extends ConsumerState<_GuestUpgradeSheet> {
         messenger
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text('Welcome! Your progress is saved.')),
+            SnackBar(content: Text(context.l10n.profileGuestUpgradedToast)),
           );
       }
     });
@@ -92,7 +93,7 @@ class _GuestUpgradeSheetState extends ConsumerState<_GuestUpgradeSheet> {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Your progress stays on this device and links to your new account.',
+          context.l10n.profileGuestUpgradeFootnote,
           textAlign: TextAlign.center,
           style: AppTypography.caption.copyWith(color: colors.textMuted),
         ),

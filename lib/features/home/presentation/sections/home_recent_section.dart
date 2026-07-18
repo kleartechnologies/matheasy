@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -22,8 +23,8 @@ class HomeRecentSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: 'Recent',
-          actionLabel: 'See all',
+          title: context.l10n.homeRecent,
+          actionLabel: context.l10n.homeSeeAll,
           onAction: () => context.push(AppRoutes.history),
         ),
         const SizedBox(height: AppSpacing.md),

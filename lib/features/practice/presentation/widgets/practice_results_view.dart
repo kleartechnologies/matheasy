@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -43,7 +44,9 @@ class PracticeResultsView extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          result.isPerfect ? 'Perfect! 🎉' : 'Session complete!',
+          result.isPerfect
+              ? context.l10n.practicePerfect
+              : context.l10n.practiceSessionComplete,
           textAlign: TextAlign.center,
           style: AppTypography.displaySmall.copyWith(color: colors.textPrimary),
         ),
@@ -65,13 +68,13 @@ class PracticeResultsView extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         PrimaryButton(
-          label: 'Keep practicing',
+          label: context.l10n.practiceKeepPracticing,
           icon: Icons.replay_rounded,
           onPressed: onContinue,
         ),
         const SizedBox(height: AppSpacing.md),
         GhostButton(
-          label: 'Done',
+          label: context.l10n.actionDone,
           expand: true,
           onPressed: onDone,
         ),
@@ -110,7 +113,7 @@ class _StatsRow extends StatelessWidget {
             tint: colors.successContainer,
             onTint: colors.onSuccessContainer,
             value: '${result.correct}/${result.total}',
-            label: 'Correct',
+            label: context.l10n.practiceStatCorrect,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -120,7 +123,7 @@ class _StatsRow extends StatelessWidget {
             tint: colors.infoContainer,
             onTint: colors.onInfoContainer,
             value: '${result.accuracyPercent}%',
-            label: 'Accuracy',
+            label: context.l10n.practiceStatAccuracy,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -130,7 +133,7 @@ class _StatsRow extends StatelessWidget {
             tint: colors.xpContainer,
             onTint: colors.onXpContainer,
             value: '+${result.xpEarned}',
-            label: 'XP earned',
+            label: context.l10n.practiceStatXpEarned,
           ),
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -60,7 +61,7 @@ class _TimerPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Semantics(
-      label: 'Untimed practice',
+      label: context.l10n.practiceUntimed,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
@@ -80,7 +81,7 @@ class _TimerPlaceholder extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xxs),
             Text(
-              'No timer',
+              context.l10n.practiceNoTimer,
               style: AppTypography.caption.copyWith(color: colors.textMuted),
             ),
           ],

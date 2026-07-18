@@ -2,6 +2,7 @@ import 'package:crop_your_image/crop_your_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -53,7 +54,7 @@ class _CropScreenState extends State<CropScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text("Couldn't crop that. Try again.")),
+            SnackBar(content: Text(context.l10n.cropFailed)),
           );
     }
   }
@@ -119,11 +120,11 @@ class _Header extends StatelessWidget {
           IconButton(
             onPressed: onClose,
             icon: const Icon(Icons.close_rounded, color: AppColors.white),
-            tooltip: 'Cancel crop',
+            tooltip: context.l10n.cropCancel,
           ),
           const Spacer(),
           Text(
-            'Crop the problem',
+            context.l10n.cropTitle,
             style: AppTypography.title.copyWith(color: AppColors.white),
           ),
           const Spacer(),
@@ -158,7 +159,7 @@ class _Footer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Drag the corners around just the problem.',
+            context.l10n.cropInstruction,
             textAlign: TextAlign.center,
             style: AppTypography.bodySmall
                 .copyWith(color: Colors.white.withValues(alpha: 0.7)),
@@ -168,7 +169,7 @@ class _Footer extends StatelessWidget {
             children: [
               Expanded(
                 child: SecondaryButton(
-                  label: 'Retake',
+                  label: context.l10n.scanRetake,
                   icon: Icons.refresh_rounded,
                   onPressed: processing ? null : onCancel,
                 ),
@@ -177,7 +178,9 @@ class _Footer extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: PrimaryButton(
-                  label: processing ? 'Preparing…' : 'Use photo',
+                  label: processing
+                      ? context.l10n.cropPreparing
+                      : context.l10n.cropUsePhoto,
                   trailingIcon: Icons.arrow_forward_rounded,
                   onPressed: processing ? null : onConfirm,
                 ),

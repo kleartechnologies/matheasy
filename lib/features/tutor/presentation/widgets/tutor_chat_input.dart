@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -87,7 +88,7 @@ class _TutorChatInputState extends State<TutorChatInput> {
         children: [
           _IconAction(
             icon: Icons.add_photo_alternate_outlined,
-            tooltip: 'Upload a question',
+            tooltip: context.l10n.tutorUploadQuestion,
             onTap: widget.onAttach,
           ),
           const SizedBox(width: AppSpacing.xs),
@@ -122,7 +123,7 @@ class _TutorChatInputState extends State<TutorChatInput> {
                       decoration: InputDecoration(
                         isCollapsed: true,
                         border: InputBorder.none,
-                        hintText: 'Ask Matheasy anything…',
+                        hintText: context.l10n.tutorInputHint,
                         hintStyle: AppTypography.bodyMedium.copyWith(
                           color: colors.textMuted,
                         ),
@@ -131,7 +132,7 @@ class _TutorChatInputState extends State<TutorChatInput> {
                   ),
                   _IconAction(
                     icon: Icons.mic_none_rounded,
-                    tooltip: 'Voice input',
+                    tooltip: context.l10n.tutorVoiceInput,
                     onTap: widget.onVoice,
                     dense: true,
                   ),
@@ -204,7 +205,7 @@ class _SendButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: 'Send message',
+      label: context.l10n.tutorSendMessage,
       child: Pressable(
         onTap: enabled ? onTap : null,
         borderRadius: AppRadius.pillRadius,

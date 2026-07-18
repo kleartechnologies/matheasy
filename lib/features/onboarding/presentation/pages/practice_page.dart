@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../widgets/onboarding_layouts.dart';
@@ -10,11 +11,10 @@ class PracticePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const OnboardingIntroLayout(
-      headline: 'Practice Until You Master It',
-      subtitle: 'Unlimited practice, XP, streaks and achievements keep you '
-          'motivated every day.',
-      illustration: _PracticeArt(),
+    return OnboardingIntroLayout(
+      headline: context.l10n.onboardingPracticeHeadline,
+      subtitle: context.l10n.onboardingPracticeSubtitle,
+      illustration: const _PracticeArt(),
     );
   }
 }
@@ -24,21 +24,21 @@ class _PracticeArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: 320,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StreakCard(days: 12),
-          SizedBox(height: AppSpacing.md),
+          const StreakCard(days: 12),
+          const SizedBox(height: AppSpacing.md),
           AchievementCard(
             icon: Icons.workspace_premium_rounded,
-            title: 'Sharp Shooter',
+            title: context.l10n.onboardingAchievementTitle,
             subtitle: '10 correct answers in a row',
             unlocked: true,
           ),
-          SizedBox(height: AppSpacing.lg),
-          XPProgressBar(value: 0.72, label: 'Level 7 · 360 XP to level 8'),
+          const SizedBox(height: AppSpacing.lg),
+          const XPProgressBar(value: 0.72, label: 'Level 7 · 360 XP to level 8'),
         ],
       ),
     );

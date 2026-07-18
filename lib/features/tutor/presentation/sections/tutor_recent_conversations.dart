@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -25,7 +26,7 @@ class TutorRecentConversations extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'Recent conversations'),
+        SectionHeader(title: context.l10n.tutorRecentConversationsTitle),
         const SizedBox(height: AppSpacing.md),
         for (var i = 0; i < conversations.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.md),

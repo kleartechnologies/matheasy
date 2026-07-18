@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -31,7 +32,7 @@ class HomeHero extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What would you like to solve today?',
+            context.l10n.homeHeroPrompt,
             style: AppTypography.headingLarge.copyWith(
               color: AppColors.white,
               height: 1.2,
@@ -44,7 +45,7 @@ class HomeHero extends StatelessWidget {
                 flex: 3,
                 child: _HeroAction(
                   icon: Icons.center_focus_strong_rounded,
-                  label: 'Scan Question',
+                  label: context.l10n.homeHeroScanQuestion,
                   filled: true,
                   onTap: () => context.push(AppRoutes.scan),
                 ),
@@ -54,7 +55,7 @@ class HomeHero extends StatelessWidget {
                 flex: 2,
                 child: _HeroAction(
                   icon: Icons.keyboard_rounded,
-                  label: 'Type',
+                  label: context.l10n.homeHeroType,
                   filled: false,
                   onTap: () => context.push(AppRoutes.manualInput),
                 ),

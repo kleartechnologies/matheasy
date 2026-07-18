@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -166,26 +167,26 @@ class _PracticeSessionScreenState
     });
 
     final state = ref.watch(practiceControllerProvider);
-    final title = widget.request?.displayTitle ?? 'Practice';
+    final title = widget.request?.displayTitle ?? context.l10n.practiceTitle;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
-          tooltip: 'Close',
+          tooltip: context.l10n.actionClose,
           onPressed: _exit,
         ),
-        title: Text(state.isComplete ? 'Results' : title),
+        title: Text(state.isComplete ? context.l10n.practiceResults : title),
       ),
       body: SafeArea(
         top: false,
         child: switch (state.phase) {
-          PracticePhase.loading || PracticePhase.idle => const LoadingState(
-              message: 'Building your session…',
+          PracticePhase.loading || PracticePhase.idle => LoadingState(
+              message: context.l10n.practiceBuildingSession,
               showBrand: true,
             ),
           PracticePhase.error => ErrorState(
-              message: "We couldn't start that session. Please try again.",
+              message: context.l10n.practiceSessionStartError,
               onRetry: _continue,
             ),
           PracticePhase.complete => PracticeResultsView(
@@ -294,28 +295,27 @@ class _PracticeLockedView extends StatelessWidget {
             const MatheasyBrandAvatar(size: 120),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              "You're on a roll!",
+              context.l10n.practiceOnARoll,
               textAlign: TextAlign.center,
               style: AppTypography.headingMedium
                   .copyWith(color: colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              "You've used all your free practice questions. Go Pro for "
-              'unlimited practice tailored to you.',
+              context.l10n.practiceFreeLimitReached,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMedium
                   .copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xl),
             PrimaryButton(
-              label: 'See Pro plans',
+              label: context.l10n.practiceSeeProPlans,
               icon: Icons.workspace_premium_rounded,
               onPressed: onSeePlans,
             ),
             const SizedBox(height: AppSpacing.sm),
             GhostButton(
-              label: 'Maybe later',
+              label: context.l10n.practiceMaybeLater,
               expand: true,
               onPressed: onNotNow,
             ),
@@ -358,12 +358,14 @@ class _ActionBar extends StatelessWidget {
       ),
       child: revealed
           ? PrimaryButton(
-              label: isLastQuestion ? 'See results' : 'Next',
+              label: isLastQuestion
+                  ? context.l10n.practiceSeeResults
+                  : context.l10n.actionNext,
               trailingIcon: Icons.arrow_forward_rounded,
               onPressed: onNext,
             )
           : PrimaryButton(
-              label: 'Check answer',
+              label: context.l10n.practiceCheckAnswer,
               onPressed: canSubmit ? onCheck : null,
             ),
     );

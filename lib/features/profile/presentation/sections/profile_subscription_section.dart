@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/pressable.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -28,11 +29,11 @@ class ProfileSubscriptionSection extends ConsumerWidget {
     final usage = ref.watch(usageSnapshotProvider);
     final remaining = usage.remainingScans;
     final subtitle = remaining <= 0
-        ? "You've used your free scans — go unlimited"
+        ? context.l10n.profileNoScansLeft
         : '$remaining free scans left · unlock unlimited';
 
     return PremiumFeatureTile(
-      title: 'Upgrade to Matheasy Pro',
+      title: context.l10n.profileUpgradeMatheasyPro,
       subtitle: subtitle,
       onTap: open,
     );
@@ -52,7 +53,7 @@ class _ProCard extends StatelessWidget {
       borderRadius: AppRadius.cardRadius,
       child: Semantics(
         button: true,
-        label: 'Matheasy Pro. Manage subscription',
+        label: context.l10n.profileProSemantics,
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
@@ -72,13 +73,13 @@ class _ProCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Matheasy Pro',
+                      context.l10n.profileMatheasyPro,
                       style: AppTypography.title
                           .copyWith(color: AppColors.white),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Unlimited everything · manage plan',
+                      context.l10n.profileProSubtitle,
                       style: AppTypography.bodySmall
                           .copyWith(color: AppColors.emerald100),
                     ),

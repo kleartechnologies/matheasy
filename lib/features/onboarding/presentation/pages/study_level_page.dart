@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../application/onboarding_controller.dart';
 import '../../domain/onboarding_models.dart';
@@ -15,8 +16,8 @@ class StudyLevelPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(onboardingFlowControllerProvider).level;
     return OnboardingQuestionLayout(
-      question: 'What are you studying?',
-      subtitle: 'We tailor every lesson and exam to your level.',
+      question: context.l10n.onboardingStudyLevelQuestion,
+      subtitle: context.l10n.onboardingStudyLevelSubtitle,
       options: [
         for (final level in StudyLevel.values)
           OnboardingOptionTile(
