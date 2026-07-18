@@ -45,6 +45,9 @@ class SegmentedControl extends StatelessWidget {
             borderRadius: AppRadius.mdRadius,
           ),
           child: Stack(
+            // Centre the label Row in the (min-height) track — otherwise it sits
+            // at the default topStart, riding high in the full-height pill.
+            alignment: Alignment.center,
             children: [
               AnimatedPositioned(
                 duration: AppDurations.medium,
@@ -57,7 +60,19 @@ class SegmentedControl extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colors.surface,
                     borderRadius: AppRadius.smRadius,
-                    boxShadow: context.elevation.card,
+                    // A SUBTLE pill shadow. The `card` token (18px blur, 6px
+                    // offset) is sized for full cards and bleeds ~19px past this
+                    // control's 5px track padding — a visible overhang below the
+                    // track. This stays within the padding.
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.isDark
+                            ? const Color(0x33000000)
+                            : const Color(0x140A1F16), // ink @ 8%
+                        blurRadius: 5,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
                   ),
                 ),
               ),

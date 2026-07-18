@@ -18,9 +18,12 @@ import 'matheasy_mark.dart';
 /// contrast: WCAG 1.4.11 exempts logotypes. Functional UI must use
 /// [AppColors.primaryAction] instead.
 ///
-/// This widget is the single source of truth for the icon; the exported
-/// iOS/Android rasters paint the same [MatheasyMarkPainter] at the same
-/// [radiusFraction] / [markFraction] (see `tool/generate_app_icons.dart`).
+/// This is the FLAT vector representation of the icon (a recolorable variant for
+/// Light / Dark / Monochrome, plus the [radiusFraction] / [markFraction] geometry
+/// constants the tooling reads). The SHIPPED launcher icon and the in-app
+/// [MatheasyBrandAvatar] instead render the official rendered artwork
+/// (`brand/matheasy-app-icon-source.png`, with the outline + long shadow) via
+/// `tool/generate_app_icons.dart` — this widget is no longer that raster.
 ///
 /// Pass a solid [background] (e.g. white, ink) for the Light / Dark / Monochrome
 /// variants. Set [rounded] to false to render a full-bleed square — iOS masks

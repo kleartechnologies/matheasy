@@ -97,10 +97,12 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    # The official rendered brand logo (white M + deep-forest outline + long
+    # shadow on the flat-emerald field) — the app-icon artwork, shown in-app by
+    # MatheasyBrandAvatar. The launcher icons are generated separately from
+    # brand/matheasy-app-icon-source.png (see tool/generate_app_icons.dart).
+    - assets/brand/matheasy_app_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

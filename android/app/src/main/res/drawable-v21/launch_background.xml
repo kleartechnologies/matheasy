@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launch splash: the brand mark centred on the brand background. The mark is a
-     single-tone raster tinted at draw time, so @color/launch_mark alone flips it
-     for values-night — one PNG set, not two. -->
+<!-- Launch splash: the official brand tile (emerald field + white M + shadow)
+     centred on the brand background. The tile carries its own colours, so it is
+     NOT tinted — the same raster shows on both the light and values-night
+     backgrounds. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/launch_background" />
 
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image"
-            android:tint="@color/launch_mark" />
+            android:src="@mipmap/launch_image" />
     </item>
 </layer-list>

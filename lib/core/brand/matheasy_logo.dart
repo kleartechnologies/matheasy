@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../extensions/context_extensions.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import 'matheasy_brand_avatar.dart';
 import 'matheasy_mark.dart';
 
 /// Which pieces of the logo to render.
@@ -56,7 +57,8 @@ class MatheasyLogo extends StatelessWidget {
   /// Explicit mark edge length. When set it overrides [size].
   final double? markSize;
 
-  /// Mark color override. Defaults to brand Emerald.
+  /// Mark color override. When set, the mark is the flat recolorable vector in
+  /// this color; when null (default), the mark is the official artwork tile.
   final Color? markColor;
 
   /// Wordmark color override. Defaults to brand ink (or white when [onDark]).
@@ -82,15 +84,31 @@ class MatheasyLogo extends StatelessWidget {
     }
   }
 
+  /// The lockup's mark. By default it is the official artwork tile (the same
+  /// [MatheasyBrandAvatar] the app-icon and in-app presence use), so the wordmark
+  /// lockups now read as [tile] + "Matheasy". An explicit [markColor] falls back
+  /// to the recolorable flat vector [MatheasyMark] (e.g. a monochrome lockup).
+  /// In a lockup the [Row]/[Column] carries the 'Matheasy' semantics, so the
+  /// mark excludes its own; [standalone] keeps it for the mark-only variant.
+  Widget _markWidget(double dim, {required bool standalone}) {
+    if (markColor != null) {
+      return MatheasyMark(
+        size: dim,
+        color: markColor!,
+        semanticLabel: standalone ? 'Matheasy' : null,
+      );
+    }
+    final tile = MatheasyBrandAvatar(size: dim);
+    return standalone ? tile : ExcludeSemantics(child: tile);
+  }
+
   @override
   Widget build(BuildContext context) {
     final dark = onDark ?? context.isDark;
-    final mark = markColor ?? AppColors.primary;
     final word = wordmarkColor ?? (dark ? AppColors.white : AppColors.ink);
     // The accent tints the "easy" half — that is wordmark TEXT, so it takes the
     // legible-as-label emerald (primaryDark on light, 6.83:1), never the 2.97:1
-    // identity tone. The mark beside it still uses full [AppColors.primary]:
-    // there it is brand art, not text.
+    // identity tone.
     final accent = wordmarkAccent
         ? (dark ? AppColors.primaryLight : AppColors.primaryDark)
         : null;
@@ -98,7 +116,7 @@ class MatheasyLogo extends StatelessWidget {
 
     switch (variant) {
       case MatheasyLogoVariant.mark:
-        return MatheasyMark(size: dim, color: mark, semanticLabel: 'Matheasy');
+        return _markWidget(dim, standalone: true);
       case MatheasyLogoVariant.wordmark:
         return _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent);
       case MatheasyLogoVariant.horizontal:
@@ -108,7 +126,7 @@ class MatheasyLogo extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark),
+              _markWidget(dim, standalone: false),
               SizedBox(width: dim * 0.16),
               _Wordmark(fontSize: dim * 0.86, color: word, accentColor: accent),
             ],
@@ -121,7 +139,7 @@ class MatheasyLogo extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MatheasyMark(size: dim, color: mark),
+              _markWidget(dim, standalone: false),
               SizedBox(height: dim * 0.22),
               _Wordmark(fontSize: dim * 0.68, color: word, accentColor: accent),
             ],

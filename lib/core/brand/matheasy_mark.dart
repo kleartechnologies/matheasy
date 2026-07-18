@@ -30,10 +30,14 @@ import '../theme/app_colors.dart';
 /// shadow and the extrusion are deliberately absent — they turn to mud below
 /// ~32px and cannot recolor for dark mode.
 ///
-/// This is the single source of truth for the mark geometry. [MatheasyLogo], the
-/// brand avatar and the app-icon tooling all paint through
-/// [MatheasyMarkPainter], so the mark on the splash screen and the mark on the
-/// App Store icon are the same vector.
+/// This is the single source of truth for the flat mark geometry. [MatheasyLogo]
+/// (the wordmark lockups) and the splash mark paint through [MatheasyMarkPainter].
+///
+/// Note: the shipped **app icon** and the in-app **brand avatar** no longer use
+/// this vector — they show the official rendered artwork (the M with a deep-forest
+/// outline and long shadow on the emerald field; `brand/matheasy-app-icon-source.png`).
+/// The brand system intends that split: the icon carries the 3D treatment, this
+/// flat mark stays recolorable and survives 24px and dark mode.
 class MatheasyMark extends StatelessWidget {
   const MatheasyMark({
     super.key,
