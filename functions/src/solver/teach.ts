@@ -16,7 +16,8 @@
  */
 import { logger } from "firebase-functions/v2";
 
-import { deriveTeachingMeta } from "./classify";
+import { classify, deriveTeachingMeta } from "./classify";
+import { solveDeterministic } from "./deterministic";
 import { JsonCompleter } from "./narrate";
 import {
   CommonMistake,
@@ -24,6 +25,7 @@ import {
   JourneyStage,
   MethodAlternative,
   MethodData,
+  PracticeItem,
   PracticeLadder,
   SolvePayload,
   TeachingCacheDoc,
@@ -181,6 +183,9 @@ function assembleTeaching(
   const takeaway = obj(json.keyTakeaway);
   const stepExtras = parseStepExtras(json.steps);
   const full = depth === "full";
+  // Pro (`full`) only, deterministic (no LLM), and self-gated: undefined for an
+  // unsupported type or if any rung fails the classify/verify/difficulty gate.
+  const practiceLadder = full ? buildPracticeLadder(payload) : undefined;
 
   // Deep-copy methods so the enriched inline fields never mutate the frozen core.
   const methods = payload.methods.map((m) => ({
@@ -241,8 +246,8 @@ function assembleTeaching(
       headline: str(takeaway.headline),
       ...(str(takeaway.detail) ? { detail: str(takeaway.detail) } : {}),
     },
-    // practiceLadder (deterministic, Pro) is a later increment; translation /
-    // decompositionPlan are word-problem / multi-part paths.
+    ...(practiceLadder ? { practiceLadder } : {}),
+    // translation / decompositionPlan are the word-problem / multi-part paths.
   };
 
   // Minimum viability (#2): a degenerate/blank model turn must NOT attach or get
@@ -381,8 +386,119 @@ function parseAlternatives(v: unknown): MethodAlternative[] {
  * rung through `classify()` family-match + a dry-run `verify()` + a difficulty
  * predicate, and re-verifies on tap. Until then it returns undefined.
  */
-export function buildPracticeLadder(): PracticeLadder | undefined {
-  return undefined;
+export function buildPracticeLadder(
+  payload: SolvePayload
+): PracticeLadder | undefined {
+  const generate = LADDER_GENERATORS[payload.problemType];
+  if (!generate) return undefined; // no generator for this type → no ladder
+
+  // Deterministic seed from the problem so the same problem always yields the
+  // same ladder, but different problems vary (no Math.random → testable).
+  const seed = ladderSeed(payload.problemLatex);
+  const ladder = generate(seed);
+
+  // GATE every rung against the engine — the ladder must never ship a problem the
+  // solver can't verify, one in a different family, one that isn't actually
+  // harder/easier, or the SAME problem the student just solved (review F1). A
+  // single failing rung drops the whole ladder (spec §4.5).
+  const normProblem = payload.problemLatex.replace(/\s+/g, "");
+  for (const item of [ladder.easier, ladder.similar, ladder.harder]) {
+    if (item.latex.replace(/\s+/g, "") === normProblem) return undefined; // not the same problem
+    const c2 = classify(item.latex);
+    if (c2.problemType !== payload.problemType) return undefined; // same family
+    const solved = solveDeterministic(c2);
+    if (!solved || !solved.verify()) return undefined; // solves + verifies
+  }
+  if (!matchesDifficulty(ladder)) return undefined;
+  return ladder;
+}
+
+/** A stable non-negative seed from the problem text (a simple char-rolling hash). */
+function ladderSeed(latex: string): number {
+  let h = 0;
+  for (let i = 0; i < latex.length; i++) {
+    h = (h * 31 + latex.charCodeAt(i)) & 0x7fffffff;
+  }
+  return h;
+}
+
+/** The difficulty predicate: easier is a single-step (coeff 1) problem, harder
+ * genuinely raises the sub-skill (a leading coefficient / bigger coefficients).
+ * The generators below already build to this; the check is a belt-and-suspenders
+ * guard so a future generator edit can't silently ship a mis-laddered rung. */
+function matchesDifficulty(l: PracticeLadder): boolean {
+  const coeff = (latex: string): number => {
+    const m = latex.match(/^\s*(\d+)\s*x/);
+    return m ? Number(m[1]) : 1;
+  };
+  // easier's leading coefficient must be 1; harder's must be >= easier's.
+  return coeff(l.easier.latex) === 1 && coeff(l.harder.latex) >= coeff(l.easier.latex);
+}
+
+type LadderGenerator = (seed: number) => PracticeLadder;
+
+const LADDER_GENERATORS: Record<string, LadderGenerator> = {
+  linear_equation: linearLadder,
+  quadratic_equation: quadraticLadder,
+};
+
+/** A small positive integer in [lo, hi], varied deterministically by (seed, salt). */
+function pick(seed: number, salt: number, lo: number, hi: number): number {
+  return lo + ((seed + salt * 7) % (hi - lo + 1));
+}
+
+function rung(latex: string, r: PracticeItem["rung"], skillHint: string): PracticeItem {
+  return { latex, rung: r, skillHint };
+}
+
+/** Linear ladder: equations with KNOWN integer roots (so the gate always
+ * verifies). easier = one step (x + b = c); similar = two steps (mx + b = c);
+ * harder = two steps with a negative constant + bigger coefficient. */
+function linearLadder(seed: number): PracticeLadder {
+  const b1 = pick(seed, 1, 2, 6);
+  const root1 = pick(seed, 2, 2, 8);
+  const m2 = pick(seed, 3, 2, 3);
+  const b2 = pick(seed, 4, 1, 5);
+  const root2 = pick(seed, 5, 2, 7);
+  const m3 = pick(seed, 6, 3, 5);
+  const b3 = pick(seed, 7, 3, 8);
+  const root3 = pick(seed, 8, 2, 6);
+  return {
+    easier: rung(`x + ${b1} = ${b1 + root1}`, "easier", "linear_one_step"),
+    similar: rung(
+      `${m2}x + ${b2} = ${m2 * root2 + b2}`,
+      "similar",
+      "linear_two_step"
+    ),
+    harder: rung(
+      `${m3}x - ${b3} = ${m3 * root3 - b3}`,
+      "harder",
+      "linear_two_step_signs"
+    ),
+  };
+}
+
+/** Quadratic ladder from integer roots (so the gate verifies). easier/similar =
+ * monic factorable x^2 - (r1+r2)x + r1 r2; harder raises the sub-skill to a
+ * LEADING coefficient with a fractional root: (2x - p)(x - q). */
+function quadraticLadder(seed: number): PracticeLadder {
+  const monic = (r1: number, r2: number): string =>
+    `x^2 - ${r1 + r2}x + ${r1 * r2} = 0`;
+  const a1 = pick(seed, 1, 1, 4);
+  const a2 = a1 + pick(seed, 2, 1, 3); // distinct, larger
+  const b1 = pick(seed, 3, 2, 5);
+  const b2 = b1 + pick(seed, 4, 1, 3);
+  const p = 2 * pick(seed, 5, 1, 2) - 1; // odd → fractional root p/2
+  const q = pick(seed, 6, 2, 5);
+  return {
+    easier: rung(monic(a1, a2), "easier", "quadratic_factoring"),
+    similar: rung(monic(b1, b2), "similar", "quadratic_factoring"),
+    harder: rung(
+      `2x^2 - ${2 * q + p}x + ${p * q} = 0`,
+      "harder",
+      "quadratic_leading_coeff"
+    ),
+  };
 }
 
 // ---------------------------------------------------------------------------

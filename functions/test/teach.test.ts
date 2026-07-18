@@ -11,10 +11,12 @@ import {
   extractNumbers,
   generateTeaching,
   methodsAlign,
+  buildPracticeLadder,
 } from "../src/solver/teach";
-import { deriveTeachingMeta } from "../src/solver/classify";
+import { classify, deriveTeachingMeta } from "../src/solver/classify";
+import { solveDeterministic } from "../src/solver/deterministic";
 import { JsonCompleter } from "../src/solver/narrate";
-import { SolvePayload, TeachingLayer } from "../src/solver/types";
+import { PracticeLadder, SolvePayload, TeachingLayer } from "../src/solver/types";
 
 // ---------------------------------------------------------------------------
 // Golden fixture 1 — x^2 - 5x + 6 = 0 (spec §4.2)
@@ -790,6 +792,93 @@ describe("generateTeaching — Pro full depth (Phase 4)", () => {
     const lite = await generateTeaching(completerOf(bad), quadraticCore(), "lite");
     expect(lite).toBeDefined();
     expect(lite!.teaching.depth).toBe("lite");
+  });
+});
+
+describe("buildPracticeLadder — deterministic, gated (Pro)", () => {
+  const payload = (problemType: string, problemLatex: string): SolvePayload => ({
+    schemaVersion: 2,
+    problemLatex,
+    problemType,
+    verified: true,
+    finalAnswer: { latex: "", plain: "" },
+    graph: null,
+    methods: [],
+  });
+
+  // Every rung the ladder ships MUST classify to the same family AND deterministic-
+  // ally solve+verify — the whole point of the gate.
+  function assertGated(ladder: PracticeLadder, problemType: string) {
+    for (const item of [ladder.easier, ladder.similar, ladder.harder]) {
+      const c = classify(item.latex);
+      expect(c.problemType).toBe(problemType);
+      const solved = solveDeterministic(c);
+      expect(solved).not.toBeNull();
+      expect(solved!.verify()).toBe(true);
+    }
+  }
+
+  it("builds a verified linear ladder (easier one-step → harder two-step)", () => {
+    const l = buildPracticeLadder(payload("linear_equation", "2x + 5 = 13"));
+    expect(l).toBeDefined();
+    expect(l!.easier.rung).toBe("easier");
+    expect(l!.easier.latex).toMatch(/^x \+/); // one-step, coefficient 1
+    assertGated(l!, "linear_equation");
+  });
+
+  it("builds a verified quadratic ladder (harder = leading coefficient)", () => {
+    const l = buildPracticeLadder(payload("quadratic_equation", "x^2 - 5x + 6 = 0"));
+    expect(l).toBeDefined();
+    expect(l!.harder.latex).toContain("2x^2"); // a genuine sub-skill bump
+    assertGated(l!, "quadratic_equation");
+  });
+
+  it("returns undefined for an unsupported type (graceful — no ladder)", () => {
+    expect(buildPracticeLadder(payload("statistics", "mean of 1, 2, 3"))).toBeUndefined();
+    expect(
+      buildPracticeLadder(payload("differential_equation", "y' = 2y")),
+    ).toBeUndefined();
+  });
+
+  it("is deterministic — the same problem yields the same ladder", () => {
+    const a = buildPracticeLadder(payload("linear_equation", "3x - 4 = 11"));
+    const b = buildPracticeLadder(payload("linear_equation", "3x - 4 = 11"));
+    expect(a).toEqual(b);
+  });
+
+  it("varies across different problems of the same type", () => {
+    const a = buildPracticeLadder(payload("quadratic_equation", "x^2 - 5x + 6 = 0"));
+    const b = buildPracticeLadder(payload("quadratic_equation", "x^2 - 9x + 20 = 0"));
+    // Same shape, but the concrete rungs differ (seeded by the problem text).
+    expect(a).not.toEqual(b);
+  });
+
+  it("never offers the exact problem just solved (dedup, F1)", () => {
+    // "x + 6 = 10" hashes to a ladder whose easier rung IS itself → the dedup
+    // guard drops the whole ladder rather than hand back the solved problem.
+    expect(
+      buildPracticeLadder(payload("linear_equation", "x + 6 = 10")),
+    ).toBeUndefined();
+  });
+
+  it("FUZZ: a returned ladder is ALWAYS fully gated across many seeds", () => {
+    const problems: [string, string][] = [
+      ...["x + 3 = 8", "2x - 1 = 9", "4x + 7 = 3", "7x - 2 = 40", "x - 5 = 5"].map(
+        (l) => ["linear_equation", l] as [string, string],
+      ),
+      ...[
+        "x^2 - 5x + 6 = 0",
+        "x^2 - 9x + 20 = 0",
+        "x^2 + 2x - 8 = 0",
+        "x^2 - 13x + 42 = 0",
+        "x^2 - 7x + 10 = 0",
+      ].map((l) => ["quadratic_equation", l] as [string, string]),
+    ];
+    for (const [type, latex] of problems) {
+      const l = buildPracticeLadder(payload(type, latex));
+      if (l === undefined) continue; // graceful (no ladder) is allowed
+      assertGated(l, type); // but if it ships one, every rung must be valid
+    }
   });
 });
 
