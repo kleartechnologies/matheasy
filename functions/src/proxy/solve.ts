@@ -20,6 +20,7 @@ import { fraction } from "mathjs";
 import {
   OPENAI_API_KEY,
   OPENAI_MODEL,
+  PRO_ENTITLEMENT_ID,
   REVENUECAT_SECRET_KEY,
   teachingEnabled,
 } from "../config";
@@ -27,6 +28,7 @@ import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
   ensureUserDoc,
+  getEntitlement,
   incrementUsage,
   recordSolveFailure,
 } from "../lib/firestore";
@@ -173,6 +175,10 @@ export const solveEquation = onCall(
         );
       }
       // Cache verified answers only (putCachedSolve no-ops on couldn't-verify).
+      // INVARIANT (review #6): the shared core cache is depth-AGNOSTIC, so it must
+      // be written HERE — before the depth-gated teaching overlay reassigns
+      // `payload` below. Never move this after the overlay, or a Pro user's
+      // full-depth methods would be written to the core and served to every tier.
       await putCachedSolve(latex, payload);
     }
 
@@ -184,19 +190,31 @@ export const solveEquation = onCall(
     if (teachingEnabled() && payload.verified && payload.routeToTutor !== true) {
       try {
         const lang = "en";
-        const cachedTeaching = await getCachedTeaching(latex, "lite", lang);
+        // Server-authoritative depth (spec §9): Pro users get the deeper `full`
+        // teaching layer, free users `lite`. Cached separately per depth, so a
+        // free user can never be served Pro-depth content.
+        const depth: "lite" | "full" =
+          (await getEntitlement(uid)) === PRO_ENTITLEMENT_ID ? "full" : "lite";
+        const cachedTeaching = await getCachedTeaching(latex, depth, lang);
         let tdoc: TeachingCacheDoc | null =
           cachedTeaching === "negative" ? null : cachedTeaching;
         if (!cachedTeaching) {
           // True miss → generate. A deterministic no-teaching (null) is pinned as a
           // negative so we don't re-enrich a reliably-failing problem every solve; a
           // transient failure throws → caught below → v1, NOT negative-cached.
-          const built = await generateTeaching(complete, payload);
+          let built = await generateTeaching(complete, payload, depth);
+          // Pro `full` fails the (stricter, more fields) firewall more often than
+          // `lite`, so a paying user could get LESS teaching than a free one. On a
+          // deterministic full rejection, fall back to a lite layer — cached under
+          // the full key so future Pro solves hit it (not a negative). Review #1.
+          if (!built && depth === "full") {
+            built = await generateTeaching(complete, payload, "lite");
+          }
           if (built) {
             tdoc = built;
-            await putCachedTeaching(latex, built, "lite", lang);
+            await putCachedTeaching(latex, built, depth, lang);
           } else {
-            await putTeachingNegative(latex, "lite", lang);
+            await putTeachingNegative(latex, depth, lang);
           }
         }
         // Overlay only when the cached working still byte-matches the live core —

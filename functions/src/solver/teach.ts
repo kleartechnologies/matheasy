@@ -22,6 +22,7 @@ import {
   CommonMistake,
   DefinedTerm,
   JourneyStage,
+  MethodAlternative,
   MethodData,
   PracticeLadder,
   SolvePayload,
@@ -29,11 +30,15 @@ import {
   TeachingLayer,
 } from "./types";
 
+/** The Pro/Free teaching depth (honest `concept_only` is a separate path). */
+export type EnrichDepth = "lite" | "full";
+
 // ---------------------------------------------------------------------------
 // Scaffolds (filled in later phases; kept here so solve.ts wiring is stable).
 // ---------------------------------------------------------------------------
 
 const ENRICH_MAX_TOKENS = 1600;
+const FULL_MAX_TOKENS = 2600;
 
 /**
  * Produce the (lite) teaching layer for a VERIFIED skeleton via ONE OpenAI call,
@@ -51,7 +56,8 @@ const ENRICH_MAX_TOKENS = 1600;
  */
 export async function generateTeaching(
   complete: JsonCompleter,
-  payload: SolvePayload
+  payload: SolvePayload,
+  depth: EnrichDepth = "lite"
 ): Promise<TeachingCacheDoc | null> {
   // Return contract:
   //   • a doc  → attach + cache it;
@@ -60,19 +66,24 @@ export async function generateTeaching(
   //              cache so a reliably-failing problem is not re-enriched every solve;
   //   • throws → a TRANSIENT completer failure — the caller ships v1 and does NOT
   //              negative-cache, so a later solve can still succeed.
+  //
+  // `depth`: "lite" (Free) authors the base layer; "full" (Pro) ALSO adds the
+  // per-step rule/explanation/commonMistake and method alternatives — the deeper,
+  // Pro-only fields the Phase-3 client renders one tap deeper.
   if (payload.verified !== true || payload.routeToTutor === true) return null;
   // Require a real exam-pick method — never silently anchor teaching to methods[0].
   const pick = payload.methods.find((m) => m.examPick);
   if (!pick || pick.steps.length === 0) return null;
 
   const pivotalIndex = pickPivotalIndex(pick.steps.length);
-  const user = enrichUserMessage(payload, pick, pivotalIndex);
+  const user = enrichUserMessage(payload, pick, pivotalIndex, depth);
+  const maxTokens = depth === "full" ? FULL_MAX_TOKENS : ENRICH_MAX_TOKENS;
 
   let json: Record<string, unknown> | undefined;
   let lastErr: unknown;
   for (let attempt = 0; attempt < 2 && !json; attempt++) {
     try {
-      json = await complete(TEACHING_ENRICH_SYSTEM, user, ENRICH_MAX_TOKENS);
+      json = await complete(TEACHING_ENRICH_SYSTEM, user, maxTokens);
     } catch (err) {
       lastErr = err;
     }
@@ -85,7 +96,7 @@ export async function generateTeaching(
     throw lastErr instanceof Error ? lastErr : new Error("teaching enrich failed");
   }
 
-  const doc = assembleTeaching(payload, pick, pivotalIndex, json);
+  const doc = assembleTeaching(payload, pick, pivotalIndex, json, depth);
   if (!doc) {
     logger.info("generateTeaching.rejected", { problemType: payload.problemType });
     return null;
@@ -121,19 +132,26 @@ function buildJourney(len: number, pivotal: number): JourneyStage[] {
 function enrichUserMessage(
   payload: SolvePayload,
   pick: MethodData,
-  pivotalIndex: number
+  pivotalIndex: number,
+  depth: EnrichDepth
 ): string {
   const meta = deriveTeachingMeta(payload.problemType);
   const steps = pick.steps.map((s, i) => ({
     stepId: `${pick.id}#${i}`,
     after: s.expression,
   }));
+  // For `full`, ground the alternatives in the OTHER methods the engine actually
+  // produced (name only) — the model may add standard ones too.
+  const others = payload.methods.filter((m) => m.id !== pick.id).map((m) => m.name);
   return [
-    `depth: lite   difficulty: ${meta.difficulty}   language: en`,
+    `depth: ${depth}   difficulty: ${meta.difficulty}   language: en`,
     `Problem (LaTeX): ${payload.problemLatex}`,
     `Problem type: ${payload.problemType}`,
     payload.finalAnswer ? `Verified final answer: ${payload.finalAnswer.plain}` : "",
     `Method chosen: ${pick.name}`,
+    depth === "full" && others.length
+      ? `Also-available methods (name only): ${others.join(", ")}`
+      : "",
     pivotalIndex >= 0 ? `Pivotal stepId: ${pick.id}#${pivotalIndex}` : "",
     `Solved steps (math is FINAL — narrate only, key by stepId):`,
     JSON.stringify(steps),
@@ -153,7 +171,8 @@ function assembleTeaching(
   payload: SolvePayload,
   pick: MethodData,
   pivotalIndex: number,
-  json: Record<string, unknown>
+  json: Record<string, unknown>,
+  depth: EnrichDepth
 ): TeachingCacheDoc | undefined {
   const meta = deriveTeachingMeta(payload.problemType);
   const header = obj(json.header);
@@ -161,6 +180,7 @@ function assembleTeaching(
   const concept = obj(json.concept);
   const takeaway = obj(json.keyTakeaway);
   const stepExtras = parseStepExtras(json.steps);
+  const full = depth === "full";
 
   // Deep-copy methods so the enriched inline fields never mutate the frozen core.
   const methods = payload.methods.map((m) => ({
@@ -178,11 +198,21 @@ function assembleTeaching(
         const prompt = str(extra?.selfExplainPrompt);
         if (prompt) s.selfExplainPrompt = prompt;
       }
+      // Pro (`full`) only: the deeper per-step fields. Ignored for `lite` even if
+      // the model returned them, so a free user never gets Pro depth.
+      if (full) {
+        const rule = str(extra?.rule);
+        const explanation = str(extra?.explanation);
+        const commonMistake = str(extra?.commonMistake);
+        if (rule) s.rule = rule;
+        if (explanation) s.explanation = explanation;
+        if (commonMistake) s.commonMistake = commonMistake;
+      }
     });
   }
 
   const teaching: TeachingLayer = {
-    depth: "lite",
+    depth,
     header: {
       category: meta.category, // ENGINE
       subcategory: str(header.subcategory),
@@ -201,14 +231,18 @@ function assembleTeaching(
       body: str(concept.body),
       definedTerms: parseDefinedTerms(concept.definedTerms),
     },
-    methodRationale: { alternatives: [] }, // Pro (`full`) fills this — Phase 4
+    // Pro (`full`) only — free users get no method comparison.
+    methodRationale: {
+      alternatives: full ? parseAlternatives(json.methodRationale) : [],
+    },
     journey: buildJourney(pick.steps.length, pivotalIndex),
     commonMistakes: parseMistakes(json.commonMistakes),
     keyTakeaway: {
       headline: str(takeaway.headline),
       ...(str(takeaway.detail) ? { detail: str(takeaway.detail) } : {}),
     },
-    // No practiceLadder / translation / decompositionPlan in Phase-1 lite.
+    // practiceLadder (deterministic, Pro) is a later increment; translation /
+    // decompositionPlan are word-problem / multi-part paths.
   };
 
   // Minimum viability (#2): a degenerate/blank model turn must NOT attach or get
@@ -250,13 +284,15 @@ ABSOLUTE RULES (a violation discards your whole output):
 7. selfExplainPrompt: ONLY for the one pivotal step id I flag, write a short QUESTION the student answers before they see the reasoning (e.g. "Which pair of numbers multiplies to 6 and adds to -5?"). A question only — never the answer. Leave it "" for every other step.
 8. operationSymbol: a tiny transform chip for a step ("− 5", "×2", "factor") or "" — never a full expression.
 9. givens: restate ONLY what the problem gives (its numbers/relations). Introduce NO new number.
+10. DEPTH — I tell you depth: "lite" or "full". For "lite", leave every step's "rule"/"explanation"/"commonMistake" as "" and "methodRationale.alternatives" as []. For "full", FILL them: rule = the named property/law that makes THIS step valid (≤6 words, e.g. "Zero-product property"); explanation = one plain sentence on what changed at this step and why; commonMistake = the specific slip a student makes AT THIS step; methodRationale.alternatives = 1-2 OTHER named methods, each with WHEN it is the better choice (conditional knowledge — a property of the problem, never a speed claim).
 
 Return ONLY a JSON object (no prose, no markdown) of EXACTLY this shape:
 {
   "header": { "subcategory": "...", "learningObjective": "...", "whyMethodChosen": "..." },
   "overview": { "asked": "...", "goal": "...", "givens": ["restate each given"], "predictionPrompt": "a one-tap question inviting a guess before the answer" },
   "concept": { "body": "first-principles explanation a newcomer could follow", "definedTerms": [ { "term": "...", "plain": "..." } ] },
-  "steps": [ { "stepId": "<echo the id>", "operationSymbol": "<chip or ''>", "selfExplainPrompt": "<question ONLY on the pivotal step, else ''>" } ],
+  "methodRationale": { "alternatives": [ { "name": "other method", "whenBetter": "when it is the better choice (full only)" } ] },
+  "steps": [ { "stepId": "<echo the id>", "operationSymbol": "<chip or ''>", "selfExplainPrompt": "<question ONLY on the pivotal step, else ''>", "rule": "<named property, full only, else ''>", "explanation": "<plain what-changed, full only, else ''>", "commonMistake": "<slip at THIS step, full only, else ''>" } ],
   "commonMistakes": [ { "mistake": "...", "whyTempting": "...", "fix": "..." } ],
   "keyTakeaway": { "headline": "one memorable rule", "detail": "optional one-sentence expansion" }
 }
@@ -267,6 +303,10 @@ Provide exactly one step object per input step, same order, same stepId.`;
 interface StepExtra {
   operationSymbol?: unknown;
   selfExplainPrompt?: unknown;
+  // Pro (`full`) only:
+  rule?: unknown;
+  explanation?: unknown;
+  commonMistake?: unknown;
 }
 
 function obj(v: unknown): Record<string, unknown> {
@@ -317,6 +357,21 @@ function parseMistakes(v: unknown): CommonMistake[] {
     const fix = str(o.fix);
     if (mistake && fix) out.push({ mistake, whyTempting, fix });
     if (out.length === 3) break;
+  }
+  return out;
+}
+
+/** Method alternatives from `methodRationale.alternatives` (Pro `full` only). */
+function parseAlternatives(v: unknown): MethodAlternative[] {
+  const alts = obj(v).alternatives;
+  if (!Array.isArray(alts)) return [];
+  const out: MethodAlternative[] = [];
+  for (const raw of alts) {
+    const a = obj(raw);
+    const name = str(a.name);
+    const whenBetter = str(a.whenBetter);
+    if (name) out.push({ name, whenBetter });
+    if (out.length === 2) break;
   }
   return out;
 }
@@ -424,6 +479,18 @@ export function validateTeaching(payload: SolvePayload, t: TeachingLayer): boole
 
   // 5) A ladder only ships on a `full` (Pro) payload.
   if (t.practiceLadder && t.depth !== "full") return false;
+
+  // 6) Symmetric to (5): a `lite` layer must carry NO Pro-only fields (the deeper
+  //    per-step fields + method alternatives). The assembler already gates these
+  //    on depth, so this is defense-in-depth against a future refactor (review #3).
+  if (t.depth === "lite") {
+    if (t.methodRationale.alternatives.length > 0) return false;
+    for (const m of payload.methods) {
+      for (const s of m.steps) {
+        if (s.rule || s.explanation || s.commonMistake) return false;
+      }
+    }
+  }
 
   return true;
 }

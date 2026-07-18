@@ -716,6 +716,96 @@ describe("generateTeaching — Phase 1 enrichment", () => {
   });
 });
 
+/** A `full`-depth enrichment: the lite response + the Pro-only deeper fields. */
+function validFullEnrich(): Record<string, unknown> {
+  const base = validEnrich();
+  const steps = base.steps as Array<Record<string, unknown>>;
+  steps[1].rule = "Sum-product factoring";
+  steps[1].explanation =
+    "The pair multiplying to 6 and adding to -5 is -2 and -3.";
+  steps[1].commonMistake = "Choosing the wrong signs.";
+  base.methodRationale = {
+    alternatives: [
+      {
+        name: "Quadratic Formula",
+        whenBetter: "When it does not factor with whole numbers.",
+      },
+    ],
+  };
+  return base;
+}
+
+describe("generateTeaching — Pro full depth (Phase 4)", () => {
+  it("full depth attaches deeper per-step fields + method alternatives", async () => {
+    const doc = await generateTeaching(
+      completerOf(validFullEnrich()),
+      quadraticCore(),
+      "full",
+    );
+    expect(doc).toBeDefined();
+    expect(doc!.teaching.depth).toBe("full");
+    const pick = doc!.methods.find((m) => m.examPick)!;
+    expect(pick.steps[1].rule).toBe("Sum-product factoring");
+    expect(pick.steps[1].explanation).toBeTruthy();
+    expect(pick.steps[1].commonMistake).toBe("Choosing the wrong signs.");
+    expect(doc!.teaching.methodRationale.alternatives).toHaveLength(1);
+    expect(doc!.teaching.methodRationale.alternatives[0].name).toBe(
+      "Quadratic Formula",
+    );
+  });
+
+  it("lite IGNORES the deeper fields even if the model returns them (no Pro leak)", async () => {
+    const doc = await generateTeaching(
+      completerOf(validFullEnrich()),
+      quadraticCore(),
+      "lite",
+    );
+    expect(doc).toBeDefined();
+    expect(doc!.teaching.depth).toBe("lite");
+    const pick = doc!.methods.find((m) => m.examPick)!;
+    expect(pick.steps[1].rule).toBeUndefined();
+    expect(pick.steps[1].explanation).toBeUndefined();
+    expect(pick.steps[1].commonMistake).toBeUndefined();
+    expect(doc!.teaching.methodRationale.alternatives).toHaveLength(0);
+  });
+
+  it("the firewall still scrubs a foreign number in a full-depth step field", async () => {
+    const bad = validFullEnrich();
+    (bad.steps as Array<Record<string, unknown>>)[1].explanation =
+      "This step always equals 42.";
+    expect(
+      await generateTeaching(completerOf(bad), quadraticCore(), "full"),
+    ).toBeNull();
+  });
+
+  it("a response that fails FULL still passes as LITE (the lite-fallback rationale, #1)", async () => {
+    // A foreign number lives ONLY in a full-only field (explanation).
+    const bad = validFullEnrich();
+    (bad.steps as Array<Record<string, unknown>>)[1].explanation =
+      "This step always equals 42.";
+    // full rejects it (the explanation is applied + scrubbed)...
+    expect(await generateTeaching(completerOf(bad), quadraticCore(), "full")).toBeNull();
+    // ...but lite ignores explanation entirely, so it still produces a doc — which
+    // is exactly the lite fallback solve.ts serves a Pro user instead of nothing.
+    const lite = await generateTeaching(completerOf(bad), quadraticCore(), "lite");
+    expect(lite).toBeDefined();
+    expect(lite!.teaching.depth).toBe("lite");
+  });
+});
+
+describe("validateTeaching — depth symmetry (#3)", () => {
+  it("rejects a lite layer that carries Pro-only fields", () => {
+    // The quadratic fixture is `full` (step rules + alternatives). Flipping it to
+    // lite (minus the ladder, which the ladder⇒full guard would catch first) must
+    // be rejected — lite may not carry Pro-only per-step fields or alternatives.
+    const p = withTeaching(quadraticFixture(), (t) => {
+      t.depth = "lite";
+      t.practiceLadder = undefined;
+    });
+    expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(false);
+  });
+});
+
 describe("methodsAlign — cross-cache staleness guard (#5)", () => {
   it("accepts identical methods and rejects a diverged expression", () => {
     const a = quadraticFixture().methods;
