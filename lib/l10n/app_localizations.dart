@@ -1094,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'You\'re all set!'**
   String get paywallAllSet;
 
+  /// No description provided for @paywallTestimonialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What learners say'**
+  String get paywallTestimonialsTitle;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:

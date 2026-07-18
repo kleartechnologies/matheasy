@@ -111,6 +111,12 @@ flutter:
     # brand/matheasy-app-icon-source.png (see tool/generate_app_icons.dart).
     - assets/brand/matheasy_app_icon.png
 
+    # Testimonial portraits shown in the paywall's "What learners say" carousel.
+    # Downscaled to 480px (rendered as ~56px circular avatars).
+    - assets/testimonials/sarah_l.png
+    - assets/testimonials/vikram.png
+    - assets/testimonials/lisa_m.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

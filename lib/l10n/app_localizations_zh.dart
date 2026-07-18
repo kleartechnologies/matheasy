@@ -503,6 +503,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallAllSet => '全部就绪！';
 
   @override
+  String get paywallTestimonialsTitle => '学习者怎么说';
+
+  @override
   String get profileTitle => '个人资料';
 
   @override
@@ -2065,6 +2068,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get paywallAllSet => '全部就绪！';
 
   @override
+  String get paywallTestimonialsTitle => '学习者怎么说';
+
+  @override
   String get profileTitle => '个人资料';
 
   @override
@@ -3625,6 +3631,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get paywallAllSet => '一切就緒！';
+
+  @override
+  String get paywallTestimonialsTitle => '學習者怎麼說';
 
   @override
   String get profileTitle => '個人檔案';

@@ -522,6 +522,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallAllSet => 'You\'re all set!';
 
   @override
+  String get paywallTestimonialsTitle => 'What learners say';
+
+  @override
   String get profileTitle => 'Profile';
 
   @override

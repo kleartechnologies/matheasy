@@ -526,6 +526,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get paywallAllSet => 'Semuanya sedia!';
 
   @override
+  String get paywallTestimonialsTitle => 'Kata pelajar';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

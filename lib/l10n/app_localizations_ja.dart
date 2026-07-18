@@ -508,6 +508,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallAllSet => '準備完了！';
 
   @override
+  String get paywallTestimonialsTitle => '学習者の声';
+
+  @override
   String get profileTitle => 'プロフィール';
 
   @override

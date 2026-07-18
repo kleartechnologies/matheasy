@@ -523,6 +523,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get paywallAllSet => 'Semua siap!';
 
   @override
+  String get paywallTestimonialsTitle => 'Kata para pelajar';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

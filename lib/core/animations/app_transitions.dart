@@ -111,10 +111,20 @@ class _EntranceAnimatorState extends State<_EntranceAnimator>
   late final Animation<double> _animation =
       CurvedAnimation(parent: _controller, curve: widget.curve);
   Timer? _delayTimer;
+  bool _started = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    // Honour reduced-motion (accessibility setting or OS), exactly as [Floaty]
+    // does: skip the entrance tween and show the final state immediately, so a
+    // staggered reveal never becomes a barrier to users who opted out of motion.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.value = 1;
+      return;
+    }
     if (widget.delay == Duration.zero) {
       _controller.forward();
     } else {

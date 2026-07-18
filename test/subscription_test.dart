@@ -19,6 +19,7 @@ import 'package:matheasy/features/auth/domain/app_user.dart';
 import 'package:matheasy/features/paywall/application/paywall_controller.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_copy.dart';
 import 'package:matheasy/features/paywall/presentation/paywall_screen.dart';
+import 'package:matheasy/features/paywall/presentation/sections/paywall_testimonials.dart';
 import 'package:matheasy/features/practice/application/practice_controller.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
@@ -477,6 +478,53 @@ void main() {
       expect(find.text('Restore purchases'), findsOneWidget);
       // Store-required disclosure stays intact and keeps the price visible.
       expect(find.textContaining('Auto-renews at'), findsOneWidget);
+    });
+
+    testWidgets('renders the learner testimonials carousel', (tester) async {
+      await pumpPaywall(tester);
+      // The section is the last ListView child, so scroll it into view (it's
+      // built lazily, below the fold on the test surface).
+      await tester.scrollUntilVisible(
+        find.text('What learners say'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      // The social-proof section: its localized eyebrow + a swipeable carousel.
+      // (Asserts on stable UI chrome, not the placeholder quote copy, which is
+      // slated to be replaced with real testimonials.)
+      expect(find.text('What learners say'), findsOneWidget);
+      expect(find.byType(PageView), findsOneWidget);
+    });
+
+    testWidgets('every testimonial card lays out without overflow (narrow)',
+        (tester) async {
+      // Render the carousel in isolation on a narrow surface — the widest the
+      // real quotes have to wrap — and swipe through EVERY card (PageView.builder
+      // lazily builds pages, so the longest quote is only exercised once swiped
+      // to). Any card overflowing its fixed-height cell throws during layout.
+      await tester.binding.setSurfaceSize(const Size(360, 640));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            backgroundColor: Color(0xFF041A0F), // AppColors.premiumDeep
+            body: Padding(
+              padding: EdgeInsets.all(20),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: PaywallTestimonials(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      for (var i = 0; i < 2; i++) {
+        await tester.fling(find.byType(PageView), const Offset(-400, 0), 1200);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      }
     });
 
     testWidgets('purchasing shows the success celebration', (tester) async {

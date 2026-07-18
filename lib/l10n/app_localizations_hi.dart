@@ -522,6 +522,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallAllSet => 'आप पूरी तरह तैयार हैं!';
 
   @override
+  String get paywallTestimonialsTitle => 'शिक्षार्थी क्या कहते हैं';
+
+  @override
   String get profileTitle => 'प्रोफ़ाइल';
 
   @override

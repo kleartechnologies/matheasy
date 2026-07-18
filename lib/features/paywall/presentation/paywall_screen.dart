@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/animations/app_transitions.dart';
 import '../../../core/animations/pressable.dart';
 import '../../../core/localization/l10n_extension.dart';
 import '../../../core/services/haptics_service.dart';
@@ -20,6 +21,7 @@ import '../application/paywall_controller.dart';
 import 'paywall_copy.dart';
 import 'sections/paywall_comparison.dart';
 import 'sections/paywall_hero.dart';
+import 'sections/paywall_testimonials.dart';
 import 'widgets/paywall_plan_card.dart';
 import 'widgets/purchase_success_overlay.dart';
 
@@ -174,17 +176,37 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           AppSpacing.lg,
                         ),
                         children: [
-                          PaywallHero(trigger: widget.trigger),
+                          // A gentle, staggered rise on open makes the paywall
+                          // feel alive without any ambient motion; each section
+                          // enters ~80ms after the one above. Honours
+                          // reduced-motion (shows instantly) via AppTransitions.
+                          AppTransitions.slideUp(
+                            child: PaywallHero(trigger: widget.trigger),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
-                          const _ProBenefits(),
+                          AppTransitions.slideUp(
+                            delay: const Duration(milliseconds: 80),
+                            child: const _ProBenefits(),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
-                          _PlanCards(state: state),
+                          AppTransitions.slideUp(
+                            delay: const Duration(milliseconds: 160),
+                            child: _PlanCards(state: state),
+                          ),
                           const SizedBox(height: AppSpacing.xl),
-                          const PaywallComparison(),
-                          // TODO(social-proof): a real testimonials / rating
-                          //   section (App/Play Store reviews or real beta
-                          //   feedback + real rating & user count) slots in here.
-                          //   Never fabricate reviews, ratings or usage stats.
+                          AppTransitions.slideUp(
+                            delay: const Duration(milliseconds: 240),
+                            child: const PaywallComparison(),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          // Social proof — real learner testimonials. Only ever
+                          //   edit these to other genuine, attributable quotes;
+                          //   never fabricate reviews, ratings or usage stats
+                          //   (App Store 2.3.1). See PaywallTestimonials.
+                          AppTransitions.slideUp(
+                            delay: const Duration(milliseconds: 320),
+                            child: const PaywallTestimonials(),
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                         ],
                       ),

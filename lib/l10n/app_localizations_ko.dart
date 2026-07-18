@@ -510,6 +510,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallAllSet => '모든 준비가 끝났어요!';
 
   @override
+  String get paywallTestimonialsTitle => '학습자의 후기';
+
+  @override
   String get profileTitle => '프로필';
 
   @override
