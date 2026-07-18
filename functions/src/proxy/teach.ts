@@ -32,18 +32,26 @@ import {
   putTeachingNegative,
 } from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
+import { classify } from "../solver/classify";
 import { JsonCompleter } from "../solver/narrate";
-import { generateTeaching, methodsAlign } from "../solver/teach";
+import {
+  generateHonestTeaching,
+  generateTeaching,
+  methodsAlign,
+} from "../solver/teach";
 
 interface EnrichRequest {
   latex?: string;
+  /** True for a routeToTutor problem (proof/conceptual/multi-part): teach the
+   * APPROACH (concept_only), since there's no verified core to enrich. */
+  honest?: boolean;
 }
 
 export const enrichTeaching = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
-    const { latex } = (request.data ?? {}) as EnrichRequest;
+    const { latex, honest } = (request.data ?? {}) as EnrichRequest;
     if (!latex || typeof latex !== "string") {
       throw new HttpsError(
         "invalid-argument",
@@ -56,18 +64,6 @@ export const enrichTeaching = onCall(
     // Feature-flagged; a client that calls this while it's off just gets no layer.
     if (!teachingEnabled()) return { teaching: null };
 
-    // The verified core must already be cached by the preceding solveEquation.
-    // No cache → nothing to teach here (we never re-solve on the teaching path).
-    const core = await getCachedSolve(latex);
-    if (!core || core.verified !== true || core.routeToTutor === true) {
-      return { teaching: null };
-    }
-    const payload = { ...core, problemLatex: latex };
-
-    const lang = "en";
-    const depth: "lite" | "full" =
-      (await getEntitlement(uid)) === PRO_ENTITLEMENT_ID ? "full" : "lite";
-
     const complete: JsonCompleter = (system, user, maxTokens) => {
       const client = createOpenAI(OPENAI_API_KEY.value());
       return chatJson<Record<string, unknown>>(
@@ -78,6 +74,38 @@ export const enrichTeaching = onCall(
         { temperature: 0.2, maxTokens }
       );
     };
+
+    // HONEST path: a routeToTutor problem (proof/conceptual/multi-part) has NO
+    // verified core to enrich — classify it and teach the APPROACH (concept_only,
+    // no answer). Not cached (spec §4.6). Confirm it really is unsolvable, so a
+    // solvable problem can never be honest-taught by a spoofed flag.
+    if (honest === true) {
+      const cls = classify(latex);
+      if (cls.strategy !== "conceptual") return { teaching: null };
+      try {
+        await assertWithinRateLimit(uid, "teach");
+        const doc = await generateHonestTeaching(complete, cls.latex, cls.problemType);
+        if (doc) return { teaching: doc.teaching, methods: doc.methods };
+      } catch (err) {
+        logger.warn("enrichTeaching honest failed — no teaching", {
+          uid,
+          err: String(err),
+        });
+      }
+      return { teaching: null };
+    }
+
+    // VERIFIED path: the core must already be cached by the preceding solveEquation.
+    // No cache → nothing to teach here (we never re-solve on the teaching path).
+    const core = await getCachedSolve(latex);
+    if (!core || core.verified !== true || core.routeToTutor === true) {
+      return { teaching: null };
+    }
+    const payload = { ...core, problemLatex: latex };
+
+    const lang = "en";
+    const depth: "lite" | "full" =
+      (await getEntitlement(uid)) === PRO_ENTITLEMENT_ID ? "full" : "lite";
 
     try {
       const cached = await getCachedTeaching(latex, depth, lang);

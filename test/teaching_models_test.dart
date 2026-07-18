@@ -240,6 +240,19 @@ void main() {
       expect(s.rule, isNull);
     });
 
+    test('approach parses (honest mode) and round-trips', () {
+      final t = TeachingLayer.fromJson(const {
+        'depth': 'concept_only',
+        'honestReason': 'proof',
+        'concept': {'body': 'A proof argues, it does not compute.'},
+        'approach': ['recognise it is a proof', 'assume the opposite', 'find a clash'],
+      });
+      expect(t.isHonest, isTrue);
+      expect(t.approach, hasLength(3));
+      final restored = TeachingLayer.fromJson(t.toJson());
+      expect(restored.approach, equals(t.approach));
+    });
+
     test('a concept with only definedTerms (no body) is NOT empty', () {
       // The jargon chips must not be silently dropped (review #3).
       final t = TeachingLayer.fromJson(const {
@@ -305,6 +318,33 @@ void main() {
 
     test('NoTeachingService yields no teaching (guests / offline)', () async {
       expect(await const NoTeachingService().enrich(base()), isNull);
+    });
+
+    test('a routeToTutor result requests HONEST teaching + merges it', () async {
+      final honestBase = SolveResponseMapper.toResultData(_equation, {
+        'problemType': 'conceptual',
+        'verified': false,
+        'routeToTutor': true,
+        'finalAnswer': null,
+        'methods': <dynamic>[],
+      });
+      var sawHonestFlag = false;
+      final service = FunctionsTeachingService((name, data) async {
+        sawHonestFlag = data['honest'] == true;
+        return {
+          'teaching': {
+            'depth': 'concept_only',
+            'honestReason': 'proof',
+            'concept': {'body': 'A proof argues, it does not compute.'},
+            'approach': ['assume the opposite', 'find a contradiction'],
+          },
+          'methods': <dynamic>[],
+        };
+      });
+      final merged = await service.enrich(honestBase);
+      expect(sawHonestFlag, isTrue); // honest flag sent for routeToTutor
+      expect(merged?.teaching?.isHonest, isTrue);
+      expect(merged?.routeToTutor, isTrue); // still routed to the tutor
     });
   });
 }

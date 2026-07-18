@@ -10,6 +10,7 @@ import {
   validateTeaching,
   extractNumbers,
   generateTeaching,
+  generateHonestTeaching,
   methodsAlign,
   buildPracticeLadder,
 } from "../src/solver/teach";
@@ -503,6 +504,52 @@ describe("validateTeaching — honest mode (unverified)", () => {
     expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(true);
   });
 
+  // review F1 — a proof's answer is frequently 0–3, exactly what SAFE_COUNTS used
+  // to let through. The honest gate must reject a small integer stated as a result.
+  it("rejects a small-integer ANSWER that SAFE_COUNTS used to pass (F1)", () => {
+    for (const leak of [
+      "The limit evaluates to one.", // spelled cardinal
+      "The series converges to 2.", // bare digit
+      "The sum is 0.", // bare digit
+      "There are exactly three solutions.", // spelled cardinal
+    ]) {
+      const p = withTeaching(honestFixture(), (t) => {
+        t.keyTakeaway.headline = leak;
+      });
+      expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(false);
+    }
+  });
+
+  it("still ACCEPTS structural multipliers mapping to 0–3 (both/single/twice)", () => {
+    const p = withTeaching(honestFixture(), (t) => {
+      t.concept.body =
+        "Work on both sides at once; a single misstep, applied twice, breaks it.";
+    });
+    expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(true);
+  });
+
+  // review F2 — extractNumbers cannot see a digit-free symbolic answer.
+  it("rejects a digit-free SYMBOLIC answer asserted as a result (F2)", () => {
+    for (const leak of [
+      "The limit converges to e.",
+      "The integral equals π.",
+      "The value is exactly the golden ratio.",
+    ]) {
+      const p = withTeaching(honestFixture(), (t) => {
+        t.keyTakeaway.headline = leak;
+      });
+      expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(false);
+    }
+  });
+
+  it("does NOT falsely reject prose that merely NAMES a constant (not asserted)", () => {
+    const p = withTeaching(honestFixture(), (t) => {
+      t.concept.body =
+        "This uses the constant e, the base of the natural logarithm.";
+    });
+    expect(validateTeaching(p, p.teaching as TeachingLayer)).toBe(true);
+  });
+
   it("rejects a foreign number in honest-mode givens", () => {
     const p = withTeaching(honestFixture(), (t) => {
       t.overview.givens = ["The value is 42"];
@@ -792,6 +839,78 @@ describe("generateTeaching — Pro full depth (Phase 4)", () => {
     const lite = await generateTeaching(completerOf(bad), quadraticCore(), "lite");
     expect(lite).toBeDefined();
     expect(lite!.teaching.depth).toBe("lite");
+  });
+});
+
+describe("generateHonestTeaching — concept-only for unverifiable problems", () => {
+  const validHonest = (): Record<string, unknown> => ({
+    header: {
+      subcategory: "Irrationality proof",
+      learningObjective: "Recognise a proof by contradiction.",
+    },
+    concept: {
+      body: "An irrational number cannot be written as a simple fraction of whole numbers; a proof by contradiction assumes the opposite and reaches an impossibility.",
+      definedTerms: [
+        { term: "irrational", plain: "a number that is not a fraction of whole numbers" },
+      ],
+    },
+    approach: [
+      "Recognise this is a proof, not a calculation.",
+      "Assume the opposite, then look for a contradiction.",
+      "The tricky part is spotting the impossibility.",
+    ],
+    commonMistakes: [
+      {
+        mistake: "Trying to compute a decimal instead of arguing.",
+        whyTempting: "A calculator answer feels like proof.",
+        fix: "A proof needs a logical contradiction, not a value.",
+      },
+    ],
+    keyTakeaway: { headline: "Assume the opposite, then find a contradiction." },
+  });
+
+  it("builds a concept_only layer with an approach + NO answer/method", async () => {
+    const doc = await generateHonestTeaching(
+      completerOf(validHonest()),
+      "\\text{Prove } \\sqrt{2} \\text{ is irrational}",
+      "conceptual",
+    );
+    expect(doc).toBeDefined();
+    expect(doc!.teaching.depth).toBe("concept_only");
+    expect(doc!.teaching.honestReason).toBe("proof");
+    expect(doc!.teaching.approach).toHaveLength(3);
+    expect(doc!.teaching.header.methodChosen).toBe(""); // no method — unsolved
+    expect(doc!.methods).toEqual([]); // no worked steps
+  });
+
+  it("rejects an honest response that states a NUMBER (empty allow-set)", async () => {
+    const bad = validHonest();
+    (bad.concept as Record<string, unknown>).body =
+      "The value works out to 1.414, which cannot be written as a fraction.";
+    expect(
+      await generateHonestTeaching(completerOf(bad), "prove x", "conceptual"),
+    ).toBeNull();
+  });
+
+  it("maps the honest reason from the problem type", async () => {
+    const mp = await generateHonestTeaching(
+      completerOf(validHonest()),
+      "find x and y and their product",
+      "multi_part",
+    );
+    expect(mp!.teaching.honestReason).toBe("multi_part");
+    const sys = await generateHonestTeaching(
+      completerOf(validHonest()),
+      "x+y+z=6, x-y=0",
+      "system_of_equations",
+    );
+    expect(sys!.teaching.honestReason).toBe("uncovered_type");
+  });
+
+  it("rejects a blank/degenerate honest response", async () => {
+    expect(
+      await generateHonestTeaching(completerOf({}), "prove x", "conceptual"),
+    ).toBeNull();
   });
 });
 

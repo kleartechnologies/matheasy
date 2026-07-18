@@ -41,6 +41,7 @@ export type EnrichDepth = "lite" | "full";
 
 const ENRICH_MAX_TOKENS = 1600;
 const FULL_MAX_TOKENS = 2600;
+const HONEST_MAX_TOKENS = 900;
 
 /**
  * Produce the (lite) teaching layer for a VERIFIED skeleton via ONE OpenAI call,
@@ -104,6 +105,105 @@ export async function generateTeaching(
     return null;
   }
   return doc;
+}
+
+/**
+ * HONEST MODE: teach the APPROACH for a problem the engine can't verify (a proof
+ * / conceptual / multi-part → routeToTutor). Produces a `concept_only` layer —
+ * concept + approach + mistakes + takeaway, NO worked steps and NO answer. The
+ * firewall (validateTeaching honest branch) rejects ANY number in the prose, so
+ * we can never fabricate a value. Same return contract as generateTeaching
+ * (doc | null | throws-on-transient). NOT cached (spec §4.6).
+ */
+export async function generateHonestTeaching(
+  complete: JsonCompleter,
+  problemLatex: string,
+  problemType: string
+): Promise<TeachingCacheDoc | null> {
+  const meta = deriveTeachingMeta(problemType);
+  const user = [
+    `difficulty: ${meta.difficulty}   language: en`,
+    `Problem (LaTeX): ${problemLatex}`,
+    `Problem type: ${problemType}`,
+  ].join("\n");
+
+  let json: Record<string, unknown> | undefined;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 2 && !json; attempt++) {
+    try {
+      json = await complete(TEACHING_HONEST_SYSTEM, user, HONEST_MAX_TOKENS);
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  if (!json) {
+    logger.warn("generateHonestTeaching.enrichFailed", { problemType, err: String(lastErr) });
+    throw lastErr instanceof Error ? lastErr : new Error("honest enrich failed");
+  }
+
+  const header = obj(json.header);
+  const concept = obj(json.concept);
+  const takeaway = obj(json.keyTakeaway);
+  const teaching: TeachingLayer = {
+    depth: "concept_only",
+    honestReason: honestReasonFor(problemType),
+    header: {
+      category: meta.category, // ENGINE
+      subcategory: str(header.subcategory),
+      difficulty: meta.difficulty, // ENGINE
+      learningObjective: str(header.learningObjective),
+      methodChosen: "", // no method — the engine couldn't solve it
+      whyMethodChosen: "",
+    },
+    overview: { asked: "", goal: "", givens: [], predictionPrompt: "" },
+    concept: {
+      body: str(concept.body),
+      definedTerms: parseDefinedTerms(concept.definedTerms),
+    },
+    methodRationale: { alternatives: [] },
+    journey: [
+      { id: "understand", stepIndices: [] },
+      { id: "chooseMethod", stepIndices: [] },
+    ],
+    approach: strArray(json.approach),
+    commonMistakes: parseMistakes(json.commonMistakes),
+    keyTakeaway: {
+      headline: str(takeaway.headline),
+      ...(str(takeaway.detail) ? { detail: str(takeaway.detail) } : {}),
+    },
+  };
+
+  // Viability: a blank/degenerate turn must not attach.
+  if (!teaching.concept.body || teaching.approach?.length === 0) return null;
+
+  // The firewall's honest branch: concept_only, no ladder, no worked steps, and
+  // — crucially — the empty allow-set rejects ANY number in the prose.
+  const payload: SolvePayload = {
+    problemLatex,
+    problemType,
+    verified: false,
+    finalAnswer: null,
+    methods: [],
+    graph: null,
+    routeToTutor: true,
+  };
+  if (!validateTeaching(payload, teaching)) {
+    logger.info("generateHonestTeaching.rejected", { problemType });
+    return null;
+  }
+  return { teaching, methods: [] };
+}
+
+/** Which honest reason applies to a routeToTutor problem type. */
+function honestReasonFor(problemType: string): "proof" | "multi_part" | "uncovered_type" {
+  switch (problemType) {
+    case "conceptual":
+      return "proof";
+    case "multi_part":
+      return "multi_part";
+    default:
+      return "uncovered_type";
+  }
 }
 
 /** The pivotal step the journey's `apply` stage points at: the central
@@ -302,6 +402,24 @@ Return ONLY a JSON object (no prose, no markdown) of EXACTLY this shape:
   "keyTakeaway": { "headline": "one memorable rule", "detail": "optional one-sentence expansion" }
 }
 Provide exactly one step object per input step, same order, same stepId.`;
+
+const TEACHING_HONEST_SYSTEM = `You are Matheasy's teaching engine, in HONEST MODE. The app could NOT compute a verified answer — this is a proof, an open/conceptual question, or a multi-part problem outside the deterministic solver. Be honest and teach the APPROACH.
+
+ABSOLUTE RULES (a violation discards your whole output):
+1. Produce NO answer, NO final value, NO worked result of ANY kind — no digits, no spelled-out numbers, no "converges to e", no "equals 0". You are teaching how to THINK, not solving.
+2. Teach: what KIND of problem this is, the theorem or strategy that applies, the first move a student would make, and what makes it tricky. Define every 3+ syllable term the moment you use it. Short, plain sentences.
+3. commonMistakes are refutation triples (the trap, why it's tempting, the fix) — and must also contain NO number.
+4. keyTakeaway.headline is a recall-worthy statement of the approach (not the answer).
+5. End the concept warmly; the app will invite the student to reason it through with the tutor.
+
+Return ONLY a JSON object (no prose, no markdown) of EXACTLY this shape:
+{
+  "header": { "subcategory": "the textbook topic", "learningObjective": "what the student will be able to recognise/do" },
+  "concept": { "body": "first-principles explanation of the idea, a newcomer could follow", "definedTerms": [ { "term": "...", "plain": "..." } ] },
+  "approach": [ "first thing to recognise about this problem", "the key theorem or strategy that applies", "what makes it tricky / what to watch for" ],
+  "commonMistakes": [ { "mistake": "...", "whyTempting": "...", "fix": "..." } ],
+  "keyTakeaway": { "headline": "how to approach a problem like this", "detail": "optional one sentence" }
+}`;
 
 // --- coercion helpers -------------------------------------------------------
 
@@ -543,10 +661,21 @@ export function validateTeaching(payload: SolvePayload, t: TeachingLayer): boole
     if (payload.methods.some((m) => m.steps.some(hasNarrationBeyondBaseline))) {
       return false;
     }
-    // Empty allow-set: reject any numeric VALUE in honest prose. Small structural
-    // counting words ("both sides", "two cases") stay exempt via SAFE_COUNTS, but a
-    // digit, decimal, fraction, or spelled value ("seven", "1.414") is a leak.
-    if (honestProse(t).some((f) => hasNumberOutside(f, EMPTY_ALLOW))) return false;
+    // Empty allow-set: reject any FOREIGN numeric value (≥4, decimals, fractions).
+    // Structural counting words ("both sides", "two cases") stay exempt via
+    // SAFE_COUNTS — they describe the proof's shape, not its answer.
+    const honestFields = honestProse(t);
+    if (honestFields.some((f) => hasNumberOutside(f, EMPTY_ALLOW))) return false;
+    // But an unsolved problem's ANSWER is frequently a small integer 0–3
+    // ("lim sin x/x = one", "converges to 2", "the sum is 0") — the exact forms
+    // SAFE_COUNTS lets through above. Reject a bare digit or a pure cardinal
+    // (zero/one/two/three) anywhere in honest prose, while still sparing the
+    // structural multipliers (both/single/twice) that map to the same values.
+    if (honestFields.some((f) => HONEST_SMALL_ANSWER.test(f))) return false;
+    // extractNumbers cannot see a digit-free symbolic answer (e, π, i, golden
+    // ratio). Reject any honest field that ASSERTS one as a result ("converges to
+    // e", "equals π"), while sparing prose that merely names the constant.
+    if (honestFields.some((f) => HONEST_SYMBOLIC_ANSWER.test(f))) return false;
     return true;
   }
 
@@ -653,6 +782,7 @@ function honestProse(t: TeachingLayer): string[] {
     t.keyTakeaway.detail ?? "",
     ...(t.translation ?? []),
     ...(t.decompositionPlan ?? []),
+    ...(t.approach ?? []),
     ...t.journey.map((j) => j.summary ?? ""),
   ].filter((s): s is string => Boolean(s));
 }
@@ -680,8 +810,30 @@ function hasNarrationBeyondBaseline(step: MethodData["steps"][number]): boolean 
  * decimal, fraction, √, and integer ≥ 4 not present in the skeleton. */
 const SAFE_COUNTS = new Set([0, 1, 2, 3]);
 
-/** The honest-mode allow-set: nothing (only SAFE_COUNTS survive the gate). */
+/** The honest-mode allow-set: nothing (only SAFE_COUNTS survive the base gate). */
 const EMPTY_ALLOW: number[] = [];
+
+/** Honest-mode small-answer denylist. SAFE_COUNTS (0–3) is the counting-word
+ *  exemption the verified path needs, but in honest mode those small integers are
+ *  exactly the answers that leak ("the limit is one", "converges to 2", "sum = 0").
+ *  Reject any bare digit or a PURE cardinal (zero/one/two/three), which spares the
+ *  structural multipliers (both/single/double/triple/once/twice/thrice) — those map
+ *  to the same values but describe the proof's shape, never state its answer. */
+const HONEST_SMALL_ANSWER = /\d|\b(?:zero|one|two|three)\b/i;
+
+/** Honest-mode symbolic-answer denylist. extractNumbers only sees digits and
+ *  spelled cardinals, so a digit-free result (e, π, i, the golden ratio) would
+ *  otherwise pass. This catches the common case where honest prose ASSERTS one of
+ *  those as the answer ("converges to e", "the limit is π", "equals i"). It
+ *  requires an assertion verb immediately before the constant, so concept prose
+ *  that merely mentions e/π ("this uses the number e") is not falsely flagged.
+ *  Arbitrary symbolic results (e.g. "the derivative is cos x") remain the prompt's
+ *  responsibility — full symbolic detection is infeasible; this closes the top hits. */
+// Trailing (?![A-Za-z0-9]) instead of \b: π is not a \w character, so a trailing
+// \b would never match after it ("equals π."). The lookahead rejects only a
+// letter/digit continuation, so "is even"/"is invalid" don't false-match on e/i.
+const HONEST_SYMBOLIC_ANSWER =
+  /(?:converges?\s+to|evaluates?\s+to|equals?|is\s+exactly|\bis)\s+(?:e|i|pi|π|\\pi|the\s+golden\s+ratio)(?![A-Za-z0-9])/i;
 
 const EPS = 1e-6;
 

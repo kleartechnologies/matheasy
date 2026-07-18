@@ -19,6 +19,7 @@ import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
+import '../domain/teaching_models.dart';
 import '../domain/visual_models.dart';
 import 'tabs/explain_tab.dart';
 import 'tabs/methods_tab.dart';
@@ -32,6 +33,7 @@ import 'widgets/result_empty.dart';
 import 'widgets/result_header.dart';
 import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
+import 'widgets/teaching/teaching_cards.dart';
 import 'widgets/visual/geometry_visual_player.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
@@ -317,6 +319,31 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           );
   }
 
+  /// The honest concept-teaching section shown above the tutor invite for a
+  /// routeToTutor problem — teaches the APPROACH (no fabricated answer). Each
+  /// card self-hides when its content is empty.
+  List<Widget> _honestTeachingCards(TeachingLayer teaching) => [
+        TeachingHeaderCard(header: teaching.header),
+        const SizedBox(height: AppSpacing.md),
+        if (!teaching.concept.isEmpty) ...[
+          ConceptOverviewCard(
+            concept: teaching.concept,
+            overview: teaching.overview,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if ((teaching.approach ?? const []).isNotEmpty) ...[
+          ApproachCard(approach: teaching.approach!),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (teaching.commonMistakes.any((m) => m.mistake.isNotEmpty)) ...[
+          CommonMistakesCard(mistakes: teaching.commonMistakes),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (!teaching.keyTakeaway.isEmpty)
+          KeyTakeawayCard(takeaway: teaching.keyTakeaway),
+      ];
+
   Widget _buildContent(ResultData result) {
     // The photo the problem was scanned from (when present) — shown at the top
     // of every state so a figure-based problem (geometry) is visible even when
@@ -327,6 +354,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     // compute-and-verify, so invite the student to reason it through in the tutor
     // rather than show a misleading "couldn't verify" error.
     if (result.routeToTutor) {
+      final teaching = result.teaching;
       return ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenH,
@@ -336,6 +364,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ),
         children: [
           scanImage,
+          // HONEST-mode concept teaching (spec §0.5): even a problem the solver
+          // can't verify (a proof / conceptual / multi-part) teaches the APPROACH
+          // from first principles — above the tutor hand-off, never an answer.
+          // Concept is the anchor of honest teaching; gating the whole section on
+          // it means a malformed layer can never paint a lone header breadcrumb.
+          if (teaching != null &&
+              teaching.isHonest &&
+              !teaching.concept.isEmpty) ...[
+            ..._honestTeachingCards(teaching),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           ResultTutorInvite(
             result: result,
             onDiscuss: () => _discussProblem(result),

@@ -822,6 +822,72 @@ class NumiInviteStrip extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// 9. Approach — HONEST MODE: how to think about an unverifiable problem
+// ---------------------------------------------------------------------------
+
+class ApproachCard extends StatelessWidget {
+  const ApproachCard({super.key, required this.approach});
+
+  final List<String> approach;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final items = approach.where((s) => s.trim().isNotEmpty).toList();
+    if (items.isEmpty) return const SizedBox.shrink();
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🧭', style: TextStyle(fontSize: 15)),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'HOW TO APPROACH IT',
+                style: AppTypography.label.copyWith(color: _emerald(context)),
+              ),
+            ],
+          ),
+          for (var i = 0; i < items.length; i++) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: colors.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${i + 1}',
+                    style: AppTypography.caption.copyWith(
+                      color: colors.onPrimaryContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    items[i],
+                    style: AppTypography.bodySmall
+                        .copyWith(color: colors.textPrimary, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // shared
 // ---------------------------------------------------------------------------
 

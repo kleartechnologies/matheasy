@@ -33,7 +33,12 @@ class FunctionsTeachingService implements TeachingService {
 
   @override
   Future<ResultData?> enrich(ResultData base) async {
-    final json = await _call('enrichTeaching', {'latex': base.equation.latex});
+    final json = await _call('enrichTeaching', {
+      'latex': base.equation.latex,
+      // A routeToTutor problem (proof / conceptual / multi-part) has no verified
+      // answer — ask for HONEST-mode concept teaching (teach the approach).
+      if (base.routeToTutor) 'honest': true,
+    });
     return SolveResponseMapper.mergeTeaching(base, json);
   }
 }

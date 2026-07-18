@@ -11,6 +11,7 @@ import 'package:matheasy/features/result/domain/teaching_models.dart';
 import 'package:matheasy/features/result/domain/visual_models.dart'
     show ProblemDifficulty;
 import 'package:matheasy/features/result/presentation/tabs/solution_tab.dart';
+import 'package:matheasy/features/result/presentation/widgets/teaching/teaching_cards.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
 
@@ -74,6 +75,7 @@ TeachingLayer _teaching() => const TeachingLayer(
       ],
       translation: null,
       decompositionPlan: null,
+      approach: null,
       commonMistakes: [
         CommonMistake(
           mistake: 'Getting the signs of the factors wrong.',
@@ -202,6 +204,28 @@ void main() {
     // _teaching() has a Simplify stage pointing at step 99 (only 2 steps exist).
     await _pump(tester, _result(teaching: _teaching()));
     expect(find.text('Simplify'), findsOneWidget); // rendered, as inactive
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ApproachCard (honest mode) renders its numbered steps',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: ApproachCard(approach: [
+            'Recognise this is a proof, not a calculation',
+            'Assume the opposite and look for a contradiction',
+            'Watch the edge case',
+          ]),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('HOW TO APPROACH IT'), findsOneWidget);
+    expect(find.text('Assume the opposite and look for a contradiction'),
+        findsOneWidget);
+    expect(find.text('1'), findsOneWidget); // numbered
     expect(tester.takeException(), isNull);
   });
 

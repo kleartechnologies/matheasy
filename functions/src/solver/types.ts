@@ -250,6 +250,10 @@ export interface TeachingLayer {
   translation?: string[];
   /** multi_part ONLY — "first solve X, then compute Y". */
   decompositionPlan?: string[];
+  /** HONEST MODE (concept_only) ONLY — how to THINK about a problem the solver
+   * can't verify (a proof / conceptual / multi-part): recognise it, the key
+   * theorem/strategy, and what makes it tricky. No worked answer. */
+  approach?: string[];
   commonMistakes: CommonMistake[];
   keyTakeaway: KeyTakeaway;
   /** Pro (`full`) only; omitted for `concept_only`. */

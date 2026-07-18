@@ -53,9 +53,8 @@ class ResultController extends _$ResultController {
       // cached entry may predate teaching, or its first fetch never completed.
       // The teaching==null guard fetches once; _recordCache(merged) then upserts
       // the enriched entry so subsequent opens skip it.
-      if (cached.result.verified &&
-          !cached.result.routeToTutor &&
-          cached.result.teaching == null) {
+      if (cached.result.teaching == null &&
+          (cached.result.verified || cached.result.routeToTutor)) {
         unawaited(_attachTeaching(cached.result));
       }
       return cached.result;
@@ -77,9 +76,10 @@ class ResultController extends _$ResultController {
         .logEvent(AnalyticsEvent.resultViewed(problemType: data.type.name)));
     // Progressive teaching (spec §5): the answer is already computed — fetch the
     // teaching layer on a SEPARATE call so it never delays the solution, then pop
-    // it in. Best-effort; a failure just leaves the plain solution. Honest /
-    // unverified problems have no teaching to fetch.
-    if (data.verified && !data.routeToTutor && data.teaching == null) {
+    // it in. Best-effort; a failure just leaves the plain solution. Fetched for a
+    // verified solve (full/lite) AND a routeToTutor problem (honest concept
+    // teaching); a couldn't-verify (likely a misread) is left untaught.
+    if (data.teaching == null && (data.verified || data.routeToTutor)) {
       unawaited(_attachTeaching(data));
     }
     return data;

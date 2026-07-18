@@ -407,6 +407,7 @@ class TeachingLayer {
     required this.journey,
     required this.translation,
     required this.decompositionPlan,
+    required this.approach,
     required this.commonMistakes,
     required this.keyTakeaway,
     required this.practiceLadder,
@@ -426,6 +427,10 @@ class TeachingLayer {
   final List<JourneyStage> journey;
   final List<String>? translation;
   final List<String>? decompositionPlan;
+
+  /// HONEST MODE (concept_only) only — how to THINK about an unverifiable problem
+  /// (recognise it, the key strategy, what's tricky). No worked answer.
+  final List<String>? approach;
   final List<CommonMistake> commonMistakes;
   final KeyTakeaway keyTakeaway;
   final PracticeLadder? practiceLadder;
@@ -440,6 +445,7 @@ class TeachingLayer {
         'journey': journey.map((s) => s.toJson()).toList(),
         if (translation != null) 'translation': translation,
         if (decompositionPlan != null) 'decompositionPlan': decompositionPlan,
+        if (approach != null) 'approach': approach,
         'commonMistakes': commonMistakes.map((m) => m.toJson()).toList(),
         'keyTakeaway': keyTakeaway.toJson(),
         if (practiceLadder != null) 'practiceLadder': practiceLadder!.toJson(),
@@ -459,6 +465,7 @@ class TeachingLayer {
         decompositionPlan: j['decompositionPlan'] is List
             ? _strList(j['decompositionPlan'])
             : null,
+        approach: j['approach'] is List ? _strList(j['approach']) : null,
         commonMistakes: _objList(j['commonMistakes'], CommonMistake.fromJson),
         keyTakeaway: KeyTakeaway.fromJson(_map(j['keyTakeaway'])),
         practiceLadder: j['practiceLadder'] is Map
