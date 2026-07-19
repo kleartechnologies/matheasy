@@ -29,6 +29,13 @@ class AppDurations {
 
   /// Auto-advance interval for the Play Solution walkthrough.
   static const Duration walkthroughStep = Duration(milliseconds: 2600);
+
+  /// One symbol-morph transition in the Animated Learning Engine (a term sliding
+  /// across the `=`, terms merging). Scaled by the playback-speed selector.
+  static const Duration morph = Duration(milliseconds: 950);
+
+  /// The final-answer celebration burst in the Animated Learning Engine.
+  static const Duration celebrate = Duration(milliseconds: 1800);
 }
 
 /// Easing curve tokens paired with [AppDurations].

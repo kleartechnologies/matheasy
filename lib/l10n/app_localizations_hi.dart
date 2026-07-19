@@ -1227,6 +1227,49 @@ class AppLocalizationsHi extends AppLocalizations {
   String get visualPlay => 'चलाएँ';
 
   @override
+  String get engineSpeed => 'प्लेबैक गति';
+
+  @override
+  String get engineWhatChanged => 'क्या बदला';
+
+  @override
+  String get engineIntro => 'हल को जीवंत होते देखें, एक-एक बदलाव के साथ।';
+
+  @override
+  String get engineUnderstandTitle => 'सवाल को समझें';
+
+  @override
+  String get engineUnderstandDetail =>
+      'पहले, आइए ठीक-ठीक देखें कि हम क्या हल कर रहे हैं।';
+
+  @override
+  String get engineVerifyTitle => 'जाँचें कि यह सही है';
+
+  @override
+  String get engineAnswerTitle => 'आपने कर दिखाया!';
+
+  @override
+  String get engineAnswerDetail => 'यही है हल — हर कदम यहीं तक ले आया।';
+
+  @override
+  String get enginePhaseUnderstand => 'समझें';
+
+  @override
+  String get enginePhaseChooseMethod => 'तरीका चुनें';
+
+  @override
+  String get enginePhaseApply => 'नियम लगाएँ';
+
+  @override
+  String get enginePhaseSimplify => 'सरल करें';
+
+  @override
+  String get enginePhaseVerify => 'सत्यापित करें';
+
+  @override
+  String get enginePhaseAnswer => 'उत्तर';
+
+  @override
   String get teachingTheIdea => 'मुख्य विचार';
 
   @override

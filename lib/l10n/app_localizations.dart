@@ -2408,6 +2408,90 @@ abstract class AppLocalizations {
   /// **'Play'**
   String get visualPlay;
 
+  /// No description provided for @engineSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get engineSpeed;
+
+  /// No description provided for @engineWhatChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'What changed'**
+  String get engineWhatChanged;
+
+  /// No description provided for @engineIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch the solution come to life, one change at a time.'**
+  String get engineIntro;
+
+  /// No description provided for @engineUnderstandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand the problem'**
+  String get engineUnderstandTitle;
+
+  /// No description provided for @engineUnderstandDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'First, let\'s look at exactly what we\'re solving.'**
+  String get engineUnderstandDetail;
+
+  /// No description provided for @engineVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check it works'**
+  String get engineVerifyTitle;
+
+  /// No description provided for @engineAnswerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve got it!'**
+  String get engineAnswerTitle;
+
+  /// No description provided for @engineAnswerDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the solution — every step led here.'**
+  String get engineAnswerDetail;
+
+  /// No description provided for @enginePhaseUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand'**
+  String get enginePhaseUnderstand;
+
+  /// No description provided for @enginePhaseChooseMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose method'**
+  String get enginePhaseChooseMethod;
+
+  /// No description provided for @enginePhaseApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply the rule'**
+  String get enginePhaseApply;
+
+  /// No description provided for @enginePhaseSimplify.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplify'**
+  String get enginePhaseSimplify;
+
+  /// No description provided for @enginePhaseVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get enginePhaseVerify;
+
+  /// No description provided for @enginePhaseAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get enginePhaseAnswer;
+
   /// No description provided for @teachingTheIdea.
   ///
   /// In en, this message translates to:

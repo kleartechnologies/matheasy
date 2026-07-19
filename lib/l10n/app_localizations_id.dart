@@ -1229,6 +1229,51 @@ class AppLocalizationsId extends AppLocalizations {
   String get visualPlay => 'Putar';
 
   @override
+  String get engineSpeed => 'Kecepatan pemutaran';
+
+  @override
+  String get engineWhatChanged => 'Yang berubah';
+
+  @override
+  String get engineIntro =>
+      'Saksikan solusinya hidup, satu perubahan setiap kali.';
+
+  @override
+  String get engineUnderstandTitle => 'Pahami soalnya';
+
+  @override
+  String get engineUnderstandDetail =>
+      'Pertama, mari kita lihat persis apa yang sedang kita selesaikan.';
+
+  @override
+  String get engineVerifyTitle => 'Periksa kebenarannya';
+
+  @override
+  String get engineAnswerTitle => 'Kamu berhasil!';
+
+  @override
+  String get engineAnswerDetail =>
+      'Inilah solusinya — setiap langkah menuju ke sini.';
+
+  @override
+  String get enginePhaseUnderstand => 'Pahami';
+
+  @override
+  String get enginePhaseChooseMethod => 'Pilih metode';
+
+  @override
+  String get enginePhaseApply => 'Terapkan aturan';
+
+  @override
+  String get enginePhaseSimplify => 'Sederhanakan';
+
+  @override
+  String get enginePhaseVerify => 'Verifikasi';
+
+  @override
+  String get enginePhaseAnswer => 'Jawaban';
+
+  @override
   String get teachingTheIdea => 'IDENYA';
 
   @override

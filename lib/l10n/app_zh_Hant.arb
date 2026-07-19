@@ -475,5 +475,19 @@
   "progressBadgeRewardStatus": "已解鎖，獎勵 {xp} XP",
   "practiceDayStreak": "{count, plural, =1{連續 1 天} other{連續 {count} 天}}",
   "practiceMasterySemantics": "{topic} 精熟度：{level}，距下一級還有 {percent}%",
-  "paywallNowOnPlan": "你現在是 {plan} 會員了。盡情享受無限學習！"
+  "paywallNowOnPlan": "你現在是 {plan} 會員了。盡情享受無限學習！",
+  "engineSpeed": "播放速度",
+  "engineWhatChanged": "變化重點",
+  "engineIntro": "一步一個變化，看解題過程活起來。",
+  "engineUnderstandTitle": "理解題目",
+  "engineUnderstandDetail": "首先，來看清楚我們到底要解什麼。",
+  "engineVerifyTitle": "驗證是否正確",
+  "engineAnswerTitle": "你做到了！",
+  "engineAnswerDetail": "這就是答案——每一步都指向這裡。",
+  "enginePhaseUnderstand": "理解",
+  "enginePhaseChooseMethod": "選擇方法",
+  "enginePhaseApply": "套用規則",
+  "enginePhaseSimplify": "化簡",
+  "enginePhaseVerify": "驗證",
+  "enginePhaseAnswer": "答案"
 }

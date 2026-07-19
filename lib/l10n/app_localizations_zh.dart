@@ -1168,6 +1168,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get visualPlay => '播放';
 
   @override
+  String get engineSpeed => '播放速度';
+
+  @override
+  String get engineWhatChanged => '变化之处';
+
+  @override
+  String get engineIntro => '看着解题过程一步步生动展开。';
+
+  @override
+  String get engineUnderstandTitle => '理解题目';
+
+  @override
+  String get engineUnderstandDetail => '首先，我们来看清楚要解的到底是什么。';
+
+  @override
+  String get engineVerifyTitle => '验证是否成立';
+
+  @override
+  String get engineAnswerTitle => '你做到了！';
+
+  @override
+  String get engineAnswerDetail => '这就是答案——每一步都通向这里。';
+
+  @override
+  String get enginePhaseUnderstand => '理解';
+
+  @override
+  String get enginePhaseChooseMethod => '选择方法';
+
+  @override
+  String get enginePhaseApply => '运用规则';
+
+  @override
+  String get enginePhaseSimplify => '化简';
+
+  @override
+  String get enginePhaseVerify => '验证';
+
+  @override
+  String get enginePhaseAnswer => '答案';
+
+  @override
   String get teachingTheIdea => '核心思路';
 
   @override
@@ -2742,6 +2784,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get visualPlay => '播放';
 
   @override
+  String get engineSpeed => '播放速度';
+
+  @override
+  String get engineWhatChanged => '变化之处';
+
+  @override
+  String get engineIntro => '看着解题过程一步步生动展开。';
+
+  @override
+  String get engineUnderstandTitle => '理解题目';
+
+  @override
+  String get engineUnderstandDetail => '首先，我们来看清楚要解的到底是什么。';
+
+  @override
+  String get engineVerifyTitle => '验证是否成立';
+
+  @override
+  String get engineAnswerTitle => '你做到了！';
+
+  @override
+  String get engineAnswerDetail => '这就是答案——每一步都通向这里。';
+
+  @override
+  String get enginePhaseUnderstand => '理解';
+
+  @override
+  String get enginePhaseChooseMethod => '选择方法';
+
+  @override
+  String get enginePhaseApply => '运用规则';
+
+  @override
+  String get enginePhaseSimplify => '化简';
+
+  @override
+  String get enginePhaseVerify => '验证';
+
+  @override
+  String get enginePhaseAnswer => '答案';
+
+  @override
   String get teachingTheIdea => '核心思路';
 
   @override
@@ -4314,6 +4398,48 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get visualPlay => '播放';
+
+  @override
+  String get engineSpeed => '播放速度';
+
+  @override
+  String get engineWhatChanged => '變化重點';
+
+  @override
+  String get engineIntro => '一步一個變化，看解題過程活起來。';
+
+  @override
+  String get engineUnderstandTitle => '理解題目';
+
+  @override
+  String get engineUnderstandDetail => '首先，來看清楚我們到底要解什麼。';
+
+  @override
+  String get engineVerifyTitle => '驗證是否正確';
+
+  @override
+  String get engineAnswerTitle => '你做到了！';
+
+  @override
+  String get engineAnswerDetail => '這就是答案——每一步都指向這裡。';
+
+  @override
+  String get enginePhaseUnderstand => '理解';
+
+  @override
+  String get enginePhaseChooseMethod => '選擇方法';
+
+  @override
+  String get enginePhaseApply => '套用規則';
+
+  @override
+  String get enginePhaseSimplify => '化簡';
+
+  @override
+  String get enginePhaseVerify => '驗證';
+
+  @override
+  String get enginePhaseAnswer => '答案';
 
   @override
   String get teachingTheIdea => '核心概念';

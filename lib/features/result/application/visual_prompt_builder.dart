@@ -1,4 +1,5 @@
 import '../../scan/domain/detected_equation.dart';
+import '../domain/animation/animation_script.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/visual_models.dart';
@@ -52,6 +53,28 @@ class VisualPromptBuilder {
       ..write(operation == null ? '' : ' (operation: $operation)')
       ..write(': ${step.beforeLatex} becomes ${step.afterLatex}.')
       ..write(' Why: ${step.explanation}');
+    return buffer.toString();
+  }
+
+  /// The tutor context for a beat of the **Animated Learning Engine** player.
+  /// The player emits an index into [AnimationScript.steps] (an Understand beat +
+  /// the verified transforms + a Verify beat) — a different list from
+  /// [VisualSolution.steps], so it needs its own summariser (reusing
+  /// [tutorStepContext] would hand the tutor a mismatched, off-by-one step).
+  static String tutorAnimationStepContext(AnimationScript script, int beatIndex) {
+    final total = script.steps.length;
+    if (beatIndex < 0 || beatIndex >= total) {
+      return 'The animated solution of the problem, answered ${script.answerLatex}.';
+    }
+    final step = script.steps[beatIndex];
+    final op = step.operationLabel;
+    final buffer = StringBuffer()
+      ..write('Beat ${beatIndex + 1} of $total — "${step.title}"')
+      ..write(op == null || op.isEmpty ? '' : ' (operation: $op)')
+      ..write(step.beforeLatex == step.afterLatex
+          ? ': ${step.afterLatex}.'
+          : ': ${step.beforeLatex} becomes ${step.afterLatex}.')
+      ..write(step.explanation.isEmpty ? '' : ' Why: ${step.explanation}');
     return buffer.toString();
   }
 

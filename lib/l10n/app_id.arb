@@ -475,5 +475,19 @@
   "progressBadgeRewardStatus": "Terbuka, hadiah {xp} XP",
   "practiceDayStreak": "{count, plural, =1{Rentetan 1 hari} other{Rentetan {count} hari}}",
   "practiceMasterySemantics": "Penguasaan {topic}: {level}, {percent}% menuju level berikutnya",
-  "paywallNowOnPlan": "Kamu sekarang di {plan}. Nikmati belajar tanpa batas!"
+  "paywallNowOnPlan": "Kamu sekarang di {plan}. Nikmati belajar tanpa batas!",
+  "engineSpeed": "Kecepatan pemutaran",
+  "engineWhatChanged": "Yang berubah",
+  "engineIntro": "Saksikan solusinya hidup, satu perubahan setiap kali.",
+  "engineUnderstandTitle": "Pahami soalnya",
+  "engineUnderstandDetail": "Pertama, mari kita lihat persis apa yang sedang kita selesaikan.",
+  "engineVerifyTitle": "Periksa kebenarannya",
+  "engineAnswerTitle": "Kamu berhasil!",
+  "engineAnswerDetail": "Inilah solusinya — setiap langkah menuju ke sini.",
+  "enginePhaseUnderstand": "Pahami",
+  "enginePhaseChooseMethod": "Pilih metode",
+  "enginePhaseApply": "Terapkan aturan",
+  "enginePhaseSimplify": "Sederhanakan",
+  "enginePhaseVerify": "Verifikasi",
+  "enginePhaseAnswer": "Jawaban"
 }

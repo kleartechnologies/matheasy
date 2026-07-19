@@ -475,5 +475,19 @@
   "progressBadgeRewardStatus": "अनलॉक्ड, इनाम {xp} XP",
   "practiceDayStreak": "{count, plural, =1{1 दिन की स्ट्रीक} other{{count} दिन की स्ट्रीक}}",
   "practiceMasterySemantics": "{topic} में महारत: {level}, अगले स्तर तक {percent}%",
-  "paywallNowOnPlan": "अब आप {plan} पर हैं। असीमित सीखने का आनंद लें!"
+  "paywallNowOnPlan": "अब आप {plan} पर हैं। असीमित सीखने का आनंद लें!",
+  "engineSpeed": "प्लेबैक गति",
+  "engineWhatChanged": "क्या बदला",
+  "engineIntro": "हल को जीवंत होते देखें, एक-एक बदलाव के साथ।",
+  "engineUnderstandTitle": "सवाल को समझें",
+  "engineUnderstandDetail": "पहले, आइए ठीक-ठीक देखें कि हम क्या हल कर रहे हैं।",
+  "engineVerifyTitle": "जाँचें कि यह सही है",
+  "engineAnswerTitle": "आपने कर दिखाया!",
+  "engineAnswerDetail": "यही है हल — हर कदम यहीं तक ले आया।",
+  "enginePhaseUnderstand": "समझें",
+  "enginePhaseChooseMethod": "तरीका चुनें",
+  "enginePhaseApply": "नियम लगाएँ",
+  "enginePhaseSimplify": "सरल करें",
+  "enginePhaseVerify": "सत्यापित करें",
+  "enginePhaseAnswer": "उत्तर"
 }

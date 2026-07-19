@@ -29,6 +29,7 @@ import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/result/domain/visual_models.dart';
 import 'package:matheasy/features/result/presentation/tabs/visual_tab.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/concept_painter.dart';
+import 'package:matheasy/features/result/presentation/widgets/visual/engine/animated_learning_player.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier1_animated_transformation.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier2_learning_cards.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier3_concept_explorer.dart';
@@ -70,6 +71,22 @@ const _resultData = ResultData(
       detail: 'Undo the + 5.',
     ),
   ],
+  explanations: [],
+  methods: [],
+  practice: [],
+);
+
+/// A solved payload with NO steps — the Animated Learning Engine can't build a
+/// script from it, so the Visual tab falls through to the classic tier
+/// renderers. Used to exercise the (now fallback) tier-selection path.
+const _resultNoSteps = ResultData(
+  equation: _equation,
+  type: ResultType.linear,
+  difficulty: Difficulty.easy,
+  answerLatex: 'x = 4',
+  verifyText: '',
+  tutorIntro: 'Here we go!',
+  steps: [],
   explanations: [],
   methods: [],
   practice: [],
@@ -610,7 +627,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.byType(VisualTeaser), findsNothing);
-      expect(find.byType(Tier1AnimatedTransformation), findsOneWidget);
+      // A solved problem now plays the Universal Animated Learning Engine —
+      // the symbol-morphing walkthrough built from the verified steps.
+      expect(find.byType(AnimatedLearningPlayer), findsOneWidget);
     });
   });
 
@@ -636,7 +655,9 @@ void main() {
         container,
         VisualTab(
           equation: _equation,
-          result: _resultData,
+          // Step-less so the engine yields no script and the classic tier
+          // dispatch (now the fallback) is exercised.
+          result: _resultNoSteps,
           onUnlock: () {},
           onOpenExplain: () {},
           onAskMatheasy: (_, _) {},
@@ -738,7 +759,8 @@ void main() {
         container,
         VisualTab(
           equation: _equation,
-          result: _resultData,
+          // Nothing to animate AND an empty visual → the classic fallback.
+          result: _resultNoSteps,
           onUnlock: () {},
           onOpenExplain: () {},
           onAskMatheasy: (_, _) {},

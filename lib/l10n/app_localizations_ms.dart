@@ -1235,6 +1235,51 @@ class AppLocalizationsMs extends AppLocalizations {
   String get visualPlay => 'Main';
 
   @override
+  String get engineSpeed => 'Kelajuan main';
+
+  @override
+  String get engineWhatChanged => 'Apa yang berubah';
+
+  @override
+  String get engineIntro =>
+      'Saksikan penyelesaian ini hidup, satu perubahan pada satu masa.';
+
+  @override
+  String get engineUnderstandTitle => 'Fahami masalahnya';
+
+  @override
+  String get engineUnderstandDetail =>
+      'Mula-mula, mari kita lihat apa yang sebenarnya kita selesaikan.';
+
+  @override
+  String get engineVerifyTitle => 'Semak ia betul';
+
+  @override
+  String get engineAnswerTitle => 'Anda berjaya!';
+
+  @override
+  String get engineAnswerDetail =>
+      'Inilah penyelesaiannya — setiap langkah membawa ke sini.';
+
+  @override
+  String get enginePhaseUnderstand => 'Fahami';
+
+  @override
+  String get enginePhaseChooseMethod => 'Pilih kaedah';
+
+  @override
+  String get enginePhaseApply => 'Guna hukumnya';
+
+  @override
+  String get enginePhaseSimplify => 'Permudahkan';
+
+  @override
+  String get enginePhaseVerify => 'Sahkan';
+
+  @override
+  String get enginePhaseAnswer => 'Jawapan';
+
+  @override
   String get teachingTheIdea => 'IDEANYA';
 
   @override

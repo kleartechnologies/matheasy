@@ -10,4 +10,14 @@ class HapticsService {
   static void medium() => HapticFeedback.mediumImpact();
   static void success() => HapticFeedback.mediumImpact();
   static void warning() => HapticFeedback.heavyImpact();
+
+  // ---- Animated Learning Engine step feedback ----
+  /// A step advances (a new beat begins).
+  static void step() => HapticFeedback.selectionClick();
+
+  /// Terms merge / a value resolves.
+  static void merge() => HapticFeedback.lightImpact();
+
+  /// The final answer is reached (paired with the celebration burst).
+  static void celebrate() => HapticFeedback.mediumImpact();
 }

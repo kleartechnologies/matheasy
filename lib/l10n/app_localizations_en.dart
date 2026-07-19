@@ -1226,6 +1226,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visualPlay => 'Play';
 
   @override
+  String get engineSpeed => 'Playback speed';
+
+  @override
+  String get engineWhatChanged => 'What changed';
+
+  @override
+  String get engineIntro =>
+      'Watch the solution come to life, one change at a time.';
+
+  @override
+  String get engineUnderstandTitle => 'Understand the problem';
+
+  @override
+  String get engineUnderstandDetail =>
+      'First, let\'s look at exactly what we\'re solving.';
+
+  @override
+  String get engineVerifyTitle => 'Check it works';
+
+  @override
+  String get engineAnswerTitle => 'You\'ve got it!';
+
+  @override
+  String get engineAnswerDetail =>
+      'This is the solution — every step led here.';
+
+  @override
+  String get enginePhaseUnderstand => 'Understand';
+
+  @override
+  String get enginePhaseChooseMethod => 'Choose method';
+
+  @override
+  String get enginePhaseApply => 'Apply the rule';
+
+  @override
+  String get enginePhaseSimplify => 'Simplify';
+
+  @override
+  String get enginePhaseVerify => 'Verify';
+
+  @override
+  String get enginePhaseAnswer => 'Answer';
+
+  @override
   String get teachingTheIdea => 'THE IDEA';
 
   @override

@@ -19,6 +19,12 @@ method switching, a graph, explanations, adaptive practice, and an AI tutor.
   [`brand/matheasy-logo-source.png`](brand/matheasy-logo-source.png). The v1.0
   system (Emerald `#10B981` + the "R8 two-check" mark) is **retired**; if a doc,
   comment, or memory still says either, it is wrong.
+- **Animated Learning Engine spec (AS-BUILT):**
+  [`docs/matheasy-animated-learning-engine-spec.md`](docs/matheasy-animated-learning-engine-spec.md)
+  — the Pro "watch math transform" engine: it builds an `AnimationScript` from the
+  **verified** solve payload and plays a symbol-morph walkthrough + per-topic visual
+  objects under a phase timeline and a speed/scrub control bar. Additive over the
+  Stage-14 Visual tiers; golden-rule-clean (it only re-positions verified tokens).
 - **Deploy runbook:** [`docs/matheasy-deploy-runbook.md`](docs/matheasy-deploy-runbook.md).
 
 ## The real stack (do NOT assume otherwise)

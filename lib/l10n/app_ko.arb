@@ -475,5 +475,19 @@
   "progressBadgeRewardStatus": "잠금 해제됨, 보상 {xp} XP",
   "practiceDayStreak": "{count, plural, =1{1일 연속} other{{count}일 연속}}",
   "practiceMasterySemantics": "{topic} 숙련도: {level}, 다음 레벨까지 {percent}%",
-  "paywallNowOnPlan": "이제 {plan}을(를) 사용 중입니다. 무제한 학습을 즐기세요!"
+  "paywallNowOnPlan": "이제 {plan}을(를) 사용 중입니다. 무제한 학습을 즐기세요!",
+  "engineSpeed": "재생 속도",
+  "engineWhatChanged": "무엇이 바뀌었나요",
+  "engineIntro": "풀이가 한 단계씩 살아나는 과정을 지켜보세요.",
+  "engineUnderstandTitle": "문제 이해하기",
+  "engineUnderstandDetail": "먼저, 우리가 무엇을 풀고 있는지 정확히 살펴봐요.",
+  "engineVerifyTitle": "맞는지 확인하기",
+  "engineAnswerTitle": "해냈어요!",
+  "engineAnswerDetail": "이것이 답이에요 — 모든 단계가 여기로 이어졌어요.",
+  "enginePhaseUnderstand": "이해하기",
+  "enginePhaseChooseMethod": "방법 고르기",
+  "enginePhaseApply": "규칙 적용하기",
+  "enginePhaseSimplify": "정리하기",
+  "enginePhaseVerify": "검산하기",
+  "enginePhaseAnswer": "정답"
 }

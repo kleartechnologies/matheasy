@@ -15,6 +15,7 @@ import '../../scan/presentation/manual_input_screen.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_models.dart';
+import '../application/animation/animation_script_builder.dart';
 import '../application/geometry_payload_mapper.dart';
 import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
@@ -35,6 +36,7 @@ import 'widgets/result_header.dart';
 import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
 import 'widgets/teaching/teaching_cards.dart';
+import 'widgets/visual/engine/engine_l10n.dart';
 import 'widgets/visual/geometry_visual_player.dart';
 
 /// The Scan Result experience — the most-used screen in the app. Renders the
@@ -161,12 +163,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     VisualSolution visual,
     int stepIndex,
   ) {
-    // Geometry emits an index into its own 4-beat scene.steps; other tiers into
-    // visual.steps — summarise from whichever the player actually renders.
+    // Summarise from whichever player actually rendered — mirror the Visual tab's
+    // dispatch (geometry → Animated Learning Engine → classic tiers) so the beat
+    // index always indexes the SAME list the learner is looking at.
     final scene = visual.geometryScene;
-    final stepSummary = scene != null
-        ? VisualPromptBuilder.tutorGeometryStepContext(scene, stepIndex)
-        : VisualPromptBuilder.tutorStepContext(visual, stepIndex);
+    final String stepSummary;
+    if (scene != null) {
+      stepSummary = VisualPromptBuilder.tutorGeometryStepContext(scene, stepIndex);
+    } else {
+      final script = AnimationScriptBuilder.build(result, copy: engineCopy(context));
+      stepSummary = script.isEmpty
+          ? VisualPromptBuilder.tutorStepContext(visual, stepIndex)
+          : VisualPromptBuilder.tutorAnimationStepContext(script, stepIndex);
+    }
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(

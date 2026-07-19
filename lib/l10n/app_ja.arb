@@ -475,5 +475,19 @@
   "progressBadgeRewardStatus": "解除済み、報酬 {xp} XP",
   "practiceDayStreak": "{count, plural, =1{1日連続} other{{count}日連続}}",
   "practiceMasterySemantics": "{topic}の習熟度: {level}、次のレベルまで{percent}%",
-  "paywallNowOnPlan": "現在{plan}をご利用中です。無制限の学習をお楽しみください！"
+  "paywallNowOnPlan": "現在{plan}をご利用中です。無制限の学習をお楽しみください！",
+  "engineSpeed": "再生速度",
+  "engineWhatChanged": "変わったところ",
+  "engineIntro": "解き方が一手ずつ形になる様子を見てみましょう。",
+  "engineUnderstandTitle": "問題を理解する",
+  "engineUnderstandDetail": "まずは、何を解くのかを正確に確認しましょう。",
+  "engineVerifyTitle": "確かめてみる",
+  "engineAnswerTitle": "できました！",
+  "engineAnswerDetail": "これが答えです — すべてのステップがここへ導きました。",
+  "enginePhaseUnderstand": "理解する",
+  "enginePhaseChooseMethod": "解き方を選ぶ",
+  "enginePhaseApply": "ルールを使う",
+  "enginePhaseSimplify": "整理する",
+  "enginePhaseVerify": "確かめる",
+  "enginePhaseAnswer": "答え"
 }

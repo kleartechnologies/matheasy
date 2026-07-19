@@ -1181,6 +1181,48 @@ class AppLocalizationsJa extends AppLocalizations {
   String get visualPlay => '再生';
 
   @override
+  String get engineSpeed => '再生速度';
+
+  @override
+  String get engineWhatChanged => '変わったところ';
+
+  @override
+  String get engineIntro => '解き方が一手ずつ形になる様子を見てみましょう。';
+
+  @override
+  String get engineUnderstandTitle => '問題を理解する';
+
+  @override
+  String get engineUnderstandDetail => 'まずは、何を解くのかを正確に確認しましょう。';
+
+  @override
+  String get engineVerifyTitle => '確かめてみる';
+
+  @override
+  String get engineAnswerTitle => 'できました！';
+
+  @override
+  String get engineAnswerDetail => 'これが答えです — すべてのステップがここへ導きました。';
+
+  @override
+  String get enginePhaseUnderstand => '理解する';
+
+  @override
+  String get enginePhaseChooseMethod => '解き方を選ぶ';
+
+  @override
+  String get enginePhaseApply => 'ルールを使う';
+
+  @override
+  String get enginePhaseSimplify => '整理する';
+
+  @override
+  String get enginePhaseVerify => '確かめる';
+
+  @override
+  String get enginePhaseAnswer => '答え';
+
+  @override
   String get teachingTheIdea => '考え方';
 
   @override

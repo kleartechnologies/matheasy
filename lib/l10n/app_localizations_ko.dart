@@ -1186,6 +1186,48 @@ class AppLocalizationsKo extends AppLocalizations {
   String get visualPlay => '재생';
 
   @override
+  String get engineSpeed => '재생 속도';
+
+  @override
+  String get engineWhatChanged => '무엇이 바뀌었나요';
+
+  @override
+  String get engineIntro => '풀이가 한 단계씩 살아나는 과정을 지켜보세요.';
+
+  @override
+  String get engineUnderstandTitle => '문제 이해하기';
+
+  @override
+  String get engineUnderstandDetail => '먼저, 우리가 무엇을 풀고 있는지 정확히 살펴봐요.';
+
+  @override
+  String get engineVerifyTitle => '맞는지 확인하기';
+
+  @override
+  String get engineAnswerTitle => '해냈어요!';
+
+  @override
+  String get engineAnswerDetail => '이것이 답이에요 — 모든 단계가 여기로 이어졌어요.';
+
+  @override
+  String get enginePhaseUnderstand => '이해하기';
+
+  @override
+  String get enginePhaseChooseMethod => '방법 고르기';
+
+  @override
+  String get enginePhaseApply => '규칙 적용하기';
+
+  @override
+  String get enginePhaseSimplify => '정리하기';
+
+  @override
+  String get enginePhaseVerify => '검산하기';
+
+  @override
+  String get enginePhaseAnswer => '정답';
+
+  @override
   String get teachingTheIdea => '핵심 개념';
 
   @override
