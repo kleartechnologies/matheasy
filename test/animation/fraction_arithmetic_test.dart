@@ -63,4 +63,20 @@ void main() {
   test('bails on plain integer arithmetic (no fraction)', () {
     expect(FractionArithmetic.tryBuild(_r('2+3', '5')), isNull);
   });
+
+  test('declines a huge operand gracefully instead of throwing (crash guard)',
+      () {
+    // A > 2^63 operand would make int.parse throw and crash the Visual tab;
+    // tryBuild must return null so dispatch falls through to the next engine.
+    expect(
+      () => FractionArithmetic.tryBuild(
+          _r(r'\frac{99999999999999999999}{2}+\frac{1}{3}', '5/6')),
+      returnsNormally,
+    );
+    expect(
+      FractionArithmetic.tryBuild(
+          _r(r'\frac{99999999999999999999}{2}+\frac{1}{3}', '5/6')),
+      isNull,
+    );
+  });
 }

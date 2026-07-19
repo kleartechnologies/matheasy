@@ -100,14 +100,25 @@ class _LongDivisionViewState extends State<LongDivisionView>
         const SizedBox(height: AppSpacing.lg),
         LayoutBuilder(
           builder: (context, constraints) {
-            final stageW =
+            final avail =
                 constraints.maxWidth.isFinite ? constraints.maxWidth : 340.0;
+            // Build at the worksheet's natural width; when a wide divisor makes
+            // it exceed the stage, FittedBox scales it down to fit rather than
+            // painting the divisor off the left edge. Normal sizes are unchanged.
+            final natural = _contentW > avail ? _contentW : avail;
             return AnimatedBuilder(
               animation: _c,
               builder: (context, _) => SizedBox(
-                width: stageW,
+                width: avail,
                 height: _totalH,
-                child: _buildStage(context, step, stageW),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: natural,
+                    height: _totalH,
+                    child: _buildStage(context, step, natural),
+                  ),
+                ),
               ),
             );
           },

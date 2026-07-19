@@ -102,14 +102,25 @@ class _LongMultiplicationViewState extends State<LongMultiplicationView>
         const SizedBox(height: AppSpacing.lg),
         LayoutBuilder(
           builder: (context, constraints) {
-            final stageW =
+            final avail =
                 constraints.maxWidth.isFinite ? constraints.maxWidth : 340.0;
+            // Build at the grid's natural width; when wide factors make it
+            // exceed the stage, FittedBox scales it down to fit rather than
+            // painting digits off the edge. Normal sizes are unchanged.
+            final natural = _gridW > avail ? _gridW : avail;
             return AnimatedBuilder(
               animation: _c,
               builder: (context, _) => SizedBox(
-                width: stageW,
+                width: avail,
                 height: _totalH,
-                child: _buildStage(context, step, stageW),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: natural,
+                    height: _totalH,
+                    child: _buildStage(context, step, natural),
+                  ),
+                ),
               ),
             );
           },

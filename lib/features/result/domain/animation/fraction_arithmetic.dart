@@ -76,11 +76,15 @@ class FractionArithmetic {
     final bFrac = m.group(5) != null;
     if (!aFrac && !bFrac) return null;
 
-    final n1 = int.parse(m.group(1) ?? m.group(3)!);
-    final d1 = int.parse(m.group(2) ?? '1');
+    // tryParse (not parse): a huge operand (> 2^63) must DECLINE gracefully, not
+    // throw — visual_tab calls tryBuild with no try/catch, so a throw here would
+    // crash the whole Visual tab instead of falling through to the next engine.
+    final n1 = int.tryParse(m.group(1) ?? m.group(3)!);
+    final d1 = int.tryParse(m.group(2) ?? '1');
     final op = m.group(4)!;
-    final n2 = int.parse(m.group(5) ?? m.group(7)!);
-    final d2 = int.parse(m.group(6) ?? '1');
+    final n2 = int.tryParse(m.group(5) ?? m.group(7)!);
+    final d2 = int.tryParse(m.group(6) ?? '1');
+    if (n1 == null || d1 == null || n2 == null || d2 == null) return null;
     if (d1 == 0 || d2 == 0) return null;
 
     // Compute the exact result as a reduced fraction.
@@ -120,9 +124,9 @@ class FractionArithmetic {
     final s = answerPlain.trim();
     final fm = RegExp(r'^(-?\d+)\s*/\s*(-?\d+)$').firstMatch(s);
     if (fm != null) {
-      final rawN = int.parse(fm.group(1)!);
-      final rawD = int.parse(fm.group(2)!);
-      if (rawD == 0) return false;
+      final rawN = int.tryParse(fm.group(1)!);
+      final rawD = int.tryParse(fm.group(2)!);
+      if (rawN == null || rawD == null || rawD == 0) return false;
       final (an, ad) = _reduce(rawN, rawD);
       return an == rn && ad == rd;
     }
