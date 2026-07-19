@@ -11,11 +11,13 @@ import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
 import '../../domain/animation/column_arithmetic.dart';
 import '../../domain/animation/decimal_arithmetic.dart';
+import '../../domain/animation/derivative_power_rule.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
 import '../../domain/animation/percentage.dart';
 import '../../domain/animation/power_root.dart';
+import '../../domain/animation/quadratic_formula.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
@@ -23,12 +25,14 @@ import '../widgets/solution_player.dart';
 import '../widgets/visual/engine/animated_learning_player.dart';
 import '../widgets/visual/engine/column_arithmetic_view.dart';
 import '../widgets/visual/engine/decimal_arithmetic_view.dart';
+import '../widgets/visual/engine/derivative_power_rule_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
 import '../widgets/visual/engine/percentage_view.dart';
 import '../widgets/visual/engine/power_root_view.dart';
+import '../widgets/visual/engine/quadratic_formula_view.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
 import '../widgets/visual/tier2_learning_cards.dart';
@@ -179,6 +183,28 @@ class VisualTab extends ConsumerWidget {
         if (percentage != null) {
           return PercentageView(
             model: percentage,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style QUADRATIC FORMULA — identify a,b,c → formula →
+        // substitute → discriminant → two roots (x^2 - 5x + 6 = 0). Golden-rule
+        // gated: integer roots that appear in the verified answer.
+        final quadratic = QuadraticFormula.tryBuild(result);
+        if (quadratic != null) {
+          return QuadraticFormulaView(
+            model: quadratic,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style DERIVATIVE (power rule) — d/dx of a polynomial: bring
+        // each power down as a multiplier and drop it by one. Golden-rule gated:
+        // the computed derivative must equal the verified answer.
+        final derivative = DerivativePowerRule.tryBuild(result);
+        if (derivative != null) {
+          return DerivativePowerRuleView(
+            model: derivative,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }

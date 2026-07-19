@@ -21,11 +21,13 @@ import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
 import '../domain/animation/column_arithmetic.dart';
 import '../domain/animation/decimal_arithmetic.dart';
+import '../domain/animation/derivative_power_rule.dart';
 import '../domain/animation/fraction_arithmetic.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
 import '../domain/animation/percentage.dart';
 import '../domain/animation/power_root.dart';
+import '../domain/animation/quadratic_formula.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/teaching_models.dart';
@@ -289,6 +291,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: pct.steps.length,
         caption: pct.steps[i].caption,
         callout: pct.steps[i].callout,
+      );
+    }
+    final quad = QuadraticFormula.tryBuild(result);
+    if (quad != null) {
+      final i = stepIndex.clamp(0, quad.steps.length - 1);
+      return (
+        label: 'quadratic formula',
+        total: quad.steps.length,
+        caption: quad.steps[i].caption,
+        callout: quad.steps[i].callout,
+      );
+    }
+    final deriv = DerivativePowerRule.tryBuild(result);
+    if (deriv != null) {
+      final i = stepIndex.clamp(0, deriv.steps.length - 1);
+      return (
+        label: 'derivative (power rule)',
+        total: deriv.steps.length,
+        caption: deriv.steps[i].caption,
+        callout: deriv.steps[i].callout,
       );
     }
     return null;
