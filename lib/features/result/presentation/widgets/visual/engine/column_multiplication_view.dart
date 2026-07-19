@@ -37,17 +37,17 @@ class ColumnMultiplicationView extends StatefulWidget {
 class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     with SingleTickerProviderStateMixin {
   // --- grid geometry (logical px) -------------------------------------------
-  static const double _fontSize = 36;
-  static const double _cellW = 40;
-  static const double _digitH = 46;
-  static const double _carryH = 26;
+  static const double _fontSize = 42;
+  static const double _cellW = 44;
+  static const double _digitH = 54;
+  static const double _carryH = 30;
   static const double _topY = _carryH;
   static const double _multY = _topY + _digitH;
-  static const double _lineY = _multY + _digitH + 2;
-  static const double _resultY = _lineY + 8;
+  static const double _lineY = _multY + _digitH + 4;
+  static const double _resultY = _lineY + 10;
   static const double _gridBottom = _resultY + _digitH;
-  static const double _calloutY = _gridBottom + 24;
-  static const double _totalH = _calloutY + 44;
+  static const double _calloutY = _gridBottom + 18;
+  static const double _totalH = _calloutY + 56; // fully contains a 1-line callout
 
   late final AnimationController _c = AnimationController(
     vsync: this,
@@ -62,8 +62,12 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
   int get _last => widget.model.steps.length - 1;
   bool get _isLast => _index == _last;
 
-  /// Centre x of column [col] (0 = ones, rightmost).
-  double _colX(int col) => (_cols - 1 - col) * _cellW + _cellW / 2;
+  /// Left edge of the (centred) grid within a stage of width [stageW].
+  double _gridLeft(double stageW) => (stageW - _gridW) / 2;
+
+  /// Centre x of column [col] (0 = ones, rightmost) within a stage of [stageW].
+  double _colX(int col, double stageW) =>
+      _gridLeft(stageW) + (_cols - 1 - col) * _cellW + _cellW / 2;
 
   @override
   void dispose() {
@@ -108,17 +112,21 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
       children: [
         _StepIndicator(index: _index, total: widget.model.steps.length),
         const SizedBox(height: AppSpacing.lg),
-        Center(
-          child: AnimatedBuilder(
-            animation: _c,
-            builder: (context, _) => SizedBox(
-              width: _gridW,
-              height: _totalH,
-              child: _buildStage(context, step, calloutIsNew),
-            ),
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stageW =
+                constraints.maxWidth.isFinite ? constraints.maxWidth : 340.0;
+            return AnimatedBuilder(
+              animation: _c,
+              builder: (context, _) => SizedBox(
+                width: stageW,
+                height: _totalH,
+                child: _buildStage(context, step, calloutIsNew, stageW),
+              ),
+            );
+          },
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.xl),
         _Caption(text: step.caption),
         const SizedBox(height: AppSpacing.md),
         _Controls(
@@ -138,7 +146,8 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     );
   }
 
-  Widget _buildStage(BuildContext context, ColMulStep step, bool calloutIsNew) {
+  Widget _buildStage(
+      BuildContext context, ColMulStep step, bool calloutIsNew, double stageW) {
     final t = Curves.easeOut.transform(_c.value);
     final colors = context.colors;
     final ink = colors.textPrimary;
@@ -152,12 +161,12 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
 
     // --- the dashed arrow (callout → emphasised cell), behind the digits ------
     if (step.callout != null) {
-      final from = Offset(_gridW / 2, _calloutY - 2);
+      final from = Offset(stageW / 2, _calloutY - 2);
       Offset? to;
       if (step.emphResultCol != null) {
-        to = Offset(_colX(step.emphResultCol!), _resultY + _digitH - 4);
+        to = Offset(_colX(step.emphResultCol!, stageW), _resultY + _digitH - 4);
       } else if (step.emphCarryCol != null) {
-        to = Offset(_colX(step.emphCarryCol!), _carryH - 2);
+        to = Offset(_colX(step.emphCarryCol!, stageW), _carryH - 2);
       }
       if (to != null) {
         children.add(Positioned.fill(
@@ -172,12 +181,13 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     step.carryDigits.forEach((col, digit) {
       final isNew = step.emphCarryCol == col;
       children.add(_cell(
-        cx: _colX(col),
-        top: _carryH * 0.15,
+        cx: _colX(col, stageW),
+        top: 0,
+        height: _carryH,
         text: '$digit',
-        fontSize: 20,
+        fontSize: 22,
         color: blue,
-        box: isNew ? blue.withValues(alpha: 0.16) : null,
+        box: isNew ? blue.withValues(alpha: 0.18) : null,
         opacity: isNew ? t : 1,
         scale: isNew ? 0.7 + 0.3 * t : 1,
       ));
@@ -188,7 +198,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     for (var i = 0; i < top.length; i++) {
       final col = top.length - 1 - i;
       children.add(_cell(
-        cx: _colX(col),
+        cx: _colX(col, stageW),
         top: _topY,
         text: '${top[i]}',
         fontSize: _fontSize,
@@ -201,14 +211,14 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
 
     // --- multiplier row (× + the single digit) --------------------------------
     children.add(_cell(
-      cx: _colX(0) - _cellW,
+      cx: _colX(0, stageW) - _cellW,
       top: _multY,
       text: '×',
       fontSize: _fontSize,
       color: colors.textSecondary,
     ));
     children.add(_cell(
-      cx: _colX(0),
+      cx: _colX(0, stageW),
       top: _multY,
       text: '${m.multiplier}',
       fontSize: _fontSize,
@@ -218,7 +228,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
 
     // --- the rule --------------------------------------------------------------
     children.add(Positioned(
-      left: _colX(_cols - 1) - _cellW / 2,
+      left: _gridLeft(stageW),
       top: _lineY,
       child: Container(width: _gridW, height: 3, color: ink),
     ));
@@ -229,7 +239,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
       if (d == null) continue;
       final isNew = step.emphResultCol == col;
       children.add(_cell(
-        cx: _colX(col),
+        cx: _colX(col, stageW),
         top: _resultY,
         text: '$d',
         fontSize: _fontSize,
@@ -267,10 +277,11 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     Color? box,
     double opacity = 1,
     double scale = 1,
+    double height = _digitH,
   }) {
     Widget child = Container(
       width: _cellW,
-      height: _digitH,
+      height: height,
       alignment: Alignment.center,
       decoration: box == null
           ? null
@@ -380,9 +391,12 @@ class _CalloutPill extends StatelessWidget {
       ),
       child: Text(
         text,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.visible,
         style: const TextStyle(
           color: AppColors.white,
-          fontSize: 19,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
       ),
