@@ -28,7 +28,6 @@ import 'tabs/methods_tab.dart';
 import 'tabs/practice_tab.dart';
 import 'tabs/solution_tab.dart';
 import 'tabs/visual_tab.dart';
-import 'widgets/play_solution_overlay.dart';
 import 'widgets/result_action_bar.dart';
 import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
@@ -448,11 +447,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         scanImage,
         ResultHeader(
           result: result,
-          onPlay: () => PlaySolutionOverlay.show(
-            context,
-            steps: result.steps,
-            verifyText: result.verifyText,
-          ),
+          // "Play step-by-step" now jumps to the Pro Visual tab — the animated
+          // walkthrough lives there (free users meet the unlock), so Play Solution
+          // is a single, Pro experience rather than a duplicate free overlay.
+          onPlay: () => _selectTab(_visualTabIndex),
           onRescan: () => context.push(AppRoutes.scan),
         ),
         const SizedBox(height: AppSpacing.lg),
