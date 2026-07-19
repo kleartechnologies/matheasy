@@ -101,8 +101,10 @@ class PowerRoot {
       ),
       PowerRootStep(
         latex: '$p',
-        caption: 'Multiply left to right',
-        callout: chain.join(' → '),
+        // A square has a single multiplication — the running chain (2→4→8…) only
+        // helps for e ≥ 3, so squares just show b × b = p.
+        caption: e == 2 ? 'Multiply it out' : 'Multiply left to right',
+        callout: e == 2 ? '$b × $b = $p' : chain.join(' → '),
       ),
       PowerRootStep(
         latex: '$b^{$e} = $p',
@@ -126,7 +128,7 @@ class PowerRoot {
       PowerRootStep(
         latex: '$power = $n',
         caption: 'Test $r',
-        callout: '$r gives $n ✓',
+        callout: '$r works ✓',
       ),
       PowerRootStep(
         latex: '$rootLatex = $r',

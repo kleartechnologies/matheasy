@@ -35,6 +35,13 @@ void main() {
     expect(p.steps.last.latex, '2^{5} = 32');
   });
 
+  test('5^2 → 25: a square shows the single multiplication, not a chain', () {
+    final p = PowerRoot.tryBuild(_r('5^2', '25'))!;
+    expect(_callouts(p), contains('5 × 5 = 25'));
+    expect(_callouts(p), isNot(contains('5 → 25')));
+    expect(p.steps.last.latex, '5^{2} = 25');
+  });
+
   test('√144 → 12: asks what times itself is 144', () {
     final p = PowerRoot.tryBuild(_r(r'\sqrt{144}', '12'))!;
     expect(p.steps.first.caption, 'The square root of 144');
