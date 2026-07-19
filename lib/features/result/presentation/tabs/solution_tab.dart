@@ -14,7 +14,6 @@ import '../../domain/result_models.dart';
 import '../../domain/teaching_models.dart';
 import '../widgets/math_text.dart';
 import '../widgets/result_graph.dart';
-import '../widgets/solution_player.dart';
 import '../widgets/step_diff.dart';
 import '../widgets/teaching/teaching_cards.dart';
 
@@ -116,41 +115,16 @@ class _SolutionTabState extends State<SolutionTab> {
     // server attached none → the whole block below is skipped and this tab is
     // byte-identical to today's. Each card also guards its own emptiness.
     final teaching = widget.result.teaching;
-    // The OPTIONAL animation sidecar (server `animationSchema`). Null/empty for
-    // every payload without one (the common case) → the entry point below is
-    // skipped and this tab is unchanged. Present only for a flag-on mathsteps
-    // equation solve.
-    final animationSchema = widget.result.animationSchema;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Visual Learning is the flagship — surfaced above the steps with more
         // visual weight than the answer banner, so students reach for
-        // understanding, not just the final line.
+        // understanding, not just the final line. (The step-by-step "Play
+        // Solution" player itself lives inside the Pro Visual tab.)
         if (widget.onOpenVisual != null) ...[
           _VisualLearningHero(onTap: widget.onOpenVisual!),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-        // The step-by-step animation player (server `animationSchema`). Shown
-        // ONLY when the server attached a non-empty schema; absent otherwise, so
-        // this tab is byte-identical to today for every payload without one.
-        if (animationSchema != null && animationSchema.isNotEmpty) ...[
-          _SolutionPlayerEntry(
-            onTap: () => SolutionPlayer.show(
-              context,
-              schema: animationSchema,
-              // The tutor narration already on-device (the exam-pick steps),
-              // index-aligned with the schema — the player looks it up per step.
-              // No new LLM call; this is pure reuse of ResultData.steps.
-              stepDetails: [
-                for (final s in widget.result.steps) s.detail,
-              ],
-              stepLabels: [
-                for (final s in widget.result.steps) s.title,
-              ],
-            ),
-          ),
           const SizedBox(height: AppSpacing.lg),
         ],
         // --- Teaching: orient BEFORE the steps (concept → why → journey). ---
@@ -919,64 +893,6 @@ class _VisualLearningHero extends StatelessWidget {
   }
 }
 
-/// The entry point to the step-by-step animation player (server `animationSchema`).
-/// A modest tappable card — deliberately lighter than the premium Visual hero so
-/// it complements rather than competes. Rendered only when a non-empty schema is
-/// present (see [SolutionTab.build]).
-class _SolutionPlayerEntry extends StatelessWidget {
-  const _SolutionPlayerEntry({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final emerald =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-    return Semantics(
-      button: true,
-      label: context.l10n.resultPlaySolution,
-      excludeSemantics: true,
-      child: AppCard(
-        onTap: onTap,
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.auto_awesome_motion_rounded,
-                  size: 22, color: emerald),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.resultPlaySolution,
-                    style: AppTypography.title.copyWith(color: colors.textPrimary),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.solutionVisualHeroSubtitle,
-                    style: AppTypography.bodySmall
-                        .copyWith(color: colors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Icon(Icons.chevron_right_rounded, size: 22, color: colors.textMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _VerifyCard extends StatelessWidget {
   const _VerifyCard({required this.text});
