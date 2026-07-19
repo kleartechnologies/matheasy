@@ -9,13 +9,13 @@ import '../../../scan/domain/detected_equation.dart';
 import '../../../subscription/application/subscription_controller.dart';
 import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
-import '../../domain/animation/column_multiplication.dart';
+import '../../domain/animation/column_arithmetic.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
 import '../widgets/solution_player.dart';
 import '../widgets/visual/engine/animated_learning_player.dart';
-import '../widgets/visual/engine/column_multiplication_view.dart';
+import '../widgets/visual/engine/column_arithmetic_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
@@ -94,13 +94,14 @@ class VisualTab extends ConsumerWidget {
             onAskMatheasy: (step) => onAskMatheasy(visual, step),
           );
         }
-        // Photomath-style COLUMN MULTIPLICATION for an integer × single-digit
-        // product (e.g. 72 × 6) — the spatial, carry-animated tutorial. Only when
-        // the algorithm's product equals the verified answer (golden rule).
-        final colMul = ColumnMultiplication.tryBuild(result);
-        if (colMul != null) {
-          return ColumnMultiplicationView(
-            model: colMul,
+        // Photomath-style COLUMN ARITHMETIC — long addition, subtraction, or
+        // single-digit multiplication (e.g. 72 × 6, 348 + 275, 502 − 87) laid out
+        // digit-by-digit with carries/borrows. Only when the standard algorithm's
+        // result equals the verified answer (golden rule).
+        final colArith = ColumnArithmetic.tryBuild(result);
+        if (colArith != null) {
+          return ColumnArithmeticView(
+            model: colArith,
             onAskStep: (i) => onAskMatheasy(
               visual,
               visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),

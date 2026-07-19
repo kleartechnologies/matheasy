@@ -11,32 +11,27 @@ import '../../../../../../core/theme/app_durations.dart';
 import '../../../../../../core/theme/app_radius.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../../../../../../core/theme/app_typography.dart';
-import '../../../../domain/animation/column_multiplication.dart';
+import '../../../../domain/animation/column_arithmetic.dart';
 
-/// A Photomath-style animated COLUMN MULTIPLICATION tutorial (e.g. `72 × 6`):
-/// the digits are laid out as a grid, the operands highlight, a bold callout
-/// shows the sub-calculation, and dashed arrows carry the digits up (carry) and
-/// down (answer line). Driven by the verified [ColumnMultiplication] model.
-class ColumnMultiplicationView extends StatefulWidget {
-  const ColumnMultiplicationView({
-    super.key,
-    required this.model,
-    this.onAskStep,
-  });
+/// A Photomath-style animated COLUMN ARITHMETIC tutorial — long addition,
+/// subtraction, or single-digit multiplication. Digits are laid out as a grid,
+/// the working operands highlight, a bold callout shows the sub-calculation, and
+/// dashed arrows carry/borrow digits up and drop answer digits down. Driven by
+/// the verified [ColumnArithmetic] model.
+class ColumnArithmeticView extends StatefulWidget {
+  const ColumnArithmeticView({super.key, required this.model, this.onAskStep});
 
-  final ColumnMultiplication model;
+  final ColumnArithmetic model;
 
   /// Optional "Ask Matheasy about this step".
   final ValueChanged<int>? onAskStep;
 
   @override
-  State<ColumnMultiplicationView> createState() =>
-      _ColumnMultiplicationViewState();
+  State<ColumnArithmeticView> createState() => _ColumnArithmeticViewState();
 }
 
-class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
+class _ColumnArithmeticViewState extends State<ColumnArithmeticView>
     with SingleTickerProviderStateMixin {
-  // --- grid geometry (logical px) -------------------------------------------
   static const double _fontSize = 42;
   static const double _cellW = 44;
   static const double _digitH = 54;
@@ -47,7 +42,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
   static const double _resultY = _lineY + 10;
   static const double _gridBottom = _resultY + _digitH;
   static const double _calloutY = _gridBottom + 18;
-  static const double _totalH = _calloutY + 56; // fully contains a 1-line callout
+  static const double _totalH = _calloutY + 56;
 
   late final AnimationController _c = AnimationController(
     vsync: this,
@@ -62,10 +57,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
   int get _last => widget.model.steps.length - 1;
   bool get _isLast => _index == _last;
 
-  /// Left edge of the (centred) grid within a stage of width [stageW].
   double _gridLeft(double stageW) => (stageW - _gridW) / 2;
-
-  /// Centre x of column [col] (0 = ones, rightmost) within a stage of [stageW].
   double _colX(int col, double stageW) =>
       _gridLeft(stageW) + (_cols - 1 - col) * _cellW + _cellW / 2;
 
@@ -147,31 +139,27 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
   }
 
   Widget _buildStage(
-      BuildContext context, ColMulStep step, bool calloutIsNew, double stageW) {
+      BuildContext context, ColumnArithmeticStep step, bool calloutIsNew, double stageW) {
     final t = Curves.easeOut.transform(_c.value);
     final colors = context.colors;
     final ink = colors.textPrimary;
     const coral = AppColors.accentCoral;
     const blue = AppColors.info;
-    final green =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    final green = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     final m = widget.model;
 
     final children = <Widget>[];
 
-    // --- the dashed arrow (callout → emphasised cell), behind the digits ------
+    // --- dashed arrow (callout → emphasised cell) -----------------------------
     if (step.callout != null) {
       final from = Offset(stageW / 2, _calloutY - 2);
       Offset? to;
       var bow = 16.0;
       if (step.emphResultCol != null) {
-        // Short arc up from the callout to the answer digit (both below the rule).
         to = Offset(_colX(step.emphResultCol!, stageW), _resultY + _digitH - 6);
       } else if (step.emphCarryCol != null) {
-        // Swing WIDE left so the carry arrow arcs through the empty column and
-        // never crosses the 7 × 6.
         to = Offset(_colX(step.emphCarryCol!, stageW), _carryH - 2);
-        bow = 54;
+        bow = 54; // swing wide-left, clear of the digits
       }
       if (to != null) {
         children.add(Positioned.fill(
@@ -183,8 +171,9 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
       }
     }
 
-    // --- carry digits (small, above the top row) ------------------------------
-    step.carryDigits.forEach((col, digit) {
+    // --- carry / borrow digits (small, above the top row) ---------------------
+    final aboveTop = {...step.carryDigits, ...step.borrowDigits};
+    aboveTop.forEach((col, digit) {
       final isNew = step.emphCarryCol == col;
       children.add(_cell(
         cx: _colX(col, stageW),
@@ -199,7 +188,7 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
       ));
     });
 
-    // --- top number ------------------------------------------------------------
+    // --- top number (with strike-through where borrowed from) -----------------
     final top = m.topDigits;
     for (var i = 0; i < top.length; i++) {
       final col = top.length - 1 - i;
@@ -209,28 +198,35 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
         text: '${top[i]}',
         fontSize: _fontSize,
         color: ink,
-        box: step.highlightTopCols.contains(col)
+        strike: step.struckTop.contains(col),
+        box: step.highlightTop.contains(col)
             ? coral.withValues(alpha: 0.20)
             : null,
       ));
     }
 
-    // --- multiplier row (× + the single digit) --------------------------------
+    // --- operator + bottom number ---------------------------------------------
     children.add(_cell(
-      cx: _colX(0, stageW) - _cellW,
+      cx: _colX(m.bottomWidth - 1, stageW) - _cellW,
       top: _multY,
-      text: '×',
+      text: m.operatorSymbol,
       fontSize: _fontSize,
       color: colors.textSecondary,
     ));
-    children.add(_cell(
-      cx: _colX(0, stageW),
-      top: _multY,
-      text: '${m.multiplier}',
-      fontSize: _fontSize,
-      color: ink,
-      box: step.highlightMultiplier ? coral.withValues(alpha: 0.20) : null,
-    ));
+    final bottom = m.bottomDigits;
+    for (var i = 0; i < bottom.length; i++) {
+      final col = bottom.length - 1 - i;
+      children.add(_cell(
+        cx: _colX(col, stageW),
+        top: _multY,
+        text: '${bottom[i]}',
+        fontSize: _fontSize,
+        color: ink,
+        box: step.highlightBottom.contains(col)
+            ? coral.withValues(alpha: 0.20)
+            : null,
+      ));
+    }
 
     // --- the rule --------------------------------------------------------------
     children.add(Positioned(
@@ -284,8 +280,8 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     double opacity = 1,
     double scale = 1,
     double height = _digitH,
+    bool strike = false,
   }) {
-    // A snug rounded box that HUGS the digit (small padding), not the whole cell.
     Widget label = Text(
       text,
       style: TextStyle(
@@ -293,30 +289,26 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
         fontWeight: FontWeight.w700,
         color: color,
         height: 1.1,
+        decoration: strike ? TextDecoration.lineThrough : null,
+        decorationColor: AppColors.accentCoral,
+        decorationThickness: 2.5,
       ),
     );
     if (box != null) {
       label = Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        decoration: BoxDecoration(
-          color: box,
-          borderRadius: BorderRadius.circular(8),
-        ),
+        decoration: BoxDecoration(color: box, borderRadius: BorderRadius.circular(8)),
         child: label,
       );
     }
-    Widget child = SizedBox(
-      width: _cellW,
-      height: height,
-      child: Center(child: label),
-    );
+    Widget child = SizedBox(width: _cellW, height: height, child: Center(child: label));
     if (scale != 1) child = Transform.scale(scale: scale, child: child);
     if (opacity != 1) child = Opacity(opacity: opacity.clamp(0, 1), child: child);
     return Positioned(left: cx - _cellW / 2, top: top, child: child);
   }
 }
 
-/// A dashed, gently-bowed arrow from [from] up to [to], drawn to [reveal] (0→1).
+/// A dashed, bowed arrow from [from] to [to], drawn to [reveal] (0→1).
 class _DashArrowPainter extends CustomPainter {
   _DashArrowPainter({
     required this.from,
@@ -330,9 +322,6 @@ class _DashArrowPainter extends CustomPainter {
   final Offset to;
   final double reveal;
   final Color color;
-
-  /// How far the curve bows to one side (perpendicular). Larger = wider arc — used
-  /// to swing the carry arrow clear of the digits.
   final double bow;
 
   @override
@@ -342,7 +331,7 @@ class _DashArrowPainter extends CustomPainter {
     final stroke = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
+      ..strokeWidth = 3.2
       ..strokeCap = StrokeCap.round;
 
     final dir = to - from;
@@ -385,7 +374,7 @@ class _DashArrowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DashArrowPainter old) =>
-      old.reveal != reveal || old.from != from || old.to != to;
+      old.reveal != reveal || old.from != from || old.to != to || old.bow != bow;
 }
 
 class _CalloutPill extends StatelessWidget {
@@ -500,29 +489,23 @@ class _Controls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _circle(
-          context,
-          icon: Icons.arrow_back_rounded,
-          label: context.l10n.resultPreviousStep,
-          onTap: index > 0 ? onPrev : null,
-        ),
+        _circle(context,
+            icon: Icons.arrow_back_rounded,
+            label: context.l10n.resultPreviousStep,
+            onTap: index > 0 ? onPrev : null),
         const SizedBox(width: AppSpacing.md),
-        _circle(
-          context,
-          icon: isLast
-              ? Icons.replay_rounded
-              : (playing ? Icons.pause_rounded : Icons.play_arrow_rounded),
-          label: context.l10n.resultPlayWalkthroughShort,
-          filled: true,
-          onTap: isLast ? onReplay : onTogglePlay,
-        ),
+        _circle(context,
+            icon: isLast
+                ? Icons.replay_rounded
+                : (playing ? Icons.pause_rounded : Icons.play_arrow_rounded),
+            label: context.l10n.resultPlayWalkthroughShort,
+            filled: true,
+            onTap: isLast ? onReplay : onTogglePlay),
         const SizedBox(width: AppSpacing.md),
-        _circle(
-          context,
-          icon: Icons.arrow_forward_rounded,
-          label: context.l10n.resultNextStep,
-          onTap: isLast ? null : onNext,
-        ),
+        _circle(context,
+            icon: Icons.arrow_forward_rounded,
+            label: context.l10n.resultNextStep,
+            onTap: isLast ? null : onNext),
       ],
     );
   }
@@ -552,11 +535,8 @@ class _Controls extends StatelessWidget {
               color: filled ? AppColors.primaryAction : colors.surfaceMuted,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: filled ? AppColors.white : colors.textSecondary,
-            ),
+            child: Icon(icon,
+                size: 24, color: filled ? AppColors.white : colors.textSecondary),
           ),
         ),
       ),
@@ -585,10 +565,8 @@ class _AskButton extends StatelessWidget {
           children: [
             Icon(Icons.help_outline_rounded, size: 16, color: emerald),
             const SizedBox(width: AppSpacing.xxs),
-            Text(
-              context.l10n.tutorAsk,
-              style: AppTypography.caption.copyWith(color: emerald),
-            ),
+            Text(context.l10n.tutorAsk,
+                style: AppTypography.caption.copyWith(color: emerald)),
           ],
         ),
       ),
