@@ -456,11 +456,8 @@ class _MorphStack extends StatelessWidget {
                 end, layout.afterSizeOf[a.id], colors.merged, resultGlow * 0.34));
           }
           frags.add(_frag(a.latex, end, appearT, color, layout.afterSizeOf[a.id]));
-          if (moveT > 0.02 && op!.fromIds.length >= 2) {
-            for (final fromId in op.fromIds) {
-              arrows.add(_ArrowSpec(_centerBefore(fromId), _centerAfter(a.id)));
-            }
-          }
+          // (The connector arrow for a merge is drawn from the callout box down to
+          // this result below — adjacent digits are too close for a useful arc.)
 
         case MorphKind.enter:
           frags.add(_frag(a.latex, end, appearT, colors.merged, layout.afterSizeOf[a.id]));
@@ -492,7 +489,20 @@ class _MorphStack extends StatelessWidget {
       }
     }
 
+    // The callout floats ~96px above the result, with a bold dashed arrow pointing
+    // down to it (adjacent operands are too close for a source→result arc).
     final callout = _primaryCallout();
+    _ArrowSpec? calloutArrow;
+    Offset? calloutAnchor; // result-x, callout-top
+    if (callout != null) {
+      final resultCenter = _centerAfter(callout.resultId);
+      final rTop = layout.afterPos[callout.resultId]?.dy ?? 0;
+      calloutAnchor = Offset(resultCenter.dx, rTop - 96);
+      calloutArrow = _ArrowSpec(
+        Offset(resultCenter.dx, rTop - 56),
+        Offset(resultCenter.dx, rTop - 6),
+      );
+    }
 
     return Stack(clipBehavior: Clip.none, children: [
       if (arrows.isNotEmpty && arrowOpacity > 0.02)
@@ -506,17 +516,28 @@ class _MorphStack extends StatelessWidget {
             ),
           ),
         ),
+      if (calloutArrow != null && calloutOpacity > 0.02)
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _ArrowsPainter(
+              arrows: [calloutArrow],
+              reveal: appearT,
+              opacity: calloutOpacity,
+              color: colors.arrow,
+            ),
+          ),
+        ),
       ...highlights,
       ...frags,
-      if (callout != null && calloutOpacity > 0.02)
+      if (callout != null && calloutAnchor != null && calloutOpacity > 0.02)
         Positioned(
-          left: 0,
-          right: 0,
-          top: -48,
-          child: Center(
+          left: calloutAnchor.dx,
+          top: calloutAnchor.dy,
+          child: FractionalTranslation(
+            translation: const Offset(-0.5, 0), // centre the pill on the result-x
             child: Opacity(
               opacity: calloutOpacity.clamp(0.0, 1.0),
-              child: _CalloutPill(latex: callout, background: colors.moved),
+              child: _CalloutPill(latex: callout.latex, background: colors.moved),
             ),
           ),
         ),
@@ -527,7 +548,7 @@ class _MorphStack extends StatelessWidget {
   /// as "sources = result" (e.g. "7 - 3 = 4"). Every part is verified LaTeX, so
   /// this can never show a value the solver didn't produce. Null when there's no
   /// clean combination to narrate.
-  String? _primaryCallout() {
+  ({String latex, int resultId})? _primaryCallout() {
     for (final op in morph.ops) {
       if (op.kind != MorphKind.merge || op.fromIds.length < 2 || op.toIds.isEmpty) {
         continue;
@@ -543,12 +564,15 @@ class _MorphStack extends StatelessWidget {
         parts.add(t.latex.trim());
       }
       if (!ok) continue;
-      final after = _afterById(op.toIds.first);
+      final resultId = op.toIds.first;
+      final after = _afterById(resultId);
       final result = after?.latex.trim() ?? '';
       if (result.isEmpty) continue;
       final lhs = parts.join(' ').replaceFirst(RegExp(r'^\+\s*'), '').trim();
       if (lhs.isEmpty) continue;
-      return '$lhs = $result';
+      // Only when the result actually has a laid-out position to anchor to.
+      if (layout.afterPos[resultId] == null) continue;
+      return (latex: '$lhs = $result', resultId: resultId);
     }
     return null;
   }
@@ -642,7 +666,7 @@ class _ArrowsPainter extends CustomPainter {
     final stroke = Paint()
       ..color = color.withValues(alpha: a)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
+      ..strokeWidth = 3.2
       ..strokeCap = StrokeCap.round;
     final fill = Paint()
       ..color = color.withValues(alpha: a)
@@ -656,7 +680,7 @@ class _ArrowsPainter extends CustomPainter {
       final metric = metrics.first;
       final drawn = metric.length * r;
       // Dashed stroke up to the reveal point.
-      const dash = 7.0, gap = 5.0;
+      const dash = 8.0, gap = 5.0;
       var d = 0.0;
       while (d < drawn) {
         final segEnd = math.min(d + dash, drawn);
@@ -664,10 +688,10 @@ class _ArrowsPainter extends CustomPainter {
         d += dash + gap;
       }
       // Arrowhead at the leading edge (once past the mid-point).
-      if (r > 0.55) {
+      if (r > 0.5) {
         final tan = metric.getTangentForOffset(drawn);
         if (tan != null) {
-          const size = 7.0;
+          const size = 9.0;
           final tip = tan.position;
           final ang = tan.angle;
           final back1 = tip + Offset.fromDirection(ang + math.pi - 0.5, size);
@@ -685,10 +709,22 @@ class _ArrowsPainter extends CustomPainter {
     }
   }
 
-  /// A quadratic-bezier that arcs UP between the two points (the Photomath swoop).
+  /// A quadratic-bezier that bows to one side (the Photomath swoop). The control
+  /// point is offset PERPENDICULAR to the line, so a horizontal move arcs up and a
+  /// vertical callout→result arrow bows gently sideways — never a degenerate loop.
   Path _curve(Offset a, Offset b) {
-    final lift = (a - b).distance * 0.28 + 16;
-    final ctrl = Offset((a.dx + b.dx) / 2, math.min(a.dy, b.dy) - lift);
+    final dir = b - a;
+    final len = dir.distance;
+    if (len < 1) {
+      return Path()
+        ..moveTo(a.dx, a.dy)
+        ..lineTo(b.dx, b.dy);
+    }
+    // Unit perpendicular chosen so a rightward move bows UP.
+    final perp = Offset(dir.dy, -dir.dx) / len;
+    final bow = math.min(len * 0.22, 24.0) + 6.0;
+    final mid = Offset((a.dx + b.dx) / 2, (a.dy + b.dy) / 2);
+    final ctrl = mid + perp * bow;
     return Path()
       ..moveTo(a.dx, a.dy)
       ..quadraticBezierTo(ctrl.dx, ctrl.dy, b.dx, b.dy);
