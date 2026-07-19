@@ -10,6 +10,7 @@ import '../../../subscription/application/subscription_controller.dart';
 import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
 import '../../domain/animation/column_arithmetic.dart';
+import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
@@ -17,6 +18,7 @@ import '../widgets/solution_player.dart';
 import '../widgets/visual/engine/animated_learning_player.dart';
 import '../widgets/visual/engine/column_arithmetic_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
+import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
 import '../widgets/visual/tier2_learning_cards.dart';
@@ -94,6 +96,19 @@ class VisualTab extends ConsumerWidget {
             onAskMatheasy: (step) => onAskMatheasy(visual, step),
           );
         }
+        // Photomath-style FRACTION ARITHMETIC — add/subtract/multiply/divide two
+        // fractions (common denominator, combine, simplify). Golden-rule gated.
+        final frac = FractionArithmetic.tryBuild(result);
+        if (frac != null) {
+          return FractionArithmeticView(
+            model: frac,
+            onAskStep: (i) => onAskMatheasy(
+              visual,
+              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
+            ),
+          );
+        }
+
         // Photomath-style COLUMN ARITHMETIC — long addition, subtraction, or
         // single-digit multiplication (e.g. 72 × 6, 348 + 275, 502 − 87) laid out
         // digit-by-digit with carries/borrows. Only when the standard algorithm's
