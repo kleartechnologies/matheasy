@@ -213,22 +213,27 @@ class _EquationMorphViewState extends State<EquationMorphView> {
   }
 }
 
-/// Emphasis colours for the morph, derived from the theme + brand tokens.
+/// Emphasis colours for the morph — bolder, Photomath-leaning: coral for the
+/// operands/moving term, blue for the dashed movement arrows, emerald for the
+/// resolved result (the answer stays on-brand green).
 class _MorphColors {
   const _MorphColors({
     required this.normal,
     required this.moved,
     required this.merged,
+    required this.arrow,
   });
 
   final Color normal;
-  final Color moved;
-  final Color merged;
+  final Color moved; // operands + the moving term
+  final Color merged; // the resolved result value
+  final Color arrow; // dashed movement/carry arrows
 
   factory _MorphColors.of(BuildContext context) => _MorphColors(
         normal: context.colors.textPrimary,
-        moved: AppColors.warning,
+        moved: AppColors.accentCoral,
         merged: context.isDark ? AppColors.primaryLight : AppColors.primaryDark,
+        arrow: AppColors.info,
       );
 }
 
@@ -346,14 +351,13 @@ class _MorphLayout {
 
 /// The animated stack of positioned fragments for one progress value.
 ///
-/// Calm, single-focus choreography (staged over the slower cadence): the
-/// unchanged tokens are pinned dead still at their final positions, and ONLY the
-/// one changed term draws attention — it glows, slides across the relation (with
-/// a sign flip at the crossing), and the new value fades in. No scaling, no
-/// bouncing: the student tracks exactly one thing.
+/// Photomath-style choreography: the changed tokens glow in bold boxes, the
+/// operands physically SLIDE (arc + scale) toward their result, a dashed blue
+/// arrow traces each move, and a bold callout shows the sub-calculation (e.g.
+/// "7 − 3 = 4") before the result pops in green. Unchanged tokens stay pinned.
 ///
-/// Phase map of `p` (0→1): HIGHLIGHT [0, .18] · MOVE [.18, .5] · MORPH [.5, .75]
-/// · SETTLE [.75, 1].
+/// Phase map of `p` (0→1): HIGHLIGHT [0, .16] · MOVE [.16, .55] · MORPH [.5, .8]
+/// · SETTLE [.8, 1].
 class _MorphStack extends StatelessWidget {
   const _MorphStack({
     required this.morph,
@@ -369,9 +373,9 @@ class _MorphStack extends StatelessWidget {
   final TextStyle baseStyle;
   final _MorphColors colors;
 
-  static const _highlightEnd = 0.18;
-  static const _moveEnd = 0.5;
-  static const _morphEnd = 0.75;
+  static const _highlightEnd = 0.16;
+  static const _moveEnd = 0.55;
+  static const _morphEnd = 0.8;
 
   double _sx(double edge0, double edge1) {
     if (p <= edge0) return 0;
@@ -380,13 +384,32 @@ class _MorphStack extends StatelessWidget {
     return t * t * (3 - 2 * t); // smoothstep
   }
 
+  Offset _centerAfter(int id) {
+    final pos = layout.afterPos[id];
+    final s = layout.afterSizeOf[id];
+    if (pos == null || s == null) return Offset.zero;
+    return pos + Offset(s.width / 2, s.height / 2);
+  }
+
+  Offset _centerBefore(int id) {
+    final pos = layout.beforePos[id];
+    final s = layout.beforeSizeOf[id];
+    if (pos == null || s == null) return Offset.zero;
+    return pos + Offset(s.width / 2, s.height / 2);
+  }
+
   @override
   Widget build(BuildContext context) {
     final moveT = _sx(_highlightEnd, _moveEnd); // slide progress
     final appearT = _sx(_moveEnd, _morphEnd); // new-value fade-in
-    // The active term glows through highlight + move, then settles.
-    final movedGlow = _sx(0, 0.12) * (1 - _sx(_moveEnd, 0.85));
+    final movedGlow = _sx(0, 0.12) * (1 - _sx(_moveEnd, 0.9));
+    // Dashed arrows draw in through highlight+move, fade out as it settles.
+    final arrowOpacity = _sx(0.04, 0.2) * (1 - _sx(_morphEnd, 1.0));
+    // The callout appears with the result and fades out at the very end.
+    final calloutOpacity =
+        _sx(_moveEnd - 0.08, _morphEnd) * (1 - _sx(0.9, 1.0));
 
+    final arrows = <_ArrowSpec>[];
     final highlights = <Widget>[]; // drawn behind
     final frags = <Widget>[];
 
@@ -398,35 +421,46 @@ class _MorphStack extends StatelessWidget {
       switch (op?.kind) {
         case MorphKind.keep:
         case null:
-          // Pinned, still, normal. Everything the student is NOT tracking.
           frags.add(_frag(a.latex, end, 1, colors.normal, layout.afterSizeOf[a.id]));
 
         case MorphKind.move:
-          // The hero: glow in place, slide across, flip sign at the crossing.
-          final start = layout.beforePos[op!.fromIds.first] ?? end;
-          final pos = Offset.lerp(start, end, moveT)!;
-          final before = _beforeById(op.fromIds.first);
+          // The hero: glow, then arc across the = with a slight scale, flipping
+          // sign at the crossing. A dashed arrow traces the path.
+          final fromId = op!.fromIds.first;
+          final start = layout.beforePos[fromId] ?? end;
+          final pos = Offset.lerp(start, end, moveT)! -
+              Offset(0, 24 * math.sin(math.pi * moveT)); // arc up mid-travel
+          final scale = 1 + 0.16 * math.sin(math.pi * moveT);
+          final before = _beforeById(fromId);
           final latex =
               (moveT < 0.5 && before != null) ? before.latex : a.latex;
           final color =
               Color.lerp(colors.normal, colors.moved, movedGlow) ?? colors.normal;
           if (movedGlow > 0.02) {
             highlights.add(_glow(pos, layout.afterSizeOf[a.id], colors.moved,
-                movedGlow * 0.22));
+                movedGlow * 0.34));
           }
-          frags.add(_frag(latex, pos, 1, color, layout.afterSizeOf[a.id]));
+          frags.add(_frag(latex, pos, 1, color, layout.afterSizeOf[a.id],
+              scale: scale));
+          if (moveT > 0.02) arrows.add(_ArrowSpec(_centerBefore(fromId), _centerAfter(a.id)));
 
         case MorphKind.merge:
-          // The resolved value fades in at its resting place — no motion, no pop.
-          final resultGlow = appearT * (1 - _sx(0.82, 1.0));
+          // The resolved value pops in green; converging arrows from each source
+          // feed into it.
+          final resultGlow = appearT * (1 - _sx(0.86, 1.0));
           final color =
-              Color.lerp(colors.merged, colors.normal, _sx(0.7, 1.0)) ??
+              Color.lerp(colors.merged, colors.normal, _sx(0.78, 1.0)) ??
                   colors.normal;
           if (resultGlow > 0.02) {
             highlights.add(_glow(
-                end, layout.afterSizeOf[a.id], colors.merged, resultGlow * 0.2));
+                end, layout.afterSizeOf[a.id], colors.merged, resultGlow * 0.34));
           }
           frags.add(_frag(a.latex, end, appearT, color, layout.afterSizeOf[a.id]));
+          if (moveT > 0.02 && op!.fromIds.length >= 2) {
+            for (final fromId in op.fromIds) {
+              arrows.add(_ArrowSpec(_centerBefore(fromId), _centerAfter(a.id)));
+            }
+          }
 
         case MorphKind.enter:
           frags.add(_frag(a.latex, end, appearT, colors.merged, layout.afterSizeOf[a.id]));
@@ -436,27 +470,87 @@ class _MorphStack extends StatelessWidget {
       }
     }
 
-    // Sources that dissolve: glow during highlight, fade out as the new value
-    // resolves. They stay put — only the tracked term ever moves.
+    // Sources that dissolve: glow during highlight, then (for a merge) physically
+    // CONVERGE toward the result while fading — the numbers visibly move together.
     for (final op in morph.ops) {
-      final fades = op.kind == MorphKind.merge || op.kind == MorphKind.exit
-          ? op.fromIds
-          : const <int>[];
-      for (final id in fades) {
+      if (op.kind != MorphKind.merge && op.kind != MorphKind.exit) continue;
+      final resultPos = op.kind == MorphKind.merge && op.toIds.isNotEmpty
+          ? layout.afterPos[op.toIds.first]
+          : null;
+      for (final id in op.fromIds) {
         final b = _beforeById(id);
         final from = layout.beforePos[id];
         if (b == null || from == null) continue;
         final srcGlow = _sx(0, 0.14) * (1 - _sx(_highlightEnd, _moveEnd));
         if (srcGlow > 0.02) {
           highlights.add(
-              _glow(from, layout.beforeSizeOf[id], colors.moved, srcGlow * 0.18));
+              _glow(from, layout.beforeSizeOf[id], colors.moved, srcGlow * 0.30));
         }
+        final pos = resultPos != null ? Offset.lerp(from, resultPos, moveT)! : from;
         final fade = (1 - _sx(_moveEnd, _morphEnd)).clamp(0.0, 1.0);
-        frags.add(_frag(b.latex, from, fade, colors.normal, layout.beforeSizeOf[id]));
+        frags.add(_frag(b.latex, pos, fade, colors.normal, layout.beforeSizeOf[id]));
       }
     }
 
-    return Stack(clipBehavior: Clip.none, children: [...highlights, ...frags]);
+    final callout = _primaryCallout();
+
+    return Stack(clipBehavior: Clip.none, children: [
+      if (arrows.isNotEmpty && arrowOpacity > 0.02)
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _ArrowsPainter(
+              arrows: arrows,
+              reveal: moveT,
+              opacity: arrowOpacity,
+              color: colors.arrow,
+            ),
+          ),
+        ),
+      ...highlights,
+      ...frags,
+      if (callout != null && calloutOpacity > 0.02)
+        Positioned(
+          left: 0,
+          right: 0,
+          top: -48,
+          child: Center(
+            child: Opacity(
+              opacity: calloutOpacity.clamp(0.0, 1.0),
+              child: _CalloutPill(latex: callout, background: colors.moved),
+            ),
+          ),
+        ),
+    ]);
+  }
+
+  /// The sub-calculation to show as a callout — the first ≥2-source merge, built
+  /// as "sources = result" (e.g. "7 - 3 = 4"). Every part is verified LaTeX, so
+  /// this can never show a value the solver didn't produce. Null when there's no
+  /// clean combination to narrate.
+  String? _primaryCallout() {
+    for (final op in morph.ops) {
+      if (op.kind != MorphKind.merge || op.fromIds.length < 2 || op.toIds.isEmpty) {
+        continue;
+      }
+      final parts = <String>[];
+      var ok = true;
+      for (final id in op.fromIds) {
+        final t = _beforeById(id);
+        if (t == null) {
+          ok = false;
+          break;
+        }
+        parts.add(t.latex.trim());
+      }
+      if (!ok) continue;
+      final after = _afterById(op.toIds.first);
+      final result = after?.latex.trim() ?? '';
+      if (result.isEmpty) continue;
+      final lhs = parts.join(' ').replaceFirst(RegExp(r'^\+\s*'), '').trim();
+      if (lhs.isEmpty) continue;
+      return '$lhs = $result';
+    }
+    return null;
   }
 
   EqToken? _beforeById(int id) {
@@ -466,8 +560,15 @@ class _MorphStack extends StatelessWidget {
     return null;
   }
 
-  /// A soft rounded halo behind the changed term — the ONLY thing that draws the
-  /// eye. Subtle (low alpha), no motion of its own.
+  EqToken? _afterById(int id) {
+    for (final t in morph.after) {
+      if (t.id == id) return t;
+    }
+    return null;
+  }
+
+  /// A rounded halo behind a changed term — bolder now so it reads as a colour
+  /// box, not just a tint.
   Widget _glow(Offset pos, Size? size, Color color, double alpha) {
     final s = size ?? const Size(24, 24);
     const pad = 7.0;
@@ -479,25 +580,157 @@ class _MorphStack extends StatelessWidget {
         height: s.height + pad * 2,
         decoration: BoxDecoration(
           color: color.withValues(alpha: alpha.clamp(0.0, 1.0)),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
     );
   }
 
-  Widget _frag(String latex, Offset pos, double opacity, Color color, Size? size) {
+  Widget _frag(
+    String latex,
+    Offset pos,
+    double opacity,
+    Color color,
+    Size? size, {
+    double scale = 1,
+  }) {
     final style = baseStyle.copyWith(color: color);
+    Widget child = Math.tex(
+      latex,
+      textStyle: style,
+      mathStyle: MathStyle.text,
+      onErrorFallback: (_) => Text(latex, style: style),
+    );
+    if (scale != 1) child = Transform.scale(scale: scale, child: child);
     return Positioned(
       left: pos.dx,
       top: pos.dy,
-      child: Opacity(
-        opacity: opacity.clamp(0.0, 1.0),
-        child: Math.tex(
-          latex,
-          textStyle: style,
-          mathStyle: MathStyle.text,
-          onErrorFallback: (_) => Text(latex, style: style),
-        ),
+      child: Opacity(opacity: opacity.clamp(0.0, 1.0), child: child),
+    );
+  }
+}
+
+/// A single dashed-arrow path spec, in the morph's coordinate space.
+@immutable
+class _ArrowSpec {
+  const _ArrowSpec(this.start, this.end);
+  final Offset start;
+  final Offset end;
+}
+
+/// Draws animated dashed curved arrows tracing each number's movement — the
+/// signature Photomath "carry / move" line. [reveal] (0→1) grows the drawn
+/// fraction of each path; an arrowhead sits at the leading edge.
+class _ArrowsPainter extends CustomPainter {
+  _ArrowsPainter({
+    required this.arrows,
+    required this.reveal,
+    required this.opacity,
+    required this.color,
+  });
+
+  final List<_ArrowSpec> arrows;
+  final double reveal;
+  final double opacity;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final a = opacity.clamp(0.0, 1.0);
+    final r = reveal.clamp(0.0, 1.0);
+    if (a <= 0.01 || r <= 0.01) return;
+    final stroke = Paint()
+      ..color = color.withValues(alpha: a)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round;
+    final fill = Paint()
+      ..color = color.withValues(alpha: a)
+      ..style = PaintingStyle.fill;
+
+    for (final arrow in arrows) {
+      if ((arrow.start - arrow.end).distance < 2) continue;
+      final path = _curve(arrow.start, arrow.end);
+      final metrics = path.computeMetrics().toList();
+      if (metrics.isEmpty) continue;
+      final metric = metrics.first;
+      final drawn = metric.length * r;
+      // Dashed stroke up to the reveal point.
+      const dash = 7.0, gap = 5.0;
+      var d = 0.0;
+      while (d < drawn) {
+        final segEnd = math.min(d + dash, drawn);
+        canvas.drawPath(metric.extractPath(d, segEnd), stroke);
+        d += dash + gap;
+      }
+      // Arrowhead at the leading edge (once past the mid-point).
+      if (r > 0.55) {
+        final tan = metric.getTangentForOffset(drawn);
+        if (tan != null) {
+          const size = 7.0;
+          final tip = tan.position;
+          final ang = tan.angle;
+          final back1 = tip + Offset.fromDirection(ang + math.pi - 0.5, size);
+          final back2 = tip + Offset.fromDirection(ang + math.pi + 0.5, size);
+          canvas.drawPath(
+            Path()
+              ..moveTo(tip.dx, tip.dy)
+              ..lineTo(back1.dx, back1.dy)
+              ..lineTo(back2.dx, back2.dy)
+              ..close(),
+            fill,
+          );
+        }
+      }
+    }
+  }
+
+  /// A quadratic-bezier that arcs UP between the two points (the Photomath swoop).
+  Path _curve(Offset a, Offset b) {
+    final lift = (a - b).distance * 0.28 + 16;
+    final ctrl = Offset((a.dx + b.dx) / 2, math.min(a.dy, b.dy) - lift);
+    return Path()
+      ..moveTo(a.dx, a.dy)
+      ..quadraticBezierTo(ctrl.dx, ctrl.dy, b.dx, b.dy);
+  }
+
+  @override
+  bool shouldRepaint(_ArrowsPainter old) =>
+      old.reveal != reveal || old.opacity != opacity || old.arrows != arrows;
+}
+
+/// The bold sub-calculation callout, e.g. "7 − 3 = 4" — Photomath's coloured box.
+class _CalloutPill extends StatelessWidget {
+  const _CalloutPill({required this.latex, required this.background});
+
+  final String latex;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    const textStyle = TextStyle(
+      color: AppColors.white,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+    );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: background.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Math.tex(
+        latex,
+        textStyle: textStyle,
+        mathStyle: MathStyle.text,
+        onErrorFallback: (_) => const Text('', style: textStyle),
       ),
     );
   }
