@@ -32,14 +32,11 @@ class AnimationScriptBuilder {
     final solverSteps =
         result.steps.where((s) => s.resultLatex.trim().isNotEmpty).toList();
 
-    // Need at least one transform to have anything to morph.
+    // Need at least one transform to have anything to morph. A verified answer
+    // with NO working is handled by [answerFloor] (the dispatch's last resort),
+    // not here — keeping [build] the "rich, from solver steps" path.
     if (original.isEmpty || solverSteps.isEmpty) {
-      return const AnimationScript(
-        categoryLabel: '',
-        answerLatex: '',
-        intro: '',
-        steps: [],
-      );
+      return _empty;
     }
 
     final steps = <AnimationStep>[];
@@ -162,6 +159,66 @@ class AnimationScriptBuilder {
       steps: steps,
       keyIdeas: visual.explanation?.keyIdeas.take(3).toList() ?? const [],
       methodName: visual.method?.name,
+    );
+  }
+
+  static const AnimationScript _empty = AnimationScript(
+    categoryLabel: '',
+    answerLatex: '',
+    intro: '',
+    steps: [],
+  );
+
+  /// The UNIVERSAL-COVERAGE FLOOR — the dispatch's last resort so no answered
+  /// problem type dead-ends on the "couldn't show it" screen: understand the
+  /// problem, then morph it straight into the verified answer. Returns [_empty]
+  /// only when there is no distinct answer to show. Golden-rule clean: it only
+  /// re-positions already-verified tokens.
+  static AnimationScript answerFloor(
+    ResultData result, {
+    AnimationCopy copy = AnimationCopy.fallback,
+  }) {
+    final original = result.equation.latex.trim();
+    final answer = result.answerLatex.trim().isNotEmpty
+        ? result.answerLatex.trim()
+        : result.answerPlain.trim();
+    if (original.isEmpty || answer.isEmpty || answer == original) return _empty;
+
+    final morph = EquationDiff.diff(
+      EquationTokenizer.tokenize(original),
+      EquationTokenizer.tokenize(answer),
+    );
+    final steps = <AnimationStep>[
+      AnimationStep(
+        title: copy.understandTitle,
+        phase: LearningPhase.understand,
+        primitive: AnimationPrimitive.highlightTerm,
+        beforeLatex: original,
+        afterLatex: original,
+        morph: StepMorph.empty,
+        explanation: _understandDetail(result, copy),
+      ),
+      AnimationStep(
+        title: copy.answerTitle,
+        phase: LearningPhase.answer,
+        primitive: _primitiveFor(morph, result.type, true),
+        beforeLatex: original,
+        afterLatex: answer,
+        morph: morph,
+        explanation: result.verifyText.trim().isNotEmpty
+            ? result.verifyText.trim()
+            : copy.answerDetail,
+        isAnswer: true,
+      ),
+    ];
+    return AnimationScript(
+      categoryLabel: result.type.label,
+      answerLatex: answer,
+      intro: copy.intro,
+      steps: steps,
+      scene: _sceneFor(result) ?? SceneObject.none,
+      keyIdeas: _keyIdeas(result),
+      methodName: _methodName(result),
     );
   }
 

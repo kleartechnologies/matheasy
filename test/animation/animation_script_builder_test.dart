@@ -105,7 +105,8 @@ void main() {
       }
     });
 
-    test('returns an empty script when there are no steps to animate', () {
+    test('build() returns an empty script when there are no steps to animate',
+        () {
       final barren = ResultData(
         equation: _eq('x = 5'),
         type: ResultType.linear,
@@ -119,6 +120,52 @@ void main() {
         tutorIntro: '',
       );
       expect(AnimationScriptBuilder.build(barren).isEmpty, isTrue);
+    });
+
+    test('answerFloor: a zero-step result with a distinct answer still '
+        'animates (problem → answer)', () {
+      final answerOnly = ResultData(
+        equation: _eq('7 + 8'),
+        type: ResultType.expression,
+        difficulty: Difficulty.easy,
+        answerLatex: '15',
+        answerPlain: '15',
+        steps: const [],
+        verifyText: '7 + 8 = 15',
+        explanations: const [],
+        methods: const [],
+        practice: const [],
+        tutorIntro: '',
+      );
+      final s = AnimationScriptBuilder.answerFloor(answerOnly);
+      expect(s.isEmpty, isFalse);
+      // Opens on Understand, then a single answer beat morphing 7 + 8 → 15.
+      expect(s.steps.first.phase, LearningPhase.understand);
+      final answers = s.steps.where((x) => x.isAnswer).toList();
+      expect(answers, hasLength(1));
+      expect(answers.first.beforeLatex, '7 + 8');
+      expect(answers.first.afterLatex, '15');
+      expect(s.answerLatex, '15');
+    });
+
+    test('answerFloor declines when there is nothing distinct to morph '
+        '(answer == problem, or no answer)', () {
+      ResultData r(String latex, String answer) => ResultData(
+            equation: _eq(latex),
+            type: ResultType.expression,
+            difficulty: Difficulty.easy,
+            answerLatex: answer,
+            answerPlain: answer,
+            steps: const [],
+            verifyText: '',
+            explanations: const [],
+            methods: const [],
+            practice: const [],
+            tutorIntro: '',
+          );
+      expect(AnimationScriptBuilder.answerFloor(r('x = 5', 'x = 5')).isEmpty,
+          isTrue);
+      expect(AnimationScriptBuilder.answerFloor(r('7 + 8', '')).isEmpty, isTrue);
     });
   });
 }

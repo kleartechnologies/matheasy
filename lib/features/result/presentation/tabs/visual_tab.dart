@@ -106,10 +106,7 @@ class VisualTab extends ConsumerWidget {
         if (frac != null) {
           return FractionArithmeticView(
             model: frac,
-            onAskStep: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
 
@@ -121,10 +118,7 @@ class VisualTab extends ConsumerWidget {
         if (colArith != null) {
           return ColumnArithmeticView(
             model: colArith,
-            onAskStep: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
 
@@ -135,10 +129,7 @@ class VisualTab extends ConsumerWidget {
         if (longMul != null) {
           return LongMultiplicationView(
             model: longMul,
-            onAskStep: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
 
@@ -149,25 +140,21 @@ class VisualTab extends ConsumerWidget {
         if (longDiv != null) {
           return LongDivisionView(
             model: longDiv,
-            onAskStep: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
 
         // PRIMARY — the Universal Animated Learning Engine: a watchable,
         // symbol-morphing walkthrough built from the VERIFIED solve payload
-        // (terms slide across the =, merges collapse, no LLM math). When it can't
-        // build a script (too few steps), fall through to the static player.
+        // (terms slide across the =, merges collapse, no LLM math). Fires whenever
+        // the solve carried working of its own. The player emits an index into
+        // THIS script's beats, so the tutor context is derived from the same
+        // script (see result_screen).
         final script = AnimationScriptBuilder.build(result, copy: engineCopy(context));
         if (!script.isEmpty) {
           return AnimatedLearningPlayer(
             script: script,
-            onAskMatheasy: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskMatheasy: (i) => onAskMatheasy(visual, i),
           );
         }
         // FALLBACK — the universal static "Play Solution" step player: works for
@@ -177,30 +164,40 @@ class VisualTab extends ConsumerWidget {
         if (playerSteps.length >= 2) {
           return SolutionPlayer(
             steps: playerSteps,
-            onAskStep: (i) => onAskMatheasy(
-              visual,
-              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
-            ),
+            onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
-        if (!visual.hasSteps) {
-          return unavailable();
+        // The solve had no working of its own. Prefer the LLM visual's rich tier
+        // renderer (concept canvas, interactive cards) when one exists…
+        if (visual.hasSteps) {
+          return switch (visual.visualization) {
+            VisualizationType.animatedTransformation =>
+              Tier1AnimatedTransformation(
+                visual: visual,
+                onAskMatheasy: (step) => onAskMatheasy(visual, step),
+              ),
+            VisualizationType.interactiveCards => Tier2LearningCards(
+                visual: visual,
+                onAskMatheasy: (step) => onAskMatheasy(visual, step),
+              ),
+            VisualizationType.conceptExplorer => Tier3ConceptExplorer(
+                visual: visual,
+                onAskMatheasy: (step) => onAskMatheasy(visual, step),
+              ),
+          };
         }
-        return switch (visual.visualization) {
-          VisualizationType.animatedTransformation =>
-            Tier1AnimatedTransformation(
-              visual: visual,
-              onAskMatheasy: (step) => onAskMatheasy(visual, step),
-            ),
-          VisualizationType.interactiveCards => Tier2LearningCards(
-              visual: visual,
-              onAskMatheasy: (step) => onAskMatheasy(visual, step),
-            ),
-          VisualizationType.conceptExplorer => Tier3ConceptExplorer(
-              visual: visual,
-              onAskMatheasy: (step) => onAskMatheasy(visual, step),
-            ),
-        };
+        // …otherwise a verified answer with nothing else to show still animates:
+        // morph the problem straight into its answer, so it never dead-ends on the
+        // "couldn't show it" screen. Only truly-nothing (no distinct answer) falls
+        // through to [unavailable].
+        final floor = AnimationScriptBuilder.answerFloor(result, copy: engineCopy(context));
+        if (!floor.isEmpty) {
+          return AnimatedLearningPlayer(
+            script: floor,
+            onAskMatheasy: (i) => onAskMatheasy(visual, i),
+          );
+        }
+        return unavailable();
       },
     );
   }

@@ -78,6 +78,29 @@ class VisualPromptBuilder {
     return buffer.toString();
   }
 
+  /// The tutor context for a step of a **bespoke method player** (fraction /
+  /// column arithmetic / long multiplication / long division). Each keeps its
+  /// OWN step list, independent of [VisualSolution.steps] and
+  /// [AnimationScript.steps], so it needs its own summariser — reusing the
+  /// others would hand the tutor a mismatched step of the (correct) problem.
+  static String tutorMethodStepContext({
+    required String methodLabel,
+    required int index,
+    required int total,
+    required String caption,
+    String? callout,
+  }) {
+    if (total <= 0) return 'The $methodLabel walkthrough of the problem.';
+    final i = index < 0 ? 0 : (index >= total ? total - 1 : index);
+    final buffer = StringBuffer()
+      ..write('Step ${i + 1} of $total of the $methodLabel walkthrough — '
+          '"$caption"');
+    if (callout != null && callout.trim().isNotEmpty) {
+      buffer.write(' (shows: ${callout.trim()})');
+    }
+    return (buffer..write('.')).toString();
+  }
+
   /// The tutor context for a step of the **geometry** player. The player emits
   /// an index into [GeometryScene.steps] (the four canonical beats), which is a
   /// different list from [VisualSolution.steps] — so geometry needs its own

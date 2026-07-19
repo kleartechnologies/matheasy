@@ -19,6 +19,10 @@ import '../application/animation/animation_script_builder.dart';
 import '../application/geometry_payload_mapper.dart';
 import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
+import '../domain/animation/column_arithmetic.dart';
+import '../domain/animation/fraction_arithmetic.dart';
+import '../domain/animation/long_division.dart';
+import '../domain/animation/long_multiplication.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/teaching_models.dart';
@@ -163,17 +167,37 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     int stepIndex,
   ) {
     // Summarise from whichever player actually rendered — mirror the Visual tab's
-    // dispatch (geometry → Animated Learning Engine → classic tiers) so the beat
-    // index always indexes the SAME list the learner is looking at.
+    // dispatch (geometry → fraction/column/long-mult/long-div → Animated Learning
+    // Engine → tiers) so the emitted index always indexes the SAME list the
+    // learner is looking at.
     final scene = visual.geometryScene;
+    final method = scene == null ? _methodStep(result, stepIndex) : null;
     final String stepSummary;
     if (scene != null) {
       stepSummary = VisualPromptBuilder.tutorGeometryStepContext(scene, stepIndex);
+    } else if (method != null) {
+      stepSummary = VisualPromptBuilder.tutorMethodStepContext(
+        methodLabel: method.label,
+        index: stepIndex,
+        total: method.total,
+        caption: method.caption,
+        callout: method.callout,
+      );
     } else {
+      // Mirror the Visual tab's fallthrough exactly: the Animated Learning Engine
+      // (from solver working) → the LLM visual's tier → the answer-floor morph.
       final script = AnimationScriptBuilder.build(result, copy: engineCopy(context));
-      stepSummary = script.isEmpty
-          ? VisualPromptBuilder.tutorStepContext(visual, stepIndex)
-          : VisualPromptBuilder.tutorAnimationStepContext(script, stepIndex);
+      if (!script.isEmpty) {
+        stepSummary =
+            VisualPromptBuilder.tutorAnimationStepContext(script, stepIndex);
+      } else if (visual.hasSteps) {
+        stepSummary = VisualPromptBuilder.tutorStepContext(visual, stepIndex);
+      } else {
+        final floor = AnimationScriptBuilder.answerFloor(result, copy: engineCopy(context));
+        stepSummary = floor.isEmpty
+            ? VisualPromptBuilder.tutorStepContext(visual, stepIndex)
+            : VisualPromptBuilder.tutorAnimationStepContext(floor, stepIndex);
+      }
     }
     context.push(
       AppRoutes.tutorChat,
@@ -185,6 +209,56 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         visualStepSummary: stepSummary,
       ),
     );
+  }
+
+  /// If a bespoke method player renders this result (mirroring the Visual tab's
+  /// dispatch order), the caption/callout for its step at [stepIndex]. Null when
+  /// none applies (→ the Animated Learning Engine / tier summarisers handle it).
+  ({String label, int total, String caption, String? callout})? _methodStep(
+    ResultData result,
+    int stepIndex,
+  ) {
+    final frac = FractionArithmetic.tryBuild(result);
+    if (frac != null) {
+      final i = stepIndex.clamp(0, frac.steps.length - 1);
+      return (
+        label: 'fraction',
+        total: frac.steps.length,
+        caption: frac.steps[i].caption,
+        callout: frac.steps[i].callout,
+      );
+    }
+    final col = ColumnArithmetic.tryBuild(result);
+    if (col != null) {
+      final i = stepIndex.clamp(0, col.steps.length - 1);
+      return (
+        label: 'column arithmetic',
+        total: col.steps.length,
+        caption: col.steps[i].caption,
+        callout: col.steps[i].callout,
+      );
+    }
+    final lmul = LongMultiplication.tryBuild(result);
+    if (lmul != null) {
+      final i = stepIndex.clamp(0, lmul.steps.length - 1);
+      return (
+        label: 'long multiplication',
+        total: lmul.steps.length,
+        caption: lmul.steps[i].caption,
+        callout: lmul.steps[i].callout,
+      );
+    }
+    final ldiv = LongDivision.tryBuild(result);
+    if (ldiv != null) {
+      final i = stepIndex.clamp(0, ldiv.steps.length - 1);
+      return (
+        label: 'long division',
+        total: ldiv.steps.length,
+        caption: ldiv.steps[i].caption,
+        callout: ldiv.steps[i].callout,
+      );
+    }
+    return null;
   }
 
   /// The locked Visual tab's CTA — the Visual Learning paywall.

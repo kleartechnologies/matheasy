@@ -736,7 +736,8 @@ void main() {
       expect(openedExplain, isTrue);
     });
 
-    testWidgets('an empty visual (no steps) also falls back', (tester) async {
+    testWidgets('a step-less solve with no visual still animates via the '
+        'answer floor (no dead-end)', (tester) async {
       const empty = VisualSolution(
         category: ProblemCategory.algebra,
         difficulty: ProblemDifficulty.secondary,
@@ -759,7 +760,8 @@ void main() {
         container,
         VisualTab(
           equation: _equation,
-          // Nothing to animate AND an empty visual → the classic fallback.
+          // No working AND an empty visual, but a distinct verified answer →
+          // the universal floor morphs 2x + 5 = 13 → x = 4 instead of a dead-end.
           result: _resultNoSteps,
           onUnlock: () {},
           onOpenExplain: () {},
@@ -770,8 +772,59 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Try again'), findsOneWidget);
+      expect(find.byType(AnimatedLearningPlayer), findsOneWidget);
+      expect(find.text('Try again'), findsNothing);
       expect(find.byType(Tier1AnimatedTransformation), findsNothing);
+    });
+
+    testWidgets('only a truly empty result (no steps, no visual, no distinct '
+        'answer) falls back to Explain', (tester) async {
+      const nothing = ResultData(
+        equation: _equation,
+        type: ResultType.linear,
+        difficulty: Difficulty.easy,
+        answerLatex: '', // no answer to morph → the floor declines too
+        verifyText: '',
+        tutorIntro: 'Nothing.',
+        steps: [],
+        explanations: [],
+        methods: [],
+        practice: [],
+      );
+      const empty = VisualSolution(
+        category: ProblemCategory.algebra,
+        difficulty: ProblemDifficulty.secondary,
+        visualization: VisualizationType.animatedTransformation,
+        answerLatex: '',
+        intro: 'Nothing to show.',
+        steps: [],
+      );
+      final container = await _container(
+        visualService: const _FixedVisualService(empty),
+      );
+      _activate(container);
+      final result = await container
+          .read(subscriptionControllerProvider.notifier)
+          .purchase(SubscriptionPlan.proAnnual);
+      expect(result, isA<PurchaseSuccess>());
+
+      await _pumpTab(
+        tester,
+        container,
+        VisualTab(
+          equation: _equation,
+          result: nothing,
+          onUnlock: () {},
+          onOpenExplain: () {},
+          onAskMatheasy: (_, _) {},
+        ),
+        reduceMotion: true,
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Try again'), findsOneWidget);
+      expect(find.byType(AnimatedLearningPlayer), findsNothing);
     });
   });
 
