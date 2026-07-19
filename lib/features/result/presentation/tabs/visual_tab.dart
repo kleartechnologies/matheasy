@@ -14,6 +14,7 @@ import '../../domain/animation/decimal_arithmetic.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
+import '../../domain/animation/percentage.dart';
 import '../../domain/animation/power_root.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
@@ -26,6 +27,7 @@ import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
+import '../widgets/visual/engine/percentage_view.dart';
 import '../widgets/visual/engine/power_root_view.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
@@ -166,6 +168,17 @@ class VisualTab extends ConsumerWidget {
         if (decimal != null) {
           return DecimalArithmeticView(
             model: decimal,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style PERCENTAGE — percent means "out of 100", so rewrite
+        // as a fraction of 100 and multiply (15% of 80 → 15/100 × 80 = 12).
+        // Golden-rule gated against the verified value.
+        final percentage = Percentage.tryBuild(result);
+        if (percentage != null) {
+          return PercentageView(
+            model: percentage,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }

@@ -24,6 +24,7 @@ import '../domain/animation/decimal_arithmetic.dart';
 import '../domain/animation/fraction_arithmetic.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
+import '../domain/animation/percentage.dart';
 import '../domain/animation/power_root.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
@@ -278,6 +279,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: dec.steps.length,
         caption: dec.steps[i].caption,
         callout: dec.steps[i].callout,
+      );
+    }
+    final pct = Percentage.tryBuild(result);
+    if (pct != null) {
+      final i = stepIndex.clamp(0, pct.steps.length - 1);
+      return (
+        label: 'percentage',
+        total: pct.steps.length,
+        caption: pct.steps[i].caption,
+        callout: pct.steps[i].callout,
       );
     }
     return null;
