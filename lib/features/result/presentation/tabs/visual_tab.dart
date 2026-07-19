@@ -10,6 +10,7 @@ import '../../../subscription/application/subscription_controller.dart';
 import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
 import '../../domain/animation/column_arithmetic.dart';
+import '../../domain/animation/decimal_arithmetic.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
@@ -20,6 +21,7 @@ import '../widgets/result_empty.dart';
 import '../widgets/solution_player.dart';
 import '../widgets/visual/engine/animated_learning_player.dart';
 import '../widgets/visual/engine/column_arithmetic_view.dart';
+import '../widgets/visual/engine/decimal_arithmetic_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
@@ -153,6 +155,17 @@ class VisualTab extends ConsumerWidget {
         if (powerRoot != null) {
           return PowerRootView(
             model: powerRoot,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style DECIMAL ARITHMETIC — line up the decimal points for
+        // +/− (3.2 + 1.45), or "multiply then place the point" for × (0.5 × 4).
+        // Golden-rule gated against the verified value.
+        final decimal = DecimalArithmetic.tryBuild(result);
+        if (decimal != null) {
+          return DecimalArithmeticView(
+            model: decimal,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }

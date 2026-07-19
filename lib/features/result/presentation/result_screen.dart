@@ -20,6 +20,7 @@ import '../application/geometry_payload_mapper.dart';
 import '../application/result_controller.dart';
 import '../application/visual_prompt_builder.dart';
 import '../domain/animation/column_arithmetic.dart';
+import '../domain/animation/decimal_arithmetic.dart';
 import '../domain/animation/fraction_arithmetic.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
@@ -267,6 +268,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: pr.steps.length,
         caption: pr.steps[i].caption,
         callout: pr.steps[i].callout,
+      );
+    }
+    final dec = DecimalArithmetic.tryBuild(result);
+    if (dec != null) {
+      final i = stepIndex.clamp(0, dec.steps.length - 1);
+      return (
+        label: 'decimal arithmetic',
+        total: dec.steps.length,
+        caption: dec.steps[i].caption,
+        callout: dec.steps[i].callout,
       );
     }
     return null;
