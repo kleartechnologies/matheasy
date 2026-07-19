@@ -5,7 +5,6 @@ import 'package:matheasy/features/result/domain/animation/animation_script.dart'
 import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/engine/animated_learning_player.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/engine/equation_morph_view.dart';
-import 'package:matheasy/features/result/presentation/widgets/visual/engine/learning_timeline.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/engine/universal_control_bar.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
@@ -62,15 +61,14 @@ Future<void> _pump(WidgetTester tester, {required bool reduceMotion}) async {
 }
 
 void main() {
-  testWidgets('renders the morph, the named timeline and the control bar',
+  testWidgets('renders the calm layout: equation hero, quiet header, controls',
       (tester) async {
     await _pump(tester, reduceMotion: true);
     expect(find.byType(AnimatedLearningPlayer), findsOneWidget);
     expect(find.byType(EquationMorphView), findsOneWidget);
-    expect(find.byType(LearningTimeline), findsOneWidget);
     expect(find.byType(UniversalControlBar), findsOneWidget);
-    // The learning phases are named, not anonymous dots.
-    expect(find.text('Understand'), findsWidgets);
+    // Minimal "Step X of Y" — not a big named timeline competing for attention.
+    expect(find.text('Step 1 of 5'), findsOneWidget);
   });
 
   testWidgets('reduced motion hides play/pause and the speed selector',
@@ -94,14 +92,11 @@ void main() {
 
   testWidgets('the Next control advances the beat', (tester) async {
     await _pump(tester, reduceMotion: true);
-    // First beat is the Understand opener.
-    expect(find.text('Understand the problem'), findsOneWidget);
-    await tester.ensureVisible(find.byIcon(Icons.last_page_rounded));
+    expect(find.text('Step 1 of 5'), findsOneWidget);
+    await tester.ensureVisible(find.byIcon(Icons.chevron_right_rounded));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.last_page_rounded));
-    await tester.pump();
+    await tester.tap(find.byIcon(Icons.chevron_right_rounded));
     await tester.pump(const Duration(milliseconds: 600));
-    // Advanced off the opener onto the first transform.
-    expect(find.text('Subtract 5'), findsOneWidget);
+    expect(find.text('Step 2 of 5'), findsOneWidget);
   });
 }

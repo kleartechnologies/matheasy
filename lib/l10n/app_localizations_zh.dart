@@ -1171,6 +1171,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get engineSpeed => '播放速度';
 
   @override
+  String get engineWhy => '为什么？';
+
+  @override
   String get engineWhatChanged => '变化之处';
 
   @override
@@ -2787,6 +2790,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get engineSpeed => '播放速度';
 
   @override
+  String get engineWhy => '为什么？';
+
+  @override
   String get engineWhatChanged => '变化之处';
 
   @override
@@ -4401,6 +4407,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get engineSpeed => '播放速度';
+
+  @override
+  String get engineWhy => '為什麼？';
 
   @override
   String get engineWhatChanged => '變化重點';

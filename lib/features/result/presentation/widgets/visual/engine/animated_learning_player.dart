@@ -2,30 +2,33 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/animations/particle_field.dart';
 import '../../../../../../core/extensions/context_extensions.dart';
 import '../../../../../../core/localization/l10n_extension.dart';
 import '../../../../../../core/services/haptics_service.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/app_durations.dart';
+import '../../../../../../core/theme/app_radius.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../../../../../../core/theme/app_typography.dart';
-import '../../../../../../core/widgets/widgets.dart';
 import '../../../../domain/animation/animation_script.dart';
+import '../../../../domain/animation/scene_spec.dart';
 import '../visual_shared_widgets.dart';
 import 'animation_renderer.dart';
 import 'engine_palette.dart';
 import 'equation_morph_view.dart';
-import 'learning_timeline.dart';
 import 'universal_control_bar.dart';
 
-/// UNIVERSAL ANIMATED LEARNING ENGINE — the shared player shell.
+/// UNIVERSAL ANIMATED LEARNING ENGINE — the shared player shell (Stage 15.5:
+/// the CALM redesign).
 ///
-/// The one player for EVERY topic: it sequences an [AnimationScript], playing
-/// each beat's symbol morph (and its visual object, when the category has one),
-/// under a named learning timeline and the universal control bar (speed, scrub,
-/// prev/next, replay). Generalized from the geometry player: same autoplay,
-/// reduced-motion discipline and step-aware semantics — now scene-agnostic.
+/// The one player for EVERY topic. The equation is the HERO: it owns the screen,
+/// and only the ONE changing term draws the eye. Everything else is deliberately
+/// quiet — a small "Step X of Y" with minimal dots up top, a single-sentence
+/// explanation that appears AFTER the animation, and a compact control row.
+/// No competing scene cards, no big timeline, no celebration, no clutter — the
+/// student tracks one transformation, like watching a great teacher at a
+/// whiteboard. (A small graph appears only for graph problems, after the
+/// equation settles.)
 ///
 /// It performs NO math: it only sequences and animates the pre-verified script.
 class AnimatedLearningPlayer extends StatefulWidget {
@@ -103,7 +106,7 @@ class _AnimatedLearningPlayerState extends State<AnimatedLearningPlayer>
 
   void _play() {
     _timer?.cancel();
-    _timer = Timer.periodic(_scaled(AppDurations.walkthroughStep), (_) {
+    _timer = Timer.periodic(_scaled(AppDurations.engineStep), (_) {
       if (_isLast) {
         _pause();
       } else {
@@ -135,10 +138,8 @@ class _AnimatedLearningPlayerState extends State<AnimatedLearningPlayer>
 
   void _fireStepFeedback() {
     if (MediaQuery.disableAnimationsOf(context)) return;
-    final step = _steps[_index];
-    if (step.isAnswer) {
-      HapticsService.celebrate();
-    } else if (step.morph.merged) {
+    // A single, quiet tick per beat — no celebration during learning.
+    if (_steps[_index].morph.merged) {
       HapticsService.merge();
     } else {
       HapticsService.step();
@@ -158,30 +159,71 @@ class _AnimatedLearningPlayerState extends State<AnimatedLearningPlayer>
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final palette = EnginePalette.of(context);
     final step = _step;
-    final showScene = script.hasScene &&
-        AnimatedLearningSceneView.hasViewFor(script.scene.kind);
+    final sceneProgress = reduceMotion
+        ? const AlwaysStoppedAnimation<double>(1)
+        : _entrance;
+
+    // The equation owns the screen: a large, plain, centred hero. Graphs appear
+    // only for genuine graph problems, small and only once the answer is reached.
+    final equationHeight = (context.screenHeight * 0.42).clamp(300.0, 520.0);
+    final showEndGraph =
+        _isLast && script.hasScene && _isGraphScene(script.scene.kind);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        MatheasyBubble(text: script.intro),
+        _StepHeader(index: _index, total: _steps.length),
+        const SizedBox(height: AppSpacing.sm),
+        // THE HERO — the equation, big and centred, the sole focal point.
+        SizedBox(
+          height: equationHeight,
+          child: RepaintBoundary(
+            child: ClipRect(
+              child: Semantics(
+                liveRegion: true,
+                label: step.semanticLabel,
+                child: ExcludeSemantics(
+                  child: EquationMorphView(
+                    key: ValueKey(_index),
+                    beforeLatex: step.beforeLatex,
+                    afterLatex: step.afterLatex,
+                    morph: step.morph,
+                    progress: _entrance,
+                    fontSize: 40,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // One sentence, appearing AFTER the animation settles.
+        _Explanation(
+          key: ValueKey(_index),
+          step: step,
+          progress: _entrance,
+          reduceMotion: reduceMotion,
+        ),
+        // The graph (graph problems only) eases in on the answer beat rather
+        // than snapping the controls down.
+        AnimatedSize(
+          duration: reduceMotion ? Duration.zero : AppDurations.medium,
+          curve: AppCurves.standard,
+          alignment: Alignment.topCenter,
+          child: showEndGraph
+              ? Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.md),
+                  child: _endGraph(context, palette, sceneProgress, step),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
         const SizedBox(height: AppSpacing.lg),
-        if (showScene) ...[
-          _scenePanel(context, palette, reduceMotion, step),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        _morphCard(context, palette, reduceMotion, step),
-        const SizedBox(height: AppSpacing.md),
-        _stepStrip(context, step),
-        const SizedBox(height: AppSpacing.md),
-        LearningTimeline(phases: script.phases, current: step.phase),
-        const SizedBox(height: AppSpacing.md),
         UniversalControlBar(
           index: _index,
           total: _steps.length,
           playing: _playing,
           reduceMotion: reduceMotion,
           speed: _speed,
+          compact: true,
           onPrev: _index == 0 ? null : () => _goTo(_index - 1),
           onNext: () => _goTo(_isLast ? 0 : _index + 1),
           onPlayPause: _playing ? _pause : _play,
@@ -189,203 +231,196 @@ class _AnimatedLearningPlayerState extends State<AnimatedLearningPlayer>
           onSeek: (i) => _goTo(i),
         ),
         const SizedBox(height: AppSpacing.sm),
-        AskMatheasyButton(onPressed: () => widget.onAskMatheasy(_index)),
-        if (_isLast && script.keyIdeas.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          _KeyIdeasCard(ideas: script.keyIdeas),
-        ],
-        if (script.methodName != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          _MethodChip(name: script.methodName!),
-        ],
+        Center(
+          child:
+              AskMatheasyButton(onPressed: () => widget.onAskMatheasy(_index)),
+        ),
       ],
     );
   }
 
-  Widget _scenePanel(
+  bool _isGraphScene(SceneObjectKind kind) =>
+      kind == SceneObjectKind.curve || kind == SceneObjectKind.parabola;
+
+  Widget _endGraph(
     BuildContext context,
     EnginePalette palette,
-    bool reduceMotion,
+    Animation<double> progress,
     AnimationStep step,
   ) {
-    final height = (context.screenHeight * 0.30).clamp(200.0, 320.0);
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      clip: true,
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
-        child: Semantics(
-          image: true,
-          label: widget.script.scene.caption,
-          child: ExcludeSemantics(
-            // Each scene animates ONLY its painter internally, so its static
-            // LaTeX labels aren't re-parsed every frame — pass the controller.
-            child: AnimatedLearningSceneView(
-              scene: widget.script.scene,
-              progress: reduceMotion
-                  ? const AlwaysStoppedAnimation<double>(1)
-                  : _entrance,
-              showAnswer: step.isAnswer,
-              palette: palette,
-            ),
+    final height = (context.screenHeight * 0.22).clamp(150.0, 240.0);
+    return SizedBox(
+      height: height,
+      child: Semantics(
+        image: true,
+        label: widget.script.scene.caption,
+        child: ExcludeSemantics(
+          child: AnimatedLearningSceneView(
+            scene: widget.script.scene,
+            progress: progress,
+            showAnswer: step.isAnswer,
+            palette: palette,
           ),
         ),
       ),
     );
   }
-
-  Widget _morphCard(
-    BuildContext context,
-    EnginePalette palette,
-    bool reduceMotion,
-    AnimationStep step,
-  ) {
-    return AppCard(
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    context.l10n.engineWhatChanged.toUpperCase(),
-                    style: AppTypography.label.copyWith(color: palette.muted),
-                  ),
-                  const Spacer(),
-                  if (step.operationLabel != null &&
-                      step.operationLabel!.isNotEmpty)
-                    VisualOperationChip(label: step.operationLabel!),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              // RepaintBoundary so the per-frame morph doesn't dirty the rest of
-              // the tab; ClipRect so a stray tall fragment can never overlap the
-              // controls below.
-              RepaintBoundary(
-                child: ClipRect(
-                  child: SizedBox(
-                    height: 118,
-                    width: double.infinity,
-                    child: Semantics(
-                      liveRegion: true,
-                      label: step.semanticLabel,
-                      child: ExcludeSemantics(
-                        child: EquationMorphView(
-                          key: ValueKey(_index),
-                          beforeLatex: step.beforeLatex,
-                          afterLatex: step.afterLatex,
-                          morph: step.morph,
-                          progress: _entrance,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (step.isAnswer)
-            Positioned.fill(
-              child: MathCelebration(active: step.isAnswer, glyphColor: palette.accent),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepStrip(BuildContext context, AnimationStep step) {
-    final colors = context.colors;
-    return AnimatedSwitcher(
-      duration: AppDurations.medium,
-      child: Column(
-        key: ValueKey(_index),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            step.title,
-            style: AppTypography.bodyMedium.copyWith(
-              color: colors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (step.explanation.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              step.explanation,
-              style:
-                  AppTypography.bodySmall.copyWith(color: colors.textSecondary),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 }
 
-class _KeyIdeasCard extends StatelessWidget {
-  const _KeyIdeasCard({required this.ideas});
+/// The quiet header: "Step X of Y" with minimal progress dots. Never competes
+/// with the equation.
+class _StepHeader extends StatelessWidget {
+  const _StepHeader({required this.index, required this.total});
 
-  final List<String> ideas;
+  final int index;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final emerald =
         context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.visualKeyIdeas,
-            style: AppTypography.label.copyWith(color: emerald),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          for (final idea in ideas)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+    return Semantics(
+      label: context.l10n.resultStepOfTotal(index + 1, total),
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            Text(
+              context.l10n.resultStepOfTotal(index + 1, total),
+              style: AppTypography.label.copyWith(color: colors.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            FittedBox(
+              fit: BoxFit.scaleDown,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle_rounded, size: 18, color: emerald),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      idea,
-                      style: AppTypography.bodySmall
-                          .copyWith(color: colors.textSecondary),
+                  for (var i = 0; i < total; i++)
+                    AnimatedContainer(
+                      duration: AppDurations.fast,
+                      width: i == index ? 16 : 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xxs),
+                      decoration: BoxDecoration(
+                        color: i == index ? emerald : colors.border,
+                        borderRadius: AppRadius.pillRadius,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _MethodChip extends StatelessWidget {
-  const _MethodChip({required this.name});
+/// The single-sentence explanation. It fades in only AFTER the morph settles, so
+/// nothing competes with the equation while it transforms. An optional "Why?"
+/// reveals the deeper detail on demand.
+class _Explanation extends StatefulWidget {
+  const _Explanation({
+    super.key,
+    required this.step,
+    required this.progress,
+    required this.reduceMotion,
+  });
 
-  final String name;
+  final AnimationStep step;
+  final Animation<double> progress;
+  final bool reduceMotion;
+
+  @override
+  State<_Explanation> createState() => _ExplanationState();
+}
+
+class _ExplanationState extends State<_Explanation> {
+  bool _showWhy = false;
+
+  /// Keep the default to ONE sentence; the rest lives behind "Why?". Handles
+  /// Latin ('. ' — a space avoids splitting decimals like 3.5) and the CJK
+  /// full stop / marks used by the app's zh/ja locales.
+  static String _firstSentence(String s) {
+    final t = s.trim();
+    var best = -1;
+    for (final d in const ['. ', '。', '！', '？']) {
+      final i = t.indexOf(d);
+      if (i > 0 && (best < 0 || i < best)) best = i;
+    }
+    return best > 0 ? t.substring(0, best + 1) : t;
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Row(
+    final emerald =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    final oneLine = _firstSentence(widget.step.explanation);
+    final why = widget.step.hint;
+
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.alt_route_rounded, size: 16, color: colors.textMuted),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(
-            name,
-            style: AppTypography.caption.copyWith(color: colors.textMuted),
+        if (oneLine.isNotEmpty)
+          Text(
+            oneLine,
+            textAlign: TextAlign.center,
+            style: AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
-        ),
+        if (why != null && why.isNotEmpty) ...[
+          TextButton(
+            onPressed: () => setState(() => _showWhy = !_showWhy),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, 40),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              foregroundColor: emerald,
+            ),
+            child: Text(context.l10n.engineWhy),
+          ),
+          AnimatedCrossFade(
+            duration: AppDurations.fast,
+            crossFadeState: _showWhy
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xxs),
+              child: Text(
+                why,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall
+                    .copyWith(color: colors.textMuted),
+              ),
+            ),
+          ),
+        ],
       ],
+    );
+
+    return AnimatedBuilder(
+      animation: widget.progress,
+      builder: (context, child) {
+        // Appear only AFTER the morph completes (its new value settles at 0.75),
+        // so nothing competes with the equation while it transforms.
+        final o = widget.reduceMotion
+            ? 1.0
+            : Curves.easeOut
+                .transform(((widget.progress.value - 0.8) / 0.2).clamp(0.0, 1.0));
+        final hidden = o < 0.99;
+        // While invisible it must not be tappable OR focusable (Opacity alone
+        // blocks neither) — else a blind tap could pre-expand "Why?".
+        return IgnorePointer(
+          ignoring: hidden,
+          child: Opacity(
+            opacity: o,
+            child: hidden ? ExcludeSemantics(child: child) : child,
+          ),
+        );
+      },
+      child: content,
     );
   }
 }

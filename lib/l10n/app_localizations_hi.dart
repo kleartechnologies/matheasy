@@ -1230,6 +1230,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get engineSpeed => 'प्लेबैक गति';
 
   @override
+  String get engineWhy => 'क्यों?';
+
+  @override
   String get engineWhatChanged => 'क्या बदला';
 
   @override

@@ -489,5 +489,6 @@
   "enginePhaseApply": "Guna hukumnya",
   "enginePhaseSimplify": "Permudahkan",
   "enginePhaseVerify": "Sahkan",
-  "enginePhaseAnswer": "Jawapan"
+  "enginePhaseAnswer": "Jawapan",
+  "engineWhy": "Mengapa?"
 }

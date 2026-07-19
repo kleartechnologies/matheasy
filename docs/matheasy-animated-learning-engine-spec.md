@@ -1,10 +1,11 @@
 # Matheasy — Universal Animated Learning Engine (AS-BUILT)
 
-> Status: **v1 built + wired + adversarially reviewed + verified** (flutter analyze
-> clean, full Dart suite green at 812 tests, functions tsc clean; a 5-dimension
-> adversarial review found 9 real defects — all fixed, incl. a golden-rule
-> fraction-sign leak). Additive over the Stage-14 Visual Learning Engine — nothing
-> shipped was regressed. User-visible after a client app-store release.
+> Status: **v1 + Stage-15.5 calm redesign, verified** (flutter analyze clean, full
+> Dart suite green at 812 tests, functions tsc clean; two adversarial-review rounds
+> → 9 + 6 real defects, all fixed). Additive over the Stage-14 Visual Learning
+> Engine — nothing shipped was regressed. User-visible after a client app-store
+> release. **The presentation layer described in §4 was redesigned in Stage 15.5 —
+> see §10, which supersedes the layout/motion details below.**
 
 The Animated Learning Engine makes students **watch** mathematics transform:
 numbers, operators and terms **move, fade, merge and split** across the equals
@@ -164,3 +165,32 @@ Math widgets / Canvas    MathText · flutter_math_fork · CustomPainter
 4. Optional: an `enrichAnimation`-style callable if a category ever needs LLM-chosen
    animation metadata — it must pass the `extractNumbers` firewall (mirror
    `validateTeaching`).
+
+## §10 Stage 15.5 — the calm redesign (presentation only)
+
+The engine/backend (§0–§3) is UNCHANGED; only the presentation was rebuilt to feel
+like watching a great teacher at a whiteboard — one focal point, minimal cognitive
+load (Photomath's *interaction* model, not its branding).
+
+- **The equation is the hero** — a large (screen·0.42, 40pt), centred, high-contrast
+  morph owns the screen. Everything else is quiet.
+- **Only the ONE changed term draws the eye.** `_MorphStack` pins unchanged tokens
+  dead still (they never move); the active term glows amber, slides across the
+  relation with a **sign flip** at the crossing, and the new value fades in. No
+  scaling, no bounce, no celebration/particles. Both equation states share ONE
+  coordinate frame anchored on the `=` (relation-anchored `_MorphLayout`), so a kept
+  term keeps its exact place and nothing collides with the `=`.
+- **Staged, unhurried timing**: HIGHLIGHT [0,.18] → MOVE [.18,.5] → MORPH [.5,.75] →
+  SETTLE. `AppDurations.morph` = 2200 ms; autoplay dwell `engineStep` = 3400 ms
+  (≈1.2 s read-pause). Speed selector scales both.
+- **One-sentence explanation** (first sentence; Latin + CJK aware) that appears only
+  *after* the morph settles (opacity gated on progress ≥ .8, with IgnorePointer +
+  ExcludeSemantics while hidden), plus an optional **"Why?"** that reveals the detail.
+- **Minimal chrome**: a small "Step X of Y" + dots up top (the big `LearningTimeline`
+  is deleted); a compact control bar (Prev · Play/Pause · Next/Replay · Speed, no
+  scrubber); a subtle Ask-Matheasy. **Removed**: scene cards, intro bubble,
+  key-ideas/method cards, the celebration overlay (`particle_field.dart` deleted).
+- **Graphs only when required**: a small graph eases in (AnimatedSize) only for
+  curve/parabola problems, only on the answer beat, after the equation settles.
+- Golden rule preserved: the sign-flip only swaps between the *verified* before/after
+  token latex; no value is ever synthesised.

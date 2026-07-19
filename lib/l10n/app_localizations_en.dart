@@ -1229,6 +1229,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get engineSpeed => 'Playback speed';
 
   @override
+  String get engineWhy => 'Why?';
+
+  @override
   String get engineWhatChanged => 'What changed';
 
   @override

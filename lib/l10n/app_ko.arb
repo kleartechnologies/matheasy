@@ -489,5 +489,6 @@
   "enginePhaseApply": "규칙 적용하기",
   "enginePhaseSimplify": "정리하기",
   "enginePhaseVerify": "검산하기",
-  "enginePhaseAnswer": "정답"
+  "enginePhaseAnswer": "정답",
+  "engineWhy": "왜?"
 }

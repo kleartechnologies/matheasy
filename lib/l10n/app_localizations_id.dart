@@ -1232,6 +1232,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get engineSpeed => 'Kecepatan pemutaran';
 
   @override
+  String get engineWhy => 'Mengapa?';
+
+  @override
   String get engineWhatChanged => 'Yang berubah';
 
   @override

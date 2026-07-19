@@ -1184,6 +1184,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get engineSpeed => '再生速度';
 
   @override
+  String get engineWhy => 'なぜ？';
+
+  @override
   String get engineWhatChanged => '変わったところ';
 
   @override

@@ -1238,6 +1238,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get engineSpeed => 'Kelajuan main';
 
   @override
+  String get engineWhy => 'Mengapa?';
+
+  @override
   String get engineWhatChanged => 'Apa yang berubah';
 
   @override

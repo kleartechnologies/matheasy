@@ -489,5 +489,6 @@
   "enginePhaseApply": "套用規則",
   "enginePhaseSimplify": "化簡",
   "enginePhaseVerify": "驗證",
-  "enginePhaseAnswer": "答案"
+  "enginePhaseAnswer": "答案",
+  "engineWhy": "為什麼？"
 }

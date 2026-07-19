@@ -489,5 +489,6 @@
   "enginePhaseApply": "नियम लगाएँ",
   "enginePhaseSimplify": "सरल करें",
   "enginePhaseVerify": "सत्यापित करें",
-  "enginePhaseAnswer": "उत्तर"
+  "enginePhaseAnswer": "उत्तर",
+  "engineWhy": "क्यों?"
 }

@@ -26,6 +26,7 @@ class UniversalControlBar extends StatelessWidget {
     required this.onPlayPause,
     required this.onCycleSpeed,
     required this.onSeek,
+    this.compact = false,
   });
 
   final int index;
@@ -41,6 +42,10 @@ class UniversalControlBar extends StatelessWidget {
   /// Seek to a step (0..total-1) from the scrubber.
   final ValueChanged<int> onSeek;
 
+  /// Compact = the calm layout: just the buttons + speed centred, no scrubber
+  /// (progress is shown as minimal dots above the equation instead).
+  final bool compact;
+
   bool get _isLast => index >= total - 1;
 
   @override
@@ -48,6 +53,45 @@ class UniversalControlBar extends StatelessWidget {
     final colors = context.colors;
     final emerald =
         context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+
+    if (compact) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _RoundIcon(
+            icon: Icons.chevron_left_rounded,
+            tooltip: context.l10n.resultPreviousStep,
+            onPressed: onPrev,
+            color: colors.textSecondary,
+          ),
+          if (!reduceMotion) ...[
+            const SizedBox(width: AppSpacing.md),
+            _RoundIcon(
+              icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              tooltip:
+                  playing ? context.l10n.visualPause : context.l10n.visualPlay,
+              onPressed: onPlayPause,
+              color: emerald,
+              filled: true,
+            ),
+          ],
+          const SizedBox(width: AppSpacing.md),
+          _RoundIcon(
+            icon: _isLast ? Icons.replay_rounded : Icons.chevron_right_rounded,
+            tooltip: _isLast
+                ? context.l10n.visualReplay
+                : context.l10n.resultNextStep,
+            onPressed: onNext,
+            color: emerald,
+          ),
+          if (!reduceMotion) ...[
+            const SizedBox(width: AppSpacing.md),
+            _SpeedChip(speed: speed, color: emerald, onTap: onCycleSpeed),
+          ],
+        ],
+      );
+    }
+
     return Row(
       children: [
         _RoundIcon(

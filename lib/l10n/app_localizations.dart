@@ -2414,6 +2414,12 @@ abstract class AppLocalizations {
   /// **'Playback speed'**
   String get engineSpeed;
 
+  /// No description provided for @engineWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why?'**
+  String get engineWhy;
+
   /// No description provided for @engineWhatChanged.
   ///
   /// In en, this message translates to:

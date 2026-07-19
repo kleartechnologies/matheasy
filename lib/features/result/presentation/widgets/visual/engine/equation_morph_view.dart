@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
@@ -236,13 +238,17 @@ class _MorphLayout {
   const _MorphLayout({
     required this.beforePos,
     required this.afterPos,
-    required this.sizeOf,
+    required this.beforeSizeOf,
+    required this.afterSizeOf,
     required this.height,
   });
 
   final Map<int, Offset> beforePos; // token id → top-left
   final Map<int, Offset> afterPos;
-  final Map<int, Size> sizeOf; // token id → measured size
+  // Separate maps: the tokenizer restarts ids at 0 per state, so a single
+  // id→size map would let after-token sizes clobber before-token sizes.
+  final Map<int, Size> beforeSizeOf;
+  final Map<int, Size> afterSizeOf;
   final double height;
 
   static _MorphLayout? compute({
@@ -253,21 +259,38 @@ class _MorphLayout {
     required double maxHeight,
     required double gap,
   }) {
-    double rowWidth(List<EqToken> row) {
+    // The combined width of a side's terms (∞ if any fragment is unmeasured).
+    double sideWidth(List<EqToken> row, int side) {
       var w = 0.0;
+      var n = 0;
       for (final t in row) {
+        if (!t.isTerm || t.side != side) continue;
         final s = sizes[t.latex];
         if (s == null) return double.infinity;
         w += s.width;
+        n++;
       }
-      if (row.isNotEmpty) w += gap * (row.length - 1);
-      return w;
+      return n == 0 ? 0 : w + gap * (n - 1);
     }
 
-    final bw = rowWidth(before);
-    final aw = rowWidth(after);
-    if (!bw.isFinite || !aw.isFinite) return null;
-    if (aw > width || bw > width) return null; // would overflow → crossfade
+    EqToken? relationOf(List<EqToken> row) {
+      for (final t in row) {
+        if (t.isRelation) return t;
+      }
+      return null;
+    }
+
+    final rel = relationOf(after) ?? relationOf(before);
+    final hasRel = rel != null;
+    final relW = hasRel ? (sizes[rel.latex]?.width ?? double.infinity) : 0.0;
+    final leftSide = hasRel ? 0 : -1;
+
+    final leftW =
+        math.max(sideWidth(before, leftSide), sideWidth(after, leftSide));
+    final rightW =
+        hasRel ? math.max(sideWidth(before, 1), sideWidth(after, 1)) : 0.0;
+    final total = leftW + (hasRel ? gap + relW + gap + rightW : 0.0);
+    if (!total.isFinite || total <= 0 || total > width) return null;
 
     double rowHeight = 0;
     for (final s in sizes.values) {
@@ -278,30 +301,59 @@ class _MorphLayout {
     // fixed morph box → crossfade (AdaptiveMath fits both dimensions) instead.
     if (maxHeight.isFinite && rowHeight > maxHeight) return null;
 
-    final sizeOf = <int, Size>{};
-    Map<int, Offset> place(List<EqToken> row, double totalWidth) {
+    // Both states share ONE coordinate frame: left terms left-aligned from a
+    // common origin, the relation pinned at a common x, right terms left-aligned
+    // from a common origin. So a kept term keeps its exact place and only the
+    // term that changed side visibly travels — and nothing ever collides with
+    // the '='. (Centred within the available width.)
+    final startX = math.max(0.0, (width - total) / 2);
+    final relX = startX + leftW + gap;
+    final rightOrigin = startX + leftW + gap + relW + gap;
+
+    Map<int, Offset> place(List<EqToken> row, Map<int, Size> sizeOut) {
       final map = <int, Offset>{};
-      var x = (width - totalWidth) / 2;
-      if (x < 0) x = 0;
+      var xl = startX;
+      var xr = rightOrigin;
       for (final t in row) {
-        final s = sizes[t.latex]!;
-        sizeOf[t.id] = s;
-        map[t.id] = Offset(x, (rowHeight - s.height) / 2);
-        x += s.width + gap;
+        final s = sizes[t.latex];
+        if (s == null) continue;
+        sizeOut[t.id] = s;
+        final y = (rowHeight - s.height) / 2;
+        if (t.isRelation) {
+          map[t.id] = Offset(relX, y);
+        } else if (t.side == 1) {
+          map[t.id] = Offset(xr, y);
+          xr += s.width + gap;
+        } else {
+          map[t.id] = Offset(xl, y);
+          xl += s.width + gap;
+        }
       }
       return map;
     }
 
+    final beforeSizeOf = <int, Size>{};
+    final afterSizeOf = <int, Size>{};
     return _MorphLayout(
-      beforePos: place(before, bw),
-      afterPos: place(after, aw),
-      sizeOf: sizeOf,
+      beforePos: place(before, beforeSizeOf),
+      afterPos: place(after, afterSizeOf),
+      beforeSizeOf: beforeSizeOf,
+      afterSizeOf: afterSizeOf,
       height: rowHeight,
     );
   }
 }
 
 /// The animated stack of positioned fragments for one progress value.
+///
+/// Calm, single-focus choreography (staged over the slower cadence): the
+/// unchanged tokens are pinned dead still at their final positions, and ONLY the
+/// one changed term draws attention — it glows, slides across the relation (with
+/// a sign flip at the crossing), and the new value fades in. No scaling, no
+/// bouncing: the student tracks exactly one thing.
+///
+/// Phase map of `p` (0→1): HIGHLIGHT [0, .18] · MOVE [.18, .5] · MORPH [.5, .75]
+/// · SETTLE [.75, 1].
 class _MorphStack extends StatelessWidget {
   const _MorphStack({
     required this.morph,
@@ -317,6 +369,10 @@ class _MorphStack extends StatelessWidget {
   final TextStyle baseStyle;
   final _MorphColors colors;
 
+  static const _highlightEnd = 0.18;
+  static const _moveEnd = 0.5;
+  static const _morphEnd = 0.75;
+
   double _sx(double edge0, double edge1) {
     if (p <= edge0) return 0;
     if (p >= edge1) return 1;
@@ -326,86 +382,81 @@ class _MorphStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final xt = Curves.easeInOutCubic.transform(p);
-    final children = <Widget>[];
+    final moveT = _sx(_highlightEnd, _moveEnd); // slide progress
+    final appearT = _sx(_moveEnd, _morphEnd); // new-value fade-in
+    // The active term glows through highlight + move, then settles.
+    final movedGlow = _sx(0, 0.12) * (1 - _sx(_moveEnd, 0.85));
 
-    // Persistent + entering + merged after-tokens travel to their new places.
+    final highlights = <Widget>[]; // drawn behind
+    final frags = <Widget>[];
+
     for (final a in morph.after) {
       final op = morph.opForAfter(a.id);
       final end = layout.afterPos[a.id];
       if (end == null) continue;
-      Offset start = end;
-      var opacity = 1.0;
-      var scale = 1.0;
-      var color = colors.normal;
 
       switch (op?.kind) {
         case MorphKind.keep:
-          start = layout.beforePos[op!.fromIds.first] ?? end;
-        case MorphKind.move:
-          start = layout.beforePos[op!.fromIds.first] ?? end;
-          // Flash amber while it travels across the relation.
-          color = Color.lerp(colors.normal, colors.moved,
-                  (1 - (2 * p - 1).abs()).clamp(0.0, 1.0)) ??
-              colors.normal;
-        case MorphKind.merge:
-          if (op!.toIds.length == 1) {
-            // Many → one: the new value pops in from the sources' centre.
-            final xs = op.fromIds
-                .map((id) => layout.beforePos[id])
-                .whereType<Offset>()
-                .toList();
-            if (xs.isNotEmpty) {
-              start = Offset(
-                xs.map((o) => o.dx).reduce((x, y) => x + y) / xs.length,
-                end.dy,
-              );
-            }
-            opacity = _sx(0.45, 1.0);
-            scale = 0.7 + 0.3 * _sx(0.45, 1.0);
-            color = colors.merged;
-          } else {
-            // One → many (split): fan out from the source.
-            start = layout.beforePos[op.fromIds.first] ?? end;
-            opacity = _sx(0.3, 1.0);
-          }
-        case MorphKind.enter:
-          opacity = _sx(0.4, 1.0);
-          color = colors.merged;
-        case MorphKind.exit:
         case null:
+          // Pinned, still, normal. Everything the student is NOT tracking.
+          frags.add(_frag(a.latex, end, 1, colors.normal, layout.afterSizeOf[a.id]));
+
+        case MorphKind.move:
+          // The hero: glow in place, slide across, flip sign at the crossing.
+          final start = layout.beforePos[op!.fromIds.first] ?? end;
+          final pos = Offset.lerp(start, end, moveT)!;
+          final before = _beforeById(op.fromIds.first);
+          final latex =
+              (moveT < 0.5 && before != null) ? before.latex : a.latex;
+          final color =
+              Color.lerp(colors.normal, colors.moved, movedGlow) ?? colors.normal;
+          if (movedGlow > 0.02) {
+            highlights.add(_glow(pos, layout.afterSizeOf[a.id], colors.moved,
+                movedGlow * 0.22));
+          }
+          frags.add(_frag(latex, pos, 1, color, layout.afterSizeOf[a.id]));
+
+        case MorphKind.merge:
+          // The resolved value fades in at its resting place — no motion, no pop.
+          final resultGlow = appearT * (1 - _sx(0.82, 1.0));
+          final color =
+              Color.lerp(colors.merged, colors.normal, _sx(0.7, 1.0)) ??
+                  colors.normal;
+          if (resultGlow > 0.02) {
+            highlights.add(_glow(
+                end, layout.afterSizeOf[a.id], colors.merged, resultGlow * 0.2));
+          }
+          frags.add(_frag(a.latex, end, appearT, color, layout.afterSizeOf[a.id]));
+
+        case MorphKind.enter:
+          frags.add(_frag(a.latex, end, appearT, colors.merged, layout.afterSizeOf[a.id]));
+
+        case MorphKind.exit:
           break;
       }
-
-      final pos = Offset.lerp(start, end, xt)!;
-      children.add(_frag(a, pos, opacity, scale, color));
     }
 
-    // Sources that leave: merge/split sources travel toward the target and fade;
-    // plain exits fade in place.
+    // Sources that dissolve: glow during highlight, fade out as the new value
+    // resolves. They stay put — only the tracked term ever moves.
     for (final op in morph.ops) {
-      if (op.kind == MorphKind.merge && op.toIds.length == 1) {
-        final target = layout.afterPos[op.toIds.first];
-        for (final id in op.fromIds) {
-          final b = _beforeById(id);
-          final from = layout.beforePos[id];
-          if (b == null || from == null || target == null) continue;
-          final pos = Offset.lerp(from, target, xt)!;
-          children.add(_frag(b, pos, (1 - _sx(0.45, 0.9)).clamp(0.0, 1.0), 1,
-              colors.normal));
+      final fades = op.kind == MorphKind.merge || op.kind == MorphKind.exit
+          ? op.fromIds
+          : const <int>[];
+      for (final id in fades) {
+        final b = _beforeById(id);
+        final from = layout.beforePos[id];
+        if (b == null || from == null) continue;
+        final srcGlow = _sx(0, 0.14) * (1 - _sx(_highlightEnd, _moveEnd));
+        if (srcGlow > 0.02) {
+          highlights.add(
+              _glow(from, layout.beforeSizeOf[id], colors.moved, srcGlow * 0.18));
         }
-      } else if (op.kind == MorphKind.exit) {
-        for (final id in op.fromIds) {
-          final b = _beforeById(id);
-          final from = layout.beforePos[id];
-          if (b == null || from == null) continue;
-          children.add(_frag(
-              b, from, (1 - _sx(0.0, 0.55)).clamp(0.0, 1.0), 1, colors.normal));
-        }
+        final fade = (1 - _sx(_moveEnd, _morphEnd)).clamp(0.0, 1.0);
+        frags.add(_frag(b.latex, from, fade, colors.normal, layout.beforeSizeOf[id]));
       }
     }
 
-    return Stack(clipBehavior: Clip.none, children: children);
+    return Stack(clipBehavior: Clip.none, children: [...highlights, ...frags]);
   }
 
   EqToken? _beforeById(int id) {
@@ -415,22 +466,37 @@ class _MorphStack extends StatelessWidget {
     return null;
   }
 
-  Widget _frag(
-      EqToken t, Offset pos, double opacity, double scale, Color color) {
+  /// A soft rounded halo behind the changed term — the ONLY thing that draws the
+  /// eye. Subtle (low alpha), no motion of its own.
+  Widget _glow(Offset pos, Size? size, Color color, double alpha) {
+    final s = size ?? const Size(24, 24);
+    const pad = 7.0;
+    return Positioned(
+      left: pos.dx - pad,
+      top: pos.dy - pad,
+      child: Container(
+        width: s.width + pad * 2,
+        height: s.height + pad * 2,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: alpha.clamp(0.0, 1.0)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
+  Widget _frag(String latex, Offset pos, double opacity, Color color, Size? size) {
     final style = baseStyle.copyWith(color: color);
     return Positioned(
       left: pos.dx,
       top: pos.dy,
       child: Opacity(
         opacity: opacity.clamp(0.0, 1.0),
-        child: Transform.scale(
-          scale: scale,
-          child: Math.tex(
-            t.latex,
-            textStyle: style,
-            mathStyle: MathStyle.text,
-            onErrorFallback: (_) => Text(t.latex, style: style),
-          ),
+        child: Math.tex(
+          latex,
+          textStyle: style,
+          mathStyle: MathStyle.text,
+          onErrorFallback: (_) => Text(latex, style: style),
         ),
       ),
     );

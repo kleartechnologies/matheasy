@@ -489,5 +489,6 @@
   "enginePhaseApply": "ルールを使う",
   "enginePhaseSimplify": "整理する",
   "enginePhaseVerify": "確かめる",
-  "enginePhaseAnswer": "答え"
+  "enginePhaseAnswer": "答え",
+  "engineWhy": "なぜ？"
 }

@@ -384,6 +384,7 @@
   "visualPause": "Pause",
   "visualPlay": "Play",
   "engineSpeed": "Playback speed",
+  "engineWhy": "Why?",
   "engineWhatChanged": "What changed",
   "engineIntro": "Watch the solution come to life, one change at a time.",
   "engineUnderstandTitle": "Understand the problem",

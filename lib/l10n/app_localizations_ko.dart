@@ -1189,6 +1189,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engineSpeed => '재생 속도';
 
   @override
+  String get engineWhy => '왜?';
+
+  @override
   String get engineWhatChanged => '무엇이 바뀌었나요';
 
   @override
