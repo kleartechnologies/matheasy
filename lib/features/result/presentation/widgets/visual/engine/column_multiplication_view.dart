@@ -163,15 +163,21 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     if (step.callout != null) {
       final from = Offset(stageW / 2, _calloutY - 2);
       Offset? to;
+      var bow = 16.0;
       if (step.emphResultCol != null) {
-        to = Offset(_colX(step.emphResultCol!, stageW), _resultY + _digitH - 4);
+        // Short arc up from the callout to the answer digit (both below the rule).
+        to = Offset(_colX(step.emphResultCol!, stageW), _resultY + _digitH - 6);
       } else if (step.emphCarryCol != null) {
+        // Swing WIDE left so the carry arrow arcs through the empty column and
+        // never crosses the 7 × 6.
         to = Offset(_colX(step.emphCarryCol!, stageW), _carryH - 2);
+        bow = 54;
       }
       if (to != null) {
         children.add(Positioned.fill(
           child: CustomPaint(
-            painter: _DashArrowPainter(from: from, to: to, reveal: t, color: blue),
+            painter: _DashArrowPainter(
+                from: from, to: to, reveal: t, color: blue, bow: bow),
           ),
         ));
       }
@@ -279,21 +285,30 @@ class _ColumnMultiplicationViewState extends State<ColumnMultiplicationView>
     double scale = 1,
     double height = _digitH,
   }) {
-    Widget child = Container(
+    // A snug rounded box that HUGS the digit (small padding), not the whole cell.
+    Widget label = Text(
+      text,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w700,
+        color: color,
+        height: 1.1,
+      ),
+    );
+    if (box != null) {
+      label = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+        decoration: BoxDecoration(
+          color: box,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: label,
+      );
+    }
+    Widget child = SizedBox(
       width: _cellW,
       height: height,
-      alignment: Alignment.center,
-      decoration: box == null
-          ? null
-          : BoxDecoration(color: box, borderRadius: BorderRadius.circular(7)),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
+      child: Center(child: label),
     );
     if (scale != 1) child = Transform.scale(scale: scale, child: child);
     if (opacity != 1) child = Opacity(opacity: opacity.clamp(0, 1), child: child);
@@ -308,12 +323,17 @@ class _DashArrowPainter extends CustomPainter {
     required this.to,
     required this.reveal,
     required this.color,
+    this.bow = 16,
   });
 
   final Offset from;
   final Offset to;
   final double reveal;
   final Color color;
+
+  /// How far the curve bows to one side (perpendicular). Larger = wider arc — used
+  /// to swing the carry arrow clear of the digits.
+  final double bow;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -330,7 +350,7 @@ class _DashArrowPainter extends CustomPainter {
     if (len < 2) return;
     final perp = Offset(dir.dy, -dir.dx) / len;
     final ctrl =
-        Offset((from.dx + to.dx) / 2, (from.dy + to.dy) / 2) + perp * 14;
+        Offset((from.dx + to.dx) / 2, (from.dy + to.dy) / 2) + perp * bow;
     final path = Path()
       ..moveTo(from.dx, from.dy)
       ..quadraticBezierTo(ctrl.dx, ctrl.dy, to.dx, to.dy);
