@@ -23,6 +23,7 @@ import '../domain/animation/column_arithmetic.dart';
 import '../domain/animation/fraction_arithmetic.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
+import '../domain/animation/power_root.dart';
 import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/teaching_models.dart';
@@ -256,6 +257,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: ldiv.steps.length,
         caption: ldiv.steps[i].caption,
         callout: ldiv.steps[i].callout,
+      );
+    }
+    final pr = PowerRoot.tryBuild(result);
+    if (pr != null) {
+      final i = stepIndex.clamp(0, pr.steps.length - 1);
+      return (
+        label: 'powers & roots',
+        total: pr.steps.length,
+        caption: pr.steps[i].caption,
+        callout: pr.steps[i].callout,
       );
     }
     return null;

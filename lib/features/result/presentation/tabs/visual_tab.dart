@@ -13,6 +13,7 @@ import '../../domain/animation/column_arithmetic.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
+import '../../domain/animation/power_root.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
@@ -23,6 +24,7 @@ import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
+import '../widgets/visual/engine/power_root_view.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
 import '../widgets/visual/tier2_learning_cards.dart';
@@ -140,6 +142,17 @@ class VisualTab extends ConsumerWidget {
         if (longDiv != null) {
           return LongDivisionView(
             model: longDiv,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style POWERS & ROOTS — a power expands into repeated
+        // multiplication (2^5 → 2×2×2×2×2 = 32); a perfect root asks "what
+        // number, raised to k, gives n?". Golden-rule gated against the value.
+        final powerRoot = PowerRoot.tryBuild(result);
+        if (powerRoot != null) {
+          return PowerRootView(
+            model: powerRoot,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
