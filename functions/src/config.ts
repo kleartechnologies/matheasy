@@ -68,6 +68,25 @@ export function teachingEnabled(): boolean {
   return TEACHING_ENABLED.value() === "true";
 }
 
+/**
+ * The kill switch for the additive animation-schema sidecar. OFF by default: the
+ * solver attaches NO `animationSchema` to the payload, so nothing changes vs today.
+ * Flip to "true" at deploy time (or via .env) to attach the schema on fresh
+ * mathsteps-path solves — the verified `solve→verify` path is untouched either way,
+ * so this only gates the ADDITIVE, strictly non-load-bearing sidecar. Rollback is
+ * asymmetric by design: OFF actively strips any sidecar on egress (even one a cache
+ * entry still carries from when it was ON), ON is lazy (no cache backfill).
+ *   set ANIMATION_SCHEMA_ENABLED=true in .env or at deploy.
+ */
+export const ANIMATION_SCHEMA_ENABLED = defineString("ANIMATION_SCHEMA_ENABLED", {
+  default: "false",
+});
+
+/** Whether the animation-schema sidecar is attached. Default OFF. */
+export function animationSchemaEnabled(): boolean {
+  return ANIMATION_SCHEMA_ENABLED.value() === "true";
+}
+
 // The region all functions run in. Keep it close to your users / Firestore.
 export const REGION = "us-central1";
 

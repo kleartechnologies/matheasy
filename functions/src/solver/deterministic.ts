@@ -167,6 +167,10 @@ function solveViaMathsteps(
     roots: roots.values,
     quadratic: quad ?? undefined,
     plotExpression: singleVarPolyPlot(parts[0], cls.unknown),
+    // The ONLY path with real equation MsStep[] — carried up for the flag-gated,
+    // non-load-bearing animation sidecar (built in the orchestrator). Additive:
+    // the verify/answer path never reads it.
+    steps,
     verify: () => verifyRoots(parts, cls.unknown, roots.values),
   };
 }

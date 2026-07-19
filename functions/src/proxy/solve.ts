@@ -16,8 +16,14 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { fraction } from "mathjs";
+import type { MsStep } from "mathsteps";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
+import {
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+  REVENUECAT_SECRET_KEY,
+  animationSchemaEnabled,
+} from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -30,6 +36,10 @@ import { getCachedSolve, putCachedSolve } from "../lib/solveCache";
 import { chatJson, createOpenAI } from "../lib/openai";
 import { languageDirective } from "../lib/language";
 
+// Namespace import (not destructured) so the call site stays a runtime property
+// access — this is what lets the wiring test spy on buildAnimationSchema to prove
+// a thrown animation can never break a verified solve.
+import * as animation from "../solver/animationSchema";
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
 import { odeAnswer, verifyOde } from "../solver/ode";
@@ -95,6 +105,45 @@ function couldNotVerify(
     methods: [],
     graph: null,
   };
+}
+
+/**
+ * Attach the OPTIONAL animation sidecar to an ALREADY-verified payload. Runs on
+ * the fresh-solve path only, AFTER the solve is complete. STRICTLY ADDITIVE and
+ * STRICTLY NON-LOAD-BEARING: a no-op unless the flag is ON and the mathsteps path
+ * produced real equation steps, and ANY throw — including the module's golden-rule
+ * firewall — is caught and logged so the verified solve returns normally. A broken
+ * animation must never turn a correct verified solve into an error.
+ */
+function attachAnimationSchema(payload: SolvePayload, steps?: MsStep[]): void {
+  if (!animationSchemaEnabled() || !steps || steps.length === 0) return;
+  try {
+    const schema = animation.buildAnimationSchema(steps);
+    if (schema.length > 0) payload.animationSchema = schema;
+  } catch (err) {
+    logger.warn("animationSchema build failed — omitting the additive sidecar", {
+      problemType: payload.problemType,
+      err: String(err),
+    });
+  }
+}
+
+/**
+ * Finalize the animation sidecar on an OUTGOING payload (egress), given the flag.
+ * The rollback is asymmetric BY DESIGN:
+ *   • flag OFF → actively STRIP any `animationSchema`, even one a cache entry still
+ *     carries from when the flag was ON — so OFF is a true no-op with zero behavior
+ *     change vs today.
+ *   • flag ON → do NOTHING here: no cache backfill. The field is whatever the
+ *     payload already carries (from the fresh-solve build, or a cache hit). A
+ *     pre-feature cache entry stays scheme-less until it naturally expires and
+ *     re-solves — the cache-HIT path never re-solves or builds a schema.
+ * Pure + synchronous, so it's unit-testable without Firebase.
+ */
+export function finalizeAnimationSidecar(payload: SolvePayload, enabled: boolean): void {
+  if (!enabled && payload.animationSchema !== undefined) {
+    delete payload.animationSchema;
+  }
 }
 
 export const solveEquation = onCall(
@@ -167,6 +216,12 @@ export const solveEquation = onCall(
       await putCachedSolve(latex, payload, language);
     }
 
+    // Animation sidecar egress (asymmetric kill switch): OFF strips any schema —
+    // even one a cache entry carries from when the flag was ON — so OFF is a true
+    // no-op; ON leaves whatever the payload already has (fresh-built or cached),
+    // with NO backfill on the cache-hit path.
+    finalizeAnimationSidecar(payload, animationSchemaEnabled());
+
     // Meter ONLY the manual-entry path (a scan already paid for OCR-sourced
     // problems). We charge whether or not the answer verified, and whether or
     // not it was a cache hit: the user's allowance tracks solves they ask for.
@@ -217,7 +272,7 @@ export async function solve(
       roots: candidate.roots,
       quadratic: candidate.quadratic,
     });
-    return {
+    const payload: SolvePayload = {
       problemLatex: cls.latex,
       problemType: cls.problemType,
       finalAnswer: candidate.answer,
@@ -225,6 +280,11 @@ export async function solve(
       methods,
       graph,
     };
+    // Additive sidecar over the now-complete verified payload (flag-gated, wrapped
+    // so a failure can never break the solve). Runs BEFORE the caller caches the
+    // payload, so a fresh solve caches the schema WITH it.
+    attachAnimationSchema(payload, candidate.steps);
+    return payload;
   }
 
   // 1b) A simultaneous system the engine could NOT complete (composition not

@@ -10,6 +10,9 @@
  * and substituted back to verify. The LLM never produces the math — it only
  * writes the plain-language `why` for each already-computed step.
  */
+import type { MsStep } from "mathsteps";
+
+import type { AnimationSchema } from "./animationSchema";
 
 // --- §4 wire contract -------------------------------------------------------
 
@@ -98,6 +101,16 @@ export interface SolvePayload {
   /** The additive teaching layer. Capability = `teaching != null` (see §2.3);
    * absent ⇒ the client renders today's UI unchanged. */
   teaching?: TeachingLayer;
+  /**
+   * OPTIONAL animation sidecar — a per-step "watch math transform" script built
+   * from the VERIFIED mathsteps steps (see solver/animationSchema.ts). Present
+   * ONLY when `ANIMATION_SCHEMA_ENABLED` is on AND the solve used the mathsteps
+   * equation path; absent for every other path, when the flag is off, or when
+   * building it threw. STRICTLY ADDITIVE + NON-LOAD-BEARING: never gates rendering,
+   * and its firewall guarantees every value traces to the verified before/after —
+   * absence is a valid state the client already tolerates.
+   */
+  animationSchema?: AnimationSchema;
 }
 
 // --- v2 teaching layer (spec: docs/matheasy-teaching-engine-spec.md §2, §4) --
@@ -412,6 +425,14 @@ export interface SolveCandidate {
   quadratic?: { a: number; b: number; c: number };
   /** The plottable expression (ascii) when the problem graphs, else null. */
   plotExpression?: string | null;
+  /**
+   * The raw mathsteps equation steps, populated ONLY by the mathsteps path
+   * (solveViaMathsteps). Carried up solely so the flag-gated, non-load-bearing
+   * animation sidecar can be built from them in the orchestrator; NEVER read by
+   * the verify/answer path, so this is purely additive. Absent for every other
+   * engine (quadratic-direct, simplify, arithmetic, derivative, linalg, ODE, …).
+   */
+  steps?: MsStep[];
   /** Proves the candidate against the original problem. */
   verify: () => boolean;
 }
