@@ -9,11 +9,13 @@ import '../../../scan/domain/detected_equation.dart';
 import '../../../subscription/application/subscription_controller.dart';
 import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
+import '../../domain/animation/column_multiplication.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
 import '../widgets/solution_player.dart';
 import '../widgets/visual/engine/animated_learning_player.dart';
+import '../widgets/visual/engine/column_multiplication_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
@@ -92,6 +94,20 @@ class VisualTab extends ConsumerWidget {
             onAskMatheasy: (step) => onAskMatheasy(visual, step),
           );
         }
+        // Photomath-style COLUMN MULTIPLICATION for an integer × single-digit
+        // product (e.g. 72 × 6) — the spatial, carry-animated tutorial. Only when
+        // the algorithm's product equals the verified answer (golden rule).
+        final colMul = ColumnMultiplication.tryBuild(result);
+        if (colMul != null) {
+          return ColumnMultiplicationView(
+            model: colMul,
+            onAskStep: (i) => onAskMatheasy(
+              visual,
+              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
+            ),
+          );
+        }
+
         // PRIMARY — the Universal Animated Learning Engine: a watchable,
         // symbol-morphing walkthrough built from the VERIFIED solve payload
         // (terms slide across the =, merges collapse, no LLM math). When it can't
