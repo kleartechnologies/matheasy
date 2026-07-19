@@ -8,6 +8,20 @@ import '../../features/auth/application/auth_service.dart' show firebaseReadyPro
 /// `functions/src/config.ts`).
 const String kFunctionsRegion = 'us-central1';
 
+/// DEV-ONLY: route Cloud Functions calls to the LOCAL emulator instead of prod.
+/// Off in every normal build (so prod behaviour is byte-unchanged); enable for a
+/// dev run with `--dart-define=USE_FUNCTIONS_EMULATOR=true`.
+const bool kUseFunctionsEmulator = bool.fromEnvironment('USE_FUNCTIONS_EMULATOR');
+
+/// The emulator host. `127.0.0.1` works for the iOS simulator / macOS; override
+/// for an Android emulator (`10.0.2.2`) or a physical device (the Mac's LAN IP)
+/// with `--dart-define=FUNCTIONS_EMULATOR_HOST=...`.
+const String kFunctionsEmulatorHost =
+    String.fromEnvironment('FUNCTIONS_EMULATOR_HOST', defaultValue: '127.0.0.1');
+
+/// The Functions emulator port (matches `firebase.json`).
+const int kFunctionsEmulatorPort = 5001;
+
 /// A backend error surfaced to the AI services, carrying a user-safe [message]
 /// and a [code] so callers can distinguish quota/auth/offline from a hard
 /// failure. Keeps the `cloud_functions` `FirebaseFunctionsException` type
@@ -45,9 +59,15 @@ class BackendException implements Exception {
 /// ready (the AI service providers gate on [aiBackendReadyProvider]), so this is
 /// never touched on an unconfigured checkout / in tests.
 final Provider<FirebaseFunctions> firebaseFunctionsProvider =
-    Provider<FirebaseFunctions>(
-  (ref) => FirebaseFunctions.instanceFor(region: kFunctionsRegion),
-);
+    Provider<FirebaseFunctions>((ref) {
+  final functions = FirebaseFunctions.instanceFor(region: kFunctionsRegion);
+  // Dev: point the callables (incl. `solveEquation`) at the local emulator so we
+  // develop against REAL verified payloads with ANIMATION_SCHEMA_ENABLED=true.
+  if (kUseFunctionsEmulator) {
+    functions.useFunctionsEmulator(kFunctionsEmulatorHost, kFunctionsEmulatorPort);
+  }
+  return functions;
+});
 
 /// Whether the real AI backend can be used: Firebase must be initialized AND the
 /// user signed into a real (non-guest) account — the callables require an auth
