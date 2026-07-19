@@ -2,6 +2,7 @@ import 'dart:ui' show Offset;
 
 import '../../scan/domain/detected_equation.dart';
 import '../../scan/domain/scan_source.dart';
+import '../domain/animation_schema.dart';
 import '../domain/result_models.dart';
 import '../domain/teaching_models.dart';
 import 'solver_service.dart';
@@ -113,6 +114,9 @@ class SolveResponseMapper {
       // v2 teaching layer (spec §2) — null for a v1 payload; the UI renders it
       // only when present + non-empty, so today's screens are unchanged.
       teaching: _teaching(json['teaching']),
+      // OPTIONAL animation sidecar — null for anything but a flag-on mathsteps
+      // equation solve, so the result UI is unchanged when absent.
+      animationSchema: AnimationSchema.tryParse(json['animationSchema']),
     );
   }
 

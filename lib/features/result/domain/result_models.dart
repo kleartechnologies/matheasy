@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../scan/domain/detected_equation.dart';
+import 'animation_schema.dart';
 import 'teaching_models.dart';
 
 /// Total string coercion — a non-String (number/list/null) degrades instead of
@@ -345,6 +346,7 @@ class ResultData {
     this.routeToTutor = false,
     this.tutorRouteReason = TutorRouteReason.proof,
     this.teaching,
+    this.animationSchema,
   });
 
   final DetectedEquation equation;
@@ -386,6 +388,12 @@ class ResultData {
   /// empty sub-model) as "show nothing" — the current UI is unchanged when absent.
   final TeachingLayer? teaching;
 
+  /// The OPTIONAL per-step animation sidecar (server `animationSchema`), or null —
+  /// the common case (flag-gated server-side, only present for mathsteps equation
+  /// solves). Null/empty ⇒ the result UI renders exactly as today; a renderer only
+  /// surfaces the player when this is present and non-empty.
+  final AnimationSchema? animationSchema;
+
   String get questionLatex => equation.latex;
 
   /// A copy with the v2 teaching layer merged in — the enriched [steps] +
@@ -414,6 +422,9 @@ class ResultData {
         routeToTutor: routeToTutor,
         tutorRouteReason: tutorRouteReason,
         teaching: teaching,
+        // Preserve the animation sidecar across the progressive teaching merge —
+        // the enrich response never carries it, so it must be forwarded here.
+        animationSchema: animationSchema,
       );
 
   Map<String, dynamic> toJson() => {
@@ -433,6 +444,7 @@ class ResultData {
         if (routeToTutor) 'tutorRouteReason': tutorRouteReason.name,
         if (graph != null) 'graph': graph!.toJson(),
         if (teaching != null) 'teaching': teaching!.toJson(),
+        if (animationSchema != null) 'animationSchema': animationSchema!.toJson(),
       };
 
   factory ResultData.fromJson(Map<String, dynamic> j) => ResultData(
@@ -475,5 +487,6 @@ class ResultData {
             ? TeachingLayer.fromJson(
                 Map<String, dynamic>.from(j['teaching'] as Map))
             : null,
+        animationSchema: AnimationSchema.tryParse(j['animationSchema']),
       );
 }

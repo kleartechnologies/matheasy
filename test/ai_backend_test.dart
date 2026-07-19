@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matheasy/core/backend/functions_client.dart';
 import 'package:matheasy/features/result/application/functions_solver_service.dart';
+import 'package:matheasy/features/result/domain/animation_schema.dart';
 import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/scan/application/functions_scanner_service.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
@@ -102,6 +103,9 @@ void main() {
       // §7 curve samples parsed into plottable points.
       expect(result.graph!.curve, hasLength(4));
       expect(result.graph!.curve[1], const Offset(-1, 0));
+      // A payload WITHOUT the animation sidecar → null (the common case). The
+      // result UI renders exactly as today when this is absent.
+      expect(result.animationSchema, isNull);
     });
 
     test('couldn\'t-verify → no answer, honest state', () {
@@ -119,6 +123,135 @@ void main() {
       expect(result.methods, isEmpty);
       expect(result.graph, isNull);
       expect(result.verifyText, contains("couldn't verify"));
+      // No sidecar on a couldn't-verify payload either.
+      expect(result.animationSchema, isNull);
+    });
+
+    test('parses the optional animationSchema when the server attaches it', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemLatex': '2x + 5 = 13',
+        'problemType': 'linear_equation',
+        'finalAnswer': {'latex': 'x = 4', 'plain': 'x = 4'},
+        'verified': true,
+        'methods': <dynamic>[],
+        'animationSchema': [
+          {
+            'stepIndex': 0,
+            'changeType': 'SUBTRACT_FROM_BOTH_SIDES',
+            'beforeLatex': '2x + 5 = 13',
+            'afterLatex': '2x = 8',
+            'animationTemplate': 'move_across_equals',
+            'tokens': [
+              {
+                'value': '5',
+                'fromPath': 'L/1',
+                'toPath': 'R/1',
+                'color': 'pink',
+                'highlight': 'circle',
+              },
+            ],
+            'explanationKey': 'anim.step.SUBTRACT_FROM_BOTH_SIDES',
+          },
+          {
+            'stepIndex': 1,
+            'changeType': 'DIVIDE_FROM_BOTH_SIDES',
+            'beforeLatex': '2x = 8',
+            'afterLatex': 'x = 4',
+            'animationTemplate': 'divide_both_sides',
+            'tokens': [
+              {
+                'value': '2',
+                'fromPath': 'L/0',
+                'toPath': 'L/1',
+                'color': 'blue',
+                'highlight': 'box',
+              },
+              // A new token (no old origin) — fromPath is explicitly null.
+              {
+                'value': '2',
+                'fromPath': null,
+                'toPath': 'R/1',
+                'color': 'blue',
+                'highlight': 'box',
+              },
+            ],
+            'explanationKey': 'anim.step.DIVIDE_FROM_BOTH_SIDES',
+          },
+        ],
+      });
+
+      final schema = result.animationSchema;
+      expect(schema, isNotNull);
+      expect(schema!.length, 2);
+
+      final first = schema[0];
+      expect(first.stepIndex, 0);
+      expect(first.changeType, 'SUBTRACT_FROM_BOTH_SIDES');
+      expect(first.beforeLatex, '2x + 5 = 13');
+      expect(first.afterLatex, '2x = 8');
+      expect(first.template, AnimationTemplate.moveAcrossEquals);
+      expect(first.explanationKey, 'anim.step.SUBTRACT_FROM_BOTH_SIDES');
+      expect(first.tokens, hasLength(1));
+      expect(first.tokens.single.value, '5');
+      expect(first.tokens.single.fromPath, 'L/1');
+      expect(first.tokens.single.toPath, 'R/1');
+      expect(first.tokens.single.color, TokenColor.pink);
+      expect(first.tokens.single.highlight, TokenHighlight.circle);
+
+      final second = schema[1];
+      expect(second.template, AnimationTemplate.divideBothSides);
+      expect(second.tokens, hasLength(2));
+      // The explicit-null endpoint survives the round trip.
+      expect(second.tokens[1].fromPath, isNull);
+      expect(second.tokens[1].toPath, 'R/1');
+    });
+
+    test('an empty animationSchema array parses to null (no entry point shown)', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemLatex': '2x + 5 = 13',
+        'problemType': 'linear_equation',
+        'finalAnswer': {'latex': 'x = 4', 'plain': 'x = 4'},
+        'verified': true,
+        'methods': <dynamic>[],
+        'animationSchema': <dynamic>[],
+      });
+      expect(result.animationSchema, isNull);
+    });
+
+    test('unknown enum values degrade to safe fallbacks (never throw)', () {
+      final result = SolveResponseMapper.toResultData(_equation, {
+        'problemLatex': '2x + 5 = 13',
+        'problemType': 'linear_equation',
+        'finalAnswer': {'latex': 'x = 4', 'plain': 'x = 4'},
+        'verified': true,
+        'methods': <dynamic>[],
+        'animationSchema': [
+          {
+            'stepIndex': 0,
+            'changeType': 'FUTURE_CHANGE_TYPE',
+            'beforeLatex': '2x + 5 = 13',
+            'afterLatex': '2x = 8',
+            // A template/colour/highlight a newer server might send.
+            'animationTemplate': 'warp_speed',
+            'tokens': [
+              {
+                'value': '5',
+                'fromPath': 'L/1',
+                'toPath': 'R/1',
+                'color': 'chartreuse',
+                'highlight': 'sparkle',
+              },
+            ],
+            'explanationKey': 'anim.step.FUTURE_CHANGE_TYPE',
+          },
+        ],
+      });
+      final step = result.animationSchema!.steps.single;
+      // Unknown template → the server's own default; unknown token enums → the
+      // model defaults. An older client can't crash on a newer server.
+      expect(step.template, AnimationTemplate.fadeInNewLine);
+      expect(step.tokens.single.color, TokenColor.blue);
+      expect(step.tokens.single.highlight, TokenHighlight.box);
     });
 
     test('routeToTutor → conceptual state, no answer, honest framing', () {
