@@ -7,11 +7,14 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../scan/domain/detected_equation.dart';
 import '../../../subscription/application/subscription_controller.dart';
+import '../../application/animation/animation_script_builder.dart';
 import '../../application/visual_solution_controller.dart';
 import '../../domain/result_models.dart';
 import '../../domain/visual_models.dart';
 import '../widgets/result_empty.dart';
 import '../widgets/solution_player.dart';
+import '../widgets/visual/engine/animated_learning_player.dart';
+import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/geometry_visual_player.dart';
 import '../widgets/visual/tier1_animated_transformation.dart';
 import '../widgets/visual/tier2_learning_cards.dart';
@@ -89,11 +92,23 @@ class VisualTab extends ConsumerWidget {
             onAskMatheasy: (step) => onAskMatheasy(visual, step),
           );
         }
-        // The universal "Play Solution" — step through the VERIFIED solve (works
-        // for EVERY problem type, since every solve carries its steps), enriched
-        // with the server animationSchema's token chips where available. No LLM
-        // math; it only re-presents already-verified values. Needs ≥2 steps to be
-        // worth playing; otherwise fall through to the existing tiers unchanged.
+        // PRIMARY — the Universal Animated Learning Engine: a watchable,
+        // symbol-morphing walkthrough built from the VERIFIED solve payload
+        // (terms slide across the =, merges collapse, no LLM math). When it can't
+        // build a script (too few steps), fall through to the static player.
+        final script = AnimationScriptBuilder.build(result, copy: engineCopy(context));
+        if (!script.isEmpty) {
+          return AnimatedLearningPlayer(
+            script: script,
+            onAskMatheasy: (i) => onAskMatheasy(
+              visual,
+              visual.steps.isEmpty ? 0 : i.clamp(0, visual.steps.length - 1),
+            ),
+          );
+        }
+        // FALLBACK — the universal static "Play Solution" step player: works for
+        // EVERY problem type (every solve carries its steps), enriched with the
+        // server animationSchema's token chips where available. No LLM math.
         final playerSteps = buildPlayerSteps(result);
         if (playerSteps.length >= 2) {
           return SolutionPlayer(

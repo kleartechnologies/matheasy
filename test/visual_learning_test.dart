@@ -28,8 +28,8 @@ import 'package:matheasy/features/result/application/visual_solution_service.dar
 import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/result/domain/visual_models.dart';
 import 'package:matheasy/features/result/presentation/tabs/visual_tab.dart';
-import 'package:matheasy/features/result/presentation/widgets/solution_player.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/concept_painter.dart';
+import 'package:matheasy/features/result/presentation/widgets/visual/engine/animated_learning_player.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier1_animated_transformation.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier2_learning_cards.dart';
 import 'package:matheasy/features/result/presentation/widgets/visual/tier3_concept_explorer.dart';
@@ -627,9 +627,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.byType(VisualTeaser), findsNothing);
-      // A solved problem now plays the universal "Play Solution" player — the
-      // step-through built from the verified solve steps.
-      expect(find.byType(SolutionPlayer), findsOneWidget);
+      // A solved problem plays the Universal Animated Learning Engine — the
+      // symbol-morphing walkthrough built from the verified steps.
+      expect(find.byType(AnimatedLearningPlayer), findsOneWidget);
     });
   });
 
