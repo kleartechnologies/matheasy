@@ -6,6 +6,7 @@ import '../../theme/app_durations.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import 'rich_math_text.dart';
 
 /// A Matheasy assistant message: the brand avatar paired with a speech bubble.
 /// Use this for assistant turns in chat, inline hints, and the "verify" note on
@@ -48,7 +49,7 @@ class MatheasyBubble extends StatelessWidget {
                   ),
                   boxShadow: context.elevation.card,
                 ),
-                child: Text(
+                child: RichMathText(
                   text,
                   style: AppTypography.bodyMedium
                       .copyWith(color: context.colors.textPrimary),

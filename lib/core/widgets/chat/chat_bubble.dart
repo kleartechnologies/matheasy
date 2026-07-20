@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import 'rich_math_text.dart';
 
 /// A single chat message bubble. [isUser] flips alignment, color and the
 /// asymmetric corner so user messages hug the right and the assistant's hug the
@@ -55,7 +56,7 @@ class ChatBubble extends StatelessWidget {
             borderRadius: radius,
             boxShadow: isUser ? null : context.elevation.card,
           ),
-          child: Text(
+          child: RichMathText(
             text,
             style: AppTypography.bodyMedium.copyWith(
               color: isUser ? AppColors.white : colors.textPrimary,
