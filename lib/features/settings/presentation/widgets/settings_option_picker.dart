@@ -23,6 +23,7 @@ Future<void> showSettingsOptionPicker<T>(
   return AppBottomSheet.show<void>(
     context,
     title: title,
+    showCloseButton: true,
     child: SingleChildScrollView(
       child: SettingsSection(
         children: [
