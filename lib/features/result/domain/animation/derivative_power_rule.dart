@@ -51,20 +51,23 @@ class DerivativePowerRule {
         _parsePoly(result.answerPlain, varName);
     if (answerPoly == null || !_mapsEqual(deriv, answerPoly)) return null;
 
-    return DerivativePowerRule(steps: _steps(poly, deriv));
+    // Render in the STUDENT'S variable (d/dt, d/ds, …), not a hardcoded x — else
+    // the walkthrough would contradict the verified answer's variable.
+    return DerivativePowerRule(steps: _steps(poly, deriv, varName));
   }
 
-  static List<DerivativeStep> _steps(Map<int, int> poly, Map<int, int> deriv) {
-    final original = _polyLatex(poly);
-    final derivLatex = _polyLatex(deriv);
+  static List<DerivativeStep> _steps(
+      Map<int, int> poly, Map<int, int> deriv, String v) {
+    final original = _polyLatex(poly, v);
+    final derivLatex = _polyLatex(deriv, v);
     return [
       DerivativeStep(
-        latex: '\\frac{d}{dx}\\left($original\\right)',
+        latex: '\\frac{d}{d$v}\\left($original\\right)',
         caption: 'Differentiate with the power rule',
-        callout: '\\frac{d}{dx}x^n = n\\,x^{n-1}',
+        callout: '\\frac{d}{d$v}$v^n = n\\,$v^{n-1}',
       ),
       DerivativeStep(
-        latex: _expandedLatex(poly),
+        latex: _expandedLatex(poly, v),
         caption: 'Bring each power down as a multiplier, drop it by one',
       ),
       DerivativeStep(
@@ -72,7 +75,7 @@ class DerivativePowerRule {
         caption: 'Multiply out',
       ),
       DerivativeStep(
-        latex: '\\frac{d}{dx}\\left($original\\right)=$derivLatex',
+        latex: '\\frac{d}{d$v}\\left($original\\right)=$derivLatex',
         caption: 'The derivative',
       ),
     ];
@@ -128,7 +131,7 @@ class DerivativePowerRule {
     return true;
   }
 
-  static String _polyLatex(Map<int, int> m) {
+  static String _polyLatex(Map<int, int> m, String v) {
     final powers = m.keys.toList()..sort((a, b) => b.compareTo(a));
     final sb = StringBuffer();
     for (var i = 0; i < powers.length; i++) {
@@ -137,13 +140,13 @@ class DerivativePowerRule {
       final sign = c < 0 ? '-' : (i == 0 ? '' : '+');
       final mag = c.abs();
       final coefPart = (mag == 1 && p != 0) ? '' : '$mag';
-      final xPart = p == 0 ? '' : (p == 1 ? 'x' : 'x^{$p}');
+      final xPart = p == 0 ? '' : (p == 1 ? v : '$v^{$p}');
       sb.write('$sign$coefPart$xPart');
     }
     return sb.isEmpty ? '0' : sb.toString();
   }
 
-  static String _expandedLatex(Map<int, int> poly) {
+  static String _expandedLatex(Map<int, int> poly, String v) {
     final powers = poly.keys.where((p) => p >= 1).toList()
       ..sort((a, b) => b.compareTo(a));
     final sb = StringBuffer();
@@ -153,7 +156,7 @@ class DerivativePowerRule {
       final sign = c < 0 ? '-' : (i == 0 ? '' : '+');
       final mag = c.abs();
       final np = p - 1;
-      final xPart = np == 0 ? '' : (np == 1 ? 'x' : 'x^{$np}');
+      final xPart = np == 0 ? '' : (np == 1 ? v : '$v^{$np}');
       sb.write('$sign$mag\\cdot$p\\,$xPart');
     }
     return sb.isEmpty ? '0' : sb.toString();

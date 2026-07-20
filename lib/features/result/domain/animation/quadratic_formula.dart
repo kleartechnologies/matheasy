@@ -124,7 +124,8 @@ class QuadraticFormula {
       ),
       QuadraticStep(
         latex: 'x=\\frac{${-b}\\pm$d}{$den}',
-        caption: '\\sqrt{$disc}=$d',
+        // Prose, not LaTeX — the caption is rendered by a plain Text widget.
+        caption: 'The square root of $disc is $d',
       ),
       QuadraticStep(
         latex: 'x=$r1 \\quad\\text{or}\\quad x=$r2',

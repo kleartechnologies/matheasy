@@ -36,6 +36,15 @@ void main() {
     expect(d.steps.last.caption, 'The derivative');
   });
 
+  test('renders in the STUDENT variable: d/dt(t^2) → 2t, never x', () {
+    final d = DerivativePowerRule.tryBuild(_r(r'\frac{d}{dt}(t^2)', '2t'))!;
+    expect(_latex(d).first, r'\frac{d}{dt}\left(t^{2}\right)');
+    expect(_latex(d), contains('2t'));
+    // No step is silently rewritten into x.
+    expect(_latex(d).any((s) => s.contains('x')), isFalse);
+    expect(d.steps.last.latex, r'\frac{d}{dt}\left(t^{2}\right)=2t');
+  });
+
   test('accepts \\left(\\right) wrappers and x^{n} braces', () {
     expect(
       DerivativePowerRule.tryBuild(
