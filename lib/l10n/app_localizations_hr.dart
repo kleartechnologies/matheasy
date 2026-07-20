@@ -401,10 +401,6 @@ class AppLocalizationsHr extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Vježbaj dok ne savladaš gradivo';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Neograničeno vježbanje, XP bodovi, nizovi i postignuća drže te motiviranim svaki dan.';
-
-  @override
   String get onboardingAchievementTitle => 'Oštro oko';
 
   @override
@@ -1686,4 +1682,107 @@ class AppLocalizationsHr extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before postaje $after. Otključaj Pro za gledanje svakog koraka.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Razumij matematiku. Ne prepisuj samo rješenja.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Skeniraj bilo koji zadatak i gledaj kako se otvara u jasna objašnjenja korak po korak.';
+
+  @override
+  String get onboardingSolvedLabel => 'Riješeno';
+
+  @override
+  String get onboardingStepsTitle => 'Gledaj kako svaki korak oživljava';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Rješenja se odvijaju korak po korak — tako naučiš kako, ne samo rješenje.';
+
+  @override
+  String get onboardingSolvingLabel => 'Rješavanje';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Korak $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Vježbaj dok ne savladaš gradivo';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Skupljaj XP, održavaj niz i gledaj stvarni napredak dok ti sve sjeda.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Razina $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP do razine $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Niz dana';
+
+  @override
+  String get onboardingLevelTitle => 'Uči na svojoj razini';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Od tablice množenja do matematičke analize, Matheasy te prati točno tamo gdje jesi.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Osnovna škola';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetika i osnove';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Srednja škola';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebra, geometrija i trigonometrija';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Fakultet';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analiza i redovi';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Sveučilište';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Napredna i primijenjena';
+
+  @override
+  String get onboardingAiMatch => 'AI odabir';
+
+  @override
+  String get onboardingReadyTitle => 'Spreman postati bolji u matematici?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Pretvori matematiku iz stresne u sasvim prirodnu. Tvoja prva lekcija je spremna.';
+
+  @override
+  String get onboardingHaveAccount => 'Već imam račun';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Razlomci';
+
+  @override
+  String get onboardingChipGeometry => 'Geometrija';
 }

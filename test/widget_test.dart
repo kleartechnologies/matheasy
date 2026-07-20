@@ -161,16 +161,19 @@ void main() {
   group('Boot flow', () {
     testWidgets('splash hands new users to onboarding', (tester) async {
       await _bootApp(tester);
-      expect(find.text('Make Math Easy'), findsOneWidget);
-      expect(find.text('Get Started'), findsOneWidget);
+      expect(
+        find.text("Understand Math. Don't Just Copy Answers."),
+        findsOneWidget,
+      );
+      expect(find.text('Continue'), findsOneWidget);
     });
 
     testWidgets('advancing onboarding shows the next page', (tester) async {
       await _bootApp(tester);
-      await tester.tap(find.text('Get Started'));
+      await tester.tap(find.text('Continue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text('Snap Any Math Question'), findsOneWidget);
+      expect(find.text('Watch Every Step Come to Life'), findsOneWidget);
     });
 
     testWidgets('onboarded users boot into the Home dashboard', (tester) async {

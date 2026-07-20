@@ -403,10 +403,6 @@ class AppLocalizationsMs extends AppLocalizations {
       'Berlatih Sehingga Anda Menguasainya';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Latihan tanpa had, XP, rentetan dan pencapaian mengekalkan semangat anda setiap hari.';
-
-  @override
   String get onboardingAchievementTitle => 'Penembak Tepat';
 
   @override
@@ -1699,4 +1695,106 @@ class AppLocalizationsMs extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before menjadi $after. Buka kunci Pro untuk menonton setiap langkah terungkai.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Fahami Matematik. Bukan Sekadar Menyalin Jawapan.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Imbas apa-apa soalan dan lihat ia terbuka menjadi penerangan langkah demi langkah yang jelas.';
+
+  @override
+  String get onboardingSolvedLabel => 'Selesai';
+
+  @override
+  String get onboardingStepsTitle => 'Lihat Setiap Langkah Menjadi Hidup';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Penyelesaian dimainkan satu langkah pada satu masa — jadi anda belajar caranya, bukan sekadar jawapannya.';
+
+  @override
+  String get onboardingSolvingLabel => 'Menyelesaikan';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Langkah $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Berlatih Sehingga Anda Menguasainya';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Kumpul XP, kekalkan rentetan anda dan lihat kemajuan sebenar apabila semuanya mula difahami.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Tahap $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP ke Tahap $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Rentetan hari';
+
+  @override
+  String get onboardingLevelTitle => 'Belajar Mengikut Tahap Anda Sendiri';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Daripada sifir hingga kalkulus, Matheasy menemani anda tepat di tahap anda berada.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Sekolah Rendah';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetik & asas';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Sekolah Menengah';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Algebra, geometri & trigonometri';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Kolej';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Kalkulus & siri';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universiti';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Lanjutan & gunaan';
+
+  @override
+  String get onboardingAiMatch => 'Padanan AI';
+
+  @override
+  String get onboardingReadyTitle => 'Sedia Menjadi Lebih Mahir Matematik?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Ubah matematik daripada menekan kepada mudah semula jadi. Pelajaran pertama anda sudah sedia.';
+
+  @override
+  String get onboardingHaveAccount => 'Saya Sudah Ada Akaun';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Pecahan';
+
+  @override
+  String get onboardingChipGeometry => 'Geometri';
 }

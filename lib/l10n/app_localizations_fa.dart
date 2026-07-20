@@ -400,10 +400,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get onboardingPracticeHeadline => 'تمرین کنید تا مسلط شوید';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'تمرین نامحدود، XP، رکوردهای متوالی و دستاوردها هر روز شما را با انگیزه نگه می‌دارند.';
-
-  @override
   String get onboardingAchievementTitle => 'نشانه‌گیر دقیق';
 
   @override
@@ -1687,4 +1683,106 @@ class AppLocalizationsFa extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before تبدیل می‌شود به $after. برای دیدن باز شدن هر گام، Pro را فعال کنید.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'ریاضی را بفهم، نه اینکه فقط جواب‌ها را کپی کنی.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'هر مسئله‌ای را اسکن کن و ببین چطور به توضیح‌های روشن و گام‌به‌گام باز می‌شود.';
+
+  @override
+  String get onboardingSolvedLabel => 'حل شد';
+
+  @override
+  String get onboardingStepsTitle => 'هر گام را زنده ببین';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'راه‌حل‌ها گام‌به‌گام پیش می‌روند — تا «چگونگی» را یاد بگیری، نه فقط جواب را.';
+
+  @override
+  String get onboardingSolvingLabel => 'در حال حل';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'گام $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'آن‌قدر تمرین کن تا مسلط شوی';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'XP جمع کن، رکورد متوالی‌ات را حفظ کن و با جا افتادن مطالب، پیشرفت واقعی‌ات را ببین.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'سطح $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP تا سطح $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'روز متوالی';
+
+  @override
+  String get onboardingLevelTitle => 'در سطح خودت یاد بگیر';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'از جدول ضرب تا حساب دیفرانسیل و انتگرال، Matheasy دقیقاً همان‌جایی که هستی همراهت است.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'دبستان';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'حساب و مفاهیم پایه';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'دبیرستان';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'جبر، هندسه و مثلثات';
+
+  @override
+  String get onboardingBandCollegeTitle => 'کالج';
+
+  @override
+  String get onboardingBandCollegeDesc => 'حسابان و سری‌ها';
+
+  @override
+  String get onboardingBandUniversityTitle => 'دانشگاه';
+
+  @override
+  String get onboardingBandUniversityDesc => 'پیشرفته و کاربردی';
+
+  @override
+  String get onboardingAiMatch => 'تطبیق AI';
+
+  @override
+  String get onboardingReadyTitle => 'آماده‌ای در ریاضی بهتر شوی؟';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'ریاضی را از یک استرس به یک عادت طبیعی تبدیل کن. اولین درست آماده است.';
+
+  @override
+  String get onboardingHaveAccount => 'از قبل حساب کاربری دارم';
+
+  @override
+  String get onboardingChipAlgebra => 'جبر';
+
+  @override
+  String get onboardingChipFractions => 'کسرها';
+
+  @override
+  String get onboardingChipGeometry => 'هندسه';
 }

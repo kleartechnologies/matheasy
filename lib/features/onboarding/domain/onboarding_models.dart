@@ -8,6 +8,7 @@ enum StudyLevel {
   igcse('IGCSE', Icons.public_rounded),
   gcse('GCSE', Icons.language_rounded),
   sat('SAT', Icons.edit_note_rounded),
+  college('College', Icons.auto_stories_rounded),
   university('University', Icons.account_balance_rounded);
 
   const StudyLevel(this.label, this.icon);

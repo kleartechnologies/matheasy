@@ -401,10 +401,6 @@ class AppLocalizationsHu extends AppLocalizations {
       'Gyakorolj, amíg nem megy tökéletesen';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'A korlátlan gyakorlás, az XP, a sorozatok és a jelvények minden nap motiválnak.';
-
-  @override
   String get onboardingAchievementTitle => 'Éles Szemű';
 
   @override
@@ -1693,4 +1689,107 @@ class AppLocalizationsHu extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before ebből lesz: $after. Oldd fel a Pro-t, hogy megnézhesd, ahogy minden lépés kibontakozik.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Értsd a matekot, ne csak másold a megoldást.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Fényképezz le bármilyen feladatot, és nézd, ahogy világos, lépésről lépésre haladó magyarázattá bomlik.';
+
+  @override
+  String get onboardingSolvedLabel => 'Megoldva';
+
+  @override
+  String get onboardingStepsTitle => 'Nézd, ahogy minden lépés életre kel';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'A megoldások lépésről lépésre bontakoznak ki — így nemcsak az eredményt, hanem a hogyant is megtanulod.';
+
+  @override
+  String get onboardingSolvingLabel => 'Megoldás…';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return '$current/$total. lépés';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Gyakorolj, amíg el nem sajátítod';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Gyűjts XP-t, tartsd a sorozatod, és nézd, ahogy minden a helyére kerül és valódi fejlődéssé válik.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return '$level. szint';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP a(z) $level. szintig';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Napos sorozat';
+
+  @override
+  String get onboardingLevelTitle => 'Tanulj a saját szinteden';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'A szorzótáblától az analízisig — a Matheasy pontosan ott vár, ahol éppen tartasz.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Általános iskola';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Számtan és alapok';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Középiskola';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebra, geometria és trigonometria';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Főiskola';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analízis és sorok';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Egyetem';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Haladó és alkalmazott';
+
+  @override
+  String get onboardingAiMatch => 'AI-ajánlás';
+
+  @override
+  String get onboardingReadyTitle => 'Készen állsz, hogy jobb legyél matekból?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'A stresszes matekból váljon második természeted. Az első leckéd készen áll.';
+
+  @override
+  String get onboardingHaveAccount => 'Már van fiókom';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Törtek';
+
+  @override
+  String get onboardingChipGeometry => 'Geometria';
 }

@@ -396,9 +396,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingPracticeHeadline => 'マスターするまで練習';
 
   @override
-  String get onboardingPracticeSubtitle => '無制限の練習、XP、連続記録、実績が毎日のやる気を後押しします。';
-
-  @override
   String get onboardingAchievementTitle => 'シャープシューター';
 
   @override
@@ -1636,4 +1633,101 @@ class AppLocalizationsJa extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$beforeが$afterになります。Proにアップグレードして、すべてのステップの展開を見ましょう。';
   }
+
+  @override
+  String get onboardingScanTitle => '答えを写すだけじゃない。数学を理解しよう。';
+
+  @override
+  String get onboardingScanSubtitle => 'どんな問題もスキャンすれば、わかりやすいステップ解説に変わります。';
+
+  @override
+  String get onboardingSolvedLabel => '解答済み';
+
+  @override
+  String get onboardingStepsTitle => 'すべてのステップが動き出す';
+
+  @override
+  String get onboardingStepsSubtitle => '解答は一歩ずつ展開 — 答えだけでなく「解き方」が身につきます。';
+
+  @override
+  String get onboardingSolvingLabel => '解答中';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'ステップ $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'マスターするまで練習';
+
+  @override
+  String get onboardingPracticeSubtitle => 'XPを獲得し、連続記録を伸ばして、着実な上達を実感しよう。';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'レベル $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return 'レベル $level まであと $xp XP';
+  }
+
+  @override
+  String get onboardingDayStreak => '連続日数';
+
+  @override
+  String get onboardingLevelTitle => '自分のレベルで学べる';
+
+  @override
+  String get onboardingLevelSubtitle => '九九から微積分まで、Matheasyがあなたに合わせて学びをサポート。';
+
+  @override
+  String get onboardingBandPrimaryTitle => '小学校';
+
+  @override
+  String get onboardingBandPrimaryDesc => '算数と基礎';
+
+  @override
+  String get onboardingBandSecondaryTitle => '中学・高校';
+
+  @override
+  String get onboardingBandSecondaryDesc => '代数・幾何・三角関数';
+
+  @override
+  String get onboardingBandCollegeTitle => '大学';
+
+  @override
+  String get onboardingBandCollegeDesc => '微積分と級数';
+
+  @override
+  String get onboardingBandUniversityTitle => '大学院';
+
+  @override
+  String get onboardingBandUniversityDesc => '発展と応用';
+
+  @override
+  String get onboardingAiMatch => 'AIマッチ';
+
+  @override
+  String get onboardingReadyTitle => '数学が得意になる準備はできた?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'ストレスだった数学が、当たり前にできることへ。最初のレッスンの準備ができました。';
+
+  @override
+  String get onboardingHaveAccount => 'すでにアカウントをお持ちの方';
+
+  @override
+  String get onboardingChipAlgebra => '代数';
+
+  @override
+  String get onboardingChipFractions => '分数';
+
+  @override
+  String get onboardingChipGeometry => '幾何';
 }

@@ -399,10 +399,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Oefen tot je het beheerst';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Onbeperkt oefenen, XP, reeksen en prestaties houden je elke dag gemotiveerd.';
-
-  @override
   String get onboardingAchievementTitle => 'Scherpschutter';
 
   @override
@@ -1688,4 +1684,107 @@ class AppLocalizationsNl extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before wordt $after. Ontgrendel Pro om elke stap te zien ontvouwen.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Begrijp wiskunde. Schrijf niet zomaar antwoorden over.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Scan elke som en zie hoe hij openvouwt in heldere uitleg, stap voor stap.';
+
+  @override
+  String get onboardingSolvedLabel => 'Opgelost';
+
+  @override
+  String get onboardingStepsTitle => 'Zie elke stap tot leven komen';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Oplossingen ontvouwen zich stap voor stap — zo leer je het hoe, niet alleen het antwoord.';
+
+  @override
+  String get onboardingSolvingLabel => 'Oplossen';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Stap $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Oefen tot je het beheerst';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Verdien XP, houd je reeks vast en zie echte vooruitgang terwijl alles op zijn plek valt.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Niveau $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP tot niveau $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Dagreeks';
+
+  @override
+  String get onboardingLevelTitle => 'Leer op jouw eigen niveau';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Van tafels tot calculus, Matheasy sluit precies aan waar jij staat.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Basisschool';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Rekenen & basis';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Middelbare school';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebra, meetkunde & trigonometrie';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Hogeschool';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Calculus & reeksen';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universiteit';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Gevorderd & toegepast';
+
+  @override
+  String get onboardingAiMatch => 'AI-match';
+
+  @override
+  String get onboardingReadyTitle => 'Klaar om beter te worden in wiskunde?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Maak van wiskunde iets vanzelfsprekends in plaats van stressvol. Je eerste les staat klaar.';
+
+  @override
+  String get onboardingHaveAccount => 'Ik heb al een account';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Breuken';
+
+  @override
+  String get onboardingChipGeometry => 'Meetkunde';
 }

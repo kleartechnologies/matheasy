@@ -401,10 +401,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Übe, bis du es beherrschst';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Unbegrenztes Üben, XP, Serien und Erfolge motivieren dich jeden Tag.';
-
-  @override
   String get onboardingAchievementTitle => 'Scharfschütze';
 
   @override
@@ -1700,4 +1696,107 @@ class AppLocalizationsDe extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before wird zu $after. Schalte Pro frei, um jeden Schritt live zu erleben.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Mathe verstehen. Nicht nur Lösungen abschreiben.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Scanne jede Aufgabe und sieh, wie sie sich in klare Schritt-für-Schritt-Erklärungen öffnet.';
+
+  @override
+  String get onboardingSolvedLabel => 'Gelöst';
+
+  @override
+  String get onboardingStepsTitle => 'Sieh jeden Schritt lebendig werden';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Lösungen entfalten sich Schritt für Schritt — so lernst du das Wie, nicht nur die Antwort.';
+
+  @override
+  String get onboardingSolvingLabel => 'Wird gelöst';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Schritt $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Übe, bis du es beherrschst';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Sammle XP, halte deine Serie und sieh echten Fortschritt, wenn alles Klick macht.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP bis Level $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Tagesserie';
+
+  @override
+  String get onboardingLevelTitle => 'Lerne auf deinem Niveau';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Vom Einmaleins bis zur Analysis holt Matheasy dich genau dort ab, wo du stehst.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Grundschule';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Rechnen & Grundlagen';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Weiterführende Schule';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebra, Geometrie & Trigonometrie';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Oberstufe';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analysis & Reihen';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universität';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Fortgeschritten & angewandt';
+
+  @override
+  String get onboardingAiMatch => 'AI-Treffer';
+
+  @override
+  String get onboardingReadyTitle => 'Bereit, besser in Mathe zu werden?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Mach aus stressiger Mathe deine zweite Natur. Deine erste Lektion wartet.';
+
+  @override
+  String get onboardingHaveAccount => 'Ich habe bereits ein Konto';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Brüche';
+
+  @override
+  String get onboardingChipGeometry => 'Geometrie';
 }

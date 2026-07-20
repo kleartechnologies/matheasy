@@ -399,10 +399,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get onboardingPracticeHeadline => 'ฝึกฝนจนกว่าจะเชี่ยวชาญ';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'ฝึกฝนได้ไม่จำกัด พร้อม XP สถิติต่อเนื่อง และรางวัลความสำเร็จที่ช่วยสร้างแรงบันดาลใจให้คุณทุกวัน';
-
-  @override
   String get onboardingAchievementTitle => 'นักแม่นยำ';
 
   @override
@@ -1678,4 +1674,105 @@ class AppLocalizationsTh extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before กลายเป็น $after ปลดล็อก Pro เพื่อชมทุกขั้นตอนคลี่คลายไป';
   }
+
+  @override
+  String get onboardingScanTitle => 'เข้าใจคณิตศาสตร์ ไม่ใช่แค่ลอกคำตอบ';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'สแกนโจทย์ใดก็ได้ แล้วดูมันคลี่ออกเป็นคำอธิบายทีละขั้นที่ชัดเจน';
+
+  @override
+  String get onboardingSolvedLabel => 'แก้แล้ว';
+
+  @override
+  String get onboardingStepsTitle => 'ดูทุกขั้นตอนมีชีวิตขึ้นมา';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'วิธีทำจะค่อย ๆ แสดงทีละขั้น — คุณจึงได้เรียนรู้ว่าทำอย่างไร ไม่ใช่แค่คำตอบ';
+
+  @override
+  String get onboardingSolvingLabel => 'กำลังแก้';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'ขั้นที่ $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'ฝึกฝนจนเชี่ยวชาญ';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'สะสม XP รักษาสถิติต่อเนื่อง และเห็นความก้าวหน้าจริงเมื่อทุกอย่างเริ่มเข้าที่';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'เลเวล $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return 'อีก $xp XP ถึงเลเวล $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'วันต่อเนื่อง';
+
+  @override
+  String get onboardingLevelTitle => 'เรียนรู้ในระดับของคุณเอง';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'ตั้งแต่สูตรคูณไปจนถึงแคลคูลัส Matheasy พร้อมอยู่เคียงข้างคุณในทุกระดับ';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'ระดับประถม';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'เลขคณิตและพื้นฐาน';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'ระดับมัธยม';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'พีชคณิต เรขาคณิต และตรีโกณมิติ';
+
+  @override
+  String get onboardingBandCollegeTitle => 'ระดับวิทยาลัย';
+
+  @override
+  String get onboardingBandCollegeDesc => 'แคลคูลัสและอนุกรม';
+
+  @override
+  String get onboardingBandUniversityTitle => 'ระดับมหาวิทยาลัย';
+
+  @override
+  String get onboardingBandUniversityDesc => 'ขั้นสูงและประยุกต์';
+
+  @override
+  String get onboardingAiMatch => 'AI จับคู่';
+
+  @override
+  String get onboardingReadyTitle => 'พร้อมเก่งคณิตศาสตร์ขึ้นหรือยัง?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'เปลี่ยนคณิตจากเรื่องเครียดให้เป็นเรื่องที่ทำได้เป็นธรรมชาติ บทเรียนแรกของคุณพร้อมแล้ว';
+
+  @override
+  String get onboardingHaveAccount => 'ฉันมีบัญชีอยู่แล้ว';
+
+  @override
+  String get onboardingChipAlgebra => 'พีชคณิต';
+
+  @override
+  String get onboardingChipFractions => 'เศษส่วน';
+
+  @override
+  String get onboardingChipGeometry => 'เรขาคณิต';
 }

@@ -127,7 +127,6 @@
   "onboardingUnderstandQuestion": "Why do we subtract 5?",
   "onboardingUnderstandAnswer": "To get 2x on its own we undo the +5 first. Whatever we do to one side, we do to the other. 👍",
   "onboardingPracticeHeadline": "Practice Until You Master It",
-  "onboardingPracticeSubtitle": "Unlimited practice, XP, streaks and achievements keep you motivated every day.",
   "onboardingAchievementTitle": "Sharp Shooter",
   "onboardingExamHeadline": "Built For Your Exams",
   "onboardingExamSubtitle": "Personalized help tuned to SPM, IGCSE, GCSE, SAT and more.",
@@ -961,5 +960,55 @@
       }
     }
   },
+  "onboardingScanTitle": "Understand Math. Don't Just Copy Answers.",
+  "onboardingScanSubtitle": "Scan any problem and watch it open up into clear, step-by-step explanations.",
+  "onboardingSolvedLabel": "Solved",
+  "onboardingStepsTitle": "Watch Every Step Come to Life",
+  "onboardingStepsSubtitle": "Solutions play out one step at a time — so you learn the how, not just the answer.",
+  "onboardingSolvingLabel": "Solving",
+  "onboardingStepCounter": "Step {current}/{total}",
+  "@onboardingStepCounter": {
+    "description": "Step counter shown in the onboarding solver illustration, e.g. 'Step 2/4'.",
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "onboardingPracticeTitle": "Practice Until You Master It",
+  "onboardingPracticeSubtitle": "Earn XP, keep your streak, and watch real progress as everything clicks.",
+  "onboardingLevelBadge": "Level {level}",
+  "@onboardingLevelBadge": {
+    "description": "Level label inside the onboarding XP ring, e.g. 'Level 7'.",
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "onboardingXpUnit": "XP",
+  "onboardingXpToNext": "{xp} XP to Level {level}",
+  "@onboardingXpToNext": {
+    "description": "Remaining XP to reach the next level, e.g. '760 XP to Level 8'.",
+    "placeholders": {
+      "xp": { "type": "int" },
+      "level": { "type": "int" }
+    }
+  },
+  "onboardingDayStreak": "Day streak",
+  "onboardingLevelTitle": "Learn at Your Own Level",
+  "onboardingLevelSubtitle": "From times tables to calculus, Matheasy meets you exactly where you are.",
+  "onboardingBandPrimaryTitle": "Primary School",
+  "onboardingBandPrimaryDesc": "Arithmetic & foundations",
+  "onboardingBandSecondaryTitle": "Secondary School",
+  "onboardingBandSecondaryDesc": "Algebra, geometry & trig",
+  "onboardingBandCollegeTitle": "College",
+  "onboardingBandCollegeDesc": "Calculus & series",
+  "onboardingBandUniversityTitle": "University",
+  "onboardingBandUniversityDesc": "Advanced & applied",
+  "onboardingAiMatch": "AI Match",
+  "onboardingReadyTitle": "Ready to Become Better at Math?",
+  "onboardingReadySubtitle": "Turn math from stressful into second nature. Your first lesson is ready.",
+  "onboardingHaveAccount": "I Already Have an Account",
+  "onboardingChipAlgebra": "Algebra",
+  "onboardingChipFractions": "Fractions",
+  "onboardingChipGeometry": "Geometry",
   "@_comment": "Math notation (x², sin, cos, π, ∫, Σ, dx, log) must NEVER be translated — only the surrounding instructional words. Placeholders {name} keep their braces."
 }

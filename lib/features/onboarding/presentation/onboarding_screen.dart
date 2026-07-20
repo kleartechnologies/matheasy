@@ -2,35 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/animations/pressable.dart';
-import '../../../core/extensions/context_extensions.dart';
 import '../../../core/localization/l10n_extension.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/haptics_service.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/theme/app_durations.dart';
-import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/widgets/widgets.dart';
 import '../application/onboarding_controller.dart';
-import '../domain/onboarding_models.dart';
-import 'pages/challenge_page.dart';
-import 'pages/completion_page.dart';
-import 'pages/daily_goal_page.dart';
-import 'pages/exam_ready_page.dart';
-import 'pages/meet_matheasy_page.dart';
-import 'pages/practice_page.dart';
-import 'pages/snap_solve_page.dart';
-import 'pages/study_level_page.dart';
-import 'pages/understand_page.dart';
-import 'pages/welcome_page.dart';
+import 'pages/level_select_page.dart';
+import 'pages/practice_intro_page.dart';
+import 'pages/ready_page.dart';
+import 'pages/scan_intro_page.dart';
+import 'pages/steps_intro_page.dart';
+import 'widgets/onboarding_dots.dart';
 
-/// Hosts the full onboarding flow: a button-driven [PageView] of 10 pages with
-/// a top progress bar, contextual back/skip, and a gated bottom CTA.
+/// Hosts the onboarding carousel: five button-driven pages (three value-props,
+/// a level picker, and the finale) under a brand bar, page dots, and a bottom
+/// CTA. Swiping is disabled so state always advances through valid steps; the
+/// per-page entrance + ambient animations live in the pages themselves.
 ///
-/// Swiping is disabled so page state always advances through valid steps; the
-/// per-page entrance animations live in the page layouts.
+/// Finishing (either finale CTA) flips the persisted onboarding flag and hands
+/// off to the auth screen — the single Apple/Google sign-in that serves both new
+/// and returning learners.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -43,22 +38,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _page = 0;
 
   static const List<Widget> _pages = [
-    WelcomePage(), // 0
-    SnapSolvePage(), // 1
-    UnderstandPage(), // 2
-    PracticePage(), // 3
-    ExamReadyPage(), // 4
-    MeetMatheasyPage(), // 5
-    StudyLevelPage(), // 6
-    ChallengePage(), // 7
-    DailyGoalPage(), // 8
-    CompletionPage(), // 9
+    ScanIntroPage(), // 0
+    StepsIntroPage(), // 1
+    PracticeIntroPage(), // 2
+    LevelSelectPage(), // 3
+    ReadyPage(), // 4
   ];
 
-  static const int _firstQuestion = 6;
   int get _lastPage => _pages.length - 1;
   bool get _isLast => _page == _lastPage;
-  bool get _showSkip => _page >= 1 && _page <= 5;
 
   @override
   void dispose() {
@@ -68,6 +56,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _animateTo(int index) {
     HapticsService.selection();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.jumpToPage(index);
+      return;
+    }
     _controller.animateToPage(
       index,
       duration: AppDurations.medium,
@@ -76,27 +68,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _next() => _isLast ? _finish() : _animateTo(_page + 1);
-  void _back() => _animateTo(_page - 1);
-  void _skip() => _animateTo(_firstQuestion);
+  void _skip() => _animateTo(_lastPage);
 
   void _finish() {
     HapticsService.success();
     final data = ref.read(onboardingFlowControllerProvider);
     AppLogger.info('Onboarding complete → $data', name: 'onboarding');
     ref.read(onboardingControllerProvider.notifier).complete();
-    context.go(AppRoutes.home);
+    if (mounted) context.go(AppRoutes.auth);
   }
-
-  bool _canContinue(OnboardingData data) => switch (_page) {
-        6 => data.hasLevel,
-        7 => data.hasTopics,
-        8 => data.hasGoal,
-        _ => true,
-      };
 
   @override
   Widget build(BuildContext context) {
-    final data = ref.watch(onboardingFlowControllerProvider);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -104,11 +87,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             children: [
               const SizedBox(height: AppSpacing.sm),
-              _TopBar(
-                progress: (_page + 1) / _pages.length,
-                onBack: _page > 0 ? _back : null,
-                onSkip: _showSkip ? _skip : null,
-              ),
+              _TopBar(onSkip: _isLast ? null : _skip),
               Expanded(
                 child: PageView(
                   controller: _controller,
@@ -117,20 +96,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   children: _pages,
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              OnboardingDots(count: _pages.length, index: _page),
               Padding(
                 padding: const EdgeInsets.only(
-                  top: AppSpacing.md,
-                  bottom: AppSpacing.xl,
+                  top: AppSpacing.lg,
+                  bottom: AppSpacing.lg,
                 ),
-                child: PrimaryButton(
-                  label: _page == 0
-                      ? context.l10n.onboardingGetStarted
-                      : context.l10n.actionContinue,
-                  trailingIcon: _isLast
-                      ? Icons.check_circle_rounded
-                      : Icons.arrow_forward_rounded,
-                  onPressed: _canContinue(data) ? _next : null,
-                ),
+                child: _isLast
+                    ? _FinaleActions(onFinish: _finish)
+                    : _ContinueAction(onNext: _next),
               ),
             ],
           ),
@@ -140,77 +115,57 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 }
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.progress, this.onBack, this.onSkip});
+class _ContinueAction extends StatelessWidget {
+  const _ContinueAction({required this.onNext});
 
-  final double progress;
-  final VoidCallback? onBack;
-  final VoidCallback? onSkip;
+  final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
-    final back = onBack;
-    final skip = onSkip;
-    return Row(
+    return PrimaryButton(label: context.l10n.actionContinue, onPressed: onNext);
+  }
+}
+
+class _FinaleActions extends StatelessWidget {
+  const _FinaleActions({required this.onFinish});
+
+  final VoidCallback onFinish;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 48,
-          child: back == null
-              ? null
-              : _NavIconButton(icon: Icons.arrow_back_rounded, onTap: back),
+        PrimaryButton(
+          label: context.l10n.onboardingGetStarted,
+          onPressed: onFinish,
         ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(child: XPProgressBar(value: progress, height: 8)),
-        const SizedBox(width: AppSpacing.md),
-        SizedBox(
-          width: 52,
-          child: skip == null
-              ? null
-              : GhostButton(
-                  label: context.l10n.onboardingSkip,
-                  size: AppButtonSize.small,
-                  onPressed: skip,
-                ),
+        const SizedBox(height: AppSpacing.xs),
+        GhostButton(
+          label: context.l10n.onboardingHaveAccount,
+          onPressed: onFinish,
         ),
       ],
     );
   }
 }
 
-class _NavIconButton extends StatelessWidget {
-  const _NavIconButton({required this.icon, required this.onTap});
+class _TopBar extends StatelessWidget {
+  const _TopBar({this.onSkip});
 
-  final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onSkip;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isBack = icon == Icons.arrow_back_rounded;
-    return Semantics(
-      button: true,
-      label: isBack ? context.l10n.onboardingBack : context.l10n.actionNext,
-      child: Pressable(
-        onTap: onTap,
-        scale: 0.94,
-        borderRadius: AppRadius.smRadius,
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Center(
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: AppRadius.smRadius,
-                border: Border.all(color: colors.border),
-              ),
-              child: Icon(icon, size: 20, color: colors.textPrimary),
-            ),
-          ),
-        ),
-      ),
+    final skip = onSkip;
+    return Row(
+      children: [
+        const MatheasyLogo(size: MatheasyLogoSize.small),
+        const Spacer(),
+        if (skip != null)
+          // Default GhostButton size (medium) gives a 48dp tap target.
+          GhostButton(label: context.l10n.onboardingSkip, onPressed: skip),
+      ],
     );
   }
 }

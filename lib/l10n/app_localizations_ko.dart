@@ -396,10 +396,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingPracticeHeadline => '완전히 익힐 때까지 연습하세요';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      '무제한 연습, XP, 연속 기록과 업적으로 매일 동기부여를 받아요.';
-
-  @override
   String get onboardingAchievementTitle => '명사수';
 
   @override
@@ -1642,4 +1638,103 @@ class AppLocalizationsKo extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before이(가) $after이(가) 됩니다. Pro를 잠금 해제하고 모든 단계를 확인하세요.';
   }
+
+  @override
+  String get onboardingScanTitle => '답만 베끼지 말고, 수학을 이해하세요.';
+
+  @override
+  String get onboardingScanSubtitle => '어떤 문제든 스캔하면 명쾌한 단계별 설명으로 술술 풀려요.';
+
+  @override
+  String get onboardingSolvedLabel => '풀이 완료';
+
+  @override
+  String get onboardingStepsTitle => '모든 풀이 과정이 살아 움직여요';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      '풀이가 한 단계씩 펼쳐져요 — 답이 아니라 \'푸는 법\'을 배우죠.';
+
+  @override
+  String get onboardingSolvingLabel => '푸는 중';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return '$current/$total단계';
+  }
+
+  @override
+  String get onboardingPracticeTitle => '완전히 익힐 때까지 연습하세요';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'XP를 얻고 연속 기록을 이어가며 실력이 쑥쑥 느는 걸 확인하세요.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return '레벨 $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '레벨 $level까지 $xp XP';
+  }
+
+  @override
+  String get onboardingDayStreak => '연속 학습일';
+
+  @override
+  String get onboardingLevelTitle => '나에게 딱 맞는 수준으로 배우기';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      '구구단부터 미적분까지, Matheasy가 지금 내 수준에 딱 맞춰줘요.';
+
+  @override
+  String get onboardingBandPrimaryTitle => '초등학교';
+
+  @override
+  String get onboardingBandPrimaryDesc => '산술과 기초';
+
+  @override
+  String get onboardingBandSecondaryTitle => '중·고등학교';
+
+  @override
+  String get onboardingBandSecondaryDesc => '대수, 기하와 삼각법';
+
+  @override
+  String get onboardingBandCollegeTitle => '대학 기초';
+
+  @override
+  String get onboardingBandCollegeDesc => '미적분과 급수';
+
+  @override
+  String get onboardingBandUniversityTitle => '대학 심화';
+
+  @override
+  String get onboardingBandUniversityDesc => '고급·응용 수학';
+
+  @override
+  String get onboardingAiMatch => 'AI 맞춤';
+
+  @override
+  String get onboardingReadyTitle => '수학 실력을 키울 준비 됐나요?';
+
+  @override
+  String get onboardingReadySubtitle => '스트레스였던 수학을 자연스러운 습관으로. 첫 수업이 준비됐어요.';
+
+  @override
+  String get onboardingHaveAccount => '이미 계정이 있어요';
+
+  @override
+  String get onboardingChipAlgebra => '대수';
+
+  @override
+  String get onboardingChipFractions => '분수';
+
+  @override
+  String get onboardingChipGeometry => '기하';
 }

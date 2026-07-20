@@ -399,10 +399,6 @@ class AppLocalizationsSv extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Öva tills du behärskar det';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Obegränsad övning, XP, sviter och prestationer håller dig motiverad varje dag.';
-
-  @override
   String get onboardingAchievementTitle => 'Prickskytt';
 
   @override
@@ -1687,4 +1683,105 @@ class AppLocalizationsSv extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before blir $after. Lås upp Pro för att se varje steg utspela sig.';
   }
+
+  @override
+  String get onboardingScanTitle => 'Förstå matten. Skriv inte bara av svaren.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Skanna vilken uppgift som helst och se den öppna sig i tydliga steg-för-steg-förklaringar.';
+
+  @override
+  String get onboardingSolvedLabel => 'Löst';
+
+  @override
+  String get onboardingStepsTitle => 'Se varje steg bli levande';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Lösningarna spelas upp ett steg i taget — så lär du dig hur, inte bara svaret.';
+
+  @override
+  String get onboardingSolvingLabel => 'Löser';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Steg $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Öva tills du behärskar det';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Samla XP, håll din svit vid liv och se verkliga framsteg när allt faller på plats.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Nivå $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP till nivå $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Dagar i rad';
+
+  @override
+  String get onboardingLevelTitle => 'Lär dig på din egen nivå';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Från multiplikationstabeller till analys möter Matheasy dig precis där du är.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Grundskola';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetik & grunder';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Gymnasium';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Algebra, geometri & trig';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Högskola';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analys & serier';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universitet';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Avancerat & tillämpat';
+
+  @override
+  String get onboardingAiMatch => 'AI-match';
+
+  @override
+  String get onboardingReadyTitle => 'Redo att bli bättre på matte?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Förvandla matte från stressigt till en självklarhet. Din första lektion väntar.';
+
+  @override
+  String get onboardingHaveAccount => 'Jag har redan ett konto';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Bråk';
+
+  @override
+  String get onboardingChipGeometry => 'Geometri';
 }

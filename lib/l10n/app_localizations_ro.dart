@@ -403,10 +403,6 @@ class AppLocalizationsRo extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Exersează până stăpânești';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Exerciții nelimitate, XP, serii și realizări te mențin motivat în fiecare zi.';
-
-  @override
   String get onboardingAchievementTitle => 'Trăgător de precizie';
 
   @override
@@ -1695,4 +1691,108 @@ class AppLocalizationsRo extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before devine $after. Deblochează Pro pentru a urmări fiecare pas desfășurându-se.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Înțelege matematica. Nu doar copia răspunsuri.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Scanează orice problemă și privește cum se deschide în explicații clare, pas cu pas.';
+
+  @override
+  String get onboardingSolvedLabel => 'Rezolvat';
+
+  @override
+  String get onboardingStepsTitle => 'Vezi fiecare pas prinzând viață';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Soluțiile se desfășoară pas cu pas — ca să înveți cum, nu doar răspunsul.';
+
+  @override
+  String get onboardingSolvingLabel => 'Se rezolvă';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Pasul $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Exersează până stăpânești';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Câștigă XP, păstrează-ți seria și vezi progresul real pe măsură ce totul se leagă.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Nivelul $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP până la Nivelul $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Serie de zile';
+
+  @override
+  String get onboardingLevelTitle => 'Învață la nivelul tău';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'De la tabla înmulțirii la analiză matematică, Matheasy te întâlnește exact unde ești.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Școală primară';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetică și baze';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Liceu';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebră, geometrie și trigonometrie';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Facultate';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analiză și serii';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universitate';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Avansat și aplicat';
+
+  @override
+  String get onboardingAiMatch => 'Potrivire AI';
+
+  @override
+  String get onboardingReadyTitle =>
+      'Gata să te descurci mai bine la matematică?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Transformă matematica din stresantă în ceva firesc. Prima ta lecție te așteaptă.';
+
+  @override
+  String get onboardingHaveAccount => 'Am deja un cont';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebră';
+
+  @override
+  String get onboardingChipFractions => 'Fracții';
+
+  @override
+  String get onboardingChipGeometry => 'Geometrie';
 }

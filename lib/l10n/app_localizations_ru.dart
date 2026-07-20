@@ -400,10 +400,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Практикуйся, пока не освоишь';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Безлимитная практика, XP, серии и достижения мотивируют тебя каждый день.';
-
-  @override
   String get onboardingAchievementTitle => 'Меткий стрелок';
 
   @override
@@ -1689,4 +1685,107 @@ class AppLocalizationsRu extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before превращается в $after. Открой Pro, чтобы увидеть каждый шаг.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Понимай математику, а не просто списывай ответы.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Отсканируй любую задачу и смотри, как она раскрывается в понятные пошаговые объяснения.';
+
+  @override
+  String get onboardingSolvedLabel => 'Решено';
+
+  @override
+  String get onboardingStepsTitle => 'Смотри, как оживает каждый шаг';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Решения раскрываются шаг за шагом — так ты понимаешь как, а не просто ответ.';
+
+  @override
+  String get onboardingSolvingLabel => 'Решаем';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Шаг $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Практикуйся, пока не освоишь';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Зарабатывай XP, держи серию и наблюдай реальный прогресс, когда всё встаёт на свои места.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Уровень $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP до уровня $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Серия дней';
+
+  @override
+  String get onboardingLevelTitle => 'Учись на своём уровне';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'От таблицы умножения до высшей математики — Matheasy встречает тебя там, где ты есть.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Начальная школа';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Арифметика и основы';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Средняя школа';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Алгебра, геометрия и тригонометрия';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Колледж';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Матанализ и ряды';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Университет';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Продвинутый и прикладной уровень';
+
+  @override
+  String get onboardingAiMatch => 'AI-подбор';
+
+  @override
+  String get onboardingReadyTitle => 'Готов стать сильнее в математике?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Преврати математику из стресса в привычку. Твой первый урок уже готов.';
+
+  @override
+  String get onboardingHaveAccount => 'У меня уже есть аккаунт';
+
+  @override
+  String get onboardingChipAlgebra => 'Алгебра';
+
+  @override
+  String get onboardingChipFractions => 'Дроби';
+
+  @override
+  String get onboardingChipGeometry => 'Геометрия';
 }

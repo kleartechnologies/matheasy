@@ -400,10 +400,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardingPracticeHeadline => 'जब तक महारत न हो, अभ्यास करें';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'असीमित अभ्यास, XP, स्ट्रीक और उपलब्धियाँ आपको हर दिन प्रेरित रखती हैं।';
-
-  @override
   String get onboardingAchievementTitle => 'पक्का निशानेबाज़';
 
   @override
@@ -1690,4 +1686,105 @@ class AppLocalizationsHi extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before बन जाता है $after। हर चरण को खुलते देखने के लिए Pro अनलॉक करें।';
   }
+
+  @override
+  String get onboardingScanTitle => 'गणित समझें। सिर्फ़ जवाब नकल न करें।';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'कोई भी सवाल स्कैन करें और उसे साफ़, चरण-दर-चरण समझ में खुलते हुए देखें।';
+
+  @override
+  String get onboardingSolvedLabel => 'हल हो गया';
+
+  @override
+  String get onboardingStepsTitle => 'हर चरण को जीवंत होते देखें';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'हल एक-एक चरण करके सामने आते हैं — ताकि आप \'कैसे\' सीखें, सिर्फ़ जवाब नहीं।';
+
+  @override
+  String get onboardingSolvingLabel => 'हल हो रहा है';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'चरण $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'जब तक महारत न हो, अभ्यास करें';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'XP कमाएँ, अपनी स्ट्रीक बनाए रखें, और सब कुछ समझ आते ही असली प्रगति देखें।';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'स्तर $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return 'स्तर $level तक $xp XP';
+  }
+
+  @override
+  String get onboardingDayStreak => 'दिन की स्ट्रीक';
+
+  @override
+  String get onboardingLevelTitle => 'अपने स्तर पर सीखें';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'पहाड़े से लेकर कैलकुलस तक, Matheasy आपको ठीक वहीं मिलता है जहाँ आप हैं।';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'प्राथमिक विद्यालय';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'अंकगणित और बुनियाद';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'माध्यमिक विद्यालय';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'बीजगणित, ज्यामिति और त्रिकोणमिति';
+
+  @override
+  String get onboardingBandCollegeTitle => 'कॉलेज';
+
+  @override
+  String get onboardingBandCollegeDesc => 'कैलकुलस और श्रेणियाँ';
+
+  @override
+  String get onboardingBandUniversityTitle => 'विश्वविद्यालय';
+
+  @override
+  String get onboardingBandUniversityDesc => 'उन्नत और व्यावहारिक';
+
+  @override
+  String get onboardingAiMatch => 'AI मिलान';
+
+  @override
+  String get onboardingReadyTitle => 'गणित में बेहतर बनने के लिए तैयार हैं?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'गणित को तनाव से निकालकर सहज आदत बना लें। आपका पहला पाठ तैयार है।';
+
+  @override
+  String get onboardingHaveAccount => 'मेरा पहले से खाता है';
+
+  @override
+  String get onboardingChipAlgebra => 'बीजगणित';
+
+  @override
+  String get onboardingChipFractions => 'भिन्न';
+
+  @override
+  String get onboardingChipGeometry => 'ज्यामिति';
 }

@@ -401,10 +401,6 @@ class AppLocalizationsNb extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Øv til du mestrer det';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Ubegrenset øving, XP, dager på rad og prestasjoner holder deg motivert hver dag.';
-
-  @override
   String get onboardingAchievementTitle => 'Skarpskytter';
 
   @override
@@ -1688,4 +1684,105 @@ class AppLocalizationsNb extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before blir $after. Lås opp Pro for å se hvert steg utfolde seg.';
   }
+
+  @override
+  String get onboardingScanTitle => 'Forstå matte. Ikke bare kopier svar.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Skann en hvilken som helst oppgave og se den åpne seg i tydelige forklaringer, steg for steg.';
+
+  @override
+  String get onboardingSolvedLabel => 'Løst';
+
+  @override
+  String get onboardingStepsTitle => 'Se hvert steg bli levende';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Løsningene spilles ut ett steg om gangen — så du lærer hvordan, ikke bare svaret.';
+
+  @override
+  String get onboardingSolvingLabel => 'Løser';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Steg $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Øv til du mestrer det';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Tjen XP, hold dagene på rad i gang, og se ekte fremgang etter hvert som alt faller på plass.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Nivå $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP til nivå $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Dager på rad';
+
+  @override
+  String get onboardingLevelTitle => 'Lær på ditt eget nivå';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Fra gangetabellen til kalkulus møter Matheasy deg akkurat der du er.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Barneskole';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Regning og grunnlag';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Ungdomsskole';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Algebra, geometri og trig';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Videregående';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Kalkulus og rekker';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Universitet';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Avansert og anvendt';
+
+  @override
+  String get onboardingAiMatch => 'AI-treff';
+
+  @override
+  String get onboardingReadyTitle => 'Klar til å bli bedre i matte?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Gjør matte fra stressende til helt naturlig. Din første leksjon er klar.';
+
+  @override
+  String get onboardingHaveAccount => 'Jeg har allerede en konto';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Brøk';
+
+  @override
+  String get onboardingChipGeometry => 'Geometri';
 }

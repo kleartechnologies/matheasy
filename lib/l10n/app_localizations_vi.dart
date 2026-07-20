@@ -400,10 +400,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Luyện Tập Đến Khi Thành Thạo';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Luyện tập không giới hạn, XP, chuỗi ngày và thành tích giúp bạn có động lực mỗi ngày.';
-
-  @override
   String get onboardingAchievementTitle => 'Xạ Thủ Tinh Nhuệ';
 
   @override
@@ -1692,4 +1688,105 @@ class AppLocalizationsVi extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before trở thành $after. Mở khóa Pro để xem từng bước diễn ra.';
   }
+
+  @override
+  String get onboardingScanTitle => 'Hiểu Toán. Đừng Chỉ Chép Đáp Án.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Quét bất kỳ bài toán nào và xem nó mở ra thành lời giải rõ ràng, từng bước một.';
+
+  @override
+  String get onboardingSolvedLabel => 'Đã giải';
+
+  @override
+  String get onboardingStepsTitle => 'Xem Từng Bước Hiện Ra Sống Động';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Lời giải diễn ra từng bước một — để bạn hiểu cách làm, không chỉ đáp án.';
+
+  @override
+  String get onboardingSolvingLabel => 'Đang giải';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Bước $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Luyện Tập Đến Khi Thành Thạo';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Kiếm XP, giữ chuỗi ngày và thấy tiến bộ thật sự khi mọi thứ dần sáng tỏ.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Cấp $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP để lên Cấp $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Chuỗi ngày';
+
+  @override
+  String get onboardingLevelTitle => 'Học Đúng Trình Độ Của Bạn';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Từ bảng cửu chương đến giải tích, Matheasy đồng hành đúng với trình độ của bạn.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Tiểu học';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Số học & nền tảng';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Trung học';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Đại số, hình học & lượng giác';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Cao đẳng';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Giải tích & chuỗi';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Đại học';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Nâng cao & ứng dụng';
+
+  @override
+  String get onboardingAiMatch => 'AI Gợi ý';
+
+  @override
+  String get onboardingReadyTitle => 'Sẵn Sàng Giỏi Toán Hơn Chưa?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Biến Toán từ nỗi lo thành điều tự nhiên. Bài học đầu tiên của bạn đã sẵn sàng.';
+
+  @override
+  String get onboardingHaveAccount => 'Tôi Đã Có Tài Khoản';
+
+  @override
+  String get onboardingChipAlgebra => 'Đại số';
+
+  @override
+  String get onboardingChipFractions => 'Phân số';
+
+  @override
+  String get onboardingChipGeometry => 'Hình học';
 }

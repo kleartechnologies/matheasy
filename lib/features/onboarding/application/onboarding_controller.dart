@@ -15,8 +15,7 @@ class OnboardingFlowController extends _$OnboardingFlowController {
   @override
   OnboardingData build() => const OnboardingData();
 
-  void selectLevel(StudyLevel level) =>
-      state = state.copyWith(level: level);
+  void selectLevel(StudyLevel level) => state = state.copyWith(level: level);
 
   void toggleTopic(MathTopic topic) {
     final next = {...state.topics};

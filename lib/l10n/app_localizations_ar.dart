@@ -399,10 +399,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingPracticeHeadline => 'تمرّن حتى تتقنها';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'تمرين غير محدود، ونقاط خبرة، وتتابعات، وإنجازات تحفزك كل يوم.';
-
-  @override
   String get onboardingAchievementTitle => 'القناص الماهر';
 
   @override
@@ -1674,4 +1670,105 @@ class AppLocalizationsAr extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before تصبح $after. افتح Pro لمشاهدة كل خطوة وهي تتكشف.';
   }
+
+  @override
+  String get onboardingScanTitle => 'افهم الرياضيات، لا تكتفِ بنسخ الحلول.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'امسح أي مسألة وشاهدها تتحول إلى شروحات واضحة خطوة بخطوة.';
+
+  @override
+  String get onboardingSolvedLabel => 'تم الحل';
+
+  @override
+  String get onboardingStepsTitle => 'شاهد كل خطوة تنبض بالحياة';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'تُعرض الحلول خطوة تلو الأخرى — لتتعلّم كيف تُحلّ، لا الإجابة فقط.';
+
+  @override
+  String get onboardingSolvingLabel => 'جارٍ الحل';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'الخطوة $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'تدرّب حتى تتقنها';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'اكسب نقاط XP، وحافظ على تتابعك، وراقب تقدّمك الحقيقي بينما يتّضح كل شيء.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'المستوى $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP للوصول إلى المستوى $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'أيام متتالية';
+
+  @override
+  String get onboardingLevelTitle => 'تعلّم على مستواك الخاص';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'من جداول الضرب إلى التفاضل والتكامل، يلتقيك Matheasy عند مستواك تمامًا.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'المرحلة الابتدائية';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'الحساب والأساسيات';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'المرحلة الثانوية';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'الجبر والهندسة وحساب المثلثات';
+
+  @override
+  String get onboardingBandCollegeTitle => 'الكلية';
+
+  @override
+  String get onboardingBandCollegeDesc => 'التفاضل والتكامل والمتسلسلات';
+
+  @override
+  String get onboardingBandUniversityTitle => 'الجامعة';
+
+  @override
+  String get onboardingBandUniversityDesc => 'متقدّم وتطبيقي';
+
+  @override
+  String get onboardingAiMatch => 'مطابقة AI';
+
+  @override
+  String get onboardingReadyTitle => 'مستعد لتتحسّن في الرياضيات؟';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'حوّل الرياضيات من مصدر توتر إلى عادة طبيعية. درسك الأول جاهز.';
+
+  @override
+  String get onboardingHaveAccount => 'لديّ حساب بالفعل';
+
+  @override
+  String get onboardingChipAlgebra => 'الجبر';
+
+  @override
+  String get onboardingChipFractions => 'الكسور';
+
+  @override
+  String get onboardingChipGeometry => 'الهندسة';
 }

@@ -401,10 +401,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Ustalaşana Kadar Alıştırma Yapın';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Sınırsız alıştırma, XP, seriler ve başarılar her gün motivasyonunuzu yüksek tutar.';
-
-  @override
   String get onboardingAchievementTitle => 'Keskin Nişancı';
 
   @override
@@ -1694,4 +1690,106 @@ class AppLocalizationsTr extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before, $after olur. Her adımın açılışını izlemek için Pro\'nun kilidini açın.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Matematiği Anla. Sadece Cevapları Kopyalama.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Herhangi bir problemi tara ve net, adım adım açıklamalara dönüşmesini izle.';
+
+  @override
+  String get onboardingSolvedLabel => 'Çözüldü';
+
+  @override
+  String get onboardingStepsTitle => 'Her Adımın Canlanışını İzle';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Çözümler adım adım ilerler — böylece sadece cevabı değil, nasıl yapıldığını öğrenirsin.';
+
+  @override
+  String get onboardingSolvingLabel => 'Çözülüyor';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Adım $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Ustalaşana Kadar Alıştırma Yap';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'XP kazan, serini sürdür ve her şey yerine oturdukça gerçek ilerlemeni gör.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Seviye $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return 'Seviye $level için $xp XP';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Günlük seri';
+
+  @override
+  String get onboardingLevelTitle => 'Kendi Seviyende Öğren';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Çarpım tablosundan kalkülüse kadar, Matheasy tam da olduğun yerde seninle buluşur.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'İlkokul';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetik ve temeller';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Ortaokul ve Lise';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Cebir, geometri ve trigonometri';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Yüksekokul';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Kalkülüs ve seriler';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Üniversite';
+
+  @override
+  String get onboardingBandUniversityDesc => 'İleri ve uygulamalı';
+
+  @override
+  String get onboardingAiMatch => 'AI Eşleşme';
+
+  @override
+  String get onboardingReadyTitle => 'Matematikte Daha İyi Olmaya Hazır mısın?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Matematiği stresli olmaktan çıkarıp ikinci doğana dönüştür. İlk dersin hazır.';
+
+  @override
+  String get onboardingHaveAccount => 'Zaten Bir Hesabım Var';
+
+  @override
+  String get onboardingChipAlgebra => 'Cebir';
+
+  @override
+  String get onboardingChipFractions => 'Kesirler';
+
+  @override
+  String get onboardingChipGeometry => 'Geometri';
 }

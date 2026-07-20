@@ -400,10 +400,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get onboardingPracticeHeadline => 'תרגל עד שתשלוט בזה';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'תרגול ללא הגבלה, נקודות XP, רצפים והישגים שומרים עליך מוטיבציה בכל יום.';
-
-  @override
   String get onboardingAchievementTitle => 'קלע מדויק';
 
   @override
@@ -1675,4 +1671,105 @@ class AppLocalizationsHe extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before הופך ל-$after. פתח את Pro כדי לצפות בכל שלב נחשף.';
   }
+
+  @override
+  String get onboardingScanTitle => 'להבין מתמטיקה. לא רק להעתיק תשובות.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'סרקו כל תרגיל וצפו בו נפתח להסברים ברורים, צעד אחר צעד.';
+
+  @override
+  String get onboardingSolvedLabel => 'נפתר';
+
+  @override
+  String get onboardingStepsTitle => 'צפו בכל שלב מתעורר לחיים';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'הפתרונות מתגלגלים שלב אחר שלב — כדי שתלמדו את הדרך, לא רק את התשובה.';
+
+  @override
+  String get onboardingSolvingLabel => 'פותר';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'שלב $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'תרגלו עד שתשלטו בזה';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'צברו XP, שמרו על הרצף, וצפו בהתקדמות אמיתית כשהכול מתחבר.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'רמה $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP לרמה $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'רצף ימים';
+
+  @override
+  String get onboardingLevelTitle => 'ללמוד ברמה שלכם';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'מלוח הכפל ועד חדו״א, Matheasy פוגש אתכם בדיוק במקום שבו אתם נמצאים.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'בית ספר יסודי';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'חשבון ויסודות';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'בית ספר על-יסודי';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'אלגברה, גאומטריה וטריגו';
+
+  @override
+  String get onboardingBandCollegeTitle => 'מכללה';
+
+  @override
+  String get onboardingBandCollegeDesc => 'חדו״א וטורים';
+
+  @override
+  String get onboardingBandUniversityTitle => 'אוניברסיטה';
+
+  @override
+  String get onboardingBandUniversityDesc => 'מתקדם ויישומי';
+
+  @override
+  String get onboardingAiMatch => 'התאמת AI';
+
+  @override
+  String get onboardingReadyTitle => 'מוכנים להשתפר במתמטיקה?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'הפכו את המתמטיקה ממלחיצה לטבע שני. השיעור הראשון שלכם מוכן.';
+
+  @override
+  String get onboardingHaveAccount => 'כבר יש לי חשבון';
+
+  @override
+  String get onboardingChipAlgebra => 'אלגברה';
+
+  @override
+  String get onboardingChipFractions => 'שברים';
+
+  @override
+  String get onboardingChipGeometry => 'גאומטריה';
 }

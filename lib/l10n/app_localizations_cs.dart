@@ -400,10 +400,6 @@ class AppLocalizationsCs extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Cvič, dokud to nezvládneš';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Neomezené cvičení, XP, série a úspěchy tě budou motivovat každý den.';
-
-  @override
   String get onboardingAchievementTitle => 'Ostrostřelec';
 
   @override
@@ -1686,4 +1682,106 @@ class AppLocalizationsCs extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before se stává $after. Odemkni Pro a sleduj, jak se odvíjí každý krok.';
   }
+
+  @override
+  String get onboardingScanTitle => 'Pochop matematiku. Neopisuj jen výsledky.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Naskenuj jakýkoliv příklad a sleduj, jak se rozvine do jasného vysvětlení krok za krokem.';
+
+  @override
+  String get onboardingSolvedLabel => 'Vyřešeno';
+
+  @override
+  String get onboardingStepsTitle => 'Sleduj, jak každý krok ožije';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Řešení se odvíjí krok po kroku — naučíš se jak, ne jen výsledek.';
+
+  @override
+  String get onboardingSolvingLabel => 'Řeším';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Krok $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Cvič, dokud to nezvládneš';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Sbírej XP, udrž si sérii a sleduj skutečný pokrok, jak ti to všechno začne dávat smysl.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Úroveň $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP do úrovně $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Denní série';
+
+  @override
+  String get onboardingLevelTitle => 'Uč se na své úrovni';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Od malé násobilky po matematickou analýzu — Matheasy tě zastihne přesně tam, kde jsi.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Základní škola';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Aritmetika a základy';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Střední škola';
+
+  @override
+  String get onboardingBandSecondaryDesc =>
+      'Algebra, geometrie a trigonometrie';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Vysoká škola';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analýza a řady';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Univerzita';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Pokročilá a aplikovaná';
+
+  @override
+  String get onboardingAiMatch => 'AI výběr';
+
+  @override
+  String get onboardingReadyTitle => 'Připraven/a zlepšit se v matematice?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Z matematiky se stane samozřejmost místo stresu. Tvá první lekce je připravená.';
+
+  @override
+  String get onboardingHaveAccount => 'Už mám účet';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Zlomky';
+
+  @override
+  String get onboardingChipGeometry => 'Geometrie';
 }

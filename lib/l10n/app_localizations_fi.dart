@@ -402,10 +402,6 @@ class AppLocalizationsFi extends AppLocalizations {
   String get onboardingPracticeHeadline => 'Harjoittele, kunnes hallitset sen';
 
   @override
-  String get onboardingPracticeSubtitle =>
-      'Rajaton harjoittelu, XP, putket ja saavutukset pitävät sinut motivoituneena joka päivä.';
-
-  @override
   String get onboardingAchievementTitle => 'Tarkka-ampuja';
 
   @override
@@ -1700,4 +1696,107 @@ class AppLocalizationsFi extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before muuttuu muotoon $after. Avaa Pro nähdäksesi jokaisen vaiheen avautuvan.';
   }
+
+  @override
+  String get onboardingScanTitle =>
+      'Ymmärrä matematiikkaa. Älä vain kopioi vastauksia.';
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Skannaa mikä tahansa tehtävä ja katso, kuinka se avautuu selkeiksi, vaihe vaiheelta eteneviksi selityksiksi.';
+
+  @override
+  String get onboardingSolvedLabel => 'Ratkaistu';
+
+  @override
+  String get onboardingStepsTitle => 'Katso jokaisen vaiheen heräävän eloon';
+
+  @override
+  String get onboardingStepsSubtitle =>
+      'Ratkaisut etenevät vaihe kerrallaan — niin opit miten, et vain vastausta.';
+
+  @override
+  String get onboardingSolvingLabel => 'Ratkaistaan';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return 'Vaihe $current/$total';
+  }
+
+  @override
+  String get onboardingPracticeTitle => 'Harjoittele, kunnes hallitset sen';
+
+  @override
+  String get onboardingPracticeSubtitle =>
+      'Kerää XP:tä, pidä putkesi yllä ja seuraa todellista edistymistä, kun kaikki loksahtaa paikoilleen.';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return 'Taso $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '$xp XP tasolle $level';
+  }
+
+  @override
+  String get onboardingDayStreak => 'Päiväputki';
+
+  @override
+  String get onboardingLevelTitle => 'Opi omalla tasollasi';
+
+  @override
+  String get onboardingLevelSubtitle =>
+      'Kertotauluista analyysiin — Matheasy tapaa sinut juuri siellä, missä olet.';
+
+  @override
+  String get onboardingBandPrimaryTitle => 'Alakoulu';
+
+  @override
+  String get onboardingBandPrimaryDesc => 'Laskutaito ja perusteet';
+
+  @override
+  String get onboardingBandSecondaryTitle => 'Yläkoulu';
+
+  @override
+  String get onboardingBandSecondaryDesc => 'Algebra, geometria ja trig.';
+
+  @override
+  String get onboardingBandCollegeTitle => 'Korkeakoulu';
+
+  @override
+  String get onboardingBandCollegeDesc => 'Analyysi ja sarjat';
+
+  @override
+  String get onboardingBandUniversityTitle => 'Yliopisto';
+
+  @override
+  String get onboardingBandUniversityDesc => 'Edistynyt ja sovellettu';
+
+  @override
+  String get onboardingAiMatch => 'AI-osuma';
+
+  @override
+  String get onboardingReadyTitle =>
+      'Valmis parantamaan matematiikan taitojasi?';
+
+  @override
+  String get onboardingReadySubtitle =>
+      'Tee matematiikasta stressaavan sijaan luontevaa. Ensimmäinen oppituntisi on valmiina.';
+
+  @override
+  String get onboardingHaveAccount => 'Minulla on jo tili';
+
+  @override
+  String get onboardingChipAlgebra => 'Algebra';
+
+  @override
+  String get onboardingChipFractions => 'Murtoluvut';
+
+  @override
+  String get onboardingChipGeometry => 'Geometria';
 }

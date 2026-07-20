@@ -920,12 +920,6 @@ abstract class AppLocalizations {
   /// **'Practice Until You Master It'**
   String get onboardingPracticeHeadline;
 
-  /// No description provided for @onboardingPracticeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited practice, XP, streaks and achievements keep you motivated every day.'**
-  String get onboardingPracticeSubtitle;
-
   /// No description provided for @onboardingAchievementTitle.
   ///
   /// In en, this message translates to:
@@ -3107,6 +3101,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{before} becomes {after}. Unlock Pro to watch every step unfold.'**
   String visualTeaserBecomes(String before, String after);
+
+  /// No description provided for @onboardingScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand Math. Don\'t Just Copy Answers.'**
+  String get onboardingScanTitle;
+
+  /// No description provided for @onboardingScanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan any problem and watch it open up into clear, step-by-step explanations.'**
+  String get onboardingScanSubtitle;
+
+  /// No description provided for @onboardingSolvedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved'**
+  String get onboardingSolvedLabel;
+
+  /// No description provided for @onboardingStepsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Every Step Come to Life'**
+  String get onboardingStepsTitle;
+
+  /// No description provided for @onboardingStepsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Solutions play out one step at a time — so you learn the how, not just the answer.'**
+  String get onboardingStepsSubtitle;
+
+  /// No description provided for @onboardingSolvingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Solving'**
+  String get onboardingSolvingLabel;
+
+  /// Step counter shown in the onboarding solver illustration, e.g. 'Step 2/4'.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current}/{total}'**
+  String onboardingStepCounter(int current, int total);
+
+  /// No description provided for @onboardingPracticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Until You Master It'**
+  String get onboardingPracticeTitle;
+
+  /// No description provided for @onboardingPracticeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn XP, keep your streak, and watch real progress as everything clicks.'**
+  String get onboardingPracticeSubtitle;
+
+  /// Level label inside the onboarding XP ring, e.g. 'Level 7'.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String onboardingLevelBadge(int level);
+
+  /// No description provided for @onboardingXpUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'XP'**
+  String get onboardingXpUnit;
+
+  /// Remaining XP to reach the next level, e.g. '760 XP to Level 8'.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to Level {level}'**
+  String onboardingXpToNext(int xp, int level);
+
+  /// No description provided for @onboardingDayStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Day streak'**
+  String get onboardingDayStreak;
+
+  /// No description provided for @onboardingLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn at Your Own Level'**
+  String get onboardingLevelTitle;
+
+  /// No description provided for @onboardingLevelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From times tables to calculus, Matheasy meets you exactly where you are.'**
+  String get onboardingLevelSubtitle;
+
+  /// No description provided for @onboardingBandPrimaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary School'**
+  String get onboardingBandPrimaryTitle;
+
+  /// No description provided for @onboardingBandPrimaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Arithmetic & foundations'**
+  String get onboardingBandPrimaryDesc;
+
+  /// No description provided for @onboardingBandSecondaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary School'**
+  String get onboardingBandSecondaryTitle;
+
+  /// No description provided for @onboardingBandSecondaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Algebra, geometry & trig'**
+  String get onboardingBandSecondaryDesc;
+
+  /// No description provided for @onboardingBandCollegeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'College'**
+  String get onboardingBandCollegeTitle;
+
+  /// No description provided for @onboardingBandCollegeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculus & series'**
+  String get onboardingBandCollegeDesc;
+
+  /// No description provided for @onboardingBandUniversityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'University'**
+  String get onboardingBandUniversityTitle;
+
+  /// No description provided for @onboardingBandUniversityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced & applied'**
+  String get onboardingBandUniversityDesc;
+
+  /// No description provided for @onboardingAiMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Match'**
+  String get onboardingAiMatch;
+
+  /// No description provided for @onboardingReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Become Better at Math?'**
+  String get onboardingReadyTitle;
+
+  /// No description provided for @onboardingReadySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn math from stressful into second nature. Your first lesson is ready.'**
+  String get onboardingReadySubtitle;
+
+  /// No description provided for @onboardingHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I Already Have an Account'**
+  String get onboardingHaveAccount;
+
+  /// No description provided for @onboardingChipAlgebra.
+  ///
+  /// In en, this message translates to:
+  /// **'Algebra'**
+  String get onboardingChipAlgebra;
+
+  /// No description provided for @onboardingChipFractions.
+  ///
+  /// In en, this message translates to:
+  /// **'Fractions'**
+  String get onboardingChipFractions;
+
+  /// No description provided for @onboardingChipGeometry.
+  ///
+  /// In en, this message translates to:
+  /// **'Geometry'**
+  String get onboardingChipGeometry;
 }
 
 class _AppLocalizationsDelegate

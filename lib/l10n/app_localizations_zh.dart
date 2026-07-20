@@ -392,9 +392,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingPracticeHeadline => '练到熟练掌握';
 
   @override
-  String get onboardingPracticeSubtitle => '无限练习、XP、连续记录和成就，让你每天都有动力。';
-
-  @override
   String get onboardingAchievementTitle => '神射手';
 
   @override
@@ -1621,6 +1618,102 @@ class AppLocalizationsZh extends AppLocalizations {
   String visualTeaserBecomes(String before, String after) {
     return '$before 变为 $after。解锁 Pro，观看每一步的展开。';
   }
+
+  @override
+  String get onboardingScanTitle => '读懂数学，别只是抄答案。';
+
+  @override
+  String get onboardingScanSubtitle => '扫描任意题目，看它展开成清晰的分步讲解。';
+
+  @override
+  String get onboardingSolvedLabel => '已解答';
+
+  @override
+  String get onboardingStepsTitle => '看每一步生动展开';
+
+  @override
+  String get onboardingStepsSubtitle => '解题过程一步步演示——让你学会怎么做，而不只是知道答案。';
+
+  @override
+  String get onboardingSolvingLabel => '解题中';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return '第 $current/$total 步';
+  }
+
+  @override
+  String get onboardingPracticeTitle => '练到真正掌握';
+
+  @override
+  String get onboardingPracticeSubtitle => '赚取 XP、保持连续记录，在一次次恍然大悟中看见真实的进步。';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return '等级 $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '还差 $xp XP 升到等级 $level';
+  }
+
+  @override
+  String get onboardingDayStreak => '连续天数';
+
+  @override
+  String get onboardingLevelTitle => '按你的水平学习';
+
+  @override
+  String get onboardingLevelSubtitle => '从乘法表到微积分，Matheasy 都能贴合你现在的水平。';
+
+  @override
+  String get onboardingBandPrimaryTitle => '小学';
+
+  @override
+  String get onboardingBandPrimaryDesc => '算术与基础';
+
+  @override
+  String get onboardingBandSecondaryTitle => '中学';
+
+  @override
+  String get onboardingBandSecondaryDesc => '代数、几何与三角';
+
+  @override
+  String get onboardingBandCollegeTitle => '学院';
+
+  @override
+  String get onboardingBandCollegeDesc => '微积分与级数';
+
+  @override
+  String get onboardingBandUniversityTitle => '大学';
+
+  @override
+  String get onboardingBandUniversityDesc => '进阶与应用';
+
+  @override
+  String get onboardingAiMatch => 'AI 匹配';
+
+  @override
+  String get onboardingReadyTitle => '准备好学好数学了吗？';
+
+  @override
+  String get onboardingReadySubtitle => '让数学从压力变成本能。你的第一课已经准备好了。';
+
+  @override
+  String get onboardingHaveAccount => '我已有账号';
+
+  @override
+  String get onboardingChipAlgebra => '代数';
+
+  @override
+  String get onboardingChipFractions => '分数';
+
+  @override
+  String get onboardingChipGeometry => '几何';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2011,9 +2104,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get onboardingPracticeHeadline => '练到熟练掌握';
 
   @override
-  String get onboardingPracticeSubtitle => '无限练习、XP、连续记录和成就，让你每天都有动力。';
-
-  @override
   String get onboardingAchievementTitle => '神射手';
 
   @override
@@ -3240,6 +3330,102 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String visualTeaserBecomes(String before, String after) {
     return '$before 变为 $after。解锁 Pro，观看每一步的展开。';
   }
+
+  @override
+  String get onboardingScanTitle => '理解数学，而不只是抄答案。';
+
+  @override
+  String get onboardingScanSubtitle => '扫描任意题目，看它展开成清晰的分步讲解。';
+
+  @override
+  String get onboardingSolvedLabel => '已解答';
+
+  @override
+  String get onboardingStepsTitle => '看每一步生动展现';
+
+  @override
+  String get onboardingStepsSubtitle => '解题过程一步步呈现——让你学会方法，而不只是答案。';
+
+  @override
+  String get onboardingSolvingLabel => '解题中';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return '第 $current/$total 步';
+  }
+
+  @override
+  String get onboardingPracticeTitle => '练到融会贯通';
+
+  @override
+  String get onboardingPracticeSubtitle => '赢取 XP，保持连续记录，在豁然开朗中看见真实进步。';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return '等级 $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '距离等级 $level 还差 $xp XP';
+  }
+
+  @override
+  String get onboardingDayStreak => '连续天数';
+
+  @override
+  String get onboardingLevelTitle => '按你的水平学习';
+
+  @override
+  String get onboardingLevelSubtitle => '从乘法口诀到微积分，Matheasy 都陪你从当下起步。';
+
+  @override
+  String get onboardingBandPrimaryTitle => '小学';
+
+  @override
+  String get onboardingBandPrimaryDesc => '算术与基础';
+
+  @override
+  String get onboardingBandSecondaryTitle => '中学';
+
+  @override
+  String get onboardingBandSecondaryDesc => '代数、几何与三角';
+
+  @override
+  String get onboardingBandCollegeTitle => '学院';
+
+  @override
+  String get onboardingBandCollegeDesc => '微积分与级数';
+
+  @override
+  String get onboardingBandUniversityTitle => '大学';
+
+  @override
+  String get onboardingBandUniversityDesc => '进阶与应用';
+
+  @override
+  String get onboardingAiMatch => 'AI 匹配';
+
+  @override
+  String get onboardingReadyTitle => '准备好把数学学得更好了吗？';
+
+  @override
+  String get onboardingReadySubtitle => '让数学从压力变成本能。你的第一课已就绪。';
+
+  @override
+  String get onboardingHaveAccount => '我已有账号';
+
+  @override
+  String get onboardingChipAlgebra => '代数';
+
+  @override
+  String get onboardingChipFractions => '分数';
+
+  @override
+  String get onboardingChipGeometry => '几何';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3628,9 +3814,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get onboardingPracticeHeadline => '練到熟練為止';
-
-  @override
-  String get onboardingPracticeSubtitle => '無限練習、XP、連續紀錄與成就，天天保持你的學習動力。';
 
   @override
   String get onboardingAchievementTitle => '神射手';
@@ -4859,4 +5042,100 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String visualTeaserBecomes(String before, String after) {
     return '$before 變成 $after。解鎖 Pro 觀看每一步的展開。';
   }
+
+  @override
+  String get onboardingScanTitle => '理解數學，而不只是照抄答案。';
+
+  @override
+  String get onboardingScanSubtitle => '掃描任何題目，看它展開成清楚的逐步解說。';
+
+  @override
+  String get onboardingSolvedLabel => '已解答';
+
+  @override
+  String get onboardingStepsTitle => '看每一步活起來';
+
+  @override
+  String get onboardingStepsSubtitle => '解答一步一步展開——讓你學會方法，而不只是答案。';
+
+  @override
+  String get onboardingSolvingLabel => '解題中';
+
+  @override
+  String onboardingStepCounter(int current, int total) {
+    return '第 $current/$total 步';
+  }
+
+  @override
+  String get onboardingPracticeTitle => '練到熟練為止';
+
+  @override
+  String get onboardingPracticeSubtitle => '累積 XP、保持連續紀錄，看著自己一點一滴真正進步。';
+
+  @override
+  String onboardingLevelBadge(int level) {
+    return '等級 $level';
+  }
+
+  @override
+  String get onboardingXpUnit => 'XP';
+
+  @override
+  String onboardingXpToNext(int xp, int level) {
+    return '再 $xp XP 升到等級 $level';
+  }
+
+  @override
+  String get onboardingDayStreak => '連續天數';
+
+  @override
+  String get onboardingLevelTitle => '依你的程度學習';
+
+  @override
+  String get onboardingLevelSubtitle => '從九九乘法到微積分，Matheasy 都能配合你的程度。';
+
+  @override
+  String get onboardingBandPrimaryTitle => '小學';
+
+  @override
+  String get onboardingBandPrimaryDesc => '算術與基礎';
+
+  @override
+  String get onboardingBandSecondaryTitle => '中學';
+
+  @override
+  String get onboardingBandSecondaryDesc => '代數、幾何與三角';
+
+  @override
+  String get onboardingBandCollegeTitle => '大專';
+
+  @override
+  String get onboardingBandCollegeDesc => '微積分與級數';
+
+  @override
+  String get onboardingBandUniversityTitle => '大學';
+
+  @override
+  String get onboardingBandUniversityDesc => '進階與應用';
+
+  @override
+  String get onboardingAiMatch => 'AI 配對';
+
+  @override
+  String get onboardingReadyTitle => '準備好變得更擅長數學了嗎？';
+
+  @override
+  String get onboardingReadySubtitle => '讓數學從壓力變成本能。你的第一堂課已準備好。';
+
+  @override
+  String get onboardingHaveAccount => '我已經有帳號';
+
+  @override
+  String get onboardingChipAlgebra => '代數';
+
+  @override
+  String get onboardingChipFractions => '分數';
+
+  @override
+  String get onboardingChipGeometry => '幾何';
 }
