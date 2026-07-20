@@ -25,6 +25,7 @@ import '../domain/animation/derivative_power_rule.dart';
 import '../domain/animation/fraction_arithmetic.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
+import '../domain/animation/matrix_determinant.dart';
 import '../domain/animation/percentage.dart';
 import '../domain/animation/power_root.dart';
 import '../domain/animation/quadratic_formula.dart';
@@ -311,6 +312,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: deriv.steps.length,
         caption: deriv.steps[i].caption,
         callout: deriv.steps[i].callout,
+      );
+    }
+    final matDet = MatrixDeterminant.tryBuild(result);
+    if (matDet != null) {
+      final i = stepIndex.clamp(0, matDet.steps.length - 1);
+      return (
+        label: 'matrix determinant',
+        total: matDet.steps.length,
+        caption: matDet.steps[i].caption,
+        callout: matDet.steps[i].callout,
       );
     }
     return null;

@@ -15,6 +15,7 @@ import '../../domain/animation/derivative_power_rule.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
+import '../../domain/animation/matrix_determinant.dart';
 import '../../domain/animation/percentage.dart';
 import '../../domain/animation/power_root.dart';
 import '../../domain/animation/quadratic_formula.dart';
@@ -30,6 +31,7 @@ import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
+import '../widgets/visual/engine/matrix_determinant_view.dart';
 import '../widgets/visual/engine/percentage_view.dart';
 import '../widgets/visual/engine/power_root_view.dart';
 import '../widgets/visual/engine/quadratic_formula_view.dart';
@@ -205,6 +207,16 @@ class VisualTab extends ConsumerWidget {
         if (derivative != null) {
           return DerivativePowerRuleView(
             model: derivative,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style 2×2 DETERMINANT — main diagonal minus anti-diagonal
+        // (ad − bc). Golden-rule gated against the verified determinant.
+        final matrixDet = MatrixDeterminant.tryBuild(result);
+        if (matrixDet != null) {
+          return MatrixDeterminantView(
+            model: matrixDet,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
