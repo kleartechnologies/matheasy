@@ -23,6 +23,7 @@ import '../domain/animation/column_arithmetic.dart';
 import '../domain/animation/decimal_arithmetic.dart';
 import '../domain/animation/derivative_power_rule.dart';
 import '../domain/animation/fraction_arithmetic.dart';
+import '../domain/animation/logarithm.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
 import '../domain/animation/matrix_determinant.dart';
@@ -322,6 +323,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: matDet.steps.length,
         caption: matDet.steps[i].caption,
         callout: matDet.steps[i].callout,
+      );
+    }
+    final log = Logarithm.tryBuild(result);
+    if (log != null) {
+      final i = stepIndex.clamp(0, log.steps.length - 1);
+      return (
+        label: 'logarithm',
+        total: log.steps.length,
+        caption: log.steps[i].caption,
+        callout: log.steps[i].callout,
       );
     }
     return null;

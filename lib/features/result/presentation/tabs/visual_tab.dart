@@ -13,6 +13,7 @@ import '../../domain/animation/column_arithmetic.dart';
 import '../../domain/animation/decimal_arithmetic.dart';
 import '../../domain/animation/derivative_power_rule.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
+import '../../domain/animation/logarithm.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
 import '../../domain/animation/matrix_determinant.dart';
@@ -29,6 +30,7 @@ import '../widgets/visual/engine/decimal_arithmetic_view.dart';
 import '../widgets/visual/engine/derivative_power_rule_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
+import '../widgets/visual/engine/logarithm_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
 import '../widgets/visual/engine/matrix_determinant_view.dart';
@@ -217,6 +219,16 @@ class VisualTab extends ConsumerWidget {
         if (matrixDet != null) {
           return MatrixDeterminantView(
             model: matrixDet,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style LOGARITHM — "what power of the base gives the number?"
+        // (log_2 8 → 3). Golden-rule gated: base^answer == argument exactly.
+        final logarithm = Logarithm.tryBuild(result);
+        if (logarithm != null) {
+          return LogarithmView(
+            model: logarithm,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }
