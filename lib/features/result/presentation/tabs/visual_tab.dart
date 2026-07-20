@@ -13,6 +13,7 @@ import '../../domain/animation/column_arithmetic.dart';
 import '../../domain/animation/decimal_arithmetic.dart';
 import '../../domain/animation/derivative_power_rule.dart';
 import '../../domain/animation/fraction_arithmetic.dart';
+import '../../domain/animation/integral_power_rule.dart';
 import '../../domain/animation/logarithm.dart';
 import '../../domain/animation/long_division.dart';
 import '../../domain/animation/long_multiplication.dart';
@@ -30,6 +31,7 @@ import '../widgets/visual/engine/decimal_arithmetic_view.dart';
 import '../widgets/visual/engine/derivative_power_rule_view.dart';
 import '../widgets/visual/engine/engine_l10n.dart';
 import '../widgets/visual/engine/fraction_arithmetic_view.dart';
+import '../widgets/visual/engine/integral_power_rule_view.dart';
 import '../widgets/visual/engine/logarithm_view.dart';
 import '../widgets/visual/engine/long_division_view.dart';
 import '../widgets/visual/engine/long_multiplication_view.dart';
@@ -229,6 +231,17 @@ class VisualTab extends ConsumerWidget {
         if (logarithm != null) {
           return LogarithmView(
             model: logarithm,
+            onAskStep: (i) => onAskMatheasy(visual, i),
+          );
+        }
+
+        // Photomath-style INTEGRAL (power rule) — ∫ of a polynomial: add one to
+        // each power, divide by the new power, add C. Golden-rule gated: the
+        // antiderivative must equal the verified answer (C stripped).
+        final integral = IntegralPowerRule.tryBuild(result);
+        if (integral != null) {
+          return IntegralPowerRuleView(
+            model: integral,
             onAskStep: (i) => onAskMatheasy(visual, i),
           );
         }

@@ -23,6 +23,7 @@ import '../domain/animation/column_arithmetic.dart';
 import '../domain/animation/decimal_arithmetic.dart';
 import '../domain/animation/derivative_power_rule.dart';
 import '../domain/animation/fraction_arithmetic.dart';
+import '../domain/animation/integral_power_rule.dart';
 import '../domain/animation/logarithm.dart';
 import '../domain/animation/long_division.dart';
 import '../domain/animation/long_multiplication.dart';
@@ -333,6 +334,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         total: log.steps.length,
         caption: log.steps[i].caption,
         callout: log.steps[i].callout,
+      );
+    }
+    final integral = IntegralPowerRule.tryBuild(result);
+    if (integral != null) {
+      final i = stepIndex.clamp(0, integral.steps.length - 1);
+      return (
+        label: 'integral (power rule)',
+        total: integral.steps.length,
+        caption: integral.steps[i].caption,
+        callout: integral.steps[i].callout,
       );
     }
     return null;
