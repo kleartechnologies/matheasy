@@ -47,6 +47,7 @@ class LearningPreferencesScreen extends ConsumerWidget {
                   options: AppLanguage.values,
                   selected: learning.language,
                   label: (o) => o.nativeName,
+                  subtitle: (o) => o.englishName,
                   icon: (o) => Icons.translate_rounded,
                   onSelected: controller.setLanguage,
                 ),

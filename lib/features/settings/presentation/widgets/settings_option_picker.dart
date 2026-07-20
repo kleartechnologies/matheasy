@@ -17,6 +17,7 @@ Future<void> showSettingsOptionPicker<T>(
   required String Function(T option) label,
   required IconData Function(T option) icon,
   required ValueChanged<T> onSelected,
+  String? Function(T option)? subtitle,
   String? Function(T option)? trailing,
 }) {
   return AppBottomSheet.show<void>(
@@ -29,6 +30,7 @@ Future<void> showSettingsOptionPicker<T>(
             SettingsTile(
               icon: icon(option),
               title: label(option),
+              subtitle: subtitle?.call(option),
               value: trailing?.call(option),
               trailing: option == selected
                   ? Icon(
