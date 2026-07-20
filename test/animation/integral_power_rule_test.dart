@@ -49,6 +49,14 @@ void main() {
     );
   });
 
+  test('variable r: ∫r^2 dr → r^3/3 + C (does not corrupt \\frac in the answer)',
+      () {
+    final i =
+        IntegralPowerRule.tryBuild(_r(r'\int r^2 dr', r'\frac{r^3}{3}+C'))!;
+    expect(_latex(i), contains(r'\frac{r^{3}}{3}+C'));
+    expect(i.steps.first.latex, contains(r'r^{2}'));
+  });
+
   test('GOLDEN RULE: bails when the antiderivative ≠ the verified answer', () {
     expect(
       IntegralPowerRule.tryBuild(_r(r'\int(3x^2+4x-5)dx', 'x^3+2x^2+C')),

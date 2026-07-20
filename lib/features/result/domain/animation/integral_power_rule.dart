@@ -87,7 +87,11 @@ class IntegralPowerRule {
         .replaceAll('−', '-')
         .replaceAllMapped(
             RegExp('$v' r'\^\{(\d+)\}'), (m) => '$v^${m.group(1)}');
-    if (v != 'x') s = s.replaceAll(v, 'x');
+    // Token-aware: rewrite the variable to x WITHOUT touching the same letter
+    // inside a LaTeX command (e.g. don't turn \frac into \fxac when v is f/r/a/c).
+    if (v != 'x') {
+      s = s.replaceAll(RegExp(r'(?<![A-Za-z\\])' + v + r'(?![A-Za-z])'), 'x');
+    }
     if (s.isEmpty) return null;
     final poly = <int, int>{};
     for (final match in RegExp(r'[+-]?[^+-]+').allMatches(s)) {
@@ -112,7 +116,11 @@ class IntegralPowerRule {
         .replaceAll('−', '-')
         .replaceAllMapped(
             RegExp('$v' r'\^\{(\d+)\}'), (m) => '$v^${m.group(1)}');
-    if (v != 'x') s = s.replaceAll(v, 'x');
+    // Token-aware: rewrite the variable to x WITHOUT touching the same letter
+    // inside a LaTeX command (e.g. don't turn \frac into \fxac when v is f/r/a/c).
+    if (v != 'x') {
+      s = s.replaceAll(RegExp(r'(?<![A-Za-z\\])' + v + r'(?![A-Za-z])'), 'x');
+    }
     if (s.isEmpty) return null;
 
     final out = <int, (int, int)>{};
