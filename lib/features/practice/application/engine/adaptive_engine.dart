@@ -123,14 +123,31 @@ class AdaptiveEngine {
     }
     if (pool.isEmpty) pool = PracticeSkill.freeSkills;
 
-    // 2b. Concept ceiling — "no concepts above the selected difficulty". When the
-    //     user has chosen a difficulty, drop skills whose concept FLOOR is above
-    //     it (a quadratic never appears at Very Easy).
+    // 2b. Concept window — "no concepts above OR trivially below the selected
+    //     difficulty". When the user has chosen a difficulty:
+    //      * ceiling: drop skills whose concept FLOOR is above it (a quadratic
+    //        never appears at Very Easy), and
+    //      * floor: drop skills whose concept is too easy FOR the level (a
+    //        one/two-step linear must not be served at Hard just because its
+    //        floor is <= Hard — that's the "Hard shows 3x + 3 = 36" bug).
     if (request.difficulty != null) {
-      final atLevel =
-          pool.where((s) => skillAllowedAt(s, request.difficulty!)).toList();
+      final level = request.difficulty!;
+      final atLevel = pool.where((s) => skillAllowedAt(s, level)).toList();
       if (atLevel.isNotEmpty) {
-        pool = atLevel;
+        // Prefer skills whose concept sits within one tier of the chosen level,
+        // but never empty the pool: clamp the lower bound to the hardest concept
+        // the topic actually offers at/under the level, so e.g. Expert + Algebra
+        // (which tops out at quadratics = Medium concept) still lands on
+        // quadratics/both-sides/simultaneous, never one-step linear.
+        final topFloor = atLevel
+            .map(conceptFloor)
+            .reduce((a, b) => a.index >= b.index ? a : b);
+        final minFloorIndex = (level.index - 1) < topFloor.index
+            ? (level.index - 1)
+            : topFloor.index;
+        pool = atLevel
+            .where((s) => conceptFloor(s).index >= minFloorIndex)
+            .toList();
       } else {
         // Impossible combo: the chosen level is below EVERY skill's floor in
         // this topic (e.g. Very Easy / Medium + Calculus). Keep the session

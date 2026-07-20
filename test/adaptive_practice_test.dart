@@ -478,6 +478,49 @@ void main() {
       expect(plan.any((r) => r.skill == PracticeSkill.quadraticFactor), isFalse);
       expect(plan.every((r) => r.skill.isFree), isTrue);
     });
+
+    test('Hard Algebra serves only advanced concepts (the 3x+3=36 bug)', () {
+      final plan = engine.plan(
+        request: const PracticeRequest(
+          topic: PracticeTopic.algebra,
+          difficulty: PracticeDifficulty.hard,
+          questionCount: 8,
+        ),
+        progress: PracticeProgress.empty,
+        isPro: true,
+      );
+      final skills = plan.map((r) => r.skill).toSet();
+      // The trivially-easy linear concepts must never appear at Hard...
+      expect(skills, isNot(contains(PracticeSkill.linearOneStep)));
+      expect(skills, isNot(contains(PracticeSkill.linearTwoStep)));
+      expect(skills, isNot(contains(PracticeSkill.evaluateExpression)));
+      // ...only the advanced algebra concepts do.
+      const advanced = {
+        PracticeSkill.linearBothSides,
+        PracticeSkill.simultaneousEquations,
+        PracticeSkill.quadraticFactor,
+      };
+      expect(skills.every(advanced.contains), isTrue,
+          reason: 'got $skills');
+    });
+
+    test('Expert Algebra falls to the hardest concept the topic has, not '
+        'one-step linear', () {
+      // Algebra tops out at quadratics (Medium concept); Expert must still land
+      // there rather than reintroducing the easy skills.
+      final plan = engine.plan(
+        request: const PracticeRequest(
+          topic: PracticeTopic.algebra,
+          difficulty: PracticeDifficulty.expert,
+          questionCount: 6,
+        ),
+        progress: PracticeProgress.empty,
+        isPro: true,
+      );
+      final skills = plan.map((r) => r.skill).toSet();
+      expect(skills, isNot(contains(PracticeSkill.linearOneStep)));
+      expect(skills, isNot(contains(PracticeSkill.linearTwoStep)));
+    });
   });
 
   group('AdaptivePracticeService', () {
