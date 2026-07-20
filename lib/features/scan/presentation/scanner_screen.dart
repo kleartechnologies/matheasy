@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,7 @@ import '../../analytics/domain/analytics_event.dart';
 import '../../progress/application/stats_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../application/scan_image_codec.dart';
 import '../application/scanner_controller.dart';
 import '../application/steadiness_detector.dart';
 import '../domain/detected_equation.dart';
@@ -66,6 +68,15 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// crop route opens, so without this flag auto-capture (steadiness) kept firing
   /// while the crop screen was up and stacked a new crop screen every ~0.8s.
   bool _busy = false;
+
+  /// True for the whole time the native gallery picker is open. Auto-capture
+  /// (steadiness) can't see a native, non-Flutter picker sheet via [ModalRoute],
+  /// so without this guard it would fire a camera capture *behind* the open
+  /// picker, set [_busy], and the returning gallery pick would then be silently
+  /// dropped by the [_busy] guard in [_cropAndRecognize] — the "I picked a photo
+  /// and nothing happened" bug. Disarms both auto-capture and the shutter until
+  /// the pick (and its crop→recognize flow) resolves.
+  bool _picking = false;
 
   /// Auto-capture (spec §10) — a nice-to-have that fires the SAME capped shutter
   /// flow when the phone is held steady. On by default; the manual shutter is
@@ -118,7 +129,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   }
 
   void _onAccel(UserAccelerometerEvent event) {
-    if (!_autoCapture || !_cameraReady || _capturing || _busy) return;
+    if (!_autoCapture || !_cameraReady || _capturing || _busy || _picking) {
+      return;
+    }
     // A route is pushed OVER the scanner (crop, gallery picker, manual input,
     // paywall): the scanner isn't the top route, so never auto-capture. Without
     // this, steadiness kept firing while the crop screen was up (state is still
@@ -250,7 +263,11 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// Shutter: capture from the live camera, then crop + recognize.
   Future<void> _shutter() async {
     final camera = _camera;
-    if (_busy || _capturing || camera == null || !camera.value.isInitialized) {
+    if (_busy ||
+        _capturing ||
+        _picking ||
+        camera == null ||
+        !camera.value.isInitialized) {
       return;
     }
     if (!_allowScanOrPaywall()) return;
@@ -272,24 +289,38 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
 
   /// Pick from the gallery, then crop + recognize.
   Future<void> _gallery() async {
-    if (_capturing || _busy) return;
+    if (_capturing || _busy || _picking) return;
     if (!_allowScanOrPaywall()) return;
     final galleryFailed = context.l10n.scanGalleryFailed;
-    Uint8List bytes;
+    // Hold [_picking] for the WHOLE pick → crop → recognize flow so steadiness
+    // auto-capture stays disarmed while the native picker is up — otherwise it
+    // fires behind the picker and the returning pick is dropped (see [_picking]).
+    _picking = true;
     try {
-      final file = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 2000,
-        imageQuality: 90,
-      );
-      if (file == null) return; // cancelled
-      bytes = await file.readAsBytes();
-    } catch (error) {
-      LoggingService.warning('Gallery pick failed: $error');
-      _toast(galleryFailed);
-      return;
+      Uint8List bytes;
+      try {
+        final file = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 2000,
+          imageQuality: 90,
+        );
+        if (file == null) return; // cancelled
+        bytes = await file.readAsBytes();
+      } catch (error) {
+        LoggingService.warning('Gallery pick failed: $error');
+        _toast(galleryFailed);
+        return;
+      }
+      // Normalize to a decodable, downscaled JPEG before the crop step:
+      // image_picker can hand back bytes crop_your_image's decoder can't read
+      // (e.g. an un-transcoded GIF), which would hang the crop screen on an
+      // infinite spinner. encodeScanJpeg decodes + re-encodes and falls back to
+      // the raw bytes on failure, so it never throws into the flow.
+      bytes = await compute(encodeScanJpeg, bytes);
+      await _cropAndRecognize(ScanSource.gallery, bytes);
+    } finally {
+      _picking = false;
     }
-    await _cropAndRecognize(ScanSource.gallery, bytes);
   }
 
   /// Manual entry — opens the math-keyboard screen. The typed problem flows
