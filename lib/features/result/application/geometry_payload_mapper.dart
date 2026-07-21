@@ -31,6 +31,9 @@ class GeometryPayloadMapper {
     if (kind == GeometrySceneKind.rightTriangleTrig) {
       return _rightTriangleTrig(m, expected);
     }
+    if (kind == GeometrySceneKind.rightTriangleInverseTrig) {
+      return _rightTriangleInverseTrig(m, expected);
+    }
     if (kind == GeometrySceneKind.sineRuleAngle) {
       return _sineRuleAngle(m, expected);
     }
@@ -133,6 +136,27 @@ class GeometryPayloadMapper {
     return GeometryScene.tryBuildRightTriangleTrig(
       knownAngleDeg: angle.value,
       knownAngleLabel: angle.label,
+      sides: sides,
+      unknownLabel: _unknownLabel(m['unknown']),
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  // ---- Right-triangle inverse trig (an acute angle from two sides) ----------
+
+  static GeometryScene? _rightTriangleInverseTrig(
+    Map<String, dynamic> m,
+    String? expected,
+  ) {
+    final sides = _trigSides(m['sides']);
+    if (sides == null) return null;
+    // Exactly two GIVEN sides (both valued) — the unknown of this kind is the
+    // ANGLE, so a blank side means a mis-filed side-finding problem; the builder
+    // enforces the same, this just short-circuits the common case.
+    if (sides.length != 2 || sides.any((s) => s.value == null)) return null;
+    return GeometryScene.tryBuildRightTriangleInverseTrig(
       sides: sides,
       unknownLabel: _unknownLabel(m['unknown']),
       ruleName: _optional(m['ruleName']),

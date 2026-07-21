@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Sistem persamaan ini mungkin punya beberapa solusi — aku hanya menampilkan jawaban jika bisa membuktikannya lengkap, dan aku tidak bisa melakukannya di sini, jadi aku tidak akan berpura-pura. Tapi inilah gunanya tutor: kita bisa menyelesaikannya bersama dan memeriksa setiap langkah.",
   "resultTutorReasonMultiPart": "Soal ini meminta lebih dari satu hal, jadi tidak ada jawaban tunggal yang bisa kuperiksa dengan mengerjakannya secara terbalik — dan aku tidak akan berpura-pura ada. Tutor adalah alat yang tepat: kita bisa mengerjakannya satu bagian demi satu bagian.",
   "resultTutorReasonProof": "Ini soal bertipe pembuktian — tidak ada jawaban tunggal yang bisa kuhitung dan kuperiksa dengan mengerjakannya secara terbalik, jadi aku tidak akan berpura-pura ada. Tapi inilah gunanya tutor: kita bisa menyusun argumennya bersama, satu langkah demi satu langkah.",
+  "resultTutorReasonBeyondSolver": "Soal ini butuh metode yang di luar jangkauan pemecah langkah-demi-langkah milikku. Aku hanya menampilkan jawaban yang bisa kubuktikan dengan menghitungnya mundur, dan di sini aku tidak bisa melakukannya, jadi aku tidak akan berpura-pura. Tapi justru untuk inilah tutor ada: kita bisa mengerjakannya bersama, selangkah demi selangkah.",
   "resultPlaySolution": "Putar Solusi",
   "resultSolved": "TERSELESAIKAN",
   "resultCloseWalkthrough": "Tutup panduan",

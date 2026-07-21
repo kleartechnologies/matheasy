@@ -1163,6 +1163,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este es un problema de tipo demostración — no hay una única respuesta que pueda calcular y comprobar sustituyéndola hacia atrás, así que no voy a fingir que la hay. Pero para esto está el tutor: podemos construir el razonamiento juntos, paso a paso.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Esta necesita un método que va más allá de mi resolutor paso a paso. Solo muestro respuestas que puedo demostrar comprobándolas hacia atrás, y aquí no puedo hacerlo, así que no voy a fingir que sí. Pero para esto está justamente el tutor: podemos resolverla juntos, paso a paso.';
+
+  @override
   String get resultPlaySolution => 'Reproducir solución';
 
   @override

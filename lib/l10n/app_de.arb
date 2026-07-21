@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Dieses Gleichungssystem kann mehrere Lösungen haben — ich zeige nur eine Antwort, wenn ich beweisen kann, dass sie vollständig ist, und das kann ich hier nicht, also tue ich nicht so als ob. Aber genau dafür ist der Tutor da: Wir können es gemeinsam lösen und jeden Schritt überprüfen.",
   "resultTutorReasonMultiPart": "Diese Aufgabe verlangt mehr als eine Sache, daher gibt es keine einzelne Antwort, die ich durch Rückrechnen prüfen kann — und ich tue nicht so, als gäbe es eine. Der Tutor ist das richtige Werkzeug: Wir können es Teil für Teil angehen.",
   "resultTutorReasonProof": "Dies ist eine Beweisaufgabe — es gibt keine einzelne Antwort, die ich berechnen und durch Rückrechnen prüfen kann, also tue ich nicht so, als gäbe es eine. Aber genau dafür ist der Tutor da: Wir können die Argumentation gemeinsam aufbauen, Schritt für Schritt.",
+  "resultTutorReasonBeyondSolver": "Diese Aufgabe braucht einen Weg, der über meinen Schritt-für-Schritt-Löser hinausgeht. Ich zeige nur Ergebnisse, die ich durch Rückwärtsrechnen belegen kann, und das gelingt mir hier nicht, also tue ich nicht so, als ob. Aber genau dafür ist der Tutor da: Wir können sie gemeinsam durchgehen, Schritt für Schritt.",
   "resultPlaySolution": "Lösung abspielen",
   "resultSolved": "GELÖST",
   "resultCloseWalkthrough": "Lösungsweg schließen",

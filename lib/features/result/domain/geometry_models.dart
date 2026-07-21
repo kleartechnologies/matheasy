@@ -73,6 +73,12 @@ enum GeometrySceneKind {
   /// Area = ½·a·b·sin C. The unknown is an area (not drawn as a blank mark —
   /// the whole interior is the answer).
   sasArea,
+
+  /// A right triangle where TWO side lengths are given and an acute ANGLE is
+  /// found by an inverse trig ratio (θ = sin⁻¹/cos⁻¹/tan⁻¹ — SOH CAH TOA read
+  /// backwards). The unknown is an angle. This is the inverse of
+  /// [rightTriangleTrig] (which finds a side from a side + an angle).
+  rightTriangleInverseTrig,
 }
 
 /// How a [GeometryScene] is drawn. Kept separate from [GeometrySceneKind] so
@@ -935,6 +941,213 @@ class GeometryScene {
     );
   }
 
+  /// Builds a solved **right-triangle inverse-trig** scene: TWO sides of a
+  /// right triangle are given (roles relative to the asked acute angle) and the
+  /// ANGLE is found by an inverse trig ratio (θ = sin⁻¹/cos⁻¹/tan⁻¹ — SOH CAH
+  /// TOA read backwards). Returns `null` when the data is inconsistent, a ratio
+  /// is out of range (a leg ≥ the hypotenuse), the angle isn't a genuine acute
+  /// angle, or it contradicts [expectedAnswerLatex]. The angle is computed here
+  /// — never taken from the model; this is the inverse of
+  /// [tryBuildRightTriangleTrig].
+  static GeometryScene? tryBuildRightTriangleInverseTrig({
+    required List<GeometryTrigSide> sides,
+    required String unknownLabel,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    // Exactly TWO given sides with distinct roles, both carrying a value — the
+    // unknown of this kind is the ANGLE, so no side may be blank. (A blank side
+    // means the recognizer meant a side-finding kind; refuse rather than guess.)
+    if (sides.length != 2) return null;
+    if (sides.map((s) => s.role).toSet().length != 2) return null;
+    final knowns = sides.where((s) => s.value != null).toList();
+    if (knowns.length != 2) return null;
+    if (!knowns.every((s) => s.value!.isFinite && s.value! > 0)) return null;
+
+    double? sideOf(GeometryTrigSideRole r) {
+      for (final s in knowns) {
+        if (s.role == r) return s.value;
+      }
+      return null;
+    }
+
+    double toDeg(double rad) => rad * 180 / math.pi;
+
+    final roles = knowns.map((s) => s.role).toSet();
+    final double opp, adj, hyp, theta;
+    final String fnLatex, fnName, numRoleName, denRoleName;
+    final double numLen, denLen;
+    if (roles.containsAll(const {
+      GeometryTrigSideRole.opposite,
+      GeometryTrigSideRole.hypotenuse,
+    })) {
+      opp = sideOf(GeometryTrigSideRole.opposite)!;
+      hyp = sideOf(GeometryTrigSideRole.hypotenuse)!;
+      if (opp >= hyp) return null; // a leg is strictly shorter than the hypotenuse
+      adj = math.sqrt(hyp * hyp - opp * opp);
+      theta = toDeg(math.asin(opp / hyp));
+      fnLatex = '\\sin';
+      fnName = 'sin';
+      numRoleName = 'opposite';
+      denRoleName = 'hypotenuse';
+      numLen = opp;
+      denLen = hyp;
+    } else if (roles.containsAll(const {
+      GeometryTrigSideRole.adjacent,
+      GeometryTrigSideRole.hypotenuse,
+    })) {
+      adj = sideOf(GeometryTrigSideRole.adjacent)!;
+      hyp = sideOf(GeometryTrigSideRole.hypotenuse)!;
+      if (adj >= hyp) return null;
+      opp = math.sqrt(hyp * hyp - adj * adj);
+      theta = toDeg(math.acos(adj / hyp));
+      fnLatex = '\\cos';
+      fnName = 'cos';
+      numRoleName = 'adjacent';
+      denRoleName = 'hypotenuse';
+      numLen = adj;
+      denLen = hyp;
+    } else if (roles.containsAll(const {
+      GeometryTrigSideRole.opposite,
+      GeometryTrigSideRole.adjacent,
+    })) {
+      opp = sideOf(GeometryTrigSideRole.opposite)!;
+      adj = sideOf(GeometryTrigSideRole.adjacent)!;
+      hyp = math.sqrt(opp * opp + adj * adj);
+      theta = toDeg(math.atan(opp / adj));
+      fnLatex = '\\tan';
+      fnName = 'tan';
+      numRoleName = 'opposite';
+      denRoleName = 'adjacent';
+      numLen = opp;
+      denLen = adj;
+    } else {
+      return null; // a hypotenuse-only pair or a duplicate role — can't form a ratio
+    }
+    if (![opp, adj, hyp].every((v) => v.isFinite && v > 0)) return null;
+    if (!theta.isFinite || theta <= 0 || theta >= 90) return null;
+
+    // Cross-check against the solver's verified angle, when one is supplied
+    // (the scan path has none — the deterministic gate here is the arithmetic
+    // above plus the drawn-wedge check below).
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    if (expected != null && (expected - theta).abs() > 0.5) return null;
+
+    final angleLabel = unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim();
+    String sideName(GeometryTrigSideRole r) => switch (r) {
+          GeometryTrigSideRole.opposite => 'opposite',
+          GeometryTrigSideRole.adjacent => 'adjacent',
+          GeometryTrigSideRole.hypotenuse => 'hypotenuse',
+        };
+    String labelFor(GeometryTrigSide s) =>
+        s.label.trim().isEmpty ? sideName(s.role) : s.label.trim();
+    // No label may name two different things (one name, two values would draw a
+    // self-contradiction) — check the angle vs each side AND the two sides vs
+    // each other (a blank side auto-fills to 'a', which can clash with an
+    // explicit 'a'), mirroring the guard in tryBuildRightTriangleTrig.
+    for (final s in knowns) {
+      if (labelFor(s) == angleLabel) return null;
+    }
+    if (labelFor(knowns[0]) == labelFor(knowns[1])) return null;
+
+    // Right angle at C = (0,0); the ASKED angle sits at A = (adj, 0) between the
+    // adjacent leg (A→C along −x) and the hypotenuse (A→B), with B = (0, opp).
+    // The drawn angle at A is exactly θ by construction. Same layout as
+    // tryBuildRightTriangleTrig: edge 0 = C→A (adjacent), 1 = A→B (hypotenuse),
+    // 2 = B→C (opposite).
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // C (right angle) — index 0
+      VisualPoint(adj, 0), // A (the asked angle) — index 1
+      VisualPoint(0, opp), // B — index 2
+    ];
+    int edgeFor(GeometryTrigSideRole r) => switch (r) {
+          GeometryTrigSideRole.adjacent => 0,
+          GeometryTrigSideRole.hypotenuse => 1,
+          GeometryTrigSideRole.opposite => 2,
+        };
+    // Draw the two GIVEN sides (values match the vertices by construction).
+    final builtSides = [
+      for (final s in knowns)
+        GeometrySide(label: labelFor(s), edge: edgeFor(s.role), value: s.value!),
+    ];
+    final builtAngle = GeometryAngle(
+      label: angleLabel,
+      vertex: 1,
+      ray1: 0,
+      ray2: 2,
+      value: theta,
+      isUnknown: true,
+    );
+    // Consistency gate: the drawn wedge at A must carry exactly the computed θ.
+    final drawnTheta = _angleBetween(vertices[1], vertices[0], vertices[2]);
+    if ((drawnTheta - theta).abs() > 0.5) return null;
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'Trigonometric ratios: SOH CAH TOA';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final numDisplay = formatLength(numLen);
+    final denDisplay = formatLength(denLen);
+    final knownText = builtSides
+        .map((s) => '${s.label} = ${formatLength(s.value)}')
+        .join(' and ');
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'Two sides of a right triangle are given: $knownText.',
+        highlight: {for (final s in builtSides) s.label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'Pick the trig ratio',
+        detail: 'The $numRoleName and $denRoleName sides are linked by $fnName: '
+            '$fnName of the angle = $numRoleName ÷ $denRoleName (SOH CAH TOA).',
+        equationLatex: '$fnLatex($angleLabel) = \\frac{$numDisplay}{$denDisplay}',
+        highlight: {for (final s in builtSides) s.label, angleLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing angle',
+        detail: 'Take the inverse $fnName to leave $angleLabel on its own.',
+        equationLatex:
+            '$angleLabel = $fnLatex^{-1}\\left(\\frac{$numDisplay}{$denDisplay}\\right)',
+        highlight: {angleLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing angle is ${_degPlain(theta)}.',
+        equationLatex: '$angleLabel = ${_deg(theta)}',
+        highlight: {angleLabel},
+      ),
+    ];
+
+    final semantics = 'Right triangle diagram. Given $knownText. $resolvedRule. '
+        'The missing angle $angleLabel is ${_degPlain(theta)}.';
+
+    return GeometryScene(
+      kind: GeometrySceneKind.rightTriangleInverseTrig,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: [builtAngle],
+      sides: builtSides,
+      // unknownKind defaults to GeometryUnknownKind.angle — the asked quantity.
+      unknownLabel: angleLabel,
+      unknownValue: theta,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+      rightAngleVertices: const [0],
+    );
+  }
+
   /// Builds a solved **sine-rule angle** scene (two sides + a non-included
   /// angle → the angle opposite the other given side), or `null` when the data
   /// is inconsistent, genuinely ambiguous with no disambiguating signal, or
@@ -1294,6 +1507,7 @@ class GeometryScene {
         GeometrySceneKind.rightTrianglePythagoras ||
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.rightTriangleInverseTrig ||
         GeometrySceneKind.sasArea =>
           false,
       };
@@ -1365,6 +1579,7 @@ class GeometryScene {
         GeometrySceneKind.rightTrianglePythagoras ||
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.rightTriangleInverseTrig ||
         GeometrySceneKind.sasArea =>
           null,
       };
@@ -1386,6 +1601,7 @@ class GeometryScene {
         GeometrySceneKind.rightTrianglePythagoras ||
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.rightTriangleInverseTrig ||
         GeometrySceneKind.sasArea =>
           null,
       };
@@ -1409,6 +1625,7 @@ class GeometryScene {
         GeometrySceneKind.rightTrianglePythagoras ||
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
+        GeometrySceneKind.rightTriangleInverseTrig ||
         GeometrySceneKind.sasArea =>
           '',
       };
@@ -1517,10 +1734,12 @@ class GeometryScene {
       case GeometrySceneKind.rightTrianglePythagoras:
       case GeometrySceneKind.rightTriangleTrig:
       case GeometrySceneKind.sineRuleAngle:
+      case GeometrySceneKind.rightTriangleInverseTrig:
       case GeometrySceneKind.sasArea:
         // These are side/mixed-given kinds built via their OWN builders
         // (tryBuildPythagoras / tryBuildRightTriangleTrig / tryBuildSineRuleAngle
-        // / tryBuildSasArea), never through the angle path — unreachable here.
+        // / tryBuildRightTriangleInverseTrig / tryBuildSasArea), never through the
+        // angle path — unreachable here.
         return null;
     }
   }

@@ -1169,6 +1169,10 @@ class AppLocalizationsMs extends AppLocalizations {
       'Ini soalan berbentuk bukti — tiada jawapan tunggal yang boleh saya kira dan semak secara songsang, jadi saya tidak akan berpura-pura ada. Tetapi inilah tujuan tutor: kita boleh membina hujah bersama, satu langkah pada satu masa.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Soalan ini memerlukan kaedah yang di luar kemampuan penyelesai langkah demi langkah saya. Saya hanya menunjukkan jawapan yang boleh saya buktikan dengan mengira secara songsang, dan di sini saya tidak dapat melakukannya, jadi saya tidak akan berpura-pura. Tetapi inilah tujuan tutor: kita boleh menyelesaikannya bersama-sama, selangkah demi selangkah.';
+
+  @override
   String get resultPlaySolution => 'Main Penyelesaian';
 
   @override

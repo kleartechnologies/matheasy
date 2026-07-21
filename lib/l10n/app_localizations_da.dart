@@ -1159,6 +1159,10 @@ class AppLocalizationsDa extends AppLocalizations {
       'Dette er en bevisopgave — der er ikke ét enkelt svar, jeg kan beregne og tjekke ved at regne baglæns, så jeg lader ikke som om, der er. Men det er præcis, hvad tutoren er til: vi kan bygge argumentet sammen, ét trin ad gangen.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Denne opgave kræver en metode, der ligger ud over min trin-for-trin-løser. Jeg viser kun svar, jeg kan bevise ved at regne baglæns, og det kan jeg ikke her, så det vil jeg ikke lade som om. Men det er lige præcis det, tutoren er til: vi kan gennemgå den sammen, ét trin ad gangen.';
+
+  @override
   String get resultPlaySolution => 'Afspil løsning';
 
   @override

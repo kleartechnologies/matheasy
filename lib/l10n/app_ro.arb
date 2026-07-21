@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Acest sistem de ecuații poate avea mai multe soluții — arăt un răspuns doar atunci când pot dovedi că este complet, iar aici nu pot face asta, așa că nu mă voi preface. Dar exact pentru asta există tutorele: putem să o rezolvăm împreună și să verificăm fiecare pas.",
   "resultTutorReasonMultiPart": "Această problemă cere mai mult de un lucru, așa că nu există un singur răspuns pe care să-l pot verifica lucrând invers — și nu mă voi preface că există. Tutorele este instrumentul potrivit: putem rezolva câte o parte pe rând.",
   "resultTutorReasonProof": "Aceasta este o problemă de tip demonstrație — nu există un singur răspuns pe care să-l pot calcula și verifica lucrând invers, așa că nu mă voi preface că există. Dar exact pentru asta există tutorele: putem construi argumentul împreună, pas cu pas.",
+  "resultTutorReasonBeyondSolver": "Aceasta are nevoie de o metodă care depășește rezolvitorul meu pas cu pas. Arăt doar răspunsuri pe care le pot dovedi verificându-le invers, iar aici nu pot face asta, așa că nu mă voi preface. Dar exact pentru asta există tutorele: o putem rezolva împreună, pas cu pas.",
   "resultPlaySolution": "Redă soluția",
   "resultSolved": "REZOLVAT",
   "resultCloseWalkthrough": "Închide parcursul",

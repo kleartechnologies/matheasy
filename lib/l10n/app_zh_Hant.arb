@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "這個聯立方程組可能有多組解——只有在我能證明答案完整時才會顯示，而這裡我做不到，所以不會假裝可以。但這正是家教的用途：我們可以一起解，並檢查每一步。",
   "resultTutorReasonMultiPart": "這題要求的不只一件事，所以沒有可以代回驗算的單一答案——我也不會假裝有。家教才是合適的工具：我們可以一部分一部分慢慢來。",
   "resultTutorReasonProof": "這是證明題——沒有可以計算並代回驗算的單一答案，所以我不會假裝有。但這正是家教的用途：我們可以一步一步一起建立論證。",
+  "resultTutorReasonBeyondSolver": "這道題需要用到我的分步求解器之外的方法。我只會給出能透過反向驗算證明的答案，而這道題我做不到，所以不會假裝可以。但這正是輔導老師存在的意義：我們可以一起，一步一步把它解出來。",
   "resultPlaySolution": "播放解題",
   "resultSolved": "已解出",
   "resultCloseWalkthrough": "關閉解題過程",

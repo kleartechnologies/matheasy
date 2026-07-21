@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Hệ phương trình này có thể có nhiều nghiệm — tôi chỉ hiển thị đáp án khi có thể chứng minh nó đầy đủ, và tôi không thể làm điều đó ở đây, nên tôi sẽ không giả vờ là có thể. Nhưng đây chính là lý do có gia sư: chúng ta có thể cùng giải và kiểm tra từng bước.",
   "resultTutorReasonMultiPart": "Bài toán này yêu cầu nhiều hơn một điều, nên không có một đáp án duy nhất mà tôi có thể kiểm tra bằng cách tính ngược lại — và tôi sẽ không giả vờ là có. Gia sư chính là công cụ phù hợp: chúng ta có thể giải quyết từng phần một.",
   "resultTutorReasonProof": "Đây là bài toán dạng chứng minh — không có một đáp án duy nhất mà tôi có thể tính và kiểm tra bằng cách tính ngược lại, nên tôi sẽ không giả vờ là có. Nhưng đây chính là lý do có gia sư: chúng ta có thể cùng xây dựng lập luận, từng bước một.",
+  "resultTutorReasonBeyondSolver": "Bài này cần một phương pháp vượt quá khả năng của trình giải từng bước của mình. Mình chỉ hiển thị những đáp án có thể chứng minh bằng cách kiểm tra ngược lại, mà ở đây thì mình không làm được, nên mình sẽ không giả vờ là làm được. Nhưng đây chính là lúc cần đến gia sư: chúng ta có thể cùng nhau giải, từng bước một.",
   "resultPlaySolution": "Phát Lời Giải",
   "resultSolved": "ĐÃ GIẢI",
   "resultCloseWalkthrough": "Đóng hướng dẫn",

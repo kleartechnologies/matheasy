@@ -1122,6 +1122,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '이건 증명 문제예요 — 계산해서 거꾸로 확인할 수 있는 하나의 답이 없어서 아는 척하지 않을게요. 하지만 바로 이럴 때 튜터가 필요해요. 함께 한 단계씩 논증을 쌓아갈 수 있어요.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      '이 문제는 제 단계별 풀이 엔진으로는 다룰 수 없는 방법이 필요해요. 저는 거꾸로 계산해서 증명할 수 있는 답만 보여드리는데, 여기서는 그렇게 할 수 없어서 아는 척하지 않을게요. 하지만 바로 이런 때를 위해 튜터가 있어요. 함께 한 단계씩 풀어 볼 수 있어요.';
+
+  @override
   String get resultPlaySolution => '풀이 재생';
 
   @override

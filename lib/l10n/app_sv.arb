@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Det här ekvationssystemet kan ha flera lösningar — jag visar bara ett svar när jag kan bevisa att det är fullständigt, och det kan jag inte göra här, så jag låtsas inte att jag kan. Men det är precis vad tutorn är till för: vi kan lösa det tillsammans och kontrollera varje steg.",
   "resultTutorReasonMultiPart": "Det här problemet frågar efter mer än en sak, så det finns inget enda svar jag kan kontrollera genom att räkna baklänges — och jag låtsas inte att det finns. Tutorn är rätt verktyg: vi kan ta det en del i taget.",
   "resultTutorReasonProof": "Det här är ett bevisproblem — det finns inget enda svar jag kan räkna ut och kontrollera baklänges, så jag låtsas inte att det finns. Men det är precis vad tutorn är till för: vi kan bygga upp resonemanget tillsammans, ett steg i taget.",
+  "resultTutorReasonBeyondSolver": "Den här kräver en metod som ligger bortom min stegvisa lösare. Jag visar bara svar som jag kan bevisa genom att räkna baklänges, och det går inte här, så jag tänker inte låtsas. Men det är precis det här handledaren är till för: vi kan gå igenom den tillsammans, ett steg i taget.",
   "resultPlaySolution": "Spela upp lösning",
   "resultSolved": "LÖST",
   "resultCloseWalkthrough": "Stäng genomgång",

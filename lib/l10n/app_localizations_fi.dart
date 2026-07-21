@@ -1170,6 +1170,10 @@ class AppLocalizationsFi extends AppLocalizations {
       'Tämä on todistustehtävä — yhtä ainoaa vastausta, jonka voisin laskea ja tarkistaa taaksepäin, ei ole, joten en teeskentele, että olisi. Mutta juuri tähän tuutori on tarkoitettu: voimme rakentaa perustelun yhdessä, vaihe kerrallaan.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Tämä vaatii menetelmän, joka menee vaihe vaiheelta -ratkaisijani ulottumattomiin. Näytän vain vastauksia, jotka voin todistaa laskemalla ne takaperin, enkä pysty siihen tässä, joten en teeskentele muuta. Mutta juuri tätä varten tutor on olemassa: voimme käydä sen läpi yhdessä, askel kerrallaan.';
+
+  @override
   String get resultPlaySolution => 'Toista ratkaisu';
 
   @override

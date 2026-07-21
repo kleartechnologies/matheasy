@@ -58,12 +58,16 @@ class SolveResponseMapper {
     final methods = _list(json['methods'], _method);
     final examMethod = _pickExamMethod(json['methods']);
     // The server sends the honest problemType alongside routeToTutor, so the
-    // invite can say what the problem actually is — a system of equations must
-    // never be presented as "a proof".
+    // invite can say what the problem actually is. Only a genuine proof/concept
+    // is called "a proof" and only a genuinely multi-part problem "more than one
+    // thing"; everything else (a derived quantity, a constrained solution, an
+    // uncomputable function value) gets the neutral, always-true reason — never
+    // a false claim, which is what reads as a broken app.
     final tutorReason = switch (_str(json['problemType'])) {
       'system_of_equations' => TutorRouteReason.system,
       'multi_part' => TutorRouteReason.multiPart,
-      _ => TutorRouteReason.proof,
+      'conceptual' => TutorRouteReason.proof,
+      _ => TutorRouteReason.beyondSolver,
     };
 
     return ResultData(
@@ -90,6 +94,10 @@ class SolveResponseMapper {
                   TutorRouteReason.proof =>
                     "This is a proof-style problem — there's no single answer "
                         'to check, so let\'s reason through it together.',
+                  TutorRouteReason.beyondSolver =>
+                    'I only show answers I can prove by working them backwards, '
+                        'and this one needs a method my step-by-step solver '
+                        "doesn't cover yet — so let's work through it together.",
                 }
               : "Matheasy couldn't verify this answer — try re-scanning or "
                   'typing it in.',
@@ -104,6 +112,9 @@ class SolveResponseMapper {
                     "Let's take this one part at a time.",
                   TutorRouteReason.proof =>
                     "I don't compute proofs — but I can walk you through one.",
+                  TutorRouteReason.beyondSolver =>
+                    "This one's beyond my step-by-step solver — let's reason it "
+                        'through together.',
                 }
               : "I couldn't fully check this one, so I'd rather not guess.",
       steps: examMethod == null ? const [] : _list(examMethod['steps'], _step),

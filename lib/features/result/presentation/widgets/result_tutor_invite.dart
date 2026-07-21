@@ -79,6 +79,8 @@ class ResultTutorInvite extends StatelessWidget {
                     context.l10n.resultTutorReasonMultiPart,
                   TutorRouteReason.proof =>
                     context.l10n.resultTutorReasonProof,
+                  TutorRouteReason.beyondSolver =>
+                    context.l10n.resultTutorReasonBeyondSolver,
                 },
                 style: AppTypography.bodyMedium
                     .copyWith(color: colors.onPrimaryContainer),

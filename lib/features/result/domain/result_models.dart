@@ -318,8 +318,15 @@ enum TutorRouteReason {
   /// under/over-determined).
   system,
 
-  /// A multi-part / derived-quantity question — no single answer to check.
+  /// A multi-part question — several genuine asks/parts, no single answer.
   multiPart,
+
+  /// A SINGLE-ask problem that is nonetheless beyond the verified step-by-step
+  /// solver: a derived quantity (x², xy, sin 2x), a branch-constrained solution,
+  /// or an uncomputable function value. The neutral, always-true default — it
+  /// never claims a false property (never "a proof", never "more than one
+  /// thing") about a problem the solver simply can't prove an answer for.
+  beyondSolver,
 }
 
 /// The full solved-problem payload rendered by the Scan Result screen.
@@ -478,7 +485,8 @@ class ResultData {
         routeToTutor: j['routeToTutor'] as bool? ?? false,
         tutorRouteReason: TutorRouteReason.values.firstWhere(
           (r) => r.name == j['tutorRouteReason'],
-          orElse: () => TutorRouteReason.proof,
+          // Unknown/absent → the neutral reason, never a false "proof".
+          orElse: () => TutorRouteReason.beyondSolver,
         ),
         graph: j['graph'] == null
             ? null

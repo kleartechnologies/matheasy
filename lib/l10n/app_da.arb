@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Dette ligningssystem kan have flere løsninger — jeg viser kun et svar, når jeg kan bevise, at det er fuldstændigt, og det kan jeg ikke her, så jeg lader ikke som om. Men det er præcis, hvad tutoren er til: vi kan løse det sammen og tjekke hvert trin.",
   "resultTutorReasonMultiPart": "Dette problem beder om mere end én ting, så der er ikke ét enkelt svar, jeg kan tjekke ved at regne baglæns — og jeg lader ikke som om, der er. Tutoren er det rigtige værktøj: vi kan tage det én del ad gangen.",
   "resultTutorReasonProof": "Dette er en bevisopgave — der er ikke ét enkelt svar, jeg kan beregne og tjekke ved at regne baglæns, så jeg lader ikke som om, der er. Men det er præcis, hvad tutoren er til: vi kan bygge argumentet sammen, ét trin ad gangen.",
+  "resultTutorReasonBeyondSolver": "Denne opgave kræver en metode, der ligger ud over min trin-for-trin-løser. Jeg viser kun svar, jeg kan bevise ved at regne baglæns, og det kan jeg ikke her, så det vil jeg ikke lade som om. Men det er lige præcis det, tutoren er til: vi kan gennemgå den sammen, ét trin ad gangen.",
   "resultPlaySolution": "Afspil løsning",
   "resultSolved": "LØST",
   "resultCloseWalkthrough": "Luk gennemgang",

@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "这个方程组可能有多个解——只有当我能证明答案完整时才会显示，而这里我做不到，所以我不会假装能行。但这正是导师的用武之地：我们可以一起解，并核对每一步。",
   "resultTutorReasonMultiPart": "这道题要求的不止一样东西，所以没有能用逆推验证的单一答案——我不会假装有。导师才是合适的工具：我们可以一部分一部分地来。",
   "resultTutorReasonProof": "这是一道证明题——没有能计算并逆推验证的单一答案，所以我不会假装有。但这正是导师的用武之地：我们可以一步步一起构建论证。",
+  "resultTutorReasonBeyondSolver": "这道题需要用到我的分步求解器之外的方法。我只展示能通过反向验算证明的答案，而这道题我做不到，所以我不会假装能做到。但这正是辅导老师存在的意义：我们可以一起，一步一步把它解出来。",
   "resultPlaySolution": "播放解答",
   "resultSolved": "已解答",
   "resultCloseWalkthrough": "关闭讲解",

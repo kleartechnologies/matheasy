@@ -1158,6 +1158,10 @@ class AppLocalizationsCs extends AppLocalizations {
       'Tohle je důkazová úloha — neexistuje jediná odpověď, kterou bych mohl/a spočítat a ověřit zpětným dosazením, takže to nebudu předstírat. Ale přesně na tohle je tutor: argument můžeme vystavět společně, krok za krokem.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Tahle úloha vyžaduje postup, který je nad síly mého krokového řešitele. Ukazuji jen odpovědi, které dokážu ověřit zpětným dosazením, a to tady nezvládnu, takže to nebudu předstírat. Přesně od toho je tu ale lektor: můžeme si to projít společně, krok za krokem.';
+
+  @override
   String get resultPlaySolution => 'Přehrát řešení';
 
   @override

@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Ennek az egyenletrendszernek több megoldása is lehet — csak akkor mutatok választ, ha bizonyítani tudom, hogy teljes, ezt pedig itt nem tudom megtenni, ezért nem is teszek úgy. De pont erre való a tutor: együtt megoldhatjuk, és minden lépést ellenőrizhetünk.",
   "resultTutorReasonMultiPart": "Ez a feladat több dologra is rákérdez, így nincs egyetlen válasz, amit visszahelyettesítéssel ellenőrizhetnék — és nem is teszek úgy, mintha lenne. A tutor a megfelelő eszköz erre: egyszerre egy részt oldhatunk meg.",
   "resultTutorReasonProof": "Ez egy bizonyítás jellegű feladat — nincs egyetlen válasz, amit ki tudnék számítani és visszahelyettesítéssel ellenőrizni, ezért nem is teszek úgy, mintha lenne. De pont erre való a tutor: együtt felépíthetjük az érvelést, lépésről lépésre.",
+  "resultTutorReasonBeyondSolver": "Ehhez olyan módszer kell, ami túlmutat a lépésről lépésre haladó megoldómon. Csak olyan válaszokat mutatok, amelyeket visszafelé számolva be tudok bizonyítani, és ezt itt nem tudom megtenni, úgyhogy nem is teszek úgy, mintha. De pontosan erre való a tanár: együtt is végigmehetünk rajta, lépésről lépésre.",
   "resultPlaySolution": "Megoldás lejátszása",
   "resultSolved": "MEGOLDVA",
   "resultCloseWalkthrough": "Bemutató bezárása",

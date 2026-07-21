@@ -1158,6 +1158,10 @@ class AppLocalizationsHr extends AppLocalizations {
       'Ovo je zadatak u obliku dokaza — ne postoji jedan odgovor koji mogu izračunati i provjeriti uvrštavanjem unatrag, pa se neću pretvarati da postoji. Ali upravo je za to tutor tu: možemo zajedno izgraditi argument, korak po korak.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Ovaj zadatak traži metodu koja nadilazi moj rješavač korak po korak. Prikazujem samo odgovore koje mogu dokazati provjerom unatrag, a to ovdje ne mogu, pa se neću pretvarati da mogu. Ali upravo za to služi mentor: možemo ga riješiti zajedno, korak po korak.';
+
+  @override
   String get resultPlaySolution => 'Pokreni rješenje';
 
   @override

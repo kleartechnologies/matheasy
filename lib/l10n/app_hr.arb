@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Ovaj sustav jednadžbi može imati više rješenja — odgovor prikazujem samo kada mogu dokazati da je potpun, a to ovdje ne mogu, pa se neću pretvarati da mogu. Ali upravo je za to tutor tu: možemo ga riješiti zajedno i provjeriti svaki korak.",
   "resultTutorReasonMultiPart": "Ovaj zadatak traži više od jedne stvari, pa ne postoji jedan odgovor koji mogu provjeriti uvrštavanjem unatrag — i neću se pretvarati da postoji. Tutor je pravi alat za ovo: možemo ga rješavati dio po dio.",
   "resultTutorReasonProof": "Ovo je zadatak u obliku dokaza — ne postoji jedan odgovor koji mogu izračunati i provjeriti uvrštavanjem unatrag, pa se neću pretvarati da postoji. Ali upravo je za to tutor tu: možemo zajedno izgraditi argument, korak po korak.",
+  "resultTutorReasonBeyondSolver": "Ovaj zadatak traži metodu koja nadilazi moj rješavač korak po korak. Prikazujem samo odgovore koje mogu dokazati provjerom unatrag, a to ovdje ne mogu, pa se neću pretvarati da mogu. Ali upravo za to služi mentor: možemo ga riješiti zajedno, korak po korak.",
   "resultPlaySolution": "Pokreni rješenje",
   "resultSolved": "RIJEŠENO",
   "resultCloseWalkthrough": "Zatvori prikaz",

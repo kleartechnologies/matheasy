@@ -1163,6 +1163,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Ini soal bertipe pembuktian — tidak ada jawaban tunggal yang bisa kuhitung dan kuperiksa dengan mengerjakannya secara terbalik, jadi aku tidak akan berpura-pura ada. Tapi inilah gunanya tutor: kita bisa menyusun argumennya bersama, satu langkah demi satu langkah.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Soal ini butuh metode yang di luar jangkauan pemecah langkah-demi-langkah milikku. Aku hanya menampilkan jawaban yang bisa kubuktikan dengan menghitungnya mundur, dan di sini aku tidak bisa melakukannya, jadi aku tidak akan berpura-pura. Tapi justru untuk inilah tutor ada: kita bisa mengerjakannya bersama, selangkah demi selangkah.';
+
+  @override
   String get resultPlaySolution => 'Putar Solusi';
 
   @override

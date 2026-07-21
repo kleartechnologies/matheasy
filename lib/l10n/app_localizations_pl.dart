@@ -1171,6 +1171,10 @@ class AppLocalizationsPl extends AppLocalizations {
       'To zadanie typu dowód — nie ma jednej odpowiedzi, którą mógłbym obliczyć i sprawdzić, podstawiając ją z powrotem, więc nie będę udawać, że jest inaczej. Ale właśnie do tego służy korepetytor: możemy razem zbudować dowód, krok po kroku.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'To zadanie wymaga metody wykraczającej poza mój solver krok po kroku. Pokazuję tylko odpowiedzi, które potrafię udowodnić, sprawdzając je wstecz, a tutaj nie umiem tego zrobić, więc nie będę udawać. Ale właśnie po to jest korepetytor: możemy przejść przez to razem, krok po kroku.';
+
+  @override
   String get resultPlaySolution => 'Odtwórz rozwiązanie';
 
   @override

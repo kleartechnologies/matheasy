@@ -1158,6 +1158,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Dit is een bewijsvraagstuk — er is geen enkel antwoord dat ik kan berekenen en achterstevoren controleren, dus ik doe niet alsof dat wel zo is. Maar hier is de tutor precies voor bedoeld: we kunnen samen de redenering opbouwen, stap voor stap.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Deze vraagt om een methode die verder gaat dan mijn stapsgewijze oplosser. Ik laat alleen antwoorden zien die ik kan bewijzen door ze terug te rekenen, en dat lukt me hier niet, dus ik doe niet alsof. Maar hier is de tutor nou juist voor: we kunnen het samen doornemen, stap voor stap.';
+
+  @override
   String get resultPlaySolution => 'Speel oplossing af';
 
   @override

@@ -79,6 +79,116 @@ describe("solve — multi-part / derived-question → tutor (not a wrong root)",
   }
 });
 
+describe("honest tutor-route reason is ACCURATE (never a false 'multi-part')", () => {
+  // A SINGLE-ask function value is beyond the verified solver, but it is NOT
+  // "more than one thing" — the client message must not claim it is.
+  it("single-ask f(-1) from a functional equation → beyond_solver (still tutor)", async () => {
+    const cls = classify(
+      "\\text{f(x) is differentiable} \\\\ x f'(x) + f(x) = \\frac{d}{dx}(x^4 - x) \\\\ f'(2) = 10 \\\\ \\text{what is } f(-1)?"
+    );
+    expect(cls.problemType).toBe("beyond_solver");
+    const p = await solve(cls, NEVER);
+    expect(p.routeToTutor).toBe(true);
+    expect(p.problemType).toBe("beyond_solver");
+  });
+
+  it("a plain 'given f(x)=…, find f(3)' single value is NOT tagged multi_part", () => {
+    const cls = classify("\\text{Given } f(x) = x^2 + 1, \\text{ find } f(3)");
+    expect(cls.problemType).not.toBe("multi_part");
+  });
+
+  it("a genuine multi-part problem still reads as multi_part", () => {
+    expect(
+      classify(
+        "\\text{Consider } y=x^2-7x+12. \\\\ \\text{(i) Factorise.} \\\\ \\text{(ii) Hence find the roots.}"
+      ).problemType
+    ).toBe("multi_part");
+  });
+
+  it("a derived quantity (find x²) reads as beyond_solver, still routes", async () => {
+    const cls = classify("\\begin{aligned} 2x + 5 = 15 \\\\ \\text{find } x^2 \\end{aligned}");
+    expect(cls.problemType).toBe("beyond_solver");
+    expect((await solve(cls, NEVER)).routeToTutor).toBe(true);
+  });
+});
+
+describe("no over-routing: solvable phrasings reach their engines", () => {
+  it("'expand and simplify (2x+1)(x-3)' is ONE ask, not multi-part", () => {
+    const cls = classify("\\text{Expand and simplify } (2x+1)(x-3)");
+    expect(cls.problemType).toBe("expression");
+  });
+
+  it("'simplify and factorise x^2-9' is ONE ask, not multi-part", () => {
+    const cls = classify("\\text{Simplify and factorise } x^2 - 9");
+    expect(cls.problemType).not.toBe("multi_part");
+    expect(cls.problemType).not.toBe("beyond_solver");
+  });
+
+  it("'the acute angle between vectors a and b' is NOT force-routed", () => {
+    // The tightened constraint no longer fires on a vector-angle ask (no numeric
+    // interval, no trig equation) — it must not become a bogus tutor route.
+    const cls = classify(
+      "\\text{Find the acute angle between the vectors } a \\text{ and } b."
+    );
+    expect(cls.problemType).not.toBe("multi_part");
+    expect(cls.problemType).not.toBe("beyond_solver");
+  });
+
+  it("'find the area A' is not mistaken for a variable product", () => {
+    const cls = classify(
+      "\\text{A rectangle is 8 cm by 5 cm. Find the area A.}"
+    );
+    expect(cls.problemType).not.toBe("multi_part");
+    expect(cls.problemType).not.toBe("beyond_solver");
+  });
+
+  it("a genuine branch-constrained trig solve still routes (beyond_solver)", async () => {
+    const cls = classify("The obtuse angle x makes \\cos x = -\\frac{1}{2} true. Determine x.");
+    expect(cls.problemType).toBe("beyond_solver");
+    expect((await solve(cls, NEVER)).routeToTutor).toBe(true);
+  });
+
+  it("a reflex-angle 'between π and 2π' constraint still routes", async () => {
+    const cls = classify(
+      "A rotating arm turns through a reflex angle x between \\pi and 2\\pi radians, where its tangent equals one. Find the angle x."
+    );
+    expect(cls.problemType).toBe("beyond_solver");
+    expect((await solve(cls, NEVER)).routeToTutor).toBe(true);
+  });
+
+  // Adversarial-review hardening (Fix 6 hole): a space-separated variable product
+  // "find x y" (= xy) must still route — NOT fall through and ship a verified
+  // wrong quantity / an answer to a corrupted parse. A WRONG candidate is offered
+  // to prove the route fires before any solve could accept it.
+  it("'…find x y' (space-separated product) routes, never ships a verified answer", async () => {
+    const cls = classify("\\text{Solve } x+y=5, x-y=1 \\text{ and find } x y");
+    expect(cls.problemType).toBe("beyond_solver");
+    const p = await solve(
+      cls,
+      completerWith({ answerLatex: "x=4.19", answerPlain: "x=4.19", solutions: [{ variable: "x", value: 4.19 }] })
+    );
+    expect(p.verified).toBe(false);
+    expect(p.routeToTutor).toBe(true);
+  });
+
+  // Adversarial-review hardening (Fix 5 hole): the interval qualifier must be seen
+  // through the REAL OCR shape, where \text{} wraps the prose and the bound is in
+  // math mode ("\text{ between } \pi") — otherwise the branch routing is lost.
+  it("a \\text{}-wrapped 'between π and 2π' constraint still routes", async () => {
+    const cls = classify(
+      "\\text{Solve } \\cos x = -\\frac{1}{2} \\text{ for } x \\text{ between } \\pi \\text{ and } 2\\pi"
+    );
+    expect(cls.problemType).toBe("beyond_solver");
+    expect((await solve(cls, NEVER)).routeToTutor).toBe(true);
+  });
+
+  it("a WORDED branch qualifier ('obtuse angle whose tangent…') routes too", () => {
+    expect(
+      classify("The obtuse angle x whose tangent equals 1. Find x.").problemType
+    ).toBe("beyond_solver");
+  });
+});
+
 describe("integral with a leading coefficient/sign is not dropped", () => {
   it("-∫₀¹ x² dx verifies -1/3 and REJECTS +1/3", async () => {
     const neg = classify("-\\int_0^1 x^2 \\, dx");

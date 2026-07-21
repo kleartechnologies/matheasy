@@ -1160,6 +1160,10 @@ class AppLocalizationsNb extends AppLocalizations {
       'Dette er en bevisoppgave — det finnes ikke ett enkelt svar jeg kan beregne og sjekke ved å regne baklengs, så jeg later ikke som om det gjør det. Men dette er nettopp hva tutoren er til for: vi kan bygge argumentet sammen, ett steg om gangen.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Denne krever en metode som ligger utenfor rekkevidden til den trinnvise løseren min. Jeg viser bare svar jeg kan bevise ved å regne baklengs, og det får jeg ikke til her, så jeg later ikke som. Men det er nettopp dette veilederen er til for: vi kan gå gjennom den sammen, ett steg om gangen.';
+
+  @override
   String get resultPlaySolution => 'Spill av løsning';
 
   @override

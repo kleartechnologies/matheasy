@@ -86,16 +86,21 @@ export function classify(rawLatex: string): Classification {
 
   // The tutor-routing checks need the FULL text (they look for "find x²", sub-
   // parts, "hence"); compute them BEFORE stripping the leading directive below.
+  // `tutorRoute` is the HONEST reason — "multi_part" (several asks) vs
+  // "beyond_solver" (a single ask outside the verified solver: a derived
+  // quantity, a branch-constrained solution, a function value). Both route to
+  // the tutor, but the client must never claim "more than one thing" about a
+  // one-line, single-ask problem.
   const conceptual = looksLikeConceptual(rawLatex);
-  const multiPart = !conceptual && looksLikeMultiPart(rawLatex);
+  const tutorRoute = conceptual ? null : classifyTutorRoute(rawLatex);
 
   // With the OCR now capturing prose, a single problem often arrives with a
   // leading imperative — "Solve 2x+5=15", "Find x: …", "Calculate the value of
   // …". Those directive words would pollute classification (their letters read
   // as variables → a bogus system → decline). Strip a leading directive from the
-  // SOLVING representation (never a conceptual / multi-part one) so the clean
+  // SOLVING representation (never a conceptual / tutor-routed one) so the clean
   // math underneath classifies normally; the display `latex` above is untouched.
-  if (!conceptual && !multiPart) {
+  if (!conceptual && !tutorRoute) {
     rawLatex = stripLeadingDirective(rawLatex);
   }
 
@@ -137,16 +142,18 @@ export function classify(rawLatex: string): Classification {
     return base("conceptual", "conceptual", "x", false, "none");
   }
 
-  // --- Multi-part / derived-question problems → the AI tutor --------------
+  // --- Multi-part / beyond-solver problems → the AI tutor -----------------
   // A single problem gets ONE verified answer; a MULTI-PART question does not.
   // With the OCR now capturing the whole problem, inputs like "given 2x+5=15,
   // find x²", "(i) … (ii) …", or "solve the system, find xy" reach the solver.
   // The single-answer engines would solve the equation and confidently show its
   // ROOT — the WRONG quantity for a question that asks for x² / xy / sin 2x /
   // part (b). There's no single value to substitution-verify, so (like a proof)
-  // route it to the tutor rather than ship a confident wrong answer.
-  if (multiPart) {
-    return base("multi_part", "conceptual", "x", false, "none");
+  // route it to the tutor rather than ship a confident wrong answer. The honest
+  // problemType ("multi_part" vs "beyond_solver") rides along so the client's
+  // message states what is TRUE — never "more than one thing" about one ask.
+  if (tutorRoute) {
+    return base(tutorRoute, "conceptual", "x", false, "none");
   }
 
   // --- Taylor / Maclaurin series (deterministic via mathjs) ---------------
@@ -554,6 +561,9 @@ const TEACHING_META: Record<string, [TeachingCategory, TeachingDifficulty]> = {
   // conceptual (proofs / multi-part → tutor)
   conceptual: ["conceptual", "university"],
   multi_part: ["conceptual", "secondary"],
+  // single-ask problems outside the verified solver (derived quantity, branch-
+  // constrained solution, uncomputable function value) — routed to the tutor.
+  beyond_solver: ["conceptual", "secondary"],
 };
 
 interface ParsedIntegral {
@@ -782,56 +792,89 @@ function looksLikeConceptual(rawLatex: string): boolean {
 const ASK_VERBS =
   /\b(find|evaluate|determine|calculate|compute|work\s*out|factori[sz]e|expand|simplify|sketch|state|prove|verify|show\s+that|write\s+down|hence)\b/gi;
 
+/** An honest tutor-route reason. `multi_part` = several genuine asks/parts;
+ * `beyond_solver` = a SINGLE ask that is nonetheless outside the verified solver
+ * (a derived quantity, a branch-constrained solution, an uncomputable function
+ * value). Both route to the tutor; the distinction only picks the honest message
+ * so the client never claims "more than one thing" about a one-line problem. */
+export type TutorRoute = "multi_part" | "beyond_solver";
+
 /**
- * True when the input is a MULTI-PART or DERIVED-QUANTITY question rather than a
- * single solvable problem — see the call site. The single-answer engines would
- * confidently return one equation's root, which is the wrong quantity when the
- * question asks for a derived expression (x², xy, sin 2x) or has several parts.
- * Conservative: it fires on explicit multi-part structure, never on a bare
- * "solve …" / "find x" / "find the roots" / an integral / a derivative.
+ * Classify a tutor-route, or null for a single solvable problem — see the call
+ * site. The single-answer engines would confidently return one equation's root,
+ * which is the wrong quantity when the question asks for a derived expression
+ * (x², xy, sin 2x), constrains the branch, or has several parts. Conservative:
+ * it fires on explicit multi-part structure or a genuinely derived/constrained
+ * ask, never on a bare "solve …" / "find x" / "find the roots" / an integral /
+ * a derivative / a single function value like "find f(2)".
  */
-function looksLikeMultiPart(rawLatex: string): boolean {
+function classifyTutorRoute(rawLatex: string): TutorRoute | null {
   // 1) Sub-part labels: (i) (ii) (iii) (iv) (a) (b) (c) (d). The "(" must not be
   //    glued to a symbol, so a function value like f(a) or a point (a,b) is safe.
-  if (/(?:^|[\s\\}])\(\s*(?:i{1,3}|iv|v|[a-d])\s*\)/i.test(rawLatex)) return true;
+  if (/(?:^|[\s\\}])\(\s*(?:i{1,3}|iv|v|[a-d])\s*\)/i.test(rawLatex)) return "multi_part";
   // 2) "hence" always chains a second part off the first.
-  if (/\bhence\b/i.test(rawLatex)) return true;
+  if (/\bhence\b/i.test(rawLatex)) return "multi_part";
   // 3) Two or more distinct asks ⇒ multi-part. Counts ASK_VERBS, their PAST-
   //    PARTICIPLE forms ("… should also be computed / is required"), and multi-
-  //    STEP instruction verbs ("multiply by 3 … add 4").
+  //    STEP instruction verbs ("multiply by 3 … add 4"). FIRST collapse a run of
+  //    TRANSFORM verbs joined over ONE target ("expand and simplify", "simplify
+  //    and factorise") into a single ask — it is one instruction, not two, and
+  //    must not be miscounted as multi-part (it solves deterministically).
+  const collapsed = rawLatex.replace(
+    /\b(?:expand|simplify|factori[sz]e)\b(?:\s*(?:,|and|then|&)\s*(?:expand|simplify|factori[sz]e)\b)+/gi,
+    "simplify"
+  );
   const asks =
-    (rawLatex.match(ASK_VERBS) ?? []).length +
-    (rawLatex.match(/\b(computed?|required|determined|calculated|evaluated|needed|wanted)\b/gi) ?? []).length +
-    (rawLatex.match(/\b(multiply|divide|add|subtract|double|triple|halve|increase|decrease)\b/gi) ?? []).length;
-  if (asks >= 2) return true;
+    (collapsed.match(ASK_VERBS) ?? []).length +
+    (collapsed.match(/\b(computed?|required|determined|calculated|evaluated|needed|wanted)\b/gi) ?? []).length +
+    (collapsed.match(/\b(multiply|divide|add|subtract|double|triple|halve|increase|decrease)\b/gi) ?? []).length;
+  if (asks >= 2) return "multi_part";
   // A single ask followed by a sequencer ("… then double that", "… also …") is a
   // second step, so it's multi-part too.
-  if (asks >= 1 && /\b(then|also|too|as\s+well|next|after\s+that)\b/i.test(rawLatex)) return true;
+  if (asks >= 1 && /\b(then|also|too|as\s+well|next|after\s+that)\b/i.test(collapsed)) return "multi_part";
   // 3b) A word problem that asks SEVERAL things — two "?" / question phrases
   //     ("what is its area? what is its perimeter?"), or "find X and the Y".
   const questionMarks = (rawLatex.match(/\?/g) ?? []).length;
   const questionPhrases = (
     rawLatex.match(/\b(what\s+(?:is|are)|how\s+(?:many|much|far|fast|long|old|big))\b/gi) ?? []
   ).length;
-  if (Math.max(questionMarks, questionPhrases) >= 2) return true;
+  if (Math.max(questionMarks, questionPhrases) >= 2) return "multi_part";
   if (
     /\b(?:find|calculate|determine|work\s*out|what\s+(?:is|are))\b[^.?]*\b(?:and\s+(?:the|also|her|his|its|their)|as\s+well\s+as|along\s+with|together\s+with)\b/i.test(
       rawLatex
     )
   ) {
-    return true;
+    return "multi_part";
   }
-  // A SOLUTION CONSTRAINT stated in prose that the arithmetic gate can't enforce
-  // — an angle qualifier, an interval, or a smallest/largest/quadrant selector.
-  // The gate would verify a root of the bare equation on the WRONG branch (e.g.
-  // "the obtuse angle x: cos x = −½" → 4π/3 instead of 2π/3). Route to the tutor.
-  if (
-    /\b(obtuse|acute|reflex|right)\s+angle|\bbetween\b[^.]*\band\b|\bin\s+the\s+(?:range|interval)\b|\b(?:smallest|largest|first|second|third|fourth)\b[^.]*\b(?:positive|negative|angle|value|quadrant|solution|root)\b|\bquadrant\b/i.test(
-      rawLatex
-    )
-  ) {
-    return true;
-  }
+  // A SOLUTION CONSTRAINT the arithmetic gate can't enforce — a NUMERIC angle/
+  // value interval, a smallest/largest/quadrant selector, or an obtuse/acute/
+  // reflex qualifier ON a trig equation. The gate would verify a root of the
+  // bare equation on the WRONG branch (e.g. "the obtuse angle x: cos x = −½" →
+  // 4π/3 instead of 2π/3). This is a SINGLE answer, but the branch selection is
+  // beyond the verified solver → route with the honest neutral reason. Requiring
+  // a NUMERIC "between … and …" (a digit/π right after "between") and a trig
+  // TERM for the angle qualifier keeps "the acute angle between vectors a and b"
+  // and "the distance between P and Q" OUT — those are solvable single asks.
+  // Unwrap `\text{…}` so the check sees the prose as one string — real OCR wraps
+  // directives/qualifiers in \text{} while the bound stays in math mode ("\text{
+  // between } \pi"), which would otherwise hide "between π" from these patterns.
+  const prose = rawLatex.replace(/\\text\s*\{([^{}]*)\}/g, " $1 ");
+  const numericInterval =
+    /\bbetween\s+(?:the\s+)?(?:-?\d|π|\\pi\b|pi\b)/i.test(prose) ||
+    /\bin\s+the\s+(?:range|interval)\b/i.test(prose) ||
+    /\b(?:smallest|largest|first|second|third|fourth)\b[^.]*\b(?:positive|negative|angle|value|quadrant|solution|root)\b/i.test(
+      prose
+    ) ||
+    /\bquadrant\b/i.test(prose);
+  const branchAngleOnTrig =
+    /\b(obtuse|acute|reflex)\s+angle\b/i.test(prose) &&
+    // symbolic (sin/cos/tan) OR spelled-out (sine/cosine/tangent) — a worded
+    // "the obtuse angle whose tangent is 1" must route too. Still gated by the
+    // angle qualifier, and routing is the SAFE direction (never a wrong answer).
+    /\b(sin|sine|cos|cosine|tan|tangent|cot|cotangent|sec|secant|csc|cosecant)\b/i.test(
+      prose
+    );
+  if (numericInterval || branchAngleOnTrig) return "beyond_solver";
   // 4) A separate "<expression> =" question line alongside another equation (a
   //    GIVEN): a "= ?" / "= □" placeholder, OR a trailing bare "=" left after a
   //    derived expression ("… \\ x·y =", "cos x = 3/5 \\ sin 2x = ?"). A plain
@@ -841,11 +884,13 @@ function looksLikeMultiPart(rawLatex: string): boolean {
     (/=\s*(?:\?|\\square|\\Box)/.test(rawLatex) || /\S\s*=\s*$/.test(rawLatex)) &&
     (rawLatex.match(/=/g) ?? []).length >= 2
   ) {
-    return true;
+    return "beyond_solver";
   }
   // 5) Two separated statements that mix a standalone EXPRESSION (no "=") with an
-  //    EQUATION — two different problems run together (e.g. "factor x²-5x+6" and
-  //    "solve x-2=0"), which flattening would merge into one wrong equation.
+  //    EQUATION — a bare derived expression on its own line beside a given (e.g.
+  //    "cos x = 3/5" and "sin 2x", or "factor x²-5x+6" and "solve x-2=0"), which
+  //    flattening would merge into one wrong equation. Beyond the single-answer
+  //    solver either way, so the neutral reason is the one that's always TRUE.
   const segments = rawLatex
     .split(/\\\\|[;\n\r]|\\begin\s*\{[^}]*\}|\\end\s*\{[^}]*\}/)
     .map((seg) => seg.replace(/\\text\s*\{[^{}]*\}/g, " ").trim())
@@ -870,13 +915,14 @@ function looksLikeMultiPart(rawLatex: string): boolean {
     const hasEquation = segments.some(
       (seg) => statement(seg) && /[a-zA-Z0-9]\s*=\s*\S/.test(seg)
     );
-    if (hasBareExpr && hasEquation) return true;
+    if (hasBareExpr && hasEquation) return "beyond_solver";
   }
   // 6) A "find/evaluate <derived expression>" alongside an equation/given: the
   //    ask is for something COMPUTED FROM the solution (x², xy, 1/x, sin 2x,
-  //    2x+1), not the plain solution itself. `find x` / `find the roots` / `find
-  //    the value of x` are the plain solution and DON'T count.
-  return asksForDerivedQuantity(rawLatex);
+  //    2x+1, a function value f(a)), not the plain solution itself. `find x` /
+  //    `find the roots` / `find the value of x` are the plain solution and DON'T
+  //    count. A single ask outside the solver → the neutral reason.
+  return asksForDerivedQuantity(rawLatex) ? "beyond_solver" : null;
 }
 
 /** Does the input pair an equation/given with a "find <derived expression>"? */
@@ -924,8 +970,13 @@ function asksForDerivedQuantity(rawLatex: string): boolean {
   }
   // Derived if the ask target applies an OPERATION to a variable: a power (x²,
   // x^2), a trig/log function, a product/ratio, an added term (2x+1), a function
-  // evaluated at a point (f(2)), or the words squared/cubed/product.
-  return /[a-zA-Z]\s*\^|[a-zA-Z][²³]|\bsquared\b|\bcubed\b|\bproduct\b|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b|\\frac|[a-zA-Z]\s*[/*]|[a-zA-Z]\s*\(\s*-?\d|\d\s*[a-zA-Z]|[a-zA-Z]\s+[a-zA-Z]/i.test(
+  // evaluated at a point (f(2)), the words squared/cubed/product, OR a variable
+  // product written as two SPACE-separated ISOLATED single letters ("x y", "P Q").
+  // The last alternative uses `\b<letter>\b` on BOTH tokens so "area A" / "total
+  // T" (a multi-letter word beside a letter) is NOT read as a product — the false
+  // positive we wanted killed — while a genuine "find x y" is still caught and
+  // routed, never solved as the wrong quantity or against a corrupted parse.
+  return /[a-zA-Z]\s*\^|[a-zA-Z][²³]|\bsquared\b|\bcubed\b|\bproduct\b|\b(sin|cos|tan|cot|sec|csc|log|ln|sqrt)\b|\\frac|[a-zA-Z]\s*[/*]|[a-zA-Z]\s*·\s*[a-zA-Z]|[a-zA-Z]\s*\(\s*-?\d|\d\s*[a-zA-Z]|\b[a-zA-Z]\b\s+\b[a-zA-Z]\b/i.test(
     target
   );
 }
@@ -950,9 +1001,12 @@ function stripLeadingDirective(rawLatex: string): string {
   ) {
     s = s.slice(block[0].length);
   }
-  // The bare directive ("Solve 2x+5=15") when it isn't wrapped in \text.
+  // The bare directive ("Solve 2x+5=15") when it isn't wrapped in \text. A run
+  // of TRANSFORM verbs joined over one target ("Expand and simplify …") is one
+  // directive — consume the whole run so "and simplify" prose doesn't survive to
+  // pollute the math (its letters would read as variables).
   const m =
-    /^\s*(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b(?:\s+(?:for|the|exact|values?|of|roots?|solutions?))*(?:\s+[a-z](?=\s*[:.}]))?\s*[:.]?\s*\}?\s*/i.exec(
+    /^\s*(?:solve|find|calculate|evaluate|determine|compute|work\s*out|simplify|factori[sz]e|expand)\b(?:\s*(?:,|and|then|&)\s*(?:simplify|factori[sz]e|expand)\b)*(?:\s+(?:for|the|exact|values?|of|roots?|solutions?))*(?:\s+[a-z](?=\s*[:.}]))?\s*[:.]?\s*\}?\s*/i.exec(
       s
     );
   if (m) s = s.slice(m[0].length);

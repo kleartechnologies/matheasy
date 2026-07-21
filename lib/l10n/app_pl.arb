@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Ten układ równań może mieć kilka rozwiązań — pokazuję odpowiedź tylko wtedy, gdy mogę udowodnić, że jest kompletna, a tutaj nie mogę tego zrobić, więc nie będę udawać, że mogę. Ale właśnie do tego służy korepetytor: możemy rozwiązać to razem i sprawdzić każdy krok.",
   "resultTutorReasonMultiPart": "To zadanie pyta o więcej niż jedną rzecz, więc nie ma jednej odpowiedzi, którą mógłbym sprawdzić, podstawiając ją z powrotem — i nie będę udawać, że jest inaczej. Korepetytor to właściwe narzędzie: możemy zająć się tym po kolei, część po części.",
   "resultTutorReasonProof": "To zadanie typu dowód — nie ma jednej odpowiedzi, którą mógłbym obliczyć i sprawdzić, podstawiając ją z powrotem, więc nie będę udawać, że jest inaczej. Ale właśnie do tego służy korepetytor: możemy razem zbudować dowód, krok po kroku.",
+  "resultTutorReasonBeyondSolver": "To zadanie wymaga metody wykraczającej poza mój solver krok po kroku. Pokazuję tylko odpowiedzi, które potrafię udowodnić, sprawdzając je wstecz, a tutaj nie umiem tego zrobić, więc nie będę udawać. Ale właśnie po to jest korepetytor: możemy przejść przez to razem, krok po kroku.",
   "resultPlaySolution": "Odtwórz rozwiązanie",
   "resultSolved": "ROZWIĄZANE",
   "resultCloseWalkthrough": "Zamknij przewodnik",

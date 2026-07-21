@@ -1170,6 +1170,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dies ist eine Beweisaufgabe — es gibt keine einzelne Antwort, die ich berechnen und durch Rückrechnen prüfen kann, also tue ich nicht so, als gäbe es eine. Aber genau dafür ist der Tutor da: Wir können die Argumentation gemeinsam aufbauen, Schritt für Schritt.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Diese Aufgabe braucht einen Weg, der über meinen Schritt-für-Schritt-Löser hinausgeht. Ich zeige nur Ergebnisse, die ich durch Rückwärtsrechnen belegen kann, und das gelingt mir hier nicht, also tue ich nicht so, als ob. Aber genau dafür ist der Tutor da: Wir können sie gemeinsam durchgehen, Schritt für Schritt.';
+
+  @override
   String get resultPlaySolution => 'Lösung abspielen';
 
   @override

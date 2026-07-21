@@ -576,4 +576,158 @@ void main() {
       );
     });
   });
+
+  group('rightTriangleInverseTrig computes an angle from two sides', () {
+    test('opposite 10, hypotenuse 24 → arcsin(10/24) ≈ 24.6° (the ABC scan)', () {
+      final scene = GeometryScene.tryBuildRightTriangleInverseTrig(
+        sides: [
+          _side('AC', GeometryTrigSideRole.opposite, 10),
+          _side('AB', GeometryTrigSideRole.hypotenuse, 24),
+        ],
+        unknownLabel: 'ABC',
+      )!;
+      expect(scene.kind, GeometrySceneKind.rightTriangleInverseTrig);
+      expect(scene.unknownIsAngle, isTrue);
+      final expectedDeg = math.asin(10 / 24) * 180 / math.pi;
+      expect(scene.unknownValue, closeTo(expectedDeg, 1e-9));
+      // The right angle is marked, and the asked wedge at vertex 1 is the answer.
+      expect(scene.rightAngleVertices, contains(0));
+      final drawn = _angleAt(scene.vertices[1], scene.vertices[0], scene.vertices[2]);
+      expect(drawn, closeTo(expectedDeg, 0.5));
+      // Both GIVEN sides are drawn with their given lengths.
+      final drawnValues = scene.sides.map((s) => s.value).toList()..sort();
+      expect(drawnValues, [closeTo(10, 1e-9), closeTo(24, 1e-9)]);
+    });
+
+    test('adjacent 8, hypotenuse 17 → arccos(8/17)', () {
+      final scene = GeometryScene.tryBuildRightTriangleInverseTrig(
+        sides: [
+          _side('a', GeometryTrigSideRole.adjacent, 8),
+          _side('c', GeometryTrigSideRole.hypotenuse, 17),
+        ],
+        unknownLabel: 'x',
+      )!;
+      expect(scene.unknownValue, closeTo(math.acos(8 / 17) * 180 / math.pi, 1e-9));
+    });
+
+    test('opposite 5, adjacent 12 → arctan(5/12)', () {
+      final scene = GeometryScene.tryBuildRightTriangleInverseTrig(
+        sides: [
+          _side('o', GeometryTrigSideRole.opposite, 5),
+          _side('a', GeometryTrigSideRole.adjacent, 12),
+        ],
+        unknownLabel: 'x',
+      )!;
+      expect(scene.unknownValue, closeTo(math.atan(5 / 12) * 180 / math.pi, 1e-9));
+    });
+
+    test('a leg ≥ the hypotenuse is impossible → null', () {
+      expect(
+        GeometryScene.tryBuildRightTriangleInverseTrig(
+          sides: [
+            _side('o', GeometryTrigSideRole.opposite, 24),
+            _side('c', GeometryTrigSideRole.hypotenuse, 10),
+          ],
+          unknownLabel: 'x',
+        ),
+        isNull,
+      );
+    });
+
+    test('a blank/absent side (only one value) → null', () {
+      expect(
+        GeometryScene.tryBuildRightTriangleInverseTrig(
+          sides: [
+            _side('o', GeometryTrigSideRole.opposite, 10),
+            _side('c', GeometryTrigSideRole.hypotenuse),
+          ],
+          unknownLabel: 'x',
+        ),
+        isNull,
+      );
+    });
+
+    test('contradicting the verified answer → null (cross-check gate)', () {
+      expect(
+        GeometryScene.tryBuildRightTriangleInverseTrig(
+          sides: [
+            _side('o', GeometryTrigSideRole.opposite, 10),
+            _side('c', GeometryTrigSideRole.hypotenuse, 24),
+          ],
+          unknownLabel: 'x',
+          expectedAnswerLatex: '40', // real answer is ≈24.6°
+        ),
+        isNull,
+      );
+    });
+
+    test('the angle label may not collide with a side label → null', () {
+      expect(
+        GeometryScene.tryBuildRightTriangleInverseTrig(
+          sides: [
+            _side('x', GeometryTrigSideRole.opposite, 10),
+            _side('c', GeometryTrigSideRole.hypotenuse, 24),
+          ],
+          unknownLabel: 'x', // same as a side label
+        ),
+        isNull,
+      );
+    });
+
+    test('two given sides may not share a label → null (no "a=10 and a=24")', () {
+      // A blank first side auto-fills to 'a' in the mapper and would clash with an
+      // explicit 'a' on the second side — a figure that labels one name with two
+      // values is drawn wrong. Guard mirrors tryBuildRightTriangleTrig.
+      expect(
+        GeometryScene.tryBuildRightTriangleInverseTrig(
+          sides: [
+            _side('a', GeometryTrigSideRole.opposite, 10),
+            _side('a', GeometryTrigSideRole.hypotenuse, 24),
+          ],
+          unknownLabel: 'x',
+        ),
+        isNull,
+      );
+      // And via the mapper, where the blank side auto-fills to 'a'.
+      expect(
+        GeometryPayloadMapper.parse({
+          'kind': 'rightTriangleInverseTrig',
+          'unknown': 'x',
+          'sides': [
+            {'role': 'opposite', 'value': 10}, // blank label → auto 'a'
+            {'label': 'a', 'role': 'hypotenuse', 'value': 24},
+          ],
+        }),
+        isNull,
+      );
+    });
+
+    test('mapper parses the recognizer payload (the ABC case)', () {
+      final scene = GeometryPayloadMapper.parse({
+        'kind': 'rightTriangleInverseTrig',
+        'unknown': 'ABC',
+        'sides': [
+          {'label': 'AC', 'role': 'opposite', 'value': 10},
+          {'label': 'AB', 'role': 'hypotenuse', 'value': 24},
+        ],
+      });
+      expect(scene, isNotNull);
+      expect(scene!.kind, GeometrySceneKind.rightTriangleInverseTrig);
+      expect(scene.unknownValue, closeTo(math.asin(10 / 24) * 180 / math.pi, 1e-9));
+    });
+
+    test('mapper rejects a payload with a blank side value', () {
+      expect(
+        GeometryPayloadMapper.parse({
+          'kind': 'rightTriangleInverseTrig',
+          'unknown': 'x',
+          'sides': [
+            {'label': 'a', 'role': 'opposite', 'value': 10},
+            {'label': 'c', 'role': 'hypotenuse'}, // no value
+          ],
+        }),
+        isNull,
+      );
+    });
+  });
 }

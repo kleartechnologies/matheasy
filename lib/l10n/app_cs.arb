@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Tato soustava rovnic může mít více řešení — odpověď ukazuji jen tehdy, když dokážu, že je úplná, a to tady nedokážu, takže to nebudu předstírat. Ale přesně na tohle je tutor: můžeme to vyřešit společně a zkontrolovat každý krok.",
   "resultTutorReasonMultiPart": "Tento příklad se ptá na víc než jednu věc, takže neexistuje jediná odpověď, kterou bych mohl/a ověřit zpětným dosazením — a nebudu předstírat, že existuje. Tutor je na tohle ten správný nástroj: můžeme to řešit po částech.",
   "resultTutorReasonProof": "Tohle je důkazová úloha — neexistuje jediná odpověď, kterou bych mohl/a spočítat a ověřit zpětným dosazením, takže to nebudu předstírat. Ale přesně na tohle je tutor: argument můžeme vystavět společně, krok za krokem.",
+  "resultTutorReasonBeyondSolver": "Tahle úloha vyžaduje postup, který je nad síly mého krokového řešitele. Ukazuji jen odpovědi, které dokážu ověřit zpětným dosazením, a to tady nezvládnu, takže to nebudu předstírat. Přesně od toho je tu ale lektor: můžeme si to projít společně, krok za krokem.",
   "resultPlaySolution": "Přehrát řešení",
   "resultSolved": "VYŘEŠENO",
   "resultCloseWalkthrough": "Zavřít průvodce",

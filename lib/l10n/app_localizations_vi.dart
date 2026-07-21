@@ -1162,6 +1162,10 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đây là bài toán dạng chứng minh — không có một đáp án duy nhất mà tôi có thể tính và kiểm tra bằng cách tính ngược lại, nên tôi sẽ không giả vờ là có. Nhưng đây chính là lý do có gia sư: chúng ta có thể cùng xây dựng lập luận, từng bước một.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Bài này cần một phương pháp vượt quá khả năng của trình giải từng bước của mình. Mình chỉ hiển thị những đáp án có thể chứng minh bằng cách kiểm tra ngược lại, mà ở đây thì mình không làm được, nên mình sẽ không giả vờ là làm được. Nhưng đây chính là lúc cần đến gia sư: chúng ta có thể cùng nhau giải, từng bước một.';
+
+  @override
   String get resultPlaySolution => 'Phát Lời Giải';
 
   @override

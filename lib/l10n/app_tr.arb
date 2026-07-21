@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Bu denklem sisteminin birden fazla çözümü olabilir — yalnızca tam olduğunu kanıtlayabildiğimde bir cevap gösteririm, burada bunu yapamıyorum, bu yüzden varmış gibi davranmayacağım. Ama öğretmenin tam olarak burada işe yaradığı yer bu: birlikte çözebilir ve her adımı kontrol edebiliriz.",
   "resultTutorReasonMultiPart": "Bu soru birden fazla şey istiyor, bu yüzden geriye doğru çalıştırarak kontrol edebileceğim tek bir cevap yok — ve varmış gibi davranmayacağım. Öğretmen doğru araç: bir seferde bir bölümünü ele alabiliriz.",
   "resultTutorReasonProof": "Bu bir ispat tarzı soru — geriye doğru çalıştırarak hesaplayıp kontrol edebileceğim tek bir cevap yok, bu yüzden varmış gibi davranmayacağım. Ama öğretmenin tam olarak burada işe yaradığı yer bu: argümanı birlikte, adım adım inşa edebiliriz.",
+  "resultTutorReasonBeyondSolver": "Bu soru, adım adım çözücümün ötesinde bir yöntem gerektiriyor. Yalnızca geriye doğru çözerek kanıtlayabildiğim yanıtları gösteririm; burada bunu yapamıyorum, o yüzden yapıyormuş gibi davranmayacağım. Ama eğitmen tam da bunun için var: bunu birlikte, adım adım çözebiliriz.",
   "resultPlaySolution": "Çözümü Oynat",
   "resultSolved": "ÇÖZÜLDÜ",
   "resultCloseWalkthrough": "Anlatımı kapat",

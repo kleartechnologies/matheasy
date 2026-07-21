@@ -1164,6 +1164,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Ez egy bizonyítás jellegű feladat — nincs egyetlen válasz, amit ki tudnék számítani és visszahelyettesítéssel ellenőrizni, ezért nem is teszek úgy, mintha lenne. De pont erre való a tutor: együtt felépíthetjük az érvelést, lépésről lépésre.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Ehhez olyan módszer kell, ami túlmutat a lépésről lépésre haladó megoldómon. Csak olyan válaszokat mutatok, amelyeket visszafelé számolva be tudok bizonyítani, és ezt itt nem tudom megtenni, úgyhogy nem is teszek úgy, mintha. De pontosan erre való a tanár: együtt is végigmehetünk rajta, lépésről lépésre.';
+
+  @override
   String get resultPlaySolution => 'Megoldás lejátszása';
 
   @override

@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Questo sistema di equazioni potrebbe avere più soluzioni — mostro una risposta solo quando posso dimostrare che è completa, e qui non posso farlo, quindi non fingerò di poterlo. Ma è proprio a questo che serve il tutor: possiamo risolverlo insieme e verificare ogni passaggio.",
   "resultTutorReasonMultiPart": "Questo problema chiede più di una cosa, quindi non c'è un'unica risposta che io possa verificare a ritroso — e non fingerò che ci sia. Il tutor è lo strumento giusto: possiamo affrontarlo una parte alla volta.",
   "resultTutorReasonProof": "Questo è un problema di tipo dimostrativo — non c'è un'unica risposta che io possa calcolare e verificare a ritroso, quindi non fingerò che ci sia. Ma è proprio a questo che serve il tutor: possiamo costruire il ragionamento insieme, un passaggio alla volta.",
+  "resultTutorReasonBeyondSolver": "Questo richiede un metodo che va oltre il mio risolutore passo passo. Mostro solo le risposte che posso dimostrare verificandole a ritroso, e qui non ci riesco, quindi non farò finta di niente. Ma è proprio a questo che serve il tutor: possiamo affrontarlo insieme, un passo alla volta.",
   "resultPlaySolution": "Riproduci soluzione",
   "resultSolved": "RISOLTO",
   "resultCloseWalkthrough": "Chiudi il percorso",

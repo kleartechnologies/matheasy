@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Dette likningssystemet kan ha flere løsninger — jeg viser bare et svar når jeg kan bevise at det er fullstendig, og det kan jeg ikke gjøre her, så jeg later ikke som om jeg kan. Men dette er nettopp hva tutoren er til for: vi kan løse det sammen og sjekke hvert steg.",
   "resultTutorReasonMultiPart": "Denne oppgaven spør om mer enn én ting, så det finnes ikke ett enkelt svar jeg kan sjekke ved å regne baklengs — og jeg later ikke som om det gjør det. Tutoren er det rette verktøyet: vi kan ta det én del om gangen.",
   "resultTutorReasonProof": "Dette er en bevisoppgave — det finnes ikke ett enkelt svar jeg kan beregne og sjekke ved å regne baklengs, så jeg later ikke som om det gjør det. Men dette er nettopp hva tutoren er til for: vi kan bygge argumentet sammen, ett steg om gangen.",
+  "resultTutorReasonBeyondSolver": "Denne krever en metode som ligger utenfor rekkevidden til den trinnvise løseren min. Jeg viser bare svar jeg kan bevise ved å regne baklengs, og det får jeg ikke til her, så jeg later ikke som. Men det er nettopp dette veilederen er til for: vi kan gå gjennom den sammen, ett steg om gangen.",
   "resultPlaySolution": "Spill av løsning",
   "resultSolved": "LØST",
   "resultCloseWalkthrough": "Lukk gjennomgang",

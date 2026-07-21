@@ -1105,6 +1105,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '这是一道证明题——没有能计算并逆推验证的单一答案，所以我不会假装有。但这正是导师的用武之地：我们可以一步步一起构建论证。';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      '这道题需要用到我的分步求解器之外的方法。我只展示能通过反向验算证明的答案，而这道题我做不到，所以我不会假装能做到。但这正是辅导老师存在的意义：我们可以一起，一步一步把它解出来。';
+
+  @override
   String get resultPlaySolution => '播放解答';
 
   @override
@@ -2817,6 +2821,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
       '这是一道证明题——没有能计算并逆推验证的单一答案，所以我不会假装有。但这正是导师的用武之地：我们可以一步步一起构建论证。';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      '这道题需要用到我的分步求解器之外的方法。我只展示能通过反向验算证明的答案，而这道题我做不到，所以我不会假装能做到。但这正是辅导老师存在的意义：我们可以一起，一步一步把它解出来。';
+
+  @override
   String get resultPlaySolution => '播放解答';
 
   @override
@@ -4527,6 +4535,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String get resultTutorReasonProof =>
       '這是證明題——沒有可以計算並代回驗算的單一答案，所以我不會假裝有。但這正是家教的用途：我們可以一步一步一起建立論證。';
+
+  @override
+  String get resultTutorReasonBeyondSolver =>
+      '這道題需要用到我的分步求解器之外的方法。我只會給出能透過反向驗算證明的答案，而這道題我做不到，所以不會假裝可以。但這正是輔導老師存在的意義：我們可以一起，一步一步把它解出來。';
 
   @override
   String get resultPlaySolution => '播放解題';

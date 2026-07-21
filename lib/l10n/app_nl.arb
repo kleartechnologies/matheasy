@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Dit stelsel van vergelijkingen kan meerdere oplossingen hebben — ik toon alleen een antwoord als ik kan bewijzen dat het compleet is, en dat kan ik hier niet, dus ik doe niet alsof. Maar hier is de tutor precies voor bedoeld: we kunnen het samen oplossen en elke stap controleren.",
   "resultTutorReasonMultiPart": "Dit vraagstuk vraagt om meer dan één ding, dus er is geen enkel antwoord dat ik kan controleren door het achterstevoren uit te rekenen — en ik doe niet alsof dat wel zo is. De tutor is hiervoor het juiste hulpmiddel: we kunnen het stap voor stap aanpakken.",
   "resultTutorReasonProof": "Dit is een bewijsvraagstuk — er is geen enkel antwoord dat ik kan berekenen en achterstevoren controleren, dus ik doe niet alsof dat wel zo is. Maar hier is de tutor precies voor bedoeld: we kunnen samen de redenering opbouwen, stap voor stap.",
+  "resultTutorReasonBeyondSolver": "Deze vraagt om een methode die verder gaat dan mijn stapsgewijze oplosser. Ik laat alleen antwoorden zien die ik kan bewijzen door ze terug te rekenen, en dat lukt me hier niet, dus ik doe niet alsof. Maar hier is de tutor nou juist voor: we kunnen het samen doornemen, stap voor stap.",
   "resultPlaySolution": "Speel oplossing af",
   "resultSolved": "OPGELOST",
   "resultCloseWalkthrough": "Sluit doorloop",

@@ -2330,6 +2330,12 @@ abstract class AppLocalizations {
   /// **'This is a proof-style problem — there\'s no single answer I can compute and check by working it backwards, so I won\'t pretend there is. But this is exactly what the tutor is for: we can build the argument together, one step at a time.'**
   String get resultTutorReasonProof;
 
+  /// No description provided for @resultTutorReasonBeyondSolver.
+  ///
+  /// In en, this message translates to:
+  /// **'This one needs a method beyond my step-by-step solver. I only show answers I can prove by working them backwards, and I can\'t do that here, so I won\'t pretend to. But this is exactly what the tutor is for: we can work through it together, one step at a time.'**
+  String get resultTutorReasonBeyondSolver;
+
   /// No description provided for @resultPlaySolution.
   ///
   /// In en, this message translates to:

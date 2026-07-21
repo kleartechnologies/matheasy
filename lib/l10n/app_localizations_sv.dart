@@ -1158,6 +1158,10 @@ class AppLocalizationsSv extends AppLocalizations {
       'Det här är ett bevisproblem — det finns inget enda svar jag kan räkna ut och kontrollera baklänges, så jag låtsas inte att det finns. Men det är precis vad tutorn är till för: vi kan bygga upp resonemanget tillsammans, ett steg i taget.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Den här kräver en metod som ligger bortom min stegvisa lösare. Jag visar bara svar som jag kan bevisa genom att räkna baklänges, och det går inte här, så jag tänker inte låtsas. Men det är precis det här handledaren är till för: vi kan gå igenom den tillsammans, ett steg i taget.';
+
+  @override
   String get resultPlaySolution => 'Spela upp lösning';
 
   @override

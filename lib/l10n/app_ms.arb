@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Sistem persamaan ini mungkin mempunyai beberapa penyelesaian — saya hanya menunjukkan jawapan apabila saya boleh membuktikan ia lengkap, dan saya tidak dapat berbuat demikian di sini, jadi saya tidak akan berpura-pura. Tetapi inilah tujuan tutor: kita boleh menyelesaikannya bersama dan menyemak setiap langkah.",
   "resultTutorReasonMultiPart": "Soalan ini meminta lebih daripada satu perkara, jadi tiada jawapan tunggal yang boleh saya semak dengan mengiranya secara songsang — dan saya tidak akan berpura-pura ada. Tutor ialah alat yang betul: kita boleh selesaikan satu bahagian pada satu masa.",
   "resultTutorReasonProof": "Ini soalan berbentuk bukti — tiada jawapan tunggal yang boleh saya kira dan semak secara songsang, jadi saya tidak akan berpura-pura ada. Tetapi inilah tujuan tutor: kita boleh membina hujah bersama, satu langkah pada satu masa.",
+  "resultTutorReasonBeyondSolver": "Soalan ini memerlukan kaedah yang di luar kemampuan penyelesai langkah demi langkah saya. Saya hanya menunjukkan jawapan yang boleh saya buktikan dengan mengira secara songsang, dan di sini saya tidak dapat melakukannya, jadi saya tidak akan berpura-pura. Tetapi inilah tujuan tutor: kita boleh menyelesaikannya bersama-sama, selangkah demi selangkah.",
   "resultPlaySolution": "Main Penyelesaian",
   "resultSolved": "DISELESAIKAN",
   "resultCloseWalkthrough": "Tutup panduan",

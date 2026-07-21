@@ -392,6 +392,7 @@
   "resultTutorReasonSystem": "Tällä yhtälöryhmällä voi olla useita ratkaisuja — näytän vastauksen vain silloin, kun voin todistaa sen olevan täydellinen, enkä pysty siihen tässä, joten en teeskentele voivani. Mutta juuri tähän tuutori on tarkoitettu: voimme ratkaista sen yhdessä ja tarkistaa jokaisen vaiheen.",
   "resultTutorReasonMultiPart": "Tämä tehtävä kysyy useampaa kuin yhtä asiaa, joten yhtä ainoaa vastausta, jonka voisin tarkistaa laskemalla taaksepäin, ei ole — enkä teeskentele, että olisi. Tuutori on tähän oikea työkalu: voimme edetä osa kerrallaan.",
   "resultTutorReasonProof": "Tämä on todistustehtävä — yhtä ainoaa vastausta, jonka voisin laskea ja tarkistaa taaksepäin, ei ole, joten en teeskentele, että olisi. Mutta juuri tähän tuutori on tarkoitettu: voimme rakentaa perustelun yhdessä, vaihe kerrallaan.",
+  "resultTutorReasonBeyondSolver": "Tämä vaatii menetelmän, joka menee vaihe vaiheelta -ratkaisijani ulottumattomiin. Näytän vain vastauksia, jotka voin todistaa laskemalla ne takaperin, enkä pysty siihen tässä, joten en teeskentele muuta. Mutta juuri tätä varten tutor on olemassa: voimme käydä sen läpi yhdessä, askel kerrallaan.",
   "resultPlaySolution": "Toista ratkaisu",
   "resultSolved": "RATKAISTU",
   "resultCloseWalkthrough": "Sulje läpikäynti",

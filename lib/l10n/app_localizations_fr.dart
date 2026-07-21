@@ -1169,6 +1169,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'C\'est un problème de type démonstration — il n\'y a pas de réponse unique que je peux calculer et vérifier en remontant les calculs, donc je ne vais pas faire semblant du contraire. Mais c\'est exactement à ça que sert le tuteur : on peut construire le raisonnement ensemble, étape par étape.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Celui-ci demande une méthode qui dépasse mon solveur pas à pas. Je n\'affiche que les réponses que je peux prouver en les vérifiant à l\'envers, et je ne peux pas le faire ici, alors je ne vais pas faire semblant. Mais c\'est exactement à ça que sert le tuteur : nous pouvons la résoudre ensemble, une étape à la fois.';
+
+  @override
   String get resultPlaySolution => 'Lire la solution';
 
   @override

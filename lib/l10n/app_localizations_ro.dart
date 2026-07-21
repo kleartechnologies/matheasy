@@ -1165,6 +1165,10 @@ class AppLocalizationsRo extends AppLocalizations {
       'Aceasta este o problemă de tip demonstrație — nu există un singur răspuns pe care să-l pot calcula și verifica lucrând invers, așa că nu mă voi preface că există. Dar exact pentru asta există tutorele: putem construi argumentul împreună, pas cu pas.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Aceasta are nevoie de o metodă care depășește rezolvitorul meu pas cu pas. Arăt doar răspunsuri pe care le pot dovedi verificându-le invers, iar aici nu pot face asta, așa că nu mă voi preface. Dar exact pentru asta există tutorele: o putem rezolva împreună, pas cu pas.';
+
+  @override
   String get resultPlaySolution => 'Redă soluția';
 
   @override

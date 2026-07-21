@@ -1118,6 +1118,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'これは証明タイプの問題です。逆算して計算・確認できる単一の答えはないので、ごまかしません。でもこれこそチューターの出番です。一緒に論証を、ひとステップずつ組み立てられます。';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'これは、私のステップごとの解答エンジンでは扱えない方法が必要です。私は答えを逆算して確かめられるものだけをお見せします。ここではそれができないので、できるふりはしません。でも、まさにこういうときのためにチューターがいます。一緒に、一歩ずつ解いていきましょう。';
+
+  @override
   String get resultPlaySolution => '解答を再生';
 
   @override

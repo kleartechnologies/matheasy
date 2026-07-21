@@ -1165,6 +1165,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu bir ispat tarzı soru — geriye doğru çalıştırarak hesaplayıp kontrol edebileceğim tek bir cevap yok, bu yüzden varmış gibi davranmayacağım. Ama öğretmenin tam olarak burada işe yaradığı yer bu: argümanı birlikte, adım adım inşa edebiliriz.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Bu soru, adım adım çözücümün ötesinde bir yöntem gerektiriyor. Yalnızca geriye doğru çözerek kanıtlayabildiğim yanıtları gösteririm; burada bunu yapamıyorum, o yüzden yapıyormuş gibi davranmayacağım. Ama eğitmen tam da bunun için var: bunu birlikte, adım adım çözebiliriz.';
+
+  @override
   String get resultPlaySolution => 'Çözümü Oynat';
 
   @override

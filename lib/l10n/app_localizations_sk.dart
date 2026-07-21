@@ -1160,6 +1160,10 @@ class AppLocalizationsSk extends AppLocalizations {
       'Toto je príklad typu dôkaz — neexistuje jedna odpoveď, ktorú by som mohol vypočítať a overiť spätným dosadením, takže to nebudem predstierať. Ale presne na to je tútor: môžeme spolu vybudovať argument, krok za krokom.';
 
   @override
+  String get resultTutorReasonBeyondSolver =>
+      'Táto úloha si žiada postup, ktorý je nad možnosti môjho krokového riešiteľa. Ukazujem len odpovede, ktoré dokážem overiť spätným dosadením, a to tu nedokážem, takže to nebudem predstierať. Presne na to je však lektor: môžeme si to prejsť spolu, krok za krokom.';
+
+  @override
   String get resultPlaySolution => 'Prehrať riešenie';
 
   @override
