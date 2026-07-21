@@ -10,6 +10,7 @@ import { parseLinalg, parseVectors } from "./linalg";
 import { parseLinearSystem } from "./linsystem";
 import { parseSimultaneous } from "./simultaneous";
 import { parseOde } from "./ode";
+import { parseLimit } from "./limit";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
 import {
@@ -175,6 +176,21 @@ export function classify(rawLatex: string): Classification {
         taylorOrder: taylor.order,
       }
     );
+  }
+
+  // --- Limit: lim_{x→a} f(x) --------------------------------------------
+  // Distinctive `\lim`, matched before the derivative/algebra paths. The value
+  // is computed by a numeric convergence oracle (solver/limit.ts) — a
+  // deterministic engine, so verifyMode is "none" (an unparsed/divergent limit
+  // declines honestly rather than hitting the LLM tier).
+  const limit = parseLimit(rawLatex);
+  if (limit) {
+    return base("limit", "limit", limit.variable, false, "none", {
+      limitVar: limit.variable,
+      limitPoint: limit.point,
+      limitDir: limit.dir,
+      limitFn: limit.fn,
+    });
   }
 
   // --- Integral: ∫ f dx (indefinite) or ∫_a^b f dx (definite) -----------
@@ -544,6 +560,7 @@ const TEACHING_META: Record<string, [TeachingCategory, TeachingDifficulty]> = {
   partial_derivative: ["calculus", "university"],
   integral: ["calculus", "preUniversity"],
   definite_integral: ["calculus", "preUniversity"],
+  limit: ["calculus", "preUniversity"],
   maclaurin_series: ["calculus", "university"],
   taylor_series: ["calculus", "university"],
   // differential equations

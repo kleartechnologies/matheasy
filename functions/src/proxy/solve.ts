@@ -42,6 +42,7 @@ import { languageDirective } from "../lib/language";
 import * as animation from "../solver/animationSchema";
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
+import { evaluateLimit } from "../solver/limit";
 import { odeAnswer, verifyOde } from "../solver/ode";
 import { exactForm } from "../solver/exact";
 import { buildGraph, GraphInput } from "../solver/graph";
@@ -259,6 +260,23 @@ export async function solve(
       methods: [],
       graph: null,
       routeToTutor: true,
+    };
+  }
+
+  // 0b) Limit — a deterministic numeric-convergence oracle (no LLM). Returns a
+  // verified value, or an honest couldn't-verify when it diverges / oscillates /
+  // the two sides disagree. Placed before the algebra engine so `\lim` never
+  // falls through to a mis-parse.
+  if (cls.strategy === "limit") {
+    const result = evaluateLimit(cls);
+    if (!result) return couldNotVerify(cls, "limit_no_converge", onCouldNotVerify);
+    return {
+      problemLatex: cls.latex,
+      problemType: cls.problemType,
+      finalAnswer: result.answer,
+      verified: true,
+      methods: result.methods,
+      graph: null,
     };
   }
 

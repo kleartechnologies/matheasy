@@ -303,6 +303,7 @@ export type Strategy =
   | "linsystem" // a linear system Ax=b, solved via mathjs, verified by A·x=b
   | "simultaneous" // 2-var linear+quadratic pair: substitution, verified per-pair
   | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
+  | "limit" // lim x→a f(x) via a numeric convergence oracle (deterministic)
   | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
@@ -390,6 +391,12 @@ export interface Classification {
   odeIndepVar?: string;
   odeOrder?: number;
   odeInitial?: { order: number; at: number; value: number }[];
+  /** A limit `lim x→a f(x)`: the variable, approach point (±Infinity allowed),
+   * side, and the function (ascii) — evaluated by a numeric convergence oracle. */
+  limitVar?: string;
+  limitPoint?: number;
+  limitDir?: "both" | "left" | "right";
+  limitFn?: string;
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */

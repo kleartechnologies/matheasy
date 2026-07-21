@@ -1,0 +1,241 @@
+/**
+ * Limit engine — `lim_{x→a} f(x)`.
+ *
+ * Golden rule (spec §1): the answer is computed deterministically and proven,
+ * never invented. Here the PROOF is a numeric oracle: we evaluate f at a
+ * geometric sequence of points approaching `a` from the allowed side(s) and
+ * require the samples to CONVERGE — and, for a two-sided limit, to converge to
+ * the SAME value from both sides. A limit that diverges, oscillates, or has a
+ * jump (the two sides disagree) is DECLINED honestly (couldn't-verify), never
+ * guessed. This mirrors how `numericIntegrate` is the source of truth for a
+ * definite integral — no LLM is involved.
+ */
+import { fraction } from "mathjs";
+
+import { exactForm } from "./exact";
+import { latexToAscii } from "./latex";
+import type { Classification, FinalAnswer, MethodData } from "./types";
+import { evalReal } from "./verify";
+
+export interface ParsedLimit {
+  variable: string;
+  /** A finite approach point, or ±Infinity. */
+  point: number;
+  dir: "both" | "left" | "right";
+  /** The function, as ascii (what mathjs evaluates). */
+  fn: string;
+}
+
+/**
+ * Parse `\lim_{x \to a} f(x)` (also `\to a^+`/`a^-` one-sided, and `a = \infty`).
+ * Returns null when there is no `\lim`, the `x \to a` subscript is malformed, or
+ * the approach point / function can't be read.
+ */
+export function parseLimit(rawLatex: string): ParsedLimit | null {
+  const braced = /\\lim\s*_\s*\{([^{}]*)\}/.exec(rawLatex);
+  const bare = /\\lim\s*_\s*([^\s{]+)/.exec(rawLatex);
+  const m = braced ?? bare;
+  if (!m) return null;
+  const sub = m[1];
+
+  // "x \to a" / "x \rightarrow a" / "x → a" / "x -> a".
+  const tm = /([a-zA-Z])\s*(?:\\to|\\rightarrow|→|-\s*>)\s*(.+)$/.exec(sub);
+  if (!tm) return null;
+  const variable = tm[1];
+  let pointRaw = tm[2].trim();
+
+  // A trailing ^+ / ^- makes it one-sided.
+  let dir: "both" | "left" | "right" = "both";
+  const dm = /\^\s*\{?\s*([+-])\s*\}?\s*$/.exec(pointRaw);
+  if (dm) {
+    dir = dm[1] === "+" ? "right" : "left";
+    pointRaw = pointRaw.slice(0, dm.index).trim();
+  }
+
+  let point: number;
+  if (/\\infty|∞/.test(pointRaw)) {
+    point = /^-/.test(pointRaw.replace(/\s+/g, "")) ? -Infinity : Infinity;
+  } else {
+    point = evalReal(latexToAscii(pointRaw));
+    if (!Number.isFinite(point)) return null;
+  }
+
+  // The function is everything AFTER the `\lim_{…}` block.
+  const fnLatex = rawLatex.slice((m.index ?? 0) + m[0].length).trim();
+  const fn = latexToAscii(fnLatex).trim();
+  if (!fn || !/[a-zA-Z0-9]/.test(fn)) return null;
+  return { variable, point, dir, fn };
+}
+
+/**
+ * From a sequence of samples approaching the point, decide whether it CONVERGES
+ * and, if so, to what value — accelerating slow (geometric) convergence with
+ * Aitken's Δ². Returns null for a diverging, oscillating, or too-slow tail. The
+ * bias is toward null: a false decline is honest, a wrong value is not.
+ */
+function converge(vals: number[]): number | null {
+  const n = vals.length;
+  if (n < 4) return null;
+  const diffs: number[] = [];
+  for (let i = 1; i < n; i++) diffs.push(vals[i] - vals[i - 1]);
+  const m = diffs.length;
+  const aLast = Math.abs(diffs[m - 1]);
+  const aPrev = Math.abs(diffs[m - 2]);
+  const aPrev2 = Math.abs(diffs[m - 3]);
+
+  // Diverging (a huge or growing step) or oscillating (steps not shrinking) → no.
+  if (aLast > 1e6) return null;
+  if (aLast > aPrev || aPrev > aPrev2) return null;
+
+  const v0 = vals[n - 3];
+  const v1 = vals[n - 2];
+  const v2 = vals[n - 1];
+  // Already flat to floating-point precision — the tail value IS the limit.
+  if (aLast < 1e-9) return v2;
+
+  // Aitken's Δ²: for v_k = L + C·ρ^k, L = v2 − (Δv)² / (Δ²v). Guard a ~0 second
+  // difference (an essentially-linear/converged tail → take the tail value).
+  const secondDiff = v2 - 2 * v1 + v0;
+  if (Math.abs(secondDiff) < 1e-14) return v2;
+  const dv = v2 - v1;
+  const L = v2 - (dv * dv) / secondDiff;
+  if (!Number.isFinite(L)) return null;
+  // Sanity: a genuine geometric tail corrects v2 by O(step); a wild extrapolation
+  // (non-geometric, oscillating, or barely-converging) is rejected as untrusted.
+  if (Math.abs(L - v2) > 100 * aLast + 1e-6) return null;
+  return L;
+}
+
+/** Evaluate f along one approach and return the converged value, or null when
+ * that side diverges / oscillates / can't be sampled. */
+function sampleSide(
+  fn: string,
+  variable: string,
+  point: number,
+  side: 1 | -1
+): number | null {
+  const finite = Number.isFinite(point);
+  // Approach points: a ± {1e-1 … 1e-6} for a finite point (1e-6 is the floor —
+  // smaller h invites floating-point cancellation), or growing |x| for ±∞.
+  const xs = finite
+    ? [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6].map((h) => point + side * h)
+    : [10, 100, 1e3, 1e4, 1e5, 1e6].map((v) => (point > 0 ? v : -v));
+
+  const vals: number[] = [];
+  for (const x of xs) {
+    const v = evalReal(fn, { [variable]: x });
+    if (Number.isFinite(v)) vals.push(v);
+  }
+  if (vals.length < 4) return null; // too few finite samples to trust
+  return converge(vals);
+}
+
+/** Snap tiny numeric noise: an integer within 1e-4, else round to 6 dp. */
+function cleanValue(v: number): number {
+  const r = Math.round(v);
+  if (Math.abs(v - r) < 1e-4) return r;
+  return Number(v.toFixed(6));
+}
+
+/** Present the verified limit value (integer / exact irrational / fraction /
+ * decimal) — mirrors the solver's own value formatting. */
+function formatLimit(n: number): FinalAnswer {
+  if (Number.isInteger(n)) return { latex: String(n), plain: String(n) };
+  const exact = exactForm(n);
+  if (exact) return { latex: exact.latex, plain: exact.plain };
+  try {
+    const fr = fraction(n) as unknown as { n: bigint; d: bigint; s: number };
+    const num = Number(fr.n);
+    const den = Number(fr.d);
+    if (den !== 1 && den <= 1000) {
+      const sign = fr.s < 0 ? "-" : "";
+      return { latex: `${sign}\\tfrac{${num}}{${den}}`, plain: `${sign}${num}/${den}` };
+    }
+  } catch {
+    /* fall through to decimal */
+  }
+  return { latex: String(n), plain: String(n) };
+}
+
+/** A short human label for the approach point, used in the narration. */
+function pointLabel(point: number, dir: "both" | "left" | "right"): string {
+  const base =
+    point === Infinity ? "∞" : point === -Infinity ? "−∞" : String(point);
+  if (dir === "right") return `${base}⁺`;
+  if (dir === "left") return `${base}⁻`;
+  return base;
+}
+
+/**
+ * Compute-and-verify the limit. Returns the verified value + engine-authored
+ * steps, or null when it diverges / oscillates / the two sides disagree (the
+ * caller then declines honestly). Deterministic — no LLM.
+ */
+export function evaluateLimit(
+  cls: Classification
+): { answer: FinalAnswer; methods: MethodData[] } | null {
+  const { limitVar, limitPoint, limitDir, limitFn } = cls;
+  if (
+    !limitVar ||
+    limitFn === undefined ||
+    limitPoint === undefined ||
+    limitDir === undefined
+  ) {
+    return null;
+  }
+
+  let value: number | null;
+  if (!Number.isFinite(limitPoint)) {
+    // At ±∞ there is only one "side" — sample growing |x|.
+    value = sampleSide(limitFn, limitVar, limitPoint, 1);
+  } else if (limitDir === "right") {
+    value = sampleSide(limitFn, limitVar, limitPoint, 1);
+  } else if (limitDir === "left") {
+    value = sampleSide(limitFn, limitVar, limitPoint, -1);
+  } else {
+    // Two-sided: both sides must converge AND agree (else a jump — DNE).
+    const r = sampleSide(limitFn, limitVar, limitPoint, 1);
+    const l = sampleSide(limitFn, limitVar, limitPoint, -1);
+    if (r === null || l === null) return null;
+    const tol = 1e-3 * (1 + Math.abs(r));
+    if (Math.abs(r - l) > tol) return null; // the two sides disagree → DNE
+    value = (r + l) / 2;
+  }
+  if (value === null || !Number.isFinite(value)) return null;
+
+  const clean = cleanValue(value);
+  const answer = formatLimit(clean);
+  const where = pointLabel(limitPoint, limitDir);
+  const fnDisplay = cls.latex;
+
+  const methods: MethodData[] = [
+    {
+      id: "limit_numeric",
+      name: "Evaluate the limit",
+      examPick: true,
+      steps: [
+        {
+          expression: fnDisplay,
+          operation: "The limit to evaluate",
+          why: `We want the value the expression approaches as ${limitVar} → ${where}.`,
+        },
+        {
+          expression: `${limitVar} \\to ${where}`,
+          operation: "Approach the point",
+          why:
+            limitDir === "both"
+              ? `Take ${limitVar} closer and closer to ${where} from both sides.`
+              : `Take ${limitVar} closer and closer to ${where} from the ${limitDir}.`,
+        },
+        {
+          expression: `${answer.latex}`,
+          operation: "Answer",
+          why: `The expression settles on ${answer.plain}${
+            limitDir === "both" ? " from both sides" : ""
+          }.`,
+        },
+      ],
+    },
+  ];
+  return { answer, methods };
+}
