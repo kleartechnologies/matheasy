@@ -122,20 +122,27 @@ function converge(vals: number[]): number | null {
   return a;
 }
 
-/** Evaluate f along one approach and return the converged value, or null when
- * that side diverges / oscillates / can't be sampled. */
-function sampleSide(
+/** The off-phase companion scale — IRRATIONAL, so a periodic function that
+ * phase-aligns with the power-of-10 primary ladder (cos(2πx) at every integer)
+ * cannot also align with this one. */
+const COMPANION_SCALE = 1 / Math.SQRT2; // ≈ 0.70710678…
+
+/** Sample f along ONE geometric approach (optionally scaled off the primary
+ * lattice by [scale]) and return the converged value, or null. */
+function sampleLadder(
   fn: string,
   variable: string,
   point: number,
-  side: 1 | -1
+  side: 1 | -1,
+  scale: number
 ): number | null {
   const finite = Number.isFinite(point);
-  // Approach points: a ± {1e-1 … 1e-6} for a finite point (1e-6 is the floor —
-  // smaller h invites floating-point cancellation), or growing |x| for ±∞.
+  // Approach points: a ± {1e-1 … 1e-6}·scale for a finite point (1e-6 is the
+  // floor — smaller h invites floating-point cancellation), or growing |x|·scale
+  // for ±∞. `scale` shifts the companion ladder off the phase-aligned lattice.
   const xs = finite
-    ? [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6].map((h) => point + side * h)
-    : [10, 100, 1e3, 1e4, 1e5, 1e6].map((v) => (point > 0 ? v : -v));
+    ? [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6].map((h) => point + side * h * scale)
+    : [10, 100, 1e3, 1e4, 1e5, 1e6].map((v) => (point > 0 ? v : -v) * scale);
 
   const vals: number[] = [];
   for (const x of xs) {
@@ -144,6 +151,31 @@ function sampleSide(
   }
   if (vals.length < 4) return null; // too few finite samples to trust
   return converge(vals);
+}
+
+/**
+ * Converge along one approach, CORROBORATED by an off-phase companion ladder —
+ * the two must agree. This defeats sample-lattice ALIASING: a periodic function
+ * (cos(2πx) as x→∞, cos(2π/x) as x→0) sampled only on the power-of-10 lattice
+ * hits the SAME phase every time and looks like a constant, so the oracle would
+ * ship a confident value for a limit that does NOT exist. The irrational-offset
+ * companion samples a different phase each step, does not alias, and disagrees —
+ * so the divergent limit is declined honestly. Genuine limits agree on both.
+ */
+function sampleSide(
+  fn: string,
+  variable: string,
+  point: number,
+  side: 1 | -1
+): number | null {
+  const primary = sampleLadder(fn, variable, point, side, 1);
+  if (primary === null) return null;
+  const companion = sampleLadder(fn, variable, point, side, COMPANION_SCALE);
+  if (companion === null) return null;
+  if (Math.abs(primary - companion) > 1e-4 * (1 + Math.abs(primary)) + 1e-7) {
+    return null; // the two ladders disagree ⇒ an aliasing artifact / DNE
+  }
+  return primary;
 }
 
 /** Snap tiny numeric noise: an integer within 1e-4, else round to 6 dp. */

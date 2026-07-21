@@ -125,3 +125,24 @@ describe("limit engine — adversarial-review hardening: log / harmonic tails DE
     expect(p.finalAnswer?.plain).toBe("1/2");
   });
 });
+
+describe("limit engine — anti-aliasing: grid-resonant periodic limits DECLINE", () => {
+  // A periodic function sampled only on the power-of-10 lattice hits the SAME
+  // phase every step and looks constant (cos(2π·integer)=1), so the oracle would
+  // ship a confident value for a limit that does NOT exist. The off-phase
+  // companion ladder must break this and force an honest decline.
+  const declines: [string, string][] = [
+    ["cos(2πx) at ∞ (aliases to 1)", "\\lim_{x \\to \\infty} \\cos(2\\pi x)"],
+    ["cos(πx) at ∞ (aliases to 1)", "\\lim_{x \\to \\infty} \\cos(\\pi x)"],
+    ["2+cos(2πx) at ∞ (aliases to 3)", "\\lim_{x \\to \\infty} 2 + \\cos(2\\pi x)"],
+    ["sin(2πx) at ∞ (noise snapped to 0)", "\\lim_{x \\to \\infty} \\sin(2\\pi x)"],
+    ["cos(2π/x) at 0 (aliases to 1 both sides)", "\\lim_{x \\to 0} \\cos\\left(\\frac{2\\pi}{x}\\right)"],
+  ];
+  for (const [name, latex] of declines) {
+    it(`${name} → couldn't-verify`, async () => {
+      const p = await solve(classify(latex), NEVER);
+      expect(p.verified).toBe(false);
+      expect(p.finalAnswer).toBeNull();
+    });
+  }
+});
