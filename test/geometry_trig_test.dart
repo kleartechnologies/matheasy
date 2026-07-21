@@ -730,4 +730,174 @@ void main() {
       );
     });
   });
+
+  group('cosineRuleSide computes the third side (SAS)', () {
+    test('a=8, b=5, included C=60° → c=7', () {
+      final scene = GeometryScene.tryBuildCosineRuleSide(
+        sideA: 8,
+        sideALabel: 'a',
+        sideB: 5,
+        sideBLabel: 'b',
+        includedAngleDeg: 60,
+        angleLabel: 'C',
+        unknownLabel: 'c',
+      )!;
+      expect(scene.kind, GeometrySceneKind.cosineRuleSide);
+      expect(scene.unknownIsAngle, isFalse);
+      expect(scene.unknownValue, closeTo(7, 1e-9));
+      // The drawn unknown edge (B→C) equals the computed side by construction.
+      final bc = _dist(scene.vertices[1], scene.vertices[2]);
+      expect(bc, closeTo(7, 1e-9));
+      // The two given sides are drawn with their given lengths + the included
+      // angle is the real drawn wedge.
+      expect(_angleAt(scene.vertices[0], scene.vertices[1], scene.vertices[2]),
+          closeTo(60, 0.5));
+    });
+
+    test('an obtuse included angle works: a=5, b=6, C=120° → √91', () {
+      final scene = GeometryScene.tryBuildCosineRuleSide(
+        sideA: 5,
+        sideALabel: 'a',
+        sideB: 6,
+        sideBLabel: 'b',
+        includedAngleDeg: 120,
+        angleLabel: 'C',
+        unknownLabel: 'x',
+      )!;
+      expect(scene.unknownValue, closeTo(math.sqrt(91), 1e-9));
+    });
+
+    test('contradicting the verified answer → null', () {
+      expect(
+        GeometryScene.tryBuildCosineRuleSide(
+          sideA: 8,
+          sideALabel: 'a',
+          sideB: 5,
+          sideBLabel: 'b',
+          includedAngleDeg: 60,
+          angleLabel: 'C',
+          unknownLabel: 'c',
+          expectedAnswerLatex: '9', // real answer is 7
+        ),
+        isNull,
+      );
+    });
+
+    test('mapper parses the recognizer payload', () {
+      final scene = GeometryPayloadMapper.parse({
+        'kind': 'cosineRuleSide',
+        'unknown': 'x',
+        'sides': [
+          {'label': 'a', 'value': 8},
+          {'label': 'b', 'value': 5},
+        ],
+        'includedAngle': {'label': 'C', 'value': 60},
+      });
+      expect(scene, isNotNull);
+      expect(scene!.kind, GeometrySceneKind.cosineRuleSide);
+      expect(scene.unknownValue, closeTo(7, 1e-9));
+    });
+
+    test('an AREA problem misfiled as cosineRuleSide is REFUSED (no side-as-area)', () {
+      // Adversarial-review hardening: cosineRuleSide and sasArea share a shape;
+      // computing the third side (7) and labelling it "Area" (true area 17.32)
+      // would be a confident wrong answer — refuse it (mirrors the _sasArea guard).
+      expect(
+        GeometryPayloadMapper.parse({
+          'kind': 'cosineRuleSide',
+          'unknown': 'Area',
+          'sides': [
+            {'label': 'a', 'value': 8},
+            {'label': 'b', 'value': 5},
+          ],
+          'includedAngle': {'label': 'C', 'value': 60},
+        }),
+        isNull,
+      );
+    });
+  });
+
+  group('cosineRuleAngle computes an angle (SSS)', () {
+    test('a=7 (opposite), b=8, c=9 → arccos(0.6667) ≈ 48.19°', () {
+      final scene = GeometryScene.tryBuildCosineRuleAngle(
+        oppositeSide: 7,
+        oppositeSideLabel: 'a',
+        adjSide1: 8,
+        adjSide1Label: 'b',
+        adjSide2: 9,
+        adjSide2Label: 'c',
+        unknownLabel: 'A',
+      )!;
+      expect(scene.kind, GeometrySceneKind.cosineRuleAngle);
+      expect(scene.unknownIsAngle, isTrue);
+      final expected = math.acos((64 + 81 - 49) / (2 * 8 * 9)) * 180 / math.pi;
+      expect(scene.unknownValue, closeTo(expected, 1e-9));
+      // The opposite side closes the triangle at length a, and the drawn wedge
+      // carries the computed angle.
+      expect(_dist(scene.vertices[1], scene.vertices[2]), closeTo(7, 1e-9));
+      expect(_angleAt(scene.vertices[0], scene.vertices[1], scene.vertices[2]),
+          closeTo(expected, 0.5));
+    });
+
+    test('sides that fail the triangle inequality → null', () {
+      expect(
+        GeometryScene.tryBuildCosineRuleAngle(
+          oppositeSide: 10, // 10 >= 1 + 2
+          oppositeSideLabel: 'a',
+          adjSide1: 1,
+          adjSide1Label: 'b',
+          adjSide2: 2,
+          adjSide2Label: 'c',
+          unknownLabel: 'A',
+        ),
+        isNull,
+      );
+    });
+
+    test('mapper parses the recognizer payload (oppositeSide → adjacent split)', () {
+      final scene = GeometryPayloadMapper.parse({
+        'kind': 'cosineRuleAngle',
+        'unknown': 'A',
+        'sides': [
+          {'label': 'a', 'value': 7},
+          {'label': 'b', 'value': 8},
+          {'label': 'c', 'value': 9},
+        ],
+        'oppositeSide': 'a',
+      });
+      expect(scene, isNotNull);
+      expect(scene!.kind, GeometrySceneKind.cosineRuleAngle);
+      final expected = math.acos((64 + 81 - 49) / (2 * 8 * 9)) * 180 / math.pi;
+      expect(scene.unknownValue, closeTo(expected, 1e-9));
+    });
+
+    test('mapper rejects a missing/unmatched oppositeSide', () {
+      expect(
+        GeometryPayloadMapper.parse({
+          'kind': 'cosineRuleAngle',
+          'unknown': 'A',
+          'sides': [
+            {'label': 'a', 'value': 7},
+            {'label': 'b', 'value': 8},
+            {'label': 'c', 'value': 9},
+          ],
+          // no oppositeSide
+        }),
+        isNull,
+      );
+      expect(
+        GeometryPayloadMapper.parse({
+          'kind': 'cosineRuleAngle',
+          'unknown': 'A',
+          'sides': [
+            {'label': 'a', 'value': 7},
+            {'label': 'b', 'value': 8},
+            {'label': 'c', 'value': 9},
+          ],
+          'oppositeSide': 'z', // matches no side
+        }),
+        isNull,
+      );
+    });
+  });
 }

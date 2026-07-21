@@ -79,6 +79,15 @@ enum GeometrySceneKind {
   /// backwards). The unknown is an angle. This is the inverse of
   /// [rightTriangleTrig] (which finds a side from a side + an angle).
   rightTriangleInverseTrig,
+
+  /// Any triangle where two sides and the INCLUDED angle are given and the third
+  /// side (opposite that angle) is found by the cosine rule
+  /// (c² = a² + b² − 2ab·cos C). The unknown is a length.
+  cosineRuleSide,
+
+  /// Any triangle where all THREE sides are given and an angle is found by the
+  /// cosine rule (cos A = (b² + c² − a²) / 2bc). The unknown is an angle.
+  cosineRuleAngle,
 }
 
 /// How a [GeometryScene] is drawn. Kept separate from [GeometrySceneKind] so
@@ -1494,6 +1503,278 @@ class GeometryScene {
     );
   }
 
+  /// Builds a solved **cosine-rule side** scene: two sides + the INCLUDED angle
+  /// between them → the third side (opposite that angle) via
+  /// c² = a² + b² − 2ab·cos C. Returns null when the data is inconsistent or
+  /// contradicts [expectedAnswerLatex]. The side is computed here, never taken
+  /// from the model; the drawn third edge is proven to equal it by construction.
+  static GeometryScene? tryBuildCosineRuleSide({
+    required double sideA,
+    required String sideALabel,
+    required double sideB,
+    required String sideBLabel,
+    required double includedAngleDeg,
+    required String angleLabel,
+    required String unknownLabel,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    if (!sideA.isFinite || sideA <= 0) return null;
+    if (!sideB.isFinite || sideB <= 0) return null;
+    if (!includedAngleDeg.isFinite ||
+        includedAngleDeg <= 0 ||
+        includedAngleDeg >= 180) {
+      return null;
+    }
+    final label = unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim();
+    final aLabel = sideALabel.trim().isEmpty ? 'a' : sideALabel.trim();
+    final bLabel = sideBLabel.trim().isEmpty ? 'b' : sideBLabel.trim();
+    final cLabel = angleLabel.trim().isEmpty ? 'C' : angleLabel.trim();
+    // Label collisions would draw one name with two different values.
+    if ({label, aLabel, bLabel, cLabel}.length != 4) return null;
+
+    final cSq = sideA * sideA +
+        sideB * sideB -
+        2 * sideA * sideB * math.cos(_rad(includedAngleDeg));
+    if (!cSq.isFinite || cSq <= 0) return null;
+    final c = math.sqrt(cSq);
+    if (!c.isFinite || c <= 0) return null;
+
+    // Cross-check against the solver's verified answer, when we have one
+    // (RELATIVE tolerance — lengths have arbitrary magnitude).
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    final lenTol = math.max(0.01, 0.01 * c.abs());
+    if (expected != null && (expected - c).abs() > lenTol) return null;
+
+    // Included angle at the origin; side a along +x to B; side b at the angle to
+    // C. The unknown third side is edge 1 (B→C), which equals c by construction.
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // A (the included angle) — index 0
+      VisualPoint(sideA, 0), // B — index 1
+      VisualPoint(
+        sideB * math.cos(_rad(includedAngleDeg)),
+        sideB * math.sin(_rad(includedAngleDeg)),
+      ), // C — index 2
+    ];
+    final bcLen = math.sqrt(
+      math.pow(vertices[2].x - vertices[1].x, 2) +
+          math.pow(vertices[2].y - vertices[1].y, 2),
+    );
+    if ((bcLen - c).abs() > 1e-6 * math.max(1, c)) return null;
+
+    // Edge 0: A→B (side a); edge 1: B→C (the unknown third side); edge 2: C→A
+    // (side b).
+    final builtSides = [
+      GeometrySide(label: aLabel, edge: 0, value: sideA),
+      GeometrySide(label: label, edge: 1, value: c, isUnknown: true),
+      GeometrySide(label: bLabel, edge: 2, value: sideB),
+    ];
+    final builtAngle = GeometryAngle(
+      label: cLabel,
+      vertex: 0,
+      ray1: 1,
+      ray2: 2,
+      value: includedAngleDeg,
+    );
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'The cosine rule: c² = a² + b² − 2ab·cos C';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final aDisplay = formatLength(sideA);
+    final bDisplay = formatLength(sideB);
+    final knownText = '$aLabel = $aDisplay, $bLabel = $bDisplay and '
+        '$cLabel = ${_degPlain(includedAngleDeg)}';
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'Two sides and the angle between them are given: $knownText.',
+        highlight: {aLabel, bLabel, cLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'The cosine rule',
+        detail: 'The square of the unknown side equals the sum of the squares '
+            'of the other two, minus twice their product times the cosine of '
+            'the angle between them.',
+        equationLatex:
+            '$label^2 = $aLabel^2 + $bLabel^2 - 2 \\times $aLabel \\times $bLabel \\times \\cos $cLabel',
+        highlight: {aLabel, bLabel, cLabel, label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing side',
+        detail: 'Substitute the numbers and take the square root.',
+        equationLatex:
+            '$label = \\sqrt{$aDisplay^2 + $bDisplay^2 - 2 \\times $aDisplay \\times $bDisplay \\times \\cos(${_deg(includedAngleDeg)})}',
+        highlight: {label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing side is ${formatLength(c)}.',
+        equationLatex: '$label = ${formatLength(c)}',
+        highlight: {label},
+      ),
+    ];
+    final semantics = 'Triangle diagram. Given $knownText. $resolvedRule. '
+        'The missing side $label is ${formatLength(c)}.';
+    return GeometryScene(
+      kind: GeometrySceneKind.cosineRuleSide,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: [builtAngle],
+      sides: builtSides,
+      unknownKind: GeometryUnknownKind.length,
+      unknownLabel: label,
+      unknownValue: c,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+    );
+  }
+
+  /// Builds a solved **cosine-rule angle** scene: all THREE sides given → an
+  /// angle via cos A = (b² + c² − a²) / 2bc, where [oppositeSide] a is opposite
+  /// the asked angle and [adjSide1]/[adjSide2] (b, c) sit around it. Returns null
+  /// on an invalid triangle (fails the triangle inequality) or a contradiction
+  /// with [expectedAnswerLatex]. The angle is computed here — never from the
+  /// model; the opposite side is proven to close the triangle by construction.
+  static GeometryScene? tryBuildCosineRuleAngle({
+    required double oppositeSide,
+    required String oppositeSideLabel,
+    required double adjSide1,
+    required String adjSide1Label,
+    required double adjSide2,
+    required String adjSide2Label,
+    required String unknownLabel,
+    String? ruleName,
+    String? caption,
+    String? expectedAnswerLatex,
+  }) {
+    final a = oppositeSide, b = adjSide1, c = adjSide2;
+    if (![a, b, c].every((v) => v.isFinite && v > 0)) return null;
+    // The three sides must actually close into a triangle.
+    if (a >= b + c || b >= a + c || c >= a + b) return null;
+
+    final label = unknownLabel.trim().isEmpty ? 'x' : unknownLabel.trim();
+    final aLabel = oppositeSideLabel.trim().isEmpty ? 'a' : oppositeSideLabel.trim();
+    final bLabel = adjSide1Label.trim().isEmpty ? 'b' : adjSide1Label.trim();
+    final cLabel = adjSide2Label.trim().isEmpty ? 'c' : adjSide2Label.trim();
+    if ({label, aLabel, bLabel, cLabel}.length != 4) return null;
+
+    final cosA = (b * b + c * c - a * a) / (2 * b * c);
+    if (!cosA.isFinite || cosA <= -1 || cosA >= 1) return null;
+    final theta = _degrees(math.acos(cosA));
+    if (!theta.isFinite || theta <= 0 || theta >= 180) return null;
+
+    final expected = _parseExpectedValue(expectedAnswerLatex);
+    if (expected != null && (expected - theta).abs() > 0.5) return null;
+
+    // The asked angle at the origin, its two ADJACENT sides as rays; the
+    // opposite side closes the triangle and must measure a.
+    //   A (unknown angle) at (0,0); C at (b,0) (side b = A→C); B at
+    //   c·(cosθ, sinθ) (side c = A→B). Then C→B = a by the cosine rule.
+    final vertices = <VisualPoint>[
+      const VisualPoint(0, 0), // A (unknown angle) — index 0
+      VisualPoint(b, 0), // C — index 1
+      VisualPoint(c * math.cos(_rad(theta)), c * math.sin(_rad(theta))), // B — 2
+    ];
+    final cbLen = math.sqrt(
+      math.pow(vertices[2].x - vertices[1].x, 2) +
+          math.pow(vertices[2].y - vertices[1].y, 2),
+    );
+    if ((cbLen - a).abs() > 1e-6 * math.max(1, a)) return null;
+    final drawnTheta = _angleBetween(vertices[0], vertices[1], vertices[2]);
+    if ((drawnTheta - theta).abs() > 0.5) return null;
+
+    // Edge 0: A→C (side b); edge 1: C→B (side a, opposite the unknown angle);
+    // edge 2: B→A (side c).
+    final builtSides = [
+      GeometrySide(label: bLabel, edge: 0, value: b),
+      GeometrySide(label: aLabel, edge: 1, value: a),
+      GeometrySide(label: cLabel, edge: 2, value: c),
+    ];
+    final builtAngle = GeometryAngle(
+      label: label,
+      vertex: 0,
+      ray1: 1,
+      ray2: 2,
+      value: theta,
+      isUnknown: true,
+    );
+
+    final resolvedRule = (ruleName != null && ruleName.trim().isNotEmpty)
+        ? ruleName.trim()
+        : 'The cosine rule: cos A = (b² + c² − a²) / 2bc';
+    final resolvedCaption = (caption != null && caption.trim().isNotEmpty)
+        ? caption.trim()
+        : resolvedRule;
+
+    final aDisplay = formatLength(a);
+    final bDisplay = formatLength(b);
+    final cDisplay = formatLength(c);
+    final knownText = '$aLabel = $aDisplay, $bLabel = $bDisplay and '
+        '$cLabel = $cDisplay';
+    final steps = <GeometryStep>[
+      GeometryStep(
+        focus: GeometryStepFocus.known,
+        title: 'Start with what we know',
+        detail: 'All three sides are given: $knownText. '
+            'The angle $label is opposite $aLabel.',
+        highlight: {aLabel, bLabel, cLabel},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.rule,
+        title: 'The cosine rule',
+        detail: 'Rearranged for an angle: its cosine equals the squares of the '
+            'two sides around it, minus the square of the opposite side, over '
+            'twice their product.',
+        equationLatex:
+            '\\cos $label = \\frac{$bLabel^2 + $cLabel^2 - $aLabel^2}{2 \\times $bLabel \\times $cLabel}',
+        highlight: {aLabel, bLabel, cLabel, label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.unknown,
+        title: 'Find the missing angle',
+        detail: 'Substitute the numbers and take the inverse cosine.',
+        equationLatex:
+            '$label = \\cos^{-1}\\left(\\frac{$bDisplay^2 + $cDisplay^2 - $aDisplay^2}{2 \\times $bDisplay \\times $cDisplay}\\right)',
+        highlight: {label},
+      ),
+      GeometryStep(
+        focus: GeometryStepFocus.answer,
+        title: 'Answer',
+        detail: 'The missing angle is ${_degPlain(theta)}.',
+        equationLatex: '$label = ${_deg(theta)}',
+        highlight: {label},
+      ),
+    ];
+    final semantics = 'Triangle diagram. Given $knownText. $resolvedRule. '
+        'The missing angle $label is ${_degPlain(theta)}.';
+    return GeometryScene(
+      kind: GeometrySceneKind.cosineRuleAngle,
+      figureKind: GeometryFigureKind.polygon,
+      vertices: vertices,
+      angles: [builtAngle],
+      sides: builtSides,
+      unknownLabel: label,
+      unknownValue: theta,
+      ruleName: resolvedRule,
+      caption: resolvedCaption,
+      semanticsLabel: semantics,
+      steps: steps,
+      polygonRing: const [0, 1, 2],
+    );
+  }
+
   static bool _isSumKind(GeometrySceneKind kind) => switch (kind) {
         GeometrySceneKind.triangleAngles ||
         GeometrySceneKind.isoscelesTriangle ||
@@ -1508,6 +1789,8 @@ class GeometryScene {
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
         GeometrySceneKind.rightTriangleInverseTrig ||
+        GeometrySceneKind.cosineRuleSide ||
+        GeometrySceneKind.cosineRuleAngle ||
         GeometrySceneKind.sasArea =>
           false,
       };
@@ -1580,6 +1863,8 @@ class GeometryScene {
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
         GeometrySceneKind.rightTriangleInverseTrig ||
+        GeometrySceneKind.cosineRuleSide ||
+        GeometrySceneKind.cosineRuleAngle ||
         GeometrySceneKind.sasArea =>
           null,
       };
@@ -1602,6 +1887,8 @@ class GeometryScene {
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
         GeometrySceneKind.rightTriangleInverseTrig ||
+        GeometrySceneKind.cosineRuleSide ||
+        GeometrySceneKind.cosineRuleAngle ||
         GeometrySceneKind.sasArea =>
           null,
       };
@@ -1626,6 +1913,8 @@ class GeometryScene {
         GeometrySceneKind.rightTriangleTrig ||
         GeometrySceneKind.sineRuleAngle ||
         GeometrySceneKind.rightTriangleInverseTrig ||
+        GeometrySceneKind.cosineRuleSide ||
+        GeometrySceneKind.cosineRuleAngle ||
         GeometrySceneKind.sasArea =>
           '',
       };
@@ -1735,11 +2024,14 @@ class GeometryScene {
       case GeometrySceneKind.rightTriangleTrig:
       case GeometrySceneKind.sineRuleAngle:
       case GeometrySceneKind.rightTriangleInverseTrig:
+      case GeometrySceneKind.cosineRuleSide:
+      case GeometrySceneKind.cosineRuleAngle:
       case GeometrySceneKind.sasArea:
         // These are side/mixed-given kinds built via their OWN builders
         // (tryBuildPythagoras / tryBuildRightTriangleTrig / tryBuildSineRuleAngle
-        // / tryBuildRightTriangleInverseTrig / tryBuildSasArea), never through the
-        // angle path — unreachable here.
+        // / tryBuildRightTriangleInverseTrig / tryBuildCosineRuleSide /
+        // tryBuildCosineRuleAngle / tryBuildSasArea), never through the angle
+        // path — unreachable here.
         return null;
     }
   }

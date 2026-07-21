@@ -40,6 +40,12 @@ class GeometryPayloadMapper {
     if (kind == GeometrySceneKind.sasArea) {
       return _sasArea(m, expected);
     }
+    if (kind == GeometrySceneKind.cosineRuleSide) {
+      return _cosineRuleSide(m, expected);
+    }
+    if (kind == GeometrySceneKind.cosineRuleAngle) {
+      return _cosineRuleAngle(m, expected);
+    }
     return _angles(kind, m, expected);
   }
 
@@ -239,6 +245,76 @@ class GeometryPayloadMapper {
       sideBLabel: b.label,
       includedAngleDeg: angle.value,
       angleLabel: angle.label,
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  // ---- Cosine rule (SAS → the third side; SSS → an angle) -------------------
+
+  static GeometryScene? _cosineRuleSide(Map<String, dynamic> m, String? expected) {
+    final angle = _labeledValue(m['includedAngle']);
+    if (angle == null) return null;
+    final raw = m['sides'];
+    if (raw is! List || raw.length != 2) return null;
+    final a = raw[0] is Map ? _labeledValue(raw[0]) : null;
+    final b = raw[1] is Map ? _labeledValue(raw[1]) : null;
+    if (a == null || b == null) return null;
+    // The unknown of this kind IS the third SIDE. cosineRuleSide and sasArea
+    // share an identical shape (two sides + the included angle), so an AREA
+    // problem misfiled here would compute a SIDE and label it "Area" — a
+    // confident wrong answer. Refuse it (mirrors the reciprocal guard in
+    // _sasArea); the normal solver/tutor flow then handles the area.
+    final rawUnknown = m['unknown'] is String ? (m['unknown'] as String).trim() : '';
+    if (rawUnknown.toLowerCase() == 'area') return null;
+    return GeometryScene.tryBuildCosineRuleSide(
+      sideA: a.value,
+      sideALabel: a.label,
+      sideB: b.value,
+      sideBLabel: b.label,
+      includedAngleDeg: angle.value,
+      angleLabel: angle.label,
+      unknownLabel: _unknownLabel(m['unknown']),
+      ruleName: _optional(m['ruleName']),
+      caption: _optional(m['caption']),
+      expectedAnswerLatex: expected,
+    );
+  }
+
+  /// `sides`: three `{label, value}`; `oppositeSide` names which side is opposite
+  /// the asked angle (the other two are the adjacent pair). A missing/unmatched
+  /// `oppositeSide`, a wrong side count, or a bad value rejects the scene.
+  static GeometryScene? _cosineRuleAngle(
+    Map<String, dynamic> m,
+    String? expected,
+  ) {
+    final raw = m['sides'];
+    if (raw is! List || raw.length != 3) return null;
+    final sides = <({String label, double value})>[];
+    for (final e in raw) {
+      final lv = e is Map ? _labeledValue(e) : null;
+      if (lv == null) return null;
+      sides.add(lv);
+    }
+    final oppLabel = _optional(m['oppositeSide']);
+    if (oppLabel == null) return null;
+    final oppIdx = sides.indexWhere((s) => s.label == oppLabel);
+    if (oppIdx < 0) return null;
+    final opp = sides[oppIdx];
+    final adj = [
+      for (var i = 0; i < sides.length; i++)
+        if (i != oppIdx) sides[i],
+    ];
+    if (adj.length != 2) return null;
+    return GeometryScene.tryBuildCosineRuleAngle(
+      oppositeSide: opp.value,
+      oppositeSideLabel: opp.label,
+      adjSide1: adj[0].value,
+      adjSide1Label: adj[0].label,
+      adjSide2: adj[1].value,
+      adjSide2Label: adj[1].label,
+      unknownLabel: _unknownLabel(m['unknown']),
       ruleName: _optional(m['ruleName']),
       caption: _optional(m['caption']),
       expectedAnswerLatex: expected,
