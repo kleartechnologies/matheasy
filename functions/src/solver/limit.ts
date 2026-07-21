@@ -73,37 +73,53 @@ export function parseLimit(rawLatex: string): ParsedLimit | null {
  * Aitken's Δ². Returns null for a diverging, oscillating, or too-slow tail. The
  * bias is toward null: a false decline is honest, a wrong value is not.
  */
+/** Aitken Δ² on ONE consecutive triple, but ONLY when the triple's tail is
+ * geometric (its difference ratio is comfortably below 1). Returns the
+ * extrapolated limit, or null when the triple isn't a trustworthy geometric
+ * tail. A flat triple returns its value. */
+function aitkenTriple(v0: number, v1: number, v2: number): number | null {
+  const d1 = v1 - v0;
+  const d2 = v2 - v1;
+  const a1 = Math.abs(d1);
+  const a2 = Math.abs(d2);
+  if (a2 < 1e-12 && a1 < 1e-9) return v2; // flat to precision ⇒ converged
+  if (a1 < 1e-15) return null; // can't form a ratio
+  // GEOMETRIC decay only. A ratio ≈ 1 (constant steps) is LINEAR growth — a
+  // divergent limit under geometric sampling (ln x, log x). A ratio drifting up
+  // toward 1 is a harmonic / one-over-log tail Aitken can't model.
+  if (a2 / a1 > 0.5) return null;
+  const secondDiff = v2 - 2 * v1 + v0;
+  if (Math.abs(secondDiff) < 1e-14) return v2;
+  const L = v2 - (d2 * d2) / secondDiff;
+  if (!Number.isFinite(L)) return null;
+  // A geometric tail (ρ ≤ 0.5) corrects v2 by ρ/(1−ρ)·|Δv| ≤ |Δv|; a bigger
+  // correction means the tail isn't really geometric — reject.
+  if (Math.abs(L - v2) > 3 * a2 + 1e-9) return null;
+  return L;
+}
+
+/**
+ * From a sequence approaching the point, decide whether it CONVERGES and to
+ * what. Aitken-extrapolates every consecutive triple from the tail inward and
+ * requires the two most-recent trustworthy (geometric) estimates to AGREE. This:
+ *   • rejects DIVERGENCE (ln x, x²) and non-geometric tails (harmonic 1/ln x,
+ *     ln(ln x)) — their per-triple estimates never form two that agree; and
+ *   • tolerates a single noise-dominated tail sample from floating-point
+ *     cancellation ((1−cos x)/x²), because the clean earlier triples still agree.
+ * The bias is toward null: a false decline is honest, a wrong value is not.
+ */
 function converge(vals: number[]): number | null {
   const n = vals.length;
   if (n < 4) return null;
-  const diffs: number[] = [];
-  for (let i = 1; i < n; i++) diffs.push(vals[i] - vals[i - 1]);
-  const m = diffs.length;
-  const aLast = Math.abs(diffs[m - 1]);
-  const aPrev = Math.abs(diffs[m - 2]);
-  const aPrev2 = Math.abs(diffs[m - 3]);
-
-  // Diverging (a huge or growing step) or oscillating (steps not shrinking) → no.
-  if (aLast > 1e6) return null;
-  if (aLast > aPrev || aPrev > aPrev2) return null;
-
-  const v0 = vals[n - 3];
-  const v1 = vals[n - 2];
-  const v2 = vals[n - 1];
-  // Already flat to floating-point precision — the tail value IS the limit.
-  if (aLast < 1e-9) return v2;
-
-  // Aitken's Δ²: for v_k = L + C·ρ^k, L = v2 − (Δv)² / (Δ²v). Guard a ~0 second
-  // difference (an essentially-linear/converged tail → take the tail value).
-  const secondDiff = v2 - 2 * v1 + v0;
-  if (Math.abs(secondDiff) < 1e-14) return v2;
-  const dv = v2 - v1;
-  const L = v2 - (dv * dv) / secondDiff;
-  if (!Number.isFinite(L)) return null;
-  // Sanity: a genuine geometric tail corrects v2 by O(step); a wild extrapolation
-  // (non-geometric, oscillating, or barely-converging) is rejected as untrusted.
-  if (Math.abs(L - v2) > 100 * aLast + 1e-6) return null;
-  return L;
+  const estimates: number[] = [];
+  for (let i = n - 1; i >= 2 && estimates.length < 3; i--) {
+    const L = aitkenTriple(vals[i - 2], vals[i - 1], vals[i]);
+    if (L !== null) estimates.push(L);
+  }
+  if (estimates.length < 2) return null;
+  const [a, b] = estimates;
+  if (Math.abs(a - b) > 1e-4 * (1 + Math.abs(a)) + 1e-7) return null;
+  return a;
 }
 
 /** Evaluate f along one approach and return the converged value, or null when
@@ -197,7 +213,11 @@ export function evaluateLimit(
     const r = sampleSide(limitFn, limitVar, limitPoint, 1);
     const l = sampleSide(limitFn, limitVar, limitPoint, -1);
     if (r === null || l === null) return null;
-    const tol = 1e-3 * (1 + Math.abs(r));
+    // Both sides are already converged values, so a genuine two-sided limit has
+    // them agreeing to convergence precision — a TIGHT tolerance. (The old 1e-3
+    // relative tol scaled up with |value|, waving through a jump of ~1 at a
+    // value of ~1000: 999.5 vs 1000.5. 1e-4 relative catches it.)
+    const tol = 1e-4 * (1 + Math.abs(r));
     if (Math.abs(r - l) > tol) return null; // the two sides disagree → DNE
     value = (r + l) / 2;
   }

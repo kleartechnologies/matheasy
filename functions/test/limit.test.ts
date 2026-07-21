@@ -83,4 +83,45 @@ describe("limit engine — golden rule: divergent / DNE limits DECLINE", () => {
     const p = await solve(classify("\\lim_{x \\to 0} \\frac{x}{\\sqrt{x^2}}"), NEVER);
     expect(p.verified).toBe(false);
   });
+
+  it("a LARGE-valued jump (999.5 vs 1000.5) declines (tight two-sided tol)", async () => {
+    const p = await solve(
+      classify("\\lim_{x \\to 0} 1000 + \\frac{0.5 x}{\\sqrt{x^2}}"),
+      NEVER
+    );
+    expect(p.verified).toBe(false);
+  });
+});
+
+describe("limit engine — adversarial-review hardening: log / harmonic tails DECLINE", () => {
+  // Geometric sampling turns logarithmic GROWTH into an arithmetic (constant-
+  // difference) sequence and 1/log into a harmonic tail — both fooled the old
+  // "differences shrink" gate into a confident WRONG finite value. The geometric-
+  // decay gate must now DECLINE all of these (they diverge, or Aitken can't
+  // extrapolate them) rather than ship a number.
+  const declines: [string, string][] = [
+    ["ln x at ∞ (→ +∞, constant diffs)", "\\lim_{x \\to \\infty} \\ln x"],
+    ["log₁₀ x at ∞ (→ +∞, snapped to 6 before)", "\\lim_{x \\to \\infty} \\log_{10} x"],
+    ["ln(x²) at ∞ (→ +∞)", "\\lim_{x \\to \\infty} \\ln(x^2)"],
+    ["ln(ln x) at ∞ (→ +∞, slow log-of-log)", "\\lim_{x \\to \\infty} \\ln(\\ln x)"],
+    ["1/ln x at 0⁺ (→ 0, harmonic — was −0.043)", "\\lim_{x \\to 0^+} \\frac{1}{\\ln x}"],
+  ];
+  for (const [name, latex] of declines) {
+    it(`${name} → couldn't-verify (never a wrong value)`, async () => {
+      const cls = classify(latex);
+      expect(cls.problemType).toBe("limit");
+      const p = await solve(cls, NEVER);
+      expect(p.verified).toBe(false);
+      expect(p.finalAnswer).toBeNull();
+    });
+  }
+
+  it("a cancellation limit (1−cos x)/x² → 1/2 still SOLVES (flat tail at h≥1e-6)", async () => {
+    const p = await solve(
+      classify("\\lim_{x \\to 0} \\frac{1 - \\cos x}{x^2}"),
+      NEVER
+    );
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("1/2");
+  });
 });
