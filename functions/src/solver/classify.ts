@@ -10,7 +10,10 @@ import { parseLinalg, parseVectors } from "./linalg";
 import { parseLinearSystem } from "./linsystem";
 import { parseSimultaneous } from "./simultaneous";
 import { parseOde } from "./ode";
+import { parseOdePointEval } from "./odePointEval";
 import { parseLimit } from "./limit";
+import { parseBoundedTrig } from "./boundedTrig";
+import { parseCircle } from "./circle";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
 import {
@@ -143,6 +146,36 @@ export function classify(rawLatex: string): Classification {
     return base("conceptual", "conceptual", "x", false, "none");
   }
 
+  // --- Bounded-range trig equation `T(x)=c` on `[lo,hi]` ------------------
+  // MUST run before the tutor-route return below: a numeric interval otherwise
+  // reads as a "beyond_solver" branch constraint, but a FULL closed interval is
+  // exactly what this engine enumerates + verifies. It matches only the strict
+  // single-bare-trig shape with a parseable interval and unambiguous unit; any
+  // branch qualifier (obtuse/smallest/quadrant) or richer form declines to null
+  // and falls through to the tutor route unchanged.
+  const boundedTrig = parseBoundedTrig(rawLatex);
+  if (boundedTrig) {
+    return base(
+      "bounded_trigonometric_equation",
+      "bounded_trig",
+      boundedTrig.variable,
+      true,
+      "none",
+      { boundedTrig }
+    );
+  }
+
+  // --- Circle mensuration (area / circumference / arc / sector) -----------
+  // A closed-form exam staple. The parse gate is strict (a plain circle, ONE
+  // target, ONE linear given, an explicit angle for arc/sector), so a real
+  // circle problem is answered in exact π-form rather than routed to the tutor;
+  // anything ambiguous returns null and falls through unchanged. Placed before
+  // the tutor-route below so a well-formed "area of a circle, r=7" is solved.
+  const circle = parseCircle(rawLatex);
+  if (circle) {
+    return base("circle_mensuration", "circle", "r", false, "none", { circle });
+  }
+
   // --- Multi-part / beyond-solver problems → the AI tutor -----------------
   // A single problem gets ONE verified answer; a MULTI-PART question does not.
   // With the OCR now capturing the whole problem, inputs like "given 2x+5=15,
@@ -190,6 +223,7 @@ export function classify(rawLatex: string): Classification {
       limitPoint: limit.point,
       limitDir: limit.dir,
       limitFn: limit.fn,
+      limitFactor: limit.factor,
     });
   }
 
@@ -216,6 +250,26 @@ export function classify(rawLatex: string): Classification {
     return base("integral", "llm_candidate", parsed.unknown, false, "derivative_back", {
       integrand: parsed.integrand,
     });
+  }
+
+  // --- ODE initial-value POINT EVALUATION (deterministic) -----------------
+  // A well-posed IVP that asks for y(b) at ONE point — dy/dx=f(x,y), y(a)=y₀,
+  // "find y(b)" — is integrated numerically and cross-checked by two independent
+  // integrators (solver/odePointEval.ts), so it returns a VERIFIED value even when
+  // the solution has no elementary closed form. Tried BEFORE the symbolic ODE path:
+  // its parse gate is strict (exactly `order` initial conditions at one point, an
+  // explicit target, no numeric-method qualifier), so a general/particular-solution
+  // request returns null here and falls through to the LLM ode path unchanged.
+  const odePoint = parseOdePointEval(rawLatex);
+  if (odePoint) {
+    return base(
+      "ode_initial_value",
+      "ode_point_eval",
+      odePoint.depVar,
+      false,
+      "none",
+      { odePointEval: odePoint }
+    );
   }
 
   // --- ODEs (y' = 2y, y'' + y = 0, \frac{dy}{dx} = …) ---------------------
@@ -561,6 +615,8 @@ const TEACHING_META: Record<string, [TeachingCategory, TeachingDifficulty]> = {
   integral: ["calculus", "preUniversity"],
   definite_integral: ["calculus", "preUniversity"],
   limit: ["calculus", "preUniversity"],
+  bounded_trigonometric_equation: ["trigonometry", "preUniversity"],
+  circle_mensuration: ["geometry", "secondary"],
   maclaurin_series: ["calculus", "university"],
   taylor_series: ["calculus", "university"],
   // differential equations

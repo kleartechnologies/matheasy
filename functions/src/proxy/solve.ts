@@ -43,6 +43,9 @@ import * as animation from "../solver/animationSchema";
 import { classify, equationParts } from "../solver/classify";
 import { solveDeterministic } from "../solver/deterministic";
 import { evaluateLimit } from "../solver/limit";
+import { solveBoundedTrig } from "../solver/boundedTrig";
+import { solveCircle } from "../solver/circle";
+import { solveOdePointEval } from "../solver/odePointEval";
 import { odeAnswer, verifyOde } from "../solver/ode";
 import { exactForm } from "../solver/exact";
 import { buildGraph, GraphInput } from "../solver/graph";
@@ -74,6 +77,44 @@ import {
   verifyRoots,
   verifySolution,
 } from "../solver/verify";
+
+/**
+ * HELD ENGINES — two numeric-sampling oracles, committed but DISABLED.
+ *
+ * The circle and bounded-trig engines are CLOSED-FORM / substitution-verified: an
+ * exact formula whose rendered coefficient is re-checked against an independent
+ * recompute, or enumerated roots each re-substituted into the original equation.
+ * Their proof is EXACT, so they ship.
+ *
+ * The limit and ODE-point-eval engines are different in kind: each PROVES its answer
+ * only by numeric SAMPLING (a convergence oracle; two independent integrators that
+ * must agree). A sampling oracle cannot be proven golden-rule-clean against a
+ * code-reading adversary, because a feature narrower than the sample spacing is
+ * invisible to it — and both the offending function AND the verifier that samples it
+ * inherit the same blind spot:
+ *   • LIMIT — an additive offset hides below the ill-conditioning noise floor, a
+ *     sign-flip sits beyond any finite reach (a confirmed case flips at x≈1e5000, past
+ *     `double`), a log-periodic function aliases the deterministic lattice. Gates
+ *     R1…R9 each surfaced fresh violations of these kinds — it never converged clean.
+ *   • ODE POINT-EVAL — two integrators that step over the SAME sub-grid spike agree on
+ *     a value that misses it (a confirmed case: y′ = 5.64e6·e^{−1e14(x−c)²} integrates
+ *     to 0, true ≈ 1). To GUARANTEE catching a width-w spike a fixed grid needs spacing
+ *     < w, but the adversary picks w below any fixed grid and encodes the narrowness in
+ *     small literals (…/1e−11) or products that defeat any magnitude cap — it is
+ *     information-theoretically irreducible for a black-box sampler. Gate round 3 closed
+ *     the parse/linearity holes (symbolic-point over-determination via a broadened
+ *     clause counter; product-of-sines nonlinearity via a SYMBOLIC affine-in-top-
+ *     derivative check that no sampling lattice can dodge), but this spike class stands.
+ *
+ * Decision (2026-07-27): ship the two closed-form engines (circle, bounded-trig) and
+ * HOLD both samplers, each to be revisited as its own scoped project (narrowed to a
+ * subset it can verify EXACTLY — e.g. interval arithmetic, or a closed-form subclass).
+ * Flipping a flag to `true` re-enables that engine's routing below; every engine and
+ * its tests remain committed and intact meanwhile. While held, a `\lim` or an ODE IVP
+ * point-eval is an honest couldn't-verify — it never falls through to the LLM tier.
+ */
+export const LIMIT_ENGINE_ENABLED = false;
+export const ODE_POINTEVAL_ENABLED = false;
 
 interface SolveRequest {
   latex?: string;
@@ -268,8 +309,64 @@ export async function solve(
   // the two sides disagree. Placed before the algebra engine so `\lim` never
   // falls through to a mis-parse.
   if (cls.strategy === "limit") {
-    const result = evaluateLimit(cls);
+    // HELD: while LIMIT_ENGINE_ENABLED is false the oracle is bypassed and every
+    // `\lim` is an honest couldn't-verify (see the flag's note above). It stays a
+    // terminal decline here — a `\lim` never falls through to the LLM tier.
+    const result = LIMIT_ENGINE_ENABLED ? evaluateLimit(cls) : null;
     if (!result) return couldNotVerify(cls, "limit_no_converge", onCouldNotVerify);
+    return {
+      problemLatex: cls.latex,
+      problemType: cls.problemType,
+      finalAnswer: result.answer,
+      verified: true,
+      methods: result.methods,
+      graph: null,
+    };
+  }
+
+  if (cls.strategy === "bounded_trig") {
+    // The enumerate-and-verify IS the proof: every root is re-substituted into
+    // the original equation, so a null means empty/inconsistent → decline.
+    const result = cls.boundedTrig ? solveBoundedTrig(cls.boundedTrig) : null;
+    if (!result) return couldNotVerify(cls, "bounded_trig_no_solution", onCouldNotVerify);
+    return {
+      problemLatex: cls.latex,
+      problemType: cls.problemType,
+      finalAnswer: result.answer,
+      verified: true,
+      methods: result.methods,
+      graph: null,
+    };
+  }
+
+  // Circle mensuration — an exact closed-form answer. solveCircle re-checks the
+  // rendered π-coefficient against an independent numeric recompute INTERNALLY and
+  // returns null if it disagrees, so a null here is an honest couldn't-verify.
+  if (cls.strategy === "circle") {
+    const result = cls.circle ? solveCircle(cls.circle) : null;
+    if (!result) return couldNotVerify(cls, "circle_no_verify", onCouldNotVerify);
+    return {
+      problemLatex: cls.latex,
+      problemType: cls.problemType,
+      finalAnswer: result.answer,
+      verified: true,
+      methods: result.methods,
+      graph: null,
+    };
+  }
+
+  // ODE initial-value point evaluation — two independent integrators (RK4+Richardson
+  // and DP5) must converge AND agree, else null. That cross-check IS the proof, so a
+  // null here is an honest couldn't-verify (divergence / stiffness / a singularity on
+  // the path / an underdetermined or boundary-value problem).
+  if (cls.strategy === "ode_point_eval") {
+    // HELD: while ODE_POINTEVAL_ENABLED is false the integrators are bypassed and every
+    // ODE IVP point-eval is an honest couldn't-verify (see the flag's note above — the
+    // sub-grid-spike hole is irreducible for a numeric sampler). It stays a terminal
+    // decline here: an ODE point-eval never falls through to the LLM tier.
+    const result =
+      ODE_POINTEVAL_ENABLED && cls.odePointEval ? solveOdePointEval(cls.odePointEval) : null;
+    if (!result) return couldNotVerify(cls, "ode_point_eval_no_verify", onCouldNotVerify);
     return {
       problemLatex: cls.latex,
       problemType: cls.problemType,

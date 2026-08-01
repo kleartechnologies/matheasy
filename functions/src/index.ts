@@ -3,7 +3,8 @@
  *
  * Every exported symbol here becomes a deployed function. Grouped by concern:
  *   • Secure AI proxy   — recognizeEquation, solveEquation, tutorReply,
- *                         generateVisualSolution, generatePracticeQuestion
+ *                         tutorImage, generateVisualSolution,
+ *                         generatePracticeQuestion
  *   • Billing           — revenuecatWebhook
  *   • Data layer        — aggregateProgress
  *
@@ -16,6 +17,7 @@ export { recognizeEquation } from "./proxy/scan";
 export { solveEquation } from "./proxy/solve";
 export { enrichTeaching } from "./proxy/teach";
 export { tutorReply } from "./proxy/tutor";
+export { tutorImage } from "./proxy/tutorImage";
 export { generateVisualSolution } from "./proxy/visual";
 export { generatePracticeQuestion } from "./proxy/practice";
 

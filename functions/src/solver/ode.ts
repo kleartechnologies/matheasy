@@ -15,7 +15,7 @@
  * or slashed notation, optionally with numeric initial conditions. Anything the
  * parser can't read cleanly declines.
  */
-import { derivative, parse } from "mathjs";
+import { derivative, evaluate, parse } from "mathjs";
 
 import { asciiToLatex, latexToAscii } from "./latex";
 import { FinalAnswer } from "./types";
@@ -35,18 +35,54 @@ export interface OdeQuery {
   initial: OdeInitialCondition[];
 }
 
+/** Canonicalize LaTeX decorations that would otherwise HIDE a condition (or a
+ * bracket) from the parser: `\left(`/`\right)` → plain parens, and the alignment
+ * tab `&`, `:=`, `\coloneqq` → `=`. Without this, a SECOND condition written
+ * `y(1) &= 5`, `y\left(2\right) = 5`, or `y(2) := 9` is invisible to parseInitial,
+ * so an over-determined / two-point problem would slip through as a well-posed IVP
+ * (the two-integrator gate can't catch it — both integrate the SAME reduced IVP).
+ *
+ * LaTeX SPACING macros (`\quad`, `\qquad`, `\:`, `\;`, `\,`, `\!`, a literal `\ `,
+ * or `~`) are the same trap one layer down: written between a condition's `dep(a)`
+ * and its `=` — `y(1) \quad = 5`, `y(1) \: = 5` — they hide the `=` from
+ * parseInitial's `\)\s*=` AND from findTarget's `(?!\s*=)` lookahead, so the extra
+ * (over-determining) condition reads as a bare TARGET point and the ill-posed
+ * problem ships as a well-posed IVP. Flatten every spacing macro to a plain space. */
+export function normalizeOdeLatex(s: string): string {
+  return s
+    .replace(/\\left|\\right/g, "")
+    .replace(/\\coloneqq/g, "=")
+    .replace(/:=/g, "=")
+    // brace-argument spacing/phantom macros: \hspace{..}, \phantom{..}, \mspace{..}
+    .replace(/\\(?:hspace|mspace|phantom|hphantom|vphantom)\s*\{[^{}]*\}/g, " ")
+    // NAMED horizontal-spacing macros — an allowlist that misses one (\thinspace …)
+    // lets a surviving spacer hide a condition's `=`, so the over-determining clause
+    // reads as a bare target. The (?![a-zA-Z]) tail matches the macro when a digit,
+    // brace, or backslash abuts it (`\quad5`) yet never eats a longer macro's name.
+    .replace(
+      /\\(?:qquad|quad|thinspace|medspace|thickspace|negthinspace|negmedspace|negthickspace|enspace|enskip|hfill|hspace|mspace)(?![a-zA-Z])/g,
+      " "
+    )
+    // symbol spacing macros \, \; \: \! and backslash-space / backslash-newline
+    .replace(/\\[,;:!]/g, " ")
+    .replace(/\\\s/g, " ")
+    .replace(/~/g, " ")
+    .replace(/&/g, " ");
+}
+
 /** Detect an ODE and build its residual + initial conditions, or null. */
 export function parseOde(rawLatex: string): OdeQuery | null {
   // A real scanned/typed ODE is short; cap the length so a pathological
   // space-flood can't drive the derivative regexes into slow backtracking.
   if (!rawLatex.includes("=") || rawLatex.length > 2000) return null;
+  const src = normalizeOdeLatex(rawLatex);
 
   // Pull out numeric initial conditions FIRST, then strip them so the ODE clause
   // is isolated (an IC like "y'(0)=1" also contains a derivative token).
-  const depGuess = guessDepVar(rawLatex);
+  const depGuess = guessDepVar(src);
   if (!depGuess) return null;
-  const initial = parseInitial(rawLatex, depGuess);
-  const odeText = pickOdeClause(stripInitial(rawLatex, depGuess));
+  const initial = parseInitial(src, depGuess);
+  const odeText = pickOdeClause(stripInitial(src, depGuess));
 
   const det = detectDerivative(odeText);
   if (!det) return null;
@@ -147,15 +183,69 @@ function buildResidual(odeText: string, dep: string, indep: string): string | nu
   return `(${lhs}) - (${rhs})`;
 }
 
-/** Numeric initial conditions: y(a)=v, y'(a)=v, y''(a)=v. */
+// The RHS value of an initial condition, most-specific alternative FIRST — regex
+// alternation is first-match, so `\frac`, a×10ᵏ and sci notation must precede the
+// plain decimal, which would otherwise stop at the slash or the 'e' and silently
+// drop the rest (reading `1/2`→1, `3/2`→3, `2.5e2`→2.5, `1×10^3`→1). Every form
+// here is normalized + evaluated by `parseIcValue` to its true number.
+const IC_VAL = [
+  String.raw`-?\d+\s*\\frac\s*\{[^{}]*\}\s*\{[^{}]*\}`, // 2\frac{1}{2} — mixed number (n + a/b)
+  String.raw`\\frac\s*\{[^{}]*\}\s*\{[^{}]*\}`, // \frac{1}{2}
+  String.raw`-?\d+(?:\.\d+)?\s*(?:\\times|\\cdot|\*|×)\s*10\s*\^\s*\{?-?\d+\}?`, // 1×10^3
+  String.raw`-?\d+(?:\.\d+)?[eE][-+]?\d+`, // 2.5e2
+  String.raw`-?\d+\s*/\s*\d+`, // 1/2, 3/2
+  String.raw`-?\d+(?:\.\d+)?`, // 250, -3, 0.5
+].join("|");
+
+/** Evaluate an initial-condition RHS token (\frac, a×10ᵏ, sci, a/b, decimal) to
+ * its real value, or NaN if it can't be read. Keeps parseInitial/stripInitial
+ * from truncating a fractional/scientific initial value to a wrong integer. */
+function parseIcValue(tok: string): number {
+  const s = tok
+    // mixed number  n\frac{a}{b} = n + a/b  (NOT n × a/b) — mirrors latex.ts, so
+    // `2\frac{1}{2}` reads 2.5, never `2·(1/2)` = 1. Must precede the plain \frac.
+    .replace(
+      /(-?)(\d+)\s*\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,
+      (_m, sg, n, a, b) => `${sg}(${n} + (${a})/(${b}))`
+    )
+    .replace(/\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "(($1)/($2))")
+    .replace(/\\times|\\cdot|×/g, "*")
+    .replace(/\^\s*\{([^{}]*)\}/g, "^($1)")
+    .replace(/[{}]/g, " ")
+    .trim();
+  try {
+    const v = evaluate(s);
+    return typeof v === "number" && Number.isFinite(v) ? v : NaN;
+  } catch {
+    return NaN;
+  }
+}
+
+/** Numeric initial conditions: y(a)=v, y'(a)=v, y''(a)=v — where v may be a
+ * fraction, scientific, or ×10ᵏ form (see IC_VAL/parseIcValue). */
 function parseInitial(rawLatex: string, dep: string): OdeInitialCondition[] {
   const re = new RegExp(
-    `${dep}\\s*('{0,2})\\s*\\(\\s*(-?\\d+(?:\\.\\d+)?)\\s*\\)\\s*=\\s*(-?\\d+(?:\\.\\d+)?)`,
+    `${dep}\\s*('{0,2})\\s*\\(\\s*(-?\\d+(?:\\.\\d+)?)\\s*\\)\\s*=\\s*(${IC_VAL})`,
     "g"
   );
   const out: OdeInitialCondition[] = [];
   for (const m of rawLatex.matchAll(re)) {
-    out.push({ order: m[1].length, at: Number(m[2]), value: Number(m[3]) });
+    const value = parseIcValue(m[3]);
+    if (!Number.isFinite(value)) continue; // unreadable value ⇒ skip (determinacy then declines)
+    out.push({ order: m[1].length, at: Number(m[2]), value });
+  }
+  // VALUE-FIRST form: `5 = y(1)`, `\tfrac12 = y'(0)`. Written this way the extra
+  // (over-determining) condition evades the forward matcher AND findTarget's
+  // `dep(a)` scan, so an ill-posed two-point problem would ship as a well-posed
+  // IVP. Capture it here so the determinacy gate (initial.length ≠ order) declines.
+  const reRev = new RegExp(
+    `(${IC_VAL})\\s*=\\s*${dep}\\s*('{0,2})\\s*\\(\\s*(-?\\d+(?:\\.\\d+)?)\\s*\\)`,
+    "g"
+  );
+  for (const m of rawLatex.matchAll(reRev)) {
+    const value = parseIcValue(m[1]);
+    if (!Number.isFinite(value)) continue;
+    out.push({ order: m[2].length, at: Number(m[3]), value });
   }
   return out;
 }
@@ -171,10 +261,12 @@ function pickOdeClause(s: string): string {
   return s.trim();
 }
 
-/** Remove IC clauses so only the ODE remains. */
+/** Remove IC clauses so only the ODE remains — the RHS matcher is IC_VAL, kept in
+ * lockstep with parseInitial so a fractional/scientific value is fully stripped
+ * (else a leftover "/2" or "e2" would pollute the isolated ODE residual). */
 function stripInitial(rawLatex: string, dep: string): string {
   const re = new RegExp(
-    `${dep}\\s*'{0,2}\\s*\\(\\s*-?\\d+(?:\\.\\d+)?\\s*\\)\\s*=\\s*-?\\d+(?:\\.\\d+)?`,
+    `${dep}\\s*'{0,2}\\s*\\(\\s*-?\\d+(?:\\.\\d+)?\\s*\\)\\s*=\\s*(?:${IC_VAL})`,
     "g"
   );
   return rawLatex.replace(re, " ");

@@ -72,7 +72,7 @@ export interface ScanResult {
  * Only TAB/FORM-FEED/BACKSPACE are repaired: they are never legitimate in math
  * LaTeX, whereas a real newline IS a legitimate line separator, so it is left be.
  */
-function repairJsonEscapedMacros(s: string): string {
+export function repairJsonEscapedMacros(s: string): string {
   return s
     .replace(/\t(?=[a-zA-Z])/g, "\\t") // \text, \times, \tan, \theta, \tfrac
     .replace(/\f(?=[a-zA-Z])/g, "\\f") // \frac
