@@ -3,16 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
-import '../../../../core/animations/floaty.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/indicators/matheasy_loader.dart';
 
-/// Full-screen processing state: the Matheasy brand avatar + a rotating set of
-/// reassuring messages while the captured photo is recognized (OpenAI Vision
-/// round-trip).
+/// Full-screen processing state: Numi thinking + a rotating set of reassuring
+/// messages while the captured photo is recognized (OpenAI Vision round-trip).
 class ProcessingOverlay extends StatefulWidget {
   const ProcessingOverlay({super.key});
 
@@ -55,9 +53,10 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Floaty(
-              child: MatheasyBrandAvatar(size: 128),
-            ),
+            // Recognition is the one genuinely AI step in the pipeline, so it
+            // is Numi doing the work here — held in `thinking` while the round
+            // trip is out. Her own breathe carries the motion (no Floaty).
+            const NumiAvatar(size: 128, state: NumiState.thinking),
             const SizedBox(height: AppSpacing.xxl),
             // The on-brand pulsing dots in the dark-surface emerald: an honest
             // "working" signal that matches the rest of the app's loading.

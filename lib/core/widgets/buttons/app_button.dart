@@ -53,6 +53,7 @@ class SecondaryButton extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.icon,
+    this.leading,
     this.trailingIcon,
     this.isLoading = false,
     this.expand = true,
@@ -62,6 +63,11 @@ class SecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+
+  /// A widget in the icon's place, for the times the mark *is* the icon —
+  /// `NumiAvatar` on a button that hands the student over to the tutor.
+  final Widget? leading;
+
   final IconData? trailingIcon;
   final bool isLoading;
   final bool expand;
@@ -73,6 +79,7 @@ class SecondaryButton extends StatelessWidget {
         label: label,
         onPressed: onPressed,
         icon: icon,
+        leading: leading,
         trailingIcon: trailingIcon,
         isLoading: isLoading,
         expand: expand,
@@ -122,12 +129,14 @@ class _AppButton extends StatelessWidget {
     required this.isLoading,
     required this.expand,
     required this.size,
+    this.leading,
   });
 
   final _ButtonVariant variant;
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Widget? leading;
   final IconData? trailingIcon;
   final bool isLoading;
   final bool expand;
@@ -199,7 +208,10 @@ class _AppButton extends StatelessWidget {
             mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[
+              if (leading != null) ...[
+                leading!,
+                const SizedBox(width: AppSpacing.sm),
+              ] else if (icon != null) ...[
                 Icon(icon, size: _fontSize + 4, color: foreground),
                 const SizedBox(width: AppSpacing.sm),
               ],

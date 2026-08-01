@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/animations/app_transitions.dart';
-import '../../../../core/animations/floaty.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
@@ -18,7 +17,7 @@ import '../../domain/result_models.dart';
 import 'math_text.dart';
 
 /// The "Play Solution" experience — a guided walkthrough that auto-advances
-/// through the steps with Matheasy narrating, a progress bar, and play/pause +
+/// through the steps with Numi narrating, a progress bar, and play/pause +
 /// step controls.
 ///
 /// FUTURE-READY (voice): each step exposes a single narration point
@@ -179,7 +178,13 @@ class _PlaySolutionOverlayState extends State<PlaySolutionOverlay> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Floaty(child: MatheasyBrandAvatar(size: 64)),
+                        // Keyed on the step so Numi re-blooms each time she
+                        // narrates a new one, then settles back to idle.
+                        NumiAvatar(
+                          key: ValueKey(_index),
+                          size: 64,
+                          state: NumiState.responding,
+                        ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Container(

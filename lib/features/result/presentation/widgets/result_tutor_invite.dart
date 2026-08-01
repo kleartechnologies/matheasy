@@ -43,7 +43,7 @@ class ResultTutorInvite extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.sm),
-        const Center(child: MatheasyBrandAvatar()),
+        const Center(child: NumiAvatar()),
         const SizedBox(height: AppSpacing.xl),
 
         // The honest framing — this is a reasoning problem, not a computation,

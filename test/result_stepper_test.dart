@@ -151,9 +151,16 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: SolutionTab(result: _twoMethodResult()),
+          // SolutionTab carries a MatheasyBubble, and Numi breathes forever
+          // inside it — reduced motion is what lets pumpAndSettle terminate.
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: SingleChildScrollView(
+                  child: SolutionTab(result: _twoMethodResult()),
+                ),
+              ),
             ),
           ),
         ),
@@ -212,8 +219,13 @@ void main() {
       Future<void> pump(ResultData r) => tester.pumpWidget(
             MaterialApp(
               theme: AppTheme.light,
-              home: Scaffold(
-                body: SingleChildScrollView(child: SolutionTab(result: r)),
+              home: Builder(
+                builder: (context) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                  child: Scaffold(
+                    body: SingleChildScrollView(child: SolutionTab(result: r)),
+                  ),
+                ),
               ),
             ),
           );

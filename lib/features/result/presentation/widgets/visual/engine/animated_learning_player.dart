@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/animations/motion_aware_size.dart';
 import '../../../../../../core/extensions/context_extensions.dart';
 import '../../../../../../core/localization/l10n_extension.dart';
 import '../../../../../../core/services/haptics_service.dart';
@@ -205,7 +206,7 @@ class _AnimatedLearningPlayerState extends State<AnimatedLearningPlayer>
         ),
         // The graph (graph problems only) eases in on the answer beat rather
         // than snapping the controls down.
-        AnimatedSize(
+        MotionAwareSize(
           duration: reduceMotion ? Duration.zero : AppDurations.medium,
           curve: AppCurves.standard,
           alignment: Alignment.topCenter,

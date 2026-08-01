@@ -1169,11 +1169,20 @@ void main() {
           theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: TutorMessageView(
-              message: message,
-              onSuggestion: (_) {},
-              onPracticeStart: () {},
+          // Numi breathes forever inside the assistant bubble, so an animating
+          // tree never settles. Reduced motion holds her still — the same
+          // escape hatch MatheasyLoader's test uses. copyWith, not a bare
+          // MediaQueryData: the bubble sizes itself off the screen width.
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: TutorMessageView(
+                  message: message,
+                  onSuggestion: (_) {},
+                  onPracticeStart: () {},
+                ),
+              ),
             ),
           ),
         ),
@@ -1216,11 +1225,16 @@ void main() {
           theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: TutorMessageView(
-              message: message,
-              onSuggestion: (_) {},
-              onPracticeStart: () {},
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: TutorMessageView(
+                  message: message,
+                  onSuggestion: (_) {},
+                  onPracticeStart: () {},
+                ),
+              ),
             ),
           ),
         ),
@@ -1239,22 +1253,27 @@ void main() {
           theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: TutorMessageView(
-              message: const TutorMessage(
-                id: 1,
-                role: TutorRole.assistant,
-                text: 'Look at the middle term.',
-                focus: TutorFocus(
-                  latex: 'x^2 + 8x + 4 = 0',
-                  caption: 'the coefficient of x',
-                  highlights: [
-                    MathHighlight(text: '8x', role: MathRole.operation),
-                  ],
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: TutorMessageView(
+                  message: const TutorMessage(
+                    id: 1,
+                    role: TutorRole.assistant,
+                    text: 'Look at the middle term.',
+                    focus: TutorFocus(
+                      latex: 'x^2 + 8x + 4 = 0',
+                      caption: 'the coefficient of x',
+                      highlights: [
+                        MathHighlight(text: '8x', role: MathRole.operation),
+                      ],
+                    ),
+                  ),
+                  onSuggestion: (_) {},
+                  onPracticeStart: () {},
                 ),
               ),
-              onSuggestion: (_) {},
-              onPracticeStart: () {},
             ),
           ),
         ),
@@ -1270,15 +1289,20 @@ void main() {
           theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: TutorMessageView(
-              message: const TutorMessage(
-                id: 1,
-                role: TutorRole.assistant,
-                text: 'Nice work.',
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: TutorMessageView(
+                  message: const TutorMessage(
+                    id: 1,
+                    role: TutorRole.assistant,
+                    text: 'Nice work.',
+                  ),
+                  onSuggestion: (_) {},
+                  onPracticeStart: () {},
+                ),
               ),
-              onSuggestion: (_) {},
-              onPracticeStart: () {},
             ),
           ),
         ),

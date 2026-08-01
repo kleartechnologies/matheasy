@@ -76,7 +76,7 @@ class _ExplainTabState extends State<ExplainTab> {
         const SizedBox(height: AppSpacing.lg),
         SecondaryButton(
           label: context.l10n.explainStillStuck,
-          icon: Icons.smart_toy_rounded,
+          leading: const NumiAvatar(size: 24),
           onPressed: widget.onAskMatheasy,
         ),
       ],

@@ -538,7 +538,15 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const ResultScreen(equation: linear),
+            // "Learn more" opens a sheet holding a MatheasyBubble, and Numi
+            // breathes forever inside it — so pumpAndSettle only terminates
+            // with reduced motion holding her still.
+            home: Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: const ResultScreen(equation: linear),
+              ),
+            ),
           ),
         ),
       );

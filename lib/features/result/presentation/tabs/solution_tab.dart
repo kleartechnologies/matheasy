@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/animations/app_transitions.dart';
+import '../../../../core/animations/motion_aware_size.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
@@ -190,7 +191,7 @@ class _SolutionTabState extends State<SolutionTab> {
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
-        AnimatedSize(
+        MotionAwareSize(
           duration: motion,
           curve: AppCurves.standard,
           alignment: Alignment.topCenter,

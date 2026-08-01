@@ -277,7 +277,7 @@ class _Explanation extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MatheasyBrandAvatar(size: 30),
+          const NumiAvatar(size: 30),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(

@@ -171,8 +171,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           const PrimaryButton(label: 'Disabled'),
           const SizedBox(height: AppSpacing.md),
           SecondaryButton(
-            label: 'Ask Matheasy',
-            icon: Icons.smart_toy_rounded,
+            label: 'Ask Numi',
+            leading: const NumiAvatar(size: 24),
             onPressed: () {},
           ),
           const SizedBox(height: AppSpacing.md),

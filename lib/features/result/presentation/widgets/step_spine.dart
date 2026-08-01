@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/animations/motion_aware_size.dart';
 import '../../../../core/animations/pressable.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
@@ -147,7 +148,7 @@ class _StepSpineState extends State<StepSpine> {
             borderRadius: AppRadius.cardRadius,
           ),
           clipBehavior: Clip.antiAlias,
-          child: AnimatedSize(
+          child: MotionAwareSize(
             duration: motion,
             curve: AppCurves.standard,
             alignment: Alignment.topCenter,

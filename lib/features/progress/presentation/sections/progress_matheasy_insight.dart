@@ -25,7 +25,7 @@ class ProgressMatheasyInsight extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MatheasyBrandAvatar(size: 48),
+          const NumiAvatar(size: 48),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

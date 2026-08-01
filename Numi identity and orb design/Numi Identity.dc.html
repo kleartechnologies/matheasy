@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#060B08; -webkit-font-smoothing:antialiased; }
+  a { color:#3ADE8C; text-decoration:none; }
+  a:hover { color:#8DF5BC; }
+  @keyframes numi-ripple { 0%{ transform:scale(1); opacity:.6 } 100%{ transform:scale(2.05); opacity:0 } }
+  @keyframes numi-sparkle { 0%,100%{ opacity:0; transform:scale(.4) } 45%{ opacity:.9; transform:scale(1) } }
+  @keyframes numi-dots { 0%,100%{ opacity:.25 } 50%{ opacity:1 } }
+  @keyframes numi-sheen { 0%{ transform:translateX(-60%) } 100%{ transform:translateX(160%) } }
+</style>
+</helmet>
+<div style="{{ rootVars }};background:#060B08;color:#EAF1EC;font-family:'Instrument Sans',system-ui,sans-serif;min-height:100vh;overflow-x:hidden">
+
+  <section style="max-width:1180px;margin:0 auto;padding:96px 40px 108px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0">
+    <div style="display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(234,241,236,.42)">
+      <img src="uploads/logo.png" alt="Matheasy" style="width:18px;height:18px;border-radius:5px;display:block">
+      <span>MATHEASY</span><span style="color:rgba(234,241,236,.2)">/</span><span style="color:#3ADE8C">AI IDENTITY v1.0</span>
+    </div>
+    <div style="width:min(300px,58vw);margin:76px 0 68px">
+      <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+    </div>
+    <h1 style="margin:0;font:500 clamp(64px,11vw,132px)/.92 'Instrument Sans',sans-serif;letter-spacing:-.045em;color:#F2F7F3">Numi</h1>
+    <p style="margin:22px 0 0;font:400 clamp(18px,2vw,23px)/1.5 'Instrument Sans',sans-serif;letter-spacing:-.01em;color:rgba(234,241,236,.66);max-width:520px;text-wrap:pretty">Intelligence, made visible. The AI tutor at the centre of Matheasy — a presence, not a character.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-top:64px;width:100%;max-width:760px">
+      <div style="background:#0A100D;padding:26px 22px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.34)">ELEMENT 01</span>
+        <span style="font:500 16px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">The Green Orb</span>
+      </div>
+      <div style="background:#0A100D;padding:26px 22px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.34)">ELEMENT 02</span>
+        <span style="font:500 16px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">The White Star</span>
+      </div>
+      <div style="background:#0A100D;padding:26px 22px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.34)">ELEMENT 03</span>
+        <span style="font:500 16px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Soft Green Glow</span>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="01 Presence" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">01</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">The Presence</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">POSITIONING</span>
+    </div>
+    <p style="margin:0 0 64px;max-width:760px;font:400 clamp(20px,2.2vw,27px)/1.45 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:rgba(234,241,236,.86);text-wrap:pretty">Numi is not a robot, a mascot or a character. Numi is a quiet, confident intelligence that appears when a student needs help — and recedes the moment they don't.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:32px">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:22px">NUMI IS</div>
+        <div style="display:flex;flex-direction:column;gap:13px;font:400 16px/1.4 'Instrument Sans',sans-serif;color:rgba(234,241,236,.78)">
+          <div>Calm, patient, confident</div>
+          <div>Premium and quietly friendly</div>
+          <div>An intelligent presence</div>
+          <div>Light, glow and timing</div>
+          <div>Trustworthy at first glance</div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:32px">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.4);margin-bottom:22px">NUMI IS NOT</div>
+        <div style="display:flex;flex-direction:column;gap:13px;font:400 16px/1.4 'Instrument Sans',sans-serif;color:rgba(234,241,236,.4)">
+          <div>A robot or an assistant avatar</div>
+          <div>A mascot, animal or cartoon</div>
+          <div>A face, body or personality drawing</div>
+          <div>Childish, noisy or overdesigned</div>
+          <div>Decorated, ever</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(180deg,#0C130F,#0A1F14);border:1px solid rgba(58,222,140,.16);border-radius:18px;padding:32px;display:flex;flex-direction:column;justify-content:space-between;gap:28px">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C">THE PRINCIPLE</div>
+        <p style="margin:0;font:500 21px/1.35 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;text-wrap:pretty">The fewer the elements, the stronger the identity. Three shapes. One colour. Nothing else.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="02 Anatomy" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">02</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Anatomy</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">CONSTRUCTION &amp; PROPORTION</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:stretch">
+      <div style="position:relative;background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;min-height:520px;display:grid;place-items:center;overflow:hidden">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:38px 38px"></div>
+        <div style="position:relative;width:160px;height:160px">
+          <div style="position:absolute;inset:-28%;border:1px dashed rgba(58,222,140,.24);border-radius:50%"></div>
+          <div style="position:absolute;inset:-50%;border:1px dashed rgba(255,255,255,.11);border-radius:6px"></div>
+          <div style="position:absolute;left:50%;top:-50%;bottom:-50%;width:1px;background:rgba(255,255,255,.09)"></div>
+          <div style="position:absolute;top:47%;left:-50%;right:-50%;height:1px;background:rgba(255,255,255,.09)"></div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="position:absolute;left:28px;top:30px;font:400 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(234,241,236,.5)">CLEAR SPACE = 0.5 × D<br><span style="color:rgba(234,241,236,.28)">NOTHING ENTERS THIS FIELD</span></div>
+        <div style="position:absolute;right:28px;top:30px;text-align:right;font:400 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(58,222,140,.75)">GLOW FIELD = 1.56 × D<br><span style="color:rgba(58,222,140,.4)">AMBIENT, NEVER CLIPPED</span></div>
+        <div style="position:absolute;left:28px;bottom:30px;font:400 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(234,241,236,.5)">LIGHT SOURCE 10:30<br><span style="color:rgba(234,241,236,.28)">SINGLE, SOFT, CONSTANT</span></div>
+        <div style="position:absolute;right:28px;bottom:30px;text-align:right;font:400 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(234,241,236,.5)">STAR = 0.26 × D · CENTRE Y 0.47<br><span style="color:rgba(234,241,236,.28)">AXIS LOCKED AT 0°</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px;flex:1">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.4);margin-bottom:20px">SPECIFICATION</div>
+          <div style="display:flex;flex-direction:column;gap:0;font:400 13px/1 'JetBrains Mono',monospace;color:rgba(234,241,236,.75)">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.45)">Orb</span><span>perfect circle · 1:1</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.45)">Star size</span><span>0.26 × D</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.45)">Star points</span><span>4 · inner ratio 0.30</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.45)">Star rotation</span><span style="color:#3ADE8C">0° — locked</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.45)">Highlight</span><span>32% / 22%</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0"><span style="color:rgba(234,241,236,.45)">Bounce light</span><span>50% / 101%</span></div>
+          </div>
+        </div>
+        <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:16px">THE SIGNATURE</div>
+          <p style="margin:0;font:400 15px/1.6 'Instrument Sans',sans-serif;color:rgba(234,241,236,.66);text-wrap:pretty">The four-point star is not decoration — it is the signature. It stays visible at every size, never rotates, never distorts, and always sits at the optical centre of the orb.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="03 Material" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">03</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Material Exploration</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">FIVE CONCEPTS · ONE IDENTITY</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:26px">
+        <div style="position:relative;width:118px;height:118px;border-radius:50%;background:radial-gradient(115% 115% at 34% 24%, #6BEFAC 0%, #12C067 34%, #05AC60 58%, #067A45 88%)">
+          <div style="position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,rgba(5,172,96,.3) 0%,rgba(5,172,96,0) 66%);z-index:-1"></div>
+          <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:9px">CONCEPT A</div>
+          <div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Minimal Glow</div>
+          <div style="font:400 12px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);margin-top:6px">Flat depth. Icon-safe.</div>
+        </div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:26px">
+        <div style="position:relative;width:118px;height:118px;border-radius:50%;overflow:hidden;background:radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.75) 0%, rgba(120,245,180,.5) 12%, rgba(18,192,103,.62) 40%, rgba(3,86,47,.9) 78%, #012D19 100%)">
+          <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(38% 38% at 56% 66%, rgba(190,255,222,.7) 0%, rgba(190,255,222,0) 70%)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 82%, rgba(255,255,255,.4) 97%, rgba(255,255,255,.6) 100%)"></div>
+          <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:9px">CONCEPT B</div>
+          <div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Glass Energy</div>
+          <div style="font:400 12px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);margin-top:6px">Refractive rim. Hero use.</div>
+        </div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:26px">
+        <div style="position:relative;width:118px;height:118px;border-radius:50%;overflow:hidden;background:radial-gradient(125% 125% at 36% 26%, rgba(200,255,226,.9) 0%, rgba(90,225,155,.55) 22%, rgba(5,172,96,.45) 52%, rgba(2,61,34,.75) 92%)">
+          <div style="position:absolute;inset:0;border-radius:50%;background:linear-gradient(200deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 42%)"></div>
+          <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:9px">CONCEPT C</div>
+          <div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Translucent</div>
+          <div style="font:400 12px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);margin-top:6px">Sits over imagery.</div>
+        </div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:26px">
+        <div style="position:relative;width:118px;height:118px;border-radius:50%;overflow:hidden;background:radial-gradient(70% 70% at 50% 52%, #7CEDB4 0%, #21CE79 18%, #08A55C 38%, #05713F 64%, #013D22 88%, #012514 100%)">
+          <div style="position:absolute;left:50%;top:47%;width:60%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side, rgba(1,49,27,.55) 0%, rgba(1,49,27,.22) 46%, rgba(1,49,27,0) 100%)"></div>
+          <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:9px">CONCEPT D</div>
+          <div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Light Core</div>
+          <div style="font:400 12px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);margin-top:6px">Reads as pure energy.</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(180deg,#0B1710,#0A100D);border:1px solid rgba(58,222,140,.2);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:26px">
+        <div style="width:118px;height:118px">
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8DF5BC;margin-bottom:9px">CONCEPT E ✓</div>
+          <div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Premium Orb</div>
+          <div style="font:400 12px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.5);margin-top:6px">Official. All surfaces.</div>
+        </div>
+      </div>
+    </div>
+    <p style="margin:26px 0 0;font:400 14px/1.6 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);max-width:640px">Concept E is the official material. A–D are sanctioned reductions of it — every one keeps the same silhouette, the same green, and the star in the same place.</p>
+  </section>
+
+  <section data-screen-label="04 Colour" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">04</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Colour System</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">MATHEASY GREEN · LOCKED</span>
+    </div>
+    <div style="height:96px;border-radius:14px;background:linear-gradient(90deg,#EAFFF4 0%,#8DF5BC 14%,#3ADE8C 30%,#05AC60 52%,#06894C 70%,#03562F 86%,#012D19 100%);margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:14px">
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <div style="height:104px;background:#05AC60"></div>
+        <div style="padding:18px 18px 20px">
+          <div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Core Green</div>
+          <div style="font:400 11px/1.8 'JetBrains Mono',monospace;color:rgba(234,241,236,.45)">#05AC60<br>oklch(.64 .16 158)<br><span style="color:rgba(234,241,236,.3)">THE ONE GREEN</span></div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <div style="height:104px;background:#8DF5BC"></div>
+        <div style="padding:18px 18px 20px">
+          <div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Highlight</div>
+          <div style="font:400 11px/1.8 'JetBrains Mono',monospace;color:rgba(234,241,236,.45)">#8DF5BC<br>oklch(.91 .13 160)<br><span style="color:rgba(234,241,236,.3)">INTERNAL LIGHT</span></div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <div style="height:104px;background:#023B21"></div>
+        <div style="padding:18px 18px 20px">
+          <div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Shadow</div>
+          <div style="font:400 11px/1.8 'JetBrains Mono',monospace;color:rgba(234,241,236,.45)">#023B21<br>oklch(.33 .09 159)<br><span style="color:rgba(234,241,236,.3)">TERMINATOR EDGE</span></div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <div style="height:104px;background:#060B08;position:relative;overflow:hidden"><div style="position:absolute;inset:-20%;background:radial-gradient(circle at 50% 50%,rgba(58,222,140,.5) 0%,rgba(5,172,96,.16) 45%,rgba(5,172,96,0) 72%)"></div></div>
+        <div style="padding:18px 18px 20px">
+          <div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Outer Glow</div>
+          <div style="font:400 11px/1.8 'JetBrains Mono',monospace;color:rgba(234,241,236,.45)">3ADE8C @ 34%<br>radius 1.56 × D<br><span style="color:rgba(234,241,236,.3)">DARK MODE</span></div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <div style="height:104px;background:#F4F7F4;position:relative;overflow:hidden"><div style="position:absolute;inset:-20%;background:radial-gradient(circle at 50% 50%,rgba(5,172,96,.28) 0%,rgba(5,172,96,.08) 46%,rgba(5,172,96,0) 74%)"></div></div>
+        <div style="padding:18px 18px 20px">
+          <div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Ambient Glow</div>
+          <div style="font:400 11px/1.8 'JetBrains Mono',monospace;color:rgba(234,241,236,.45)">05AC60 @ 18%<br>radius 1.56 × D<br><span style="color:rgba(234,241,236,.3)">LIGHT MODE</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-top:14px">
+      <div style="background:#060B08;padding:22px"><div style="width:26px;height:26px;border-radius:7px;background:#060B08;border:1px solid rgba(255,255,255,.14);margin-bottom:14px"></div><div style="font:500 13px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Void</div><div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">#060B08</div></div>
+      <div style="background:#060B08;padding:22px"><div style="width:26px;height:26px;border-radius:7px;background:#0C130F;border:1px solid rgba(255,255,255,.1);margin-bottom:14px"></div><div style="font:500 13px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Panel</div><div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">#0C130F</div></div>
+      <div style="background:#060B08;padding:22px"><div style="width:26px;height:26px;border-radius:7px;background:#F4F7F4;margin-bottom:14px"></div><div style="font:500 13px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Paper</div><div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">#F4F7F4</div></div>
+      <div style="background:#060B08;padding:22px"><div style="width:26px;height:26px;border-radius:7px;background:#EAF1EC;margin-bottom:14px"></div><div style="font:500 13px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Ink Light</div><div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">#EAF1EC</div></div>
+      <div style="background:#060B08;padding:22px"><div style="width:26px;height:26px;border-radius:7px;background:#0A2417;margin-bottom:14px"></div><div style="font:500 13px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Ink Dark</div><div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">#0A2417</div></div>
+    </div>
+  </section>
+
+  <section data-screen-label="05 Motion" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">05</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Motion</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">FOUR OFFICIAL STATES</span>
+    </div>
+    <p style="margin:0 0 44px;max-width:720px;font:400 clamp(18px,2vw,23px)/1.5 'Instrument Sans',sans-serif;letter-spacing:-.015em;color:rgba(234,241,236,.8);text-wrap:pretty">Numi has no expression. Everything it feels is carried by light, breath and timing. The star never moves — the light moves around it.</p>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.82fr);gap:20px">
+      <div style="position:relative;background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;min-height:440px;display:grid;place-items:center;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 50%,rgba(5,172,96,.07) 0%,rgba(5,172,96,0) 70%)"></div>
+        <div style="position:relative;width:230px;height:230px;{{ heroVars }}">
+          <div style="position:absolute;inset:0;opacity:var(--rip,0);transition:opacity .5s ease">
+            <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.5);animation:numi-ripple var(--rip-dur,3s) cubic-bezier(.15,.6,.3,1) infinite;animation-play-state:var(--play,running)"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.4);animation:numi-ripple var(--rip-dur,3s) cubic-bezier(.15,.6,.3,1) infinite .8s;animation-play-state:var(--play,running)"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.3);animation:numi-ripple var(--rip-dur,3s) cubic-bezier(.15,.6,.3,1) infinite 1.6s;animation-play-state:var(--play,running)"></div>
+          </div>
+          <div style="position:absolute;inset:0;opacity:var(--spark,0);transition:opacity .4s ease;pointer-events:none">
+            <div style="position:absolute;left:8%;top:22%;width:5px;height:5px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite"></div>
+            <div style="position:absolute;right:12%;top:34%;width:4px;height:4px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite .4s"></div>
+            <div style="position:absolute;right:24%;bottom:14%;width:5px;height:5px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite .8s"></div>
+            <div style="position:absolute;left:20%;bottom:22%;width:3px;height:3px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite 1.2s"></div>
+          </div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="position:absolute;left:26px;bottom:24px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C">{{ stateTag }}</div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px;display:flex;flex-direction:column">
+        <div style="display:flex;gap:6px;background:#070C09;border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:5px;margin-bottom:28px">
+          <sc-for list="{{ states }}" as="s" hint-placeholder-count="4">
+            <button type="button" onClick="{{ s.select }}" style="{{ s.btn }}">{{ s.label }}</button>
+          </sc-for>
+        </div>
+        <div style="font:500 22px/1.2 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;margin-bottom:12px">{{ stateName }}</div>
+        <p style="margin:0 0 26px;font:400 15px/1.6 'Instrument Sans',sans-serif;color:rgba(234,241,236,.6);min-height:76px;text-wrap:pretty">{{ stateNote }}</p>
+        <div style="display:flex;flex-direction:column;font:400 12px/1 'JetBrains Mono',monospace;color:rgba(234,241,236,.78);margin-top:auto">
+          <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.42)">Duration</span><span>{{ stateDur }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.42)">Easing</span><span>{{ stateEase }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.42)">Scale</span><span>{{ stateScale }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(234,241,236,.42)">Glow</span><span>{{ stateGlow }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0"><span style="color:rgba(234,241,236,.42)">Star</span><span style="color:#3ADE8C">locked · 0°</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:14px">
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:22px">
+        <div style="position:relative;width:96px;height:96px">
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.38);margin-bottom:8px">STATE 01</div><div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Idle</div><div style="font:400 12px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.44);margin-top:6px">Breathing glow. 1–2% scale. 6.5s loop.</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:22px">
+        <div style="position:relative;width:96px;height:96px;--gs:1.3">
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.5);animation:numi-ripple 2.6s cubic-bezier(.15,.6,.3,1) infinite;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.32);animation:numi-ripple 2.6s cubic-bezier(.15,.6,.3,1) infinite 1.3s;animation-play-state:var(--play,running)"></div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.38);margin-bottom:8px">STATE 02</div><div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Listening</div><div style="font:400 12px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.44);margin-top:6px">Brighter glow. One soft ripple outward.</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:22px">
+        <div style="position:relative;width:96px;height:96px;--core-dur:3.6s">
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.4);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.28);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite 1.1s;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.18);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite 2.2s;animation-play-state:var(--play,running)"></div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:8px">STATE 03 · SIGNATURE</div><div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Thinking</div><div style="font:400 12px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.44);margin-top:6px">Light orbits the star. Star never rotates.</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:22px">
+        <div style="position:relative;width:96px;height:96px;--gs:1.55;--core-dur:2s">
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(200,255,226,.6);animation:numi-ripple .9s cubic-bezier(.15,.6,.3,1) infinite;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;left:6%;top:18%;width:4px;height:4px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite"></div>
+          <div style="position:absolute;right:10%;bottom:20%;width:4px;height:4px;border-radius:50%;background:#fff;animation:numi-sparkle 1.6s ease-in-out infinite .7s"></div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.38);margin-bottom:8px">STATE 04</div><div style="font:500 15px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Responding</div><div style="font:400 12px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.44);margin-top:6px">600ms pulse, faint sparkle, back to idle.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="06 Modes" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">06</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Light &amp; Dark</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">ONE ORB · TWO ENVIRONMENTS</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+      <div style="background:#060B08;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:52px 40px;display:flex;flex-direction:column;align-items:center;gap:40px">
+        <div style="width:150px;height:150px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <div style="text-align:center">
+          <div style="font:500 18px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC;margin-bottom:10px">Dark Mode</div>
+          <div style="font:400 12px/1.9 'JetBrains Mono',monospace;color:rgba(234,241,236,.44)">SURFACE #060B08<br>GLOW 3ADE8C @ 34% · FULL RADIUS<br>RIM LIGHT 100%</div>
+        </div>
+      </div>
+      <div style="--gs:.5;background:#F4F7F4;border:1px solid rgba(1,64,34,.1);border-radius:18px;padding:52px 40px;display:flex;flex-direction:column;align-items:center;gap:40px">
+        <div style="width:150px;height:150px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <div style="text-align:center">
+          <div style="font:500 18px/1.3 'Instrument Sans',sans-serif;color:#0A2417;margin-bottom:10px">Light Mode</div>
+          <div style="font:400 12px/1.9 'JetBrains Mono',monospace;color:rgba(10,36,23,.5)">SURFACE #F4F7F4<br>GLOW 05AC60 @ 18% · FULL RADIUS<br>RIM LIGHT 60%</div>
+        </div>
+      </div>
+      <div style="background:#05AC60;border-radius:18px;padding:52px 40px;display:flex;flex-direction:column;align-items:center;gap:40px;position:relative;overflow:hidden">
+        <div style="width:150px;height:150px;--gs:0;position:relative;z-index:1"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <div style="text-align:center;position:relative;z-index:1">
+          <div style="font:500 18px/1.3 'Instrument Sans',sans-serif;color:#fff;margin-bottom:10px">On Brand Green</div>
+          <div style="font:400 12px/1.9 'JetBrains Mono',monospace;color:rgba(255,255,255,.72)">SURFACE #05AC60<br>GLOW OFF · SHADOW ONLY<br>DEEPEN SHADOW EDGE TO #012D19</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="07 Scale" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">07</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Scale</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">256 → 24 PX</span>
+    </div>
+    <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:56px 40px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:56px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:200px;height:200px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">256</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:112px;height:112px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">128</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:64px;height:64px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">64</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:48px;height:48px;--starR:.28"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">48</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:32px;height:32px;--starR:.3;--gs:.7"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">32</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px"><div style="width:24px;height:24px;--starR:.32;--gs:.55"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">24</span></div>
+    </div>
+    <p style="margin:26px 0 0;font:400 14px/1.6 'Instrument Sans',sans-serif;color:rgba(234,241,236,.42);max-width:660px">Below 48px the star grows to 0.28–0.32 × D and the glow is reduced, so the signature stays legible in toolbars, tab bars and favicons. Never simplify further — the star is never removed.</p>
+  </section>
+
+  <section data-screen-label="08 Product" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">08</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">In Product</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">APP · MATHEASY iOS</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:48px 32px">
+
+      <div style="width:272px;border-radius:36px;background:#070D0A;border:1px solid rgba(255,255,255,.09);padding:20px 20px 24px;display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;font:500 10px/1 'JetBrains Mono',monospace;color:rgba(234,241,236,.4);margin-bottom:46px"><span>9:41</span><span>▲ ▮</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:34px;flex:1">
+          <div style="width:112px;height:112px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+          <div style="text-align:center">
+            <div style="font:500 26px/1.15 'Instrument Sans',sans-serif;letter-spacing:-.03em;color:#EAF1EC;margin-bottom:12px">Meet Numi</div>
+            <p style="margin:0;font:400 14px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.55);text-wrap:pretty">Your patient maths tutor. Ask anything, at any hour, as many times as you need.</p>
+          </div>
+        </div>
+        <div style="margin-top:34px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#05AC60;color:#022C18;border-radius:13px;padding:15px;text-align:center;font:500 15px/1 'Instrument Sans',sans-serif">Start learning</div>
+          <div style="color:rgba(234,241,236,.45);padding:13px;text-align:center;font:400 13px/1 'Instrument Sans',sans-serif">I already have an account</div>
+        </div>
+        <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.26);text-align:center;margin-top:20px">ONBOARDING</div>
+      </div>
+
+      <div style="width:272px;border-radius:36px;background:#070D0A;border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:11px">
+          <div style="width:32px;height:32px;flex:none;--starR:.3;--gs:.8"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+          <div style="flex:1"><div style="font:500 14px/1.2 'Instrument Sans',sans-serif;color:#EAF1EC">Numi</div><div style="font:400 11px/1.4 'Instrument Sans',sans-serif;color:#3ADE8C">Here with you</div></div>
+          <div style="font:400 16px/1 'Instrument Sans',sans-serif;color:rgba(234,241,236,.3)">⋯</div>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px;flex:1">
+          <div style="align-self:flex-end;max-width:82%;background:#05AC60;color:#022C18;border-radius:15px 15px 5px 15px;padding:11px 14px;font:400 13px/1.45 'Instrument Sans',sans-serif">I don't get why you flip the inequality sign</div>
+          <div style="align-self:flex-start;max-width:88%;background:#101812;border:1px solid rgba(255,255,255,.06);border-radius:15px 15px 15px 5px;padding:12px 14px;font:400 13px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.82)">Good question — it happens for one reason only. Let's test it with numbers.</div>
+          <div style="align-self:flex-start;max-width:88%;background:#101812;border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:14px;font:400 15px/1.4 'JetBrains Mono',monospace;color:#8DF5BC;text-align:center">−2x &lt; 6</div>
+          <div style="align-self:flex-start;display:flex;align-items:center;gap:7px;padding:6px 2px">
+            <div style="width:5px;height:5px;border-radius:50%;background:#3ADE8C;animation:numi-dots 1.4s ease-in-out infinite"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#3ADE8C;animation:numi-dots 1.4s ease-in-out infinite .2s"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#3ADE8C;animation:numi-dots 1.4s ease-in-out infinite .4s"></div>
+          </div>
+        </div>
+        <div style="padding:14px 20px 22px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px">
+          <div style="flex:1;background:#101812;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:12px 13px;font:400 13px/1 'Instrument Sans',sans-serif;color:rgba(234,241,236,.34)">Ask Numi anything…</div>
+          <div style="width:40px;height:40px;flex:none;border-radius:12px;background:#05AC60;display:grid;place-items:center;color:#022C18;font:500 15px/1 'Instrument Sans',sans-serif">↑</div>
+        </div>
+        <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.26);text-align:center;padding-bottom:16px">AI TUTOR · CHAT HEADER</div>
+      </div>
+
+      <div style="width:272px;border-radius:36px;background:#070D0A;border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:20px 20px 14px;display:flex;justify-content:space-between;font:500 10px/1 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)"><span>SCAN RESULT</span><span>✕</span></div>
+        <div style="margin:0 20px;height:132px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 6px,transparent 6px 12px);display:grid;place-items:center;font:400 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(234,241,236,.34);text-align:center">PHOTO OF<br>STUDENT'S WORKBOOK</div>
+        <div style="margin:16px 20px 0;background:#101812;border:1px solid rgba(58,222,140,.16);border-radius:16px;padding:16px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+            <div style="width:24px;height:24px;flex:none;--starR:.32;--gs:.9"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+            <span style="font:500 12px/1 'Instrument Sans',sans-serif;color:#8DF5BC">Numi solved it — 3 steps</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;font:400 12px/1.4 'JetBrains Mono',monospace;color:rgba(234,241,236,.72)">
+            <div style="display:flex;gap:10px"><span style="color:rgba(58,222,140,.7)">1</span><span>3(x + 4) = 27</span></div>
+            <div style="display:flex;gap:10px"><span style="color:rgba(58,222,140,.7)">2</span><span>x + 4 = 9</span></div>
+            <div style="display:flex;gap:10px"><span style="color:rgba(58,222,140,.7)">3</span><span style="color:#8DF5BC">x = 5</span></div>
+          </div>
+        </div>
+        <div style="margin:14px 20px 0;font:400 12px/1.55 'Instrument Sans',sans-serif;color:rgba(234,241,236,.5)">Want me to walk through why step 2 works?</div>
+        <div style="margin:16px 20px 0;display:flex;gap:8px">
+          <div style="flex:1;background:#05AC60;color:#022C18;border-radius:11px;padding:12px;text-align:center;font:500 13px/1 'Instrument Sans',sans-serif">Explain</div>
+          <div style="flex:1;border:1px solid rgba(255,255,255,.1);color:rgba(234,241,236,.6);border-radius:11px;padding:12px;text-align:center;font:500 13px/1 'Instrument Sans',sans-serif">Practise</div>
+        </div>
+        <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.26);text-align:center;padding:20px 0 16px">SCANNER RESULT</div>
+      </div>
+
+      <div style="width:272px;border-radius:36px;background:#070D0A;border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:38px;padding:40px 24px;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 42%,rgba(5,172,96,.14) 0%,rgba(5,172,96,0) 72%)"></div>
+        <div style="position:relative;width:128px;height:128px;--core-dur:3.6s">
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.38);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.24);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite 1.1s;animation-play-state:var(--play,running)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(141,245,188,.14);animation:numi-ripple 3.4s cubic-bezier(.15,.6,.3,1) infinite 2.2s;animation-play-state:var(--play,running)"></div>
+          <dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import>
+        </div>
+        <div style="text-align:center;position:relative">
+          <div style="font:500 18px/1.3 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;margin-bottom:8px">Working through it</div>
+          <div style="font:400 13px/1.5 'Instrument Sans',sans-serif;color:rgba(234,241,236,.45)">One moment — checking each step.</div>
+        </div>
+        <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.26);position:absolute;bottom:22px">THINKING / LOADING</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px">
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px;display:flex;align-items:center;gap:18px">
+        <div style="width:24px;height:24px;flex:none;--starR:.32;--gs:.55"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <div><div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Toolbar icon · 24px</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">STAR 0.32 × D · GLOW 55%</div></div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px;display:flex;align-items:center;gap:18px">
+        <div style="width:40px;height:40px;flex:none;--starR:.28"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <div><div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">Chat avatar · 40px</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">STAR 0.28 × D · GLOW 100%</div></div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px;display:flex;align-items:center;gap:18px">
+        <img src="uploads/logo.png" alt="Matheasy app icon" style="width:40px;height:40px;border-radius:11px;flex:none;display:block">
+        <div><div style="font:500 14px/1.3 'Instrument Sans',sans-serif;color:#EAF1EC">App icon stays Matheasy</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">NUMI LIVES INSIDE THE PRODUCT</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="09 Web" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">09</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Website</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">HERO · LIGHT MODE</span>
+    </div>
+    <div style="border:1px solid rgba(255,255,255,.09);border-radius:18px;overflow:hidden;background:#F4F7F4">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;background:#0A100D;border-bottom:1px solid rgba(255,255,255,.07)">
+        <div style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.14)"></div>
+        <div style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.14)"></div>
+        <div style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.14)"></div>
+        <div style="margin-left:14px;background:#101812;border-radius:7px;padding:6px 14px;font:400 11px/1 'JetBrains Mono',monospace;color:rgba(234,241,236,.4)">matheasy.com/numi</div>
+      </div>
+      <div style="--gs:.5;padding:26px 40px 0;display:flex;align-items:center;justify-content:space-between;gap:20px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="uploads/logo.png" alt="Matheasy" style="width:26px;height:26px;border-radius:7px;display:block">
+          <span style="font:600 16px/1 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#0A2417">Matheasy</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:28px;font:400 14px/1 'Instrument Sans',sans-serif;color:rgba(10,36,23,.6)">
+          <span>Learn</span><span>Numi</span><span>Pricing</span>
+          <span style="background:#05AC60;color:#fff;border-radius:9px;padding:10px 16px;font-weight:500">Try free</span>
+        </div>
+      </div>
+      <div style="--gs:.5;padding:76px 40px 92px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0">
+        <div style="width:172px;height:172px;margin-bottom:44px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+        <h3 style="margin:0;font:500 clamp(34px,5vw,58px)/1.02 'Instrument Sans',sans-serif;letter-spacing:-.04em;color:#0A2417;max-width:760px;text-wrap:pretty">Ask Numi anything. It never runs out of patience.</h3>
+        <p style="margin:22px 0 36px;font:400 18px/1.5 'Instrument Sans',sans-serif;color:rgba(10,36,23,.58);max-width:480px;text-wrap:pretty">An AI maths tutor that explains, step by step, until it actually clicks.</p>
+        <div style="display:flex;gap:12px">
+          <span style="background:#05AC60;color:#fff;border-radius:12px;padding:16px 26px;font:500 15px/1 'Instrument Sans',sans-serif">Start a lesson</span>
+          <span style="border:1px solid rgba(10,36,23,.14);color:#0A2417;border-radius:12px;padding:16px 26px;font:500 15px/1 'Instrument Sans',sans-serif">See how it works</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="10 Marketing" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">10</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Marketing &amp; Store</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">OUT-OF-HOME · APP STORE</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:14px">
+      <div style="aspect-ratio:4/5;border-radius:18px;background:#02301C;border:1px solid rgba(255,255,255,.06);padding:38px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">
+        <img src="uploads/logo.png" alt="Matheasy" style="width:30px;height:30px;border-radius:8px;display:block">
+        <div style="display:grid;place-items:center;flex:1"><div style="width:min(180px,50%);"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div></div>
+        <div style="font:500 clamp(22px,2.4vw,30px)/1.15 'Instrument Sans',sans-serif;letter-spacing:-.03em;color:#EAF1EC;text-wrap:pretty">Stuck at 11pm?<br>Numi is awake.</div>
+      </div>
+      <div style="--gs:.5;aspect-ratio:4/5;border-radius:18px;background:#F4F7F4;padding:38px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">
+        <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(10,36,23,.45)">MATHEASY</div>
+        <div style="display:grid;place-items:center;flex:1"><div style="width:min(150px,44%)"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div></div>
+        <div>
+          <div style="font:500 clamp(22px,2.4vw,30px)/1.12 'Instrument Sans',sans-serif;letter-spacing:-.03em;color:#0A2417;text-wrap:pretty">Intelligence, made visible.</div>
+          <div style="font:400 14px/1.5 'Instrument Sans',sans-serif;color:rgba(10,36,23,.5);margin-top:12px">Meet Numi — the tutor inside Matheasy.</div>
+        </div>
+      </div>
+      <div style="aspect-ratio:4/5;border-radius:18px;background:#05AC60;padding:38px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative">
+        <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(255,255,255,.75)">AI TUTOR</div>
+        <div style="display:grid;place-items:center;flex:1;--gs:0"><div style="width:min(160px,46%)"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div></div>
+        <div style="font:500 clamp(22px,2.4vw,30px)/1.15 'Instrument Sans',sans-serif;letter-spacing:-.03em;color:#fff;text-wrap:pretty">Every step.<br>As many times as you need.</div>
+      </div>
+    </div>
+    <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:40px 32px">
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(234,241,236,.38);margin-bottom:30px;text-align:center">APP STORE SCREENSHOTS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:18px;justify-content:center">
+        <div style="width:186px;display:flex;flex-direction:column;gap:14px">
+          <div style="font:500 15px/1.25 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;text-align:center;min-height:38px">Ask. Numi<br>never rushes you.</div>
+          <div style="aspect-ratio:9/19;border-radius:22px;background:#070D0A;border:1px solid rgba(255,255,255,.09);padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+            <div style="width:76px;height:76px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+            <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+              <div style="align-self:flex-end;background:#05AC60;border-radius:10px 10px 3px 10px;padding:8px 10px;font:400 10px/1.4 'Instrument Sans',sans-serif;color:#022C18;max-width:88%">Why is this wrong?</div>
+              <div style="align-self:flex-start;background:#101812;border-radius:10px 10px 10px 3px;padding:8px 10px;font:400 10px/1.4 'Instrument Sans',sans-serif;color:rgba(234,241,236,.75);max-width:92%">Let's find the exact step together.</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:186px;display:flex;flex-direction:column;gap:14px">
+          <div style="font:500 15px/1.25 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;text-align:center;min-height:38px">Scan homework.<br>Get real steps.</div>
+          <div style="aspect-ratio:9/19;border-radius:22px;background:#070D0A;border:1px solid rgba(255,255,255,.09);padding:16px;display:flex;flex-direction:column;gap:12px;justify-content:center">
+            <div style="height:84px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 6px,transparent 6px 12px);display:grid;place-items:center;font:400 8px/1.5 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(234,241,236,.32);text-align:center">HOMEWORK<br>PHOTO</div>
+            <div style="background:#101812;border:1px solid rgba(58,222,140,.16);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;flex:none;--starR:.32;--gs:.8"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div><span style="font:500 10px/1 'Instrument Sans',sans-serif;color:#8DF5BC">3 steps</span></div>
+              <div style="font:400 10px/1.7 'JetBrains Mono',monospace;color:rgba(234,241,236,.7)">3(x + 4) = 27<br>x + 4 = 9<br><span style="color:#8DF5BC">x = 5</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:186px;display:flex;flex-direction:column;gap:14px">
+          <div style="font:500 15px/1.25 'Instrument Sans',sans-serif;letter-spacing:-.02em;color:#EAF1EC;text-align:center;min-height:38px">A tutor that<br>waits for you.</div>
+          <div style="aspect-ratio:9/19;border-radius:22px;background:#070D0A;border:1px solid rgba(255,255,255,.09);display:grid;place-items:center;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 50%,rgba(5,172,96,.16) 0%,rgba(5,172,96,0) 72%)"></div>
+            <div style="position:relative;width:104px;height:104px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+            <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.4)">ALWAYS THERE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="11 Rules" style="max-width:1180px;margin:0 auto;padding:104px 40px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:52px">
+      <span style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#05AC60">11</span>
+      <h2 style="margin:0;font:500 clamp(28px,3vw,38px)/1.05 'Instrument Sans',sans-serif;letter-spacing:-.025em;color:#EAF1EC">Brand Rules</h2>
+      <span style="margin-left:auto;font:400 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.34)">NON-NEGOTIABLE</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px">
+      <div style="background:linear-gradient(180deg,#0B1710,#0A100D);border:1px solid rgba(58,222,140,.18);border-radius:18px;padding:32px">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#3ADE8C;margin-bottom:22px">ALWAYS</div>
+        <div style="display:flex;flex-direction:column;gap:13px;font:400 15px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.8)">
+          <div>The green orb, the white four-point star, the official glow.</div>
+          <div>Star upright at 0°, at the optical centre.</div>
+          <div>A single soft light source from 10:30.</div>
+          <div>Clear space of 0.5 × D on every side.</div>
+        </div>
+      </div>
+      <div style="background:#0C130F;border:1px solid rgba(255,107,94,.16);border-radius:18px;padding:32px">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF6B5E;margin-bottom:22px">NEVER</div>
+        <div style="display:flex;flex-direction:column;gap:13px;font:400 15px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.55)">
+          <div>Rotate, distort or remove the star.</div>
+          <div>Stretch the orb or break the circle.</div>
+          <div>Change the green, or add a second accent.</div>
+          <div>Add eyes, mouths, limbs or accessories.</div>
+          <div>Make seasonal, emoji or cartoon versions.</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:24px">
+        <div style="position:relative;width:92px;height:92px;display:grid;place-items:center">
+          <div style="position:relative;width:92px;height:92px;border-radius:50%;background:radial-gradient(115% 115% at 34% 24%, #6BEFAC 0%, #12C067 34%, #05AC60 58%, #067A45 88%)">
+            <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%) rotate(38deg);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+          </div>
+          <div style="position:absolute;left:-8%;right:-8%;top:50%;height:1.5px;background:#FF6B5E;transform:rotate(-32deg)"></div>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF6B5E;margin-bottom:8px">NEVER</div><div style="font:400 13px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.6)">Rotate the star</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:24px">
+        <div style="position:relative;width:92px;height:92px;display:grid;place-items:center">
+          <div style="position:relative;width:112px;height:78px;border-radius:50%;background:radial-gradient(115% 115% at 34% 24%, #6BEFAC 0%, #12C067 34%, #05AC60 58%, #067A45 88%)">
+            <div style="position:absolute;left:50%;top:47%;width:22%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+          </div>
+          <div style="position:absolute;left:-8%;right:-8%;top:50%;height:1.5px;background:#FF6B5E;transform:rotate(-32deg)"></div>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF6B5E;margin-bottom:8px">NEVER</div><div style="font:400 13px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.6)">Stretch the orb</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:24px">
+        <div style="position:relative;width:92px;height:92px;display:grid;place-items:center">
+          <div style="position:relative;width:92px;height:92px;border-radius:50%;background:radial-gradient(115% 115% at 34% 24%, #9BC4FF 0%, #4A7BFF 34%, #6B4AFF 62%, #3A2A8C 90%)">
+            <div style="position:absolute;left:50%;top:47%;width:26%;aspect-ratio:1/1;transform:translate(-50%,-50%);background:#fff;clip-path:polygon(50% 0%, 60.6% 39.4%, 100% 50%, 60.6% 60.6%, 50% 100%, 39.4% 60.6%, 0% 50%, 39.4% 39.4%)"></div>
+          </div>
+          <div style="position:absolute;left:-8%;right:-8%;top:50%;height:1.5px;background:#FF6B5E;transform:rotate(-32deg)"></div>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF6B5E;margin-bottom:8px">NEVER</div><div style="font:400 13px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.6)">Change the palette</div></div>
+      </div>
+      <div style="background:#0A100D;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:24px">
+        <div style="position:relative;width:92px;height:92px;display:grid;place-items:center">
+          <div style="position:relative;width:92px;height:92px;border-radius:50%;background:radial-gradient(115% 115% at 34% 24%, #6BEFAC 0%, #12C067 34%, #05AC60 58%, #067A45 88%)">
+            <div style="position:absolute;left:31%;top:38%;width:11%;height:15%;border-radius:50%;background:#023B21"></div>
+            <div style="position:absolute;right:31%;top:38%;width:11%;height:15%;border-radius:50%;background:#023B21"></div>
+            <div style="position:absolute;left:50%;top:66%;width:26%;height:13%;border-radius:0 0 40px 40px;border-bottom:2.5px solid #023B21;transform:translateX(-50%)"></div>
+          </div>
+          <div style="position:absolute;left:-8%;right:-8%;top:50%;height:1.5px;background:#FF6B5E;transform:rotate(-32deg)"></div>
+        </div>
+        <div style="text-align:center"><div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF6B5E;margin-bottom:8px">NEVER</div><div style="font:400 13px/1.45 'Instrument Sans',sans-serif;color:rgba(234,241,236,.6)">Give Numi a face</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1180px;margin:0 auto;padding:104px 40px 132px;border-top:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;text-align:center">
+    <div style="width:88px;height:88px;margin-bottom:40px"><dc-import name="NumiOrb" hint-size="100%,100%" style="width:100%;display:block"></dc-import></div>
+    <p style="margin:0;max-width:640px;font:500 clamp(22px,2.6vw,32px)/1.28 'Instrument Sans',sans-serif;letter-spacing:-.03em;color:#EAF1EC;text-wrap:pretty">A green orb. A small white star. A soft glow. That is all it ever needs to be.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;margin-top:44px;font:400 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(234,241,236,.32)">
+      <span>MATHEASY · NUMI IDENTITY</span><span>v1.0</span><span>CORE GREEN #05AC60</span><span>STAR LOCKED 0°</span>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;glowIntensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.3,&quot;max&quot;:1.6,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Numi&quot;},&quot;starRatio&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.26,&quot;min&quot;:0.18,&quot;max&quot;:0.34,&quot;step&quot;:0.01,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Numi&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Numi&quot;}}">
+class Component extends DCLogic {
+  state = { motion: 'thinking' };
+
+  get spec() {
+    return {
+      idle: {
+        name: 'Idle', tag: 'IDLE',
+        note: 'A soft breathing glow and an almost imperceptible float. The student should feel that Numi is patiently waiting, not idling.',
+        dur: '6500ms · loop', ease: 'cubic-bezier(.45,0,.55,1)', scale: '1.000 → 1.018', glow: '0.62 → 0.90 opacity',
+        vars: '--rip:0;--spark:0;--core-dur:7.5s;--gs:1'
+      },
+      listening: {
+        name: 'Listening', tag: 'LISTENING',
+        note: 'The glow brightens by a third and one gentle ripple expands outward. Numi leans in through light only — never through movement.',
+        dur: '2600ms · loop', ease: 'cubic-bezier(.15,.6,.3,1)', scale: '1.000 → 1.010', glow: '+35% · brighter rim',
+        vars: '--rip:.9;--rip-dur:2.6s;--spark:0;--core-dur:6s;--gs:1.3'
+      },
+      thinking: {
+        name: 'Thinking', tag: 'THINKING · SIGNATURE',
+        note: 'The signature state. Internal light drifts slowly around the star while soft concentric ripples expand. The star stays perfectly still — the light moves, never the symbol.',
+        dur: '3400ms · loop', ease: 'cubic-bezier(.15,.6,.3,1)', scale: '1.000 → 1.018', glow: 'breathing · 0.7 → 1.0',
+        vars: '--rip:.65;--rip-dur:3.4s;--spark:0;--core-dur:3.6s;--gs:1.12'
+      },
+      responding: {
+        name: 'Responding', tag: 'RESPONDING',
+        note: 'A single tiny pulse, one outward bloom of glow and a faint sparkle, then a smooth return to idle. No fireworks, no celebration.',
+        dur: '600ms · once', ease: 'cubic-bezier(.2,.8,.2,1)', scale: '1.000 → 1.035', glow: '+55% bloom, then decay',
+        vars: '--rip:.95;--rip-dur:.9s;--spark:1;--core-dur:2s;--gs:1.55'
+      }
+    };
+  }
+
+  renderVals() {
+    const spec = this.spec;
+    const cur = spec[this.state.motion] || spec.idle;
+    const glow = this.props.glowIntensity ?? 1;
+    const starR = this.props.starRatio ?? 0.26;
+    const play = (this.props.motion ?? true) ? 'running' : 'paused';
+    return {
+      rootVars: `--glow:${glow};--starR:${starR};--play:${play}`,
+      heroVars: cur.vars,
+      stateName: cur.name, stateTag: cur.tag, stateNote: cur.note,
+      stateDur: cur.dur, stateEase: cur.ease, stateScale: cur.scale, stateGlow: cur.glow,
+      states: Object.keys(spec).map(k => {
+        const on = k === this.state.motion;
+        return {
+          key: k, label: spec[k].name,
+          select: () => this.setState({ motion: k }),
+          btn: `flex:1;cursor:pointer;border:none;border-radius:8px;padding:10px 6px;font:500 12px/1 'Instrument Sans',sans-serif;letter-spacing:-.01em;transition:background .2s ease,color .2s ease;background:${on ? '#05AC60' : 'transparent'};color:${on ? '#022C18' : 'rgba(234,241,236,.55)'}`
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

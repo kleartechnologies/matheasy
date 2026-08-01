@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/animations/floaty.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 
-/// The Tutor home hero: a big, friendly Numi brand avatar, the headline
-/// question and a primary call to start chatting.
+/// The Tutor home hero: Numi at full size, the headline question and a primary
+/// call to start chatting.
 class TutorHero extends StatelessWidget {
   const TutorHero({super.key, required this.onAskMatheasy});
 
@@ -19,9 +18,9 @@ class TutorHero extends StatelessWidget {
     final colors = context.colors;
     return Column(
       children: [
-        const Floaty(
-          child: MatheasyBrandAvatar(size: 116),
-        ),
+        // No Floaty: Numi's breathe-and-glow is the official idle motion, and
+        // stacking a second bob on top of it would be an invented animation.
+        const NumiAvatar(size: 116),
         const SizedBox(height: AppSpacing.lg),
         Text(
           context.l10n.tutorHeroTitle,

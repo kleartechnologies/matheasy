@@ -412,7 +412,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   }
 }
 
-/// The chat app-bar identity: Numi's brand avatar, name and a warm status line.
+/// The chat app-bar identity: Numi herself, her name and a warm status line.
 class _NumiAppBarTitle extends StatelessWidget {
   const _NumiAppBarTitle();
 
@@ -422,7 +422,7 @@ class _NumiAppBarTitle extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const MatheasyBrandAvatar(size: 34),
+        const NumiAvatar(size: 34),
         const SizedBox(width: AppSpacing.sm),
         // Flexible + clamped lines so the title never overflows the app bar at
         // large text scales.

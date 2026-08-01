@@ -60,7 +60,7 @@ class PracticeFeedback extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MatheasyBrandAvatar(size: 40),
+          const NumiAvatar(size: 40),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

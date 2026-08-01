@@ -8,9 +8,14 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import 'rich_math_text.dart';
 
-/// A Matheasy assistant message: the brand avatar paired with a speech bubble.
-/// Use this for assistant turns in chat, inline hints, and the "verify" note on
-/// solutions.
+/// A tutor message: Numi paired with a speech bubble. Use this for assistant
+/// turns in chat, inline hints, and the "verify" note on solutions — anywhere
+/// the AI is the one talking.
+///
+/// IN TESTS: [NumiAvatar] breathes forever, so a tree containing this bubble
+/// never settles. Wrap it in a `MediaQuery` with `disableAnimations: true`
+/// (`copyWith`, not a bare `MediaQueryData` — the bubble measures itself
+/// against the screen width) before reaching for `pumpAndSettle`.
 class MatheasyBubble extends StatelessWidget {
   const MatheasyBubble({
     super.key,
@@ -31,7 +36,7 @@ class MatheasyBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            MatheasyBrandAvatar(size: avatarSize),
+            NumiAvatar(size: avatarSize),
             const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Container(
@@ -63,7 +68,8 @@ class MatheasyBubble extends StatelessWidget {
   }
 }
 
-/// Animated "Matheasy is typing…" indicator (three pulsing dots in a bubble).
+/// Animated "Numi is typing…" indicator (three pulsing dots in a bubble, with
+/// Numi held in the `thinking` state alongside them).
 class MatheasyTypingIndicator extends StatefulWidget {
   const MatheasyTypingIndicator({super.key, this.avatarSize = 34});
 
@@ -95,7 +101,7 @@ class _MatheasyTypingIndicatorState extends State<MatheasyTypingIndicator>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          MatheasyBrandAvatar(size: widget.avatarSize),
+          NumiAvatar(size: widget.avatarSize, state: NumiState.thinking),
           const SizedBox(width: AppSpacing.sm),
           Container(
             padding: const EdgeInsets.symmetric(

@@ -74,7 +74,7 @@ class TutorPracticeCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              const MatheasyBrandAvatar(size: 30),
+              const NumiAvatar(size: 30),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
