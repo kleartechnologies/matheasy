@@ -70,7 +70,7 @@ class _PracticeVisualScreenState extends ConsumerState<PracticeVisualScreen> {
         .check(RateLimitedAction.visualGeneration);
     if (limit.isLimited) {
       throw const VisualGenerationException(
-        'Give Matheasy a moment before the next visual.',
+        'Give Numi a moment before the next visual.',
       );
     }
     return ref.read(visualSolutionServiceProvider).generate(

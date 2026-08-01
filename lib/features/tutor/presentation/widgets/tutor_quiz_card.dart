@@ -16,7 +16,7 @@ import '../../domain/tutor_models.dart';
 
 /// An inline, interactive quiz card. The student taps an option; the card
 /// reveals whether it was right, highlights the correct answer and slides open
-/// an explanation from Matheasy. Answering is one-shot — once revealed, options
+/// an explanation from Numi. Answering is one-shot — once revealed, options
 /// lock so the moment of feedback stays clear.
 class TutorQuizCard extends StatefulWidget {
   const TutorQuizCard(this.question, {super.key});

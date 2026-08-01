@@ -138,7 +138,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorTitle => 'AI 辅导';
 
   @override
-  String get tutorAsk => '向 Matheasy 提问';
+  String get tutorAsk => '向 Numi 提问';
 
   @override
   String get tutorHint => '给我一点提示';
@@ -186,7 +186,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get practiceVisualNothing => '现在没有可展示的内容。';
 
   @override
-  String get practiceVisualLoading => 'Matheasy 正在为你绘制可视化讲解…';
+  String get practiceVisualLoading => 'Numi 正在为你绘制可视化讲解…';
 
   @override
   String get practiceVisualProFeature => '可视化学习是 Matheasy Pro 功能。';
@@ -237,7 +237,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get practiceRecommendedForYou => '为你推荐';
 
   @override
-  String get practiceAskMatheasyWhy => '问 Matheasy 为什么';
+  String get practiceAskMatheasyWhy => '问 Numi 为什么';
 
   @override
   String get practiceShowVisually => '给我看可视化';
@@ -291,13 +291,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorVoiceChatSoon => '语音对话即将上线。';
 
   @override
-  String get tutorEmptyTitle => '尽管问 Matheasy';
+  String get tutorEmptyTitle => '尽管问 Numi';
 
   @override
   String get tutorEmptyMessage => '拍张照片或输入问题，即可获得清晰的分步讲解。';
 
   @override
-  String get tutorTyping => 'Matheasy 正在输入';
+  String get tutorTyping => 'Numi 正在输入';
 
   @override
   String get tutorTagline => '你的 AI 数学导师';
@@ -309,7 +309,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorHeroSubtitle => '有任何数学问题都可以问我。';
 
   @override
-  String get tutorAskMatheasy => '问 Matheasy';
+  String get tutorAskMatheasy => '问 Numi';
 
   @override
   String get tutorExploreTopics => '探索主题';
@@ -327,7 +327,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tutorUploadQuestion => '上传题目';
 
   @override
-  String get tutorInputHint => '尽管问 Matheasy…';
+  String get tutorInputHint => '尽管问 Numi…';
 
   @override
   String get tutorVoiceInput => '语音输入';
@@ -349,6 +349,143 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => '还差一点——不过很接近了！';
+
+  @override
+  String get tutorModePrompt => '你想怎么学这道题？';
+
+  @override
+  String get tutorModeChange => '换一种学习方式';
+
+  @override
+  String get tutorModeHint => '只要提示';
+
+  @override
+  String get tutorModeHintDetail => '往对的方向轻推一把——你自己来解。';
+
+  @override
+  String get tutorModeSolveTogether => '一起解';
+
+  @override
+  String get tutorModeSolveTogetherDetail => '一步一步来，节奏由你定。';
+
+  @override
+  String get tutorModeTeachMe => '教我';
+
+  @override
+  String get tutorModeTeachMeDetail => '从思路讲起，配上例子。';
+
+  @override
+  String get tutorModeShowSolution => '看完整解答';
+
+  @override
+  String get tutorModeShowSolutionDetail => '整道题的完整解法，并加以讲解。';
+
+  @override
+  String get tutorModeQuizMe => '考考我';
+
+  @override
+  String get tutorModeQuizMeDetail => '我出题，你作答，我给反馈。';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return '已切换到$mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => '讲得再简单些';
+
+  @override
+  String get tutorActionExplainSimplerMessage => '能讲得更简单一点吗？';
+
+  @override
+  String get tutorActionGiveExample => '举个例子';
+
+  @override
+  String get tutorActionGiveExampleMessage => '能给我举个例子吗？';
+
+  @override
+  String get tutorActionTellMeWhy => '为什么这样可行？';
+
+  @override
+  String get tutorActionTellMeWhyMessage => '为什么这样可行？';
+
+  @override
+  String get tutorActionShowAnotherMethod => '换个方法';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => '还有别的做法吗？';
+
+  @override
+  String get tutorActionCreateQuiz => '考考我';
+
+  @override
+  String get tutorActionCreateQuizMessage => '就这个内容考考我。';
+
+  @override
+  String get tutorActionPracticeMore => '练习';
+
+  @override
+  String get tutorActionPracticeMoreMessage => '给我一道练习题。';
+
+  @override
+  String get tutorActionGiveHint => '给我提示';
+
+  @override
+  String get tutorActionGiveHintMessage => '给我一点提示。';
+
+  @override
+  String get tutorActionNextStep => '下一步';
+
+  @override
+  String get tutorActionNextStepMessage => '下一步是什么？';
+
+  @override
+  String get tutorActionCheckMyWork => '检查我的解答';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => '能帮我检查一下计算吗？';
+
+  @override
+  String get tutorActionCommonMistakes => '常见错误';
+
+  @override
+  String get tutorActionCommonMistakesMessage => '这里要当心哪些错误？';
+
+  @override
+  String get tutorActionPracticeEasier => '简单一点的';
+
+  @override
+  String get tutorActionPracticeEasierMessage => '给我一道同类但简单点的题。';
+
+  @override
+  String get tutorActionPracticeSimilar => '类似的';
+
+  @override
+  String get tutorActionPracticeSimilarMessage => '给我一道类似的题练手。';
+
+  @override
+  String get tutorActionPracticeHarder => '难一点的';
+
+  @override
+  String get tutorActionPracticeHarderMessage => '给我一道同类但难一点的题。';
+
+  @override
+  String get tutorActionPracticeChallenge => '来点挑战';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => '给我一道有挑战性的题。';
+
+  @override
+  String get tutorActionShowSolution => '看解答';
+
+  @override
+  String get tutorActionShowSolutionMessage => '把完整解答给我看看。';
+
+  @override
+  String get tutorActionIDontUnderstand => '我没看懂';
+
+  @override
+  String get tutorActionIDontUnderstandMessage => '我没看懂——能换个说法讲吗？';
 
   @override
   String get onboardingGetStarted => '开始使用';
@@ -753,7 +890,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get progressSeeAll => '查看全部';
 
   @override
-  String get progressMatheasySays => 'Matheasy 说';
+  String get progressMatheasySays => 'Numi 说';
 
   @override
   String get progressRecentActivity => '最近动态';
@@ -993,13 +1130,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get explainEmptyMessage => '这道题没有文字解析——不过我可以一步步为你讲解。';
 
   @override
-  String get resultAskMatheasy => '问 Matheasy';
+  String get resultAskMatheasy => '问 Numi';
 
   @override
-  String get explainStillStuck => '还是卡住了？问问 Matheasy';
+  String get explainStillStuck => '还是卡住了？问问 Numi';
 
   @override
-  String get visualLoadingMessage => 'Matheasy 正在为你绘制可视化讲解…';
+  String get visualLoadingMessage => 'Numi 正在为你绘制可视化讲解…';
 
   @override
   String get visualUnavailableMessage => '可视化讲解暂时无法使用——在此期间，讲解标签页里有完整内容。';
@@ -1157,7 +1294,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get visualKeyIdeas => '核心要点';
 
   @override
-  String get visualAskAboutStep => '就这一步问 Matheasy';
+  String get visualAskAboutStep => '就这一步问 Numi';
 
   @override
   String get visualReplay => '重播';
@@ -1474,7 +1611,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return '$topic 全对通关。Matheasy 为你点赞！';
+    return '$topic 全对通关。Numi 为你点赞！';
   }
 
   @override
@@ -1718,6 +1855,138 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => '几何';
+
+  @override
+  String get resultStartLearning => '开始学习';
+
+  @override
+  String get resultStartLearningHint => '一步一步走一遍';
+
+  @override
+  String get resultLearnMore => '了解更多';
+
+  @override
+  String get resultLearnMoreSubtitle => '原理、术语、解法和图像';
+
+  @override
+  String get resultCopy => '复制';
+
+  @override
+  String get resultCopied => '答案已复制';
+
+  @override
+  String get resultSave => '保存';
+
+  @override
+  String get resultSavedShort => '已保存';
+
+  @override
+  String get solutionWhyThisWorks => '为什么这样可行';
+
+  @override
+  String get solutionStepBack => '返回';
+
+  @override
+  String get solutionFinishLesson => '完成';
+
+  @override
+  String get solutionLessonComplete => '本课完成';
+
+  @override
+  String get solutionLessonCompleteSubtitle => '每一步都是你自己走下来的。';
+
+  @override
+  String get solutionReplayLesson => '再看一遍';
+
+  @override
+  String get solutionMethodUsed => '使用的方法';
+
+  @override
+  String get solutionStillConfused => '还是不太清楚？';
+
+  @override
+  String get solutionStillConfusedBody => '这道题的任何部分，Numi 都能陪你过一遍。';
+
+  @override
+  String get solutionPracticeTitle => '现在自己试一题';
+
+  @override
+  String get solutionPracticeSubtitle => '练过才真正记得住。';
+
+  @override
+  String get solutionPracticeThisTopic => '练习这个主题';
+
+  @override
+  String get solutionWatchItAnimate => '看动画演示';
+
+  @override
+  String get solutionWatchItAnimateSubtitle => '看着每一步动起来，而不只是摆在那里。';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get solutionSolvingSteps => '解题步骤';
+
+  @override
+  String get solutionTapStepHint => '点按任意一步，看看它是怎么来的';
+
+  @override
+  String get solutionAnswerRow => '解答';
+
+  @override
+  String get solutionExplainHow => '讲讲怎么做';
+
+  @override
+  String get learnMoreTitle => '了解更多';
+
+  @override
+  String get learnMoreAllSteps => '全部步骤';
+
+  @override
+  String get learnMoreGlossary => '术语表';
+
+  @override
+  String get learnMoreExplanations => '用三种方式讲解';
+
+  @override
+  String get learnMoreCompareMethods => '比较方法';
+
+  @override
+  String get learnMoreUseThisMethod => '用这个方法解';
+
+  @override
+  String get learnMoreNothing => '这道题暂时还没有更多内容。';
+
+  @override
+  String get tutorImageSheetTitle => '添加照片';
+
+  @override
+  String get tutorImageAttached => '你发送的照片';
+
+  @override
+  String get tutorImageAskProblem => '可以帮我看看这道题吗？';
+
+  @override
+  String get tutorImageAskWork => '可以帮我检查一下解题过程吗？';
+
+  @override
+  String get tutorImageSawProblem => 'Numi 已从你的照片中读出题目';
+
+  @override
+  String get tutorImageSawWork => 'Numi 已读出你的解题过程';
+
+  @override
+  String get tutorImageNotMath => '这张照片里没有找到数学内容。发给我一道题，或者你的解题过程照片，我来看看。📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      '我没能看清楚。请在光线更好的地方重拍，让题目占满画面——或者直接输入，我马上帮你。';
+
+  @override
+  String get tutorImageFailed => '现在读不了这张照片。请检查网络连接后再试一次。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1854,7 +2123,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorTitle => 'AI 辅导';
 
   @override
-  String get tutorAsk => '向 Matheasy 提问';
+  String get tutorAsk => '向 Numi 提问';
 
   @override
   String get tutorHint => '给我一点提示';
@@ -1902,7 +2171,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get practiceVisualNothing => '现在没有可展示的内容。';
 
   @override
-  String get practiceVisualLoading => 'Matheasy 正在为你绘制可视化讲解…';
+  String get practiceVisualLoading => 'Numi 正在为你绘制可视化讲解…';
 
   @override
   String get practiceVisualProFeature => '可视化学习是 Matheasy Pro 功能。';
@@ -1953,7 +2222,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get practiceRecommendedForYou => '为你推荐';
 
   @override
-  String get practiceAskMatheasyWhy => '问 Matheasy 为什么';
+  String get practiceAskMatheasyWhy => '问 Numi 为什么';
 
   @override
   String get practiceShowVisually => '给我看可视化';
@@ -2007,13 +2276,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorVoiceChatSoon => '语音对话即将上线。';
 
   @override
-  String get tutorEmptyTitle => '尽管问 Matheasy';
+  String get tutorEmptyTitle => '尽管问 Numi';
 
   @override
   String get tutorEmptyMessage => '拍张照片或输入问题，即可获得清晰的分步讲解。';
 
   @override
-  String get tutorTyping => 'Matheasy 正在输入';
+  String get tutorTyping => 'Numi 正在输入';
 
   @override
   String get tutorTagline => '你的 AI 数学导师';
@@ -2025,7 +2294,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorHeroSubtitle => '有任何数学问题都可以问我。';
 
   @override
-  String get tutorAskMatheasy => '问 Matheasy';
+  String get tutorAskMatheasy => '问 Numi';
 
   @override
   String get tutorExploreTopics => '探索主题';
@@ -2043,7 +2312,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get tutorUploadQuestion => '上传题目';
 
   @override
-  String get tutorInputHint => '尽管问 Matheasy…';
+  String get tutorInputHint => '尽管问 Numi…';
 
   @override
   String get tutorVoiceInput => '语音输入';
@@ -2065,6 +2334,143 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tutorQuizNotQuite => '还差一点——不过很接近了！';
+
+  @override
+  String get tutorModePrompt => '你想怎么学这道题？';
+
+  @override
+  String get tutorModeChange => '换一种学习方式';
+
+  @override
+  String get tutorModeHint => '只要提示';
+
+  @override
+  String get tutorModeHintDetail => '往对的方向轻推一把——你自己来解。';
+
+  @override
+  String get tutorModeSolveTogether => '一起解';
+
+  @override
+  String get tutorModeSolveTogetherDetail => '一步一步来，节奏由你定。';
+
+  @override
+  String get tutorModeTeachMe => '教我';
+
+  @override
+  String get tutorModeTeachMeDetail => '从思路讲起，配上例子。';
+
+  @override
+  String get tutorModeShowSolution => '看完整解答';
+
+  @override
+  String get tutorModeShowSolutionDetail => '整道题的完整解法，并加以讲解。';
+
+  @override
+  String get tutorModeQuizMe => '考考我';
+
+  @override
+  String get tutorModeQuizMeDetail => '我出题，你作答，我给反馈。';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return '已切换到$mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => '讲得再简单些';
+
+  @override
+  String get tutorActionExplainSimplerMessage => '能讲得更简单一点吗？';
+
+  @override
+  String get tutorActionGiveExample => '举个例子';
+
+  @override
+  String get tutorActionGiveExampleMessage => '能给我举个例子吗？';
+
+  @override
+  String get tutorActionTellMeWhy => '为什么这样可行？';
+
+  @override
+  String get tutorActionTellMeWhyMessage => '为什么这样可行？';
+
+  @override
+  String get tutorActionShowAnotherMethod => '换个方法';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => '还有别的做法吗？';
+
+  @override
+  String get tutorActionCreateQuiz => '考考我';
+
+  @override
+  String get tutorActionCreateQuizMessage => '就这个内容考考我。';
+
+  @override
+  String get tutorActionPracticeMore => '练习';
+
+  @override
+  String get tutorActionPracticeMoreMessage => '给我一道练习题。';
+
+  @override
+  String get tutorActionGiveHint => '给我提示';
+
+  @override
+  String get tutorActionGiveHintMessage => '给我一点提示。';
+
+  @override
+  String get tutorActionNextStep => '下一步';
+
+  @override
+  String get tutorActionNextStepMessage => '下一步是什么？';
+
+  @override
+  String get tutorActionCheckMyWork => '检查我的解答';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => '能帮我检查一下计算吗？';
+
+  @override
+  String get tutorActionCommonMistakes => '常见错误';
+
+  @override
+  String get tutorActionCommonMistakesMessage => '这里要当心哪些错误？';
+
+  @override
+  String get tutorActionPracticeEasier => '简单一点的';
+
+  @override
+  String get tutorActionPracticeEasierMessage => '给我一道同类但简单点的题。';
+
+  @override
+  String get tutorActionPracticeSimilar => '类似的';
+
+  @override
+  String get tutorActionPracticeSimilarMessage => '给我一道类似的题练手。';
+
+  @override
+  String get tutorActionPracticeHarder => '难一点的';
+
+  @override
+  String get tutorActionPracticeHarderMessage => '给我一道同类但难一点的题。';
+
+  @override
+  String get tutorActionPracticeChallenge => '来点挑战';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => '给我一道有挑战性的题。';
+
+  @override
+  String get tutorActionShowSolution => '看解答';
+
+  @override
+  String get tutorActionShowSolutionMessage => '把完整解答给我看看。';
+
+  @override
+  String get tutorActionIDontUnderstand => '我没看懂';
+
+  @override
+  String get tutorActionIDontUnderstandMessage => '我没看懂——能换个说法讲吗？';
 
   @override
   String get onboardingGetStarted => '开始使用';
@@ -2469,7 +2875,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get progressSeeAll => '查看全部';
 
   @override
-  String get progressMatheasySays => 'Matheasy 说';
+  String get progressMatheasySays => 'Numi 说';
 
   @override
   String get progressRecentActivity => '最近动态';
@@ -2709,13 +3115,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get explainEmptyMessage => '这道题没有文字解析——不过我可以一步步为你讲解。';
 
   @override
-  String get resultAskMatheasy => '问 Matheasy';
+  String get resultAskMatheasy => '问 Numi';
 
   @override
-  String get explainStillStuck => '还是卡住了？问问 Matheasy';
+  String get explainStillStuck => '还是卡住了？问问 Numi';
 
   @override
-  String get visualLoadingMessage => 'Matheasy 正在为你绘制可视化讲解…';
+  String get visualLoadingMessage => 'Numi 正在为你绘制可视化讲解…';
 
   @override
   String get visualUnavailableMessage => '可视化讲解暂时无法使用——在此期间，讲解标签页里有完整内容。';
@@ -2873,7 +3279,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get visualKeyIdeas => '核心要点';
 
   @override
-  String get visualAskAboutStep => '就这一步问 Matheasy';
+  String get visualAskAboutStep => '就这一步问 Numi';
 
   @override
   String get visualReplay => '重播';
@@ -3190,7 +3596,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return '$topic 全对通关。Matheasy 为你点赞！';
+    return '$topic 全对通关。Numi 为你点赞！';
   }
 
   @override
@@ -3434,6 +3840,138 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get onboardingChipGeometry => '几何';
+
+  @override
+  String get resultStartLearning => '开始学习';
+
+  @override
+  String get resultStartLearningHint => '一步一步走一遍';
+
+  @override
+  String get resultLearnMore => '了解更多';
+
+  @override
+  String get resultLearnMoreSubtitle => '原理、术语、解法和图像';
+
+  @override
+  String get resultCopy => '复制';
+
+  @override
+  String get resultCopied => '答案已复制';
+
+  @override
+  String get resultSave => '保存';
+
+  @override
+  String get resultSavedShort => '已保存';
+
+  @override
+  String get solutionWhyThisWorks => '为什么这样可行';
+
+  @override
+  String get solutionStepBack => '返回';
+
+  @override
+  String get solutionFinishLesson => '完成';
+
+  @override
+  String get solutionLessonComplete => '本课完成';
+
+  @override
+  String get solutionLessonCompleteSubtitle => '每一步都是你自己走下来的。';
+
+  @override
+  String get solutionReplayLesson => '再看一遍';
+
+  @override
+  String get solutionMethodUsed => '使用的方法';
+
+  @override
+  String get solutionStillConfused => '还是不太清楚？';
+
+  @override
+  String get solutionStillConfusedBody => '这道题的任何部分，Numi 都能陪你过一遍。';
+
+  @override
+  String get solutionPracticeTitle => '现在自己试一题';
+
+  @override
+  String get solutionPracticeSubtitle => '练过才真正记得住。';
+
+  @override
+  String get solutionPracticeThisTopic => '练习这个主题';
+
+  @override
+  String get solutionWatchItAnimate => '看动画演示';
+
+  @override
+  String get solutionWatchItAnimateSubtitle => '看着每一步动起来，而不只是摆在那里。';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get solutionSolvingSteps => '解题步骤';
+
+  @override
+  String get solutionTapStepHint => '点按任意一步，看看它是怎么来的';
+
+  @override
+  String get solutionAnswerRow => '解答';
+
+  @override
+  String get solutionExplainHow => '讲讲怎么做';
+
+  @override
+  String get learnMoreTitle => '了解更多';
+
+  @override
+  String get learnMoreAllSteps => '全部步骤';
+
+  @override
+  String get learnMoreGlossary => '术语表';
+
+  @override
+  String get learnMoreExplanations => '用三种方式讲解';
+
+  @override
+  String get learnMoreCompareMethods => '比较方法';
+
+  @override
+  String get learnMoreUseThisMethod => '用这个方法解';
+
+  @override
+  String get learnMoreNothing => '这道题暂时还没有更多内容。';
+
+  @override
+  String get tutorImageSheetTitle => '添加照片';
+
+  @override
+  String get tutorImageAttached => '你发送的照片';
+
+  @override
+  String get tutorImageAskProblem => '可以帮我看看这道题吗？';
+
+  @override
+  String get tutorImageAskWork => '可以帮我检查一下解题过程吗？';
+
+  @override
+  String get tutorImageSawProblem => 'Numi 已从你的照片中读出题目';
+
+  @override
+  String get tutorImageSawWork => 'Numi 已读出你的解题过程';
+
+  @override
+  String get tutorImageNotMath => '这张照片里没有找到数学内容。发给我一道题，或者你的解题过程照片，我来看看。📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      '我没能看清楚。请在光线更好的地方重拍，让题目占满画面——或者直接输入，我马上帮你。';
+
+  @override
+  String get tutorImageFailed => '现在读不了这张照片。请检查网络连接后再试一次。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3570,7 +4108,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorTitle => 'AI 家教';
 
   @override
-  String get tutorAsk => '詢問 Matheasy';
+  String get tutorAsk => '詢問 Numi';
 
   @override
   String get tutorHint => '給我提示';
@@ -3618,7 +4156,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get practiceVisualNothing => '目前沒有可視覺化的內容。';
 
   @override
-  String get practiceVisualLoading => 'Matheasy 正在為你繪製視覺化解題…';
+  String get practiceVisualLoading => 'Numi 正在為你繪製視覺化解題…';
 
   @override
   String get practiceVisualProFeature => '視覺學習是 Matheasy Pro 功能。';
@@ -3669,7 +4207,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get practiceRecommendedForYou => '為你推薦';
 
   @override
-  String get practiceAskMatheasyWhy => '問 Matheasy 為什麼';
+  String get practiceAskMatheasyWhy => '問 Numi 為什麼';
 
   @override
   String get practiceShowVisually => '用視覺化呈現給我看';
@@ -3723,13 +4261,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorVoiceChatSoon => '語音聊天即將推出。';
 
   @override
-  String get tutorEmptyTitle => '有問題都可以問 Matheasy';
+  String get tutorEmptyTitle => '有問題都可以問 Numi';
 
   @override
   String get tutorEmptyMessage => '拍張照或輸入問題，就能獲得清楚的逐步講解。';
 
   @override
-  String get tutorTyping => 'Matheasy 正在輸入';
+  String get tutorTyping => 'Numi 正在輸入';
 
   @override
   String get tutorTagline => '你的 AI 數學家教';
@@ -3741,7 +4279,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorHeroSubtitle => '任何數學問題都可以問我。';
 
   @override
-  String get tutorAskMatheasy => '問 Matheasy';
+  String get tutorAskMatheasy => '問 Numi';
 
   @override
   String get tutorExploreTopics => '探索主題';
@@ -3759,7 +4297,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get tutorUploadQuestion => '上傳題目';
 
   @override
-  String get tutorInputHint => '有問題都可以問 Matheasy…';
+  String get tutorInputHint => '有問題都可以問 Numi…';
 
   @override
   String get tutorVoiceInput => '語音輸入';
@@ -3781,6 +4319,143 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tutorQuizNotQuite => '還不太對——但很接近了！';
+
+  @override
+  String get tutorModePrompt => '你想怎麼學這一題？';
+
+  @override
+  String get tutorModeChange => '換一種學習方式';
+
+  @override
+  String get tutorModeHint => '只要提示';
+
+  @override
+  String get tutorModeHintDetail => '往對的方向輕推一把——你自己來解。';
+
+  @override
+  String get tutorModeSolveTogether => '一起解';
+
+  @override
+  String get tutorModeSolveTogetherDetail => '一步一步來，節奏由你決定。';
+
+  @override
+  String get tutorModeTeachMe => '教我';
+
+  @override
+  String get tutorModeTeachMeDetail => '從想法講起，搭配例子。';
+
+  @override
+  String get tutorModeShowSolution => '看完整解答';
+
+  @override
+  String get tutorModeShowSolutionDetail => '整題的完整解法，並加以說明。';
+
+  @override
+  String get tutorModeQuizMe => '考考我';
+
+  @override
+  String get tutorModeQuizMeDetail => '我出題，你作答，我給回饋。';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return '已切換到$mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => '講得再簡單一些';
+
+  @override
+  String get tutorActionExplainSimplerMessage => '可以講得更簡單一點嗎？';
+
+  @override
+  String get tutorActionGiveExample => '舉個例子';
+
+  @override
+  String get tutorActionGiveExampleMessage => '可以給我舉個例子嗎？';
+
+  @override
+  String get tutorActionTellMeWhy => '為什麼這樣可行？';
+
+  @override
+  String get tutorActionTellMeWhyMessage => '為什麼這樣可行？';
+
+  @override
+  String get tutorActionShowAnotherMethod => '換個方法';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => '還有別的做法嗎？';
+
+  @override
+  String get tutorActionCreateQuiz => '考考我';
+
+  @override
+  String get tutorActionCreateQuizMessage => '就這個內容考考我。';
+
+  @override
+  String get tutorActionPracticeMore => '練習';
+
+  @override
+  String get tutorActionPracticeMoreMessage => '給我一題練習。';
+
+  @override
+  String get tutorActionGiveHint => '給我提示';
+
+  @override
+  String get tutorActionGiveHintMessage => '給我一點提示。';
+
+  @override
+  String get tutorActionNextStep => '下一步';
+
+  @override
+  String get tutorActionNextStepMessage => '下一步是什麼？';
+
+  @override
+  String get tutorActionCheckMyWork => '檢查我的解答';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => '可以幫我檢查一下計算嗎？';
+
+  @override
+  String get tutorActionCommonMistakes => '常見錯誤';
+
+  @override
+  String get tutorActionCommonMistakesMessage => '這裡要小心哪些錯誤？';
+
+  @override
+  String get tutorActionPracticeEasier => '簡單一點的';
+
+  @override
+  String get tutorActionPracticeEasierMessage => '給我一題同類型但簡單一點的。';
+
+  @override
+  String get tutorActionPracticeSimilar => '類似的';
+
+  @override
+  String get tutorActionPracticeSimilarMessage => '給我一題類似的來練手。';
+
+  @override
+  String get tutorActionPracticeHarder => '難一點的';
+
+  @override
+  String get tutorActionPracticeHarderMessage => '給我一題同類型但難一點的。';
+
+  @override
+  String get tutorActionPracticeChallenge => '來點挑戰';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => '給我一題有挑戰性的。';
+
+  @override
+  String get tutorActionShowSolution => '看解答';
+
+  @override
+  String get tutorActionShowSolutionMessage => '把完整解答給我看。';
+
+  @override
+  String get tutorActionIDontUnderstand => '我看不懂';
+
+  @override
+  String get tutorActionIDontUnderstandMessage => '我看不懂——可以換個說法講嗎？';
 
   @override
   String get onboardingGetStarted => '開始使用';
@@ -4185,7 +4860,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get progressSeeAll => '查看全部';
 
   @override
-  String get progressMatheasySays => 'Matheasy 說';
+  String get progressMatheasySays => 'Numi 說';
 
   @override
   String get progressRecentActivity => '最近活動';
@@ -4425,13 +5100,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get explainEmptyMessage => '這題沒有文字說明——但我可以一步步帶你講解。';
 
   @override
-  String get resultAskMatheasy => '問 Matheasy';
+  String get resultAskMatheasy => '問 Numi';
 
   @override
-  String get explainStillStuck => '還是卡住了？問問 Matheasy';
+  String get explainStillStuck => '還是卡住了？問問 Numi';
 
   @override
-  String get visualLoadingMessage => 'Matheasy 正在為你繪製視覺化解題…';
+  String get visualLoadingMessage => 'Numi 正在為你繪製視覺化解題…';
 
   @override
   String get visualUnavailableMessage => '視覺化解題目前無法使用——這段期間「講解」分頁有完整內容。';
@@ -4589,7 +5264,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get visualKeyIdeas => '關鍵概念';
 
   @override
-  String get visualAskAboutStep => '向 Matheasy 詢問這一步';
+  String get visualAskAboutStep => '向 Numi 詢問這一步';
 
   @override
   String get visualReplay => '重播';
@@ -4906,7 +5581,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return '在 $topic 上完美無誤。Matheasy 對你刮目相看！';
+    return '在 $topic 上完美無誤。Numi 對你刮目相看！';
   }
 
   @override
@@ -5150,4 +5825,136 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get onboardingChipGeometry => '幾何';
+
+  @override
+  String get resultStartLearning => '開始學習';
+
+  @override
+  String get resultStartLearningHint => '一步一步走一遍';
+
+  @override
+  String get resultLearnMore => '了解更多';
+
+  @override
+  String get resultLearnMoreSubtitle => '原理、術語、解法和圖形';
+
+  @override
+  String get resultCopy => '複製';
+
+  @override
+  String get resultCopied => '答案已複製';
+
+  @override
+  String get resultSave => '儲存';
+
+  @override
+  String get resultSavedShort => '已儲存';
+
+  @override
+  String get solutionWhyThisWorks => '為什麼這樣可行';
+
+  @override
+  String get solutionStepBack => '返回';
+
+  @override
+  String get solutionFinishLesson => '完成';
+
+  @override
+  String get solutionLessonComplete => '本課完成';
+
+  @override
+  String get solutionLessonCompleteSubtitle => '每一步都是你自己走過來的。';
+
+  @override
+  String get solutionReplayLesson => '再看一遍';
+
+  @override
+  String get solutionMethodUsed => '使用的方法';
+
+  @override
+  String get solutionStillConfused => '還是不太清楚？';
+
+  @override
+  String get solutionStillConfusedBody => '這題的任何部分，Numi 都能陪你走一遍。';
+
+  @override
+  String get solutionPracticeTitle => '現在自己試一題';
+
+  @override
+  String get solutionPracticeSubtitle => '練過才真的記得住。';
+
+  @override
+  String get solutionPracticeThisTopic => '練習這個主題';
+
+  @override
+  String get solutionWatchItAnimate => '看動畫示範';
+
+  @override
+  String get solutionWatchItAnimateSubtitle => '看著每一步動起來，而不只是擺在那裡。';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get solutionSolvingSteps => '解題步驟';
+
+  @override
+  String get solutionTapStepHint => '點一下任一步驟，看看它是怎麼來的';
+
+  @override
+  String get solutionAnswerRow => '解答';
+
+  @override
+  String get solutionExplainHow => '說明怎麼做';
+
+  @override
+  String get learnMoreTitle => '了解更多';
+
+  @override
+  String get learnMoreAllSteps => '所有步驟';
+
+  @override
+  String get learnMoreGlossary => '術語表';
+
+  @override
+  String get learnMoreExplanations => '用三種方式說明';
+
+  @override
+  String get learnMoreCompareMethods => '比較方法';
+
+  @override
+  String get learnMoreUseThisMethod => '用這個方法解';
+
+  @override
+  String get learnMoreNothing => '這題目前還沒有更多內容。';
+
+  @override
+  String get tutorImageSheetTitle => '新增照片';
+
+  @override
+  String get tutorImageAttached => '你傳送的照片';
+
+  @override
+  String get tutorImageAskProblem => '可以幫我看看這道題嗎？';
+
+  @override
+  String get tutorImageAskWork => '可以幫我檢查一下解題過程嗎？';
+
+  @override
+  String get tutorImageSawProblem => 'Numi 已從你的照片中讀出題目';
+
+  @override
+  String get tutorImageSawWork => 'Numi 已讀出你的解題過程';
+
+  @override
+  String get tutorImageNotMath => '這張照片裡沒有找到數學內容。傳給我一道題，或是你的解題過程照片，我來看看。📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      '我沒能看清楚。請在光線更好的地方重拍，讓題目佔滿畫面——或者直接輸入，我馬上幫你。';
+
+  @override
+  String get tutorImageFailed => '現在讀不了這張照片。請檢查網路連線後再試一次。';
 }

@@ -139,7 +139,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tutorTitle => 'Tutor AI';
 
   @override
-  String get tutorAsk => 'Tanya Matheasy';
+  String get tutorAsk => 'Tanya Numi';
 
   @override
   String get tutorHint => 'Beri aku petunjuk';
@@ -189,7 +189,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get practiceVisualLoading =>
-      'Matheasy sedang menyiapkan panduan visualmu…';
+      'Numi sedang menyiapkan panduan visualmu…';
 
   @override
   String get practiceVisualProFeature =>
@@ -244,7 +244,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get practiceRecommendedForYou => 'Rekomendasi untukmu';
 
   @override
-  String get practiceAskMatheasyWhy => 'Tanya Matheasy kenapa';
+  String get practiceAskMatheasyWhy => 'Tanya Numi kenapa';
 
   @override
   String get practiceShowVisually => 'Tampilkan secara visual';
@@ -298,14 +298,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Obrolan suara segera hadir.';
 
   @override
-  String get tutorEmptyTitle => 'Tanya apa saja ke Matheasy';
+  String get tutorEmptyTitle => 'Tanya apa saja ke Numi';
 
   @override
   String get tutorEmptyMessage =>
       'Foto atau ketik soal dan dapatkan penjelasan yang jelas, langkah demi langkah.';
 
   @override
-  String get tutorTyping => 'Matheasy sedang mengetik';
+  String get tutorTyping => 'Numi sedang mengetik';
 
   @override
   String get tutorTagline => 'Tutor matematika AI-mu';
@@ -317,7 +317,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tutorHeroSubtitle => 'Tanya apa saja soal matematika.';
 
   @override
-  String get tutorAskMatheasy => 'Tanya Matheasy';
+  String get tutorAskMatheasy => 'Tanya Numi';
 
   @override
   String get tutorExploreTopics => 'Jelajahi topik';
@@ -335,7 +335,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tutorUploadQuestion => 'Unggah soal';
 
   @override
-  String get tutorInputHint => 'Tanya apa saja ke Matheasy…';
+  String get tutorInputHint => 'Tanya apa saja ke Numi…';
 
   @override
   String get tutorVoiceInput => 'Input suara';
@@ -357,6 +357,153 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Belum tepat — tapi hampir!';
+
+  @override
+  String get tutorModePrompt => 'Kamu mau belajar ini dengan cara apa?';
+
+  @override
+  String get tutorModeChange => 'Ubah cara belajar';
+
+  @override
+  String get tutorModeHint => 'Petunjuk saja';
+
+  @override
+  String get tutorModeHintDetail =>
+      'Sedikit dorongan ke arah yang benar — kamu yang menyelesaikan.';
+
+  @override
+  String get tutorModeSolveTogether => 'Selesaikan bersama';
+
+  @override
+  String get tutorModeSolveTogetherDetail =>
+      'Satu langkah setiap kali, kamu yang memimpin.';
+
+  @override
+  String get tutorModeTeachMe => 'Ajari aku';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Mulai dari idenya, dengan contoh.';
+
+  @override
+  String get tutorModeShowSolution => 'Tampilkan solusi lengkap';
+
+  @override
+  String get tutorModeShowSolutionDetail => 'Seluruh penyelesaian, dijelaskan.';
+
+  @override
+  String get tutorModeQuizMe => 'Kuis aku';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Aku bertanya, kamu menjawab, aku memberi masukan.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Beralih ke $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Jelaskan lebih sederhana';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Bisa dijelaskan lebih sederhana?';
+
+  @override
+  String get tutorActionGiveExample => 'Beri contoh';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Bisa beri aku contoh?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Kenapa itu berhasil?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Kenapa itu berhasil?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Metode lain';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage =>
+      'Apakah ada cara lain untuk ini?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Kuis aku';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Kuis aku tentang ini.';
+
+  @override
+  String get tutorActionPracticeMore => 'Latihan';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Beri aku soal latihan.';
+
+  @override
+  String get tutorActionGiveHint => 'Beri petunjuk';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Beri aku petunjuk.';
+
+  @override
+  String get tutorActionNextStep => 'Langkah berikutnya';
+
+  @override
+  String get tutorActionNextStepMessage => 'Apa langkah berikutnya?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Periksa pekerjaanku';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => 'Bisa periksa hitunganku?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Kesalahan umum';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Kesalahan apa yang harus kuhindari di sini?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Yang lebih mudah';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Beri aku soal yang lebih mudah seperti ini.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Yang serupa';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Beri aku soal serupa untuk dicoba.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Yang lebih sulit';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Beri aku soal yang lebih sulit seperti ini.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Tantang aku';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => 'Beri aku soal tantangan.';
+
+  @override
+  String get tutorActionShowSolution => 'Tampilkan solusi';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Tunjukkan solusi lengkapnya.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Aku belum paham';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Aku belum paham — bisa dijelaskan dengan cara lain?';
 
   @override
   String get onboardingGetStarted => 'Mulai';
@@ -790,7 +937,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get progressSeeAll => 'Lihat semua';
 
   @override
-  String get progressMatheasySays => 'Kata Matheasy';
+  String get progressMatheasySays => 'Kata Numi';
 
   @override
   String get progressRecentActivity => 'Aktivitas terbaru';
@@ -1048,14 +1195,13 @@ class AppLocalizationsId extends AppLocalizations {
       'Tidak ada uraian untuk yang ini — tapi aku bisa memandumu langkah demi langkah.';
 
   @override
-  String get resultAskMatheasy => 'Tanya Matheasy';
+  String get resultAskMatheasy => 'Tanya Numi';
 
   @override
-  String get explainStillStuck => 'Masih bingung? Tanya Matheasy';
+  String get explainStillStuck => 'Masih bingung? Tanya Numi';
 
   @override
-  String get visualLoadingMessage =>
-      'Matheasy sedang menyiapkan panduan visualmu…';
+  String get visualLoadingMessage => 'Numi sedang menyiapkan panduan visualmu…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1217,7 +1363,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get visualKeyIdeas => 'IDE UTAMA';
 
   @override
-  String get visualAskAboutStep => 'Tanya Matheasy tentang langkah ini';
+  String get visualAskAboutStep => 'Tanya Numi tentang langkah ini';
 
   @override
   String get visualReplay => 'Putar ulang';
@@ -1545,7 +1691,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Hasil sempurna di $topic. Matheasy terkesan!';
+    return 'Hasil sempurna di $topic. Numi terkesan!';
   }
 
   @override
@@ -1795,4 +1941,142 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometri';
+
+  @override
+  String get resultStartLearning => 'Mulai belajar';
+
+  @override
+  String get resultStartLearningHint => 'Telusuri satu langkah setiap kali';
+
+  @override
+  String get resultLearnMore => 'Selengkapnya';
+
+  @override
+  String get resultLearnMoreSubtitle => 'Teori, glosarium, metode, dan grafik';
+
+  @override
+  String get resultCopy => 'Salin';
+
+  @override
+  String get resultCopied => 'Jawaban disalin';
+
+  @override
+  String get resultSave => 'Simpan';
+
+  @override
+  String get resultSavedShort => 'Tersimpan';
+
+  @override
+  String get solutionWhyThisWorks => 'Kenapa ini berhasil';
+
+  @override
+  String get solutionStepBack => 'Kembali';
+
+  @override
+  String get solutionFinishLesson => 'Selesai';
+
+  @override
+  String get solutionLessonComplete => 'Pelajaran selesai';
+
+  @override
+  String get solutionLessonCompleteSubtitle =>
+      'Setiap langkah kamu kerjakan sendiri.';
+
+  @override
+  String get solutionReplayLesson => 'Ulangi pelajaran';
+
+  @override
+  String get solutionMethodUsed => 'Metode yang dipakai';
+
+  @override
+  String get solutionStillConfused => 'Masih bingung?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi bisa membahas bagian mana pun dari soal ini bersamamu.';
+
+  @override
+  String get solutionPracticeTitle => 'Sekarang coba sendiri';
+
+  @override
+  String get solutionPracticeSubtitle => 'Latihan yang membuatnya melekat.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Latih topik ini';
+
+  @override
+  String get solutionWatchItAnimate => 'Lihat animasinya';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Lihat setiap langkah bergerak, bukan sekadar diam.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Langkah $step dari $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Langkah penyelesaian';
+
+  @override
+  String get solutionTapStepHint =>
+      'Ketuk langkah mana pun untuk melihat cara kerjanya';
+
+  @override
+  String get solutionAnswerRow => 'Solusi';
+
+  @override
+  String get solutionExplainHow => 'Jelaskan caranya';
+
+  @override
+  String get learnMoreTitle => 'Selengkapnya';
+
+  @override
+  String get learnMoreAllSteps => 'Semua langkah';
+
+  @override
+  String get learnMoreGlossary => 'Glosarium';
+
+  @override
+  String get learnMoreExplanations => 'Dijelaskan dengan tiga cara';
+
+  @override
+  String get learnMoreCompareMethods => 'Bandingkan metode';
+
+  @override
+  String get learnMoreUseThisMethod => 'Selesaikan dengan metode ini';
+
+  @override
+  String get learnMoreNothing => 'Belum ada tambahan untuk soal ini.';
+
+  @override
+  String get tutorImageSheetTitle => 'Tambahkan foto';
+
+  @override
+  String get tutorImageAttached => 'Foto yang kamu kirim';
+
+  @override
+  String get tutorImageAskProblem => 'Bisakah kamu membantuku dengan soal ini?';
+
+  @override
+  String get tutorImageAskWork => 'Bisakah kamu memeriksa pengerjaanku?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi membaca soal dari fotomu';
+
+  @override
+  String get tutorImageSawWork => 'Numi membaca pengerjaanmu';
+
+  @override
+  String get tutorImageNotMath =>
+      'Aku tidak menemukan matematika di foto itu. Kirim soal atau foto pengerjaanmu, nanti aku lihat. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Aku tidak bisa membacanya dengan jelas. Coba lagi dengan cahaya lebih terang dan soal memenuhi bingkai — atau ketik saja, aku langsung bantu.';
+
+  @override
+  String get tutorImageFailed =>
+      'Aku tidak bisa membaca foto itu sekarang. Periksa koneksimu lalu coba lagi.';
 }

@@ -56,8 +56,10 @@ void main() {
     // floor is 34 so a long answer stays readable.
     final answer = adaptive.firstWhere((a) => a.maxFontSize == 56);
     expect(answer.minFontSize, 34);
-    // The problem band: up to 40.
-    expect(adaptive.any((a) => a.maxFontSize == 40), isTrue);
+    // The problem band: up to 38 (V3 — the answer, not the problem, is the
+    // biggest thing on the screen).
+    expect(adaptive.any((a) => a.maxFontSize == 38 && a.minFontSize == 26),
+        isTrue);
 
     // Nothing on the screen scrolls sideways — every rendered MathText fits.
     final maths = _maths(tester);
@@ -70,17 +72,23 @@ void main() {
     expect(find.text('FINAL ANSWER'), findsOneWidget);
   });
 
-  testWidgets('steps size adaptively (≤30) and never scroll once revealed',
+  testWidgets('steps size adaptively (≤36) and never scroll once revealed',
       (tester) async {
     await pumpSolved(tester);
-    await tester.tap(find.text('Reveal all'));
+    await tester.tap(find.text('Start Learning'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     final adaptive = _adaptive(tester);
-    // Step maths band is 22–30 (down from the previous fixed 30-and-scroll).
+    // The opened step shows BOTH the before and after expression, so it takes a
+    // calmer band (18–28) than a lone equation would…
     expect(
-      adaptive.any((a) => a.maxFontSize == 30 && a.minFontSize == 22),
+      adaptive.any((a) => a.maxFontSize == 28 && a.minFontSize == 18),
+      isTrue,
+    );
+    // …and the collapsed rows of the spine sit quietly beneath it at 16–22.
+    expect(
+      adaptive.any((a) => a.maxFontSize == 22 && a.minFontSize == 16),
       isTrue,
     );
 

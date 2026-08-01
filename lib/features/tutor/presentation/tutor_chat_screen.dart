@@ -1,28 +1,36 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/localization/l10n_extension.dart';
+import '../../../core/monitoring/logging_service.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../progress/application/stats_controller.dart';
+import '../../scan/application/scan_image_codec.dart';
+import '../../scan/domain/scan_source.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../application/tutor_controller.dart';
 import '../domain/tutor_models.dart';
+import 'tutor_copy.dart';
 import 'widgets/tutor_chat_input.dart';
 import 'widgets/tutor_message_view.dart';
+import 'widgets/tutor_mode_picker.dart';
 
-/// The full-screen chat with Matheasy — a modern, premium AI conversation.
+/// The full-screen chat with Numi — a modern, premium AI conversation.
 ///
 /// Pushed over the shell. Opens aware of a scanned problem or a tapped prompt
 /// when a [launchContext] is supplied. All responses are local mocks today; the
@@ -39,7 +47,12 @@ class TutorChatScreen extends ConsumerStatefulWidget {
 
 class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   final ScrollController _scroll = ScrollController();
+  final ImagePicker _picker = ImagePicker();
   bool _started = false;
+
+  /// Held for the whole pick → encode → send flow, so a second tap can't open
+  /// the native picker twice or start a second read behind the first.
+  bool _picking = false;
 
   @override
   void initState() {
@@ -70,15 +83,43 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
+  /// Keeps the newest turn in view.
+  ///
+  /// A whole message appearing deserves the [smooth] glide; a reply streaming in
+  /// grows by a few characters at a time, and animating towards a target that
+  /// moves every frame only fights itself — so that case jumps.
+  void _scrollToBottom({bool smooth = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
+      final target = _scroll.position.maxScrollExtent;
+      if (!smooth) {
+        _scroll.jumpTo(target);
+        return;
+      }
       _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
+        target,
         duration: AppDurations.medium,
         curve: AppCurves.standard,
       );
     });
+  }
+
+  /// Whether the student is watching the bottom of the conversation rather than
+  /// reading back through it — a streaming reply follows only when they are.
+  bool get _atBottom {
+    if (!_scroll.hasClients) return true;
+    final position = _scroll.position;
+    return position.maxScrollExtent - position.pixels < 80;
+  }
+
+  /// True when the only change is the last bubble getting longer, i.e. a reply
+  /// being written into it.
+  static bool _lastMessageGrew(TutorSession prev, TutorSession next) {
+    if (next.streamingId == null) return false;
+    if (prev.messages.isEmpty || next.messages.isEmpty) return false;
+    final before = prev.messages.last;
+    final after = next.messages.last;
+    return before.id == after.id && after.text.length > before.text.length;
   }
 
   void _recordTutorUse() =>
@@ -101,7 +142,128 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   void _sendAction(SuggestionAction action) {
     if (!_ensureTutorQuota()) return;
     _recordTutorUse();
-    unawaited(ref.read(tutorChatControllerProvider.notifier).sendAction(action));
+    unawaited(
+      ref
+          .read(tutorChatControllerProvider.notifier)
+          .sendAction(action, TutorCopy.message(context, action)),
+    );
+  }
+
+  /// The student answered "How would you like to learn this?" — their choice
+  /// costs a message, so it goes through the same quota gate as any turn.
+  void _chooseMode(TutorMode mode, String label) {
+    if (!_ensureTutorQuota()) return;
+    _recordTutorUse();
+    unawaited(
+      ref.read(tutorChatControllerProvider.notifier).chooseMode(mode, label),
+    );
+  }
+
+  /// Attaches a photo — a question the student is stuck on, or their own
+  /// working for Numi to check (spec Parts 2 and 12).
+  ///
+  /// Costs two things, so it gates on both: a tutor message, and a scan (the
+  /// read behind it is the same paid Vision call the scanner makes, and the
+  /// server meters it identically).
+  Future<void> _attach() async {
+    if (_picking) return;
+    if (!_ensureTutorQuota()) return;
+    if (!ref.read(usageSnapshotProvider).canScan) {
+      context.push(AppRoutes.paywall, extra: PaywallTrigger.scanLimit);
+      return;
+    }
+
+    _picking = true;
+    try {
+      final source = await _askPhotoSource();
+      if (source == null || !mounted) return;
+
+      final galleryFailed = context.l10n.scanGalleryFailed;
+      Uint8List bytes;
+      try {
+        final file = await _picker.pickImage(
+          source: source == ScanSource.camera
+              ? ImageSource.camera
+              : ImageSource.gallery,
+          maxWidth: 2000,
+          imageQuality: 90,
+        );
+        if (file == null) return; // cancelled
+        bytes = await file.readAsBytes();
+      } catch (error) {
+        LoggingService.warning('Tutor photo pick failed: $error');
+        _toast(galleryFailed);
+        return;
+      }
+      // Normalize to a compact, decodable JPEG off the UI thread — the same
+      // step the scanner takes, and the reason the backend always gets JPEG.
+      bytes = await compute(encodeScanJpeg, bytes);
+      if (!mounted) return;
+
+      _recordTutorUse();
+      ref.read(usageControllerProvider.notifier).recordScan();
+      final sent = await ref
+          .read(tutorChatControllerProvider.notifier)
+          .sendImage(bytes, copy: TutorCopy.image(context), source: source);
+      // The server had the last word on the scan allowance and said no.
+      if (!sent && mounted) {
+        context.push(AppRoutes.paywall, extra: PaywallTrigger.scanLimit);
+      }
+    } finally {
+      _picking = false;
+    }
+  }
+
+  /// "Take photo" or "Gallery" — the same two doors the scanner offers.
+  Future<ScanSource?> _askPhotoSource() {
+    return showModalBottomSheet<ScanSource>(
+      context: context,
+      backgroundColor: context.colors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenH,
+                AppSpacing.lg,
+                AppSpacing.screenH,
+                AppSpacing.sm,
+              ),
+              child: Text(
+                sheetContext.l10n.tutorImageSheetTitle,
+                style: AppTypography.title.copyWith(
+                  color: sheetContext.colors.textPrimary,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text(sheetContext.l10n.scanTakePhoto),
+              onTap: () =>
+                  Navigator.of(sheetContext).pop(ScanSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(sheetContext.l10n.scanGallery),
+              onTap: () =>
+                  Navigator.of(sheetContext).pop(ScanSource.gallery),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Switches mode mid-conversation. Free — nothing is sent; the *next* message
+  /// is answered in the new mode.
+  Future<void> _switchMode(TutorMode current) async {
+    final mode = await showTutorModeSheet(context, current: current);
+    if (mode == null || !mounted) return;
+    ref.read(tutorChatControllerProvider.notifier).setMode(mode);
+    _toast(context.l10n.tutorModeSwitched(TutorCopy.modeLabel(context, mode)));
   }
 
   void _newChat() {
@@ -115,7 +277,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Opens a practice session from a practice card Matheasy offered. Matheasy's
+  /// Opens a practice session from a practice card Numi offered. Numi's
   /// practice prompts are algebra-focused, so we launch an algebra session.
   void _startPractice() {
     context.push(
@@ -131,8 +293,16 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     ref.listen(tutorChatControllerProvider, (prev, next) {
       if (prev == null ||
           prev.messages.length != next.messages.length ||
-          prev.isTyping != next.isTyping) {
+          prev.isThinking != next.isThinking) {
         _scrollToBottom();
+        return;
+      }
+      // A reply streaming in doesn't add a message, it lengthens one — follow it
+      // only while the student is at the bottom watching it arrive. Dragging
+      // someone back down mid-scroll to chase text is worse than letting the
+      // words run past the fold.
+      if (_lastMessageGrew(prev, next) && _atBottom) {
+        _scrollToBottom(smooth: false);
       }
     });
 
@@ -147,8 +317,13 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
           tooltip: context.l10n.tutorBack,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const _MatheasyAppBarTitle(),
+        title: const _NumiAppBarTitle(),
         actions: [
+          IconButton(
+            icon: Icon(session.mode.icon),
+            tooltip: context.l10n.tutorModeChange,
+            onPressed: () => unawaited(_switchMode(session.mode)),
+          ),
           IconButton(
             icon: const Icon(Icons.add_comment_outlined),
             tooltip: context.l10n.tutorNewConversation,
@@ -164,7 +339,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
             TutorChatInput(
               enabled: !session.isTyping,
               onSend: _send,
-              onAttach: () => _toast(context.l10n.tutorImageUploadSoon),
+              onAttach: () => unawaited(_attach()),
               onVoice: () => _toast(context.l10n.tutorVoiceChatSoon),
             ),
           ],
@@ -183,7 +358,13 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
 
     final messages = session.messages;
     final lastAssistant = messages.lastIndexWhere((m) => m.isAssistant);
-    final itemCount = messages.length + (session.isTyping ? 1 : 0);
+    // The picker is a trailing row, not a message — it sits under the greeting
+    // until the student chooses, then disappears for the rest of the thread.
+    final showPicker = session.awaitingModeChoice && !session.isTyping;
+    // Only while she is still thinking: once the words are arriving, the reply
+    // itself is the indicator (spec Part 18).
+    final itemCount =
+        messages.length + (session.isThinking ? 1 : 0) + (showPicker ? 1 : 0);
 
     return ListView.builder(
       controller: _scroll,
@@ -195,6 +376,14 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
       ),
       itemCount: itemCount,
       itemBuilder: (context, index) {
+        if (showPicker && index == messages.length) {
+          return Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.lg),
+            child: AppTransitions.slideUp(
+              child: TutorModePicker(onSelected: _chooseMode),
+            ),
+          );
+        }
         if (index >= messages.length) {
           return Padding(
             padding: const EdgeInsets.only(top: AppSpacing.md),
@@ -223,10 +412,9 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   }
 }
 
-/// The chat app-bar identity: Matheasy's brand avatar, name and a warm status
-/// line.
-class _MatheasyAppBarTitle extends StatelessWidget {
-  const _MatheasyAppBarTitle();
+/// The chat app-bar identity: Numi's brand avatar, name and a warm status line.
+class _NumiAppBarTitle extends StatelessWidget {
+  const _NumiAppBarTitle();
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +432,7 @@ class _MatheasyAppBarTitle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Matheasy',
+                'Numi',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.title.copyWith(color: colors.textPrimary),

@@ -80,6 +80,11 @@ class AnalyticsEvent {
   factory AnalyticsEvent.tutorMessageSent() =>
       const AnalyticsEvent('tutor_message_sent');
 
+  /// Which of the five teaching modes students actually pick — the signal for
+  /// whether the "How would you like to learn this?" menu is earning its place.
+  factory AnalyticsEvent.tutorModeSelected(String mode) =>
+      AnalyticsEvent('tutor_mode_selected', {'mode': mode});
+
   // ---- Practice ----
   factory AnalyticsEvent.practiceStarted({required String topic}) =>
       AnalyticsEvent('practice_started', {'topic': topic});

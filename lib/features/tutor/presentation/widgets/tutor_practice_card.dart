@@ -12,7 +12,7 @@ import '../../../result/domain/result_models.dart';
 import '../../domain/tutor_models.dart';
 
 /// An inline practice-question card. Shows the question, its difficulty and XP
-/// reward, an encouraging line from Matheasy, and a call to action to attempt it.
+/// reward, an encouraging line from Numi, and a call to action to attempt it.
 class TutorPracticeCard extends StatelessWidget {
   const TutorPracticeCard(this.prompt, {super.key, this.onStart});
 

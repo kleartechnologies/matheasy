@@ -141,8 +141,13 @@ void main() {
     });
   });
 
-  group('method switcher (§5)', () {
-    testWidgets('switching method drives its own stepper', (tester) async {
+  group('method switching (V3 — via "Learn more")', () {
+    testWidgets('choosing another method restarts the lesson on its steps',
+        (tester) async {
+      tester.view.physicalSize = const Size(390, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
@@ -153,19 +158,26 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
-      // Both method chips are present; method 0's step shows first.
-      expect(find.text('Factoring'), findsOneWidget);
-      expect(find.text('Formula'), findsOneWidget);
+      // Method chips no longer crowd the solve — the lesson starts on the
+      // recommended method and the comparison waits in "Learn more".
+      expect(find.text('Formula'), findsNothing);
+      await tester.tap(find.text('Start Learning'));
+      await tester.pumpAndSettle();
       expect(find.text('Factor the quadratic'), findsOneWidget);
       expect(find.text('Apply the formula'), findsNothing);
 
-      // Select the other method → its stepper renders.
-      await tester.tap(find.text('Formula'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.text('Learn more'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compare methods'));
+      await tester.pumpAndSettle();
+
+      // "Solve with this method" closes the sheet and re-runs the lesson.
+      expect(find.text('Formula'), findsOneWidget);
+      await tester.tap(find.text('Solve with this method').last);
+      await tester.pumpAndSettle();
+
       expect(find.text('Apply the formula'), findsOneWidget);
       expect(find.text('Factor the quadratic'), findsNothing);
     });
@@ -191,8 +203,12 @@ void main() {
       expect(find.text('Hide'), findsOneWidget); // now expanded
     });
 
-    testWidgets('Solution tab shows the graph section only when graph != null',
+    testWidgets('V3 — never on the Solution tab, only inside "Learn more"',
         (tester) async {
+      tester.view.physicalSize = const Size(390, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       Future<void> pump(ResultData r) => tester.pumpWidget(
             MaterialApp(
               theme: AppTheme.light,
@@ -203,11 +219,21 @@ void main() {
           );
 
       await pump(_twoMethodResult(graph: _graph));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      // The graph never competes with the solve.
+      expect(find.text('Graph'), findsNothing);
+
+      await tester.tap(find.text('Learn more'));
+      await tester.pumpAndSettle();
       expect(find.text('Graph'), findsOneWidget);
+      expect(find.text('Show'), findsOneWidget); // still collapsed in there
+      await tester.tapAt(const Offset(10, 10)); // dismiss via the barrier
+      await tester.pumpAndSettle();
 
       await pump(_twoMethodResult()); // graph == null
-      await tester.pump();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Learn more'));
+      await tester.pumpAndSettle();
       expect(find.text('Graph'), findsNothing); // no empty box
     });
   });

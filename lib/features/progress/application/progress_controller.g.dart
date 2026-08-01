@@ -48,7 +48,7 @@ final class ProgressControllerProvider
 }
 
 String _$progressControllerHash() =>
-    r'ef6e0d2ccbc0c861bbf7e7858d148eaaeea61e59';
+    r'323716669bfd088e35b59e0a6e33a6b9992177bd';
 
 /// Assembles the Progress dashboard from practice progress, local analytics,
 /// achievements and the signed-in user. Recomputes whenever any of those change.

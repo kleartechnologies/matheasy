@@ -139,7 +139,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get tutorTitle => 'AI Tutor';
 
   @override
-  String get tutorAsk => 'Kérdezd a Matheasy-t';
+  String get tutorAsk => 'Kérdezd a Numi-t';
 
   @override
   String get tutorHint => 'Adj egy tippet';
@@ -188,7 +188,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get practiceVisualLoading =>
-      'A Matheasy most rajzolja a vizuális bemutatót…';
+      'A Numi most rajzolja a vizuális bemutatót…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +243,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get practiceRecommendedForYou => 'Neked ajánlott';
 
   @override
-  String get practiceAskMatheasyWhy => 'Kérdezd meg a Matheasy-t, miért';
+  String get practiceAskMatheasyWhy => 'Kérdezd meg a Numi-t, miért';
 
   @override
   String get practiceShowVisually => 'Mutasd meg vizuálisan';
@@ -297,14 +297,14 @@ class AppLocalizationsHu extends AppLocalizations {
   String get tutorVoiceChatSoon => 'A hangalapú csevegés hamarosan elérhető.';
 
   @override
-  String get tutorEmptyTitle => 'Kérdezz bármit a Matheasy-tól';
+  String get tutorEmptyTitle => 'Kérdezz bármit a Numi-tól';
 
   @override
   String get tutorEmptyMessage =>
       'Fotózd le vagy írd be a kérdést, és kapj egy világos, lépésről lépésre magyarázatot.';
 
   @override
-  String get tutorTyping => 'A Matheasy éppen ír';
+  String get tutorTyping => 'A Numi éppen ír';
 
   @override
   String get tutorTagline => 'A te AI matektutorod';
@@ -316,7 +316,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get tutorHeroSubtitle => 'Kérdezz bármit a matematikáról.';
 
   @override
-  String get tutorAskMatheasy => 'Kérdezd a Matheasy-t';
+  String get tutorAskMatheasy => 'Kérdezd a Numi-t';
 
   @override
   String get tutorExploreTopics => 'Témák felfedezése';
@@ -334,7 +334,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get tutorUploadQuestion => 'Kérdés feltöltése';
 
   @override
-  String get tutorInputHint => 'Kérdezz bármit a Matheasy-tól…';
+  String get tutorInputHint => 'Kérdezz bármit a Numi-tól…';
 
   @override
   String get tutorVoiceInput => 'Hangbevitel';
@@ -356,6 +356,153 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Még nem egészen — de közel jársz!';
+
+  @override
+  String get tutorModePrompt => 'Hogyan szeretnéd ezt megtanulni?';
+
+  @override
+  String get tutorModeChange => 'Tanulási mód módosítása';
+
+  @override
+  String get tutorModeHint => 'Csak egy tipp';
+
+  @override
+  String get tutorModeHintDetail => 'Egy lökés a jó irányba — te oldod meg.';
+
+  @override
+  String get tutorModeSolveTogether => 'Oldjuk meg együtt';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Lépésről lépésre, és te vezetsz.';
+
+  @override
+  String get tutorModeTeachMe => 'Taníts meg';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Az ötlettel kezdünk, példákkal.';
+
+  @override
+  String get tutorModeShowSolution => 'Teljes megoldás mutatása';
+
+  @override
+  String get tutorModeShowSolutionDetail => 'A teljes levezetés, elmagyarázva.';
+
+  @override
+  String get tutorModeQuizMe => 'Kérdezz ki';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Én kérdezek, te válaszolsz, én visszajelzést adok.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Átváltva erre: $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Magyarázd egyszerűbben';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'El tudnád magyarázni egyszerűbben?';
+
+  @override
+  String get tutorActionGiveExample => 'Mondj példát';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Tudnál mondani egy példát?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Miért működik ez?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Miért működik ez?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Másik módszer';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage =>
+      'Van erre másik megoldás is?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Kérdezz ki';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Kérdezz ki ebből.';
+
+  @override
+  String get tutorActionPracticeMore => 'Gyakorlás';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Adj egy gyakorlófeladatot.';
+
+  @override
+  String get tutorActionGiveHint => 'Adj egy tippet';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Adj egy tippet.';
+
+  @override
+  String get tutorActionNextStep => 'Következő lépés';
+
+  @override
+  String get tutorActionNextStepMessage => 'Mi a következő lépés?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Ellenőrizd a munkám';
+
+  @override
+  String get tutorActionCheckMyWorkMessage =>
+      'Meg tudnád nézni, jól számoltam-e?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Gyakori hibák';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Milyen hibákra kell itt figyelnem?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Könnyebbet';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Adj egy könnyebb feladatot ilyen témában.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Hasonlót';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Adj egy hasonló feladatot, hadd próbáljam meg.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Nehezebbet';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Adj egy nehezebb feladatot ilyen témában.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Hívj ki';
+
+  @override
+  String get tutorActionPracticeChallengeMessage =>
+      'Adj egy igazán nehéz feladatot.';
+
+  @override
+  String get tutorActionShowSolution => 'Mutasd a megoldást';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Mutasd meg a teljes megoldást.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Nem értem';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Nem értem — el tudnád magyarázni másképp?';
 
   @override
   String get onboardingGetStarted => 'Kezdjük';
@@ -790,7 +937,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get progressSeeAll => 'Összes megtekintése';
 
   @override
-  String get progressMatheasySays => 'A Matheasy szerint';
+  String get progressMatheasySays => 'A Numi szerint';
 
   @override
   String get progressRecentActivity => 'Legutóbbi tevékenység';
@@ -1049,14 +1196,14 @@ class AppLocalizationsHu extends AppLocalizations {
       'Ehhez nincs írásos magyarázat — de lépésről lépésre elmondhatom szóban.';
 
   @override
-  String get resultAskMatheasy => 'Kérdezd a Matheasy-t';
+  String get resultAskMatheasy => 'Kérdezd a Numi-t';
 
   @override
-  String get explainStillStuck => 'Még mindig elakadtál? Kérdezd a Matheasy-t';
+  String get explainStillStuck => 'Még mindig elakadtál? Kérdezd a Numi-t';
 
   @override
   String get visualLoadingMessage =>
-      'A Matheasy most rajzolja a vizuális bemutatót…';
+      'A Numi most rajzolja a vizuális bemutatót…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1218,7 +1365,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get visualKeyIdeas => 'KULCSGONDOLATOK';
 
   @override
-  String get visualAskAboutStep => 'Kérdezd a Matheasy-t erről a lépésről';
+  String get visualAskAboutStep => 'Kérdezd a Numi-t erről a lépésről';
 
   @override
   String get visualReplay => 'Újrajátszás';
@@ -1545,7 +1692,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Hibátlan teljesítmény ebben: $topic. A Matheasy elismerését fejezi ki!';
+    return 'Hibátlan teljesítmény ebben: $topic. A Numi elismerését fejezi ki!';
   }
 
   @override
@@ -1796,4 +1943,144 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometria';
+
+  @override
+  String get resultStartLearning => 'Tanulás indítása';
+
+  @override
+  String get resultStartLearningHint => 'Menj végig rajta lépésről lépésre';
+
+  @override
+  String get resultLearnMore => 'Tudj meg többet';
+
+  @override
+  String get resultLearnMoreSubtitle =>
+      'Elmélet, szójegyzék, módszerek és a grafikon';
+
+  @override
+  String get resultCopy => 'Másolás';
+
+  @override
+  String get resultCopied => 'Válasz kimásolva';
+
+  @override
+  String get resultSave => 'Mentés';
+
+  @override
+  String get resultSavedShort => 'Mentve';
+
+  @override
+  String get solutionWhyThisWorks => 'Miért működik';
+
+  @override
+  String get solutionStepBack => 'Vissza';
+
+  @override
+  String get solutionFinishLesson => 'Befejezés';
+
+  @override
+  String get solutionLessonComplete => 'Lecke kész';
+
+  @override
+  String get solutionLessonCompleteSubtitle =>
+      'Minden lépést magad oldottál meg.';
+
+  @override
+  String get solutionReplayLesson => 'Lecke újranézése';
+
+  @override
+  String get solutionMethodUsed => 'Használt módszer';
+
+  @override
+  String get solutionStillConfused => 'Még mindig nem tiszta?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'A Numi a feladat bármelyik részét átbeszéli veled.';
+
+  @override
+  String get solutionPracticeTitle => 'Most próbáld meg te';
+
+  @override
+  String get solutionPracticeSubtitle => 'A gyakorlástól rögzül.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Ennek a témának a gyakorlása';
+
+  @override
+  String get solutionWatchItAnimate => 'Nézd meg animálva';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Nézd, ahogy minden lépés mozog, nem csak áll.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return '$step. lépés / $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Megoldási lépések';
+
+  @override
+  String get solutionTapStepHint =>
+      'Koppints bármelyik lépésre, hogy lásd, hogyan működik';
+
+  @override
+  String get solutionAnswerRow => 'Megoldás';
+
+  @override
+  String get solutionExplainHow => 'Magyarázd el, hogyan';
+
+  @override
+  String get learnMoreTitle => 'Tudj meg többet';
+
+  @override
+  String get learnMoreAllSteps => 'Minden lépés';
+
+  @override
+  String get learnMoreGlossary => 'Szójegyzék';
+
+  @override
+  String get learnMoreExplanations => 'Háromféleképpen elmagyarázva';
+
+  @override
+  String get learnMoreCompareMethods => 'Módszerek összehasonlítása';
+
+  @override
+  String get learnMoreUseThisMethod => 'Megoldás ezzel a módszerrel';
+
+  @override
+  String get learnMoreNothing => 'Ehhez a feladathoz még nincs több.';
+
+  @override
+  String get tutorImageSheetTitle => 'Fénykép hozzáadása';
+
+  @override
+  String get tutorImageAttached => 'Az elküldött fénykép';
+
+  @override
+  String get tutorImageAskProblem => 'Segítenél nekem ebben a feladatban?';
+
+  @override
+  String get tutorImageAskWork => 'Megnéznéd a levezetésemet?';
+
+  @override
+  String get tutorImageSawProblem =>
+      'A Numi elolvasta a feladatot a fényképedről';
+
+  @override
+  String get tutorImageSawWork => 'A Numi elolvasta a levezetésedet';
+
+  @override
+  String get tutorImageNotMath =>
+      'Nem találok matematikát azon a fényképen. Küldj egy feladatot vagy egy képet a levezetésedről, és megnézem. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Nem tudtam pontosan kiolvasni. Próbáld újra több fénnyel, és úgy, hogy a feladat kitöltse a képet — vagy írd be, és rögtön segítek.';
+
+  @override
+  String get tutorImageFailed =>
+      'Most nem tudtam elolvasni azt a fényképet. Ellenőrizd a kapcsolatot, és próbáld újra.';
 }

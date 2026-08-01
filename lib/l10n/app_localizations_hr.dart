@@ -139,7 +139,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get tutorTitle => 'AI tutor';
 
   @override
-  String get tutorAsk => 'Pitaj Matheasy';
+  String get tutorAsk => 'Pitaj Numi';
 
   @override
   String get tutorHint => 'Daj mi savjet';
@@ -188,7 +188,7 @@ class AppLocalizationsHr extends AppLocalizations {
       'Trenutačno nema ničega za vizualizaciju.';
 
   @override
-  String get practiceVisualLoading => 'Matheasy priprema tvoj vizualni prikaz…';
+  String get practiceVisualLoading => 'Numi priprema tvoj vizualni prikaz…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +243,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get practiceRecommendedForYou => 'Preporučeno za tebe';
 
   @override
-  String get practiceAskMatheasyWhy => 'Pitaj Matheasy zašto';
+  String get practiceAskMatheasyWhy => 'Pitaj Numi zašto';
 
   @override
   String get practiceShowVisually => 'Pokaži mi vizualno';
@@ -297,14 +297,14 @@ class AppLocalizationsHr extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Glasovni razgovor uskoro stiže.';
 
   @override
-  String get tutorEmptyTitle => 'Pitaj Matheasy bilo što';
+  String get tutorEmptyTitle => 'Pitaj Numi bilo što';
 
   @override
   String get tutorEmptyMessage =>
       'Fotografiraj ili upiši pitanje i dobit ćeš jasno objašnjenje korak po korak.';
 
   @override
-  String get tutorTyping => 'Matheasy piše';
+  String get tutorTyping => 'Numi piše';
 
   @override
   String get tutorTagline => 'Tvoj AI tutor za matematiku';
@@ -316,7 +316,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get tutorHeroSubtitle => 'Pitaj me bilo što o matematici.';
 
   @override
-  String get tutorAskMatheasy => 'Pitaj Matheasy';
+  String get tutorAskMatheasy => 'Pitaj Numi';
 
   @override
   String get tutorExploreTopics => 'Istraži teme';
@@ -334,7 +334,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get tutorUploadQuestion => 'Prenesi pitanje';
 
   @override
-  String get tutorInputHint => 'Pitaj Matheasy bilo što…';
+  String get tutorInputHint => 'Pitaj Numi bilo što…';
 
   @override
   String get tutorVoiceInput => 'Glasovni unos';
@@ -356,6 +356,153 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Ne baš — ali blizu!';
+
+  @override
+  String get tutorModePrompt => 'Kako želiš ovo naučiti?';
+
+  @override
+  String get tutorModeChange => 'Promijeni način učenja';
+
+  @override
+  String get tutorModeHint => 'Samo natuknica';
+
+  @override
+  String get tutorModeHintDetail =>
+      'Mali poticaj u pravom smjeru — ti rješavaš.';
+
+  @override
+  String get tutorModeSolveTogether => 'Riješimo zajedno';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Korak po korak, a ti vodiš.';
+
+  @override
+  String get tutorModeTeachMe => 'Nauči me';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Krećemo od ideje, uz primjere.';
+
+  @override
+  String get tutorModeShowSolution => 'Prikaži cijelo rješenje';
+
+  @override
+  String get tutorModeShowSolutionDetail =>
+      'Cijelo rješenje, korak po korak i objašnjeno.';
+
+  @override
+  String get tutorModeQuizMe => 'Ispitaj me';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Ja pitam, ti odgovaraš, ja dajem povratnu informaciju.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Prebačeno na: $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Objasni jednostavnije';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Možeš li to objasniti jednostavnije?';
+
+  @override
+  String get tutorActionGiveExample => 'Daj primjer';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Možeš li mi dati primjer?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Zašto to radi?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Zašto to radi?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Druga metoda';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage =>
+      'Može li se to napraviti i drukčije?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Ispitaj me';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Ispitaj me o ovome.';
+
+  @override
+  String get tutorActionPracticeMore => 'Vježbaj';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Daj mi zadatak za vježbu.';
+
+  @override
+  String get tutorActionGiveHint => 'Daj mi natuknicu';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Daj mi natuknicu.';
+
+  @override
+  String get tutorActionNextStep => 'Sljedeći korak';
+
+  @override
+  String get tutorActionNextStepMessage => 'Koji je sljedeći korak?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Provjeri moj postupak';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => 'Možeš li provjeriti moj račun?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Česte greške';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Na koje greške ovdje moram paziti?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Lakši';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Daj mi lakši zadatak ovog tipa.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Sličan';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Daj mi sličan zadatak za pokušaj.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Teži';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Daj mi teži zadatak ovog tipa.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Izazovi me';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => 'Daj mi zahtjevan zadatak.';
+
+  @override
+  String get tutorActionShowSolution => 'Prikaži rješenje';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Pokaži mi cijelo rješenje.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Ne razumijem';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Ne razumijem — možeš li to objasniti drukčije?';
 
   @override
   String get onboardingGetStarted => 'Započni';
@@ -785,7 +932,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get progressSeeAll => 'Prikaži sve';
 
   @override
-  String get progressMatheasySays => 'Matheasy kaže';
+  String get progressMatheasySays => 'Numi kaže';
 
   @override
   String get progressRecentActivity => 'Nedavna aktivnost';
@@ -1044,13 +1191,13 @@ class AppLocalizationsHr extends AppLocalizations {
       'Za ovo nema pisanog objašnjenja — ali mogu te provesti kroz njega korak po korak.';
 
   @override
-  String get resultAskMatheasy => 'Pitaj Matheasy';
+  String get resultAskMatheasy => 'Pitaj Numi';
 
   @override
-  String get explainStillStuck => 'Još si zapeo? Pitaj Matheasy';
+  String get explainStillStuck => 'Još si zapeo? Pitaj Numi';
 
   @override
-  String get visualLoadingMessage => 'Matheasy priprema tvoj vizualni prikaz…';
+  String get visualLoadingMessage => 'Numi priprema tvoj vizualni prikaz…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1212,7 +1359,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get visualKeyIdeas => 'KLJUČNE IDEJE';
 
   @override
-  String get visualAskAboutStep => 'Pitaj Matheasy o ovom koraku';
+  String get visualAskAboutStep => 'Pitaj Numi o ovom koraku';
 
   @override
   String get visualReplay => 'Ponovno pokreni';
@@ -1538,7 +1685,7 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Besprijekoran rezultat u temi $topic. Matheasy je impresioniran!';
+    return 'Besprijekoran rezultat u temi $topic. Numi je impresioniran!';
   }
 
   @override
@@ -1789,4 +1936,142 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometrija';
+
+  @override
+  String get resultStartLearning => 'Počni učiti';
+
+  @override
+  String get resultStartLearningHint => 'Prođi kroz to korak po korak';
+
+  @override
+  String get resultLearnMore => 'Saznaj više';
+
+  @override
+  String get resultLearnMoreSubtitle => 'Teorija, pojmovnik, metode i graf';
+
+  @override
+  String get resultCopy => 'Kopiraj';
+
+  @override
+  String get resultCopied => 'Odgovor kopiran';
+
+  @override
+  String get resultSave => 'Spremi';
+
+  @override
+  String get resultSavedShort => 'Spremljeno';
+
+  @override
+  String get solutionWhyThisWorks => 'Zašto ovo radi';
+
+  @override
+  String get solutionStepBack => 'Natrag';
+
+  @override
+  String get solutionFinishLesson => 'Završi';
+
+  @override
+  String get solutionLessonComplete => 'Lekcija završena';
+
+  @override
+  String get solutionLessonCompleteSubtitle => 'Svaki korak je tvoja zasluga.';
+
+  @override
+  String get solutionReplayLesson => 'Ponovi lekciju';
+
+  @override
+  String get solutionMethodUsed => 'Korištena metoda';
+
+  @override
+  String get solutionStillConfused => 'Još uvijek nejasno?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi ti može objasniti bilo koji dio ovog zadatka.';
+
+  @override
+  String get solutionPracticeTitle => 'Sad je red na tebi';
+
+  @override
+  String get solutionPracticeSubtitle => 'Vježbom se to učvrsti.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Vježbaj ovu temu';
+
+  @override
+  String get solutionWatchItAnimate => 'Pogledaj animaciju';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Gledaj kako se svaki korak mijenja, a ne samo stoji.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Korak $step od $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Koraci rješavanja';
+
+  @override
+  String get solutionTapStepHint =>
+      'Dodirni bilo koji korak da vidiš kako radi';
+
+  @override
+  String get solutionAnswerRow => 'Rješenje';
+
+  @override
+  String get solutionExplainHow => 'Objasni kako';
+
+  @override
+  String get learnMoreTitle => 'Saznaj više';
+
+  @override
+  String get learnMoreAllSteps => 'Svi koraci';
+
+  @override
+  String get learnMoreGlossary => 'Pojmovnik';
+
+  @override
+  String get learnMoreExplanations => 'Objašnjeno na tri načina';
+
+  @override
+  String get learnMoreCompareMethods => 'Usporedi metode';
+
+  @override
+  String get learnMoreUseThisMethod => 'Riješi ovom metodom';
+
+  @override
+  String get learnMoreNothing => 'Za ovaj zadatak još nema ničeg dodatnog.';
+
+  @override
+  String get tutorImageSheetTitle => 'Dodaj fotografiju';
+
+  @override
+  String get tutorImageAttached => 'Poslana fotografija';
+
+  @override
+  String get tutorImageAskProblem => 'Možeš li mi pomoći s ovim zadatkom?';
+
+  @override
+  String get tutorImageAskWork => 'Možeš li provjeriti moj postupak?';
+
+  @override
+  String get tutorImageSawProblem =>
+      'Numi je pročitao zadatak s tvoje fotografije';
+
+  @override
+  String get tutorImageSawWork => 'Numi je pročitao tvoj postupak';
+
+  @override
+  String get tutorImageNotMath =>
+      'Na toj fotografiji ne nalazim matematiku. Pošalji mi zadatak ili sliku svog postupka pa ću pogledati. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Nisam to uspio jasno pročitati. Pokušaj ponovno uz više svjetla i sa zadatkom preko cijelog kadra — ili ga upiši pa ću odmah pomoći.';
+
+  @override
+  String get tutorImageFailed =>
+      'Sada nisam uspio pročitati tu fotografiju. Provjeri vezu i pokušaj ponovno.';
 }

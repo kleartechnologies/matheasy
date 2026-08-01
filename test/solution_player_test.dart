@@ -102,12 +102,12 @@ void main() {
       expect(find.text('STEP 1 OF 2'), findsOneWidget);
     });
 
-    testWidgets('shows the "Ask Matheasy" affordance and reports the step index',
+    testWidgets('shows the "Ask Numi" affordance and reports the step index',
         (tester) async {
       int? asked;
       await _pump(tester, onAskStep: (i) => asked = i);
-      expect(find.text('Ask Matheasy'), findsOneWidget);
-      await tester.tap(find.text('Ask Matheasy'));
+      expect(find.text('Ask Numi'), findsOneWidget);
+      await tester.tap(find.text('Ask Numi'));
       expect(asked, 0);
     });
 

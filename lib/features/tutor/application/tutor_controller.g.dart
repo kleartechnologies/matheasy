@@ -66,7 +66,7 @@ final class TutorHomeProvider
 
 String _$tutorHomeHash() => r'99f50ea3bd13f093a5b7b523a1e5b65ece387be2';
 
-/// Drives the live chat conversation with Matheasy.
+/// Drives the live chat conversation with Numi.
 ///
 /// Holds the running [TutorSession] and orchestrates the send → typing → reply
 /// loop through the [TutorService]. Kept alive so the conversation survives
@@ -76,7 +76,7 @@ String _$tutorHomeHash() => r'99f50ea3bd13f093a5b7b523a1e5b65ece387be2';
 @ProviderFor(TutorChatController)
 final tutorChatControllerProvider = TutorChatControllerProvider._();
 
-/// Drives the live chat conversation with Matheasy.
+/// Drives the live chat conversation with Numi.
 ///
 /// Holds the running [TutorSession] and orchestrates the send → typing → reply
 /// loop through the [TutorService]. Kept alive so the conversation survives
@@ -84,7 +84,7 @@ final tutorChatControllerProvider = TutorChatControllerProvider._();
 /// screen calls [start] once per open to seed a greeting or auto-send a prompt.
 final class TutorChatControllerProvider
     extends $NotifierProvider<TutorChatController, TutorSession> {
-  /// Drives the live chat conversation with Matheasy.
+  /// Drives the live chat conversation with Numi.
   ///
   /// Holds the running [TutorSession] and orchestrates the send → typing → reply
   /// loop through the [TutorService]. Kept alive so the conversation survives
@@ -118,9 +118,9 @@ final class TutorChatControllerProvider
 }
 
 String _$tutorChatControllerHash() =>
-    r'61632908b5d3480ca2f6763413a803b98f6dc91c';
+    r'1f158b021c419dafe98e12c3cf9b3127bab4b53e';
 
-/// Drives the live chat conversation with Matheasy.
+/// Drives the live chat conversation with Numi.
 ///
 /// Holds the running [TutorSession] and orchestrates the send → typing → reply
 /// loop through the [TutorService]. Kept alive so the conversation survives

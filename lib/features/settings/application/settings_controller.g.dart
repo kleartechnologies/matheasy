@@ -63,7 +63,7 @@ final class SettingsControllerProvider
 }
 
 String _$settingsControllerHash() =>
-    r'9b9eb4a1941e50835235303c5acca11bec25f75b';
+    r'12b57e6d0453f4ee08fd9d796444d707b504c044';
 
 /// The single source of truth for every locally-persisted setting.
 ///

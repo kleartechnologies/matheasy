@@ -90,7 +90,7 @@ void main() {
   });
 
   group('result-tab empties carry a real next action (§9)', () {
-    testWidgets('empty Explain offers Ask Matheasy (not a fake "loading")',
+    testWidgets('empty Explain offers Ask Numi (not a fake "loading")',
         (tester) async {
       var asked = false;
       await _pump(
@@ -105,7 +105,7 @@ void main() {
       await tester.pump();
 
       expect(find.textContaining('talk you through'), findsOneWidget);
-      await tester.tap(find.text('Ask Matheasy'));
+      await tester.tap(find.text('Ask Numi'));
       expect(asked, isTrue);
     });
 

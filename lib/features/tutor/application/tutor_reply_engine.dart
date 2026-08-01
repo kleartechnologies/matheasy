@@ -4,7 +4,7 @@ import '../domain/tutor_models.dart';
 /// The deterministic, offline "brain" behind [MockTutorService].
 ///
 /// Maps a student's message to an educational reply by detecting intent from
-/// keywords, then composing warm, on-brand Matheasy copy plus optional inline cards
+/// keywords, then composing warm, on-brand Numi copy plus optional inline cards
 /// (quiz / practice) and follow-up suggestion chips. Pure and stateless — the
 /// running [history] is passed in, so replies can vary (e.g. rotating examples)
 /// while staying fully reproducible for tests.
@@ -16,9 +16,13 @@ import '../domain/tutor_models.dart';
 class TutorReplyEngine {
   const TutorReplyEngine();
 
-  /// The opening turn when a chat starts. Scan-aware when [context] carries a
-  /// recognized problem; otherwise a friendly, inviting welcome.
-  TutorResponse greeting(TutorLaunchContext? context) {
+  /// The opening turn when a chat starts. Problem-aware when [context] carries a
+  /// recognized problem, and pitched to [mode] once the student has chosen.
+  ///
+  /// The answer is only ever named in a mode that [TutorMode.revealsAnswer] —
+  /// the offline engine honours the same contract the server does, so a student
+  /// in Hint mode isn't handed the answer just because the network dropped.
+  TutorResponse greeting(TutorLaunchContext? context, {TutorMode? mode}) {
     if (context != null && context.hasVisualStep) {
       return const TutorResponse(
         text: "I can see the exact step you're looking at 👀 — ask me "
@@ -33,23 +37,27 @@ class TutorReplyEngine {
     if (context != null && context.hasScan) {
       final type = context.equationType ?? 'problem';
       final answer = context.answerLatex;
-      final answerLine = answer == null
+      // No mode yet means the picker is about to ask "How would you like to
+      // learn this?" — so this turn only says what Numi can see, and holds the
+      // answer back until the student has chosen a mode that reveals it.
+      if (mode == null) {
+        return TutorResponse(
+          text: "I can see your $type — I've already solved it and checked the "
+              'answer. 🎯',
+        );
+      }
+      final answerLine = answer == null || !mode.revealsAnswer
           ? ''
           : ' The answer works out to $answer, but the interesting part is '
               '*why*.';
       return TutorResponse(
-        text: 'I can see your $type — nice work scanning it in! 🎯$answerLine '
+        text: '${_modeOpener(mode)}I can see your $type.$answerLine '
             'What would you like to understand about it?',
-        suggestions: const [
-          SuggestionAction.tellMeWhy,
-          SuggestionAction.explainSimpler,
-          SuggestionAction.giveExample,
-          SuggestionAction.createQuiz,
-        ],
+        suggestions: _modeSuggestions(mode),
       );
     }
     return const TutorResponse(
-      text: "Hi, I'm Matheasy — your personal math coach! 👋 Ask me anything, and "
+      text: "Hi, I'm Numi — your personal math coach! 👋 Ask me anything, and "
           "we'll work through it together, step by step.",
       suggestions: [
         SuggestionAction.giveExample,
@@ -59,15 +67,65 @@ class TutorReplyEngine {
     );
   }
 
-  /// Produce Matheasy's reply to [userText] given the running [history] and optional
-  /// scan [context].
+  /// The one-line framing that tells the student which mode they're in.
+  String _modeOpener(TutorMode? mode) => switch (mode) {
+        TutorMode.hint => "Hints only — I won't give the answer away. ",
+        TutorMode.solveTogether => "Let's work through this together. ",
+        TutorMode.teachMe => "Let's start from the very beginning. ",
+        TutorMode.showSolution => "Here's the whole thing, step by step. ",
+        TutorMode.quizMe => "Quiz time — I'll ask, you answer. ",
+        null => '',
+      };
+
+  List<SuggestionAction> _modeSuggestions(TutorMode? mode) => switch (mode) {
+        TutorMode.hint => const [
+            SuggestionAction.giveHint,
+            SuggestionAction.iDontUnderstand,
+            SuggestionAction.showSolution,
+          ],
+        TutorMode.solveTogether => const [
+            SuggestionAction.nextStep,
+            SuggestionAction.tellMeWhy,
+            SuggestionAction.iDontUnderstand,
+          ],
+        TutorMode.teachMe => const [
+            SuggestionAction.giveExample,
+            SuggestionAction.explainSimpler,
+            SuggestionAction.tellMeWhy,
+          ],
+        TutorMode.showSolution => const [
+            SuggestionAction.tellMeWhy,
+            SuggestionAction.showAnotherMethod,
+            SuggestionAction.practiceSimilar,
+          ],
+        TutorMode.quizMe => const [
+            SuggestionAction.giveHint,
+            SuggestionAction.explainSimpler,
+            SuggestionAction.practiceEasier,
+          ],
+        null => const [
+            SuggestionAction.tellMeWhy,
+            SuggestionAction.explainSimpler,
+            SuggestionAction.giveExample,
+          ],
+      };
+
+  /// Produce Numi's reply to [userText] given the running [history], the
+  /// teaching [mode] and the optional problem [context].
   TutorResponse reply(
     String userText, {
     required List<TutorMessage> history,
     TutorLaunchContext? context,
+    TutorMode mode = TutorMode.fallback,
   }) {
     final text = userText.toLowerCase().trim();
 
+    // Hint mode holds the line offline too: an explicit ask for the answer gets
+    // a nudge and the escape hatch, never the answer.
+    if (mode == TutorMode.hint &&
+        _matches(text, ['answer', 'solution', 'just tell me'])) {
+      return _hintHeld();
+    }
     if (_matches(text, ['quiz', 'test me'])) return _quiz(history);
     if (_matches(text, ['practice', 'practise', 'exercise'])) {
       return _practice(history);
@@ -125,6 +183,24 @@ class TutorReplyEngine {
   }
 
   // ---- Intent responses ----
+
+  /// Hint mode, asked for the answer. The mode is a promise to the student, so
+  /// this holds it — and points at the mode that *does* answer, rather than
+  /// leaving them stuck.
+  TutorResponse _hintHeld() {
+    return const TutorResponse(
+      text: "I'm keeping the answer to myself for now — that's the deal with "
+          "hints, and it's what makes the moment it clicks yours. 🤫\n\n"
+          "Tell me where you got stuck and I'll nudge you from there. Want the "
+          'whole worked solution instead? Switch to Show Full Solution any '
+          'time.',
+      suggestions: [
+        SuggestionAction.giveHint,
+        SuggestionAction.iDontUnderstand,
+        SuggestionAction.showSolution,
+      ],
+    );
+  }
 
   TutorResponse _why(TutorLaunchContext? context) {
     return const TutorResponse(

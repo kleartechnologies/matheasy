@@ -7,7 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 
-/// The Tutor home hero: a big, friendly Matheasy brand avatar, the headline
+/// The Tutor home hero: a big, friendly Numi brand avatar, the headline
 /// question and a primary call to start chatting.
 class TutorHero extends StatelessWidget {
   const TutorHero({super.key, required this.onAskMatheasy});

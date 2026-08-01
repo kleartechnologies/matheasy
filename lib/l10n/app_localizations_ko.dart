@@ -139,7 +139,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorTitle => 'AI 튜터';
 
   @override
-  String get tutorAsk => 'Matheasy에게 질문하기';
+  String get tutorAsk => 'Numi에게 질문하기';
 
   @override
   String get tutorHint => '힌트 주세요';
@@ -187,7 +187,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get practiceVisualNothing => '지금은 보여줄 시각 자료가 없어요.';
 
   @override
-  String get practiceVisualLoading => 'Matheasy가 시각적 풀이 과정을 그리고 있어요…';
+  String get practiceVisualLoading => 'Numi가 시각적 풀이 과정을 그리고 있어요…';
 
   @override
   String get practiceVisualProFeature => '시각적 학습은 Matheasy Pro 기능이에요.';
@@ -240,7 +240,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get practiceRecommendedForYou => '맞춤 추천';
 
   @override
-  String get practiceAskMatheasyWhy => 'Matheasy에게 이유 물어보기';
+  String get practiceAskMatheasyWhy => 'Numi에게 이유 물어보기';
 
   @override
   String get practiceShowVisually => '시각적으로 보기';
@@ -294,13 +294,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorVoiceChatSoon => '음성 채팅 기능이 곧 추가돼요.';
 
   @override
-  String get tutorEmptyTitle => 'Matheasy에게 무엇이든 물어보세요';
+  String get tutorEmptyTitle => 'Numi에게 무엇이든 물어보세요';
 
   @override
   String get tutorEmptyMessage => '사진을 찍거나 질문을 입력하면 단계별로 명확한 설명을 받을 수 있어요.';
 
   @override
-  String get tutorTyping => 'Matheasy가 입력 중이에요';
+  String get tutorTyping => 'Numi가 입력 중이에요';
 
   @override
   String get tutorTagline => '나만의 AI 수학 튜터';
@@ -312,7 +312,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorHeroSubtitle => '수학에 대해 무엇이든 물어보세요.';
 
   @override
-  String get tutorAskMatheasy => 'Matheasy에게 물어보기';
+  String get tutorAskMatheasy => 'Numi에게 물어보기';
 
   @override
   String get tutorExploreTopics => '주제 둘러보기';
@@ -330,7 +330,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tutorUploadQuestion => '문제 업로드';
 
   @override
-  String get tutorInputHint => 'Matheasy에게 무엇이든 물어보세요…';
+  String get tutorInputHint => 'Numi에게 무엇이든 물어보세요…';
 
   @override
   String get tutorVoiceInput => '음성 입력';
@@ -352,6 +352,144 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => '아쉬워요 — 그래도 거의 맞았어요!';
+
+  @override
+  String get tutorModePrompt => '어떻게 배우고 싶어?';
+
+  @override
+  String get tutorModeChange => '학습 방식 바꾸기';
+
+  @override
+  String get tutorModeHint => '힌트만';
+
+  @override
+  String get tutorModeHintDetail => '방향만 살짝 알려줄게 — 푸는 건 네가.';
+
+  @override
+  String get tutorModeSolveTogether => '같이 풀기';
+
+  @override
+  String get tutorModeSolveTogetherDetail => '한 단계씩, 네가 이끄는 대로.';
+
+  @override
+  String get tutorModeTeachMe => '가르쳐 줘';
+
+  @override
+  String get tutorModeTeachMeDetail => '개념부터, 예시와 함께.';
+
+  @override
+  String get tutorModeShowSolution => '전체 풀이 보기';
+
+  @override
+  String get tutorModeShowSolutionDetail => '풀이 전체를 설명과 함께.';
+
+  @override
+  String get tutorModeQuizMe => '문제 내줘';
+
+  @override
+  String get tutorModeQuizMeDetail => '내가 묻고, 네가 답하고, 내가 피드백할게.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return '$mode 모드로 전환했어요';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => '더 쉽게 설명해 줘';
+
+  @override
+  String get tutorActionExplainSimplerMessage => '더 쉽게 설명해 줄 수 있어?';
+
+  @override
+  String get tutorActionGiveExample => '예를 들어 줘';
+
+  @override
+  String get tutorActionGiveExampleMessage => '예를 하나 들어 줄래?';
+
+  @override
+  String get tutorActionTellMeWhy => '왜 이렇게 되는 거야?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => '왜 이렇게 되는 거야?';
+
+  @override
+  String get tutorActionShowAnotherMethod => '다른 방법';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => '다른 방법으로도 할 수 있어?';
+
+  @override
+  String get tutorActionCreateQuiz => '문제 내줘';
+
+  @override
+  String get tutorActionCreateQuizMessage => '이걸로 문제 내줘.';
+
+  @override
+  String get tutorActionPracticeMore => '연습';
+
+  @override
+  String get tutorActionPracticeMoreMessage => '연습 문제 하나 줘.';
+
+  @override
+  String get tutorActionGiveHint => '힌트 줘';
+
+  @override
+  String get tutorActionGiveHintMessage => '힌트 하나 줘.';
+
+  @override
+  String get tutorActionNextStep => '다음 단계';
+
+  @override
+  String get tutorActionNextStepMessage => '다음 단계는 뭐야?';
+
+  @override
+  String get tutorActionCheckMyWork => '내 풀이 확인해 줘';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => '내 계산 좀 확인해 줄래?';
+
+  @override
+  String get tutorActionCommonMistakes => '자주 하는 실수';
+
+  @override
+  String get tutorActionCommonMistakesMessage => '여기서 조심해야 할 실수는 뭐야?';
+
+  @override
+  String get tutorActionPracticeEasier => '더 쉬운 문제';
+
+  @override
+  String get tutorActionPracticeEasierMessage => '이런 유형으로 더 쉬운 문제 줘.';
+
+  @override
+  String get tutorActionPracticeSimilar => '비슷한 문제';
+
+  @override
+  String get tutorActionPracticeSimilarMessage => '풀어 볼 비슷한 문제 하나 줘.';
+
+  @override
+  String get tutorActionPracticeHarder => '더 어려운 문제';
+
+  @override
+  String get tutorActionPracticeHarderMessage => '이런 유형으로 더 어려운 문제 줘.';
+
+  @override
+  String get tutorActionPracticeChallenge => '도전 문제';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => '도전할 만한 문제 하나 줘.';
+
+  @override
+  String get tutorActionShowSolution => '풀이 보기';
+
+  @override
+  String get tutorActionShowSolutionMessage => '전체 풀이를 보여 줘.';
+
+  @override
+  String get tutorActionIDontUnderstand => '이해가 안 돼';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      '이해가 안 돼 — 다른 방식으로 설명해 줄 수 있어?';
 
   @override
   String get onboardingGetStarted => '시작하기';
@@ -762,7 +900,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get progressSeeAll => '전체 보기';
 
   @override
-  String get progressMatheasySays => 'Matheasy의 한마디';
+  String get progressMatheasySays => 'Numi의 한마디';
 
   @override
   String get progressRecentActivity => '최근 활동';
@@ -1009,13 +1147,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get explainEmptyMessage => '이 문제에 대한 설명은 없지만, 단계별로 직접 설명해 드릴 수 있어요.';
 
   @override
-  String get resultAskMatheasy => 'Matheasy에게 물어보기';
+  String get resultAskMatheasy => 'Numi에게 물어보기';
 
   @override
-  String get explainStillStuck => '아직 막혔나요? Matheasy에게 물어보세요';
+  String get explainStillStuck => '아직 막혔나요? Numi에게 물어보세요';
 
   @override
-  String get visualLoadingMessage => 'Matheasy가 시각적 풀이 과정을 그리고 있어요…';
+  String get visualLoadingMessage => 'Numi가 시각적 풀이 과정을 그리고 있어요…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1174,7 +1312,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get visualKeyIdeas => '핵심 아이디어';
 
   @override
-  String get visualAskAboutStep => '이 단계에 대해 Matheasy에게 물어보기';
+  String get visualAskAboutStep => '이 단계에 대해 Numi에게 물어보기';
 
   @override
   String get visualReplay => '다시 재생';
@@ -1494,7 +1632,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return '$topic 완벽하게 풀었어요. Matheasy가 감탄했어요!';
+    return '$topic 완벽하게 풀었어요. Numi가 감탄했어요!';
   }
 
   @override
@@ -1741,4 +1879,137 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => '기하';
+
+  @override
+  String get resultStartLearning => '학습 시작';
+
+  @override
+  String get resultStartLearningHint => '한 단계씩 따라가 보기';
+
+  @override
+  String get resultLearnMore => '더 알아보기';
+
+  @override
+  String get resultLearnMoreSubtitle => '이론, 용어집, 풀이 방법, 그래프';
+
+  @override
+  String get resultCopy => '복사';
+
+  @override
+  String get resultCopied => '답을 복사했어요';
+
+  @override
+  String get resultSave => '저장';
+
+  @override
+  String get resultSavedShort => '저장됨';
+
+  @override
+  String get solutionWhyThisWorks => '왜 이렇게 되는지';
+
+  @override
+  String get solutionStepBack => '뒤로';
+
+  @override
+  String get solutionFinishLesson => '완료';
+
+  @override
+  String get solutionLessonComplete => '학습 완료';
+
+  @override
+  String get solutionLessonCompleteSubtitle => '모든 단계를 스스로 해냈어요.';
+
+  @override
+  String get solutionReplayLesson => '다시 보기';
+
+  @override
+  String get solutionMethodUsed => '사용한 방법';
+
+  @override
+  String get solutionStillConfused => '아직 헷갈리나요?';
+
+  @override
+  String get solutionStillConfusedBody => 'Numi가 이 문제의 어떤 부분이든 같이 살펴봐 줄 거예요.';
+
+  @override
+  String get solutionPracticeTitle => '이제 직접 풀어 보기';
+
+  @override
+  String get solutionPracticeSubtitle => '연습해야 오래 남아요.';
+
+  @override
+  String get solutionPracticeThisTopic => '이 주제 연습하기';
+
+  @override
+  String get solutionWatchItAnimate => '애니메이션으로 보기';
+
+  @override
+  String get solutionWatchItAnimateSubtitle => '각 단계가 가만히 있는 게 아니라 움직이는 걸 보세요.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return '$total단계 중 $step단계';
+  }
+
+  @override
+  String get solutionSolvingSteps => '풀이 단계';
+
+  @override
+  String get solutionTapStepHint => '아무 단계나 눌러 어떻게 되는지 확인하세요';
+
+  @override
+  String get solutionAnswerRow => '풀이';
+
+  @override
+  String get solutionExplainHow => '어떻게 하는지 설명';
+
+  @override
+  String get learnMoreTitle => '더 알아보기';
+
+  @override
+  String get learnMoreAllSteps => '모든 단계';
+
+  @override
+  String get learnMoreGlossary => '용어집';
+
+  @override
+  String get learnMoreExplanations => '세 가지 방식으로 설명';
+
+  @override
+  String get learnMoreCompareMethods => '방법 비교';
+
+  @override
+  String get learnMoreUseThisMethod => '이 방법으로 풀기';
+
+  @override
+  String get learnMoreNothing => '이 문제에 대한 추가 내용은 아직 없어요.';
+
+  @override
+  String get tutorImageSheetTitle => '사진 추가';
+
+  @override
+  String get tutorImageAttached => '보낸 사진';
+
+  @override
+  String get tutorImageAskProblem => '이 문제 도와줄 수 있어?';
+
+  @override
+  String get tutorImageAskWork => '내 풀이를 확인해 줄 수 있어?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi가 사진에서 문제를 읽었어요';
+
+  @override
+  String get tutorImageSawWork => 'Numi가 네 풀이를 읽었어요';
+
+  @override
+  String get tutorImageNotMath =>
+      '그 사진에서는 수학을 찾지 못했어요. 문제나 풀이 사진을 보내주면 살펴볼게요. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      '잘 알아보지 못했어요. 더 밝은 곳에서 문제가 화면을 채우도록 다시 찍어보거나, 직접 입력해 주면 바로 도와줄게요.';
+
+  @override
+  String get tutorImageFailed => '지금은 그 사진을 읽지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.';
 }

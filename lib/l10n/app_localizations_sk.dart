@@ -139,7 +139,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get tutorTitle => 'AI tútor';
 
   @override
-  String get tutorAsk => 'Opýtaj sa Matheasy';
+  String get tutorAsk => 'Opýtaj sa Numi';
 
   @override
   String get tutorHint => 'Daj mi nápovedu';
@@ -187,8 +187,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get practiceVisualNothing => 'Momentálne nie je čo zobraziť.';
 
   @override
-  String get practiceVisualLoading =>
-      'Matheasy pripravuje tvoj vizuálny postup…';
+  String get practiceVisualLoading => 'Numi pripravuje tvoj vizuálny postup…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +242,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get practiceRecommendedForYou => 'Odporúčané pre teba';
 
   @override
-  String get practiceAskMatheasyWhy => 'Opýtaj sa Matheasy prečo';
+  String get practiceAskMatheasyWhy => 'Opýtaj sa Numi prečo';
 
   @override
   String get practiceShowVisually => 'Ukáž mi to vizuálne';
@@ -297,14 +296,14 @@ class AppLocalizationsSk extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Hlasový chat čoskoro príde.';
 
   @override
-  String get tutorEmptyTitle => 'Opýtaj sa Matheasy na čokoľvek';
+  String get tutorEmptyTitle => 'Opýtaj sa Numi na čokoľvek';
 
   @override
   String get tutorEmptyMessage =>
       'Odfoť otázku alebo ju napíš a získaj jasné vysvetlenie krok za krokom.';
 
   @override
-  String get tutorTyping => 'Matheasy píše';
+  String get tutorTyping => 'Numi píše';
 
   @override
   String get tutorTagline => 'Tvoj AI tútor matematiky';
@@ -316,7 +315,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get tutorHeroSubtitle => 'Opýtaj sa ma na čokoľvek z matematiky.';
 
   @override
-  String get tutorAskMatheasy => 'Opýtaj sa Matheasy';
+  String get tutorAskMatheasy => 'Opýtaj sa Numi';
 
   @override
   String get tutorExploreTopics => 'Preskúmať témy';
@@ -334,7 +333,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get tutorUploadQuestion => 'Nahrať otázku';
 
   @override
-  String get tutorInputHint => 'Opýtaj sa Matheasy na čokoľvek…';
+  String get tutorInputHint => 'Opýtaj sa Numi na čokoľvek…';
 
   @override
   String get tutorVoiceInput => 'Hlasový vstup';
@@ -356,6 +355,152 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Nie celkom — ale blízko!';
+
+  @override
+  String get tutorModePrompt => 'Ako sa to chceš naučiť?';
+
+  @override
+  String get tutorModeChange => 'Zmeniť spôsob učenia';
+
+  @override
+  String get tutorModeHint => 'Len pomôcka';
+
+  @override
+  String get tutorModeHintDetail =>
+      'Postrčenie správnym smerom — vyriešiš to ty.';
+
+  @override
+  String get tutorModeSolveTogether => 'Vyriešiť spoločne';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Krok za krokom, a vedieš ty.';
+
+  @override
+  String get tutorModeTeachMe => 'Nauč ma to';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Začneme od myšlienky, s príkladmi.';
+
+  @override
+  String get tutorModeShowSolution => 'Zobraziť celé riešenie';
+
+  @override
+  String get tutorModeShowSolutionDetail =>
+      'Celé vyriešené zadanie aj s vysvetlením.';
+
+  @override
+  String get tutorModeQuizMe => 'Vyskúšaj ma';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Ja sa pýtam, ty odpovedáš, ja dám spätnú väzbu.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Prepnuté na: $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Vysvetli jednoduchšie';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Môžeš to vysvetliť jednoduchšie?';
+
+  @override
+  String get tutorActionGiveExample => 'Daj príklad';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Môžeš mi dať príklad?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Prečo to funguje?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Prečo to funguje?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Iná metóda';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => 'Dá sa to urobiť aj inak?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Vyskúšaj ma';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Vyskúšaj ma z tohto.';
+
+  @override
+  String get tutorActionPracticeMore => 'Precvičiť';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Daj mi cvičnú úlohu.';
+
+  @override
+  String get tutorActionGiveHint => 'Daj mi pomôcku';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Daj mi pomôcku.';
+
+  @override
+  String get tutorActionNextStep => 'Ďalší krok';
+
+  @override
+  String get tutorActionNextStepMessage => 'Aký je ďalší krok?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Skontroluj môj postup';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => 'Môžeš skontrolovať môj výpočet?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Časté chyby';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Na aké chyby si tu mám dať pozor?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Ľahšiu';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Daj mi ľahšiu úlohu tohto typu.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Podobnú';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Daj mi podobnú úlohu na skúšku.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Ťažšiu';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Daj mi ťažšiu úlohu tohto typu.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Vyzvi ma';
+
+  @override
+  String get tutorActionPracticeChallengeMessage => 'Daj mi náročnú úlohu.';
+
+  @override
+  String get tutorActionShowSolution => 'Zobraziť riešenie';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Ukáž mi celé riešenie.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Nerozumiem';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Nerozumiem — môžeš to vysvetliť inak?';
 
   @override
   String get onboardingGetStarted => 'Začať';
@@ -786,7 +931,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get progressSeeAll => 'Zobraziť všetko';
 
   @override
-  String get progressMatheasySays => 'Matheasy hovorí';
+  String get progressMatheasySays => 'Numi hovorí';
 
   @override
   String get progressRecentActivity => 'Nedávna aktivita';
@@ -1045,14 +1190,13 @@ class AppLocalizationsSk extends AppLocalizations {
       'Pre toto nie je písomné vysvetlenie — ale môžem ťa ním previesť krok za krokom.';
 
   @override
-  String get resultAskMatheasy => 'Opýtaj sa Matheasy';
+  String get resultAskMatheasy => 'Opýtaj sa Numi';
 
   @override
-  String get explainStillStuck => 'Stále si zaseknutý? Opýtaj sa Matheasy';
+  String get explainStillStuck => 'Stále si zaseknutý? Opýtaj sa Numi';
 
   @override
-  String get visualLoadingMessage =>
-      'Matheasy pripravuje tvoj vizuálny postup…';
+  String get visualLoadingMessage => 'Numi pripravuje tvoj vizuálny postup…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1214,7 +1358,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get visualKeyIdeas => 'KĽÚČOVÉ MYŠLIENKY';
 
   @override
-  String get visualAskAboutStep => 'Opýtaj sa Matheasy na tento krok';
+  String get visualAskAboutStep => 'Opýtaj sa Numi na tento krok';
 
   @override
   String get visualReplay => 'Prehrať znova';
@@ -1540,7 +1684,7 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Bezchybný výkon v téme $topic. Matheasy je ohromený!';
+    return 'Bezchybný výkon v téme $topic. Numi je ohromený!';
   }
 
   @override
@@ -1791,4 +1935,142 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometria';
+
+  @override
+  String get resultStartLearning => 'Začať sa učiť';
+
+  @override
+  String get resultStartLearningHint => 'Prejdi to krok za krokom';
+
+  @override
+  String get resultLearnMore => 'Zistiť viac';
+
+  @override
+  String get resultLearnMoreSubtitle => 'Teória, slovníček, metódy a graf';
+
+  @override
+  String get resultCopy => 'Kopírovať';
+
+  @override
+  String get resultCopied => 'Odpoveď skopírovaná';
+
+  @override
+  String get resultSave => 'Uložiť';
+
+  @override
+  String get resultSavedShort => 'Uložené';
+
+  @override
+  String get solutionWhyThisWorks => 'Prečo to funguje';
+
+  @override
+  String get solutionStepBack => 'Späť';
+
+  @override
+  String get solutionFinishLesson => 'Dokončiť';
+
+  @override
+  String get solutionLessonComplete => 'Lekcia dokončená';
+
+  @override
+  String get solutionLessonCompleteSubtitle =>
+      'Každý krok sa ti podarilo zvládnuť.';
+
+  @override
+  String get solutionReplayLesson => 'Prehrať lekciu znova';
+
+  @override
+  String get solutionMethodUsed => 'Použitá metóda';
+
+  @override
+  String get solutionStillConfused => 'Stále nejasné?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi ti môže prejsť ktorúkoľvek časť tejto úlohy.';
+
+  @override
+  String get solutionPracticeTitle => 'Teraz je rad na tebe';
+
+  @override
+  String get solutionPracticeSubtitle => 'Precvičovaním sa to usadí.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Precvičiť túto tému';
+
+  @override
+  String get solutionWatchItAnimate => 'Pozri sa na animáciu';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Sleduj, ako sa každý krok mení, nie ako len stojí.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Krok $step z $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Kroky riešenia';
+
+  @override
+  String get solutionTapStepHint =>
+      'Klepni na ktorýkoľvek krok a uvidíš, ako funguje';
+
+  @override
+  String get solutionAnswerRow => 'Riešenie';
+
+  @override
+  String get solutionExplainHow => 'Vysvetliť ako';
+
+  @override
+  String get learnMoreTitle => 'Zistiť viac';
+
+  @override
+  String get learnMoreAllSteps => 'Všetky kroky';
+
+  @override
+  String get learnMoreGlossary => 'Slovníček';
+
+  @override
+  String get learnMoreExplanations => 'Vysvetlené tromi spôsobmi';
+
+  @override
+  String get learnMoreCompareMethods => 'Porovnať metódy';
+
+  @override
+  String get learnMoreUseThisMethod => 'Vyriešiť touto metódou';
+
+  @override
+  String get learnMoreNothing => 'K tejto úlohe zatiaľ nič ďalšie nie je.';
+
+  @override
+  String get tutorImageSheetTitle => 'Pridať fotku';
+
+  @override
+  String get tutorImageAttached => 'Odoslaná fotka';
+
+  @override
+  String get tutorImageAskProblem => 'Môžeš mi pomôcť s touto úlohou?';
+
+  @override
+  String get tutorImageAskWork => 'Môžeš mi skontrolovať postup?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi prečítal úlohu z tvojej fotky';
+
+  @override
+  String get tutorImageSawWork => 'Numi prečítal tvoj postup';
+
+  @override
+  String get tutorImageNotMath =>
+      'Na tej fotke nenachádzam žiadnu matematiku. Pošli mi úlohu alebo fotku svojho postupu a pozriem sa na to. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Nepodarilo sa mi to prečítať. Skús to znova pri lepšom svetle a s úlohou cez celý záber — alebo ju napíš a hneď ti pomôžem.';
+
+  @override
+  String get tutorImageFailed =>
+      'Teraz sa mi tú fotku nepodarilo prečítať. Skontroluj pripojenie a skús to znova.';
 }

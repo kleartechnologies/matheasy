@@ -419,7 +419,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorAsk.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy'**
+  /// **'Ask Numi'**
   String get tutorAsk;
 
   /// No description provided for @tutorHint.
@@ -515,7 +515,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceVisualLoading.
   ///
   /// In en, this message translates to:
-  /// **'Matheasy is sketching your visual walkthrough…'**
+  /// **'Numi is sketching your visual walkthrough…'**
   String get practiceVisualLoading;
 
   /// No description provided for @practiceVisualProFeature.
@@ -617,7 +617,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceAskMatheasyWhy.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy why'**
+  /// **'Ask Numi why'**
   String get practiceAskMatheasyWhy;
 
   /// No description provided for @practiceShowVisually.
@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy anything'**
+  /// **'Ask Numi anything'**
   String get tutorEmptyTitle;
 
   /// No description provided for @tutorEmptyMessage.
@@ -737,7 +737,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorTyping.
   ///
   /// In en, this message translates to:
-  /// **'Matheasy is typing'**
+  /// **'Numi is typing'**
   String get tutorTyping;
 
   /// No description provided for @tutorTagline.
@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorAskMatheasy.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy'**
+  /// **'Ask Numi'**
   String get tutorAskMatheasy;
 
   /// No description provided for @tutorExploreTopics.
@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorInputHint.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy anything…'**
+  /// **'Ask Numi anything…'**
   String get tutorInputHint;
 
   /// No description provided for @tutorVoiceInput.
@@ -841,6 +841,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not quite — but close!'**
   String get tutorQuizNotQuite;
+
+  /// No description provided for @tutorModePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to learn this?'**
+  String get tutorModePrompt;
+
+  /// No description provided for @tutorModeChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change how we learn'**
+  String get tutorModeChange;
+
+  /// No description provided for @tutorModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Just a hint'**
+  String get tutorModeHint;
+
+  /// No description provided for @tutorModeHintDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'A nudge in the right direction — you solve it.'**
+  String get tutorModeHintDetail;
+
+  /// No description provided for @tutorModeSolveTogether.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve together'**
+  String get tutorModeSolveTogether;
+
+  /// No description provided for @tutorModeSolveTogetherDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'One step at a time, with you driving.'**
+  String get tutorModeSolveTogetherDetail;
+
+  /// No description provided for @tutorModeTeachMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Teach me'**
+  String get tutorModeTeachMe;
+
+  /// No description provided for @tutorModeTeachMeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from the idea, with examples.'**
+  String get tutorModeTeachMeDetail;
+
+  /// No description provided for @tutorModeShowSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Show full solution'**
+  String get tutorModeShowSolution;
+
+  /// No description provided for @tutorModeShowSolutionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole worked solution, explained.'**
+  String get tutorModeShowSolutionDetail;
+
+  /// No description provided for @tutorModeQuizMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz me'**
+  String get tutorModeQuizMe;
+
+  /// No description provided for @tutorModeQuizMeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'I ask, you answer, I give feedback.'**
+  String get tutorModeQuizMeDetail;
+
+  /// No description provided for @tutorModeSwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to {mode}'**
+  String tutorModeSwitched(String mode);
+
+  /// No description provided for @tutorActionExplainSimpler.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain simpler'**
+  String get tutorActionExplainSimpler;
+
+  /// No description provided for @tutorActionExplainSimplerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you explain that more simply?'**
+  String get tutorActionExplainSimplerMessage;
+
+  /// No description provided for @tutorActionGiveExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Give an example'**
+  String get tutorActionGiveExample;
+
+  /// No description provided for @tutorActionGiveExampleMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you give me an example?'**
+  String get tutorActionGiveExampleMessage;
+
+  /// No description provided for @tutorActionTellMeWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why does that work?'**
+  String get tutorActionTellMeWhy;
+
+  /// No description provided for @tutorActionTellMeWhyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Why does that work?'**
+  String get tutorActionTellMeWhyMessage;
+
+  /// No description provided for @tutorActionShowAnotherMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Another method'**
+  String get tutorActionShowAnotherMethod;
+
+  /// No description provided for @tutorActionShowAnotherMethodMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there another way to do this?'**
+  String get tutorActionShowAnotherMethodMessage;
+
+  /// No description provided for @tutorActionCreateQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz me'**
+  String get tutorActionCreateQuiz;
+
+  /// No description provided for @tutorActionCreateQuizMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz me on this.'**
+  String get tutorActionCreateQuizMessage;
+
+  /// No description provided for @tutorActionPracticeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice'**
+  String get tutorActionPracticeMore;
+
+  /// No description provided for @tutorActionPracticeMoreMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a practice question.'**
+  String get tutorActionPracticeMoreMessage;
+
+  /// No description provided for @tutorActionGiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a hint'**
+  String get tutorActionGiveHint;
+
+  /// No description provided for @tutorActionGiveHintMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a hint.'**
+  String get tutorActionGiveHintMessage;
+
+  /// No description provided for @tutorActionNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get tutorActionNextStep;
+
+  /// No description provided for @tutorActionNextStepMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s the next step?'**
+  String get tutorActionNextStepMessage;
+
+  /// No description provided for @tutorActionCheckMyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check my work'**
+  String get tutorActionCheckMyWork;
+
+  /// No description provided for @tutorActionCheckMyWorkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you check my work?'**
+  String get tutorActionCheckMyWorkMessage;
+
+  /// No description provided for @tutorActionCommonMistakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Common mistakes'**
+  String get tutorActionCommonMistakes;
+
+  /// No description provided for @tutorActionCommonMistakesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'What mistakes should I watch out for here?'**
+  String get tutorActionCommonMistakesMessage;
+
+  /// No description provided for @tutorActionPracticeEasier.
+  ///
+  /// In en, this message translates to:
+  /// **'Easier one'**
+  String get tutorActionPracticeEasier;
+
+  /// No description provided for @tutorActionPracticeEasierMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me an easier question like this.'**
+  String get tutorActionPracticeEasierMessage;
+
+  /// No description provided for @tutorActionPracticeSimilar.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar one'**
+  String get tutorActionPracticeSimilar;
+
+  /// No description provided for @tutorActionPracticeSimilarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a similar question to try.'**
+  String get tutorActionPracticeSimilarMessage;
+
+  /// No description provided for @tutorActionPracticeHarder.
+  ///
+  /// In en, this message translates to:
+  /// **'Harder one'**
+  String get tutorActionPracticeHarder;
+
+  /// No description provided for @tutorActionPracticeHarderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a harder question like this.'**
+  String get tutorActionPracticeHarderMessage;
+
+  /// No description provided for @tutorActionPracticeChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge me'**
+  String get tutorActionPracticeChallenge;
+
+  /// No description provided for @tutorActionPracticeChallengeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give me a challenge question.'**
+  String get tutorActionPracticeChallengeMessage;
+
+  /// No description provided for @tutorActionShowSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the solution'**
+  String get tutorActionShowSolution;
+
+  /// No description provided for @tutorActionShowSolutionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me the full solution.'**
+  String get tutorActionShowSolutionMessage;
+
+  /// No description provided for @tutorActionIDontUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t understand'**
+  String get tutorActionIDontUnderstand;
+
+  /// No description provided for @tutorActionIDontUnderstandMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t understand — can you explain it a different way?'**
+  String get tutorActionIDontUnderstandMessage;
 
   /// No description provided for @onboardingGetStarted.
   ///
@@ -1637,7 +1907,7 @@ abstract class AppLocalizations {
   /// No description provided for @progressMatheasySays.
   ///
   /// In en, this message translates to:
-  /// **'Matheasy says'**
+  /// **'Numi says'**
   String get progressMatheasySays;
 
   /// No description provided for @progressRecentActivity.
@@ -2117,19 +2387,19 @@ abstract class AppLocalizations {
   /// No description provided for @resultAskMatheasy.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy'**
+  /// **'Ask Numi'**
   String get resultAskMatheasy;
 
   /// No description provided for @explainStillStuck.
   ///
   /// In en, this message translates to:
-  /// **'Still stuck? Ask Matheasy'**
+  /// **'Still stuck? Ask Numi'**
   String get explainStillStuck;
 
   /// No description provided for @visualLoadingMessage.
   ///
   /// In en, this message translates to:
-  /// **'Matheasy is sketching your visual walkthrough…'**
+  /// **'Numi is sketching your visual walkthrough…'**
   String get visualLoadingMessage;
 
   /// No description provided for @visualUnavailableMessage.
@@ -2435,7 +2705,7 @@ abstract class AppLocalizations {
   /// No description provided for @visualAskAboutStep.
   ///
   /// In en, this message translates to:
-  /// **'Ask Matheasy about this step'**
+  /// **'Ask Numi about this step'**
   String get visualAskAboutStep;
 
   /// No description provided for @visualReplay.
@@ -2939,7 +3209,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceSummaryPerfect.
   ///
   /// In en, this message translates to:
-  /// **'A flawless run on {topic}. Matheasy is impressed!'**
+  /// **'A flawless run on {topic}. Numi is impressed!'**
   String practiceSummaryPerfect(String topic);
 
   /// No description provided for @practiceSummaryGood.
@@ -3287,6 +3557,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Geometry'**
   String get onboardingChipGeometry;
+
+  /// No description provided for @resultStartLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Learning'**
+  String get resultStartLearning;
+
+  /// No description provided for @resultStartLearningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk through it one step at a time'**
+  String get resultStartLearningHint;
+
+  /// No description provided for @resultLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get resultLearnMore;
+
+  /// No description provided for @resultLearnMoreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theory, glossary, methods and the graph'**
+  String get resultLearnMoreSubtitle;
+
+  /// No description provided for @resultCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get resultCopy;
+
+  /// No description provided for @resultCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer copied'**
+  String get resultCopied;
+
+  /// No description provided for @resultSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get resultSave;
+
+  /// No description provided for @resultSavedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get resultSavedShort;
+
+  /// No description provided for @solutionWhyThisWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this works'**
+  String get solutionWhyThisWorks;
+
+  /// No description provided for @solutionStepBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get solutionStepBack;
+
+  /// No description provided for @solutionFinishLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get solutionFinishLesson;
+
+  /// No description provided for @solutionLessonComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson complete'**
+  String get solutionLessonComplete;
+
+  /// No description provided for @solutionLessonCompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You worked through every step yourself.'**
+  String get solutionLessonCompleteSubtitle;
+
+  /// No description provided for @solutionReplayLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay the lesson'**
+  String get solutionReplayLesson;
+
+  /// No description provided for @solutionMethodUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Method used'**
+  String get solutionMethodUsed;
+
+  /// No description provided for @solutionStillConfused.
+  ///
+  /// In en, this message translates to:
+  /// **'Still confused?'**
+  String get solutionStillConfused;
+
+  /// No description provided for @solutionStillConfusedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi can talk you through any part of this problem.'**
+  String get solutionStillConfusedBody;
+
+  /// No description provided for @solutionPracticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Now try one yourself'**
+  String get solutionPracticeTitle;
+
+  /// No description provided for @solutionPracticeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice is how it sticks.'**
+  String get solutionPracticeSubtitle;
+
+  /// No description provided for @solutionPracticeThisTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice this topic'**
+  String get solutionPracticeThisTopic;
+
+  /// No description provided for @solutionWatchItAnimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch it animate'**
+  String get solutionWatchItAnimate;
+
+  /// No description provided for @solutionWatchItAnimateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See every step move, not just sit there.'**
+  String get solutionWatchItAnimateSubtitle;
+
+  /// Screen-reader label for the step player's progress dots.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String solutionProgressSemantics(int step, int total);
+
+  /// No description provided for @solutionSolvingSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Solving steps'**
+  String get solutionSolvingSteps;
+
+  /// No description provided for @solutionTapStepHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any step to see how it works'**
+  String get solutionTapStepHint;
+
+  /// No description provided for @solutionAnswerRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Solution'**
+  String get solutionAnswerRow;
+
+  /// No description provided for @solutionExplainHow.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain how'**
+  String get solutionExplainHow;
+
+  /// No description provided for @learnMoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get learnMoreTitle;
+
+  /// No description provided for @learnMoreAllSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'All steps'**
+  String get learnMoreAllSteps;
+
+  /// No description provided for @learnMoreGlossary.
+  ///
+  /// In en, this message translates to:
+  /// **'Glossary'**
+  String get learnMoreGlossary;
+
+  /// No description provided for @learnMoreExplanations.
+  ///
+  /// In en, this message translates to:
+  /// **'Explained three ways'**
+  String get learnMoreExplanations;
+
+  /// No description provided for @learnMoreCompareMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare methods'**
+  String get learnMoreCompareMethods;
+
+  /// No description provided for @learnMoreUseThisMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve with this method'**
+  String get learnMoreUseThisMethod;
+
+  /// No description provided for @learnMoreNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s nothing extra for this problem yet.'**
+  String get learnMoreNothing;
+
+  /// No description provided for @tutorImageSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get tutorImageSheetTitle;
+
+  /// No description provided for @tutorImageAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo you sent'**
+  String get tutorImageAttached;
+
+  /// No description provided for @tutorImageAskProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you help me with this problem?'**
+  String get tutorImageAskProblem;
+
+  /// No description provided for @tutorImageAskWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you check my working?'**
+  String get tutorImageAskWork;
+
+  /// No description provided for @tutorImageSawProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi read the problem from your photo'**
+  String get tutorImageSawProblem;
+
+  /// No description provided for @tutorImageSawWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi read your working'**
+  String get tutorImageSawWork;
+
+  /// No description provided for @tutorImageNotMath.
+  ///
+  /// In en, this message translates to:
+  /// **'I can\'t find any math in that photo. Send me a problem, or a picture of your working, and I\'ll take a look. 📷'**
+  String get tutorImageNotMath;
+
+  /// No description provided for @tutorImageUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t quite make that out. Try again with more light and the problem filling the frame — or type it in and I\'ll help straight away.'**
+  String get tutorImageUnreadable;
+
+  /// No description provided for @tutorImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t read that photo just now. Please check your connection and try again.'**
+  String get tutorImageFailed;
 }
 
 class _AppLocalizationsDelegate

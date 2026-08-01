@@ -14,7 +14,7 @@ import 'sections/tutor_quick_actions.dart';
 import 'sections/tutor_recent_conversations.dart';
 import 'sections/tutor_suggested_prompts.dart';
 
-/// The Tutor home — the landing page for AI learning with Matheasy.
+/// The Tutor home — the landing page for AI learning with Numi.
 ///
 /// A calm, inviting surface: a hero prompt, suggested starters, recent
 /// conversations, learning categories and quick actions. Every path opens the

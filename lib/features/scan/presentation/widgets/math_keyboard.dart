@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/animations/pressable.dart';
@@ -5,208 +7,261 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../application/math_field_controller.dart';
+import 'math_key_catalogue.dart';
+import 'math_layout.dart';
 
-/// A single key on the [MathKeyboard]. [insert] is the LaTeX written at the
-/// caret; [caretBack] moves the caret that many characters left afterwards, so
-/// templates like `\frac{}{}` land the caret inside their first placeholder.
-class MathKey {
-  const MathKey(this.label, this.insert, {this.caretBack = 0, this.accent = false});
-
-  /// The face shown on the key (may be a unicode glyph).
-  final String label;
-
-  /// LaTeX inserted at the caret.
-  final String insert;
-
-  /// Characters to step the caret back into a placeholder after inserting.
-  final int caretBack;
-
-  /// Whether to give the key the tinted "operator" treatment.
-  final bool accent;
-}
-
-/// A named page of keys.
-class MathKeyCategory {
-  const MathKeyCategory(this.label, this.keys);
-  final String label;
-  final List<MathKey> keys;
-}
-
-/// The Matheasy educational math keyboard.
+/// The Matheasy structured math keyboard.
 ///
-/// Categorised for learning — basics, variables, powers & roots, trigonometry,
-/// calculus and logarithms — with fractions, exponents, square roots,
-/// parentheses and variables reachable throughout. Emits LaTeX so the typed
-/// problem flows into the same recognize → solve pipeline as a scan.
+/// Every key is a miniature of what it inserts: tapping `□/□` opens a real
+/// fraction in the field with two dashed boxes, and the caret lands in the
+/// first one. Keys marked with a dot carry alternates on long-press, which is
+/// how roots, relations and extra variables stay reachable without a wall of
+/// keys.
+///
+/// It drives a [MathFieldController] directly — the expression tree is the
+/// single source of truth, and LaTeX is produced only when the problem is
+/// submitted, so the recognize → solve pipeline is untouched.
 class MathKeyboard extends StatefulWidget {
   const MathKeyboard({
     super.key,
-    required this.onInsert,
-    required this.onBackspace,
-    required this.onMoveLeft,
-    required this.onMoveRight,
+    required this.controller,
     this.onSolve,
     this.solveLabel = 'Solve',
+    this.busy = false,
   });
 
-  /// Insert [latex] at the caret, then step back [caretBack] chars.
-  final void Function(String latex, int caretBack) onInsert;
-  final VoidCallback onBackspace;
-  final VoidCallback onMoveLeft;
-  final VoidCallback onMoveRight;
+  /// The field this keyboard types into.
+  final MathFieldController controller;
 
-  /// Submit. `null` disables the Solve key (empty / invalid input).
+  /// Submit. The key enables itself as soon as the field is non-empty — it
+  /// watches [controller] directly, so the host screen never has to rebuild on
+  /// every keystroke just to flip a button. `null` disables it outright.
   final VoidCallback? onSolve;
+
+  /// A submit is in flight; the key stays visible but inert.
+  final bool busy;
 
   /// Label on the submit key — "Solve" for typing; "Use this" when editing an
   /// OCR result (which returns to the confirmation sheet rather than solving).
   final String solveLabel;
 
-  static const List<MathKeyCategory> categories = [
-    MathKeyCategory('123', [
-      MathKey('7', '7'), MathKey('8', '8'), MathKey('9', '9'),
-      MathKey('÷', r'\div ', accent: true), MathKey('×', r'\times ', accent: true),
-      MathKey('4', '4'), MathKey('5', '5'), MathKey('6', '6'),
-      MathKey('−', '-', accent: true), MathKey('+', '+', accent: true),
-      MathKey('1', '1'), MathKey('2', '2'), MathKey('3', '3'),
-      MathKey('x', 'x'), MathKey('=', '=', accent: true),
-      MathKey('0', '0'), MathKey('.', '.'), MathKey('y', 'y'),
-      MathKey('(', '('), MathKey(')', ')'),
-      MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('x²', r'^{2}'), MathKey('xⁿ', r'^{}', caretBack: 1),
-      MathKey('√', r'\sqrt{}', caretBack: 1), MathKey('π', r'\pi '),
-    ]),
-    MathKeyCategory('x y', [
-      MathKey('x', 'x'), MathKey('y', 'y'), MathKey('z', 'z'),
-      MathKey('a', 'a'), MathKey('b', 'b'),
-      MathKey('n', 'n'), MathKey('t', 't'), MathKey('k', 'k'),
-      MathKey('θ', r'\theta '), MathKey('π', r'\pi '),
-      MathKey('α', r'\alpha '), MathKey('β', r'\beta '),
-      MathKey('λ', r'\lambda '), MathKey('μ', r'\mu '), MathKey('Δ', r'\Delta '),
-      MathKey('=', '=', accent: true), MathKey('<', '<', accent: true),
-      MathKey('>', '>', accent: true), MathKey('≤', r'\le ', accent: true),
-      MathKey('≥', r'\ge ', accent: true),
-      MathKey('(', '('), MathKey(')', ')'), MathKey(',', ', '),
-      MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('xⁿ', r'^{}', caretBack: 1),
-    ]),
-    MathKeyCategory('√ xⁿ', [
-      MathKey('x²', r'^{2}'), MathKey('x³', r'^{3}'), MathKey('xⁿ', r'^{}', caretBack: 1),
-      MathKey('√', r'\sqrt{}', caretBack: 1), MathKey('∛', r'\sqrt[3]{}', caretBack: 1),
-      MathKey('ⁿ√', r'\sqrt[]{}', caretBack: 3), MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('xₙ', r'_{}', caretBack: 1), MathKey('|x|', r'\left|\right|', caretBack: 7),
-      MathKey('eˣ', r'e^{}', caretBack: 1),
-      MathKey('×', r'\times ', accent: true), MathKey('÷', r'\div ', accent: true),
-      MathKey('±', r'\pm '), MathKey('(', '('), MathKey(')', ')'),
-      MathKey('7', '7'), MathKey('8', '8'), MathKey('9', '9'),
-      MathKey('x', 'x'), MathKey('=', '=', accent: true),
-    ]),
-    MathKeyCategory('sin', [
-      MathKey('sin', r'\sin()', caretBack: 1), MathKey('cos', r'\cos()', caretBack: 1),
-      MathKey('tan', r'\tan()', caretBack: 1),
-      MathKey('csc', r'\csc()', caretBack: 1), MathKey('sec', r'\sec()', caretBack: 1),
-      MathKey('cot', r'\cot()', caretBack: 1),
-      MathKey('sin⁻¹', r'\sin^{-1}()', caretBack: 1),
-      MathKey('cos⁻¹', r'\cos^{-1}()', caretBack: 1),
-      MathKey('tan⁻¹', r'\tan^{-1}()', caretBack: 1),
-      MathKey('θ', r'\theta '), MathKey('π', r'\pi '), MathKey('°', r'^{\circ}'),
-      MathKey('√', r'\sqrt{}', caretBack: 1), MathKey('x²', r'^{2}'),
-      MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('(', '('), MathKey(')', ')'), MathKey('=', '=', accent: true),
-    ]),
-    MathKeyCategory('∫ d⁄dx', [
-      MathKey('∫', r'\int ', accent: true),
-      MathKey('∫ᵇₐ', r'\int_{}^{}', caretBack: 4, accent: true),
-      MathKey('d⁄dx', r'\frac{d}{dx}', accent: true),
-      MathKey('∂', r'\partial '), MathKey('′', "'"),
-      MathKey('lim', r'\lim_{x \to }', caretBack: 1, accent: true),
-      MathKey('Σ', r'\sum_{}^{}', caretBack: 4, accent: true),
-      MathKey('∞', r'\infty '), MathKey('→', r'\to '), MathKey('dx', 'dx'),
-      MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('√', r'\sqrt{}', caretBack: 1), MathKey('xⁿ', r'^{}', caretBack: 1),
-      MathKey('e', 'e'), MathKey('π', r'\pi '),
-      MathKey('x', 'x'), MathKey('=', '=', accent: true),
-      MathKey('(', '('), MathKey(')', ')'),
-    ]),
-    MathKeyCategory('log', [
-      MathKey('log', r'\log()', caretBack: 1, accent: true),
-      MathKey('ln', r'\ln()', caretBack: 1, accent: true),
-      MathKey('logₐ', r'\log_{}()', caretBack: 3, accent: true),
-      MathKey('log₁₀', r'\log_{10}()', caretBack: 1),
-      MathKey('eˣ', r'e^{}', caretBack: 1),
-      MathKey('10ˣ', r'10^{}', caretBack: 1),
-      MathKey('e', 'e'), MathKey('π', r'\pi '), MathKey('∞', r'\infty '),
-      MathKey('a⁄b', r'\frac{}{}', caretBack: 3, accent: true),
-      MathKey('√', r'\sqrt{}', caretBack: 1), MathKey('xⁿ', r'^{}', caretBack: 1),
-      MathKey('x', 'x'), MathKey('=', '=', accent: true),
-      MathKey('(', '('), MathKey(')', ')'),
-    ]),
-  ];
+  /// The pages of keys, in the order their chips appear.
+  static List<MathKeyTab> get tabs => MathKeys.tabs;
+
+  /// The letters page, reached from the `abc` button.
+  static MathKeyTab get letters => MathKeys.letters;
+
+  /// The widget key on the cell for [spec] — labels are unique within a page,
+  /// and only one page is on screen at a time.
+  static String keyOf(MathKeySpec spec) => 'mathkey:${spec.label}';
+
+  /// The submit key, whose enabled/disabled state is the thing worth asserting.
+  static const ValueKey<String> solveKey = ValueKey('mathkey:solve');
 
   @override
   State<MathKeyboard> createState() => _MathKeyboardState();
 }
 
+const double _keyHeight = 52;
+
+/// Below this a key stops being comfortably tappable, so the grid gives up on
+/// fitting the width and scrolls sideways instead of shrinking further.
+const double _minKeyWidth = 44;
+
 class _MathKeyboardState extends State<MathKeyboard> {
-  int _category = 0;
+  int _tab = 0;
+  bool _letters = false;
+
+  MathKeyTab get _page => _letters ? MathKeyboard.letters : MathKeyboard.tabs[_tab];
+
+  void _press(MathKeySpec key) {
+    HapticsService.selection();
+    final atom = key.atom;
+    if (atom != null) {
+      widget.controller.insertAtom(atom);
+      return;
+    }
+    final template = key.template;
+    if (template == null) return;
+    if (key.wrapPrevious) {
+      widget.controller.applyToPrevious(template);
+    } else {
+      widget.controller.insertTemplate(template);
+    }
+  }
+
+  /// The long-press menu behind a dotted key.
+  Future<void> _showAlternates(BuildContext keyContext, MathKeySpec key) async {
+    HapticsService.selection();
+    final box = keyContext.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(keyContext).context.findRenderObject() as RenderBox?;
+    if (box == null || overlay == null) return;
+    final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+    final bottomRight = box.localToGlobal(
+      box.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
+    final colors = context.colors;
+    final style = MathRenderStyle(fontSize: 19, color: colors.textPrimary);
+
+    final chosen = await showMenu<MathKeySpec>(
+      context: keyContext,
+      position: RelativeRect.fromRect(
+        Rect.fromPoints(topLeft, bottomRight),
+        Offset.zero & overlay.size,
+      ),
+      color: colors.surface,
+      items: [
+        for (final alt in key.alternates)
+          PopupMenuItem<MathKeySpec>(
+            value: alt,
+            height: 46,
+            child: Semantics(
+              button: true,
+              excludeSemantics: true,
+              label: alt.label,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _KeyFace(spec: alt, style: style),
+              ),
+            ),
+          ),
+      ],
+    );
+    if (chosen != null) _press(chosen);
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final keys = MathKeyboard.categories[_category].keys;
 
     return Container(
       decoration: BoxDecoration(
         color: colors.surfaceMuted,
         border: Border(top: BorderSide(color: colors.border)),
       ),
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        AppSpacing.sm,
-        AppSpacing.sm,
-        AppSpacing.sm + MediaQuery.paddingOf(context).bottom,
+      padding: EdgeInsets.only(
+        bottom: AppSpacing.sm + MediaQuery.paddingOf(context).bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _categoryBar(colors),
-          const SizedBox(height: AppSpacing.sm),
-          ..._rows(keys, colors),
-          const SizedBox(height: AppSpacing.sm),
-          _actionRow(colors),
+          _utilityBar(colors),
+          _tabBar(colors),
+          Container(height: 1, color: colors.border),
+          _grid(_page, colors),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.sm,
+              AppSpacing.sm,
+              AppSpacing.sm,
+              0,
+            ),
+            child: _solveKey(colors),
+          ),
         ],
       ),
     );
   }
 
-  Widget _categoryBar(AppSemanticColors colors) {
+  // -- Chrome ---------------------------------------------------------------
+
+  Widget _utilityBar(AppSemanticColors colors) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          _lettersToggle(colors),
+          const Spacer(),
+          _iconKey(Icons.chevron_left_rounded, context.l10n.keyboardMoveLeft,
+              widget.controller.moveLeft, colors),
+          const SizedBox(width: AppSpacing.xs),
+          _iconKey(Icons.chevron_right_rounded, context.l10n.keyboardMoveRight,
+              widget.controller.moveRight, colors),
+          const SizedBox(width: AppSpacing.xs),
+          _iconKey(Icons.backspace_outlined, context.l10n.keyboardDelete,
+              widget.controller.backspace, colors),
+        ],
+      ),
+    );
+  }
+
+  Widget _lettersToggle(AppSemanticColors colors) {
+    return Semantics(
+      button: true,
+      selected: _letters,
+      excludeSemantics: true,
+      label: context.l10n.scanKeyboardCategoryKeys(_letters ? '123' : 'abc'),
+      child: Pressable(
+        // Pressable already ticks; a second call here double-taps the motor.
+        onTap: () => setState(() => _letters = !_letters),
+        borderRadius: AppRadius.smRadius,
+        child: Container(
+          height: 40,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: _letters ? AppColors.primaryAction : colors.surface,
+            borderRadius: AppRadius.smRadius,
+            border: Border.all(
+              color: _letters ? AppColors.primaryAction : colors.border,
+            ),
+          ),
+          child: Text(
+            _letters ? '123' : 'abc',
+            style: AppTypography.caption.copyWith(
+              color: _letters ? AppColors.white : colors.textSecondary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tabBar(AppSemanticColors colors) {
     return SizedBox(
-      height: 36,
+      height: 46,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: MathKeyboard.categories.length,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        itemCount: MathKeyboard.tabs.length,
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
         itemBuilder: (context, i) {
-          final selected = i == _category;
+          final tab = MathKeyboard.tabs[i];
+          // While the letters page is open no chip is current — tapping one
+          // both selects it and closes `abc`.
+          final selected = !_letters && i == _tab;
           return Semantics(
+            key: ValueKey('mathtab:${tab.id}'),
             button: true,
             selected: selected,
             excludeSemantics: true,
-            label: context.l10n
-                .scanKeyboardCategoryKeys(MathKeyboard.categories[i].label),
+            label: context.l10n.scanKeyboardCategoryKeys(
+              '${tab.labelTop} ${tab.labelBottom}',
+            ),
             child: Pressable(
-              onTap: () {
-                HapticsService.selection();
-                setState(() => _category = i);
-              },
+              onTap: () => setState(() {
+                _tab = i;
+                _letters = false;
+              }),
               borderRadius: AppRadius.smRadius,
               child: Container(
                 alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 // A selected chip is a filled control carrying white text —
                 // primaryAction (4.78:1), never the identity emerald (2.97:1).
                 decoration: BoxDecoration(
@@ -216,12 +271,12 @@ class _MathKeyboardState extends State<MathKeyboard> {
                     color: selected ? AppColors.primaryAction : colors.border,
                   ),
                 ),
-                child: Text(
-                  MathKeyboard.categories[i].label,
-                  style: AppTypography.caption.copyWith(
-                    color: selected ? AppColors.white : colors.textSecondary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tab.labelTop, style: _chipStyle(selected, colors)),
+                    Text(tab.labelBottom, style: _chipStyle(selected, colors)),
+                  ],
                 ),
               ),
             ),
@@ -231,57 +286,122 @@ class _MathKeyboardState extends State<MathKeyboard> {
     );
   }
 
-  List<Widget> _rows(List<MathKey> keys, AppSemanticColors colors) {
-    const perRow = 5;
-    final rows = <Widget>[];
-    for (var i = 0; i < keys.length; i += perRow) {
-      final slice = keys.sublist(i, (i + perRow).clamp(0, keys.length));
-      rows.add(Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-        child: Row(
-          children: [
-            for (var j = 0; j < perRow; j++) ...[
-              if (j > 0) const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: j < slice.length
-                    ? _keyTile(slice[j], colors)
-                    : const SizedBox.shrink(),
+  TextStyle _chipStyle(bool selected, AppSemanticColors colors) =>
+      AppTypography.caption.copyWith(
+        fontSize: 11,
+        height: 1.15,
+        fontWeight: FontWeight.w700,
+        color: selected ? AppColors.white : colors.textSecondary,
+      );
+
+  // -- The key grid ---------------------------------------------------------
+
+  /// Lays a page out edge-to-edge. A wide page (the seven trig columns) fits
+  /// the width of an ordinary phone perfectly well, so whether it scrolls is
+  /// measured rather than declared: it only becomes a sideways-scrolling strip
+  /// when the screen is too narrow to keep the keys tappable.
+  Widget _grid(MathKeyTab tab, AppSemanticColors colors) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = tab.columns;
+        final dividers = (columns - 1).toDouble();
+        final fitted = (constraints.maxWidth - dividers) / columns;
+        final scrolls = fitted < _minKeyWidth;
+
+        final rows = <Widget>[];
+        for (var r = 0; r < tab.rows.length; r++) {
+          if (r > 0) rows.add(Container(height: 1, color: colors.border));
+          final cells = <Widget>[];
+          for (var c = 0; c < columns; c++) {
+            if (c > 0) cells.add(Container(width: 1, color: colors.border));
+            final row = tab.rows[r];
+            final cell = _cell(c < row.length ? row[c] : null, colors);
+            cells.add(
+              scrolls
+                  ? SizedBox(width: _minKeyWidth, child: cell)
+                  : Expanded(child: cell),
+            );
+          }
+          rows.add(
+            SizedBox(
+              height: _keyHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: cells,
               ),
-            ],
-          ],
-        ),
-      ));
-    }
-    return rows;
+            ),
+          );
+        }
+
+        final grid = Column(
+          key: ValueKey(tab.id),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: rows,
+        );
+
+        if (!scrolls) return grid;
+        // A stretched column needs a bounded width inside a horizontal viewport.
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: columns * _minKeyWidth + dividers,
+            child: grid,
+          ),
+        );
+      },
+    );
   }
 
-  Widget _keyTile(MathKey key, AppSemanticColors colors) {
-    return Semantics(
-      button: true,
-      excludeSemantics: true,
-      label: key.label,
-      child: Pressable(
-        onTap: () {
-          HapticsService.selection();
-          widget.onInsert(key.insert, key.caretBack);
-        },
-        borderRadius: AppRadius.smRadius,
-        child: Container(
-          height: 48,
-          alignment: Alignment.center,
-          // An accent key is a primary container: the token pair flips with the
-          // theme, so the label keeps its contrast in dark mode too (primaryDark
-          // is a light-surface ink and went near-invisible on the dark surface).
-          decoration: BoxDecoration(
-            color: key.accent ? colors.primaryContainer : colors.surface,
-            borderRadius: AppRadius.smRadius,
-            border: Border.all(color: colors.border),
-          ),
-          child: Text(
-            key.label,
-            style: AppTypography.title.copyWith(
-              color: key.accent ? colors.onPrimaryContainer : colors.textPrimary,
-              fontSize: 17,
+  Widget _cell(MathKeySpec? spec, AppSemanticColors colors) {
+    if (spec == null) return ColoredBox(color: colors.surfaceMuted);
+
+    // The digit block reads as a calculator pad: lighter than the surrounding
+    // function keys, the way the numbers stand out on a physical keypad.
+    final numeric = _isNumeric(spec);
+    final style = MathRenderStyle(fontSize: 19, color: colors.textPrimary);
+
+    return Builder(
+      key: ValueKey(MathKeyboard.keyOf(spec)),
+      builder: (keyContext) => Semantics(
+        button: true,
+        excludeSemantics: true,
+        label: spec.label,
+        child: Material(
+          color: numeric ? colors.surface : colors.surfaceMuted,
+          child: InkWell(
+            onTap: () => _press(spec),
+            onLongPress: spec.hasAlternates
+                ? () => _showAlternates(keyContext, spec)
+                : null,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 6,
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _KeyFace(spec: spec, style: style),
+                    ),
+                  ),
+                ),
+                if (spec.hasAlternates)
+                  Positioned(
+                    top: 5,
+                    right: 6,
+                    child: Container(
+                      width: 4,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colors.errorText,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -289,64 +409,68 @@ class _MathKeyboardState extends State<MathKeyboard> {
     );
   }
 
-  Widget _actionRow(AppSemanticColors colors) {
-    return Row(
-      children: [
-        _iconKey(Icons.chevron_left_rounded, context.l10n.keyboardMoveLeft, () {
-          HapticsService.selection();
-          widget.onMoveLeft();
-        }, colors),
-        const SizedBox(width: AppSpacing.xs),
-        _iconKey(Icons.chevron_right_rounded, context.l10n.keyboardMoveRight, () {
-          HapticsService.selection();
-          widget.onMoveRight();
-        }, colors),
-        const SizedBox(width: AppSpacing.xs),
-        _iconKey(Icons.backspace_outlined, context.l10n.keyboardDelete, () {
-          HapticsService.selection();
-          widget.onBackspace();
-        }, colors),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Semantics(
-            button: true,
-            enabled: widget.onSolve != null,
-            excludeSemantics: true,
-            label: widget.solveLabel,
-            child: Pressable(
-              onTap: widget.onSolve == null
-                  ? null
-                  : () {
-                      HapticsService.success();
-                      widget.onSolve!();
-                    },
-              borderRadius: AppRadius.smRadius,
-              child: Container(
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  // Solid interactive emerald — white label at 4.78:1 AA.
-                  color: widget.onSolve != null
-                      ? AppColors.primaryAction
-                      : colors.surface,
-                  borderRadius: AppRadius.smRadius,
-                  border: widget.onSolve != null
-                      ? null
-                      : Border.all(color: colors.border),
-                ),
-                child: Text(
-                  widget.solveLabel,
-                  style: AppTypography.button.copyWith(
-                    color: widget.onSolve != null
-                        ? AppColors.white
-                        : colors.textMuted,
-                  ),
-                ),
+  static bool _isNumeric(MathKeySpec spec) {
+    final display = spec.atom?.display;
+    return display != null && display.length == 1 && '0123456789.='.contains(display);
+  }
+
+  // -- Actions --------------------------------------------------------------
+
+  /// Watches the controller so it lights up the moment there is something to
+  /// solve. Enablement is deliberately generous — anything non-empty is
+  /// submittable, and the screen's validation explains an unfilled box — because
+  /// a button that stays grey after you have typed reads as broken.
+  Widget _solveKey(AppSemanticColors colors) {
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) {
+        final enabled = widget.onSolve != null &&
+            !widget.busy &&
+            !widget.controller.isEmpty;
+        return Semantics(
+          key: MathKeyboard.solveKey,
+          button: true,
+          enabled: enabled,
+          excludeSemantics: true,
+          label: widget.solveLabel,
+          child: Pressable(
+            haptic: false, // fired below, as the heavier "success" tick
+            onTap: enabled
+                ? () {
+                    HapticsService.success();
+                    widget.onSolve!();
+                  }
+                : null,
+            borderRadius: AppRadius.smRadius,
+            child: Container(
+              height: 52,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                // Solid interactive emerald — white label at 4.78:1 AA.
+                color: enabled ? AppColors.primaryAction : colors.surface,
+                borderRadius: AppRadius.smRadius,
+                border: enabled ? null : Border.all(color: colors.border),
               ),
+              child: widget.busy
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation(colors.textMuted),
+                      ),
+                    )
+                  : Text(
+                      widget.solveLabel,
+                      style: AppTypography.button.copyWith(
+                        color: enabled ? AppColors.white : colors.textMuted,
+                      ),
+                    ),
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -358,22 +482,120 @@ class _MathKeyboardState extends State<MathKeyboard> {
   ) {
     return Semantics(
       button: true,
+      excludeSemantics: true,
       label: label,
-      child: Pressable(
-        onTap: onTap,
-        borderRadius: AppRadius.smRadius,
+      child: _RepeatKey(
+        onPress: onTap,
         child: Container(
-          width: 52,
-          height: 52,
+          width: 48,
+          height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: AppRadius.smRadius,
             border: Border.all(color: colors.border),
           ),
-          child: Icon(icon, size: 22, color: colors.textSecondary),
+          child: Icon(icon, size: 20, color: colors.textSecondary),
         ),
       ),
+    );
+  }
+}
+
+/// A key that fires once on tap and then auto-repeats while it is held — how
+/// backspace and the arrows behave on every real keyboard, and the difference
+/// between clearing a mistyped expression in one gesture and twelve taps.
+class _RepeatKey extends StatefulWidget {
+  const _RepeatKey({required this.onPress, required this.child});
+
+  final VoidCallback onPress;
+  final Widget child;
+
+  @override
+  State<_RepeatKey> createState() => _RepeatKeyState();
+}
+
+class _RepeatKeyState extends State<_RepeatKey> {
+  static const Duration _delay = Duration(milliseconds: 400);
+  static const Duration _interval = Duration(milliseconds: 70);
+
+  Timer? _timer;
+  bool _down = false;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _fire() {
+    HapticsService.selection();
+    widget.onPress();
+  }
+
+  void _start() {
+    setState(() => _down = true);
+    _fire();
+    _timer = Timer(_delay, () {
+      _timer = Timer.periodic(_interval, (_) => _fire());
+    });
+  }
+
+  void _stop() {
+    _timer?.cancel();
+    _timer = null;
+    if (_down) setState(() => _down = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _start(),
+      onTapUp: (_) => _stop(),
+      onTapCancel: _stop,
+      child: AnimatedScale(
+        scale: _down ? 0.94 : 1.0,
+        duration: AppDurations.press,
+        curve: AppCurves.standard,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// What a key shows: a glyph, or a miniature of the structure it opens with its
+/// slots drawn as the same dashed boxes they will become in the field.
+class _KeyFace extends StatelessWidget {
+  const _KeyFace({required this.spec, required this.style});
+
+  final MathKeySpec spec;
+  final MathRenderStyle style;
+
+  static Widget _emptySlot(int index, MathRenderStyle style) =>
+      MathPlaceholderBox(style: style);
+
+  @override
+  Widget build(BuildContext context) {
+    final face = spec.face;
+    if (face != null) return MathGlyph(text: face, style: style, upright: true);
+
+    final facePart = spec.facePart;
+    if (facePart != null) {
+      return MathPartView(
+        part: facePart,
+        style: style,
+        slotBuilder: _emptySlot,
+      );
+    }
+
+    final atom = spec.atom;
+    if (atom != null) return MathAtomView(atom: atom, style: style);
+
+    return MathPartView(
+      part: spec.template!.layout,
+      style: style,
+      slotBuilder: _emptySlot,
     );
   }
 }

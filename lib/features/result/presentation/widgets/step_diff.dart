@@ -140,3 +140,12 @@ String? emphasizeChanged(String prev, String curr, {required String colorHex}) {
   final changed = d.changed.join();
   return '${d.prefix.join()}\\textcolor{$colorHex}{$changed}${d.suffix.join()}';
 }
+
+/// [prev] with the span that is ABOUT to become [curr] emphasised — the mirror
+/// of [emphasizeChanged], for lighting up the "before" line of an opened step so
+/// the learner can see what the move acts *on*, not only what it produced.
+///
+/// Same diff, read from the other end: the changed span of `prev` relative to
+/// `curr` is exactly the part `curr` replaced.
+String? emphasizeOutgoing(String prev, String curr, {required String colorHex}) =>
+    emphasizeChanged(curr, prev, colorHex: colorHex);

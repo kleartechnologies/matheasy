@@ -12,72 +12,84 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/result_models.dart';
 import '../../domain/teaching_models.dart';
-import '../widgets/math_text.dart';
-import '../widgets/result_graph.dart';
-import '../widgets/step_diff.dart';
+import '../widgets/learn_more_sheet.dart';
+import '../widgets/lesson_summary.dart';
+import '../widgets/step_spine.dart';
 import '../widgets/teaching/teaching_cards.dart';
 
-/// Diameter of the numbered rail bullets; trailing content indents past it.
-const double _railWidth = 30;
-const double _railIndent = _railWidth + AppSpacing.md;
+/// Where the learner is in the guided journey.
+enum LessonPhase {
+  /// Answer's on screen; the lesson hasn't started. One CTA, nothing else.
+  intro,
 
-/// The emerald that highlights the changed span of a step (§5), as the
-/// `#RRGGBB` literal `\textcolor` needs. Derived from the ramp so it cannot
-/// drift from the brand: the changed span is *text*, so it takes the emerald
-/// that stays legible as a label on each theme's card ([AppColors.primary]
-/// itself is 2.97:1 and would disappear).
-String _accentHex(BuildContext context) {
-  final accent = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-  return '#${(accent.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+  /// Walking the spine — every step visible, one opened.
+  learning,
+
+  /// The learner reached the Solution row — summary, practice reward, Numi.
+  complete,
 }
 
-/// Tab 1 — the step-by-step worked solution (spec §4/§5).
+/// V3 · the Solution tab, rebuilt as a **guided journey** instead of a page.
 ///
-/// The stepper reveals ONE step at a time by default ("Next step"), with a
-/// "Reveal all" toggle, and — when there is more than one method — a switcher so
-/// each method drives its own stepper (the exam pick is badged). Every step past
-/// the first highlights WHAT CHANGED from the previous step (accent colour, plus
-/// a subtle scale on reveal unless reduce-motion is on), the "understand, don't
-/// just copy" moment.
+/// The screen above already answered *what is the answer?*. This tab answers
+/// *why?* — and it answers it one question at a time:
+///
+///   §3 Start Learning → §4 the step player → §5 the summary → §6 practice →
+///   §7 Numi (only once the lesson is done).
+///
+/// Everything optional — the idea, what it asks, the plan, the glossary, method
+/// comparison, the three explanation voices, every mistake, the graph — is one
+/// tap away in [LearnMoreSheet] and collapsed by default. Nothing was deleted;
+/// it simply stopped competing with the solve.
 class SolutionTab extends StatefulWidget {
   const SolutionTab({
     super.key,
     required this.result,
     this.onOpenVisual,
-    this.onOpenMethods,
     this.onAskMatheasy,
     this.onAttemptPractice,
+    this.onPracticeTopic,
   });
 
   final ResultData result;
 
-  /// Opens the Visual Learning tab — the flagship "understand it, don't just
-  /// read it" experience. Null in tests / previews (the hero is then omitted).
+  /// Opens the Visual Learning tab. Offered *after* the lesson, never before —
+  /// the animation is a second pass over ground the learner already covered.
   final VoidCallback? onOpenVisual;
 
-  /// Opens the Methods tab from the "compare methods" link (§5). Null → hidden.
-  final VoidCallback? onOpenMethods;
-
-  /// Opens Numi from the teaching hand-off strip. Null → the strip is hidden.
+  /// Opens Numi. Only surfaced at the end ("still confused?"), never pinned.
   final VoidCallback? onAskMatheasy;
 
-  /// Attempts a practice-ladder rung. Null → the ladder renders read-only.
+  /// Attempts a practice-ladder rung (easier / similar / harder).
   final ValueChanged<PracticeItem>? onAttemptPractice;
+
+  /// Falls back to topic practice when the payload carries no ladder.
+  final VoidCallback? onPracticeTopic;
 
   @override
   State<SolutionTab> createState() => _SolutionTabState();
 }
 
 class _SolutionTabState extends State<SolutionTab> {
+  /// Which row of the spine the learner is on. `null` means the lesson hasn't
+  /// started; `steps.length` is the Solution row, the end of the lesson.
+  int? _cursor;
+
+  /// Whether that row is opened into a card. The ✕ shuts it without moving the
+  /// cursor, so the learner drops back to the bare list and keeps their place.
+  bool _open = true;
+
+  /// Sticky once the Solution row has been reached: shutting the card, or
+  /// stepping back to re-read step 2, must not pull the summary out from under
+  /// a learner who has already finished.
+  bool _finished = false;
+
   int _method = 0;
-  int _revealed = 1;
-  bool _revealAll = false;
 
   List<MethodSolution> get _methods => widget.result.methods;
 
-  /// The steps for the selected method: its own structured stepper (§4), else
-  /// the top-level steps (exam pick), else derived from its plain-text steps
-  /// (the offline mock).
+  /// The steps for the selected method: its own structured stepper, else the
+  /// top-level steps (exam pick), else derived from its plain-text steps.
   List<SolutionStep> get _steps {
     if (_methods.isEmpty) return widget.result.steps;
     final method = _methods[_method.clamp(0, _methods.length - 1)];
@@ -91,140 +103,196 @@ class _SolutionTabState extends State<SolutionTab> {
     ];
   }
 
-  void _selectMethod(int index) {
-    if (index == _method) return;
+  String get _methodName =>
+      _methods.isEmpty ? '' : _methods[_method.clamp(0, _methods.length - 1)].name;
+
+  /// The Solution row: one past the last step.
+  int get _solutionIndex => _steps.length;
+
+  LessonPhase get _phase {
+    if (_cursor == null) return LessonPhase.intro;
+    return _finished ? LessonPhase.complete : LessonPhase.learning;
+  }
+
+  void _focusStep(int index) {
+    final target = index.clamp(0, _solutionIndex);
     setState(() {
-      _method = index;
-      _revealed = 1;
-      _revealAll = false;
+      _cursor = target;
+      _open = true;
+      if (target >= _solutionIndex) _finished = true;
     });
   }
 
-  void _next() => setState(
-        () => _revealed = (_revealed + 1).clamp(1, _steps.length),
-      );
+  void _start() => _focusStep(0);
 
-  void _revealEverything() => setState(() => _revealAll = true);
+  /// Shut, "Next step" reopens where you are rather than skipping a step you
+  /// never read.
+  void _next() => _open ? _focusStep((_cursor ?? -1) + 1) : _focusStep(_cursor ?? 0);
+
+  void _back() => _focusStep((_cursor ?? 1) - 1);
+
+  void _collapse() => setState(() => _open = false);
+
+  void _replay() => setState(() {
+        _cursor = 0;
+        _open = true;
+        _finished = false;
+      });
+
+  /// Switching methods restarts the walkthrough — a half-finished lesson in one
+  /// method makes no sense in another.
+  void _useMethod(int index) {
+    if (index == _method || index < 0 || index >= _methods.length) return;
+    setState(() {
+      _method = index;
+      _cursor = 0;
+      _open = true;
+      _finished = false;
+    });
+  }
+
+  void _openLearnMore() => LearnMoreSheet.show(
+        context,
+        result: widget.result,
+        onUseMethod: _useMethod,
+        onAskMatheasy: widget.onAskMatheasy ?? () {},
+      );
 
   @override
   Widget build(BuildContext context) {
     final steps = _steps;
-    final shown = _revealAll ? steps.length : _revealed.clamp(1, steps.length);
-    final more = shown < steps.length;
-    // The additive teaching layer (spec §5). Null for a v1 payload / when the
-    // server attached none → the whole block below is skipped and this tab is
-    // byte-identical to today's. Each card also guards its own emptiness.
-    final teaching = widget.result.teaching;
+    // Nothing to walk through (a bare answer, or a method with no steps) — skip
+    // straight to the takeaway rather than offering an empty lesson.
+    final phase = steps.isEmpty ? LessonPhase.complete : _phase;
+    final motion = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : AppDurations.medium;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Visual Learning is the flagship — surfaced above the steps with more
-        // visual weight than the answer banner, so students reach for
-        // understanding, not just the final line. (The step-by-step "Play
-        // Solution" player itself lives inside the Pro Visual tab.)
-        if (widget.onOpenVisual != null) ...[
-          _VisualLearningHero(onTap: widget.onOpenVisual!),
-          const SizedBox(height: AppSpacing.lg),
+        // The spine outlives the lesson: once it's up it stays up, so a learner
+        // reading the summary can still glance back at step 2 — or tap it.
+        if (phase != LessonPhase.intro && steps.isNotEmpty) ...[
+          StepSpine(
+            key: ValueKey('spine-$_method'),
+            problemLatex: widget.result.equation.latex,
+            steps: steps,
+            answerLatex: widget.result.answerLatex,
+            focused: (_cursor ?? 0).clamp(0, steps.length),
+            expanded: _open,
+            onFocus: _focusStep,
+            onCollapse: _collapse,
+            onNext: _next,
+            onBack: _back,
+            glossary:
+                widget.result.teaching?.concept.definedTerms ?? const [],
+          ),
+          const SizedBox(height: AppSpacing.xl),
         ],
-        // --- Teaching: orient BEFORE the steps (concept → why → journey). ---
-        if (teaching != null) ...[
-          TeachingHeaderCard(header: teaching.header),
-          const SizedBox(height: AppSpacing.md),
-          if (!teaching.concept.isEmpty || !teaching.overview.isEmpty) ...[
-            ConceptOverviewCard(
-              concept: teaching.concept,
-              overview: teaching.overview,
+        AnimatedSize(
+          duration: motion,
+          curve: AppCurves.standard,
+          alignment: Alignment.topCenter,
+          child: AnimatedSwitcher(
+            duration: motion,
+            transitionBuilder: AppTransitions.fadeThrough,
+            child: KeyedSubtree(
+              key: ValueKey('$phase-$_method'),
+              child: switch (phase) {
+                LessonPhase.intro => _buildIntro(context),
+                // The spine above IS the lesson — nothing to add underneath it
+                // until the learner reaches the end.
+                LessonPhase.learning => const SizedBox(width: double.infinity),
+                LessonPhase.complete => _buildComplete(context, steps),
+              },
             ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          if (teaching.journey.isNotEmpty) ...[
-            LearningJourneyRail(
-              journey: teaching.journey,
-              stepCount: steps.length,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          if (teaching.header.whyMethodChosen.isNotEmpty ||
-              !teaching.methodRationale.isEmpty) ...[
-            WhyThisMethodCard(
-              header: teaching.header,
-              rationale: teaching.methodRationale,
-              onCompare: widget.onOpenMethods,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-        ],
-        // A compact one-line intro keeps the brand voice without pushing the
-        // steps down the page — the maths, not the chatter, should lead.
+          ),
+        ),
+        // The one door to everything optional: always last on the page, always
+        // shut. Reachable mid-lesson (a learner stuck on a word needs the
+        // glossary *now*) without ever being in the way.
+        const SizedBox(height: AppSpacing.lg),
+        _LearnMoreRow(onTap: _openLearnMore),
+      ],
+    );
+  }
+
+  // --- §3 the invitation ----------------------------------------------------
+
+  Widget _buildIntro(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // One line in the tutor's voice — the whole reason this doesn't feel
+        // like a textbook. One line, not a paragraph.
         if (widget.result.tutorIntro.isNotEmpty) ...[
           MatheasyBubble(text: widget.result.tutorIntro, avatarSize: 28),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        PrimaryButton(
+          label: context.l10n.resultStartLearning,
+          icon: Icons.play_arrow_rounded,
+          onPressed: _start,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Center(
+          child: Text(
+            context.l10n.resultStartLearningHint,
+            textAlign: TextAlign.center,
+            style: AppTypography.caption
+                .copyWith(color: context.colors.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- §5–§7 the close ------------------------------------------------------
+
+  Widget _buildComplete(BuildContext context, List<SolutionStep> steps) {
+    final teaching = widget.result.teaching;
+    final ladder = teaching?.practiceLadder;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LessonSummary(
+          result: widget.result,
+          methodName: _methodName,
+          onReplay: _replay,
+        ),
+        // The animation is a *re-watch*, offered once the learner has done the
+        // thinking — never as a shortcut past it.
+        if (widget.onOpenVisual != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _WatchItAnimateRow(onTap: widget.onOpenVisual!),
+        ],
+        // §6 — practice is the reward for finishing, so it lands here and
+        // nowhere earlier. Skipped entirely when there is nothing to practise:
+        // a header over an empty space is the exact clutter V3 removes.
+        if (ladder != null || widget.onPracticeTopic != null) ...[
+          const SizedBox(height: AppSpacing.xl),
+          _SectionIntro(
+            title: context.l10n.solutionPracticeTitle,
+            subtitle: context.l10n.solutionPracticeSubtitle,
+          ),
           const SizedBox(height: AppSpacing.md),
-        ],
-        if (_methods.length > 1) ...[
-          _MethodSwitcher(
-            methods: _methods,
-            selected: _method,
-            onSelect: _selectMethod,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-        for (var i = 0; i < shown; i++)
-          KeyedSubtree(
-            // Key by method+step so switching methods rebuilds fresh cards (so
-            // the reveal emphasis re-runs), and re-revealing doesn't re-animate
-            // already-shown steps.
-            key: ValueKey('m$_method-s$i'),
-            child: AppTransitions.slideUp(
-              delay: Duration(milliseconds: (i * 40).clamp(0, 200)),
-              child: _StepCard(
-                step: steps[i],
-                number: i + 1,
-                isLast: i == steps.length - 1,
-                defaultExpanded: i == 0,
-                previousLatex: i > 0 ? steps[i - 1].resultLatex : null,
-                // Pulse the just-revealed step (the active transformation).
-                pulse: more && i == shown - 1,
-              ),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.xs),
-        if (more)
-          _RevealControls(
-            current: shown,
-            total: steps.length,
-            onNext: _next,
-            onRevealAll: _revealEverything,
-          )
-        else if (widget.result.verifyText.isNotEmpty)
-          _VerifyCard(text: widget.result.verifyText),
-        // --- Teaching: consolidate AFTER the steps (mistakes → takeaway → practice). ---
-        if (teaching != null) ...[
-          if (teaching.commonMistakes.any((m) => m.mistake.isNotEmpty)) ...[
-            const SizedBox(height: AppSpacing.lg),
-            CommonMistakesCard(mistakes: teaching.commonMistakes),
-          ],
-          if (!teaching.keyTakeaway.isEmpty) ...[
-            const SizedBox(height: AppSpacing.lg),
-            KeyTakeawayCard(takeaway: teaching.keyTakeaway),
-          ],
-          if (teaching.practiceLadder != null) ...[
-            const SizedBox(height: AppSpacing.lg),
+          if (ladder != null)
             PracticeLadderCard(
-              ladder: teaching.practiceLadder!,
+              ladder: ladder,
               onAttempt: widget.onAttemptPractice,
+            )
+          else
+            SecondaryButton(
+              label: context.l10n.solutionPracticeThisTopic,
+              icon: Icons.fitness_center_rounded,
+              onPressed: widget.onPracticeTopic,
             ),
-          ],
         ],
-        // The graph (§7) — an expander, after the answer + steps. Omitted
-        // entirely when the problem isn't a plottable function.
-        if (widget.result.graph != null) ...[
-          const SizedBox(height: AppSpacing.lg),
-          ResultGraphSection(graph: widget.result.graph!),
-        ],
-        if (teaching != null && widget.onAskMatheasy != null) ...[
-          const SizedBox(height: AppSpacing.lg),
-          NumiInviteStrip(onAsk: widget.onAskMatheasy),
+        // §7 — Numi, last, and only for the learner who still needs them.
+        if (widget.onAskMatheasy != null) ...[
+          const SizedBox(height: AppSpacing.xl),
+          _StillConfused(onAsk: widget.onAskMatheasy!),
         ],
       ],
     );
@@ -232,96 +300,83 @@ class _SolutionTabState extends State<SolutionTab> {
 }
 
 // ---------------------------------------------------------------------------
-// Method switcher (§5)
+// Small pieces
 // ---------------------------------------------------------------------------
 
-class _MethodSwitcher extends StatelessWidget {
-  const _MethodSwitcher({
-    required this.methods,
-    required this.selected,
-    required this.onSelect,
-  });
+class _SectionIntro extends StatelessWidget {
+  const _SectionIntro({required this.title, required this.subtitle});
 
-  final List<MethodSolution> methods;
-  final int selected;
-  final ValueChanged<int> onSelect;
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: methods.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, i) => _MethodChip(
-          method: methods[i],
-          isSelected: i == selected,
-          onTap: () => onSelect(i),
-        ),
-      ),
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: AppTypography.title.copyWith(color: colors.textPrimary)),
+        Text(subtitle,
+            style:
+                AppTypography.caption.copyWith(color: colors.textSecondary)),
+      ],
     );
   }
 }
 
-class _MethodChip extends StatelessWidget {
-  const _MethodChip({
-    required this.method,
-    required this.isSelected,
-    required this.onTap,
-  });
+/// The single entry point to every optional layer — a quiet row, not a card.
+class _LearnMoreRow extends StatelessWidget {
+  const _LearnMoreRow({required this.onTap});
 
-  final MethodSolution method;
-  final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // The unselected chip's star is an emerald label on a card — it needs the
-    // tone that stays legible per theme, not the logo tile.
-    final emeraldLabel =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Semantics(
       button: true,
-      selected: isSelected,
-      label: '${method.name}${method.recommended ? ', exam pick' : ''}',
+      label: context.l10n.resultLearnMore,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: Pressable(
         onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: AppDurations.fast,
+        borderRadius: AppRadius.mdRadius,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 56),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            // Selected carries white content → the interactive emerald.
-            color: isSelected ? AppColors.primaryAction : colors.surface,
-            borderRadius: AppRadius.pillRadius,
-            border: Border.all(
-              color: isSelected ? AppColors.primaryAction : colors.border,
-            ),
+            color: colors.surfaceMuted,
+            borderRadius: AppRadius.mdRadius,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              if (method.recommended) ...[
-                Icon(
-                  Icons.star_rounded,
-                  size: 15,
-                  color: isSelected ? AppColors.white : emeraldLabel,
-                ),
-                const SizedBox(width: AppSpacing.xxs),
-              ],
-              Text(
-                method.name,
-                style: AppTypography.button.copyWith(
-                  fontSize: 13,
-                  color: isSelected ? AppColors.white : colors.textPrimary,
+              Icon(Icons.auto_stories_rounded, size: 18, color: colors.textMuted),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.resultLearnMore,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      context.l10n.resultLearnMoreSubtitle,
+                      style: AppTypography.caption
+                          .copyWith(color: colors.textSecondary),
+                    ),
+                  ],
                 ),
               ),
+              Icon(Icons.keyboard_arrow_right_rounded,
+                  size: 20, color: colors.textMuted),
             ],
           ),
         ),
@@ -330,502 +385,9 @@ class _MethodChip extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Reveal controls (one-at-a-time default)
-// ---------------------------------------------------------------------------
-
-class _RevealControls extends StatelessWidget {
-  const _RevealControls({
-    required this.current,
-    required this.total,
-    required this.onNext,
-    required this.onRevealAll,
-  });
-
-  final int current;
-  final int total;
-  final VoidCallback onNext;
-  final VoidCallback onRevealAll;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: _railIndent),
-      child: Row(
-        children: [
-          Expanded(
-            child: PrimaryButton(
-              label: context.l10n.solutionNextStepOf(current, total),
-              trailingIcon: Icons.arrow_downward_rounded,
-              onPressed: onNext,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Semantics(
-            button: true,
-            label: context.l10n.solutionRevealAllSteps,
-            excludeSemantics: true,
-            child: GestureDetector(
-              onTap: onRevealAll,
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.md,
-                ),
-                child: Text(
-                  context.l10n.solutionRevealAll,
-                  style: AppTypography.button.copyWith(
-                    fontSize: 14,
-                    color: context.isDark
-                        ? AppColors.primaryLight
-                        : AppColors.primaryDark,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Step card
-// ---------------------------------------------------------------------------
-
-class _StepCard extends StatefulWidget {
-  const _StepCard({
-    required this.step,
-    required this.number,
-    required this.isLast,
-    required this.defaultExpanded,
-    required this.previousLatex,
-    required this.pulse,
-  });
-
-  final SolutionStep step;
-  final int number;
-  final bool isLast;
-  final bool defaultExpanded;
-
-  /// The previous step's expression, for the "what changed" emphasis (null on
-  /// the first step).
-  final String? previousLatex;
-
-  /// Whether to play the reveal scale-pulse (suppressed under reduce-motion).
-  final bool pulse;
-
-  @override
-  State<_StepCard> createState() => _StepCardState();
-}
-
-class _StepCardState extends State<_StepCard> {
-  late bool _expanded = widget.defaultExpanded;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isAnswer = widget.isLast;
-    // The "Why?" affordance is an emerald label on a card — per-theme tone.
-    final emeraldLabel =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-    // The reveal scale-pulse wraps the WHOLE card, OUTSIDE the IntrinsicHeight,
-    // so the Transform never perturbs the intrinsic-height measurement (which
-    // caused a sub-pixel overflow). Suppressed under reduce-motion (§5).
-    final pulse = widget.pulse && !MediaQuery.disableAnimationsOf(context);
-    // The step has expandable "why" content if it carries the reasoning OR any of
-    // the deeper (Pro/full) teaching fields.
-    final s = widget.step;
-    final hasWhy = s.detail.isNotEmpty ||
-        (s.rule?.isNotEmpty ?? false) ||
-        (s.explanation?.isNotEmpty ?? false) ||
-        (s.commonMistake?.isNotEmpty ?? false);
-    // The timeline connector is a positioned line behind the row (not an
-    // IntrinsicHeight-stretched Expanded), so the card takes its natural height
-    // and can't cause a sub-pixel intrinsic-height overflow.
-    final card = Stack(
-      children: [
-        if (!widget.isLast)
-          Positioned(
-            left: _railWidth / 2 - 1,
-            top: _railWidth,
-            bottom: 0,
-            child: Container(width: 2, color: colors.border),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Bullet(number: widget.number, highlight: isAnswer),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: AppCard(
-                onTap: () => setState(() => _expanded = !_expanded),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // A compact eyebrow — what this step does, and the operation
-                    // applied — sits ABOVE the equation but is deliberately small.
-                    // The equation is the hero of the card (equation-first, not
-                    // prose-first). Skipped entirely when there's nothing to label.
-                    if (widget.step.title.isNotEmpty ||
-                        widget.step.operationLabel != null) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.step.title,
-                              style: AppTypography.caption.copyWith(
-                                color: colors.textSecondary,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                          if (widget.step.operationLabel != null) ...[
-                            const SizedBox(width: AppSpacing.sm),
-                            _OperationChip(label: widget.step.operationLabel!),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                    ],
-                    _StepExpression(
-                      latex: widget.step.resultLatex,
-                      previousLatex: widget.previousLatex,
-                      isAnswer: isAnswer,
-                    ),
-                    // Pivotal step: an elicited "your turn" question BEFORE the
-                    // reasoning — the generation moment (spec §0.4). A soft nudge:
-                    // the "Why?" reveal below is still one tap away.
-                    if (widget.step.pivotal &&
-                        (widget.step.selfExplainPrompt?.isNotEmpty ?? false)) ...[
-                      const SizedBox(height: AppSpacing.md),
-                      _SelfExplainBox(prompt: widget.step.selfExplainPrompt!),
-                    ],
-                    AnimatedCrossFade(
-                      duration: AppDurations.fast,
-                      crossFadeState: _expanded
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
-                      firstChild: _StepDetail(step: widget.step),
-                      secondChild: const SizedBox(width: double.infinity),
-                    ),
-                    if (hasWhy) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          Text(
-                            _expanded
-                                ? context.l10n.solutionHideWhy
-                                : context.l10n.solutionWhy,
-                            style: AppTypography.caption
-                                .copyWith(color: emeraldLabel),
-                          ),
-                          AnimatedRotation(
-                            turns: _expanded ? 0.5 : 0,
-                            duration: AppDurations.fast,
-                            child: Icon(Icons.keyboard_arrow_down_rounded,
-                                size: 18, color: emeraldLabel),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ), // Column
-              ), // AppCard
-            ), // Expanded
-          ], // Row children
-        ), // Row
-      ), // Padding
-    ], // Stack children
-    );
-    return pulse ? _ScaleIn(child: card) : card;
-  }
-}
-
-/// Renders a step's expression with the changed-vs-previous span emphasised in
-/// the accent colour (spec §5). The colour is the reduce-motion-safe emphasis;
-/// on reveal it also scale-pulses unless animations are disabled. Falls back to
-/// a plain render + reveal pulse when there's no isolable changed span.
-class _StepExpression extends StatelessWidget {
-  const _StepExpression({
-    required this.latex,
-    required this.previousLatex,
-    required this.isAnswer,
-  });
-
-  final String latex;
-  final String? previousLatex;
-  final bool isAnswer;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final emphasized = previousLatex == null
-        ? null
-        : emphasizeChanged(previousLatex!, latex, colorHex: _accentHex(context));
-
-    // Sized to the content (max 30, down to 22 for a wide line) so a long step
-    // fits without scrolling sideways but a short one stays big. Measured from
-    // the plain expression; the coloured emphasis is what's actually drawn.
-    return AdaptiveMath(
-      latex,
-      renderLatex: emphasized,
-      minFontSize: 22,
-      maxFontSize: 30,
-      style: AppTypography.headingSmall.copyWith(
-        color: isAnswer ? colors.onSuccessContainer : colors.textPrimary,
-      ),
-    );
-  }
-}
-
-/// A one-shot subtle grow-in, played once when the widget first mounts.
-class _ScaleIn extends StatefulWidget {
-  const _ScaleIn({required this.child});
-
-  final Widget child;
-
-  @override
-  State<_ScaleIn> createState() => _ScaleInState();
-}
-
-class _ScaleInState extends State<_ScaleIn>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: AppDurations.medium,
-  )..forward();
-
-  // Grows in to 1.0 (never past it, so it can't paint outside the step card's
-  // box — the card lives inside an IntrinsicHeight). Subtle, per §5.
-  late final Animation<double> _scale = Tween<double>(begin: 0.9, end: 1).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scale,
-      alignment: Alignment.centerLeft,
-      child: widget.child,
-    );
-  }
-}
-
-/// The numbered timeline bullet (the connector line is drawn behind the row).
-class _Bullet extends StatelessWidget {
-  const _Bullet({required this.number, required this.highlight});
-
-  final int number;
-  final bool highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: _railWidth,
-      height: _railWidth,
-      decoration: BoxDecoration(
-        // Solid: the number on the answer bullet is white, so this is the
-        // interactive emerald (4.78:1), never the 2.97:1 logo tone.
-        color: highlight ? AppColors.primaryAction : colors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '$number',
-        style: AppTypography.caption.copyWith(
-          color: highlight ? AppColors.white : colors.onPrimaryContainer,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
-class _OperationChip extends StatelessWidget {
-  const _OperationChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.warningContainer,
-        borderRadius: AppRadius.smRadius,
-      ),
-      child: Text(
-        label,
-        style: AppTypography.label.copyWith(color: colors.onWarningContainer),
-      ),
-    );
-  }
-}
-
-/// The pivotal-step "your turn" prompt — an elicited question shown before the
-/// reasoning (spec §0.4). A generation nudge (a QUESTION, never an assertion),
-/// not a hard gate: the "Why?" reveal is still one tap away.
-class _SelfExplainBox extends StatelessWidget {
-  const _SelfExplainBox({required this.prompt});
-
-  final String prompt;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final emerald =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: colors.primaryContainer,
-        borderRadius: AppRadius.smRadius,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.edit_rounded, size: 15, color: emerald),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: AppTypography.bodySmall
-                    .copyWith(color: colors.onPrimaryContainer),
-                children: [
-                  TextSpan(
-                    text: context.l10n.solutionYourTurn,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  TextSpan(text: prompt),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The expandable reasoning for a step: the "why" plus the deeper (Pro) fields —
-/// the named rule, the plain explanation, and the common slip at this step —
-/// each shown only when present, so a v1 / lite step shows just the "why".
-/// (An empty-detail step renders no stray blank line — a benign layout delta
-/// from the pre-Phase-3 offline-mock rendering; the real solver always sets why.)
-class _StepDetail extends StatelessWidget {
-  const _StepDetail({required this.step});
-
-  final SolutionStep step;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final rule = step.rule;
-    final explanation = step.explanation;
-    final mistake = step.commonMistake;
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (step.detail.isNotEmpty)
-            Text(
-              step.detail,
-              style: AppTypography.bodySmall
-                  .copyWith(color: colors.textSecondary),
-            ),
-          if (rule != null && rule.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                borderRadius: AppRadius.smRadius,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.straighten_rounded,
-                      size: 13, color: colors.onPrimaryContainer),
-                  const SizedBox(width: AppSpacing.xxs),
-                  Flexible(
-                    child: Text(
-                      rule,
-                      style: AppTypography.caption.copyWith(
-                        color: colors.onPrimaryContainer,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          if (explanation != null && explanation.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              explanation,
-              style: AppTypography.caption.copyWith(color: colors.textSecondary),
-            ),
-          ],
-          if (mistake != null && mistake.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: colors.warningContainer,
-                borderRadius: AppRadius.smRadius,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.warning_amber_rounded,
-                      size: 14, color: colors.onWarningContainer),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      mistake,
-                      style: AppTypography.caption
-                          .copyWith(color: colors.onWarningContainer),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// The flagship Visual Learning entry — a premium, gold-accented card that
-/// out-weighs the answer banner, nudging students toward the animated
-/// walkthrough (understand the solution, don't just read the final line). Taps
-/// jump to the Visual tab, where free users meet the unlock and Pro users the
-/// full experience — monetization is unchanged.
-class _VisualLearningHero extends StatelessWidget {
-  const _VisualLearningHero({required this.onTap});
+/// Post-lesson invitation into the animated walkthrough.
+class _WatchItAnimateRow extends StatelessWidget {
+  const _WatchItAnimateRow({required this.onTap});
 
   final VoidCallback onTap;
 
@@ -847,14 +409,14 @@ class _VisualLearningHero extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: AppColors.white.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.auto_awesome_rounded,
-                    size: 24, color: AppColors.goldLight),
+                    size: 22, color: AppColors.goldLight),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -862,29 +424,22 @@ class _VisualLearningHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.resultVisualLearningLabel,
-                      style: AppTypography.label
-                          .copyWith(color: AppColors.goldLight),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      context.l10n.solutionVisualHeroTitle,
-                      style: AppTypography.headingSmall
-                          .copyWith(color: AppColors.white),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      context.l10n.solutionVisualHeroSubtitle,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.white.withValues(alpha: 0.78),
+                      context.l10n.solutionWatchItAnimate,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w700,
                       ),
+                    ),
+                    Text(
+                      context.l10n.solutionWatchItAnimateSubtitle,
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.goldLight),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.arrow_forward_rounded,
-                  size: 22, color: AppColors.white),
+              const Icon(Icons.keyboard_arrow_right_rounded,
+                  size: 20, color: AppColors.white),
             ],
           ),
         ),
@@ -893,17 +448,33 @@ class _VisualLearningHero extends StatelessWidget {
   }
 }
 
+/// §7 — the tutor hand-off, offered only after the lesson is done.
+class _StillConfused extends StatelessWidget {
+  const _StillConfused({required this.onAsk});
 
-class _VerifyCard extends StatelessWidget {
-  const _VerifyCard({required this.text});
-
-  final String text;
+  final VoidCallback onAsk;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: _railIndent),
-      child: MatheasyBubble(text: text),
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.solutionStillConfused,
+          style: AppTypography.title.copyWith(color: colors.textPrimary),
+        ),
+        Text(
+          context.l10n.solutionStillConfusedBody,
+          style: AppTypography.caption.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        SecondaryButton(
+          label: context.l10n.teachingAskNumi,
+          icon: Icons.forum_rounded,
+          onPressed: onAsk,
+        ),
+      ],
     );
   }
 }

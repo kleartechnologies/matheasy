@@ -16,13 +16,14 @@ import '../../../core/theme/app_typography.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
 import '../../progress/application/stats_controller.dart';
-import '../../result/presentation/widgets/math_text.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../application/math_field_controller.dart';
 import '../application/scanner_service.dart';
 import '../domain/detected_equation.dart';
 import '../domain/math_input.dart';
 import '../domain/scan_source.dart';
+import 'widgets/math_field.dart';
 import 'widgets/math_keyboard.dart';
 
 /// Arguments passed as the route `extra` for [ManualInputScreen].
@@ -60,101 +61,54 @@ class ManualInputScreen extends ConsumerStatefulWidget {
 }
 
 class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focus = FocusNode();
+  late final MathFieldController _controller;
   String? _error;
   bool _submitting = false;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onChanged);
-    // Pre-fill with the recognized LaTeX when editing an OCR result, caret at end.
-    final initial = widget.args?.initialLatex?.trim();
-    if (initial != null && initial.isNotEmpty) {
-      _controller.value = TextEditingValue(
-        text: initial,
-        selection: TextSelection.collapsed(offset: initial.length),
-      );
-    }
-    // Focus the field so the caret shows; readOnly keeps the OS keyboard away.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focus.requestFocus();
-    });
+    // Pre-fill with the recognized LaTeX when editing an OCR result: the parser
+    // turns it back into an editable tree, so the user corrects a fraction by
+    // tapping into its numerator rather than by editing backslashes.
+    _controller = MathFieldController(initialLatex: widget.args?.initialLatex)
+      ..addListener(_onChanged);
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onChanged);
     _controller.dispose();
-    _focus.dispose();
     super.dispose();
   }
 
   void _onChanged() {
-    setState(() {
-      if (_error != null) _error = null; // clear the error as they edit
-    });
-  }
-
-  // ---- Editing (driven by the math keyboard) --------------------------------
-
-  void _insert(String latex, int caretBack) {
-    final value = _controller.value;
-    final sel = value.selection;
-    final start = sel.isValid ? sel.start : value.text.length;
-    final end = sel.isValid ? sel.end : value.text.length;
-    final text = value.text.replaceRange(start, end, latex);
-    final caret = (start + latex.length - caretBack).clamp(0, text.length);
-    _controller.value = TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: caret),
-    );
-    if (!_focus.hasFocus) _focus.requestFocus();
-  }
-
-  void _backspace() {
-    final value = _controller.value;
-    final sel = value.selection;
-    if (!sel.isValid) return;
-    if (sel.start != sel.end) {
-      final text = value.text.replaceRange(sel.start, sel.end, '');
-      _controller.value = TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: sel.start),
-      );
-      return;
-    }
-    final caret = sel.start;
-    if (caret <= 0) return;
-    // Delete a trailing LaTeX command (\sin, \theta, \sqrt…) as one unit.
-    final before = value.text.substring(0, caret);
-    final match = RegExp(r'\\[a-zA-Z]+$').firstMatch(before);
-    final from = match != null ? match.start : caret - 1;
-    final text = value.text.replaceRange(from, caret, '');
-    _controller.value = TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: from),
-    );
-  }
-
-  void _move(int delta) {
-    final value = _controller.value;
-    final sel = value.selection;
-    final base = sel.isValid ? sel.baseOffset : value.text.length;
-    final pos = (base + delta).clamp(0, value.text.length);
-    _controller.selection = TextSelection.collapsed(offset: pos);
-    if (!_focus.hasFocus) _focus.requestFocus();
+    if (_error == null) return; // the field repaints itself
+    setState(() => _error = null); // clear the error as they edit
   }
 
   // ---- Submit ---------------------------------------------------------------
+
+  /// Blocks the two mistakes the structured editor can produce: nothing typed,
+  /// and a structure whose dashed boxes are still empty. When a box is empty
+  /// the caret is moved there, so the fix is one tap of a key away.
+  String? _validate(String latex) {
+    final error = MathInput.validateExpression(
+      latex,
+      hasEmptySlot: _controller.hasEmptySlot,
+    );
+    if (error != null && _controller.hasEmptySlot) {
+      _controller.moveToNextEmptySlot();
+    }
+    return error;
+  }
 
   /// Edit mode (§3): validate and return the corrected LaTeX to the caller (the
   /// scanner). No recognize, no solve, no metering — the scan was already
   /// charged at recognition, so the scanner re-solves it via that same scan.
   void _useCorrected() {
-    final latex = _controller.text.trim();
-    final error = MathInput.validate(latex);
+    final latex = _controller.latex.trim();
+    final error = _validate(latex);
     if (error != null) {
       setState(() => _error = error);
       return;
@@ -165,8 +119,8 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
   /// Standalone typing: wrap the LaTeX and run it through the full scan pipeline
   /// (identical downstream treatment to a scan).
   Future<void> _solve() async {
-    final latex = _controller.text.trim();
-    final error = MathInput.validate(latex);
+    final latex = _controller.latex.trim();
+    final error = _validate(latex);
     if (error != null) {
       setState(() => _error = error);
       return;
@@ -221,7 +175,6 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final editMode = widget.args?.editMode ?? false;
-    final canSolve = _controller.text.trim().isNotEmpty && !_submitting;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -254,60 +207,60 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
               ),
             ),
           ),
+          // The keyboard watches the controller itself for whether there is
+          // anything to submit, so typing repaints one button rather than the
+          // whole screen.
           MathKeyboard(
-            onInsert: _insert,
-            onBackspace: _backspace,
-            onMoveLeft: () => _move(-1),
-            onMoveRight: () => _move(1),
+            controller: _controller,
             solveLabel: editMode ? context.l10n.manualUseThis : context.l10n.scanSolve,
-            onSolve: canSolve
-                ? (editMode ? _useCorrected : () => unawaited(_solve()))
-                : null,
+            busy: _submitting,
+            onSolve: editMode ? _useCorrected : () => unawaited(_solve()),
           ),
         ],
       ),
     );
   }
 
+  /// The empty state, shown above the field until there is something in it.
+  /// Once the user starts typing it gets out of the way — the expression itself
+  /// is the preview now, drawn full-size in the field below.
   Widget _preview(AppSemanticColors colors) {
-    final latex = _controller.text.trim();
-    if (latex.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.functions_rounded, size: 44, color: colors.textMuted),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              context.l10n.manualPreviewEmpty,
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'e.g.  2x + 5 = 13',
-              style: AppTypography.mono.copyWith(
-                color: colors.textMuted,
-                letterSpacing: 0.5,
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        if (!_controller.isEmpty) return const SizedBox.shrink();
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.functions_rounded, size: 44, color: colors.textMuted),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                context.l10n.manualPreviewEmpty,
+                textAlign: TextAlign.center,
+                style:
+                    AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Center(
-      child: MathText(
-        latex,
-        style: AppTypography.displaySmall.copyWith(color: colors.textPrimary),
-      ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'e.g.  2x + 5 = 13',
+                style: AppTypography.mono.copyWith(
+                  color: colors.textMuted,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _field(AppSemanticColors colors) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -317,30 +270,11 @@ class _ManualInputScreenState extends ConsumerState<ManualInputScreen> {
           width: _error != null ? 1.5 : 1,
         ),
       ),
-      child: TextField(
+      // The structured editor: the expression is typeset as you build it, and
+      // every structure still missing a value shows a dashed box you can tap.
+      child: MathField(
         controller: _controller,
-        focusNode: _focus,
-        readOnly: true, // built only via the math keyboard — no OS keyboard
-        showCursor: true,
-        keyboardType: TextInputType.none,
-        // Theme-aware emerald: the caret is load-bearing here (the keyboard has
-        // explicit move-left/right keys), and a fixed primaryAction would sit at
-        // ~2:1 on the dark surface.
-        cursorColor: colors.onPrimaryContainer,
-        style: AppTypography.mono.copyWith(
-          fontSize: 16,
-          height: 1.4,
-          letterSpacing: 0.2,
-          color: colors.textPrimary,
-        ),
-        decoration: InputDecoration.collapsed(
-          hintText: r'Tap keys to type · e.g. 2x+5=13',
-          hintStyle: AppTypography.mono.copyWith(
-            fontSize: 14,
-            letterSpacing: 0.2,
-            color: colors.textMuted,
-          ),
-        ),
+        hint: 'Tap keys to type',
       ),
     );
   }

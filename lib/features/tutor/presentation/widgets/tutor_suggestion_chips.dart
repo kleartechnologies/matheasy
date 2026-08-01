@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/tutor_models.dart';
+import '../tutor_copy.dart';
 
-/// The interactive quick-reply chips Matheasy offers under a response ("Explain
-/// Simpler", "Give Example", …). Tapping one sends its message back into the
+/// The interactive quick-reply chips Numi offers under a response ("Explain
+/// simpler", "Give an example", …). Tapping one sends its message back into the
 /// conversation. Wraps to multiple lines on narrow screens.
 class TutorSuggestionChips extends StatelessWidget {
   const TutorSuggestionChips({
@@ -26,7 +27,7 @@ class TutorSuggestionChips extends StatelessWidget {
       children: [
         for (final action in actions)
           FeatureChip(
-            label: action.label,
+            label: TutorCopy.label(context, action),
             icon: action.icon,
             onTap: () => onSelected(action),
           ),

@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/extensions/context_extensions.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/visual_models.dart';
 
@@ -26,6 +28,26 @@ class ConceptPalette {
 
   /// Colour for on-canvas labels (angle values, side lengths, vertex names).
   final Color textColor;
+
+  /// The app's drawing palette for the ambient theme.
+  ///
+  /// One definition, so a concept drawn in the Visual tab and the same concept
+  /// drawn beside a tutor message are recognisably the same picture.
+  factory ConceptPalette.of(BuildContext context) {
+    final colors = context.colors;
+    // The drawn concept is non-text graphics on a card: it needs the emerald
+    // that clears 3:1 on this theme's surface, which the logo tone does not.
+    final stroke =
+        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    return ConceptPalette(
+      grid: colors.divider,
+      axis: colors.textMuted,
+      stroke: stroke,
+      fill: stroke.withValues(alpha: 0.16),
+      accent: AppColors.warning,
+      textColor: colors.textPrimary,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

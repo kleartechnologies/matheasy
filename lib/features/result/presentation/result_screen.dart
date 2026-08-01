@@ -35,15 +35,13 @@ import '../domain/geometry_models.dart';
 import '../domain/result_models.dart';
 import '../domain/teaching_models.dart';
 import '../domain/visual_models.dart';
-import 'tabs/explain_tab.dart';
-import 'tabs/methods_tab.dart';
 import 'tabs/practice_tab.dart';
 import 'tabs/solution_tab.dart';
 import 'tabs/visual_tab.dart';
-import 'widgets/result_action_bar.dart';
+import 'widgets/answer_card.dart';
+import 'widgets/problem_card.dart';
 import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
-import 'widgets/result_header.dart';
 import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
 import 'widgets/teaching/teaching_cards.dart';
@@ -64,27 +62,21 @@ class ResultScreen extends ConsumerStatefulWidget {
 }
 
 class _ResultScreenState extends ConsumerState<ResultScreen> {
-  static const List<String> _tabLabels = [
-    'Solution',
-    'Explain',
-    'Methods',
-    'Practice',
-    'Visual',
-  ];
+  /// V3 — three tabs, down from five. Explain and Methods were never
+  /// destinations a student chose on purpose; they are expandable sections
+  /// inside Solution's "Learn more" sheet now.
+  static const int _tabCount = 3;
 
   /// The localized label for tab [i] — the result tabs follow the learner's
   /// language (the math inside each tab stays universal).
   String _tabLabel(BuildContext context, int i) => switch (i) {
         0 => context.l10n.resultTabSolution,
-        1 => context.l10n.resultTabExplain,
-        2 => context.l10n.resultTabMethods,
-        3 => context.l10n.resultTabPractice,
-        _ => context.l10n.resultTabVisual,
+        1 => context.l10n.resultTabVisual,
+        _ => context.l10n.resultTabPractice,
       };
 
-  /// The Visual tab's position — appended last so the practice jump in
-  /// [ResultActionBar] (`_selectTab(3)`) keeps its index.
-  static const int _visualTabIndex = 4;
+  static const int _visualTabIndex = 1;
+  static const int _practiceTabIndex = 2;
 
   bool _saved = false;
 
@@ -370,13 +362,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
 
     final async = ref.watch(resultControllerProvider(equation));
-    final result = switch (async) {
-      AsyncData(:final value) => value,
-      _ => null,
-    };
 
     return Scaffold(
-      extendBody: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
@@ -385,14 +372,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(context.l10n.resultTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.ios_share_rounded),
-            tooltip: context.l10n.resultShare,
-            onPressed: () => _toast(context.l10n.resultSharingSoon),
-          ),
-        ],
       ),
+      // V3 — no pinned action bar. Save/share/copy live on the answer card, Numi
+      // waits until the lesson is over, and practice is the reward at the end:
+      // nothing may float over the learner mid-step.
       body: async.when(
         loading: () => LoadingState(
           message: context.l10n.resultSolvingMessage,
@@ -401,22 +384,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         error: (error, _) => _buildSolveError(error),
         data: (data) => _buildContent(data),
       ),
-      bottomNavigationBar: result == null || !result.verified
-          ? null
-          : ResultActionBar(
-              saved: _saved,
-              onAskMatheasy: () => _askMatheasy(result),
-              onGeneratePractice: () {
-                _selectTab(3);
-                _toast(context.l10n.resultPracticeReady);
-              },
-              onToggleSave: () {
-                setState(() => _saved = !_saved);
-                _toast(_saved
-                    ? context.l10n.resultSavedToLibrary
-                    : context.l10n.resultRemoved);
-              },
-            ),
     );
   }
 
@@ -597,30 +564,43 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
-    final tabIndex = ref.watch(resultTabProvider);
+    // The remembered tab is keepAlive and may hold a pre-V3 index (Explain,
+    // Methods) from an earlier session — clamp it into the new three.
+    final tabIndex = ref.watch(resultTabProvider).clamp(0, _tabCount - 1);
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenH,
         AppSpacing.md,
         AppSpacing.screenH,
-        AppSpacing.tabClearance, // clears the floating action bar
+        AppSpacing.xxxl,
       ),
       children: [
         scanImage,
-        ResultHeader(
+        // §1 — what we read. Nothing else.
+        ProblemCard(
           result: result,
-          // "Play step-by-step" now jumps to the Pro Visual tab — the animated
-          // walkthrough lives there (free users meet the unlock), so Play Solution
-          // is a single, Pro experience rather than a duplicate free overlay.
-          onPlay: () => _selectTab(_visualTabIndex),
           onRescan: () => context.push(AppRoutes.scan),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // §2 — the answer, and the three things you do with an answer.
+        AnswerCard(
+          result: result,
+          saved: _saved,
+          onToggleSave: () {
+            setState(() => _saved = !_saved);
+            _toast(_saved
+                ? context.l10n.resultSavedToLibrary
+                : context.l10n.resultRemoved);
+          },
+          onShare: () => _toast(context.l10n.resultSharingSoon),
+          onCopied: () => _toast(context.l10n.resultCopied),
         ),
         const SizedBox(height: AppSpacing.lg),
         SegmentedControl(
           selectedIndex: tabIndex,
           onChanged: _selectTab,
           items: [
-            for (var i = 0; i < _tabLabels.length; i++)
+            for (var i = 0; i < _tabCount; i++)
               SegmentItem(
                 label: _tabLabel(context, i),
                 // The Pro star on the Visual segment (the "Visual ⭐" tab).
@@ -650,35 +630,30 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   Widget _buildTab(int index, ResultData result) {
     switch (index) {
-      case 1:
-        return ExplainTab(
-          explanations: result.explanations,
-          onAskMatheasy: () => _askMatheasy(result),
-        );
-      case 2:
-        return MethodsTab(methods: result.methods);
-      case 3:
-        return PracticeTab(
-          questions: result.practice,
-          onGenerateMore: () => _practice(result),
-          onOpenQuestion: () => _practice(result),
-        );
       case _visualTabIndex:
         return VisualTab(
           equation: result.equation,
           result: result,
           onUnlock: _openVisualPaywall,
-          onOpenExplain: () => _selectTab(1),
+          // Explain is no longer a tab — the three voices live in the Solution
+          // tab's "Learn more" sheet, so this hands back to Solution.
+          onOpenExplain: () => _selectTab(0),
           onAskMatheasy: (visual, stepIndex) =>
               _askMatheasyAboutStep(result, visual, stepIndex),
+        );
+      case _practiceTabIndex:
+        return PracticeTab(
+          questions: result.practice,
+          onGenerateMore: () => _practice(result),
+          onOpenQuestion: () => _practice(result),
         );
       case 0:
       default:
         return SolutionTab(
           result: result,
           onOpenVisual: () => _selectTab(_visualTabIndex),
-          onOpenMethods: () => _selectTab(2),
           onAskMatheasy: () => _askMatheasy(result),
+          onPracticeTopic: () => _practice(result),
           // A practice-ladder rung re-enters the solve pipeline as a fresh
           // problem (it ships as a PROBLEM, never an answer) via the editor.
           onAttemptPractice: (item) => context.push(

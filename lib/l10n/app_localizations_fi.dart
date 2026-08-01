@@ -139,7 +139,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get tutorTitle => 'AI-tuutori';
 
   @override
-  String get tutorAsk => 'Kysy Matheasyltä';
+  String get tutorAsk => 'Kysy Numiltä';
 
   @override
   String get tutorHint => 'Anna minulle vihje';
@@ -187,8 +187,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get practiceVisualNothing => 'Ei vielä mitään visualisoitavaa.';
 
   @override
-  String get practiceVisualLoading =>
-      'Matheasy piirtää visuaalista läpikäyntiäsi…';
+  String get practiceVisualLoading => 'Numi piirtää visuaalista läpikäyntiäsi…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +242,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get practiceRecommendedForYou => 'Suositeltu sinulle';
 
   @override
-  String get practiceAskMatheasyWhy => 'Kysy Matheasyltä miksi';
+  String get practiceAskMatheasyWhy => 'Kysy Numiltä miksi';
 
   @override
   String get practiceShowVisually => 'Näytä minulle visuaalisesti';
@@ -297,14 +296,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Äänikeskustelu tulee pian.';
 
   @override
-  String get tutorEmptyTitle => 'Kysy Matheasyltä mitä tahansa';
+  String get tutorEmptyTitle => 'Kysy Numiltä mitä tahansa';
 
   @override
   String get tutorEmptyMessage =>
       'Ota kuva tai kirjoita kysymys ja saat selkeän, askel askeleelta etenevän selityksen.';
 
   @override
-  String get tutorTyping => 'Matheasy kirjoittaa';
+  String get tutorTyping => 'Numi kirjoittaa';
 
   @override
   String get tutorTagline => 'Tekoälypohjainen matematiikan tuutorisi';
@@ -316,7 +315,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get tutorHeroSubtitle => 'Kysy minulta mitä tahansa matematiikasta.';
 
   @override
-  String get tutorAskMatheasy => 'Kysy Matheasyltä';
+  String get tutorAskMatheasy => 'Kysy Numiltä';
 
   @override
   String get tutorExploreTopics => 'Tutustu aiheisiin';
@@ -334,7 +333,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get tutorUploadQuestion => 'Lataa kysymys';
 
   @override
-  String get tutorInputHint => 'Kysy Matheasyltä mitä tahansa…';
+  String get tutorInputHint => 'Kysy Numiltä mitä tahansa…';
 
   @override
   String get tutorVoiceInput => 'Äänisyöte';
@@ -356,6 +355,153 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Ei ihan — mutta lähellä!';
+
+  @override
+  String get tutorModePrompt => 'Miten haluat oppia tämän?';
+
+  @override
+  String get tutorModeChange => 'Vaihda oppimistapaa';
+
+  @override
+  String get tutorModeHint => 'Vain vihje';
+
+  @override
+  String get tutorModeHintDetail =>
+      'Pieni tönäisy oikeaan suuntaan — sinä ratkaiset.';
+
+  @override
+  String get tutorModeSolveTogether => 'Ratkaistaan yhdessä';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Askel kerrallaan, sinä ohjaat.';
+
+  @override
+  String get tutorModeTeachMe => 'Opeta minulle';
+
+  @override
+  String get tutorModeTeachMeDetail =>
+      'Aloitetaan ideasta, esimerkkien kanssa.';
+
+  @override
+  String get tutorModeShowSolution => 'Näytä koko ratkaisu';
+
+  @override
+  String get tutorModeShowSolutionDetail => 'Koko ratkaisu selitettynä.';
+
+  @override
+  String get tutorModeQuizMe => 'Kysele minulta';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Minä kysyn, sinä vastaat, minä annan palautetta.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Vaihdettiin tilaan $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Selitä yksinkertaisemmin';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Voitko selittää sen yksinkertaisemmin?';
+
+  @override
+  String get tutorActionGiveExample => 'Anna esimerkki';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Voitko antaa minulle esimerkin?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Miksi se toimii?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Miksi se toimii?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Toinen tapa';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => 'Onko tähän toista tapaa?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Kysele minulta';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Kysele minulta tästä.';
+
+  @override
+  String get tutorActionPracticeMore => 'Harjoittele';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Anna minulle harjoitustehtävä.';
+
+  @override
+  String get tutorActionGiveHint => 'Anna vihje';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Anna minulle vihje.';
+
+  @override
+  String get tutorActionNextStep => 'Seuraava askel';
+
+  @override
+  String get tutorActionNextStepMessage => 'Mikä on seuraava askel?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Tarkista työni';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => 'Voitko tarkistaa laskuni?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Yleiset virheet';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Mitä virheitä minun kannattaa varoa tässä?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Helpompi';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Anna minulle helpompi tehtävä tästä aiheesta.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Samanlainen';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Anna minulle samanlainen tehtävä kokeiltavaksi.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Vaikeampi';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Anna minulle vaikeampi tehtävä tästä aiheesta.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Haasta minut';
+
+  @override
+  String get tutorActionPracticeChallengeMessage =>
+      'Anna minulle haastetehtävä.';
+
+  @override
+  String get tutorActionShowSolution => 'Näytä ratkaisu';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Näytä minulle koko ratkaisu.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'En ymmärrä';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'En ymmärrä — voitko selittää sen toisella tavalla?';
 
   @override
   String get onboardingGetStarted => 'Aloita';
@@ -794,7 +940,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get progressSeeAll => 'Näytä kaikki';
 
   @override
-  String get progressMatheasySays => 'Matheasy sanoo';
+  String get progressMatheasySays => 'Numi sanoo';
 
   @override
   String get progressRecentActivity => 'Viimeisin toiminta';
@@ -1055,14 +1201,13 @@ class AppLocalizationsFi extends AppLocalizations {
       'Tälle ei ole kirjallista selitystä — mutta voin käydä sen kanssasi läpi askel askeleelta.';
 
   @override
-  String get resultAskMatheasy => 'Kysy Matheasyltä';
+  String get resultAskMatheasy => 'Kysy Numiltä';
 
   @override
-  String get explainStillStuck => 'Vieläkö jumissa? Kysy Matheasyltä';
+  String get explainStillStuck => 'Vieläkö jumissa? Kysy Numiltä';
 
   @override
-  String get visualLoadingMessage =>
-      'Matheasy piirtää visuaalista läpikäyntiäsi…';
+  String get visualLoadingMessage => 'Numi piirtää visuaalista läpikäyntiäsi…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1224,7 +1369,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get visualKeyIdeas => 'KESKEISET IDEAT';
 
   @override
-  String get visualAskAboutStep => 'Kysy Matheasyltä tästä vaiheesta';
+  String get visualAskAboutStep => 'Kysy Numiltä tästä vaiheesta';
 
   @override
   String get visualReplay => 'Toista uudelleen';
@@ -1552,7 +1697,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Virheetön suoritus aiheessa $topic. Matheasy on vaikuttunut!';
+    return 'Virheetön suoritus aiheessa $topic. Numi on vaikuttunut!';
   }
 
   @override
@@ -1803,4 +1948,143 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometria';
+
+  @override
+  String get resultStartLearning => 'Aloita oppiminen';
+
+  @override
+  String get resultStartLearningHint => 'Käy se läpi askel kerrallaan';
+
+  @override
+  String get resultLearnMore => 'Lue lisää';
+
+  @override
+  String get resultLearnMoreSubtitle =>
+      'Teoria, sanasto, menetelmät ja kuvaaja';
+
+  @override
+  String get resultCopy => 'Kopioi';
+
+  @override
+  String get resultCopied => 'Vastaus kopioitu';
+
+  @override
+  String get resultSave => 'Tallenna';
+
+  @override
+  String get resultSavedShort => 'Tallennettu';
+
+  @override
+  String get solutionWhyThisWorks => 'Miksi tämä toimii';
+
+  @override
+  String get solutionStepBack => 'Takaisin';
+
+  @override
+  String get solutionFinishLesson => 'Valmis';
+
+  @override
+  String get solutionLessonComplete => 'Oppitunti suoritettu';
+
+  @override
+  String get solutionLessonCompleteSubtitle => 'Teit jokaisen askeleen itse.';
+
+  @override
+  String get solutionReplayLesson => 'Katso oppitunti uudelleen';
+
+  @override
+  String get solutionMethodUsed => 'Käytetty menetelmä';
+
+  @override
+  String get solutionStillConfused => 'Vieläkö epäselvää?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi voi käydä kanssasi läpi minkä tahansa kohdan tästä tehtävästä.';
+
+  @override
+  String get solutionPracticeTitle => 'Kokeile nyt itse';
+
+  @override
+  String get solutionPracticeSubtitle =>
+      'Harjoittelu saa asian jäämään mieleen.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Harjoittele tätä aihetta';
+
+  @override
+  String get solutionWatchItAnimate => 'Katso animaationa';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Näe jokainen askel liikkeessä, ei vain paikallaan.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Askel $step/$total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Ratkaisun askeleet';
+
+  @override
+  String get solutionTapStepHint =>
+      'Napauta mitä tahansa askelta nähdäksesi, miten se toimii';
+
+  @override
+  String get solutionAnswerRow => 'Ratkaisu';
+
+  @override
+  String get solutionExplainHow => 'Selitä miten';
+
+  @override
+  String get learnMoreTitle => 'Lue lisää';
+
+  @override
+  String get learnMoreAllSteps => 'Kaikki askeleet';
+
+  @override
+  String get learnMoreGlossary => 'Sanasto';
+
+  @override
+  String get learnMoreExplanations => 'Selitetty kolmella tavalla';
+
+  @override
+  String get learnMoreCompareMethods => 'Vertaa menetelmiä';
+
+  @override
+  String get learnMoreUseThisMethod => 'Ratkaise tällä menetelmällä';
+
+  @override
+  String get learnMoreNothing => 'Tähän tehtävään ei ole vielä mitään lisää.';
+
+  @override
+  String get tutorImageSheetTitle => 'Lisää kuva';
+
+  @override
+  String get tutorImageAttached => 'Lähettämäsi kuva';
+
+  @override
+  String get tutorImageAskProblem => 'Voitko auttaa minua tässä tehtävässä?';
+
+  @override
+  String get tutorImageAskWork => 'Voitko tarkistaa laskuni?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi luki tehtävän kuvastasi';
+
+  @override
+  String get tutorImageSawWork => 'Numi luki laskusi';
+
+  @override
+  String get tutorImageNotMath =>
+      'En löydä kuvasta matematiikkaa. Lähetä minulle tehtävä tai kuva laskuistasi, niin katson sen. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'En saanut siitä selvää. Yritä uudelleen paremmassa valossa niin, että tehtävä täyttää kuvan — tai kirjoita se, niin autan heti.';
+
+  @override
+  String get tutorImageFailed =>
+      'En pystynyt lukemaan kuvaa juuri nyt. Tarkista yhteytesi ja yritä uudelleen.';
 }

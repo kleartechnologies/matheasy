@@ -139,7 +139,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tutorTitle => 'Tutor IA';
 
   @override
-  String get tutorAsk => 'Chiedi a Matheasy';
+  String get tutorAsk => 'Chiedi a Numi';
 
   @override
   String get tutorHint => 'Dammi un suggerimento';
@@ -188,7 +188,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get practiceVisualLoading =>
-      'Matheasy sta disegnando il tuo percorso visivo…';
+      'Numi sta disegnando il tuo percorso visivo…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +243,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get practiceRecommendedForYou => 'Consigliato per te';
 
   @override
-  String get practiceAskMatheasyWhy => 'Chiedi a Matheasy perché';
+  String get practiceAskMatheasyWhy => 'Chiedi a Numi perché';
 
   @override
   String get practiceShowVisually => 'Mostramelo visivamente';
@@ -299,14 +299,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tutorVoiceChatSoon => 'La chat vocale arriverà presto.';
 
   @override
-  String get tutorEmptyTitle => 'Chiedi qualsiasi cosa a Matheasy';
+  String get tutorEmptyTitle => 'Chiedi qualsiasi cosa a Numi';
 
   @override
   String get tutorEmptyMessage =>
       'Scatta una foto o scrivi una domanda e ottieni una spiegazione chiara, passo dopo passo.';
 
   @override
-  String get tutorTyping => 'Matheasy sta scrivendo';
+  String get tutorTyping => 'Numi sta scrivendo';
 
   @override
   String get tutorTagline => 'Il tuo tutor IA di matematica';
@@ -318,7 +318,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tutorHeroSubtitle => 'Chiedimi qualsiasi cosa sulla matematica.';
 
   @override
-  String get tutorAskMatheasy => 'Chiedi a Matheasy';
+  String get tutorAskMatheasy => 'Chiedi a Numi';
 
   @override
   String get tutorExploreTopics => 'Esplora argomenti';
@@ -336,7 +336,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tutorUploadQuestion => 'Carica una domanda';
 
   @override
-  String get tutorInputHint => 'Chiedi qualsiasi cosa a Matheasy…';
+  String get tutorInputHint => 'Chiedi qualsiasi cosa a Numi…';
 
   @override
   String get tutorVoiceInput => 'Input vocale';
@@ -358,6 +358,157 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Non proprio — ma ci sei quasi!';
+
+  @override
+  String get tutorModePrompt => 'Come vuoi imparare questo?';
+
+  @override
+  String get tutorModeChange => 'Cambia il modo di imparare';
+
+  @override
+  String get tutorModeHint => 'Solo un indizio';
+
+  @override
+  String get tutorModeHintDetail =>
+      'Una spinta nella direzione giusta: lo risolvi tu.';
+
+  @override
+  String get tutorModeSolveTogether => 'Risolviamo insieme';
+
+  @override
+  String get tutorModeSolveTogetherDetail =>
+      'Un passo alla volta, con te alla guida.';
+
+  @override
+  String get tutorModeTeachMe => 'Insegnamelo';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Partiamo dall\'idea, con esempi.';
+
+  @override
+  String get tutorModeShowSolution => 'Mostra la soluzione completa';
+
+  @override
+  String get tutorModeShowSolutionDetail =>
+      'Tutta la soluzione svolta e spiegata.';
+
+  @override
+  String get tutorModeQuizMe => 'Mettimi alla prova';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Io chiedo, tu rispondi, io ti do un riscontro.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'Passato a $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Spiega più semplice';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Puoi spiegarlo più semplicemente?';
+
+  @override
+  String get tutorActionGiveExample => 'Fai un esempio';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Mi fai un esempio?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Perché funziona?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Perché funziona?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Un altro metodo';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage =>
+      'C\'è un altro modo per farlo?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Mettimi alla prova';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Fammi delle domande su questo.';
+
+  @override
+  String get tutorActionPracticeMore => 'Esercitati';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Dammi un esercizio.';
+
+  @override
+  String get tutorActionGiveHint => 'Dammi un indizio';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Dammi un indizio.';
+
+  @override
+  String get tutorActionNextStep => 'Passo successivo';
+
+  @override
+  String get tutorActionNextStepMessage => 'Qual è il passo successivo?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Controlla il mio lavoro';
+
+  @override
+  String get tutorActionCheckMyWorkMessage =>
+      'Puoi controllare quello che ho fatto?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Errori comuni';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'A quali errori devo fare attenzione qui?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Uno più facile';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Dammi un esercizio più facile come questo.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Uno simile';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Dammi un esercizio simile da provare.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Uno più difficile';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Dammi un esercizio più difficile come questo.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Sfidami';
+
+  @override
+  String get tutorActionPracticeChallengeMessage =>
+      'Dammi un esercizio impegnativo.';
+
+  @override
+  String get tutorActionShowSolution => 'Mostra la soluzione';
+
+  @override
+  String get tutorActionShowSolutionMessage =>
+      'Mostrami la soluzione completa.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Non ho capito';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Non ho capito — puoi spiegarlo in un altro modo?';
 
   @override
   String get onboardingGetStarted => 'Inizia';
@@ -796,7 +947,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get progressSeeAll => 'Vedi tutto';
 
   @override
-  String get progressMatheasySays => 'Matheasy dice';
+  String get progressMatheasySays => 'Numi dice';
 
   @override
   String get progressRecentActivity => 'Attività recente';
@@ -1058,14 +1209,14 @@ class AppLocalizationsIt extends AppLocalizations {
       'Nessuna spiegazione scritta per questo — ma posso guidarti passo dopo passo a voce.';
 
   @override
-  String get resultAskMatheasy => 'Chiedi a Matheasy';
+  String get resultAskMatheasy => 'Chiedi a Numi';
 
   @override
-  String get explainStillStuck => 'Ancora bloccato? Chiedi a Matheasy';
+  String get explainStillStuck => 'Ancora bloccato? Chiedi a Numi';
 
   @override
   String get visualLoadingMessage =>
-      'Matheasy sta disegnando il tuo percorso visivo…';
+      'Numi sta disegnando il tuo percorso visivo…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1227,7 +1378,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get visualKeyIdeas => 'IDEE CHIAVE';
 
   @override
-  String get visualAskAboutStep => 'Chiedi a Matheasy su questo passaggio';
+  String get visualAskAboutStep => 'Chiedi a Numi su questo passaggio';
 
   @override
   String get visualReplay => 'Riproduci di nuovo';
@@ -1555,7 +1706,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Un percorso impeccabile su $topic. Matheasy è impressionato!';
+    return 'Un percorso impeccabile su $topic. Numi è impressionato!';
   }
 
   @override
@@ -1806,4 +1957,143 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometria';
+
+  @override
+  String get resultStartLearning => 'Inizia a imparare';
+
+  @override
+  String get resultStartLearningHint => 'Vai avanti un passo alla volta';
+
+  @override
+  String get resultLearnMore => 'Scopri di più';
+
+  @override
+  String get resultLearnMoreSubtitle =>
+      'Teoria, glossario, metodi e il grafico';
+
+  @override
+  String get resultCopy => 'Copia';
+
+  @override
+  String get resultCopied => 'Risposta copiata';
+
+  @override
+  String get resultSave => 'Salva';
+
+  @override
+  String get resultSavedShort => 'Salvato';
+
+  @override
+  String get solutionWhyThisWorks => 'Perché funziona';
+
+  @override
+  String get solutionStepBack => 'Indietro';
+
+  @override
+  String get solutionFinishLesson => 'Fine';
+
+  @override
+  String get solutionLessonComplete => 'Lezione completata';
+
+  @override
+  String get solutionLessonCompleteSubtitle =>
+      'Hai fatto ogni passaggio con le tue forze.';
+
+  @override
+  String get solutionReplayLesson => 'Rivedi la lezione';
+
+  @override
+  String get solutionMethodUsed => 'Metodo usato';
+
+  @override
+  String get solutionStillConfused => 'Ancora dubbi?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi può spiegarti qualsiasi parte di questo problema.';
+
+  @override
+  String get solutionPracticeTitle => 'Ora prova tu';
+
+  @override
+  String get solutionPracticeSubtitle => 'È esercitandosi che rimane.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Esercitati su questo argomento';
+
+  @override
+  String get solutionWatchItAnimate => 'Guardalo in animazione';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Guarda ogni passo muoversi, non stare solo lì.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Passo $step di $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Passaggi della soluzione';
+
+  @override
+  String get solutionTapStepHint => 'Tocca un passo per vedere come funziona';
+
+  @override
+  String get solutionAnswerRow => 'Soluzione';
+
+  @override
+  String get solutionExplainHow => 'Spiega come';
+
+  @override
+  String get learnMoreTitle => 'Scopri di più';
+
+  @override
+  String get learnMoreAllSteps => 'Tutti i passaggi';
+
+  @override
+  String get learnMoreGlossary => 'Glossario';
+
+  @override
+  String get learnMoreExplanations => 'Spiegato in tre modi';
+
+  @override
+  String get learnMoreCompareMethods => 'Confronta i metodi';
+
+  @override
+  String get learnMoreUseThisMethod => 'Risolvi con questo metodo';
+
+  @override
+  String get learnMoreNothing =>
+      'Per questo problema non c\'è ancora nulla in più.';
+
+  @override
+  String get tutorImageSheetTitle => 'Aggiungi una foto';
+
+  @override
+  String get tutorImageAttached => 'Foto che hai inviato';
+
+  @override
+  String get tutorImageAskProblem => 'Puoi aiutarmi con questo problema?';
+
+  @override
+  String get tutorImageAskWork => 'Puoi controllare i miei passaggi?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi ha letto il problema dalla tua foto';
+
+  @override
+  String get tutorImageSawWork => 'Numi ha letto i tuoi passaggi';
+
+  @override
+  String get tutorImageNotMath =>
+      'Non trovo matematica in quella foto. Mandami un problema o una foto dei tuoi passaggi e ci do un\'occhiata. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Non sono riuscito a leggerlo bene. Riprova con più luce e con il problema che riempie l\'inquadratura — oppure scrivilo e ti aiuto subito.';
+
+  @override
+  String get tutorImageFailed =>
+      'Non sono riuscito a leggere quella foto adesso. Controlla la connessione e riprova.';
 }

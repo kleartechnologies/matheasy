@@ -37,6 +37,7 @@ import 'package:matheasy/features/scan/domain/scan_state.dart';
 import 'package:matheasy/features/scan/presentation/manual_input_screen.dart';
 import 'package:matheasy/features/scan/presentation/scanner_screen.dart';
 import 'package:matheasy/features/scan/presentation/widgets/capture_confirmation.dart';
+import 'package:matheasy/features/scan/presentation/widgets/math_field.dart';
 import 'package:matheasy/features/splash/presentation/splash_screen.dart';
 import 'package:matheasy/features/subscription/application/usage_controller.dart';
 import 'package:matheasy/features/subscription/domain/usage_counts.dart';
@@ -412,8 +413,13 @@ void main() {
       );
       await tester.pump();
 
-      // Pre-filled with the recognized LaTeX (not blank) and in edit mode.
-      expect(find.text(r'2x + 5 = 13'), findsOneWidget);
+      // Pre-filled with the recognized equation (not blank) and in edit mode.
+      // It arrives as a typeset expression tree, so the assertion reads the
+      // field's LaTeX rather than looking for a raw string on screen.
+      expect(
+        tester.widget<MathField>(find.byType(MathField)).controller.latex,
+        '2x+5=13',
+      );
       expect(find.text('Fix the problem'), findsOneWidget);
       expect(find.text('Use this'), findsOneWidget); // not "Solve"
     });
@@ -480,9 +486,10 @@ void main() {
       expect(fraction.type, ResultType.fraction);
     });
 
-    testWidgets('screen solves; steps reveal one at a time (§5)', (tester) async {
+    testWidgets('V3 — the screen opens on problem + answer + one CTA',
+        (tester) async {
       // Keep the default 800 width (no IntrinsicHeight sub-pixel overflow) but
-      // taller, so "Reveal all" is on-screen and tappable.
+      // taller, so the whole opening view is on-screen and tappable.
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -499,23 +506,34 @@ void main() {
       expect(find.text('Matheasy is solving your problem…'), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 600)); // solve delay
+      // §1 the problem, §2 the answer, §3 the single call to action.
       expect(find.text('Linear Equation'), findsOneWidget);
       expect(find.text('FINAL ANSWER'), findsOneWidget);
-      // One-at-a-time (spec §5): the first step shows; a later one is hidden
-      // behind "Next step".
-      expect(find.text('Start with the equation'), findsOneWidget);
+      expect(find.text('Start Learning'), findsOneWidget);
+      // Not one step of working until the learner asks for it.
+      expect(find.text('Start with the equation'), findsNothing);
       expect(find.text('Subtract 5 from both sides'), findsNothing);
-      expect(find.textContaining('Next step'), findsOneWidget);
 
-      // Reveal all → the later step appears.
-      await tester.tap(find.text('Reveal all'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      // §4 the spine — every step listed, the first one open.
+      await tester.tap(find.text('Start Learning'));
+      await tester.pumpAndSettle();
+      expect(find.text('Start with the equation'), findsOneWidget);
       expect(find.text('Subtract 5 from both sides'), findsOneWidget);
+      expect(find.text('Solving steps'), findsOneWidget);
+
+      // Advancing opens the next row; the map itself doesn't move.
+      await tester.tap(find.text('Next step'));
+      await tester.pumpAndSettle();
+      expect(find.text('Subtract 5 from both sides'), findsOneWidget);
+      expect(find.text('Start with the equation'), findsOneWidget);
     });
 
-    testWidgets('switching to Methods reveals the recommended badge',
+    testWidgets('V3 — three tabs; Explain and Methods are gone from the strip',
         (tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -527,11 +545,17 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
 
-      await tester.tap(find.text('Methods'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      // (The segmented control renders a label plus a semantics twin.)
+      expect(find.text('Solution'), findsWidgets);
+      expect(find.text('Visual'), findsWidgets);
+      expect(find.text('Practice'), findsWidgets);
+      expect(find.text('Explain'), findsNothing);
+      expect(find.text('Methods'), findsNothing);
 
-      expect(find.text('RECOMMENDED'), findsOneWidget);
+      // Method comparison survives — one tap deeper, in "Learn more".
+      await tester.tap(find.text('Learn more'));
+      await tester.pumpAndSettle();
+      expect(find.text('Compare methods'), findsOneWidget);
     });
   });
 }

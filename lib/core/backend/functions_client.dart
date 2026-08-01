@@ -93,13 +93,54 @@ Future<Map<String, dynamic>> callFunction(
     if (value is Map) return Map<String, dynamic>.from(value);
     throw const BackendException('Unexpected response from the server.');
   } on FirebaseFunctionsException catch (error) {
-    final rawDetails = error.details;
-    throw BackendException(
-      error.message ?? 'Something went wrong. Please try again.',
-      code: error.code,
-      details: rawDetails is Map
-          ? Map<String, dynamic>.from(rawDetails)
-          : null,
-    );
+    throw _translate(error);
   }
+}
+
+/// Invokes a *streaming* callable [name], reporting each partial chunk to
+/// [onChunk] and returning the same final `Map` result [callFunction] would.
+///
+/// The server decides what to stream; a function that streams nothing still
+/// returns its result here, so this is a drop-in for [callFunction] wherever
+/// partial output is worth showing. Failures map onto the same
+/// [BackendException] vocabulary — including the ones the SDK reports only once
+/// the stream is already open.
+Future<Map<String, dynamic>> streamFunction(
+  FirebaseFunctions functions,
+  String name,
+  Map<String, dynamic> data, {
+  required void Function(Map<String, dynamic> chunk) onChunk,
+}) async {
+  try {
+    final stream =
+        functions.httpsCallable(name).stream<Object?, Object?>(data);
+    await for (final response in stream) {
+      switch (response) {
+        case Chunk(:final partialData):
+          if (partialData is Map) {
+            onChunk(Map<String, dynamic>.from(partialData));
+          }
+        case Result(:final result):
+          final value = result.data;
+          if (value is Map) return Map<String, dynamic>.from(value);
+          throw const BackendException('Unexpected response from the server.');
+      }
+    }
+    // The stream ended without a final result — the server died mid-answer.
+    throw const BackendException(
+      'The connection dropped before the answer finished.',
+      code: 'unavailable',
+    );
+  } on FirebaseFunctionsException catch (error) {
+    throw _translate(error);
+  }
+}
+
+BackendException _translate(FirebaseFunctionsException error) {
+  final rawDetails = error.details;
+  return BackendException(
+    error.message ?? 'Something went wrong. Please try again.',
+    code: error.code,
+    details: rawDetails is Map ? Map<String, dynamic>.from(rawDetails) : null,
+  );
 }

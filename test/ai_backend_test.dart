@@ -7,9 +7,11 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matheasy/core/backend/functions_client.dart';
+import 'package:matheasy/core/theme/math_semantics.dart';
 import 'package:matheasy/features/result/application/functions_solver_service.dart';
 import 'package:matheasy/features/result/domain/animation_schema.dart';
 import 'package:matheasy/features/result/domain/result_models.dart';
+import 'package:matheasy/features/result/domain/visual_models.dart';
 import 'package:matheasy/features/scan/application/functions_scanner_service.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
@@ -364,6 +366,255 @@ void main() {
       });
       expect(response.text, isNotEmpty);
       expect(response.suggestions, isNotEmpty);
+    });
+
+    // Spec Parts 7–8. The equation has already been checked against the app's
+    // verified maths server-side (`tutorFocus.ts`); the mapper's job is to make
+    // sure nothing that survives can point at the WRONG symbol.
+    group('focus', () {
+      test('maps the equation, caption and highlight roles', () {
+        final response = TutorReplyMapper.toResponse({
+          'reply': 'Look at the middle term.',
+          'focus': {
+            'latex': 'x^2 + 8x + 4 = 0',
+            'caption': 'the coefficient of x',
+            'spans': [
+              {'text': '8x', 'role': 'operation'},
+              {'text': '4', 'role': 'known'},
+            ],
+          },
+        });
+        final focus = response.focus!;
+        expect(focus.latex, 'x^2 + 8x + 4 = 0');
+        expect(focus.caption, 'the coefficient of x');
+        expect(focus.highlights, [
+          const MathHighlight(text: '8x', role: MathRole.operation),
+          const MathHighlight(text: '4', role: MathRole.known),
+        ]);
+        expect(focus.leadRole, MathRole.operation);
+      });
+
+      test('drops a span that is not in the equation', () {
+        final response = TutorReplyMapper.toResponse({
+          'reply': 'x',
+          'focus': {
+            'latex': '2x + 1 = 5',
+            'caption': 'here',
+            'spans': [
+              {'text': '9y', 'role': 'known'},
+              {'text': '2x', 'role': 'unknown'},
+            ],
+          },
+        });
+        expect(response.focus!.highlights, [
+          const MathHighlight(text: '2x', role: MathRole.unknown),
+        ]);
+      });
+
+      test('an unknown role becomes the one colour that cannot mislead', () {
+        final response = TutorReplyMapper.toResponse({
+          'reply': 'x',
+          'focus': {
+            'latex': '2x + 1 = 5',
+            'caption': 'here',
+            'spans': [
+              {'text': '5', 'role': 'correct'},
+            ],
+          },
+        });
+        expect(response.focus!.highlights.single.role, MathRole.aside);
+      });
+
+      // An equation with nothing lit up is just the reply restated.
+      test('drops a focus with nothing left to highlight', () {
+        expect(
+          TutorReplyMapper.toResponse({
+            'reply': 'x',
+            'focus': {
+              'latex': '2x + 1 = 5',
+              'caption': 'here',
+              'spans': [
+                {'text': 'z', 'role': 'known'},
+              ],
+            },
+          }).focus,
+          isNull,
+        );
+        expect(
+          TutorReplyMapper.toResponse({
+            'reply': 'x',
+            'focus': {'latex': '2x + 1 = 5', 'caption': 'here'},
+          }).focus,
+          isNull,
+        );
+      });
+
+      // Spec Part 9. The server derives every number from the verified
+      // equation, so the client's job is only to name the right drawing.
+      test('maps a sketch onto the concept the app already knows how to paint',
+          () {
+        final focus = TutorReplyMapper.toResponse({
+          'reply': 'Three of the four parts.',
+          'focus': {
+            'latex': r'\frac{3}{4}',
+            'caption': 'three quarters',
+            'spans': [
+              {'text': '3', 'role': 'known'},
+            ],
+            'sketch': {
+              'kind': 'fraction',
+              'params': {'numerator': 3, 'denominator': 4},
+            },
+          },
+        }).focus!;
+        expect(focus.sketch!.kind, VisualConceptKind.fractionBar);
+        expect(focus.sketch!.params, {'numerator': 3.0, 'denominator': 4.0});
+        // The caption legends both the equation and the drawing.
+        expect(focus.sketch!.caption, 'three quarters');
+      });
+
+      test('labels the unit circle with its angle, which every language reads',
+          () {
+        final focus = TutorReplyMapper.toResponse({
+          'reply': 'Thirty degrees.',
+          'focus': {
+            'latex': r'\sin(30^\circ)',
+            'caption': 'the angle',
+            'spans': [
+              {'text': '30', 'role': 'known'},
+            ],
+            'sketch': {
+              'kind': 'unitCircle',
+              'params': {'angleDegrees': 30},
+            },
+          },
+        }).focus!;
+        expect(focus.sketch!.labels['angle'], '30°');
+      });
+
+      test('drops a drawing it cannot paint, keeping the equation', () {
+        TutorFocus focusWith(Object? sketch) => TutorReplyMapper.toResponse({
+              'reply': 'x',
+              'focus': {
+                'latex': '2x + 1 = 5',
+                'caption': 'here',
+                'spans': [
+                  {'text': '2x', 'role': 'unknown'},
+                ],
+                'sketch': sketch,
+              },
+            }).focus!;
+
+        // A kind from a newer server than this build.
+        expect(focusWith({'kind': 'hyperbola', 'params': {'a': 1}}).sketch,
+            isNull);
+        expect(focusWith({'kind': 'line'}).sketch, isNull); // no numbers
+        expect(
+          focusWith({
+            'kind': 'line',
+            'params': {'slope': 'two'},
+          }).sketch,
+          isNull,
+        );
+        expect(focusWith('fraction').sketch, isNull);
+        expect(focusWith(null).sketch, isNull);
+        // …and the equation itself still renders in every one of those cases.
+        expect(focusWith(null).latex, '2x + 1 = 5');
+      });
+
+      test('a reply without a focus is unaffected', () {
+        expect(TutorReplyMapper.toResponse({'reply': 'hi'}).focus, isNull);
+        expect(
+          TutorReplyMapper.toResponse({'reply': 'hi', 'focus': 'x = 4'}).focus,
+          isNull,
+        );
+      });
+    });
+  });
+
+  group('FunctionsTutorService streaming (spec Part 18)', () {
+    test('uses the plain callable when nobody is watching the words', () async {
+      var plain = 0;
+      var streamed = 0;
+      final service = FunctionsTutorService(
+        (name, data) async {
+          plain++;
+          return {'reply': 'Done.'};
+        },
+        stream: (name, data, onChunk) async {
+          streamed++;
+          return {'reply': 'Done.'};
+        },
+      );
+
+      final response = await service.reply('hi', history: const []);
+      expect(plain, 1);
+      expect(streamed, 0, reason: 'no onDelta — nothing to stream to');
+      expect(response.text, 'Done.');
+    });
+
+    test('streams chunks to onDelta and returns the final response', () async {
+      final service = FunctionsTutorService(
+        (name, data) async => fail('should have taken the streaming path'),
+        stream: (name, data, onChunk) async {
+          expect(name, 'tutorReply');
+          expect(data['userText'], 'why?');
+          onChunk({'delta': 'Sub'});
+          onChunk({'delta': 'tract '});
+          onChunk({'delta': '5.'});
+          return {
+            'reply': 'Subtract 5.',
+            'suggestions': ['tellMeWhy'],
+          };
+        },
+      );
+
+      final pieces = <String>[];
+      final response = await service.reply(
+        'why?',
+        history: const [],
+        onDelta: pieces.add,
+      );
+      expect(pieces, ['Sub', 'tract ', '5.']);
+      expect(response.text, 'Subtract 5.');
+      expect(response.suggestions, [SuggestionAction.tellMeWhy]);
+    });
+
+    test('ignores chunks that carry no delta text', () async {
+      final service = FunctionsTutorService(
+        (name, data) async => fail('should have taken the streaming path'),
+        stream: (name, data, onChunk) async {
+          onChunk({'delta': ''});
+          onChunk({'delta': 42});
+          onChunk(<String, dynamic>{});
+          onChunk({'delta': 'Real.'});
+          return {'reply': 'Real.'};
+        },
+      );
+
+      final pieces = <String>[];
+      await service.reply('hi', history: const [], onDelta: pieces.add);
+      expect(pieces, ['Real.']);
+    });
+
+    test('falls back to the plain callable with no streaming transport', () async {
+      // An older construction site (and every existing test) passes only the
+      // callable; asking for deltas must not break it.
+      var called = 0;
+      final service = FunctionsTutorService((name, data) async {
+        called++;
+        return {'reply': 'Fine.'};
+      });
+
+      var deltas = 0;
+      final response = await service.reply(
+        'hi',
+        history: const [],
+        onDelta: (_) => deltas++,
+      );
+      expect(called, 1);
+      expect(deltas, 0);
+      expect(response.text, 'Fine.');
     });
   });
 

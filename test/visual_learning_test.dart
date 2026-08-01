@@ -855,8 +855,10 @@ void main() {
           visualStepSummary: 'Step 2 of 2 — "Divide by 2": 2x = 8 becomes x = 4.',
         ),
       );
-      expect(sent?['problemLatex'], '2x + 5 = 13');
-      expect(sent?['visualStep'], contains('Divide by 2'));
+      final problem = sent?['problem'] as Map<String, dynamic>?;
+      final focus = sent?['stepFocus'] as Map<String, dynamic>?;
+      expect(problem?['questionLatex'], '2x + 5 = 13');
+      expect(focus?['summary'], contains('Divide by 2'));
     });
 
     test('the offline engine greets visual-step launches specifically', () {

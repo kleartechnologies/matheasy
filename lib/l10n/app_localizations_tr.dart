@@ -139,7 +139,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorTitle => 'Yapay Zekâ Öğretmeni';
 
   @override
-  String get tutorAsk => 'Matheasy\'ye Sor';
+  String get tutorAsk => 'Numi\'ye Sor';
 
   @override
   String get tutorHint => 'Bana bir ipucu ver';
@@ -187,7 +187,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get practiceVisualNothing => 'Şu anda görselleştirilecek bir şey yok.';
 
   @override
-  String get practiceVisualLoading => 'Matheasy görsel anlatımınızı çiziyor…';
+  String get practiceVisualLoading => 'Numi görsel anlatımınızı çiziyor…';
 
   @override
   String get practiceVisualProFeature =>
@@ -242,7 +242,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get practiceRecommendedForYou => 'Size özel öneriler';
 
   @override
-  String get practiceAskMatheasyWhy => 'Matheasy\'ye nedenini sor';
+  String get practiceAskMatheasyWhy => 'Numi\'ye nedenini sor';
 
   @override
   String get practiceShowVisually => 'Bana görsel olarak göster';
@@ -296,14 +296,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Sesli sohbet yakında geliyor.';
 
   @override
-  String get tutorEmptyTitle => 'Matheasy\'ye istediğinizi sorun';
+  String get tutorEmptyTitle => 'Numi\'ye istediğinizi sorun';
 
   @override
   String get tutorEmptyMessage =>
       'Bir fotoğraf çekin veya bir soru yazın; net, adım adım bir açıklama alın.';
 
   @override
-  String get tutorTyping => 'Matheasy yazıyor';
+  String get tutorTyping => 'Numi yazıyor';
 
   @override
   String get tutorTagline => 'Yapay zekâ matematik öğretmeniniz';
@@ -315,7 +315,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorHeroSubtitle => 'Matematikle ilgili her şeyi sorabilirsiniz.';
 
   @override
-  String get tutorAskMatheasy => 'Matheasy\'ye Sor';
+  String get tutorAskMatheasy => 'Numi\'ye Sor';
 
   @override
   String get tutorExploreTopics => 'Konuları keşfet';
@@ -333,7 +333,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutorUploadQuestion => 'Bir soru yükle';
 
   @override
-  String get tutorInputHint => 'Matheasy\'ye istediğinizi sorun…';
+  String get tutorInputHint => 'Numi\'ye istediğinizi sorun…';
 
   @override
   String get tutorVoiceInput => 'Sesli giriş';
@@ -355,6 +355,153 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Tam değil — ama yaklaştın!';
+
+  @override
+  String get tutorModePrompt => 'Bunu nasıl öğrenmek istersin?';
+
+  @override
+  String get tutorModeChange => 'Öğrenme şeklini değiştir';
+
+  @override
+  String get tutorModeHint => 'Sadece ipucu';
+
+  @override
+  String get tutorModeHintDetail => 'Doğru yöne küçük bir itme — çözen sensin.';
+
+  @override
+  String get tutorModeSolveTogether => 'Birlikte çözelim';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Adım adım, yönlendiren sensin.';
+
+  @override
+  String get tutorModeTeachMe => 'Bana öğret';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Fikirden başlıyoruz, örneklerle.';
+
+  @override
+  String get tutorModeShowSolution => 'Tüm çözümü göster';
+
+  @override
+  String get tutorModeShowSolutionDetail => 'Çözümün tamamı, açıklamasıyla.';
+
+  @override
+  String get tutorModeQuizMe => 'Beni sına';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Ben sorarım, sen cevaplarsın, ben geri bildirim veririm.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return '$mode moduna geçildi';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Daha basit anlat';
+
+  @override
+  String get tutorActionExplainSimplerMessage =>
+      'Bunu daha basit anlatabilir misin?';
+
+  @override
+  String get tutorActionGiveExample => 'Örnek ver';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Bana bir örnek verebilir misin?';
+
+  @override
+  String get tutorActionTellMeWhy => 'Bu neden işe yarıyor?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'Bu neden işe yarıyor?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Başka yöntem';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage =>
+      'Bunu başka bir yolla yapmak mümkün mü?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Beni sına';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Bu konuda beni sına.';
+
+  @override
+  String get tutorActionPracticeMore => 'Alıştırma';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Bana bir alıştırma sorusu ver.';
+
+  @override
+  String get tutorActionGiveHint => 'Bana ipucu ver';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Bana bir ipucu ver.';
+
+  @override
+  String get tutorActionNextStep => 'Sonraki adım';
+
+  @override
+  String get tutorActionNextStepMessage => 'Sonraki adım ne?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Çözümümü kontrol et';
+
+  @override
+  String get tutorActionCheckMyWorkMessage =>
+      'Yaptığım işlemi kontrol eder misin?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Sık yapılan hatalar';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'Burada hangi hatalara dikkat etmeliyim?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Daha kolayı';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Bana bunun gibi daha kolay bir soru ver.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Benzeri';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Denemem için benzer bir soru ver.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Daha zoru';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Bana bunun gibi daha zor bir soru ver.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Beni zorla';
+
+  @override
+  String get tutorActionPracticeChallengeMessage =>
+      'Bana zorlayıcı bir soru ver.';
+
+  @override
+  String get tutorActionShowSolution => 'Çözümü göster';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Bana tüm çözümü göster.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Anlamadım';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Anlamadım — başka bir şekilde anlatabilir misin?';
 
   @override
   String get onboardingGetStarted => 'Başlayın';
@@ -792,7 +939,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get progressSeeAll => 'Tümünü gör';
 
   @override
-  String get progressMatheasySays => 'Matheasy diyor ki';
+  String get progressMatheasySays => 'Numi diyor ki';
 
   @override
   String get progressRecentActivity => 'Son etkinlik';
@@ -1051,13 +1198,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bunun için yazılı bir anlatım yok — ama size adım adım anlatabilirim.';
 
   @override
-  String get resultAskMatheasy => 'Matheasy\'ye Sor';
+  String get resultAskMatheasy => 'Numi\'ye Sor';
 
   @override
-  String get explainStillStuck => 'Hâlâ takıldınız mı? Matheasy\'ye Sorun';
+  String get explainStillStuck => 'Hâlâ takıldınız mı? Numi\'ye Sorun';
 
   @override
-  String get visualLoadingMessage => 'Matheasy görsel anlatımınızı çiziyor…';
+  String get visualLoadingMessage => 'Numi görsel anlatımınızı çiziyor…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1219,7 +1366,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get visualKeyIdeas => 'ANAHTAR FİKİRLER';
 
   @override
-  String get visualAskAboutStep => 'Bu adım hakkında Matheasy\'ye sorun';
+  String get visualAskAboutStep => 'Bu adım hakkında Numi\'ye sorun';
 
   @override
   String get visualReplay => 'Yeniden oynat';
@@ -1546,7 +1693,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return '$topic konusunda kusursuz bir performans. Matheasy etkilendi!';
+    return '$topic konusunda kusursuz bir performans. Numi etkilendi!';
   }
 
   @override
@@ -1796,4 +1943,142 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometri';
+
+  @override
+  String get resultStartLearning => 'Öğrenmeye başla';
+
+  @override
+  String get resultStartLearningHint => 'Adım adım üzerinden geç';
+
+  @override
+  String get resultLearnMore => 'Daha fazlası';
+
+  @override
+  String get resultLearnMoreSubtitle => 'Teori, sözlük, yöntemler ve grafik';
+
+  @override
+  String get resultCopy => 'Kopyala';
+
+  @override
+  String get resultCopied => 'Cevap kopyalandı';
+
+  @override
+  String get resultSave => 'Kaydet';
+
+  @override
+  String get resultSavedShort => 'Kaydedildi';
+
+  @override
+  String get solutionWhyThisWorks => 'Bu neden işe yarıyor';
+
+  @override
+  String get solutionStepBack => 'Geri';
+
+  @override
+  String get solutionFinishLesson => 'Bitir';
+
+  @override
+  String get solutionLessonComplete => 'Ders tamamlandı';
+
+  @override
+  String get solutionLessonCompleteSubtitle => 'Her adımı kendin yaptın.';
+
+  @override
+  String get solutionReplayLesson => 'Dersi tekrar izle';
+
+  @override
+  String get solutionMethodUsed => 'Kullanılan yöntem';
+
+  @override
+  String get solutionStillConfused => 'Hâlâ kafan karışık mı?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi bu sorunun her bölümünü seninle konuşabilir.';
+
+  @override
+  String get solutionPracticeTitle => 'Şimdi sen dene';
+
+  @override
+  String get solutionPracticeSubtitle =>
+      'Kalıcı olmasını sağlayan şey alıştırmadır.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Bu konuyu çalış';
+
+  @override
+  String get solutionWatchItAnimate => 'Animasyonlu izle';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Her adımın hareket ettiğini gör, öylece durmasını değil.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Adım $step/$total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Çözüm adımları';
+
+  @override
+  String get solutionTapStepHint =>
+      'Nasıl çalıştığını görmek için herhangi bir adıma dokun';
+
+  @override
+  String get solutionAnswerRow => 'Çözüm';
+
+  @override
+  String get solutionExplainHow => 'Nasıl olduğunu açıkla';
+
+  @override
+  String get learnMoreTitle => 'Daha fazlası';
+
+  @override
+  String get learnMoreAllSteps => 'Tüm adımlar';
+
+  @override
+  String get learnMoreGlossary => 'Sözlük';
+
+  @override
+  String get learnMoreExplanations => 'Üç farklı şekilde anlatıldı';
+
+  @override
+  String get learnMoreCompareMethods => 'Yöntemleri karşılaştır';
+
+  @override
+  String get learnMoreUseThisMethod => 'Bu yöntemle çöz';
+
+  @override
+  String get learnMoreNothing => 'Bu soru için henüz ek bir şey yok.';
+
+  @override
+  String get tutorImageSheetTitle => 'Fotoğraf ekle';
+
+  @override
+  String get tutorImageAttached => 'Gönderdiğin fotoğraf';
+
+  @override
+  String get tutorImageAskProblem => 'Bu soruda bana yardım eder misin?';
+
+  @override
+  String get tutorImageAskWork => 'Çözümümü kontrol eder misin?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi fotoğrafındaki soruyu okudu';
+
+  @override
+  String get tutorImageSawWork => 'Numi çözümünü okudu';
+
+  @override
+  String get tutorImageNotMath =>
+      'O fotoğrafta matematik bulamıyorum. Bana bir soru ya da çözümünün fotoğrafını gönder, bakayım. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Tam olarak seçemedim. Daha aydınlık bir ortamda, soru kareyi dolduracak şekilde tekrar dene — ya da yazarak gönder, hemen yardım edeyim.';
+
+  @override
+  String get tutorImageFailed =>
+      'Şu anda o fotoğrafı okuyamadım. Bağlantını kontrol edip tekrar dene.';
 }

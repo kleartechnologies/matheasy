@@ -22,6 +22,7 @@ export 'cards/streak_card.dart';
 
 // Chat
 export 'chat/chat_bubble.dart';
+export 'chat/highlighted_math.dart';
 export 'chat/matheasy_bubble.dart';
 
 // Chips

@@ -401,18 +401,7 @@ class _ConceptCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // The drawn concept is non-text graphics on a card: it needs the emerald
-    // that clears 3:1 on this theme's surface, which the logo tone does not.
-    final stroke =
-        context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
-    final palette = ConceptPalette(
-      grid: colors.divider,
-      axis: colors.textMuted,
-      stroke: stroke,
-      fill: stroke.withValues(alpha: 0.16),
-      accent: AppColors.warning,
-      textColor: colors.textPrimary,
-    );
+    final palette = ConceptPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -139,7 +139,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tutorTitle => 'Tutore AI';
 
   @override
-  String get tutorAsk => 'Întreabă-l pe Matheasy';
+  String get tutorAsk => 'Întreabă-l pe Numi';
 
   @override
   String get tutorHint => 'Dă-mi un indiciu';
@@ -187,8 +187,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get practiceVisualNothing => 'Nimic de vizualizat momentan.';
 
   @override
-  String get practiceVisualLoading =>
-      'Matheasy îți schițează parcursul vizual…';
+  String get practiceVisualLoading => 'Numi îți schițează parcursul vizual…';
 
   @override
   String get practiceVisualProFeature =>
@@ -243,7 +242,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get practiceRecommendedForYou => 'Recomandat pentru tine';
 
   @override
-  String get practiceAskMatheasyWhy => 'Întreabă-l pe Matheasy de ce';
+  String get practiceAskMatheasyWhy => 'Întreabă-l pe Numi de ce';
 
   @override
   String get practiceShowVisually => 'Arată-mi vizual';
@@ -298,14 +297,14 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tutorVoiceChatSoon => 'Chatul vocal va fi disponibil în curând.';
 
   @override
-  String get tutorEmptyTitle => 'Întreabă-l pe Matheasy orice';
+  String get tutorEmptyTitle => 'Întreabă-l pe Numi orice';
 
   @override
   String get tutorEmptyMessage =>
       'Fă o poză sau scrie o întrebare și primești o explicație clară, pas cu pas.';
 
   @override
-  String get tutorTyping => 'Matheasy scrie';
+  String get tutorTyping => 'Numi scrie';
 
   @override
   String get tutorTagline => 'Tutorele tău de matematică AI';
@@ -317,7 +316,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tutorHeroSubtitle => 'Întreabă-mă orice despre matematică.';
 
   @override
-  String get tutorAskMatheasy => 'Întreabă-l pe Matheasy';
+  String get tutorAskMatheasy => 'Întreabă-l pe Numi';
 
   @override
   String get tutorExploreTopics => 'Explorează subiecte';
@@ -335,7 +334,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tutorUploadQuestion => 'Încarcă o întrebare';
 
   @override
-  String get tutorInputHint => 'Întreabă-l pe Matheasy orice…';
+  String get tutorInputHint => 'Întreabă-l pe Numi orice…';
 
   @override
   String get tutorVoiceInput => 'Intrare vocală';
@@ -357,6 +356,150 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get tutorQuizNotQuite => 'Nu chiar — dar aproape!';
+
+  @override
+  String get tutorModePrompt => 'Cum vrei să înveți asta?';
+
+  @override
+  String get tutorModeChange => 'Schimbă felul în care învățăm';
+
+  @override
+  String get tutorModeHint => 'Doar un indiciu';
+
+  @override
+  String get tutorModeHintDetail => 'Un impuls în direcția bună — tu rezolvi.';
+
+  @override
+  String get tutorModeSolveTogether => 'Rezolvăm împreună';
+
+  @override
+  String get tutorModeSolveTogetherDetail => 'Pas cu pas, iar tu conduci.';
+
+  @override
+  String get tutorModeTeachMe => 'Învață-mă';
+
+  @override
+  String get tutorModeTeachMeDetail => 'Pornim de la idee, cu exemple.';
+
+  @override
+  String get tutorModeShowSolution => 'Arată soluția completă';
+
+  @override
+  String get tutorModeShowSolutionDetail => 'Toată rezolvarea, explicată.';
+
+  @override
+  String get tutorModeQuizMe => 'Testează-mă';
+
+  @override
+  String get tutorModeQuizMeDetail =>
+      'Eu întreb, tu răspunzi, eu îți dau feedback.';
+
+  @override
+  String tutorModeSwitched(String mode) {
+    return 'S-a trecut la $mode';
+  }
+
+  @override
+  String get tutorActionExplainSimpler => 'Explică mai simplu';
+
+  @override
+  String get tutorActionExplainSimplerMessage => 'Poți explica mai simplu?';
+
+  @override
+  String get tutorActionGiveExample => 'Dă un exemplu';
+
+  @override
+  String get tutorActionGiveExampleMessage => 'Îmi poți da un exemplu?';
+
+  @override
+  String get tutorActionTellMeWhy => 'De ce funcționează?';
+
+  @override
+  String get tutorActionTellMeWhyMessage => 'De ce funcționează?';
+
+  @override
+  String get tutorActionShowAnotherMethod => 'Altă metodă';
+
+  @override
+  String get tutorActionShowAnotherMethodMessage => 'Se poate face și altfel?';
+
+  @override
+  String get tutorActionCreateQuiz => 'Testează-mă';
+
+  @override
+  String get tutorActionCreateQuizMessage => 'Testează-mă la asta.';
+
+  @override
+  String get tutorActionPracticeMore => 'Exersează';
+
+  @override
+  String get tutorActionPracticeMoreMessage => 'Dă-mi un exercițiu.';
+
+  @override
+  String get tutorActionGiveHint => 'Dă-mi un indiciu';
+
+  @override
+  String get tutorActionGiveHintMessage => 'Dă-mi un indiciu.';
+
+  @override
+  String get tutorActionNextStep => 'Pasul următor';
+
+  @override
+  String get tutorActionNextStepMessage => 'Care e pasul următor?';
+
+  @override
+  String get tutorActionCheckMyWork => 'Verifică-mi rezolvarea';
+
+  @override
+  String get tutorActionCheckMyWorkMessage => 'Poți să-mi verifici calculele?';
+
+  @override
+  String get tutorActionCommonMistakes => 'Greșeli frecvente';
+
+  @override
+  String get tutorActionCommonMistakesMessage =>
+      'La ce greșeli trebuie să am grijă aici?';
+
+  @override
+  String get tutorActionPracticeEasier => 'Una mai ușoară';
+
+  @override
+  String get tutorActionPracticeEasierMessage =>
+      'Dă-mi un exercițiu mai ușor de genul acesta.';
+
+  @override
+  String get tutorActionPracticeSimilar => 'Una similară';
+
+  @override
+  String get tutorActionPracticeSimilarMessage =>
+      'Dă-mi un exercițiu similar, să încerc.';
+
+  @override
+  String get tutorActionPracticeHarder => 'Una mai grea';
+
+  @override
+  String get tutorActionPracticeHarderMessage =>
+      'Dă-mi un exercițiu mai greu de genul acesta.';
+
+  @override
+  String get tutorActionPracticeChallenge => 'Provoacă-mă';
+
+  @override
+  String get tutorActionPracticeChallengeMessage =>
+      'Dă-mi un exercițiu-provocare.';
+
+  @override
+  String get tutorActionShowSolution => 'Arată soluția';
+
+  @override
+  String get tutorActionShowSolutionMessage => 'Arată-mi soluția completă.';
+
+  @override
+  String get tutorActionIDontUnderstand => 'Nu înțeleg';
+
+  @override
+  String get tutorActionIDontUnderstandMessage =>
+      'Nu înțeleg — poți să explici altfel?';
 
   @override
   String get onboardingGetStarted => 'Începe';
@@ -791,7 +934,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get progressSeeAll => 'Vezi tot';
 
   @override
-  String get progressMatheasySays => 'Matheasy spune';
+  String get progressMatheasySays => 'Numi spune';
 
   @override
   String get progressRecentActivity => 'Activitate recentă';
@@ -1051,13 +1194,13 @@ class AppLocalizationsRo extends AppLocalizations {
       'Nu există o explicație scrisă pentru aceasta — dar te pot ghida pas cu pas.';
 
   @override
-  String get resultAskMatheasy => 'Întreabă-l pe Matheasy';
+  String get resultAskMatheasy => 'Întreabă-l pe Numi';
 
   @override
-  String get explainStillStuck => 'Tot blocat? Întreabă-l pe Matheasy';
+  String get explainStillStuck => 'Tot blocat? Întreabă-l pe Numi';
 
   @override
-  String get visualLoadingMessage => 'Matheasy îți schițează parcursul vizual…';
+  String get visualLoadingMessage => 'Numi îți schițează parcursul vizual…';
 
   @override
   String get visualUnavailableMessage =>
@@ -1219,7 +1362,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get visualKeyIdeas => 'IDEI CHEIE';
 
   @override
-  String get visualAskAboutStep => 'Întreabă-l pe Matheasy despre acest pas';
+  String get visualAskAboutStep => 'Întreabă-l pe Numi despre acest pas';
 
   @override
   String get visualReplay => 'Redă din nou';
@@ -1547,7 +1690,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String practiceSummaryPerfect(String topic) {
-    return 'Un parcurs perfect la $topic. Matheasy este impresionat!';
+    return 'Un parcurs perfect la $topic. Numi este impresionat!';
   }
 
   @override
@@ -1799,4 +1942,143 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get onboardingChipGeometry => 'Geometrie';
+
+  @override
+  String get resultStartLearning => 'Începe să înveți';
+
+  @override
+  String get resultStartLearningHint => 'Parcurge-l pas cu pas';
+
+  @override
+  String get resultLearnMore => 'Află mai multe';
+
+  @override
+  String get resultLearnMoreSubtitle => 'Teorie, glosar, metode și graficul';
+
+  @override
+  String get resultCopy => 'Copiază';
+
+  @override
+  String get resultCopied => 'Răspuns copiat';
+
+  @override
+  String get resultSave => 'Salvează';
+
+  @override
+  String get resultSavedShort => 'Salvat';
+
+  @override
+  String get solutionWhyThisWorks => 'De ce funcționează';
+
+  @override
+  String get solutionStepBack => 'Înapoi';
+
+  @override
+  String get solutionFinishLesson => 'Termină';
+
+  @override
+  String get solutionLessonComplete => 'Lecție încheiată';
+
+  @override
+  String get solutionLessonCompleteSubtitle =>
+      'Ai parcurs fiecare pas pe cont propriu.';
+
+  @override
+  String get solutionReplayLesson => 'Reia lecția';
+
+  @override
+  String get solutionMethodUsed => 'Metoda folosită';
+
+  @override
+  String get solutionStillConfused => 'Tot neclar?';
+
+  @override
+  String get solutionStillConfusedBody =>
+      'Numi îți poate explica orice parte din această problemă.';
+
+  @override
+  String get solutionPracticeTitle => 'Acum încearcă tu';
+
+  @override
+  String get solutionPracticeSubtitle => 'Exercițiul e cel care fixează.';
+
+  @override
+  String get solutionPracticeThisTopic => 'Exersează acest subiect';
+
+  @override
+  String get solutionWatchItAnimate => 'Vezi animația';
+
+  @override
+  String get solutionWatchItAnimateSubtitle =>
+      'Vezi fiecare pas mișcându-se, nu doar stând.';
+
+  @override
+  String solutionProgressSemantics(int step, int total) {
+    return 'Pasul $step din $total';
+  }
+
+  @override
+  String get solutionSolvingSteps => 'Pașii rezolvării';
+
+  @override
+  String get solutionTapStepHint =>
+      'Atinge orice pas ca să vezi cum funcționează';
+
+  @override
+  String get solutionAnswerRow => 'Soluție';
+
+  @override
+  String get solutionExplainHow => 'Explică cum';
+
+  @override
+  String get learnMoreTitle => 'Află mai multe';
+
+  @override
+  String get learnMoreAllSteps => 'Toți pașii';
+
+  @override
+  String get learnMoreGlossary => 'Glosar';
+
+  @override
+  String get learnMoreExplanations => 'Explicat în trei feluri';
+
+  @override
+  String get learnMoreCompareMethods => 'Compară metodele';
+
+  @override
+  String get learnMoreUseThisMethod => 'Rezolvă cu această metodă';
+
+  @override
+  String get learnMoreNothing =>
+      'Pentru această problemă nu există încă nimic în plus.';
+
+  @override
+  String get tutorImageSheetTitle => 'Adaugă o fotografie';
+
+  @override
+  String get tutorImageAttached => 'Fotografia trimisă';
+
+  @override
+  String get tutorImageAskProblem => 'Mă poți ajuta cu această problemă?';
+
+  @override
+  String get tutorImageAskWork => 'Poți să-mi verifici rezolvarea?';
+
+  @override
+  String get tutorImageSawProblem => 'Numi a citit problema din fotografia ta';
+
+  @override
+  String get tutorImageSawWork => 'Numi a citit rezolvarea ta';
+
+  @override
+  String get tutorImageNotMath =>
+      'Nu găsesc matematică în fotografia aceea. Trimite-mi o problemă sau o poză cu rezolvarea ta și mă uit. 📷';
+
+  @override
+  String get tutorImageUnreadable =>
+      'Nu am reușit să o descifrez. Încearcă din nou cu mai multă lumină și cu problema pe tot cadrul — sau scrie-o și te ajut imediat.';
+
+  @override
+  String get tutorImageFailed =>
+      'Nu am putut citi fotografia acum. Verifică-ți conexiunea și încearcă din nou.';
 }
