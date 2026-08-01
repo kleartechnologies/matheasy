@@ -3,12 +3,19 @@
 firebase-debug.log
 firebase-debug.*.log
 firestore-debug.log
+node_modules/
 functions/node_modules/
 functions/lib/
 functions/.env
 functions/.env.*
 functions/.secret.local
 functions/.runtimeconfig.json
+
+# Throwaway solver probes — one-off scripts run against a local engine while
+# hunting a wrong answer. They are scratch work, not tests; the real coverage
+# lives in functions/test/.
+functions/_*.mts
+functions/_*.mjs
 
 # Miscellaneous
 *.class
