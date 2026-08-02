@@ -65,6 +65,16 @@ export type Workflow =
    * with a model proven on this app's vision path.
    */
   | "tutorVision"
+  /**
+   * The educational quality judge — the gate that decides whether an
+   * explanation may be shown at all.
+   *
+   * It writes no maths and shows no student a word it produced, so on output it
+   * looks like a narration job. It is on the reasoning tier anyway, because it
+   * is the last thing standing between a subtly wrong lesson and a child, and a
+   * gate that is weaker than what it is gating is not a gate.
+   */
+  | "quality"
   // --- Narration tier: prose ABOUT maths that is already verified ------------
   /** Numi's tutor replies. */
   | "tutor"
@@ -119,6 +129,9 @@ const EFFORT: Record<Workflow, ReasoningEffort> = {
   // Reading the page, but on the latency-visible streaming path with a student
   // waiting — between `scan`'s "high" and `tutor`'s "low".
   tutorVision: "medium",
+  // Catching a lesson that is plausible-but-wrong is exactly the job that
+  // rewards thinking, and it runs off the student's critical path.
+  quality: "high",
   tutor: "low",
   teach: "low",
 };
@@ -134,6 +147,8 @@ const VERBOSITY: Record<Workflow, Verbosity> = {
   handwriting: "low",
   // Both write Numi's voice, so both write like Numi.
   tutorVision: "medium",
+  // A verdict, not an essay: scores and one-line findings.
+  quality: "low",
   tutor: "medium",
   teach: "medium",
 };

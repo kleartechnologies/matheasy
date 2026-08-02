@@ -128,6 +128,46 @@ export function animationSchemaEnabled(): boolean {
 }
 
 /**
+ * The kill switch for the model-backed half of the educational quality gate.
+ *
+ * ON (the default) an explanation is read by a judge before it is shown, and
+ * anything below the bar is regenerated. OFF collapses the gate to its
+ * deterministic checks — the structural half still runs and still blocks, so a
+ * lesson that contradicts the verified answer or points at a highlight nobody
+ * drew is rejected either way. The lever exists for cost and for latency
+ * incidents, not for quality: turning it off makes the gate cheaper, never
+ * absent.
+ *   set QUALITY_JUDGE_ENABLED=false in .env or at deploy.
+ */
+export const QUALITY_JUDGE_ENABLED = defineString("QUALITY_JUDGE_ENABLED", {
+  default: "true",
+});
+
+/** Whether the LLM judge runs. Default ON; the deterministic checks always run. */
+export function qualityJudgeEnabled(): boolean {
+  return QUALITY_JUDGE_ENABLED.value() !== "false";
+}
+
+/**
+ * How many times an explanation may be regenerated before the layer gives up.
+ *
+ * Giving up means showing NO explanation — never a bad one, and never a
+ * different answer. The verified solution has already been proven and is on
+ * screen regardless; the teaching layer is additive, so its worst case is the
+ * app as it was before this layer existed.
+ */
+export const QUALITY_MAX_ATTEMPTS = defineString("QUALITY_MAX_ATTEMPTS", {
+  default: "3",
+});
+
+/** Attempts allowed per explanation, clamped to a sane 1-5. */
+export function qualityMaxAttempts(): number {
+  const parsed = Number.parseInt(QUALITY_MAX_ATTEMPTS.value(), 10);
+  if (!Number.isFinite(parsed)) return 3;
+  return Math.max(1, Math.min(5, parsed));
+}
+
+/**
  * The kill switch for the two-pass scan pipeline (preprocess → OCR → vision).
  *
  * ON (the default) the scanner enhances the photo, runs a dedicated OCR

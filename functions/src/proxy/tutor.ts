@@ -36,7 +36,9 @@ import { assertWithinQuota, ensureUserDoc, incrementUsage } from "../lib/firesto
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { createOpenAI } from "../lib/openai";
 import { chatParams } from "../lib/models";
-import { languageDirective } from "../lib/language";
+import { contentLanguage, languageDirective } from "../lib/language";
+import { runDeterministicChecks } from "../quality/checks";
+import { tutorToQualityInput } from "../quality/adapters";
 import { verifyTutorCard, type TutorCardOut } from "./tutorCard";
 import { verifyTutorFocus, type TutorFocusOut } from "./tutorFocus";
 import {
@@ -843,6 +845,46 @@ export const tutorReply = onCall(
       actions = verdict.actions;
       if (verdict.reason) {
         logger.warn("tutorReply actions rejected", { uid, mode, reason: verdict.reason });
+      }
+    }
+
+    // EDUCATIONAL QUALITY, the part of it that still has teeth on a streamed
+    // reply. The words have already reached the student token by token and
+    // cannot be recalled — but the overlay has not been drawn yet, and it is
+    // returned in this response. So the check that runs here is the one that can
+    // still act: if the prose describes the page differently from the way the
+    // app is about to mark it up ("the angle in green" over a gold highlight),
+    // the gesture is dropped and the student is left with the words alone rather
+    // than with words and a picture that disagree.
+    if (actions.length > 0 && typeof payload.reply === "string" && payload.reply) {
+      const clash = runDeterministicChecks(
+        tutorToQualityInput({
+          reply: payload.reply,
+          truth: {
+            problemLatex: text(problem.questionLatex, 300),
+            answerPlain: text(problem.finalAnswer, 200),
+            stepExpressions: (Array.isArray(problem.steps) ? problem.steps : [])
+              .slice(0, MAX_STEPS)
+              .map((step) => text(step.resultLatex, 300)),
+            verified: problem.verified === true,
+          },
+          language: contentLanguage(language),
+          difficulty: "medium",
+          state,
+          anchors,
+          actions,
+          visualRefs: actions.map((action) => action.target),
+          ocrConfidence: problem.ocr?.confidence,
+        })
+      ).filter((f) => f.dimension === "visualConsistency" && f.severity === "hard");
+
+      if (clash.length > 0) {
+        logger.warn("tutorReply actions dropped — the reply describes them differently", {
+          uid,
+          mode,
+          checks: clash.map((f) => f.check),
+        });
+        actions = [];
       }
     }
 

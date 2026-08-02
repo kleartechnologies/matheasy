@@ -21,7 +21,13 @@ import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
-import { languageDirective } from "../lib/language";
+import { contentLanguage, languageDirective } from "../lib/language";
+import { runDeterministicChecks } from "../quality/checks";
+import {
+  DIFFICULTY_LEVELS,
+  type DifficultyLevel,
+  type QualityFinding,
+} from "../quality/types";
 
 interface PracticeRequest {
   topic?: string;
@@ -106,6 +112,8 @@ export const generatePracticeQuestion = onCall(
     }
 
     const requested = Math.max(1, Math.min(MAX_COUNT, Number(count) || 3));
+    const lang = contentLanguage(language);
+    const wantedDifficulty = asDifficultyLevel(difficulty);
     // Step budget the model must respect (sanitized; maxSteps >= targetSteps).
     const tSteps = Math.max(1, Math.min(20, Math.round(Number(targetSteps)) || 4));
     const mSteps = Math.max(
@@ -182,6 +190,34 @@ export const generatePracticeQuestion = onCall(
         const key = (q.promptLatex ?? q.prompt).trim().toLowerCase();
         if (seen.has(key)) continue; // discard duplicates
         seen.add(key);
+
+        // Educational quality screening (spec check 15). A question that fails
+        // is discarded and the shortfall re-prompted by the loop above — the
+        // same "validate → discard → regenerate" contract the structural check
+        // already uses, so nothing new can reach a student.
+        const findings = screenQuestion(q, {
+          language: lang,
+          difficulty: wantedDifficulty,
+          skill,
+          skillLabel: skillLabel ?? skill,
+          topic,
+        });
+        const fatal = findings.filter(
+          (f) => f.severity === "hard" || (f.severity === "major" && DROP_ON_MAJOR.has(f.check))
+        );
+        if (fatal.length > 0) {
+          logger.warn("practice.qualityRejected", {
+            uid,
+            skill,
+            difficulty: wantedDifficulty,
+            language: lang,
+            checks: fatal.map((f) => `${f.check}:${f.severity}`),
+          });
+          // Stays in `seen`: if the model offers the same rejected question
+          // again next round, skip it early rather than re-screen it.
+          continue;
+        }
+
         collected.push(q);
         if (collected.length >= requested) break;
       }
@@ -190,6 +226,108 @@ export const generatePracticeQuestion = onCall(
     return { questions: collected.slice(0, MAX_COUNT), usage: null };
   }
 );
+
+/** The client sends `PracticeDifficulty.name`, which is this vocabulary exactly. */
+function asDifficultyLevel(raw: string | undefined): DifficultyLevel {
+  const found = DIFFICULTY_LEVELS.find((level) => level === raw);
+  return found ?? "medium";
+}
+
+/** The reading band each level is pitched at, for the vocabulary checks. */
+function bandFor(level: DifficultyLevel): "primary" | "secondary" | "preUniversity" | "university" {
+  switch (level) {
+    case "veryEasy":
+    case "easy":
+      return "primary";
+    case "medium":
+      return "secondary";
+    case "hard":
+      return "preUniversity";
+    case "expert":
+      return "university";
+  }
+}
+
+/**
+ * The checks a generated question is DROPPED for.
+ *
+ * Deliberately narrower than the full battery. A practice question is judged on
+ * whether it is in the right language, at the right level, and about the thing
+ * the student asked to practise — the three ways a generated question can be
+ * useless to the person who requested it. The softer signals (sentence length,
+ * an unexplained term inside an explanation) are logged and left alone, because
+ * silently binning a usable question to satisfy a heuristic costs the student a
+ * question and gains them nothing.
+ */
+const DROP_ON_MAJOR = new Set<QualityFinding["check"]>([
+  "language_quality",
+  "practice_alignment",
+  "adaptive_teaching",
+]);
+
+/**
+ * Educational quality screening for ONE generated question (spec check 15).
+ *
+ * Note what is NOT here: nothing verifies the question's own mathematics, and
+ * nothing could — a freshly invented question has never been through the solver,
+ * so there is no proven answer to compare against. That is exactly why this is
+ * the deterministic subset and no model opinion: asking an LLM whether an
+ * unverified question is correct would put a second, unproven source of
+ * mathematical truth into the app. The client re-enters every practice question
+ * through the full `solve()` gate when the student answers it, and THAT is where
+ * its maths is proven.
+ */
+function screenQuestion(
+  q: PracticePayload["questions"][number],
+  ctx: {
+    language: string;
+    difficulty: DifficultyLevel;
+    skill: string;
+    skillLabel: string;
+    topic?: string;
+  }
+): QualityFinding[] {
+  return runDeterministicChecks({
+    explanation: {
+      fields: [
+        {
+          id: "prompt",
+          kind: "practice",
+          text: [q.prompt, q.promptLatex, q.explanation].filter(Boolean).join("\n"),
+        },
+      ],
+    },
+    truth: {
+      problemLatex: q.promptLatex ?? q.prompt,
+      stepExpressions: [],
+      verified: false,
+      problemType: ctx.skill,
+    },
+    audience: {
+      language: ctx.language,
+      difficulty: ctx.difficulty,
+      band: bandFor(ctx.difficulty),
+      knownConcepts: [ctx.skill, ctx.skillLabel, ctx.topic].filter(
+        (c): c is string => Boolean(c)
+      ),
+    },
+    visuals: { anchors: [], actions: [] },
+    // A generated question carries no verified solution and makes no claim to
+    // one, so there is nothing for the certainty checks to hedge about.
+    certainty: { state: "PASS" },
+    practice: [
+      {
+        id: "prompt",
+        prompt: q.prompt,
+        explanation: q.explanation,
+        skill: ctx.skill,
+        difficulty: ctx.difficulty,
+        concepts: [ctx.skill],
+      },
+    ],
+    surface: "practice",
+  });
+}
 
 /** Structural validation mirroring the client mapper — a malformed question is
  * discarded (and regenerated) rather than shown. */
