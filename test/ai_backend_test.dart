@@ -16,6 +16,7 @@ import 'package:matheasy/features/scan/application/functions_scanner_service.dar
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
 import 'package:matheasy/features/tutor/application/functions_tutor_service.dart';
+import 'package:matheasy/features/tutor/domain/tutor_context_builder.dart';
 import 'package:matheasy/features/tutor/domain/tutor_models.dart';
 
 const _equation = DetectedEquation(
@@ -618,6 +619,121 @@ void main() {
     });
   });
 
+  group('what Numi is handed about a scanned problem', () {
+    final photo = Uint8List.fromList([1, 2, 3, 4]);
+    final scanned = DetectedEquation(
+      latex: '2x + 5 = 13',
+      confidence: 0.98,
+      source: ScanSource.camera,
+      kind: EquationKind.linear,
+      imageBytes: photo,
+      ocr: const {
+        'latex': '2x + 5 = 1З',
+        'confidence': 0.62,
+        'uncertain': ['the 3 in 13'],
+      },
+    );
+
+    ResultData resultFrom(DetectedEquation equation) => ResultData(
+          equation: equation,
+          type: ResultType.linear,
+          difficulty: Difficulty.easy,
+          answerLatex: 'x = 4',
+          steps: const [],
+          verifyText: '2(4) + 5 = 13 ✓',
+          explanations: const [],
+          methods: const [],
+          practice: const [
+            PracticeQuestion(
+              questionLatex: '3x + 1 = 7',
+              difficulty: Difficulty.easy,
+              xpReward: 20,
+            ),
+            PracticeQuestion(
+              questionLatex: '5x - 2 = 13',
+              difficulty: Difficulty.medium,
+              xpReward: 30,
+            ),
+          ],
+          tutorIntro: '',
+        );
+
+    test('the builder carries the read, the practice and the photo', () {
+      final problem = TutorContextBuilder.fromResult(resultFrom(scanned));
+      expect(problem.ocrLatex, '2x + 5 = 1З');
+      expect(problem.ocrConfidence, closeTo(0.62, 1e-9));
+      expect(problem.ocrUncertain, ['the 3 in 13']);
+      expect(problem.practice, ['3x + 1 = 7 (easy)', '5x - 2 = 13 (medium)']);
+      expect(problem.scanImageBytes, photo);
+    });
+
+    test('a typed problem carries none of it, and that is not an error', () {
+      const typed = DetectedEquation(
+        latex: '2x + 5 = 13',
+        confidence: 1,
+        source: ScanSource.manual,
+        kind: EquationKind.linear,
+      );
+      final problem = TutorContextBuilder.fromResult(resultFrom(typed));
+      expect(problem.ocrLatex, isNull);
+      expect(problem.ocrConfidence, isNull);
+      expect(problem.ocrUncertain, isEmpty);
+      expect(problem.scanImageBytes, isNull);
+    });
+
+    test('the mapper puts the read inside problem and the photo at the top', () {
+      final json = TutorRequestMapper.context(
+        TutorLaunchContext(problem: TutorContextBuilder.fromResult(resultFrom(scanned))),
+      );
+      final problem = json['problem'] as Map<String, dynamic>;
+      expect(problem['ocr'], {
+        'latex': '2x + 5 = 1З',
+        'confidence': closeTo(0.62, 1e-9),
+        'uncertain': ['the 3 in 13'],
+      });
+      expect(problem['practice'], ['3x + 1 = 7 (easy)', '5x - 2 = 13 (medium)']);
+      // Top level, not inside `problem` — the server reads it once per chat.
+      expect(json['imageBase64'], 'AQIDBA==');
+      expect(json['mimeType'], 'image/jpeg');
+    });
+
+    test('the photo goes up once, on the student\'s first message', () async {
+      final sent = <Map<String, dynamic>>[];
+      final service = FunctionsTutorService((name, data) async {
+        sent.add(data);
+        return {'reply': 'ok'};
+      });
+      final context = TutorLaunchContext(
+        problem: TutorContextBuilder.fromResult(resultFrom(scanned)),
+      );
+
+      // Numi greets first, so the transcript is non-empty before the student
+      // has said anything — the photo must still ride along here.
+      await service.reply(
+        'why?',
+        history: const [
+          TutorMessage(id: 1, role: TutorRole.assistant, text: 'Hi!'),
+        ],
+        context: context,
+      );
+      // …and must NOT ride along again once the conversation is under way.
+      await service.reply(
+        'and then?',
+        history: const [
+          TutorMessage(id: 1, role: TutorRole.assistant, text: 'Hi!'),
+          TutorMessage(id: 2, role: TutorRole.user, text: 'why?'),
+          TutorMessage(id: 3, role: TutorRole.assistant, text: 'Because…'),
+        ],
+        context: context,
+      );
+
+      expect(sent.first['imageBase64'], 'AQIDBA==');
+      expect(sent.last.containsKey('imageBase64'), isFalse);
+      // The cheap text context is still sent on every turn.
+      expect((sent.last['problem'] as Map<String, dynamic>)['ocr'], isNotNull);
+    });
+  });
+
   group('FunctionsScannerService', () {
     test('manual entry wraps typed latex without calling the backend', () async {
       var called = false;
@@ -646,6 +762,32 @@ void main() {
       expect(eq.latex, r'\frac{1}{2}');
       expect(eq.confidence, closeTo(0.87, 0.001));
       expect(eq.kind, EquationKind.fraction);
+    });
+
+    test('keeps the transcription pass\'s own account of the read', () async {
+      final service = FunctionsScannerService((name, data) async => {
+            'latex': '2x + 5 = 13',
+            'confidence': 0.9,
+            'ocr': {
+              'latex': '2x + 5 = 1З',
+              'confidence': 0.62,
+              'uncertain': ['the 3 in 13'],
+            },
+          });
+
+      final eq = await service.recognize(ScanSource.camera, imageBytes: _bytes());
+      expect(eq.ocr, isNotNull);
+      expect(eq.ocr!['confidence'], closeTo(0.62, 1e-9));
+      // An edit corrects a misread, so the original read must not survive it.
+      expect(eq.copyWith(latex: '2x + 5 = 13').ocr, isNull);
+    });
+
+    test('an older backend without an ocr block is not an error', () async {
+      final service = FunctionsScannerService(
+        (name, data) async => {'latex': '2x + 5 = 13', 'confidence': 0.9},
+      );
+      final eq = await service.recognize(ScanSource.camera, imageBytes: _bytes());
+      expect(eq.ocr, isNull);
     });
 
     test('throws a typed BackendException when no math is found', () async {

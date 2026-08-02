@@ -79,15 +79,23 @@ class ResultScanImage extends StatelessWidget {
     );
   }
 
-  void _openFullScreen(BuildContext context) {
-    Navigator.of(context, rootNavigator: true).push(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.black.withValues(alpha: 0.92),
-        pageBuilder: (_, _, _) => _FullScreenImage(imageBytes: imageBytes),
-      ),
-    );
-  }
+  void _openFullScreen(BuildContext context) =>
+      showScannedImageFullScreen(context, imageBytes);
+}
+
+/// Opens the pinch-to-zoom full view of a scanned photo.
+///
+/// Public so any surface that shows the scan — the result card here, the
+/// geometry player's compare view — opens the SAME viewer rather than each
+/// growing its own.
+void showScannedImageFullScreen(BuildContext context, Uint8List imageBytes) {
+  Navigator.of(context, rootNavigator: true).push(
+    PageRouteBuilder<void>(
+      opaque: false,
+      barrierColor: Colors.black.withValues(alpha: 0.92),
+      pageBuilder: (_, _, _) => _FullScreenImage(imageBytes: imageBytes),
+    ),
+  );
 }
 
 /// A dismissible, pinch-to-zoom full-screen view of the scanned image.

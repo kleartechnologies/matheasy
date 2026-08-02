@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'scan_anchor.dart';
 import 'scan_source.dart';
 
 /// Coarse classification of a detected problem, used for the result caption.
@@ -30,6 +31,8 @@ class DetectedEquation {
     required this.kind,
     this.imageBytes,
     this.geometry,
+    this.ocr,
+    this.anchors = const [],
   });
 
   final String latex;
@@ -61,6 +64,23 @@ class DetectedEquation {
   /// [imageBytes] — it's a rendering hint for the live scan, not persisted state.
   final Map<String, dynamic>? geometry;
 
+  /// The scanner's own account of HOW it read the page — the raw `ocr` payload
+  /// (`latex`, `confidence`, `uncertain[]`) from the transcription pass.
+  ///
+  /// Carried so the tutor can be told the read was shaky and exactly which marks
+  /// were doubtful: the most common "the app is wrong" is a misread character,
+  /// not a bad solve. TRANSIENT for the same reasons as [geometry].
+  final Map<String, dynamic>? ocr;
+
+  /// WHERE the marks are on the page, as concepts the tutor can point at (see
+  /// [ScanAnchor]). Empty for typed problems, for a history re-open, and
+  /// whenever the reader placed nothing.
+  ///
+  /// TRANSIENT for the same reasons as [imageBytes]: without the photo there is
+  /// nothing to draw an overlay on, so persisting the coordinates alone would
+  /// only carry dead weight into the sync store.
+  final List<ScanAnchor> anchors;
+
   int get confidencePercent => (confidence * 100).round();
 
   Map<String, dynamic> toJson() => {
@@ -91,6 +111,8 @@ class DetectedEquation {
     EquationKind? kind,
     Uint8List? imageBytes,
     Map<String, dynamic>? geometry,
+    Map<String, dynamic>? ocr,
+    List<ScanAnchor>? anchors,
   }) {
     return DetectedEquation(
       latex: latex ?? this.latex,
@@ -103,6 +125,14 @@ class DetectedEquation {
       // so the recognizer's original extraction no longer applies. It's dropped
       // unless a caller explicitly supplies fresh facts.
       geometry: geometry,
+      // Same reasoning: once the student has corrected the text, the original
+      // transcription is history — telling the tutor "this was read as …" about
+      // a line the student has since rewritten would be actively misleading.
+      ocr: ocr,
+      // And the same again, with teeth: an edit means at least one mark was
+      // read wrong, so every box placed by that read is suspect. Dropping them
+      // costs the overlay; keeping them would point at the wrong symbol.
+      anchors: anchors ?? const [],
     );
   }
 

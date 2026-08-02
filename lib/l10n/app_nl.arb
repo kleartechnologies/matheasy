@@ -516,6 +516,8 @@
   "resultStepOfUpper": "STAP {step} VAN {total}",
   "resultStepOfTotal": "Stap {step} van {total}",
   "geometryStepOfLabel": "Stap {step} van {total}. {label}",
+  "geometryViewDiagram": "Tekening",
+  "geometryViewPhoto": "Jouw foto",
   "geometryStepOfTitle": "STAP {step} VAN {total} · {title}",
   "teachingLearningJourney": "Leertraject: {stages}",
   "teachingTemptingBecause": "Verleidelijk omdat: {reason}",

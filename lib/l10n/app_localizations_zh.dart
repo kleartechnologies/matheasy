@@ -1736,6 +1736,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => '图形';
+
+  @override
+  String get geometryViewPhoto => '你的照片';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return '第 $step／$total 步 · $title';
   }
@@ -3721,6 +3727,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get geometryViewDiagram => '图形';
+
+  @override
+  String get geometryViewPhoto => '你的照片';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return '第 $step／$total 步 · $title';
   }
@@ -5704,6 +5716,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String geometryStepOfLabel(int step, int total, String label) {
     return '第 $step 步，共 $total 步。$label';
   }
+
+  @override
+  String get geometryViewDiagram => '圖形';
+
+  @override
+  String get geometryViewPhoto => '你的照片';
 
   @override
   String geometryStepOfTitle(int step, int total, String title) {

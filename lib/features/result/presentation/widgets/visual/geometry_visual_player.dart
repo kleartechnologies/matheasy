@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ import '../../../../../core/widgets/widgets.dart';
 import '../../../domain/geometry_models.dart';
 import '../../../domain/visual_models.dart';
 import '../math_text.dart';
+import '../result_scan_image.dart';
 import 'geometry_scene_painter.dart';
 import 'visual_shared_widgets.dart';
 
@@ -25,12 +27,18 @@ import 'visual_shared_widgets.dart';
 ///
 /// Every measure it draws comes from the deterministically-solved
 /// [GeometryScene]; this widget only sequences and animates it.
+///
+/// When the problem was scanned, [scanImageBytes] puts the ORIGINAL photo one
+/// tap away in the same region: geometry is the one topic where the app redraws
+/// the figure rather than reading it, so the student must always be able to
+/// check the clean reconstruction against the thing they actually photographed.
 class GeometryVisualPlayer extends StatefulWidget {
   const GeometryVisualPlayer({
     super.key,
     required this.visual,
     required this.scene,
     required this.onAskMatheasy,
+    this.scanImageBytes,
   });
 
   final VisualSolution visual;
@@ -38,6 +46,11 @@ class GeometryVisualPlayer extends StatefulWidget {
 
   /// Called with the active step index when the student asks Matheasy.
   final ValueChanged<int> onAskMatheasy;
+
+  /// The photo the problem was scanned from, when there is one. Null for a
+  /// typed problem or a history re-open — the compare toggle simply doesn't
+  /// appear, and the player renders exactly as it did before.
+  final Uint8List? scanImageBytes;
 
   @override
   State<GeometryVisualPlayer> createState() => _GeometryVisualPlayerState();
@@ -58,6 +71,11 @@ class _GeometryVisualPlayerState extends State<GeometryVisualPlayer>
   bool _playing = false;
   bool _decidedAutoplay = false;
   Timer? _timer;
+
+  /// Whether the region is showing the student's original photo instead of the
+  /// app-drawn figure. Always starts on the diagram — the photo is the check,
+  /// not the lesson.
+  bool _showPhoto = false;
 
   List<GeometryStep> get _steps => widget.scene.steps;
   bool get _isLast => _index >= _steps.length - 1;
@@ -124,6 +142,15 @@ class _GeometryVisualPlayerState extends State<GeometryVisualPlayer>
     if (mounted) setState(() => _playing = false);
   }
 
+  /// Swap the region between the app-drawn figure and the original photo.
+  /// Autoplay pauses on the way to the photo — a walkthrough advancing behind a
+  /// view the student can't see is just a step they missed.
+  void _setShowPhoto(bool value) {
+    if (value == _showPhoto) return;
+    if (value) _pause();
+    setState(() => _showPhoto = value);
+  }
+
   void _goTo(int index, {bool fromTimer = false}) {
     if (!fromTimer) _pause();
     setState(() => _index = index.clamp(0, _steps.length - 1));
@@ -147,24 +174,38 @@ class _GeometryVisualPlayerState extends State<GeometryVisualPlayer>
     final viewport = MediaQuery.sizeOf(context).height;
     final playerHeight = (viewport * 0.66).clamp(380.0, 640.0);
 
+    final photo = widget.scanImageBytes;
+    final canCompare = photo != null && photo.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Both figures, one tap apart: the clean diagram the app constructed and
+        // the photo it was constructed from. Only for a scanned problem.
+        if (canCompare) ...[
+          _CompareToggle(
+            showPhoto: _showPhoto,
+            onChanged: _setShowPhoto,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         SizedBox(
           height: playerHeight,
           child: Column(
             children: [
-              // 70% — the animated diagram.
+              // 70% — the animated diagram (or the original photo).
               Expanded(
                 flex: 7,
-                child: _Diagram(
-                  scene: widget.scene,
-                  index: _index,
-                  entrance: _entrance,
-                  pulse: _pulse,
-                  palette: palette,
-                  reduceMotion: reduceMotion,
-                ),
+                child: canCompare && _showPhoto
+                    ? _ScanPhoto(imageBytes: photo)
+                    : _Diagram(
+                        scene: widget.scene,
+                        index: _index,
+                        entrance: _entrance,
+                        pulse: _pulse,
+                        palette: palette,
+                        reduceMotion: reduceMotion,
+                      ),
               ),
               const SizedBox(height: AppSpacing.sm),
               // 20% — the compact step explanation.
@@ -229,6 +270,80 @@ class _GeometryVisualPlayerState extends State<GeometryVisualPlayer>
       badgeBackground: colors.warningContainer,
       badgeText: colors.onWarningContainer,
       tick: emerald,
+    );
+  }
+}
+
+/// The Diagram / Your-photo switch above the region.
+///
+/// Geometry is the one place the app REDRAWS the problem instead of reading it
+/// back, so the reconstruction has to stay auditable: one tap puts the original
+/// photo in the same frame, at the same size, for a direct comparison. Narrow
+/// and left-aligned so it never reads as a second set of result tabs.
+class _CompareToggle extends StatelessWidget {
+  const _CompareToggle({required this.showPhoto, required this.onChanged});
+
+  final bool showPhoto;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 260),
+        child: SegmentedControl(
+          selectedIndex: showPhoto ? 1 : 0,
+          onChanged: (i) => onChanged(i == 1),
+          items: [
+            SegmentItem(
+              label: context.l10n.geometryViewDiagram,
+              icon: Icons.architecture_rounded,
+            ),
+            SegmentItem(
+              label: context.l10n.geometryViewPhoto,
+              icon: Icons.image_outlined,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The original photo, shown in the region the diagram normally occupies —
+/// same card, same size, so switching back and forth actually compares.
+class _ScanPhoto extends StatelessWidget {
+  const _ScanPhoto({required this.imageBytes});
+
+  final Uint8List imageBytes;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AppCard(
+      padding: EdgeInsets.zero,
+      clip: true,
+      onTap: () => showScannedImageFullScreen(context, imageBytes),
+      child: Semantics(
+        image: true,
+        label: context.l10n.resultScannedImageLabel,
+        child: Container(
+          width: double.infinity,
+          color: colors.surfaceMuted,
+          alignment: Alignment.center,
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.contain,
+            // A malformed capture must never take the player down with it.
+            errorBuilder: (_, _, _) => Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child:
+                  Icon(Icons.broken_image_outlined, color: colors.textMuted),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

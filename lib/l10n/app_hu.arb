@@ -516,6 +516,8 @@
   "resultStepOfUpper": "{step}. LÉPÉS, ÖSSZESEN {total}",
   "resultStepOfTotal": "{step}. lépés, összesen {total}",
   "geometryStepOfLabel": "{step}. lépés, összesen {total}. {label}",
+  "geometryViewDiagram": "Ábra",
+  "geometryViewPhoto": "A fotód",
   "geometryStepOfTitle": "{step}. LÉPÉS, ÖSSZESEN {total} · {title}",
   "teachingLearningJourney": "Tanulási út: {stages}",
   "teachingTemptingBecause": "Csábító, mert: {reason}",

@@ -516,6 +516,8 @@
   "resultStepOfUpper": "ADIM {step} / {total}",
   "resultStepOfTotal": "Adım {step} / {total}",
   "geometryStepOfLabel": "Adım {step} / {total}. {label}",
+  "geometryViewDiagram": "Şekil",
+  "geometryViewPhoto": "Fotoğrafın",
   "geometryStepOfTitle": "ADIM {step} / {total} · {title}",
   "teachingLearningJourney": "Öğrenme yolculuğu: {stages}",
   "teachingTemptingBecause": "Cazip çünkü: {reason}",

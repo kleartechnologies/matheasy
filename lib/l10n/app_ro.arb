@@ -516,6 +516,8 @@
   "resultStepOfUpper": "PASUL {step} DIN {total}",
   "resultStepOfTotal": "Pasul {step} din {total}",
   "geometryStepOfLabel": "Pasul {step} din {total}. {label}",
+  "geometryViewDiagram": "Desen",
+  "geometryViewPhoto": "Poza ta",
   "geometryStepOfTitle": "PASUL {step} DIN {total} · {title}",
   "teachingLearningJourney": "Parcurs de învățare: {stages}",
   "teachingTemptingBecause": "Tentant pentru că: {reason}",

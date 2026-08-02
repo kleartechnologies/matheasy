@@ -20,7 +20,6 @@ import type { MsStep } from "mathsteps";
 
 import {
   OPENAI_API_KEY,
-  OPENAI_MODEL,
   REVENUECAT_SECRET_KEY,
   animationSchemaEnabled,
 } from "../config";
@@ -224,11 +223,15 @@ export const solveEquation = onCall(
       // OpenAI JSON completer for the solve narration + any LLM-candidate solve.
       // Only the fresh-solve branch calls OpenAI (a cache hit does not), so it's
       // allocated here — teaching moved to its own `enrichTeaching` callable.
-      const complete: JsonCompleter = (system, user, maxTokens) => {
+      const complete: JsonCompleter = (system, user, maxTokens, attempt) => {
         const client = createOpenAI(OPENAI_API_KEY.value());
         return chatJson<Record<string, unknown>>(
           client,
-          OPENAI_MODEL.value(),
+          // A retry only happens after the verification gate REJECTED the first
+          // candidate, so that problem has already proven to need more thinking
+          // than the default effort gave it. `solveRetry` escalates to maximum
+          // effort (and the token headroom to match).
+          attempt === "retry" ? "solveRetry" : "solve",
           // Narrate the steps in the learner's language (math stays universal).
           system + languageDirective(language),
           user,
@@ -424,10 +427,11 @@ export async function solve(
     return couldNotVerify(cls, "no_verify_mode", onCouldNotVerify);
   }
 
-  const llm = await generateLlmCandidate(complete, cls);
+  let llm = await generateLlmCandidate(complete, cls);
   if (!llm) return couldNotVerify(cls, "llm_no_candidate", onCouldNotVerify);
 
-  const outcome = verifyCandidate(cls, llm);
+  let outcome = verifyCandidate(cls, llm);
+
   if (!outcome.ok) {
     // Log WHAT the model returned so a rejection reads as "model was wrong /
     // imprecise" vs a gate problem — the substitution check itself is trusted.
@@ -436,7 +440,41 @@ export async function solve(
       answer: llm.answer.plain,
       values: llm.assignments.map((a) => a.value),
     });
-    return couldNotVerify(cls, "verify_gate_failed", onCouldNotVerify);
+
+    // ONE retry, at maximum reasoning effort and told exactly which answer just
+    // failed. A large share of rejections are not "this problem is unsolvable"
+    // but a recoverable slip — a root rounded too coarsely to survive
+    // substitution, a missed second root, an extraneous log root left in. Giving
+    // up after a single sample throws those away.
+    //
+    // The golden rule is untouched: the retry's candidate goes through the SAME
+    // `verifyCandidate` gate. This can only convert a rejected answer into a
+    // proven one or leave the honest couldn't-verify exactly as it was — it can
+    // never let an unverified answer through.
+    //
+    // COST: bounded at 2 candidate calls per solve, and only on the minority
+    // path where the first was rejected. Note `RATE_LIMITS.solve` meters
+    // REQUESTS, not OpenAI calls, so a user's worst-case call ceiling doubles on
+    // rejections — the same trade-off already documented for teaching enrichment.
+    const retry = await generateLlmCandidate(complete, cls, "retry", llm.answer.plain);
+    const retryOutcome = retry ? verifyCandidate(cls, retry) : null;
+
+    if (retry && retryOutcome?.ok) {
+      logger.info("solve.retryVerified", {
+        problemType: cls.problemType,
+        rejected: llm.answer.plain,
+        answer: retry.answer.plain,
+      });
+      llm = retry;
+      outcome = retryOutcome;
+    } else {
+      logger.info("solve.retryRejected", {
+        problemType: cls.problemType,
+        firstAnswer: llm.answer.plain,
+        retryAnswer: retry?.answer.plain ?? null,
+      });
+      return couldNotVerify(cls, "verify_gate_failed", onCouldNotVerify);
+    }
   }
 
   return {

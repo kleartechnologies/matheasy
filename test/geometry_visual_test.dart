@@ -5,6 +5,9 @@
 // (70/20/10), steps advance, and the animated painter survives every step under
 // both normal and reduced motion. Offline throughout.
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,6 +39,13 @@ VisualSolution _sceneSolution() {
     geometryScene: scene,
   );
 }
+
+/// A real (1×1, transparent) PNG, so `Image.memory` takes its decode path
+/// rather than the error placeholder.
+final Uint8List _pngBytes = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk'
+  'YPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+);
 
 Future<void> _pump(
   WidgetTester tester,
@@ -267,6 +277,77 @@ void main() {
       }
       expect(find.textContaining('STEP 4 OF 4'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    // Geometry is the one topic where the app REDRAWS the problem instead of
+    // reading it back, so the reconstruction has to stay checkable against the
+    // photo it came from — both figures, one tap apart, at the same size.
+    testWidgets('a scanned problem can switch the region to the original photo',
+        (tester) async {
+      final sol = _sceneSolution();
+      await _pump(tester, GeometryVisualPlayer(
+        visual: sol,
+        scene: sol.geometryScene!,
+        scanImageBytes: _pngBytes,
+        onAskMatheasy: (_) {},
+      ));
+
+      // Starts on the diagram — the photo is the check, not the lesson.
+      expect(_geometryPainter(), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+
+      await tester.tap(find.text('Your photo'));
+      await tester.pump();
+
+      expect(find.byType(Image), findsOneWidget);
+      expect(_geometryPainter(), findsNothing);
+
+      // ...and back, so the two are genuinely comparable.
+      await tester.tap(find.text('Diagram'));
+      await tester.pump();
+      expect(_geometryPainter(), findsOneWidget);
+    });
+
+    testWidgets('switching to the photo pauses autoplay', (tester) async {
+      // A walkthrough advancing behind a view the student can't see is a step
+      // they silently missed.
+      final sol = _sceneSolution();
+      await _pump(
+        tester,
+        GeometryVisualPlayer(
+          visual: sol,
+          scene: sol.geometryScene!,
+          scanImageBytes: _pngBytes,
+          onAskMatheasy: (_) {},
+        ),
+        reduceMotion: false,
+      );
+      expect(find.textContaining('STEP 1 OF 4'), findsOneWidget);
+
+      await tester.tap(find.text('Your photo'));
+      await tester.pump();
+      await tester.pump(AppDurations.walkthroughStep * 2);
+      await tester.pump();
+
+      await tester.tap(find.text('Diagram'));
+      await tester.pump();
+      expect(find.textContaining('STEP 1 OF 4'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a typed problem shows no compare toggle at all',
+        (tester) async {
+      final sol = _sceneSolution();
+      await _pump(tester, GeometryVisualPlayer(
+        visual: sol,
+        scene: sol.geometryScene!,
+        onAskMatheasy: (_) {},
+      ));
+
+      expect(find.text('Your photo'), findsNothing);
+      expect(find.text('Diagram'), findsNothing);
+      expect(_geometryPainter(), findsOneWidget);
     });
 
     testWidgets('auto-plays through the steps under normal motion',

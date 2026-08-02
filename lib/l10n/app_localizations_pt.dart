@@ -1827,6 +1827,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Diagrama';
+
+  @override
+  String get geometryViewPhoto => 'A tua foto';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'PASSO $step DE $total · $title';
   }

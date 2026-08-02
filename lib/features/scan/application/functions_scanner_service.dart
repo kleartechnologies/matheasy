@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../../../core/backend/functions_client.dart';
 import '../domain/detected_equation.dart';
+import '../domain/scan_anchor.dart';
 import '../domain/scan_source.dart';
 import 'scanner_service.dart';
 
@@ -55,6 +56,7 @@ class FunctionsScannerService implements ScannerService {
     final confidence = json['confidence'];
     final topic = json['topic'] is String ? json['topic'] as String : null;
     final geometry = json['geometry'];
+    final ocr = json['ocr'];
     return DetectedEquation(
       latex: latex,
       confidence: confidence is num ? confidence.toDouble().clamp(0.0, 1.0) : 0.9,
@@ -67,6 +69,13 @@ class FunctionsScannerService implements ScannerService {
       geometry: geometry is Map
           ? Map<String, dynamic>.from(geometry)
           : null,
+      // How the page was read (the transcription pass's draft + its doubts).
+      // Absent on an older backend — the tutor context simply omits the block.
+      ocr: ocr is Map ? Map<String, dynamic>.from(ocr) : null,
+      // WHERE each concept sits on the photo, so the tutor can point at the
+      // student's own page instead of reading values out loud. Empty on an
+      // older backend, which simply means no overlay.
+      anchors: ScanAnchor.listFromJson(json['anchors']),
     );
   }
 

@@ -516,6 +516,8 @@
   "resultStepOfUpper": "КРОК {step} З {total}",
   "resultStepOfTotal": "Крок {step} з {total}",
   "geometryStepOfLabel": "Крок {step} з {total}. {label}",
+  "geometryViewDiagram": "Креслення",
+  "geometryViewPhoto": "Твоє фото",
   "geometryStepOfTitle": "КРОК {step} З {total} · {title}",
   "teachingLearningJourney": "Шлях навчання: {stages}",
   "teachingTemptingBecause": "Спокусливо, бо: {reason}",

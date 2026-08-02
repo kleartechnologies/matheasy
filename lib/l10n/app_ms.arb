@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "Langkah seterusnya · {current} daripada {total}",
   "visualTeaserBecomes": "{before} menjadi {after}. Buka kunci Pro untuk menonton setiap langkah terungkai.",
+  "geometryViewDiagram": "Rajah",
+  "geometryViewPhoto": "Foto kamu",
   "geometryStepOfTitle": "LANGKAH {step} DARIPADA {total} · {title}",
   "practiceXpToNextLevel": "{xp} XP ke Tahap {level}",
   "practiceTopicMastery": "Penguasaan {topic}",

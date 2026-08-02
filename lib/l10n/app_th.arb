@@ -516,6 +516,8 @@
   "resultStepOfUpper": "ขั้นตอนที่ {step} จาก {total}",
   "resultStepOfTotal": "ขั้นตอนที่ {step} จาก {total}",
   "geometryStepOfLabel": "ขั้นตอนที่ {step} จาก {total} {label}",
+  "geometryViewDiagram": "รูป",
+  "geometryViewPhoto": "รูปถ่ายของเธอ",
   "geometryStepOfTitle": "ขั้นตอนที่ {step} จาก {total} · {title}",
   "teachingLearningJourney": "เส้นทางการเรียนรู้: {stages}",
   "teachingTemptingBecause": "น่าเข้าใจผิดเพราะ: {reason}",

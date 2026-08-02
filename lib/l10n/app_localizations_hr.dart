@@ -1810,6 +1810,12 @@ class AppLocalizationsHr extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Crtež';
+
+  @override
+  String get geometryViewPhoto => 'Tvoja fotografija';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'KORAK $step OD $total · $title';
   }

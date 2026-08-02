@@ -516,6 +516,8 @@
   "resultStepOfUpper": "שלב {step} מתוך {total}",
   "resultStepOfTotal": "שלב {step} מתוך {total}",
   "geometryStepOfLabel": "שלב {step} מתוך {total}. {label}",
+  "geometryViewDiagram": "תרשים",
+  "geometryViewPhoto": "התמונה שלך",
   "geometryStepOfTitle": "שלב {step} מתוך {total} · {title}",
   "teachingLearningJourney": "מסע הלמידה: {stages}",
   "teachingTemptingBecause": "מפתה כי: {reason}",

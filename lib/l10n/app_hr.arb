@@ -516,6 +516,8 @@
   "resultStepOfUpper": "KORAK {step} OD {total}",
   "resultStepOfTotal": "Korak {step} od {total}",
   "geometryStepOfLabel": "Korak {step} od {total}. {label}",
+  "geometryViewDiagram": "Crtež",
+  "geometryViewPhoto": "Tvoja fotografija",
   "geometryStepOfTitle": "KORAK {step} OD {total} · {title}",
   "teachingLearningJourney": "Put učenja: {stages}",
   "teachingTemptingBecause": "Primamljivo jer: {reason}",

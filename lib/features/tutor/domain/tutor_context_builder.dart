@@ -41,7 +41,53 @@ class TutorContextBuilder {
       steps: _steps(result),
       commonMistakes: _commonMistakes(result),
       source: source ?? _source(result),
+      // How the problem was READ, so Numi can question the transcription rather
+      // than defend an answer to a problem the student never wrote.
+      ocrLatex: _ocrString(result, 'latex'),
+      ocrConfidence: _ocrConfidence(result),
+      ocrUncertain: _ocrUncertain(result),
+      // The practice the app has already generated and checked for this problem.
+      practice: [
+        for (final q in result.practice.take(maxPractice))
+          if (q.questionLatex.isNotEmpty)
+            '${q.questionLatex} (${q.difficulty.name})',
+      ],
+      // The page itself. Sent on the opening turn only — the server drops it on
+      // every turn after that (see `openingScanImage` in `tutor.ts`).
+      scanImageBytes: result.equation.imageBytes,
+      // …and the map of that page, which rides along on every turn instead. The
+      // photo is what Numi reads once; the anchors are what Numi points at for
+      // the rest of the conversation.
+      anchors: result.equation.anchors,
     );
+  }
+
+  /// How many practice questions to name. Enough for "give me another one" to
+  /// have somewhere to point; not so many that the prompt turns into a worksheet.
+  static const int maxPractice = 5;
+
+  /// How many doubtful marks to carry. The server caps again at 6.
+  static const int maxUncertain = 6;
+
+  static String? _ocrString(ResultData result, String key) {
+    final value = result.equation.ocr?[key];
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static double? _ocrConfidence(ResultData result) {
+    final value = result.equation.ocr?['confidence'];
+    return value is num ? value.toDouble().clamp(0.0, 1.0) : null;
+  }
+
+  static List<String> _ocrUncertain(ResultData result) {
+    final value = result.equation.ocr?['uncertain'];
+    if (value is! List) return const [];
+    return [
+      for (final item in value)
+        if (item is String && item.trim().isNotEmpty) item.trim(),
+    ].take(maxUncertain).toList();
   }
 
   static List<TutorContextStep> _steps(ResultData result) {

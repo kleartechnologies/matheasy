@@ -1813,6 +1813,12 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Чертёж';
+
+  @override
+  String get geometryViewPhoto => 'Твоё фото';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'ШАГ $step ИЗ $total · $title';
   }

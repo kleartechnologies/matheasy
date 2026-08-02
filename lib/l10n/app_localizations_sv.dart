@@ -1808,6 +1808,12 @@ class AppLocalizationsSv extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Figur';
+
+  @override
+  String get geometryViewPhoto => 'Din bild';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'STEG $step AV $total · $title';
   }

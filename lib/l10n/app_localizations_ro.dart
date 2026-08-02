@@ -1815,6 +1815,12 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Desen';
+
+  @override
+  String get geometryViewPhoto => 'Poza ta';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'PASUL $step DIN $total · $title';
   }

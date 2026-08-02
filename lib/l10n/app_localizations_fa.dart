@@ -1807,6 +1807,12 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'نمودار';
+
+  @override
+  String get geometryViewPhoto => 'عکس تو';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'گام $step از $total · $title';
   }

@@ -13,6 +13,9 @@ String _hex(MathRole role) => switch (role) {
       MathRole.unknown => '#444444',
       MathRole.mistake => '#555555',
       MathRole.aside => '#666666',
+      MathRole.hint => '#777777',
+      MathRole.concept => '#888888',
+      MathRole.memory => '#999999',
     };
 
 String _colorize(String latex, List<MathHighlight> spans) =>

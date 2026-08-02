@@ -22,11 +22,21 @@ import {
 } from "./types";
 import { Interval } from "./verify";
 
+/**
+ * Which attempt at a problem this completion is.
+ *
+ * The solver stays provider-agnostic — it says only that this is a SECOND try
+ * after the verification gate rejected the first. The proxy decides what that
+ * costs (a stronger reasoning effort; see `lib/models.ts`).
+ */
+export type CompletionAttempt = "first" | "retry";
+
 /** Injected JSON-mode completion (wired to OpenAI in the proxy; stubbed in tests). */
 export type JsonCompleter = (
   system: string,
   user: string,
-  maxTokens: number
+  maxTokens: number,
+  attempt?: CompletionAttempt
 ) => Promise<Record<string, unknown>>;
 
 // --- Deterministic narration ------------------------------------------------
@@ -161,15 +171,45 @@ Rules:
 - Provide 1-2 methods, exactly one with "examPick": true, each with 2-5 steps.
 - All LaTeX must be valid and delimiter-free (no $, no \\[ \\]).`;
 
-/** Get a candidate solution from the LLM; returns null on failure. */
+/**
+ * What the FIRST candidate got wrong, fed back into the retry.
+ *
+ * Telling the model that a specific answer failed substitution is a far stronger
+ * correction signal than simply asking it to think harder — it rules that answer
+ * out explicitly. It changes nothing about trust: the retry's candidate goes
+ * through exactly the same verification gate, so this can only ever turn a
+ * rejected answer into a PROVEN one or into an honest couldn't-verify.
+ */
+export function retryDirective(rejected: string): string {
+  return (
+    `\n\nIMPORTANT — this is a SECOND attempt. Your previous answer was ${rejected}, ` +
+    "and it FAILED verification: substituting it back into the original problem did " +
+    "not hold. That answer is wrong — do not repeat it. Work the problem again from " +
+    "the start by a different route, and before answering, substitute your result " +
+    "back into the ORIGINAL problem yourself and confirm both sides agree. If the " +
+    "solutions are irrational, give 8+ significant digits; a rounded root fails the check."
+  );
+}
+
+/**
+ * Get a candidate solution from the LLM; returns null on failure.
+ *
+ * [attempt] is passed through to the completer so the proxy can escalate the
+ * model's reasoning effort on a retry, and [rejected] (the answer the gate threw
+ * out) is fed back to the model so it does not simply produce it again.
+ */
 export async function generateLlmCandidate(
   complete: JsonCompleter,
-  cls: Classification
+  cls: Classification,
+  attempt: CompletionAttempt = "first",
+  rejected?: string
 ): Promise<LlmCandidate | null> {
-  const user = `Problem (LaTeX): ${cls.latex}\nProblem type: ${cls.problemType}`;
+  const user =
+    `Problem (LaTeX): ${cls.latex}\nProblem type: ${cls.problemType}` +
+    (attempt === "retry" && rejected ? retryDirective(rejected) : "");
   let json: Record<string, unknown>;
   try {
-    json = await complete(CANDIDATE_SYSTEM, user, 2000);
+    json = await complete(CANDIDATE_SYSTEM, user, 2000, attempt);
   } catch (err) {
     // Was swallowed silently — an OpenAI 429 / timeout / malformed JSON here is
     // the difference between "the model errored" and "we honestly couldn't

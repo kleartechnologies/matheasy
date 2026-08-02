@@ -1,16 +1,35 @@
 /**
- * `recognizeEquation` — the secure OpenAI Vision OCR proxy.
+ * `recognizeEquation` — the secure OpenAI Vision OCR proxy, and pass 2 of the
+ * scan pipeline.
  *
- * The app sends a base64 photo; this function calls OpenAI Vision (gpt-4o) with
- * the secret API key and returns clean, delimiter-free LaTeX for the primary
- * problem in the image. Mirrors the Flutter `ScannerService` contract
- * (`recognize` → a detected equation), and meters against the free `scans`
- * quota.
+ * The app sends a base64 photo; this function returns clean, delimiter-free
+ * LaTeX for the primary problem in the image. It mirrors the Flutter
+ * `ScannerService` contract (`recognize` → a detected equation) and meters
+ * against the free `scans` quota.
+ *
+ * Reading the photo is THREE stages, not one:
+ *
+ *   1. **Preprocess** (`lib/imagePrep.ts`) — render a contrast-enhanced second
+ *      view of the page, so faint pencil and thin strokes are legible.
+ *   2. **OCR** (`./ocr.ts`) — a transcription-only pass that reads the page
+ *      without interpreting it, and reports which marks it was unsure about.
+ *   3. **Vision reasoning** (here) — interpret the problem with BOTH images and
+ *      that draft reading in hand: correct the OCR, classify the topic, and
+ *      extract the structured geometry facts.
+ *
+ * The split exists because a single pass that reads and interprets at once tends
+ * to normalise what it sees into the problem it expects — quietly turning
+ * `f'(x)` into `f(x)`. Stage 3 can only CORRECT stage 2 if stage 2 committed to
+ * a literal reading first.
+ *
+ * Every added stage fails soft: if preprocessing or OCR fails, this collapses to
+ * the original single-image call. `SCAN_PIPELINE_ENABLED=false` does the same on
+ * purpose.
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
+import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY, scanPipelineEnabled } from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -19,6 +38,9 @@ import {
 } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatVisionJson, createOpenAI, moderateImage } from "../lib/openai";
+import { prepareScanImage, visionImages } from "../lib/imagePrep";
+import { ocrContextBlock, OcrReading, readPage } from "./ocr";
+import { deriveSemanticAnchors } from "./anchors";
 
 interface ScanRequest {
   imageBase64?: string;
@@ -147,7 +169,13 @@ Example of a well-formed multi-part transcription:
 "\\text{It is given that } \\tan\\theta = 2. \\\\ \\text{(i) Find the exact value of } \\tan A \\text{, given that } \\tan(A+\\theta)=4. \\\\ \\text{(ii) Find the exact value of } \\tan B \\text{, given that } \\sin(B+\\theta)=3\\cos(B-\\theta)."`;
 
 export const recognizeEquation = onCall(
-  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 60 },
+  {
+    secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY],
+    // Preprocessing + two sequential reasoning-model vision passes; the old
+    // 60s ceiling was sized for a single gpt-4o call.
+    memory: "1GiB",
+    timeoutSeconds: 180,
+  },
   async (request) => {
     const uid = requireUid(request);
     const { imageBase64, mimeType = "image/jpeg", source = "camera" } =
@@ -196,14 +224,33 @@ export const recognizeEquation = onCall(
       );
     }
 
+    // --- Stage 1: preprocessing ---------------------------------------------
+    // Produces the contrast-enhanced second view of the page. Fails soft to
+    // "original only", so a sharp/format problem costs accuracy, never a scan.
+    const pipeline = scanPipelineEnabled();
+    const prepared = pipeline
+      ? await prepareScanImage(imageDataUri)
+      : { original: imageDataUri, enhanced: null };
+    const images = visionImages(prepared.original, prepared.enhanced);
+
+    // --- Stage 2: OCR -------------------------------------------------------
+    // A dedicated transcription-only pass, so stage 3 has a draft to CORRECT
+    // rather than having to read and interpret in one breath. Returns null on
+    // any failure; stage 3 runs on the images alone in that case.
+    const reading: OcrReading | null = pipeline ? await readPage(client, images) : null;
+
+    // --- Stage 3: vision reasoning ------------------------------------------
+    // Interpretation, OCR correction, topic, and the structured geometry facts —
+    // with both images AND the draft reading in front of it.
     let result: ScanPayload;
     try {
       result = await chatVisionJson<ScanPayload>(
         client,
-        OPENAI_MODEL.value(),
+        "scan",
         SYSTEM_PROMPT,
-        imageDataUri,
-        "Read the ENTIRE math problem in this photo — every line, all given conditions, every sub-part, and the question(s) — and return the JSON described above.",
+        images,
+        "Read the ENTIRE math problem in this photo — every line, all given conditions, every sub-part, and the question(s) — and return the JSON described above." +
+          ocrContextBlock(reading),
         // Room for a full multi-part transcription (givens + (i)/(ii)/… + questions).
         { temperature: 0.1, maxTokens: 1200 }
       );
@@ -223,6 +270,13 @@ export const recognizeEquation = onCall(
     // Preserves the full multi-line `problem` intact for the solver.
     const { isMath, problem, topic, confidence, geometry } =
       coerceScanResult(result);
+
+    // Turn the OCR's raw marks into things a tutor can talk about — "the angle
+    // at B", "the unknown" — by crossing the boxes stage 2 placed with the
+    // structured facts stage 3 named. Deterministic and model-free: nothing here
+    // may invent a location, so an empty list is the honest outcome whenever the
+    // reader placed nothing.
+    const anchors = deriveSemanticAnchors(reading?.anchors ?? [], geometry);
 
     // Meter the paid Vision call HERE, before the not-found check: the request
     // was billed the moment `chatVisionJson` returned, whether or not math was
@@ -248,6 +302,23 @@ export const recognizeEquation = onCall(
       // client validates + computes. Present only for solvable angle/right-
       // triangle problems, else null.
       geometry,
+      // The OCR stage's own reading, carried through for Numi: when a student
+      // says "that's not what my paper says", the difference between the draft
+      // transcription and the final one is the evidence for what was misread.
+      // Purely informational — nothing downstream computes from it.
+      ocr: reading
+        ? {
+            latex: reading.latex,
+            confidence: reading.confidence,
+            uncertain: reading.uncertain,
+          }
+        : null,
+      // WHERE things are on the page, as concepts rather than marks — so the
+      // tutor can point at "this angle" on the student's own photo instead of
+      // reading a number out loud. Derived deterministically from the OCR boxes
+      // and the geometry facts (`anchors.ts`); never asked of a model, never
+      // computed from. Empty whenever pass 1 placed nothing.
+      anchors,
       usage: quota,
     };
   }

@@ -516,6 +516,8 @@
   "resultStepOfUpper": "الخطوة {step} من {total}",
   "resultStepOfTotal": "الخطوة {step} من {total}",
   "geometryStepOfLabel": "الخطوة {step} من {total}. {label}",
+  "geometryViewDiagram": "الرسم",
+  "geometryViewPhoto": "صورتك",
   "geometryStepOfTitle": "الخطوة {step} من {total} · {title}",
   "teachingLearningJourney": "رحلة التعلم: {stages}",
   "teachingTemptingBecause": "مغرٍ لأن: {reason}",

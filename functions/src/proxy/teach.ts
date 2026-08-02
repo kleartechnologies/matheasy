@@ -18,7 +18,6 @@ import { logger } from "firebase-functions/v2";
 
 import {
   OPENAI_API_KEY,
-  OPENAI_MODEL,
   PRO_ENTITLEMENT_ID,
   teachingEnabled,
 } from "../config";
@@ -71,7 +70,7 @@ export const enrichTeaching = onCall(
       const client = createOpenAI(OPENAI_API_KEY.value());
       return chatJson<Record<string, unknown>>(
         client,
-        OPENAI_MODEL.value(),
+        "teach",
         // Inject the language directive into every teaching LLM call so all
         // narration is written in the learner's language (math stays universal).
         system + languageDirective(language),

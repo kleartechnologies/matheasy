@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "Langkah berikutnya · {current} dari {total}",
   "visualTeaserBecomes": "{before} menjadi {after}. Buka Pro untuk menyaksikan setiap langkah terungkap.",
+  "geometryViewDiagram": "Diagram",
+  "geometryViewPhoto": "Foto kamu",
   "geometryStepOfTitle": "LANGKAH {step} DARI {total} · {title}",
   "practiceXpToNextLevel": "{xp} XP lagi menuju Level {level}",
   "practiceTopicMastery": "Penguasaan {topic}",

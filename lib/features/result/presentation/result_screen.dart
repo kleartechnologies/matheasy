@@ -413,6 +413,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           GeometryVisualPlayer(
             visual: _geoVisual(scene),
             scene: scene,
+            // Also inside the player, at diagram size — the card above is a
+            // thumbnail, and a reconstruction is only auditable against the
+            // photo at the same scale.
+            scanImageBytes: widget.equation?.imageBytes,
             onAskMatheasy: (step) => _askMatheasyAboutGeometry(scene, step),
           ),
         ],

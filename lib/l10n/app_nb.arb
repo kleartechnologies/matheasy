@@ -516,6 +516,8 @@
   "resultStepOfUpper": "STEG {step} AV {total}",
   "resultStepOfTotal": "Steg {step} av {total}",
   "geometryStepOfLabel": "Steg {step} av {total}. {label}",
+  "geometryViewDiagram": "Figur",
+  "geometryViewPhoto": "Bildet ditt",
   "geometryStepOfTitle": "STEG {step} AV {total} · {title}",
   "teachingLearningJourney": "Læringsreise: {stages}",
   "teachingTemptingBecause": "Fristende fordi: {reason}",

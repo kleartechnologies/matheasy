@@ -30,14 +30,27 @@ import OpenAI from "openai";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
+import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY } from "../config";
 import { requireUid } from "../lib/auth";
 import { assertWithinQuota, ensureUserDoc, incrementUsage } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { createOpenAI } from "../lib/openai";
+import { chatParams } from "../lib/models";
 import { languageDirective } from "../lib/language";
 import { verifyTutorCard, type TutorCardOut } from "./tutorCard";
 import { verifyTutorFocus, type TutorFocusOut } from "./tutorFocus";
+import {
+  anchorContextBlock,
+  coerceSemanticAnchors,
+  type SemanticAnchor,
+} from "./anchors";
+import { verifyTutorActions, type TutorActionOut } from "./tutorActions";
+import {
+  normalizeVerificationState,
+  verificationDirective,
+  verificationState,
+  type VerificationState,
+} from "./tutorVerification";
 import {
   DEFAULT_TUTOR_MODE,
   modeAwaitsStudent,
@@ -67,6 +80,22 @@ interface TutorStep {
   rule?: string;
 }
 
+/**
+ * How the problem was READ off the page — the scanner's draft transcription and
+ * how sure it was (see `proxy/ocr.ts`).
+ *
+ * Numi needs this because the most common "the app is wrong" is not a wrong
+ * solve, it is a wrong READ: a 5 taken for a 6, a missing prime, a lost minus.
+ * Knowing the confidence and exactly which marks were doubtful lets her say
+ * "the 6 in the second line was hard to read — is it a 6 or a 5?" instead of
+ * defending an answer to a problem the student never wrote.
+ */
+interface TutorOcr {
+  latex?: string;
+  confidence?: number;
+  uncertain?: string[];
+}
+
 /** The full solve context (spec Part 1) — everything Numi should already know. */
 interface TutorProblem {
   questionLatex?: string;
@@ -80,6 +109,21 @@ interface TutorProblem {
   steps?: TutorStep[];
   commonMistakes?: string[];
   source?: string;
+  /** The scanner's read of the photo, when the problem came from one. */
+  ocr?: TutorOcr;
+  /** The practice questions the app has already generated for this problem. */
+  practice?: string[];
+  /**
+   * The parts of the student's page Numi may point at, derived deterministically
+   * at scan time (see `anchors.ts`). Empty for a typed problem.
+   */
+  anchors?: unknown;
+  /**
+   * How sure the app is (see `tutorVerification.ts`). The client may send one;
+   * an absent or unrecognised value is recomputed here from the facts, so an
+   * older client still gets the right behaviour.
+   */
+  verification?: unknown;
 }
 
 /** The exact step the student tapped "Ask Numi about this" on (spec Part 6). */
@@ -113,6 +157,13 @@ interface TutorRequest {
    * `tutorWork.ts` — before Numi is allowed to say a word about it.
    */
   studentWork?: unknown;
+  /**
+   * The photo the problem was scanned from, as base64 or a data URI. Optional,
+   * and read only on the OPENING turn — see `openingScanImage`.
+   */
+  imageBase64?: string;
+  /** MIME type for [imageBase64] when it isn't already a data URI. */
+  mimeType?: string;
   language?: string;
   /** Legacy (pre-Numi clients). */
   problemLatex?: string;
@@ -135,6 +186,8 @@ interface TutorPayload {
   card?: unknown;
   focus?: unknown;
   meta?: unknown;
+  /** Where to point on the student's page — verified in `tutorActions.ts`. */
+  actions?: unknown;
 }
 
 /** The chips the client can render. The model picks ids; the CLIENT localizes. */
@@ -161,6 +214,9 @@ const SUGGESTION_SET = new Set<string>(SUGGESTION_IDS);
 
 const MAX_STEPS = 14;
 const MAX_HISTORY = 14;
+
+/** Mirrors `MAX_IMAGE_BASE64_LEN` in `scan.ts` — ~5MB base64 ≈ 3.7MB decoded. */
+const MAX_IMAGE_BASE64_LEN = 5_000_000;
 
 const SYSTEM_PROMPT = `You are Numi, the AI math tutor inside the Matheasy app. You are a warm, patient private tutor sitting beside one student — not a chatbot, not documentation, not an answer machine. Your job is that the student leaves understanding MORE than before, not that they leave with an answer.
 
@@ -191,6 +247,7 @@ RESPONSE — return ONLY a JSON object, no markdown:
   "suggestions": ["2-3 ids from the allowed list below"],
   "card": null,
   "focus": null,
+  "actions": [],
   "meta": {
     "conceptsCovered": ["short names of ideas you taught this turn"],
     "mistake": "the specific misconception the student just showed, or null",
@@ -223,7 +280,16 @@ SKETCH — add a picture when the maths has one. Inside "focus" you may add "ske
 - "parabola" — a quadratic; draws the curve with its roots.
 - "area" — a definite integral; shades the region being measured.
 - "unitCircle" — a trig ratio of a specific angle; draws the angle on the unit circle.
-You give the NAME only. Every number in the drawing is computed by the app from the same verified equation, so a picture can never disagree with the maths — and if the equation isn't really that shape, the app draws nothing. Omit "sketch" when no picture would help.`;
+You give the NAME only. Every number in the drawing is computed by the app from the same verified equation, so a picture can never disagree with the maths — and if the equation isn't really that shape, the app draws nothing. Omit "sketch" when no picture would help.
+
+ACTIONS — point at their page while you talk. When the context includes a list of page anchors (THE PAGE ITSELF), the student is looking at a photo of their own worksheet and you can make the app draw on it:
+{"actions":[{"type":"highlight","target":"angle_B"},{"type":"pulse","target":"equation"}]}
+- "target" MUST be an id copied EXACTLY from the anchor list you were given. Never invent an id, never guess coordinates, never point at something that isn't listed — the server silently discards anything it cannot find, and a discarded action means you gestured at nothing.
+- "type" is one of: highlight (tint the region — your default), circle (draw a ring around it), underline, glow, pulse (a soft repeating beat — use for "look here first"), flash (one quick blink), zoom, focusRegion (dim the rest of the page and spotlight this), fade (push it into the background), drawArrow (point at it from outside), drawBracket (bracket it as a group).
+- At most TWO actions per turn, usually ONE. A page with six things lit up teaches nothing about where to look. Emit "actions":[] whenever you are not talking about a specific place on the page.
+- Optional "role" sets the teaching colour and defaults to the anchor's own: "unknown" (what we're solving for), "known" (a given), "operation" (the formula at work), "answer" (the result), "mistake", "hint", "concept", "memory". Use it deliberately — colour means something here.
+- THE POINT of an action is that it changes how you WRITE. When you point at something, refer to it by place, not by value: "look at this angle", "notice this denominator", "the side I've circled", "the highlighted radius" — NOT "the value 28" or "the number in the third line". The student can see exactly what you are pointing at.
+- Actions decorate the page; they never assert arithmetic. Pointing at the unknown is allowed even in modes where you must not reveal the answer.`;
 
 /** Trim + cap an untrusted string field. */
 function text(value: unknown, max: number): string {
@@ -310,7 +376,55 @@ export function buildProblemContext(problem: TutorProblem, withAnswer: boolean):
     lines.push(`Common mistakes on this kind of problem: ${mistakes.join("; ")}`);
   }
 
+  // HOW IT WAS READ. Included in every mode, answer-withheld ones too: this is
+  // about the transcription of the QUESTION, never about the answer.
+  lines.push(...ocrLines(problem.ocr));
+
+  // The practice already waiting for this student, so "give me another one"
+  // points at a question the app has generated and checked rather than one Numi
+  // invents on the spot.
+  const practice = list(problem.practice, 5, 200);
+  if (practice.length > 0) {
+    lines.push(
+      "Practice questions the app has already generated for this problem (you may point the student at these; they are checked):"
+    );
+    practice.forEach((q, i) => lines.push(`  ${i + 1}. ${q}`));
+  }
+
   return lines.join("\n");
+}
+
+/**
+ * The "how confident is the read" block.
+ *
+ * A low confidence or a listed doubtful mark is ACTIONABLE for a tutor: it turns
+ * "no, the answer is right" into "which character is that?" — the only honest
+ * response when the problem itself may be a misread.
+ */
+function ocrLines(ocr: TutorOcr | undefined): string[] {
+  if (!ocr || typeof ocr !== "object") return [];
+  const lines: string[] = [];
+  const draft = text(ocr.latex, 300);
+  const confidence =
+    typeof ocr.confidence === "number" && Number.isFinite(ocr.confidence)
+      ? Math.min(1, Math.max(0, ocr.confidence))
+      : null;
+  const uncertain = list(ocr.uncertain, 6, 160);
+
+  if (draft) lines.push(`This problem was READ from a photo. The transcription: ${draft}`);
+  if (confidence !== null) {
+    lines.push(
+      confidence < 0.7
+        ? `The transcription confidence was LOW (${confidence.toFixed(2)}). If the student says the problem looks wrong, believe them — the likeliest fault is the read, not the maths.`
+        : `Transcription confidence: ${confidence.toFixed(2)}.`
+    );
+  }
+  if (uncertain.length > 0) {
+    lines.push(
+      `Marks the reader was unsure of — check these first if the student disputes the problem: ${uncertain.join("; ")}`
+    );
+  }
+  return lines;
 }
 
 /** Render what Numi already knows about this student (spec Parts 10, 11). */
@@ -342,6 +456,70 @@ export function buildMemoryContext(memory: TutorMemory): string {
     );
   }
   return lines.join("\n");
+}
+
+/**
+ * The scanned photo to attach to THIS turn, or null.
+ *
+ * Attached only on the opening turn of a conversation. The reasoning:
+ *
+ *   • VALUE is front-loaded. The photo settles "is that a 5 or a 6?" and shows a
+ *     figure no LaTeX line can carry — and once Numi has read it, that reading is
+ *     in the transcript for every later turn. Re-sending the same pixels each
+ *     message buys nothing.
+ *   • COST is not. It is a mobile upload and a vision-token charge per message,
+ *     on the one endpoint a student uses dozens of times per session.
+ *
+ * "Opening" is measured by the student's turns, not the transcript's length: a
+ * chat that opens with Numi's greeting is still the student's first message, and
+ * keying off `history.length` would silently mean "never".
+ *
+ * Anything oversized or not a plausible image is DROPPED, never an error — the
+ * turn simply proceeds as it always did.
+ */
+export function openingScanImage(
+  data: Pick<TutorRequest, "imageBase64" | "mimeType">,
+  history: TutorTurn[]
+): string | null {
+  if (Array.isArray(history) && history.some((turn) => turn?.role === "user")) {
+    return null;
+  }
+  const raw = typeof data.imageBase64 === "string" ? data.imageBase64.trim() : "";
+  if (!raw || raw.length > MAX_IMAGE_BASE64_LEN) return null;
+  if (raw.startsWith("data:")) {
+    return /^data:image\/[a-z0-9.+-]+;base64,.+/i.test(raw) ? raw : null;
+  }
+  const mime =
+    typeof data.mimeType === "string" && /^image\/[a-z0-9.+-]+$/i.test(data.mimeType.trim())
+      ? data.mimeType.trim()
+      : "image/jpeg";
+  return `data:${mime};base64,${raw}`;
+}
+
+/**
+ * The student's turn — with the scanned page attached when there is one.
+ *
+ * The trailing instruction matters as much as the image: without it a model
+ * handed a photo of a solved problem will happily re-read the maths off the page
+ * and start narrating ITS reading instead of the verified solve. The photo is
+ * for seeing what is written, never for recomputing what it means.
+ */
+function userMessage(
+  userText: string,
+  image: string | null
+): OpenAI.Chat.ChatCompletionMessageParam {
+  if (!image) return { role: "user", content: userText };
+  return {
+    role: "user",
+    content: [
+      { type: "text", text: userText },
+      { type: "image_url", image_url: { url: image } },
+      {
+        type: "text",
+        text: "The image above is the photo this problem was scanned from. Use it to see what is actually on the page — the figure, the layout, the exact characters. The verified answer and steps in your context still stand: looking at the photo NEVER means recomputing them.",
+      },
+    ],
+  };
 }
 
 /** Parse the model's suggestion ids, dropping anything outside the vocabulary. */
@@ -393,7 +571,9 @@ export function parseMeta(value: unknown): TutorMeta {
 }
 
 export const tutorReply = onCall(
-  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 120 },
+  // 1GiB because the opening turn of a scanned-problem chat can carry a
+  // multi-megabyte base64 photo through this process (see `openingScanImage`).
+  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "1GiB", timeoutSeconds: 120 },
   async (request, response) => {
     const uid = requireUid(request);
     const data = (request.data ?? {}) as TutorRequest;
@@ -429,6 +609,32 @@ export const tutorReply = onCall(
         content: `CONTEXT — what the student is working on right now.\n${problemContext}`,
       });
     }
+
+    // THE PAGE. The anchors were located deterministically at scan time and make
+    // the round trip with the conversation — no vision tokens are spent to point
+    // at them, and pointing works on every turn, not just the one carrying the
+    // photo.
+    const anchors: SemanticAnchor[] = coerceSemanticAnchors(problem.anchors);
+    const anchorContext = anchorContextBlock(anchors);
+    if (anchorContext) {
+      messages.push({ role: "system", content: anchorContext });
+    }
+
+    // HOW SURE THE APP IS. Computed from facts the app owns, and expressed as
+    // behaviour: the doubtful states tell Numi to stop and check the question
+    // with the student rather than to teach an answer they may not have asked.
+    const state: VerificationState =
+      normalizeVerificationState(problem.verification) ??
+      verificationState({
+        verified: problem.verified,
+        hasAnswer: text(problem.finalAnswer, 200).length > 0,
+        ocrConfidence: problem.ocr?.confidence,
+        uncertain: problem.ocr?.uncertain,
+      });
+    messages.push({
+      role: "system",
+      content: verificationDirective(state, list(problem.ocr?.uncertain, 4, 160)),
+    });
 
     // The exact step they tapped (spec Part 6): answer about THAT step unless
     // they ask otherwise. `visualStep` is the legacy field for the same thing.
@@ -502,24 +708,42 @@ export const tutorReply = onCall(
         content: turn.text,
       });
     }
-    messages.push({ role: "user", content: userText });
+
+    // THE PHOTO ITSELF, on the opening turn of a chat about a scanned problem.
+    // Everything else Numi gets is a transcription of the page; the page is the
+    // only thing that can settle a dispute about what is actually written on it,
+    // and for a figure it carries what no LaTeX line can. Only the opening turn
+    // (see `openingScanImage`) — a conversation costs one upload, not one per
+    // message — and its absence changes nothing else.
+    const scanImage = openingScanImage(data, history);
 
     // Streamed so the student sees Numi start writing rather than a typing dot
     // (spec Part 18). `sendChunk` no-ops for a client that didn't ask for a
     // stream — an app version already in the stores is served exactly as before,
     // because the final `return` below is unchanged either way.
     const streamer = new ReplyStreamer();
-    let payload: TutorPayload;
-    let content = "";
-    try {
-      const client = createOpenAI(OPENAI_API_KEY.value());
+    const client = createOpenAI(OPENAI_API_KEY.value());
+
+    /** One streamed attempt, with or without the photo attached. */
+    const attempt = async (image: string | null): Promise<TutorPayload> => {
+      let content = "";
       const completion = await client.chat.completions.create({
-        model: OPENAI_MODEL.value(),
-        temperature: 0.6,
-        // Teach Me legitimately runs longer than the interactive modes.
-        max_tokens: mode === "teachMe" ? 1200 : 900,
+        // Numi runs on the NARRATION tier at low effort: every number she is
+        // allowed to say was already computed and verified by the solver (the
+        // answer firewall), so what is being bought here is prose quality, and
+        // she is on the latency-visible streaming path. `chatParams` also drops
+        // the temperature a reasoning model would reject.
+        //
+        // A turn carrying the photo is a different job — it is READING a page —
+        // so it goes to the reasoning tier, the one already proven on this app's
+        // vision path.
+        ...chatParams(
+          image ? "tutorVision" : "tutor",
+          // Teach Me legitimately runs longer than the interactive modes.
+          { temperature: 0.6, maxTokens: mode === "teachMe" ? 1200 : 900 }
+        ),
         response_format: { type: "json_object" },
-        messages,
+        messages: [...messages, userMessage(userText, image)],
         stream: true,
       });
       for await (const part of completion) {
@@ -530,7 +754,27 @@ export const tutorReply = onCall(
         if (delta) await response?.sendChunk({ delta });
       }
       if (!content) throw new Error("empty response");
-      payload = JSON.parse(content) as TutorPayload;
+      return JSON.parse(content) as TutorPayload;
+    };
+
+    let payload: TutorPayload;
+    try {
+      try {
+        payload = await attempt(scanImage);
+      } catch (err) {
+        // The photo is an ENHANCEMENT to the turn, never a requirement — and it
+        // is the one part of this request that changes the model, the tier and
+        // the request shape all at once. If that combination fails before a
+        // single word reached the student, take the turn text-only rather than
+        // let a scanned problem lose its tutor.
+        if (!scanImage || streamer.text.trim()) throw err;
+        logger.warn("tutorReply retrying without the scan photo", {
+          uid,
+          mode,
+          err: String(err),
+        });
+        payload = await attempt(null);
+      }
     } catch (err) {
       // The reply itself may have arrived intact even though the JSON around it
       // did not (a `max_tokens` cut lands mid-object). The student already has
@@ -589,6 +833,19 @@ export const tutorReply = onCall(
       }
     }
 
+    // The same gate once more, for pointing: Numi may only gesture at places the
+    // APP located on the page. An id nobody derived is dropped rather than
+    // drawn — an outline at invented coordinates would point confidently at the
+    // wrong part of the student's own homework.
+    let actions: TutorActionOut[] = [];
+    if (payload.actions) {
+      const verdict = verifyTutorActions(payload.actions, anchors);
+      actions = verdict.actions;
+      if (verdict.reason) {
+        logger.warn("tutorReply actions rejected", { uid, mode, reason: verdict.reason });
+      }
+    }
+
     const suggestions = parseSuggestions(payload.suggestions);
     const quota = await incrementUsage(uid, "tutorMessages");
 
@@ -597,6 +854,10 @@ export const tutorReply = onCall(
       suggestions: suggestions.length > 0 ? suggestions : defaultSuggestions(mode),
       card,
       focus: focusOut,
+      actions,
+      // Echoed so the client can show the same honesty in its own UI (a
+      // "check the question" banner) without recomputing the rules.
+      verification: state,
       meta: parseMeta(payload.meta),
       mode: mode ?? DEFAULT_TUTOR_MODE,
       usage: quota,

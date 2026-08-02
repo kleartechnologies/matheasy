@@ -508,6 +508,9 @@ class TutorChatController extends _$TutorChatController {
         card: response.card,
         focus: response.focus,
         suggestions: response.suggestions,
+        // Where this turn points on the student's page. Already gated
+        // server-side against the anchors the app itself derived.
+        actions: response.actions,
       );
 }
 

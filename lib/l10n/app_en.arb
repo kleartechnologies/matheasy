@@ -964,6 +964,14 @@
       }
     }
   },
+  "geometryViewDiagram": "Diagram",
+  "@geometryViewDiagram": {
+    "description": "Toggle label for the app-drawn clean geometry diagram."
+  },
+  "geometryViewPhoto": "Your photo",
+  "@geometryViewPhoto": {
+    "description": "Toggle label for the student's own scanned photo of the figure."
+  },
   "geometryStepOfTitle": "STEP {step} OF {total} · {title}",
   "@geometryStepOfTitle": {
     "placeholders": {

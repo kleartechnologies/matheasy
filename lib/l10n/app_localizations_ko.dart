@@ -1757,6 +1757,12 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => '도형';
+
+  @override
+  String get geometryViewPhoto => '내 사진';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return '$total 중 $step단계 · $title';
   }

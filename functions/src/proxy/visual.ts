@@ -11,7 +11,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, PRO_ENTITLEMENT_ID } from "../config";
+import { OPENAI_API_KEY, PRO_ENTITLEMENT_ID } from "../config";
 import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
@@ -169,7 +169,7 @@ export const generateVisualSolution = onCall(
       const client = createOpenAI(OPENAI_API_KEY.value());
       payload = await chatJson<VisualPayload>(
         client,
-        OPENAI_MODEL.value(),
+        "geometry",
         SYSTEM_PROMPT + languageDirective(language),
         userMessage,
         { temperature: 0.2, maxTokens: 3000 }

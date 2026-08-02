@@ -29,6 +29,7 @@ import 'tutor_copy.dart';
 import 'widgets/tutor_chat_input.dart';
 import 'widgets/tutor_message_view.dart';
 import 'widgets/tutor_mode_picker.dart';
+import 'widgets/tutor_page_overlay.dart';
 
 /// The full-screen chat with Numi — a modern, premium AI conversation.
 ///
@@ -361,6 +362,9 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
     // The picker is a trailing row, not a message — it sits under the greeting
     // until the student chooses, then disappears for the rest of the thread.
     final showPicker = session.awaitingModeChoice && !session.isTyping;
+    // Resolved once for the whole thread, not per message: it's the same photo
+    // and the same anchors for every turn of the conversation.
+    final page = TutorScannedPage.from(session.context);
     // Only while she is still thinking: once the words are arriving, the reply
     // itself is the indicator (spec Part 18).
     final itemCount =
@@ -404,6 +408,7 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
               showSuggestions: showSuggestions,
               onSuggestion: _sendAction,
               onPracticeStart: _startPractice,
+              page: page,
             ),
           ),
         );

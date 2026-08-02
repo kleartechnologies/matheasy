@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "अगला चरण · {total} में से {current}",
   "visualTeaserBecomes": "{before} बन जाता है {after}। हर चरण को खुलते देखने के लिए Pro अनलॉक करें।",
+  "geometryViewDiagram": "आरेख",
+  "geometryViewPhoto": "तुम्हारी फ़ोटो",
   "geometryStepOfTitle": "चरण {step} / {total} · {title}",
   "practiceXpToNextLevel": "Level {level} तक {xp} XP",
   "practiceTopicMastery": "{topic} में महारत",

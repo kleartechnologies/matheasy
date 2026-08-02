@@ -1823,6 +1823,12 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Rajah';
+
+  @override
+  String get geometryViewPhoto => 'Foto kamu';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'LANGKAH $step DARIPADA $total · $title';
   }

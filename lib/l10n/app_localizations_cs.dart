@@ -1809,6 +1809,12 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Nákres';
+
+  @override
+  String get geometryViewPhoto => 'Tvoje fotka';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'KROK $step Z $total · $title';
   }

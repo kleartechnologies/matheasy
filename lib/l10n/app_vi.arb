@@ -516,6 +516,8 @@
   "resultStepOfUpper": "BƯỚC {step}/{total}",
   "resultStepOfTotal": "Bước {step}/{total}",
   "geometryStepOfLabel": "Bước {step}/{total}. {label}",
+  "geometryViewDiagram": "Hình vẽ",
+  "geometryViewPhoto": "Ảnh của bạn",
   "geometryStepOfTitle": "BƯỚC {step}/{total} · {title}",
   "teachingLearningJourney": "Hành trình học tập: {stages}",
   "teachingTemptingBecause": "Dễ nhầm vì: {reason}",

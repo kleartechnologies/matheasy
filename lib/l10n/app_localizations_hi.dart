@@ -1816,6 +1816,12 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'आरेख';
+
+  @override
+  String get geometryViewPhoto => 'तुम्हारी फ़ोटो';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'चरण $step / $total · $title';
   }

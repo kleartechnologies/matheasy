@@ -1813,6 +1813,12 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Креслення';
+
+  @override
+  String get geometryViewPhoto => 'Твоє фото';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'КРОК $step З $total · $title';
   }

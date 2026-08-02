@@ -2,10 +2,11 @@ import 'package:flutter/foundation.dart';
 
 /// Accessibility preferences.
 ///
-/// STAGE 10: infrastructure + persistence. [largerText] and [reducedMotion] are
-/// wired through the root `MediaQuery` (text scaling + animation suppression);
-/// [highContrast] and [voiceFeedback] are persisted and surfaced in the UI, with
-/// their functional wiring reserved for a later hardening pass.
+/// [largerText], [reducedMotion] and [highContrast] are wired through the root
+/// `MediaQuery` (text scaling, animation suppression, and the high-contrast
+/// flag that surfaces like the tutor's page overlay read). [voiceFeedback] is
+/// persisted and surfaced in the UI, with its functional wiring reserved for a
+/// later hardening pass.
 @immutable
 class AccessibilitySettings {
   const AccessibilitySettings({

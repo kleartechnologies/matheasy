@@ -3348,6 +3348,18 @@ abstract class AppLocalizations {
   /// **'Step {step} of {total}. {label}'**
   String geometryStepOfLabel(int step, int total, String label);
 
+  /// Toggle label for the app-drawn clean geometry diagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagram'**
+  String get geometryViewDiagram;
+
+  /// Toggle label for the student's own scanned photo of the figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photo'**
+  String get geometryViewPhoto;
+
   /// No description provided for @geometryStepOfTitle.
   ///
   /// In en, this message translates to:

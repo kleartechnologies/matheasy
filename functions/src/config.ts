@@ -27,13 +27,53 @@ export const REVENUECAT_SECRET_KEY = defineSecret("REVENUECAT_SECRET_KEY");
 
 // --- Parameters (non-secret, overridable at deploy time) --------------------
 /**
- * The OpenAI model powering the solver + tutor. Kept as a parameter so you can
- * bump the model without a code change:
- *   firebase deploy --only functions  (prompts for the value the first time)
- * or set a default in .env — see functions/README.md.
+ * The OpenAI models powering the pipeline, split by JOB (see `lib/models.ts`).
+ *
+ * The product rule is **accuracy > speed > cost**: every workflow where a wrong
+ * output would reach a student as maths — reading the photo, correcting the OCR,
+ * interpreting a geometry figure, proposing a candidate solution, generating
+ * practice, reading handwritten work — runs on the REASONING tier. The tiers the
+ * student only ever sees as *prose* about already-verified maths (Numi's replies,
+ * the teaching layer) run on the NARRATION tier, which is cheaper and lower
+ * latency without touching a single number.
+ *
+ * Both are deploy-time parameters so a model bump is a config change, not a code
+ * change. Set them in `.env` (see `functions/README.md`) or at deploy:
+ *   OPENAI_MODEL_REASONING=gpt-5.6-sol
+ *   OPENAI_MODEL_NARRATION=gpt-5.6-terra
+ *
+ * ROLLBACK: setting BOTH to `gpt-4o` restores the pre-migration behaviour
+ * exactly — `lib/models.ts` detects a legacy sampling model and sends the old
+ * `temperature` + `max_tokens` shape (see `isReasoningModel`).
  */
-export const OPENAI_MODEL = defineString("OPENAI_MODEL", {
-  default: "gpt-4o",
+/**
+ * The tier defaults, as literals.
+ *
+ * These are NOT redundant with the `default:` below. A `defineString` default is
+ * only used by the deploy tooling to seed the value — at RUNTIME `.value()`
+ * returns the EMPTY STRING when the variable is absent from the environment, it
+ * does not fall back. Relying on `default:` alone would ship `model: ""` and 400
+ * every call, so `lib/models.ts` falls back to these constants instead.
+ */
+export const DEFAULT_MODEL_REASONING = "gpt-5.6-sol";
+export const DEFAULT_MODEL_NARRATION = "gpt-5.6-terra";
+
+export const OPENAI_MODEL_REASONING = defineString("OPENAI_MODEL_REASONING", {
+  default: DEFAULT_MODEL_REASONING,
+});
+
+export const OPENAI_MODEL_NARRATION = defineString("OPENAI_MODEL_NARRATION", {
+  default: DEFAULT_MODEL_NARRATION,
+});
+
+/**
+ * DEPRECATED single-model parameter, kept only as an escape hatch: when set to a
+ * non-empty value it OVERRIDES both tiers above. Leave it unset. It exists so a
+ * live incident can be pinned to one known-good model with one env var and a
+ * redeploy, without editing code.
+ */
+export const OPENAI_MODEL_OVERRIDE = defineString("OPENAI_MODEL", {
+  default: "",
 });
 
 /**
@@ -85,6 +125,32 @@ export const ANIMATION_SCHEMA_ENABLED = defineString("ANIMATION_SCHEMA_ENABLED",
 /** Whether the animation-schema sidecar is attached. Default OFF. */
 export function animationSchemaEnabled(): boolean {
   return ANIMATION_SCHEMA_ENABLED.value() === "true";
+}
+
+/**
+ * The kill switch for the two-pass scan pipeline (preprocess → OCR → vision).
+ *
+ * ON (the default) the scanner enhances the photo, runs a dedicated OCR
+ * transcription pass, and hands pass 2 both images plus that draft reading. OFF
+ * collapses to the original single-pass call on the raw photo — the pre-rebuild
+ * behaviour — which is the lever to pull if the second pass ever proves to cost
+ * more latency than it buys in accuracy.
+ *
+ * COST: ON, a cache-miss scan makes TWO vision calls instead of one. Both are
+ * metered as a single `recognize` request, so as with teaching enrichment the
+ * per-user OpenAI-call ceiling is double the request ceiling.
+ *   set SCAN_PIPELINE_ENABLED=false in .env or at deploy to disable.
+ */
+export const SCAN_PIPELINE_ENABLED = defineString("SCAN_PIPELINE_ENABLED", {
+  default: "true",
+});
+
+/** Whether the two-pass scan pipeline is on. Defaults to ON when unset. */
+export function scanPipelineEnabled(): boolean {
+  // Note the inverted read: an unset param resolves to "" at runtime (a
+  // `default:` only seeds the deploy prompt), and the default for this flag is
+  // ON — so anything other than an explicit "false" means on.
+  return SCAN_PIPELINE_ENABLED.value().trim().toLowerCase() !== "false";
 }
 
 // The region all functions run in. Keep it close to your users / Firestore.

@@ -516,6 +516,8 @@
   "resultStepOfUpper": "KROK {step} Z {total}",
   "resultStepOfTotal": "Krok {step} z {total}",
   "geometryStepOfLabel": "Krok {step} z {total}. {label}",
+  "geometryViewDiagram": "Nákres",
+  "geometryViewPhoto": "Tvoje fotka",
   "geometryStepOfTitle": "KROK {step} Z {total} · {title}",
   "teachingLearningJourney": "Cesta učení: {stages}",
   "teachingTemptingBecause": "Lákavé, protože: {reason}",

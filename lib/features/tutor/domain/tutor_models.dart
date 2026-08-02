@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/math_semantics.dart';
 import '../../result/domain/result_models.dart';
 import '../../result/domain/visual_models.dart';
+import '../../scan/domain/scan_anchor.dart';
 
 /// Who authored a chat message.
 ///
@@ -213,11 +214,143 @@ class TutorFocus {
       highlights.isEmpty ? MathRole.aside : highlights.first.role;
 }
 
+/// A gesture Numi makes at the student's own scanned page.
+///
+/// Each one is drawn as an overlay on the original photo — never a regenerated
+/// or re-rendered image — so what the student sees highlighted is literally
+/// their own handwriting.
+enum TutorActionType {
+  /// A translucent wash over the region.
+  highlight,
+
+  /// A hand-drawn-looking ellipse around it.
+  circle,
+
+  /// A stroke beneath it.
+  underline,
+
+  /// A soft halo, for "this is what we're working with".
+  glow,
+
+  /// A slow breathing scale — attention without alarm.
+  pulse,
+
+  /// Scale the region up in place, for something small and fiddly.
+  zoom,
+
+  /// Dim everything else instead of marking this.
+  fade,
+
+  /// A pointer into the region, as a tutor's pen would come in from the side.
+  drawArrow,
+
+  /// A brace spanning it, for "all of this together is one thing".
+  drawBracket,
+
+  /// A single quick flash — the lightest possible "here".
+  flash,
+
+  /// A spotlight: the region stays lit, the rest of the page darkens.
+  focusRegion;
+
+  /// The wire name. Unknown values are dropped by the mapper rather than
+  /// guessed at — a gesture nobody can draw is not a gesture.
+  static TutorActionType? parse(String? name) {
+    final key = name?.trim();
+    if (key == null || key.isEmpty) return null;
+    for (final type in TutorActionType.values) {
+      if (type.name == key) return type;
+    }
+    return null;
+  }
+}
+
+/// One verified gesture: what to draw, and which anchor on the page to draw it
+/// on (spec Rule 4).
+///
+/// [target] is always the id of a [ScanAnchor] the APP derived — the server
+/// drops any action naming an id nobody located (`tutorActions.ts`), and the
+/// renderer drops it again if the anchor isn't on the page it is drawing. An
+/// outline at invented coordinates would circle the wrong part of a student's
+/// homework with total confidence, which is a hallucination with a highlighter.
+@immutable
+class TutorAction {
+  const TutorAction({
+    required this.type,
+    required this.target,
+    this.role = MathRole.aside,
+  });
+
+  final TutorActionType type;
+
+  /// The [ScanAnchor.id] this gesture points at.
+  final String target;
+
+  /// The teaching colour, defaulted server-side from the anchor's own meaning.
+  final MathRole role;
+
+  @override
+  bool operator ==(Object other) =>
+      other is TutorAction &&
+      other.type == type &&
+      other.target == target &&
+      other.role == role;
+
+  @override
+  int get hashCode => Object.hash(type, target, role);
+
+  @override
+  String toString() => 'TutorAction(${type.name} → $target)';
+}
+
+/// How sure the app is about the problem in front of the student (spec Rule 7).
+///
+/// Computed server-side from facts the app owns — did the answer survive
+/// substitution, how legible was the page — and echoed back so the UI can be
+/// honest in its own voice without recomputing the rules.
+enum TutorCertainty {
+  /// Verified by substitution, read cleanly.
+  pass,
+
+  /// Verified, page read well.
+  highConfidence,
+
+  /// Verified, but the solve was shaky.
+  lowConfidence,
+
+  /// The maths checks out; the READ of the page does not.
+  ocrLowConfidence,
+
+  /// The answer did not survive verification. There is no verified answer.
+  verifierDisagreement;
+
+  /// Whether the student should be shown a "let's check the question" note.
+  /// Only the two doubtful states earn one — a banner on every reply is noise,
+  /// and noise is how a real warning gets ignored.
+  bool get needsAttention =>
+      this == ocrLowConfidence || this == verifierDisagreement;
+
+  static const Map<String, TutorCertainty> _wire = {
+    'PASS': pass,
+    'HIGH_CONFIDENCE': highConfidence,
+    'LOW_CONFIDENCE': lowConfidence,
+    'OCR_LOW_CONFIDENCE': ocrLowConfidence,
+    'VERIFIER_DISAGREEMENT': verifierDisagreement,
+  };
+
+  /// Parses the server's SCREAMING_CASE name. Anything unrecognised is null, so
+  /// a newer server never makes an older build claim certainty it wasn't told
+  /// about.
+  static TutorCertainty? parse(String? name) =>
+      _wire[name?.trim().toUpperCase() ?? ''];
+}
+
 /// A single message in a tutor conversation.
 ///
 /// A message is one "turn": text, an optional photo the student sent, an
-/// optional rich [card] (quiz/practice), an optional [focus] equation, and the
-/// [suggestions] the tutor offers afterwards.
+/// optional rich [card] (quiz/practice), an optional [focus] equation, the
+/// [actions] pointing at the scanned page, and the [suggestions] the tutor
+/// offers afterwards.
 @immutable
 class TutorMessage {
   const TutorMessage({
@@ -228,6 +361,7 @@ class TutorMessage {
     this.focus,
     this.suggestions = const [],
     this.image,
+    this.actions = const [],
   });
 
   /// Convenience for a user turn (text and/or a photo, no card/suggestions).
@@ -238,7 +372,8 @@ class TutorMessage {
   })  : role = TutorRole.user,
         card = null,
         focus = null,
-        suggestions = const [];
+        suggestions = const [],
+        actions = const [];
 
   /// Convenience for a neutral, centered system notice.
   const TutorMessage.system({required this.id, required this.text})
@@ -246,7 +381,8 @@ class TutorMessage {
         card = null,
         focus = null,
         suggestions = const [],
-        image = null;
+        image = null,
+        actions = const [];
 
   final int id;
   final TutorRole role;
@@ -257,6 +393,10 @@ class TutorMessage {
   /// one (spec Part 8).
   final TutorFocus? focus;
   final List<SuggestionAction> suggestions;
+
+  /// Where on the scanned page this turn is pointing (spec Rule 4). Empty for
+  /// every turn that is only words — which is most of them, deliberately.
+  final List<TutorAction> actions;
 
   /// The photo the student attached to this turn, as JPEG bytes.
   ///
@@ -271,6 +411,9 @@ class TutorMessage {
   bool get isSystem => role == TutorRole.system;
 
   bool get hasImage => image != null;
+
+  /// Whether this turn has somewhere on the page to point.
+  bool get hasActions => actions.isNotEmpty;
 }
 
 /// What a photo the student sent Numi turned out to be (spec Part 2).
@@ -548,6 +691,12 @@ class TutorProblemContext {
     this.steps = const [],
     this.commonMistakes = const [],
     this.source,
+    this.ocrLatex,
+    this.ocrConfidence,
+    this.ocrUncertain = const [],
+    this.practice = const [],
+    this.scanImageBytes,
+    this.anchors = const [],
   });
 
   final String questionLatex;
@@ -575,6 +724,38 @@ class TutorProblemContext {
 
   /// Where the problem came from: scan, typed, practice.
   final String? source;
+
+  /// The scanner's draft transcription of the photo, when there was one.
+  ///
+  /// Numi is told this is how the problem was READ, not what it IS. The most
+  /// common "the app got it wrong" is a misread character, not a bad solve, and
+  /// a tutor who knows the read was shaky asks about the character instead of
+  /// defending the answer.
+  final String? ocrLatex;
+
+  /// How sure the scanner was of that read, 0–1.
+  final double? ocrConfidence;
+
+  /// The specific marks the scanner flagged as doubtful.
+  final List<String> ocrUncertain;
+
+  /// Practice questions the app has already generated for this problem, as
+  /// LaTeX — so "give me another one" points at a checked question.
+  final List<String> practice;
+
+  /// The photo the problem was scanned from. Sent on the OPENING turn only (the
+  /// server drops it on any later turn), so a conversation costs one upload.
+  ///
+  /// Transient, like [DetectedEquation.imageBytes]: it rides along with a live
+  /// scan and is simply absent for a typed problem or a history re-open.
+  final Uint8List? scanImageBytes;
+
+  /// The places on that photo Numi is allowed to point at (spec Rules 2–3).
+  ///
+  /// These, not the pixels, are what makes the round trip on every turn: the
+  /// photo is uploaded once per conversation, but the anchors are cheap text,
+  /// so pointing keeps working for the whole session at zero vision cost.
+  final List<ScanAnchor> anchors;
 }
 
 /// The exact step the student tapped "Ask Numi about this step" on (spec Part 6).
@@ -610,6 +791,8 @@ class TutorResponse {
     this.focus,
     this.suggestions = const [],
     this.meta = const TutorTurnMeta(),
+    this.actions = const [],
+    this.certainty,
   });
 
   final String text;
@@ -621,6 +804,14 @@ class TutorResponse {
 
   /// Learning signals folded into the session's [TutorMemory].
   final TutorTurnMeta meta;
+
+  /// Where on the scanned page to point while saying this (spec Rule 4).
+  /// Already verified server-side against the page's own anchors.
+  final List<TutorAction> actions;
+
+  /// How sure the app is about this problem (spec Rule 7). Null when the server
+  /// didn't say — an older deployment, or the offline engine.
+  final TutorCertainty? certainty;
 }
 
 /// Context handed to the chat when it opens.

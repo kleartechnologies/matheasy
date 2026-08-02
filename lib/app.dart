@@ -95,6 +95,13 @@ class AccessibilityScope extends StatelessWidget {
     if (accessibility.reducedMotion) {
       data = data.copyWith(disableAnimations: true);
     }
+    if (accessibility.highContrast) {
+      // Composed the same way as the others — the app toggle can turn high
+      // contrast ON, never off, so a learner who set it at the OS level keeps
+      // it whatever this switch says. Read through `MediaQuery.highContrastOf`,
+      // which makes the app preference and the platform's one signal.
+      data = data.copyWith(highContrast: true);
+    }
     if (data == media) return child;
     return MediaQuery(data: data, child: child);
   }

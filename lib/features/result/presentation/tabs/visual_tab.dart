@@ -113,6 +113,10 @@ class VisualTab extends ConsumerWidget {
           return GeometryVisualPlayer(
             visual: visual,
             scene: scene,
+            // The figure here is REDRAWN, not photographed — so the photo it was
+            // redrawn from travels with it, one tap away, for the student to
+            // check the reconstruction against.
+            scanImageBytes: equation.imageBytes,
             onAskMatheasy: (step) => onAskMatheasy(visual, step),
           );
         }

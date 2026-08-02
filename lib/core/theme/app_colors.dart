@@ -151,6 +151,20 @@ class AppColors {
   static const Color accentAmber = warning;
   static const Color accentCoral = Color(0xFFC2410C);
 
+  // ---- Teaching-vocabulary hues ----
+  // Three more meanings the tutor needs when it points at the student's own
+  // page: a nudge, a named concept, and something they've met before. Same
+  // tonal discipline as the ramp, and each is paired light/dark so the meaning
+  // survives a theme switch. `mustard` is what "memory yellow" has to become to
+  // be legible on white — [gold] itself is 1.63:1 there and is a surface only.
+  static const Color teal = Color(0xFF0F766E); // 5.43:1 on white
+  static const Color tealLight = Color(0xFF5EEAD4);
+  // A step darker than [accentCoral], which lands at 4.50:1 on the muted focus
+  // panel — right on the AA line, i.e. a rounding error away from failing.
+  static const Color coralDeep = Color(0xFFB03C0B); // 6.00:1 on white
+  static const Color coralLight = Color(0xFFFDBA74);
+  static const Color mustard = Color(0xFF7A6100); // 5.94:1 on white
+
   // ---- Premium / XP (gold) ----
   // Gamification accents. Gold is a *surface* color (dark ink sits on it), never
   // a text color on white — 1.63:1 there.

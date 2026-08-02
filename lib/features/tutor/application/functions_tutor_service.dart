@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../core/theme/math_semantics.dart';
 import '../../result/domain/result_models.dart';
 import '../../result/domain/visual_models.dart';
@@ -63,7 +65,16 @@ class FunctionsTutorService implements TutorService {
               'text': m.text.isEmpty && m.hasImage ? '[photo]' : m.text,
             },
       ],
-      if (context != null) ...TutorRequestMapper.context(context),
+      if (context != null)
+        ...TutorRequestMapper.context(
+          context,
+          // The photo is uploaded once per conversation, on the student's first
+          // message. The server independently drops it on later turns, but the
+          // saving that matters is here: not putting a photo on the wire from a
+          // phone dozens of times a session. "First" is measured by the
+          // student's turns — Numi's greeting is already in `history`.
+          includeImage: history.every((m) => m.role != TutorRole.user),
+        ),
       if (!memory.isEmpty) 'memory': TutorRequestMapper.memory(memory),
       // Checked server-side against the verified solution before the model sees
       // it — see `tutorWork.ts`. The model is handed a verdict, not a judgement
@@ -94,7 +105,14 @@ class FunctionsTutorService implements TutorService {
 class TutorRequestMapper {
   const TutorRequestMapper._();
 
-  static Map<String, dynamic> context(TutorLaunchContext context) {
+  /// [includeImage] gates the scan photo only. Pass false on every turn after
+  /// the student's first message: the pixels are already read and quoted in the
+  /// transcript, so re-uploading them costs bandwidth and vision tokens for
+  /// nothing. Everything else in the context is cheap text and always sent.
+  static Map<String, dynamic> context(
+    TutorLaunchContext context, {
+    bool includeImage = true,
+  }) {
     final out = <String, dynamic>{};
     final problem = context.problem;
     if (problem != null) {
@@ -120,7 +138,33 @@ class TutorRequestMapper {
         if (problem.commonMistakes.isNotEmpty)
           'commonMistakes': problem.commonMistakes,
         if (problem.source != null) 'source': problem.source,
+        // HOW the problem was read, so a dispute about the question can be
+        // answered honestly instead of defended.
+        if (problem.ocrLatex != null ||
+            problem.ocrConfidence != null ||
+            problem.ocrUncertain.isNotEmpty)
+          'ocr': {
+            if (problem.ocrLatex != null) 'latex': problem.ocrLatex,
+            if (problem.ocrConfidence != null)
+              'confidence': problem.ocrConfidence,
+            if (problem.ocrUncertain.isNotEmpty)
+              'uncertain': problem.ocrUncertain,
+          },
+        if (problem.practice.isNotEmpty) 'practice': problem.practice,
+        // The map of the page. Sent on EVERY turn, unlike the photo: it is a
+        // few hundred bytes of text, and it is what lets Numi keep pointing at
+        // the student's own handwriting long after the pixels stopped being
+        // uploaded.
+        if (problem.anchors.isNotEmpty)
+          'anchors': [for (final a in problem.anchors) a.toJson()],
       };
+      // The photo itself rides at the TOP level, not inside `problem`: the
+      // server reads it once, on the opening turn, and drops it thereafter.
+      final bytes = includeImage ? problem.scanImageBytes : null;
+      if (bytes != null && bytes.isNotEmpty) {
+        out['imageBase64'] = base64Encode(bytes);
+        out['mimeType'] = 'image/jpeg';
+      }
     } else if (context.questionLatex != null) {
       // A caller with only the scalars still gets a well-formed problem block.
       out['problem'] = {
@@ -167,7 +211,39 @@ class TutorReplyMapper {
       focus: _focus(json['focus']),
       suggestions: _suggestions(json['suggestions']),
       meta: _meta(json['meta']),
+      actions: actions(json['actions']),
+      certainty: TutorCertainty.parse(
+        json['verification'] is String ? json['verification'] as String : null,
+      ),
     );
+  }
+
+  /// The gestures at the scanned page.
+  ///
+  /// Every one has already survived the server's gate (`tutorActions.ts`): the
+  /// target is the id of an anchor the APP derived, never a coordinate the
+  /// model proposed. What's left to do here is only shaping — plus dropping a
+  /// gesture type this build doesn't know how to draw, which is the honest
+  /// response to a newer server.
+  static List<TutorAction> actions(Object? raw) {
+    if (raw is! List) return const [];
+    final out = <TutorAction>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final map = item.cast<String, dynamic>();
+      final type = TutorActionType.parse(
+        map['type'] is String ? map['type'] as String : null,
+      );
+      final target = _nullable(map['target']);
+      if (type == null || target == null) continue;
+      final action = TutorAction(
+        type: type,
+        target: target,
+        role: MathRole.parse(map['role'] is String ? map['role'] as String : null),
+      );
+      if (!out.contains(action)) out.add(action);
+    }
+    return out;
   }
 
   /// The server sends chip IDS; unknown ids are dropped rather than guessed at.

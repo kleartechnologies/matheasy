@@ -516,6 +516,8 @@
   "resultStepOfUpper": "VAIHE {step}/{total}",
   "resultStepOfTotal": "Vaihe {step}/{total}",
   "geometryStepOfLabel": "Vaihe {step}/{total}. {label}",
+  "geometryViewDiagram": "Kuvio",
+  "geometryViewPhoto": "Oma kuva",
   "geometryStepOfTitle": "VAIHE {step}/{total} · {title}",
   "teachingLearningJourney": "Oppimispolku: {stages}",
   "teachingTemptingBecause": "Houkuttelevaa, koska: {reason}",

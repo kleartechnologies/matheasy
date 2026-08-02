@@ -19,6 +19,7 @@ import {
   buildMemoryContext,
   buildProblemContext,
   defaultSuggestions,
+  openingScanImage,
   parseMeta,
   parseSuggestions,
 } from "../src/proxy/tutor";
@@ -305,5 +306,112 @@ describe("card routing", () => {
 
   it("routes by kind", () => {
     expect(verifyTutorCard(QUIZ).card).toMatchObject({ kind: "quiz" });
+  });
+});
+
+describe("problem context — how the page was read", () => {
+  const BASE = {
+    questionLatex: "2x + 4 = 10",
+    finalAnswer: "x = 3",
+    verified: true,
+  };
+
+  it("tells Numi the transcription and which marks were doubtful", () => {
+    const context = buildProblemContext(
+      { ...BASE, ocr: { latex: "2x + 4 = 1O", confidence: 0.94, uncertain: ["the 0 in 10"] } },
+      true
+    );
+    expect(context).toContain("2x + 4 = 1O");
+    expect(context).toContain("Transcription confidence: 0.94");
+    expect(context).toContain("the 0 in 10");
+  });
+
+  it("says outright to believe the student when the read was shaky", () => {
+    const context = buildProblemContext({ ...BASE, ocr: { confidence: 0.41 } }, true);
+    expect(context).toContain("LOW (0.41)");
+    expect(context).toMatch(/believe them/i);
+  });
+
+  it("keeps the read block in answer-withheld modes — it describes the QUESTION", () => {
+    // The firewall hides the answer, not the transcription. A student disputing
+    // "that's not my problem" deserves an honest reply in every mode.
+    const context = buildProblemContext(
+      { ...BASE, ocr: { latex: "2x + 4 = 1O", confidence: 0.41 } },
+      false
+    );
+    expect(context).toContain("2x + 4 = 1O");
+    expect(context).toContain("LOW (0.41)");
+    expect(context).not.toContain("x = 3");
+  });
+
+  it("says nothing at all when the problem was typed, not scanned", () => {
+    expect(buildProblemContext(BASE, true)).not.toMatch(/READ from a photo/);
+    expect(buildProblemContext({ ...BASE, ocr: {} }, true)).not.toMatch(/READ from a photo/);
+  });
+
+  it("points 'give me another one' at practice the app already checked", () => {
+    const context = buildProblemContext(
+      { ...BASE, practice: ["3x + 1 = 7 (easy)", "5x - 2 = 13 (medium)"] },
+      true
+    );
+    expect(context).toContain("1. 3x + 1 = 7 (easy)");
+    expect(context).toContain("2. 5x - 2 = 13 (medium)");
+    // Capped, so a long practice set can't crowd out the solve context.
+    const many = buildProblemContext(
+      { ...BASE, practice: Array.from({ length: 9 }, (_, i) => `q${i}`) },
+      true
+    );
+    expect(many).toContain("5. q4");
+    expect(many).not.toContain("6. q5");
+  });
+});
+
+describe("the scan photo attached to a tutor turn", () => {
+  const IMAGE = "AAAAAAAA";
+
+  it("wraps raw base64 with the declared mime", () => {
+    expect(openingScanImage({ imageBase64: IMAGE, mimeType: "image/png" }, [])).toBe(
+      `data:image/png;base64,${IMAGE}`
+    );
+  });
+
+  it("falls back to jpeg when the mime is missing or junk", () => {
+    expect(openingScanImage({ imageBase64: IMAGE }, [])).toBe(
+      `data:image/jpeg;base64,${IMAGE}`
+    );
+    expect(openingScanImage({ imageBase64: IMAGE, mimeType: "text/html" }, [])).toBe(
+      `data:image/jpeg;base64,${IMAGE}`
+    );
+  });
+
+  it("passes a well-formed data URI through and rejects a malformed one", () => {
+    const uri = `data:image/jpeg;base64,${IMAGE}`;
+    expect(openingScanImage({ imageBase64: uri }, [])).toBe(uri);
+    expect(openingScanImage({ imageBase64: "data:text/html;base64,abc" }, [])).toBeNull();
+    expect(openingScanImage({ imageBase64: "data:image/jpeg;base64," }, [])).toBeNull();
+  });
+
+  it("still attaches on the student's first message when Numi greeted first", () => {
+    // The greeting is already in the transcript — keying off history LENGTH
+    // would mean the photo is never sent at all.
+    expect(
+      openingScanImage({ imageBase64: IMAGE }, [{ role: "assistant", text: "Hi!" }])
+    ).toBe(`data:image/jpeg;base64,${IMAGE}`);
+  });
+
+  it("drops it once the student has spoken — one upload per conversation", () => {
+    expect(
+      openingScanImage({ imageBase64: IMAGE }, [
+        { role: "assistant", text: "Hi!" },
+        { role: "user", text: "why?" },
+        { role: "assistant", text: "because…" },
+      ])
+    ).toBeNull();
+  });
+
+  it("drops an absent or oversized image rather than failing the turn", () => {
+    expect(openingScanImage({}, [])).toBeNull();
+    expect(openingScanImage({ imageBase64: "   " }, [])).toBeNull();
+    expect(openingScanImage({ imageBase64: "A".repeat(5_000_001) }, [])).toBeNull();
   });
 });

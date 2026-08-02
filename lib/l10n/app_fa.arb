@@ -516,6 +516,8 @@
   "resultStepOfUpper": "گام {step} از {total}",
   "resultStepOfTotal": "گام {step} از {total}",
   "geometryStepOfLabel": "گام {step} از {total}. {label}",
+  "geometryViewDiagram": "نمودار",
+  "geometryViewPhoto": "عکس تو",
   "geometryStepOfTitle": "گام {step} از {total} · {title}",
   "teachingLearningJourney": "مسیر یادگیری: {stages}",
   "teachingTemptingBecause": "وسوسه‌انگیز به این دلیل: {reason}",

@@ -8,8 +8,80 @@
 import OpenAI from "openai";
 import { logger } from "firebase-functions/v2";
 
+import {
+  ChatParams,
+  ChatTuning,
+  Workflow,
+  chatParams,
+  fallbackChatParams,
+  isUnsupportedParameterError,
+} from "./models";
+
 export function createOpenAI(apiKey: string): OpenAI {
   return new OpenAI({ apiKey });
+}
+
+/**
+ * Send one Chat Completions request for [workflow] and return the message text.
+ *
+ * Everything model-specific is concentrated here:
+ *
+ *   • the model, effort, verbosity and token budget come from the registry, so
+ *     no call site names a model;
+ *   • a 400 that rejects a PARAMETER (not the content) is retried once with the
+ *     minimal legacy-safe body — the migration net, loudly logged so a
+ *     misconfigured tier shows up in the logs instead of hiding as a fallback;
+ *   • a `length` finish is reported as truncation rather than as the misleading
+ *     "empty response". On a reasoning model an over-tight budget is spent on
+ *     invisible reasoning tokens and the content comes back EMPTY, which is
+ *     otherwise indistinguishable from a refusal.
+ */
+async function completeText(
+  client: OpenAI,
+  workflow: Workflow,
+  messages: OpenAI.Chat.ChatCompletionMessageParam[],
+  defaults: { temperature: number; maxTokens: number },
+  tuning: ChatTuning
+): Promise<string> {
+  const params = chatParams(workflow, defaults, tuning);
+
+  const send = async (p: ChatParams) =>
+    client.chat.completions.create({
+      ...p,
+      response_format: { type: "json_object" },
+      messages,
+    } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
+
+  let completion;
+  try {
+    completion = await send(params);
+  } catch (err) {
+    if (!isUnsupportedParameterError(err)) throw err;
+    const retry = fallbackChatParams(params);
+    logger.warn("openai.parameterRejected — retrying with the minimal body", {
+      workflow,
+      model: params.model,
+      err: String(err),
+    });
+    completion = await send(retry);
+  }
+
+  const choice = completion.choices[0];
+  const content = choice?.message?.content;
+  if (!content) {
+    if (choice?.finish_reason === "length") {
+      // Almost always a budget that did not cover the model's reasoning tokens.
+      logger.error("openai.truncated — raise the token budget for this workflow", {
+        workflow,
+        model: params.model,
+        budget: params.max_completion_tokens ?? params.max_tokens,
+        usage: completion.usage,
+      });
+      throw new Error("OpenAI response was truncated before any content");
+    }
+    throw new Error("OpenAI returned an empty response");
+  }
+  return content;
 }
 
 export interface ModerationVerdict {
@@ -51,11 +123,19 @@ export async function moderateImage(
   }
 }
 
-export interface ChatJsonOptions {
-  /** Lower = more deterministic. Math wants a steady hand. */
-  temperature?: number;
-  maxTokens?: number;
+/** Parse a JSON-mode response, logging the offending text on failure. */
+function parseJson<T>(content: string, what: string): T {
+  try {
+    return JSON.parse(content) as T;
+  } catch (err) {
+    logger.error(`Failed to parse OpenAI ${what} response`, {
+      content: content.slice(0, 500),
+    });
+    throw new Error("OpenAI returned malformed JSON");
+  }
 }
+
+export type ChatJsonOptions = ChatTuning;
 
 /**
  * Run a chat completion in JSON mode and return the parsed object.
@@ -66,88 +146,76 @@ export interface ChatJsonOptions {
  */
 export async function chatJson<T>(
   client: OpenAI,
-  model: string,
+  workflow: Workflow,
   system: string,
   user: string,
   options: ChatJsonOptions = {}
 ): Promise<T> {
-  const completion = await client.chat.completions.create({
-    model,
-    temperature: options.temperature ?? 0.2,
-    max_tokens: options.maxTokens ?? 1500,
-    response_format: { type: "json_object" },
-    messages: [
+  const content = await completeText(
+    client,
+    workflow,
+    [
       { role: "system", content: system },
       { role: "user", content: user },
     ],
-  });
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("OpenAI returned an empty response");
-  }
-
-  try {
-    return JSON.parse(content) as T;
-  } catch (err) {
-    logger.error("Failed to parse OpenAI JSON response", {
-      content: content.slice(0, 500),
-    });
-    throw new Error("OpenAI returned malformed JSON");
-  }
+    { temperature: 0.2, maxTokens: 1500 },
+    options
+  );
+  return parseJson<T>(content, "JSON");
 }
 
-export interface ChatVisionJsonOptions {
-  /** Lower = more deterministic. Reading a photo wants a steady hand. */
-  temperature?: number;
-  maxTokens?: number;
+export type ChatVisionJsonOptions = ChatTuning;
+
+/** One image in a vision turn, with a label the model can refer to. */
+export interface VisionImage {
+  /** A `data:<mime>;base64,...` URI. */
+  dataUri: string;
+  /** What this image IS, e.g. "ORIGINAL PHOTO" — prefixed to it in the turn. */
+  label?: string;
 }
 
 /**
- * Run a vision chat completion in JSON mode and return the parsed object.
+ * Run a vision chat completion in JSON mode over ONE OR MORE images.
  *
- * The user turn carries both `userText` and an image (`imageDataUri`, a
- * `data:<mime>;base64,...` URI). Like [chatJson], the system prompt MUST
- * instruct the model to return JSON (OpenAI's `json_object` response format
- * requires the word "JSON" to appear). Throws if the model returns unparseable
- * or empty content.
+ * Multiple images are how the scanner gives the model every view of the same
+ * page — the original photo AND the contrast-enhanced render — so it can fall
+ * back to whichever is legible where the other is not. Each image is preceded by
+ * its own text label so the model knows which is which; without labels a second
+ * image reads as a second, unrelated problem.
+ *
+ * Like [chatJson], the system prompt MUST instruct the model to return JSON.
  */
 export async function chatVisionJson<T>(
   client: OpenAI,
-  model: string,
+  workflow: Workflow,
   system: string,
-  imageDataUri: string,
+  images: string | VisionImage[],
   userText: string,
   options: ChatVisionJsonOptions = {}
 ): Promise<T> {
-  const completion = await client.chat.completions.create({
-    model,
-    temperature: options.temperature ?? 0.1,
-    max_tokens: options.maxTokens ?? 700,
-    response_format: { type: "json_object" },
-    messages: [
+  const list: VisionImage[] =
+    typeof images === "string" ? [{ dataUri: images }] : images;
+  if (list.length === 0) {
+    throw new Error("chatVisionJson requires at least one image");
+  }
+
+  const content: OpenAI.Chat.ChatCompletionContentPart[] = [
+    { type: "text", text: userText },
+  ];
+  for (const image of list) {
+    if (image.label) content.push({ type: "text", text: image.label });
+    content.push({ type: "image_url", image_url: { url: image.dataUri } });
+  }
+
+  const text = await completeText(
+    client,
+    workflow,
+    [
       { role: "system", content: system },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: userText },
-          { type: "image_url", image_url: { url: imageDataUri } },
-        ],
-      },
+      { role: "user", content },
     ],
-  });
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("OpenAI returned an empty response");
-  }
-
-  try {
-    return JSON.parse(content) as T;
-  } catch (err) {
-    logger.error("Failed to parse OpenAI vision JSON response", {
-      content: content.slice(0, 500),
-    });
-    throw new Error("OpenAI returned malformed JSON");
-  }
+    { temperature: 0.1, maxTokens: 700 },
+    options
+  );
+  return parseJson<T>(text, "vision JSON");
 }

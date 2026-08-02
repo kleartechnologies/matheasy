@@ -516,6 +516,8 @@
   "resultStepOfUpper": "TRIN {step} AF {total}",
   "resultStepOfTotal": "Trin {step} af {total}",
   "geometryStepOfLabel": "Trin {step} af {total}. {label}",
+  "geometryViewDiagram": "Diagram",
+  "geometryViewPhoto": "Dit foto",
   "geometryStepOfTitle": "TRIN {step} AF {total} · {title}",
   "teachingLearningJourney": "Læringsrejse: {stages}",
   "teachingTemptingBecause": "Fristende fordi: {reason}",

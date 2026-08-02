@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "下一步 · 第 {current} 步，共 {total} 步",
   "visualTeaserBecomes": "{before} 變成 {after}。解鎖 Pro 觀看每一步的展開。",
+  "geometryViewDiagram": "圖形",
+  "geometryViewPhoto": "你的照片",
   "geometryStepOfTitle": "第 {step} 步，共 {total} 步 · {title}",
   "practiceXpToNextLevel": "還差 {xp} XP 升到 Level {level}",
   "practiceTopicMastery": "{topic} 精熟度",

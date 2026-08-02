@@ -16,7 +16,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, PRO_ENTITLEMENT_ID } from "../config";
+import { OPENAI_API_KEY, PRO_ENTITLEMENT_ID } from "../config";
 import { requireUid } from "../lib/auth";
 import { ensureUserDoc, getEntitlement } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
@@ -153,7 +153,7 @@ export const generatePracticeQuestion = onCall(
       try {
         payload = await chatJson<PracticePayload>(
           client,
-          OPENAI_MODEL.value(),
+          "practice",
           SYSTEM_PROMPT + languageDirective(language),
           buildUserMessage(need),
           { temperature: 0.7, maxTokens: 2500 }

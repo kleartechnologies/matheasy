@@ -1795,6 +1795,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'الرسم';
+
+  @override
+  String get geometryViewPhoto => 'صورتك';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'الخطوة $step من $total · $title';
   }

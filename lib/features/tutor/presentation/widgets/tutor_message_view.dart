@@ -10,6 +10,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/tutor_models.dart';
 import 'tutor_focus_card.dart';
+import 'tutor_page_overlay.dart';
 import 'tutor_practice_card.dart';
 import 'tutor_quiz_card.dart';
 import 'tutor_suggestion_chips.dart';
@@ -31,6 +32,7 @@ class TutorMessageView extends StatelessWidget {
     required this.onSuggestion,
     required this.onPracticeStart,
     this.showSuggestions = false,
+    this.page,
   });
 
   /// Avatar diameter used to indent an assistant turn's card/chips so they line
@@ -41,6 +43,11 @@ class TutorMessageView extends StatelessWidget {
   final ValueChanged<SuggestionAction> onSuggestion;
   final VoidCallback onPracticeStart;
   final bool showSuggestions;
+
+  /// The scanned page this conversation is about, when there is one. Supplied
+  /// by the chat screen from the session context — a message carries WHERE it
+  /// points, never the pixels, so a thread of thirty turns holds one photo.
+  final TutorScannedPage? page;
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +78,28 @@ class TutorMessageView extends StatelessWidget {
   Widget _assistant(BuildContext context) {
     final card = message.card;
     final focus = message.focus;
+    final page = this.page;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MatheasyBubble(
           text: message.text,
         ),
+        // The student's own page, with Numi's hand on it. First of everything
+        // under the bubble: "look at the angle on the top right" is useless
+        // until you can see which one she means.
+        if (page != null && message.hasActions)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: _avatar + AppSpacing.sm,
+              top: AppSpacing.sm,
+            ),
+            child: TutorPageOverlay(
+              imageBytes: page.imageBytes,
+              anchors: page.anchors,
+              actions: message.actions,
+            ),
+          ),
         // The equation she is pointing at sits directly under her words, before
         // any card: it belongs to the explanation, not beside it.
         if (focus != null)

@@ -516,6 +516,8 @@
   "resultStepOfUpper": "PASSAGGIO {step} DI {total}",
   "resultStepOfTotal": "Passaggio {step} di {total}",
   "geometryStepOfLabel": "Passaggio {step} di {total}. {label}",
+  "geometryViewDiagram": "Figura",
+  "geometryViewPhoto": "La tua foto",
   "geometryStepOfTitle": "PASSAGGIO {step} DI {total} · {title}",
   "teachingLearningJourney": "Percorso di apprendimento: {stages}",
   "teachingTemptingBecause": "Allettante perché: {reason}",

@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "다음 단계 · {total} 중 {current}",
   "visualTeaserBecomes": "{before}이(가) {after}이(가) 됩니다. Pro를 잠금 해제하고 모든 단계를 확인하세요.",
+  "geometryViewDiagram": "도형",
+  "geometryViewPhoto": "내 사진",
   "geometryStepOfTitle": "{total} 중 {step}단계 · {title}",
   "practiceXpToNextLevel": "Level {level}까지 {xp} XP",
   "practiceTopicMastery": "{topic} 숙련도",

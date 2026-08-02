@@ -10,8 +10,15 @@ import 'app_semantic_colors.dart';
 /// student learns to read "orange = the operation happening right now" once and
 /// then reads it everywhere without a legend.
 ///
-/// The six roles are fixed. Adding a seventh dilutes the vocabulary — if a new
+/// The roles are deliberately few. Adding one dilutes the vocabulary — if a new
 /// idea needs a colour, it almost certainly belongs to one of these already.
+///
+/// The last three exist for the visual-teaching layer, where Numi points at the
+/// student's own photo: a nudge, a named concept and a callback to earlier work
+/// are things a tutor's hand distinguishes, and they had nowhere to live in the
+/// original six. They are painted with the SAME vocabulary as in-equation
+/// highlighting on purpose — a student should not have to learn "green means
+/// the answer" twice, once for the page and once for the working.
 enum MathRole {
   /// The correct answer, a verified result, the key takeaway.
   answer,
@@ -27,6 +34,15 @@ enum MathRole {
 
   /// A warning, a mistake, a sign error, an incorrect assumption.
   mistake,
+
+  /// A nudge: the next thing to look at, not the answer to it.
+  hint,
+
+  /// A named idea — the rule, the definition, the thing being taught.
+  concept,
+
+  /// Something from earlier: a previous step, an old mistake, prior practice.
+  memory,
 
   /// Supporting information — background that matters less than the rest.
   aside;
@@ -92,6 +108,16 @@ extension MathRoleColors on MathRole {
         return isDark ? AppColors.secondaryLight : AppColors.secondary;
       case MathRole.mistake:
         return colors.errorText;
+      // Warm but clearly not the amber of `operation`: a hint says "look here
+      // next", which must not read as "this is the step happening now".
+      case MathRole.hint:
+        return isDark ? AppColors.coralLight : AppColors.coralDeep;
+      case MathRole.concept:
+        return isDark ? AppColors.tealLight : AppColors.teal;
+      // "Memory yellow" — but gold is 1.63:1 on white and is a surface colour,
+      // so light mode gets the dark mustard the same hue survives as.
+      case MathRole.memory:
+        return isDark ? AppColors.gold : AppColors.mustard;
       case MathRole.aside:
         return colors.textSecondary;
     }

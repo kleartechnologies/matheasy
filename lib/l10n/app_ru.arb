@@ -516,6 +516,8 @@
   "resultStepOfUpper": "ШАГ {step} ИЗ {total}",
   "resultStepOfTotal": "Шаг {step} из {total}",
   "geometryStepOfLabel": "Шаг {step} из {total}. {label}",
+  "geometryViewDiagram": "Чертёж",
+  "geometryViewPhoto": "Твоё фото",
   "geometryStepOfTitle": "ШАГ {step} ИЗ {total} · {title}",
   "teachingLearningJourney": "Путь обучения: {stages}",
   "teachingTemptingBecause": "Заманчиво, потому что: {reason}",

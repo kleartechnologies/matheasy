@@ -1815,6 +1815,12 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Hình vẽ';
+
+  @override
+  String get geometryViewPhoto => 'Ảnh của bạn';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'BƯỚC $step/$total · $title';
   }

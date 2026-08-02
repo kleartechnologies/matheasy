@@ -22,7 +22,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, OPENAI_MODEL, REVENUECAT_SECRET_KEY } from "../config";
+import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY, scanPipelineEnabled } from "../config";
 import { requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
@@ -32,6 +32,7 @@ import {
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { languageDirective } from "../lib/language";
 import { chatVisionJson, createOpenAI, moderateImage } from "../lib/openai";
+import { prepareScanImage, visionImages } from "../lib/imagePrep";
 import { repairJsonEscapedMacros } from "./scan";
 import { MAX_WORK_LINES } from "./tutorWork";
 
@@ -160,7 +161,9 @@ TRANSCRIBING
 The "note" is shown to the STUDENT, so keep it short, plain and specific: "The last two lines are cut off at the bottom of the photo." It is the only prose you write — "problem" and "work" are always universal math notation. Return JSON.`;
 
 export const tutorImage = onCall(
-  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 60 },
+  // Preprocessing + a reasoning-model vision pass need more headroom than the
+  // single gpt-4o call this was sized for.
+  { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "1GiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
     const { imageBase64, mimeType = "image/jpeg", caption, language } =
@@ -212,17 +215,24 @@ export const tutorImage = onCall(
         ? ` The student also wrote: "${caption.trim().slice(0, 200)}". Use it only to decide what the photo is; still transcribe only what you can see.`
         : "";
 
+    // Handwritten pencil working is the hardest thing the app is asked to read —
+    // fainter and less regular than print — so it gets the same enhanced second
+    // view as a scan. Fails soft to the original alone.
+    const prepared = scanPipelineEnabled()
+      ? await prepareScanImage(imageDataUri)
+      : { original: imageDataUri, enhanced: null };
+
     let payload: TutorImagePayload;
     try {
       payload = await chatVisionJson<TutorImagePayload>(
         client,
-        OPENAI_MODEL.value(),
+        "handwriting",
         // The directive reaches exactly one field — `note` — because everything
         // else this function returns is math notation, which it leaves alone. A
         // student reading Thai should not be told "the last line is cut off" in
         // English.
         SYSTEM_PROMPT + languageDirective(language),
-        imageDataUri,
+        visionImages(prepared.original, prepared.enhanced),
         `Read this photo and return the JSON described above. Transcribe only — do not solve it and do not judge whether anything is correct.${hint}`,
         { temperature: 0.1, maxTokens: 1200 }
       );

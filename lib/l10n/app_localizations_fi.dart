@@ -1822,6 +1822,12 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Kuvio';
+
+  @override
+  String get geometryViewPhoto => 'Oma kuva';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'VAIHE $step/$total · $title';
   }

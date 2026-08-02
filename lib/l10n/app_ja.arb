@@ -466,6 +466,8 @@
   "homeChallengeSubtitleXp": "{subtitle} · +{xp} XP",
   "solutionNextStepOf": "次のステップ · {total}中{current}",
   "visualTeaserBecomes": "{before}が{after}になります。Proにアップグレードして、すべてのステップの展開を見ましょう。",
+  "geometryViewDiagram": "図",
+  "geometryViewPhoto": "あなたの写真",
   "geometryStepOfTitle": "ステップ {step}/{total} · {title}",
   "practiceXpToNextLevel": "レベル{level}まであと{xp} XP",
   "practiceTopicMastery": "{topic}の習熟度",

@@ -1818,6 +1818,12 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get geometryViewDiagram => 'Şekil';
+
+  @override
+  String get geometryViewPhoto => 'Fotoğrafın';
+
+  @override
   String geometryStepOfTitle(int step, int total, String title) {
     return 'ADIM $step / $total · $title';
   }
