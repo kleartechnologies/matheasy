@@ -39,6 +39,25 @@ class UsageCounts {
     );
   }
 
+  /// Folds another tally in by taking the LARGER of each counter.
+  ///
+  /// Used to reconcile the local ledger with the server's authoritative one. Max
+  /// rather than sum because both sides count the same actions — summing would
+  /// double-charge an honest user who never did anything but use one device.
+  /// Max is also idempotent, so reconciling repeatedly (every launch, after
+  /// every sign-in) converges instead of drifting, and a wiped local file simply
+  /// re-adopts the server's number.
+  UsageCounts mergedWith(UsageCounts other) => UsageCounts(
+        scansUsed: scansUsed > other.scansUsed ? scansUsed : other.scansUsed,
+        tutorMessagesUsed: tutorMessagesUsed > other.tutorMessagesUsed
+            ? tutorMessagesUsed
+            : other.tutorMessagesUsed,
+        practiceQuestionsGenerated:
+            practiceQuestionsGenerated > other.practiceQuestionsGenerated
+                ? practiceQuestionsGenerated
+                : other.practiceQuestionsGenerated,
+      );
+
   Map<String, dynamic> toJson() => {
         'scansUsed': scansUsed,
         'tutorMessagesUsed': tutorMessagesUsed,

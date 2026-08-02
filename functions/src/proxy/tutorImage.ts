@@ -23,7 +23,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
 import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY, scanPipelineEnabled } from "../config";
-import { requireUid } from "../lib/auth";
+import { callerIdentity, requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
   ensureUserDoc,
@@ -166,6 +166,7 @@ export const tutorImage = onCall(
   { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "1GiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const { imageBase64, mimeType = "image/jpeg", caption, language } =
       (request.data ?? {}) as TutorImageRequest;
 
@@ -191,7 +192,7 @@ export const tutorImage = onCall(
     // rate limit caps every user (free and Pro) before the paid call, and the
     // read is metered against `scans` because that is literally what it costs.
     await assertWithinRateLimit(uid, "recognize");
-    await assertWithinQuota(uid, "scans");
+    await assertWithinQuota(uid, "scans", identity);
 
     const client = createOpenAI(OPENAI_API_KEY.value());
 
@@ -251,7 +252,7 @@ export const tutorImage = onCall(
     // billed the moment `chatVisionJson` returned; charging only on a useful
     // read would let a scripted client burn unlimited OpenAI cost on junk
     // images while the free `scans` quota stayed pinned at 0.
-    const quota = await incrementUsage(uid, "scans");
+    const quota = await incrementUsage(uid, "scans", identity);
 
     // Deliberately NOT an error, even for `unreadable`/`notMath` — the student
     // gets a real reply from Numi either way (spec Part 2: never silently fail).

@@ -21,6 +21,9 @@ export { tutorImage } from "./proxy/tutorImage";
 export { generateVisualSolution } from "./proxy/visual";
 export { generatePracticeQuestion } from "./proxy/practice";
 
+// --- Identity + usage (server-authoritative free-tier enforcement) ----------
+export { registerInstallation, linkIdentity, usageStatus } from "./proxy/usage";
+
 // --- Billing (RevenueCat → Firestore entitlement sync) ----------------------
 export { revenuecatWebhook } from "./billing/revenuecatWebhook";
 

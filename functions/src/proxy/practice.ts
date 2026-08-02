@@ -16,9 +16,13 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, PRO_ENTITLEMENT_ID } from "../config";
-import { requireUid } from "../lib/auth";
-import { ensureUserDoc, getEntitlement } from "../lib/firestore";
+import { OPENAI_API_KEY } from "../config";
+import { callerIdentity, requireUid } from "../lib/auth";
+import {
+  assertWithinQuota,
+  ensureUserDoc,
+  incrementUsage,
+} from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
 import { contentLanguage, languageDirective } from "../lib/language";
@@ -92,6 +96,7 @@ export const generatePracticeQuestion = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const {
       topic,
       skill,
@@ -124,15 +129,12 @@ export const generatePracticeQuestion = onCall(
     await ensureUserDoc(uid);
     await assertWithinRateLimit(uid, "practice");
 
-    // Adaptive / AI-generated practice is Pro-exclusive — enforce server-side.
-    const entitlement = await getEntitlement(uid);
-    if (entitlement !== PRO_ENTITLEMENT_ID) {
-      throw new HttpsError(
-        "permission-denied",
-        "Adaptive Practice is a Matheasy Pro feature. Upgrade to unlock it.",
-        { feature: "adaptivePractice", upgradeRequired: true }
-      );
-    }
+    // Adaptive / AI-generated practice is Pro-exclusive — enforced server-side
+    // as a metered allowance whose free ceiling is 0 (see `usage/features.ts`),
+    // so opening it to free users, even partially, is a Remote Config edit
+    // rather than a deploy. The refusal still carries `upgradeRequired`, which
+    // is what the app opens the paywall on.
+    await assertWithinQuota(uid, "practiceQuestions", identity);
 
     const buildUserMessage = (need: number) =>
       [
@@ -223,7 +225,11 @@ export const generatePracticeQuestion = onCall(
       }
     }
 
-    return { questions: collected.slice(0, MAX_COUNT), usage: null };
+    // One charge per GENERATION, not per question: the batch exists to amortize
+    // a single OpenAI call, and that call is what costs money.
+    const quota = await incrementUsage(uid, "practiceQuestions", identity);
+
+    return { questions: collected.slice(0, MAX_COUNT), usage: quota };
   }
 );
 

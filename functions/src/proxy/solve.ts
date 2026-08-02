@@ -23,7 +23,7 @@ import {
   REVENUECAT_SECRET_KEY,
   animationSchemaEnabled,
 } from "../config";
-import { requireUid } from "../lib/auth";
+import { callerIdentity, requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
   ensureUserDoc,
@@ -191,6 +191,7 @@ export const solveEquation = onCall(
   { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const { latex, countAsScan = false, language } = (request.data ??
       {}) as SolveRequest;
 
@@ -207,7 +208,7 @@ export const solveEquation = onCall(
     // the LLM narration call still costs money) and any retry loop (spec §10).
     await assertWithinRateLimit(uid, "solve");
     if (countAsScan) {
-      await assertWithinQuota(uid, "scans");
+      await assertWithinQuota(uid, "scans", identity);
     }
 
     // Server result cache (spec §10): a repeat of an already-solved problem
@@ -270,7 +271,9 @@ export const solveEquation = onCall(
     // Meter ONLY the manual-entry path (a scan already paid for OCR-sourced
     // problems). We charge whether or not the answer verified, and whether or
     // not it was a cache hit: the user's allowance tracks solves they ask for.
-    const quota = countAsScan ? await incrementUsage(uid, "scans") : null;
+    const quota = countAsScan
+      ? await incrementUsage(uid, "scans", identity)
+      : null;
 
     // Stamp the wire schema version on egress (spec §2.3) — TELEMETRY ONLY, never a
     // client render gate. The v2 teaching layer is fetched SEPARATELY by the client

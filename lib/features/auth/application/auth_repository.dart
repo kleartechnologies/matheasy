@@ -39,6 +39,14 @@ class AuthRepository {
 
   AppUser? _resolve() => _cloudUser;
 
+  /// See [AuthService.ensureAnonymousSession] — the device's initial identity.
+  /// It never reaches [watchUser]: an anonymous session still resolves to a
+  /// `null` user, so the sign-in wall is unchanged.
+  Future<String?> ensureAnonymousSession() => _service.ensureAnonymousSession();
+
+  /// See [AuthService.lastAnonymousUid] — read straight after a sign-in.
+  String? get lastAnonymousUid => _service.lastAnonymousUid;
+
   Future<AppUser> signInWithGoogle() => _service.signInWithGoogle();
 
   Future<AppUser> signInWithApple() => _service.signInWithApple();

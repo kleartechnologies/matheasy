@@ -57,6 +57,11 @@ dependencies:
   firebase_crashlytics: ^5.2.4
   firebase_analytics: ^12.4.3
   cloud_functions: ^6.3.3
+  # Firebase Installation ID — layer 1 of the server-side free-usage identity
+  # chain. A Firebase-issued, app-scoped, resettable id: NOT IMEI / MAC / serial
+  # / advertising id, so it is App Store-, Play- and GDPR-compliant. It never
+  # leaves the device in the clear either — the server stores only its SHA-256.
+  firebase_app_installations: ^0.4.2+6
   image_picker: ^1.2.3
   camera: ^0.12.0+1
   crop_your_image: ^2.0.0

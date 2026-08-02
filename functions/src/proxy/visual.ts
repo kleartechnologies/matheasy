@@ -4,16 +4,21 @@
  * Takes a problem (plus the solver's answer, when known) and returns the
  * universal visual-solution schema the Flutter Visual tab renders: category,
  * level, renderer tier, before→after steps and optional visualization
- * metadata (graphs, number lines, shapes). PRO-ONLY: the `pro` entitlement is
- * enforced HERE, server-side, so a client can't unlock the feature by
- * spoofing UI state. Not metered — Pro usage is unlimited.
+ * metadata (graphs, number lines, shapes). PRO-ONLY, enforced HERE and
+ * server-side, so a client can't unlock the feature by spoofing UI state — as a
+ * metered allowance whose free ceiling is 0 (see `usage/features.ts`), which
+ * makes "give free users one" a Remote Config edit rather than a deploy.
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
-import { OPENAI_API_KEY, PRO_ENTITLEMENT_ID } from "../config";
-import { requireUid } from "../lib/auth";
-import { ensureUserDoc, getEntitlement } from "../lib/firestore";
+import { OPENAI_API_KEY } from "../config";
+import { callerIdentity, requireUid } from "../lib/auth";
+import {
+  assertWithinQuota,
+  ensureUserDoc,
+  incrementUsage,
+} from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { chatJson, createOpenAI } from "../lib/openai";
 import { languageDirective } from "../lib/language";
@@ -132,6 +137,7 @@ export const generateVisualSolution = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const { latex, answerLatex, problemType, language } = (request.data ??
       {}) as VisualRequest;
 
@@ -145,16 +151,13 @@ export const generateVisualSolution = onCall(
     await ensureUserDoc(uid);
     await assertWithinRateLimit(uid, "visual");
 
-    // The Visual Learning Engine is Pro-exclusive — enforce the entitlement
-    // server-side (the UI gate alone is spoofable).
-    const entitlement = await getEntitlement(uid);
-    if (entitlement !== PRO_ENTITLEMENT_ID) {
-      throw new HttpsError(
-        "permission-denied",
-        "Visual Learning is a Matheasy Pro feature. Upgrade to unlock it.",
-        { feature: "visualLearning", upgradeRequired: true }
-      );
-    }
+    // The Visual Learning Engine is Pro-exclusive — enforced server-side, since
+    // the UI gate alone is spoofable. Expressed as a metered allowance whose
+    // free ceiling is 0 rather than as an entitlement branch, so a promotional
+    // "one free visual explanation" is a Remote Config edit, not a deploy. The
+    // refusal still carries `upgradeRequired`, which is what the app opens the
+    // paywall on.
+    await assertWithinQuota(uid, "visualExplanations", identity);
 
     const userMessage = [
       `Create the visual learning experience for this problem: ${latex}`,
@@ -182,6 +185,10 @@ export const generateVisualSolution = onCall(
       );
     }
 
-    return { ...payload, usage: null };
+    // Charged only after the paid call returned, so a provider failure never
+    // costs a student part of an allowance they never got the benefit of.
+    const quota = await incrementUsage(uid, "visualExplanations", identity);
+
+    return { ...payload, usage: quota };
   }
 );

@@ -59,7 +59,7 @@ final class AuthControllerProvider
   }
 }
 
-String _$authControllerHash() => r'a8a1e0f3a420ec7dbfc798c313351b907404d270';
+String _$authControllerHash() => r'd2db760b920cd8edb5bd12dbe0ff102f45284dad';
 
 /// The single source of truth for the auth session.
 ///

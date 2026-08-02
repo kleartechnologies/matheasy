@@ -11,6 +11,7 @@ import '../domain/auth_failure.dart';
 import '../domain/auth_state.dart';
 import '../domain/user_profile.dart';
 import 'auth_repository.dart';
+import 'identity_controller.dart';
 
 part 'auth_controller.g.dart';
 
@@ -61,7 +62,18 @@ class AuthController extends _$AuthController {
     state = state.copyWith(busy: true, clearFailure: true);
     try {
       final user = await action();
+      // Read BEFORE anything else awaits: this is the anonymous uid the device
+      // was carrying a moment ago, and the sign-in that just happened replaced
+      // it. Handing it to the server folds its spent usage into this account —
+      // free usage is lifetime, so signing in must never hand out a fresh one.
+      final previousUid = ref.read(authRepositoryProvider).lastAnonymousUid;
       state = AuthState.authenticated(user);
+      // Fire-and-forget: identity bookkeeping must never delay or fail a
+      // sign-in. Nothing depends on it client-side — the server re-derives
+      // every allowance from the database on the next metered request.
+      unawaited(
+        ref.read(identityControllerProvider.notifier).linkAfterSignIn(previousUid),
+      );
       // Interactive sign-in only — a silent session restore comes through the
       // stream, not here, so it isn't counted as a new account.
       unawaited(ref.read(analyticsServiceProvider).logEvent(

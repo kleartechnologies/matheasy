@@ -64,6 +64,14 @@ class FakeAuthService implements AuthService {
 
   int signOutCount = 0;
   int deleteCount = 0;
+  int anonymousSessionCount = 0;
+
+  /// The uid [ensureAnonymousSession] hands back, and what a subsequent sign-in
+  /// reports as [lastAnonymousUid]. `null` models a device that couldn't get an
+  /// anonymous session at all.
+  String? anonymousUid = 'anon-uid-1';
+
+  String? _lastAnonymousUid;
 
   @override
   Stream<AppUser?> authStateChanges() async* {
@@ -75,9 +83,20 @@ class FakeAuthService implements AuthService {
   AppUser? get currentUser => _current;
 
   @override
+  String? get lastAnonymousUid => _lastAnonymousUid;
+
+  @override
+  Future<String?> ensureAnonymousSession() async {
+    if (_current != null) return _current!.id;
+    anonymousSessionCount++;
+    return anonymousUid;
+  }
+
+  @override
   Future<AppUser> signInWithGoogle() async {
     if (googleError != null) throw googleError!;
     final user = _googleResult ?? googleTestUser();
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
     _current = user;
     _controller.add(user);
     return user;
@@ -87,6 +106,7 @@ class FakeAuthService implements AuthService {
   Future<AppUser> signInWithApple() async {
     if (appleError != null) throw appleError!;
     final user = _appleResult ?? appleTestUser();
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
     _current = user;
     _controller.add(user);
     return user;

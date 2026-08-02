@@ -30,7 +30,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
 import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY, scanPipelineEnabled } from "../config";
-import { requireUid } from "../lib/auth";
+import { callerIdentity, requireUid } from "../lib/auth";
 import {
   assertWithinQuota,
   ensureUserDoc,
@@ -178,6 +178,7 @@ export const recognizeEquation = onCall(
   },
   async (request) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const { imageBase64, mimeType = "image/jpeg", source = "camera" } =
       (request.data ?? {}) as ScanRequest;
 
@@ -203,7 +204,7 @@ export const recognizeEquation = onCall(
     // Rate limit BEFORE the quota check and the paid call — the abuse backstop
     // that caps every user (free and Pro), spec §10.
     await assertWithinRateLimit(uid, "recognize");
-    await assertWithinQuota(uid, "scans");
+    await assertWithinQuota(uid, "scans", identity);
 
     const client = createOpenAI(OPENAI_API_KEY.value());
 
@@ -283,7 +284,7 @@ export const recognizeEquation = onCall(
     // found. Charging only on a successful read would let a scripted client
     // send endless non-math images and burn unlimited OpenAI cost while the
     // free `scans` quota stays pinned at 0.
-    const quota = await incrementUsage(uid, "scans");
+    const quota = await incrementUsage(uid, "scans", identity);
 
     if (!isMath || !problem) {
       throw new HttpsError(

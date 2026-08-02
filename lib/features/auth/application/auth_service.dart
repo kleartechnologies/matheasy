@@ -22,6 +22,29 @@ abstract interface class AuthService {
   /// The currently cached cloud user, if any (synchronous).
   AppUser? get currentUser;
 
+  /// Establishes an ANONYMOUS Firebase session if this installation has no
+  /// session at all, and returns the resulting uid (`null` if unavailable).
+  ///
+  /// This is layer 2 of the free-usage identity chain: a fresh install gets a
+  /// server identity immediately, before anyone signs in, so the installation
+  /// can be registered and any usage it accrues has somewhere to land. It is
+  /// deliberately invisible to the rest of the app — an anonymous Firebase user
+  /// maps to a `null` [AppUser] (see [FirebaseAuthService]), so the router still
+  /// requires a real sign-in exactly as before. Nothing about the sign-in wall,
+  /// routing or the paywall changes.
+  ///
+  /// Never throws; a device that can't get one is simply metered on its account
+  /// and installation ledgers instead.
+  Future<String?> ensureAnonymousSession();
+
+  /// The anonymous uid this device was carrying immediately before the most
+  /// recent successful interactive sign-in, or `null`.
+  ///
+  /// The controller hands it to the `linkIdentity` callable so the anonymous
+  /// session's spent usage is absorbed by the account rather than abandoned —
+  /// "anonymous usage should merge into the signed-in account".
+  String? get lastAnonymousUid;
+
   /// Interactive Google sign-in. Throws [AuthFailure] on cancel/failure.
   Future<AppUser> signInWithGoogle();
 
@@ -60,6 +83,12 @@ class UnconfiguredAuthService implements AuthService {
 
   @override
   AppUser? get currentUser => null;
+
+  @override
+  Future<String?> ensureAnonymousSession() async => null;
+
+  @override
+  String? get lastAnonymousUid => null;
 
   @override
   Future<AppUser> signInWithGoogle() async =>

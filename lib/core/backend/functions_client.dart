@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/application/auth_service.dart' show firebaseReadyProvider;
+import '../security/installation_identity.dart';
 
 /// The region the Cloud Functions are deployed to (mirrors `REGION` in
 /// `functions/src/config.ts`).
@@ -79,6 +80,23 @@ final Provider<bool> aiBackendReadyProvider = Provider<bool>((ref) {
   return user != null && !user.isGuest;
 });
 
+/// Stamps the device's installation id onto an outgoing callable payload.
+///
+/// Every metered endpoint reads it (`callerIdentity` server-side) to find this
+/// device's usage ledger, which is what makes free usage survive a new account.
+/// Applied HERE, at the one choke point, rather than at each of the nine call
+/// sites — so a new AI service can't forget it and quietly become the hole.
+///
+/// Absent id → the field is omitted, never sent as null; an explicit
+/// `installationId` already in [data] wins (the identity callables pass their
+/// own). Sending it is not a claim the server trusts: see
+/// [InstallationIdentity].
+Map<String, dynamic> withInstallationId(Map<String, dynamic> data) {
+  final id = InstallationIdentity.value;
+  if (id == null || data.containsKey('installationId')) return data;
+  return <String, dynamic>{...data, 'installationId': id};
+}
+
 /// Invokes a callable [name] with [data] and returns its `Map` result, mapping
 /// every failure onto a typed [BackendException]. The single choke point where
 /// the SDK exception type is translated.
@@ -88,7 +106,8 @@ Future<Map<String, dynamic>> callFunction(
   Map<String, dynamic> data,
 ) async {
   try {
-    final result = await functions.httpsCallable(name).call(data);
+    final result =
+        await functions.httpsCallable(name).call(withInstallationId(data));
     final value = result.data;
     if (value is Map) return Map<String, dynamic>.from(value);
     throw const BackendException('Unexpected response from the server.');
@@ -112,8 +131,9 @@ Future<Map<String, dynamic>> streamFunction(
   required void Function(Map<String, dynamic> chunk) onChunk,
 }) async {
   try {
-    final stream =
-        functions.httpsCallable(name).stream<Object?, Object?>(data);
+    final stream = functions
+        .httpsCallable(name)
+        .stream<Object?, Object?>(withInstallationId(data));
     await for (final response in stream) {
       switch (response) {
         case Chunk(:final partialData):

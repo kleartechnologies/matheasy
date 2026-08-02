@@ -7,11 +7,14 @@ rules_version = '2';
 // reads and writes.
 //
 // Server-managed fields on the `users/{uid}` document — `entitlement`,
-// `usage`, `subscription`, `stats` — are written ONLY by the Admin SDK
-// (RevenueCat webhook, usage metering, progress aggregation), which bypasses
-// these rules. Stage 14 gates the Pro-only Visual Learning Engine on the
-// `entitlement` field server-side, so the client must not be able to forge it:
-// the user document is therefore read-only to the client.
+// `usage`, `usageDaily`, `subscription`, `identity`, `stats` — are written ONLY
+// by the Admin SDK (RevenueCat webhook, usage metering, progress aggregation),
+// which bypasses these rules. Stage 14 gates the Pro-only Visual Learning
+// Engine on the `entitlement` field server-side, so the client must not be able
+// to forge it: the user document is therefore read-only to the client.
+//
+// The anti-abuse collections at the bottom go further and are not readable
+// either. See the comment there for why.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -36,6 +39,40 @@ service cloud.firestore {
         allow read: if isOwner(uid);
         allow create: if isOwner(uid);
       }
+    }
+
+    // --- Anti-abuse collections: SERVER ONLY -------------------------------
+    //
+    // These three are the free-tier enforcement substrate. The Admin SDK
+    // bypasses these rules, so `false` here means "Cloud Functions and nobody
+    // else" — which is the whole design: a client that could read its own
+    // installation document would learn its risk score and which uids the
+    // device has carried, and a client that could write one could reset the
+    // device's spent usage to zero and make the entire system decorative.
+    //
+    // There is nothing here a student needs. The app gets its meter from the
+    // `usageStatus` callable, which returns a display value computed
+    // server-side, never a document it could edit.
+
+    // One doc per installation, keyed by SHA-256 of the installation ID.
+    match /installations/{installationId} {
+      allow read, write: if false;
+    }
+
+    // The append-only metering trail (uid, hashed installation, feature, verdict).
+    match /usage_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Pre-aggregated daily counters for dashboards.
+    match /analytics/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Raw solve-failure drill-down (anonymous, no uid) — server-written,
+    // surfaced only through the admin `solveFailureReport` callable.
+    match /solve_failures/{failureId} {
+      allow read, write: if false;
     }
   }
 }

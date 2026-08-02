@@ -30,6 +30,12 @@ class FirebaseAuthService implements AuthService {
   /// future so concurrent taps don't double-initialize.
   Future<void>? _googleInit;
 
+  /// The anonymous uid held immediately before the last interactive sign-in.
+  String? _lastAnonymousUid;
+
+  /// De-duplicates concurrent [ensureAnonymousSession] calls (launch + a retry).
+  Future<String?>? _anonymousSignIn;
+
   @override
   Stream<AppUser?> authStateChanges() =>
       _auth.authStateChanges().map(_toAppUser);
@@ -38,7 +44,42 @@ class FirebaseAuthService implements AuthService {
   AppUser? get currentUser => _toAppUser(_auth.currentUser);
 
   @override
+  String? get lastAnonymousUid => _lastAnonymousUid;
+
+  @override
+  Future<String?> ensureAnonymousSession() async {
+    final existing = _auth.currentUser;
+    if (existing != null) return existing.uid;
+    final future = _anonymousSignIn ??= _signInAnonymously();
+    try {
+      return await future;
+    } finally {
+      // Drop the cached future either way so a later launch can retry rather
+      // than re-await a permanently-settled one.
+      _anonymousSignIn = null;
+    }
+  }
+
+  Future<String?> _signInAnonymously() async {
+    try {
+      final result = await _auth.signInAnonymously();
+      return result.user?.uid;
+    } catch (error, stack) {
+      // Best-effort by design: without an anonymous session the app behaves
+      // exactly as it did before this layer existed — the user signs in and is
+      // metered on their account. Never surface this; nothing asked for it.
+      AppLogger.error(
+        'Anonymous session unavailable',
+        error: error,
+        stackTrace: stack,
+      );
+      return null;
+    }
+  }
+
+  @override
   Future<AppUser> signInWithGoogle() async {
+    _rememberAnonymousUid();
     try {
       await _ensureGoogleInit();
       final account = await _google.authenticate();
@@ -55,6 +96,7 @@ class FirebaseAuthService implements AuthService {
 
   @override
   Future<AppUser> signInWithApple() async {
+    _rememberAnonymousUid();
     try {
       // A nonce binds this request to the returned id-token, mitigating replay.
       final rawNonce = _generateNonce();
@@ -131,8 +173,25 @@ class FirebaseAuthService implements AuthService {
     }
   }
 
-  AppUser? _toAppUser(User? user) =>
-      user == null ? null : _mapUser(user, _providerOf(user));
+  /// Captures the uid of the anonymous session (if that is what we're holding)
+  /// just before a credential exchange replaces it, so the controller can ask
+  /// the server to fold its usage into the account that is about to appear.
+  void _rememberAnonymousUid() {
+    final user = _auth.currentUser;
+    _lastAnonymousUid = (user != null && user.isAnonymous) ? user.uid : null;
+  }
+
+  /// An ANONYMOUS Firebase user is not a user as far as this app is concerned.
+  ///
+  /// It exists only so the device has a server identity to register and meter
+  /// against; mapping it to `null` keeps the whole app — the router's sign-in
+  /// wall, `aiBackendReadyProvider`, the RevenueCat `logIn(uid)` binding —
+  /// behaving byte-identically to before the anti-abuse layer was added. The
+  /// anonymous uid is reachable only through [lastAnonymousUid], which exists
+  /// for exactly one caller.
+  AppUser? _toAppUser(User? user) => user == null || user.isAnonymous
+      ? null
+      : _mapUser(user, _providerOf(user));
 
   /// Maps a Firebase [User] onto the vendor-free [AppUser]. Lives here (not in
   /// the domain) so `app_user.dart` never imports firebase_auth.

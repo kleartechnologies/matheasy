@@ -209,20 +209,19 @@ export const PRODUCT_MONTHLY = "matheasy_pro_monthly";
 export const PRODUCT_ANNUAL = "matheasy_pro_annual";
 
 /**
- * Free-tier lifetime allowances, per metered feature. Mirrors
- * `UsageQuota.free` in the Flutter app so client and server agree. `-1` means
- * uncapped (the Pro tier).
+ * Free-tier lifetime allowances and the metered feature list.
+ *
+ * These moved to `usage/features.ts` when limits became Remote Config-driven,
+ * and are re-exported here only so older imports keep resolving. There is one
+ * catalogue and one set of defaults; do not add a feature or a number here.
+ * The COMPILED values in `usage/features.ts` are just the fallback — the live
+ * ceilings come from Remote Config via `usage/limits.ts`.
  */
-export const FREE_QUOTA = {
-  scans: 5,
-  tutorMessages: 20,
-  practiceQuestions: 10,
-} as const;
-
-export const UNLIMITED = -1;
-
-/** The metered features the server enforces quotas for. */
-export type MeteredFeature = keyof typeof FREE_QUOTA;
+export {
+  DEFAULT_FREE_LIMITS as FREE_QUOTA,
+  UNLIMITED,
+  type MeteredFeature,
+} from "./usage/features";
 
 /**
  * Per-user, server-enforced RATE LIMITS on the paid OpenAI endpoints (spec §10).
@@ -250,6 +249,10 @@ export const RATE_LIMITS = {
   // from solve so it never adds latency to the answer). Cache-first, so most
   // views cost nothing; the ceiling caps a retry loop / cold-cache burst.
   teach: { perMinute: 30, perDay: 400 },
+  // Account linking. Free to call and it writes to two documents, so it needs a
+  // ceiling — but a legitimate student may genuinely sign in and out a few times
+  // while working out which account they used, so the ceiling is loose.
+  identity: { perMinute: 10, perDay: 60 },
 } as const;
 
 /** The paid endpoints the server rate-limits per user. */

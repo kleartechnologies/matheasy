@@ -94,20 +94,86 @@ abstract class _$UsageController extends $Notifier<UsageCounts> {
   }
 }
 
-/// The computed usage view the UI and gating consult. Reacts to both the counts
-/// and the Pro entitlement, so the moment a purchase lands every gate reopens.
+/// The computed usage view the UI and gating consult. Reacts to the counts, the
+/// Pro entitlement and the server's meter, so the moment a purchase lands every
+/// gate reopens — and the moment the server's number arrives, the meter tells
+/// the truth.
+///
+/// The server's view wins where the two disagree, in the only direction that is
+/// safe to be wrong in:
+///
+///  * **counts** — the LARGER of local and server. The server's figure is the
+///    effective one (max across this account and this installation), so a fresh
+///    account on a spent device, a reinstall or a cleared preferences file shows
+///    the usage that will actually be enforced rather than a hopeful zero. Local
+///    can still be ahead of it between a scan and the next refresh, and that is
+///    why it is a max and not an adoption.
+///  * **quota** — the server's live Remote Config limits when known, so the
+///    ceiling can be tuned without shipping a build. `UsageQuota.free` is the
+///    compiled fallback.
+///  * **isPro** — either source saying yes is yes. RevenueCat's local cache is
+///    fresher right after a purchase; the server's is fresher after a renewal or
+///    a grace period. Being generous here is a UX call only — the server still
+///    refuses anything the entitlement doesn't cover.
+///
+/// This remains PRESENTATION. Every real decision is re-made in
+/// `functions/src/usage/guard.ts`, from the database, on the next request.
 
 @ProviderFor(usageSnapshot)
 final usageSnapshotProvider = UsageSnapshotProvider._();
 
-/// The computed usage view the UI and gating consult. Reacts to both the counts
-/// and the Pro entitlement, so the moment a purchase lands every gate reopens.
+/// The computed usage view the UI and gating consult. Reacts to the counts, the
+/// Pro entitlement and the server's meter, so the moment a purchase lands every
+/// gate reopens — and the moment the server's number arrives, the meter tells
+/// the truth.
+///
+/// The server's view wins where the two disagree, in the only direction that is
+/// safe to be wrong in:
+///
+///  * **counts** — the LARGER of local and server. The server's figure is the
+///    effective one (max across this account and this installation), so a fresh
+///    account on a spent device, a reinstall or a cleared preferences file shows
+///    the usage that will actually be enforced rather than a hopeful zero. Local
+///    can still be ahead of it between a scan and the next refresh, and that is
+///    why it is a max and not an adoption.
+///  * **quota** — the server's live Remote Config limits when known, so the
+///    ceiling can be tuned without shipping a build. `UsageQuota.free` is the
+///    compiled fallback.
+///  * **isPro** — either source saying yes is yes. RevenueCat's local cache is
+///    fresher right after a purchase; the server's is fresher after a renewal or
+///    a grace period. Being generous here is a UX call only — the server still
+///    refuses anything the entitlement doesn't cover.
+///
+/// This remains PRESENTATION. Every real decision is re-made in
+/// `functions/src/usage/guard.ts`, from the database, on the next request.
 
 final class UsageSnapshotProvider
     extends $FunctionalProvider<UsageSnapshot, UsageSnapshot, UsageSnapshot>
     with $Provider<UsageSnapshot> {
-  /// The computed usage view the UI and gating consult. Reacts to both the counts
-  /// and the Pro entitlement, so the moment a purchase lands every gate reopens.
+  /// The computed usage view the UI and gating consult. Reacts to the counts, the
+  /// Pro entitlement and the server's meter, so the moment a purchase lands every
+  /// gate reopens — and the moment the server's number arrives, the meter tells
+  /// the truth.
+  ///
+  /// The server's view wins where the two disagree, in the only direction that is
+  /// safe to be wrong in:
+  ///
+  ///  * **counts** — the LARGER of local and server. The server's figure is the
+  ///    effective one (max across this account and this installation), so a fresh
+  ///    account on a spent device, a reinstall or a cleared preferences file shows
+  ///    the usage that will actually be enforced rather than a hopeful zero. Local
+  ///    can still be ahead of it between a scan and the next refresh, and that is
+  ///    why it is a max and not an adoption.
+  ///  * **quota** — the server's live Remote Config limits when known, so the
+  ///    ceiling can be tuned without shipping a build. `UsageQuota.free` is the
+  ///    compiled fallback.
+  ///  * **isPro** — either source saying yes is yes. RevenueCat's local cache is
+  ///    fresher right after a purchase; the server's is fresher after a renewal or
+  ///    a grace period. Being generous here is a UX call only — the server still
+  ///    refuses anything the entitlement doesn't cover.
+  ///
+  /// This remains PRESENTATION. Every real decision is re-made in
+  /// `functions/src/usage/guard.ts`, from the database, on the next request.
   UsageSnapshotProvider._()
     : super(
         from: null,
@@ -141,4 +207,4 @@ final class UsageSnapshotProvider
   }
 }
 
-String _$usageSnapshotHash() => r'e2b652e0899fffd94d9f84e9dd84b9a8e2ac777d';
+String _$usageSnapshotHash() => r'd0715d7bff13847624d4c2cf4d71ea4cc748db63';

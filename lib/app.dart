@@ -5,6 +5,7 @@ import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/analytics/application/analytics_controller.dart';
+import 'features/auth/application/identity_controller.dart';
 import 'features/progress/presentation/widgets/achievement_celebration_host.dart';
 import 'features/settings/application/settings_controller.dart';
 import 'features/settings/domain/accessibility_settings.dart';
@@ -23,6 +24,10 @@ class MatheasyApp extends ConsumerWidget {
     // Keep the analytics engine alive from the root — before onboarding/auth —
     // so state-derived events (onboarding completed, achievements) are captured.
     ref.watch(analyticsControllerProvider);
+    // Same reason, for the device's server identity: the installation id, the
+    // initial anonymous session and the usage meter are established at launch,
+    // before any screen can ask whether a scan is allowed.
+    ref.watch(identityControllerProvider);
 
     return MaterialApp.router(
       title: AppConstants.appName,

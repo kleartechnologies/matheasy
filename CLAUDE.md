@@ -25,6 +25,13 @@ method switching, a graph, explanations, adaptive practice, and an AI tutor.
   **verified** solve payload and plays a symbol-morph walkthrough + per-topic visual
   objects under a phase timeline and a speed/scrub control bar. Additive over the
   Stage-14 Visual tiers; golden-rule-clean (it only re-positions verified tokens).
+- **Anti-abuse & free-usage protection (AS-BUILT):**
+  [`docs/matheasy-anti-abuse-security.md`](docs/matheasy-anti-abuse-security.md)
+  — the server-side identity chain (installation → anonymous → account →
+  subscription), lifetime free usage as `max(account, device)`, the single
+  verification layer in `functions/src/usage/guard.ts`, Remote Config limits, the
+  monitoring-only risk engine, and an honest list of what it does **not** stop.
+  Read it before touching a quota, a limit, or the sign-in flow.
 - **Deploy runbook:** [`docs/matheasy-deploy-runbook.md`](docs/matheasy-deploy-runbook.md).
 
 ## The real stack (do NOT assume otherwise)

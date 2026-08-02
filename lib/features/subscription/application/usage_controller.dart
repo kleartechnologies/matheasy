@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/usage_counts.dart';
 import '../domain/usage_quota.dart';
 import '../domain/usage_snapshot.dart';
+import 'server_usage_controller.dart';
 import 'subscription_controller.dart';
 import 'usage_tracker.dart';
 
@@ -50,13 +51,37 @@ class UsageController extends _$UsageController {
   }
 }
 
-/// The computed usage view the UI and gating consult. Reacts to both the counts
-/// and the Pro entitlement, so the moment a purchase lands every gate reopens.
+/// The computed usage view the UI and gating consult. Reacts to the counts, the
+/// Pro entitlement and the server's meter, so the moment a purchase lands every
+/// gate reopens — and the moment the server's number arrives, the meter tells
+/// the truth.
+///
+/// The server's view wins where the two disagree, in the only direction that is
+/// safe to be wrong in:
+///
+///  * **counts** — the LARGER of local and server. The server's figure is the
+///    effective one (max across this account and this installation), so a fresh
+///    account on a spent device, a reinstall or a cleared preferences file shows
+///    the usage that will actually be enforced rather than a hopeful zero. Local
+///    can still be ahead of it between a scan and the next refresh, and that is
+///    why it is a max and not an adoption.
+///  * **quota** — the server's live Remote Config limits when known, so the
+///    ceiling can be tuned without shipping a build. `UsageQuota.free` is the
+///    compiled fallback.
+///  * **isPro** — either source saying yes is yes. RevenueCat's local cache is
+///    fresher right after a purchase; the server's is fresher after a renewal or
+///    a grace period. Being generous here is a UX call only — the server still
+///    refuses anything the entitlement doesn't cover.
+///
+/// This remains PRESENTATION. Every real decision is re-made in
+/// `functions/src/usage/guard.ts`, from the database, on the next request.
 @riverpod
 UsageSnapshot usageSnapshot(Ref ref) {
+  final local = ref.watch(usageControllerProvider);
+  final server = ref.watch(serverUsageControllerProvider);
   return UsageSnapshot(
-    counts: ref.watch(usageControllerProvider),
-    quota: UsageQuota.free,
-    isPro: ref.watch(isProProvider),
+    counts: server == null ? local : local.mergedWith(server.counts),
+    quota: server?.quota ?? UsageQuota.free,
+    isPro: ref.watch(isProProvider) || (server?.isPro ?? false),
   );
 }

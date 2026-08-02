@@ -31,7 +31,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 
 import { OPENAI_API_KEY, REVENUECAT_SECRET_KEY } from "../config";
-import { requireUid } from "../lib/auth";
+import { callerIdentity, requireUid } from "../lib/auth";
 import { assertWithinQuota, ensureUserDoc, incrementUsage } from "../lib/firestore";
 import { assertWithinRateLimit } from "../lib/rateLimit";
 import { createOpenAI } from "../lib/openai";
@@ -578,6 +578,7 @@ export const tutorReply = onCall(
   { secrets: [OPENAI_API_KEY, REVENUECAT_SECRET_KEY], memory: "1GiB", timeoutSeconds: 120 },
   async (request, response) => {
     const uid = requireUid(request);
+    const identity = callerIdentity(request);
     const data = (request.data ?? {}) as TutorRequest;
     const { userText, history = [], language } = data;
 
@@ -587,7 +588,7 @@ export const tutorReply = onCall(
 
     await ensureUserDoc(uid);
     await assertWithinRateLimit(uid, "tutor");
-    await assertWithinQuota(uid, "tutorMessages");
+    await assertWithinQuota(uid, "tutorMessages", identity);
 
     const mode = normalizeMode(data.mode);
     const helpLevel = normalizeHelpLevel(data.helpLevel);
@@ -889,7 +890,7 @@ export const tutorReply = onCall(
     }
 
     const suggestions = parseSuggestions(payload.suggestions);
-    const quota = await incrementUsage(uid, "tutorMessages");
+    const quota = await incrementUsage(uid, "tutorMessages", identity);
 
     return {
       reply: typeof payload.reply === "string" ? payload.reply : "",
