@@ -1300,3 +1300,1736 @@ describe("parseCircle — adversarial gate regressions ROUND 17 (2026-07)", () =
     expect(ship("The central angle of a sector that measures 30 wide is 90 degrees. The circle has radius 4 cm. Find the sector area.")).toBe("4π cm² ≈ 12.5664 cm²");
   });
 });
+
+// Adversarial gate ROUND 18 (2026-07): a FRESH complete sweep (35/35 agents, 0 error — a much
+// deeper finder pool than prior rounds) found 28 holes in eight root-cause classes, all fixed
+// at the parse layer. Permanent regression tests.
+describe("parseCircle — adversarial gate regressions ROUND 18 (2026-07)", () => {
+  const ship = (latex: string) => {
+    const spec = parseCircle(latex);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) A PART of the disc named by a non-"sector" noun (wedge / pie slice / one quarter /
+  // each friend's share / "covered by the sector") must not receive the WHOLE-disc πr².
+  // Gated on the resolved TARGET: with a sector target the same nouns are legitimate scenery.
+  it("(A): a part-of-disc ask with a whole-figure target declines; a sector target still ships", () => {
+    expect(parseCircle("A circle has radius 6 cm. Find the area of the wedge cut by an arc of 90 degrees.")).toBeNull();
+    expect(parseCircle("A circular pizza of radius 12 cm has an arc of 60 degrees marked. Find the area of the pie slice.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has central angle 90 degrees. Find the area of the circle covered by the sector.")).toBeNull();
+    expect(parseCircle("A circular cake of radius 10 cm is cut into quarters. Find the area of one quarter.")).toBeNull();
+    expect(parseCircle("A circular pizza of radius 14 cm is shared equally among 4 friends. Find the area each friend receives.")).toBeNull();
+    // A genuine sector ask that merely mentions slices still resolves.
+    expect(ship("A circle has radius 9 cm. The central angle for 1 of the slices is 40 degrees. Find the sector area.")).toBe("9π cm² ≈ 28.2743 cm²");
+  });
+
+  // (B) POSTPOSITIVE given ("7 cm in radius") must win over a later distractor length; the
+  // possessive relative clause ("whose crust is 2 cm wide is 15 cm") binds the main clause.
+  it("(B): a postpositive given beats a trailing distractor length", () => {
+    expect(ship("A circular disc is 7 cm in radius and the table it rests on is 100 cm wide. Find the area of the disc.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("A circular tabletop is 120 cm in diameter and its leg is 75 cm long. Find the area of the tabletop.")).toBe("3600π cm² ≈ 11309.7336 cm²");
+    expect(ship("A circular running wheel is 70 cm in diameter and the axle is 4 cm thick. Find the distance around the wheel.")).toBe("70π cm ≈ 219.9115 cm");
+    expect(ship("The radius of a circular pizza whose crust is 2 cm wide is 15 cm. Find the area of the pizza.")).toBe("225π cm² ≈ 706.8583 cm²");
+  });
+
+  // (C) An explicit AREA ask survives a subordinate boundary-length clause, including the
+  // adjectival "the TOTAL area" and the participial "the area COVERED BY" / "it occupies".
+  // A scenery area plus a "how long is the wire" ask is a two-target ambiguity → decline.
+  it("(C): area-vs-boundary — explicit area asks ship area; scenery-area + length ask declines", () => {
+    expect(ship("Calculate the total area of a circular pond of radius 3 m that is surrounded by a length of edging.")).toBe("9π m² ≈ 28.2743 m²");
+    expect(ship("A circular garden has a radius of 7 m. Calculate the area covered by grass inside the length of fencing that runs around it.")).toBe("49π m² ≈ 153.938 m²");
+    expect(ship("A circular lawn has radius 9 m. Calculate the area it occupies, not counting the length of edging placed on it.")).toBe("81π m² ≈ 254.469 m²");
+    // SUPERSEDED BY ROUND 20. This used to decline as a two-target ambiguity. The ROUND-20
+    // gate then flagged the identical shape ("The AREA of the circle … is given in the table.
+    // How LONG is the elastic that stretches once round it?") as a VIOLATION for shipping the
+    // area — the ask clause names the length and the area is scenery. Reading the target from
+    // the ask clause resolves both; here it ships the correct 2πr, which the stated 154 sq cm
+    // agrees with. A correct answer beats an honest decline.
+    expect(ship("A wire is bent to fit exactly along the edge of a circle of radius 7 cm. How long must the wire be? The area of the circle is 154 sq cm.")).toBe("14π cm ≈ 43.9823 cm");
+    // A genuine boundary-length ask (no area object) still ships the circumference.
+    expect(ship("A circular plot has radius 7 m. Find the length of fencing needed to go around it.")).toBe("14π m ≈ 43.9823 m");
+  });
+
+  // (D) A DERIVED angle — radians by their textbook name ("in circular measure"), a percentage
+  // of another angle, a multiplier, or a supplement — is not the stated number. Decline.
+  it("(D): derived/non-degree central angles decline", () => {
+    expect(parseCircle("An arc of a circle of radius 10 cm subtends an angle of 1.2 in circular measure at the centre. Find the arc length.")).toBeNull();
+    expect(parseCircle("A sector of a circle with radius 14 cm has a central angle that is 30% of 360 degrees. Find the area of the sector.")).toBeNull();
+    expect(parseCircle("The central angle of a sector of a circle of radius 12 cm is double 45 degrees. Find the area of the sector.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 12 cm has a central angle supplementary to 120 degrees. Find the area of the sector.")).toBeNull();
+  });
+
+  // (E) A UNICODE VULGAR FRACTION is a real value, not a truncation: "7½" is 7.5, not 7.
+  it("(E): vulgar fractions read at their true value", () => {
+    expect(ship("The radius of a circle is 7½ cm. Find its area.")).toBe("225/4 π cm² ≈ 176.7146 cm²");
+    expect(ship("A sector of a circle of radius 12 cm has a central angle of 22½ degrees. Find the sector area.")).toBe("9π cm² ≈ 28.2743 cm²");
+  });
+
+  // (F) The OTHER figure's area (an annular paving/surround, a rectangular card, a hexagonal
+  // tile), a pronominal fraction ("half of it"), and a compound multi-unit length all decline.
+  it("(F): surrounds, adjectival other-shapes, pronominal fractions and compound units decline", () => {
+    expect(parseCircle("A circular pond of radius 7 m is surrounded by a paved surround 2 m wide. Find the area of the paving.")).toBeNull();
+    expect(parseCircle("A rectangular sheet of card measures 30 cm by 20 cm. A circle of radius 5 cm is cut from it. Find the area of the card outside the circle.")).toBeNull();
+    expect(parseCircle("A hexagonal tile has a circle of radius 4 cm stamped on it. Find the area of the tile.")).toBeNull();
+    expect(parseCircle("A circular field has a radius of 14 m. Half of it is planted with grass. Find the area of the grass.")).toBeNull();
+    expect(parseCircle("The radius of a circle is 1 m 20 cm. Find its area.")).toBeNull();
+  });
+});
+
+// ── ROUND-19 (adversarial gate wf_024a8e15-c02; 41 agents, 34 confirmed) ──────────
+// The deepest sweep so far. Ten root causes, all in the PARSE layer:
+//  • a SWEPT angle whose host noun is narrative ("rotates through an ARC of 45°") switched
+//    off the dangling-angle guard, shipping the whole disc for a sector (8× too large);
+//  • an area/boundary ask decided by which clause is SCENERY, not by which words appear;
+//  • the "N cm ACROSS" diameter idiom, unread, so a SECOND circle's given was bound;
+//  • alternative angular units ("rads", "grades", "0.5 of a revolution") read as degrees;
+//  • non-circle composite regions ("the area of the tile NOT COVERED by the circle");
+//  • a qualified half ("the NORTHERN half"), an annular band stated as a width;
+//  • Unicode fraction glyphs beyond the hand-picked set (⅑, ⅐) and the U+2044 slash;
+//  • a SUBORDINATE clause ("the radius … WHEN the water level is 2 m deep is 14 m") whose
+//    predication was bound instead of the main clause's.
+// Permanent regression tests.
+describe("circle — ROUND-19 gate regressions", () => {
+  const ship = (latex: string) => {
+    const spec = parseCircle(latex);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) A SWEPT angle: the "arc"/"sector" noun is narrative, the ask names no whole figure,
+  // so πr² / 2πr would silently discard the stated angle. Decline. An ask that DOES name the
+  // whole circle ("the area of the circle") keeps shipping — see the C2 regressions above.
+  it("(A): a swept angle on a descriptive area/boundary ask declines", () => {
+    expect(parseCircle("A searchlight with a beam of radius 20 m rotates through an arc of 45 degrees. Find the area lit.")).toBeNull();
+    expect(parseCircle("A circular lawn sprinkler of radius 8 m turns through an arc of 120 degrees. Find the area watered.")).toBeNull();
+    expect(parseCircle("A windscreen wiper of radius 12 cm sweeps through an arc of 60 degrees. Find the area it cleans.")).toBeNull();
+    expect(parseCircle("A point on a circular disc of radius 20 cm moves through a central angle of 90 degrees. Find the distance it travels around the circle.")).toBeNull();
+    expect(parseCircle("A circular gear of radius 10 cm rotates through a central angle of 120 degrees. Find the distance around the edge travelled by a tooth.")).toBeNull();
+    expect(ship("A circle has radius 10 cm and a sector of angle 90 degrees. Find the area of the circle.")).toBe("100π cm² ≈ 314.1593 cm²");
+  });
+
+  // (B) The ASK CLAUSE decides the target: an "area of a circular garden" that is merely
+  // scenery must not beat an explicit "find the length of the fence". The boundary object may
+  // carry a determiner and adjectives ("the length of THE METAL STRIP").
+  it("(B): a boundary ask beats a scenery area clause", () => {
+    expect(ship("The area of a circular garden of radius 7 m is planted with grass. Find the length of the fence needed to go round it.")).toBe("14π m ≈ 43.9823 m");
+    expect(ship("The area of a circular sign of radius 9 cm is painted. Work out the length of the metal strip fitted to its edge.")).toBe("18π cm ≈ 56.5487 cm");
+    // Both a sector-area and a circle-area phrase present ⇒ which is the ask is unreadable.
+    expect(parseCircle("The sector area is shown in the diagram and the central angle is 90 degrees. What is the area of the circle of radius 8 cm?")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle of 90 degrees. Find the area of the circle taken up by the sector.")).toBeNull();
+    // A plain sector ask that merely names its circle is NOT ambiguous and still ships.
+    expect(ship("Find the sector area of a circle, radius 6 cm, central angle 60°")).toBe("6π cm² ≈ 18.8496 cm²");
+  });
+
+  // (C) "N cm ACROSS" is a diameter, read explicitly. ANY disagreeing reading elsewhere —
+  // named or symbolic — is a possible second circle and declines. The symbol tier used to LOSE
+  // to the idiom (on the theory that "d" was a foreign quantity, "its thickness is d = 2 mm"),
+  // but ROUND 20 showed the same shape is more often the asked circle's OWN diameter ("a
+  // tabletop with D = 120 CM has a coaster 10 CM ACROSS" shipped 25π for a true 3600π). A weak
+  // anchor cannot tell those apart, so disagreement now declines in both directions.
+  // ROUND 23 SUPERSEDES the "decline in both directions" rule: a span is now read WITH the
+  // noun it is predicated of, so a dimension stated in a clause that never mentions the asked
+  // figure ("It stands on a circular BASE of diameter 40 cm") is another object's, not a
+  // competing reading of this one. It disagrees only when it might be the SAME figure's.
+  it("(C): the 'across' idiom beats a dimension stated of a DIFFERENT object", () => {
+    expect(ship("A circular tabletop is 90 cm across. It stands on a circular base of diameter 40 cm. Find the area of the tabletop.")).toBe("2025π cm² ≈ 6361.7251 cm²");
+    expect(ship("A circular pond is 20 m across. The path beside it has diameter 26 m. Find the circumference of the pond.")).toBe("20π m ≈ 62.8319 m");
+    expect(ship("A circular lid is 6 cm across. Its thickness is d = 2 mm. Find the area of the lid.")).toBe("9π cm² ≈ 28.2743 cm²");
+    // …and symmetrically, a span stated of ANOTHER object no longer vetoes the asked figure's
+    // own stated dimension — it is a distractor, which is what a word problem always meant it
+    // to be.
+    expect(ship("A circular tabletop with d = 120 cm has a coaster 10 cm across resting on it. Find the area of the tabletop.")).toBe("3600π cm² ≈ 11309.7336 cm²");
+    expect(ship("A circular clock face with d = 24 cm has a sticker 6 cm across on it. Find the circumference of the clock face.")).toBe("24π cm ≈ 75.3982 cm");
+    // A span is fatal only when it is the ONLY size in the text and belongs to other scenery.
+    expect(parseCircle("A circular fountain sits in a courtyard 40 m across. Find the area of the fountain.")).toBeNull();
+  });
+
+  // (D) Alternative ANGULAR UNITS and derived angles — clipped plurals ("rads", "grades"),
+  // a revolution without the "full/complete" modifier, a spelled-out ordinal fraction, and an
+  // angle given as a DIFFERENCE of two protractor positions. All read as degrees before.
+  it("(D): alternative angular units and derived angles decline", () => {
+    expect(parseCircle("An arc of a circle of radius 10 cm subtends a central angle of 1.5 rads. Find the arc length.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 10 cm has a central angle of 100 grades. Find the sector area.")).toBeNull();
+    expect(parseCircle("Find the arc length of a circle of radius 8 cm with a central angle of 0.5 of a revolution.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 12 cm has a central angle of one fourth of 360 degrees. Find the sector area.")).toBeNull();
+    expect(parseCircle("An arc of a circle of radius 12 cm runs from the 90 degree position to the 150 degree position on a protractor. Find the length around the edge of the arc.")).toBeNull();
+    expect(parseCircle("Find the area of 60 percent of a circular field of radius 20 m")).toBeNull();
+  });
+
+  // (E) NON-CIRCLE composite regions, qualified halves, annular bands stated as a width, and
+  // the curved SIDE of a solid — each would have shipped the circle's own πr².
+  it("(E): composite regions, qualified halves, annular bands and solid faces decline", () => {
+    expect(parseCircle("A circle of radius 4 cm touches all four sides of a tile of side 8 cm. Find the area of the tile not covered by the circle.")).toBeNull();
+    expect(parseCircle("A circle of radius 5 cm is cut from a card measuring 12 cm by 12 cm. Find the area of the card that remains.")).toBeNull();
+    expect(parseCircle("A circular field has radius 7 m. A goat can reach only the northern half. Find the area the goat can graze.")).toBeNull();
+    expect(parseCircle("A circular badge of radius 6 cm has its lower half painted red. Find the area painted red.")).toBeNull();
+    expect(parseCircle("A circular window has radius 60 cm. Find the area of the upper half.")).toBeNull();
+    expect(parseCircle("A circular pond of radius 7 m is surrounded by grass out to a fence 3 m away. Find the area of the grass.")).toBeNull();
+    expect(parseCircle("Find the area of the curved side of a circular tin of radius 5 cm and height 10 cm")).toBeNull();
+  });
+
+  // (F) The shared GLYPH normaliser: the whole Unicode fraction block plus the typographic
+  // U+2044 fraction slash, which a `\d+/\d+` token never matched ("3⁄4" read as a bare 3).
+  it("(F): the full vulgar-fraction block and the U+2044 slash read exactly", () => {
+    expect(ship("Find the area of a circle with radius 3⁄4 m")).toBe("9/16 π m² ≈ 1.7671 m²");
+    expect(ship("Find the circumference of a circle with radius 3⁄4 m")).toBe("3/2 π m ≈ 4.7124 m");
+    expect(ship("Find the area of a circle with radius 7⅑ cm")).toBe("4096/81 π cm² ≈ 158.8637 cm²");
+    expect(ship("Find the area of a circle with radius 3⅐ cm")).toBe("484/49 π cm² ≈ 31.0312 cm²");
+  });
+
+  // (G) The shared SUBORDINATE-CLAUSE firewall: a when/while/where clause predicates its own
+  // subject, so the MAIN clause's value is the quantity's. Previously the distractor won.
+  it("(G): a subordinate clause no longer steals the predication", () => {
+    expect(ship("The radius of a circular pond when the water level is 2 m deep is 14 m. Find the area.")).toBe("196π m² ≈ 615.7522 m²");
+    expect(ship("The radius of a circle drawn while the pen width is 1 mm is 6 cm. Find the circumference.")).toBe("12π cm ≈ 37.6991 cm");
+    expect(ship("The diameter of a circular table where each place setting is 40 cm wide is 180 cm. Find the circumference.")).toBe("180π cm ≈ 565.4867 cm");
+    expect(ship("The central angle of a sector of a circle of radius 6 cm where the scale is 3 to 1 is 60 degrees. Find the arc length.")).toBe("2π cm ≈ 6.2832 cm");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ROUND-20 adversarial gate (28 confirmed violations, complete 35-agent sweep).
+// The headline defect was ARCHITECTURAL: the angle reader had only two states, "a
+// degree value" and `undefined`, and the dangling-angle guard tested `!== undefined`.
+// So an angle the reader could NOT read (π/2, radians, a sweep "from 30° to 120°",
+// "2^{c}") switched the safety OFF and shipped the whole disc — while the SAME problem
+// written "90 degrees" declined correctly. The reader now returns a THIRD state,
+// "unreadable", and the guard fails CLOSED on it.
+// The other classes were fixed in the SHARED nl/ layer where they generalise: every
+// reading of a named quantity (nl/quantity readBoundValues) so two objects can be told
+// from one, and ask-clause extraction (nl/ask) so scenery cannot hijack the target.
+// ---------------------------------------------------------------------------
+describe("circle — ROUND-20 gate regressions", () => {
+  const ship = (latex: string) => {
+    const spec = parseCircle(latex);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) THE FAIL-OPEN ANGLE GUARD. An unreadable angle is the strongest reason to
+  // decline, not a reason to proceed. Each of these shipped the WHOLE circle.
+  it("(A): an angle that cannot be read declines instead of switching the guard off", () => {
+    expect(parseCircle("A sprinkler at the centre of a circular lawn of radius 10 m turns through an angle of π/2. Find the area watered.")).toBeNull();
+    expect(parseCircle("A searchlight at the centre of a circular field of radius 20 m sweeps from 30 degrees to 120 degrees. Find the area lit.")).toBeNull();
+    expect(parseCircle("A circular protractor of radius 6 cm. Find the length around the circle from the 20 degree mark to the 80 degree mark.")).toBeNull();
+    expect(parseCircle("A point on the rim of a circular disc of radius 10 cm moves as the disc turns through 1.5 radians. Find the distance it travels around the circle.")).toBeNull();
+    expect(parseCircle("Find the area of the sector of a circle of radius 12 cm with a central angle of 30 + 45 degrees.")).toBeNull();
+    expect(parseCircle("Find the arc length of a circle of radius 9 cm whose central angle is 2^{c}.")).toBeNull();
+    // …and an angle-free problem must still read as "no angle" and ship normally, so the
+    // fail-closed rule cannot be satisfied by declining everything.
+    expect(ship("Find the area of a circle with radius 7 cm")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("Find the area of the circle with radius 7 cm. Give your answer in terms of π.")).toBe("49π cm² ≈ 153.938 cm²");
+  });
+
+  // (B) NAMED ANGLE UNITS are exact multiples of 90°/180° — read them, do not take the
+  // COUNT as the angle. "Subtends 2 right angles" had been shipping 2°.
+  it("(B): 'N right angles' / 'N straight angles' read as exact degrees", () => {
+    expect(ship("An arc of a circle of radius 6 cm subtends 2 right angles at the centre. Find the length of the arc.")).toBe("6π cm ≈ 18.8496 cm");
+    expect(ship("The central angle of a sector of a circle of radius 14 cm is 2 right angles. Find the area of the sector.")).toBe("98π cm² ≈ 307.8761 cm²");
+    expect(ship("An arc of a circle of radius 6 cm subtends 2 straight angles at the centre. Find the length of the arc.")).toBe("12π cm ≈ 37.6991 cm");
+    expect(ship("An arc subtends 2 right angles at the centre of a circle of radius 14 cm. Find the arc length.")).toBe("14π cm ≈ 43.9823 cm");
+    // A RELATIONAL fraction of one is still not a stated measure → decline.
+    expect(parseCircle("A sector of a circle of radius 12 cm has a central angle of two thirds of a right angle. Find the sector area.")).toBeNull();
+  });
+
+  // (C) TWO OBJECTS, one ask. The same dimension named twice with different values is two
+  // circles; the best-anchored reading is then the wrong one's. (nl/quantity readBoundValues)
+  it("(C): a dimension named for two different objects declines", () => {
+    expect(parseCircle("A circular pond of diameter 12 m has a fountain 60 cm in diameter at its centre. Find the area of the pond.")).toBeNull();
+    expect(parseCircle("A coin 2 cm in diameter lies on a circular plate whose diameter is 30 cm. Find the area of the plate.")).toBeNull();
+    expect(parseCircle("A coin 1 cm in radius lies on a circular table whose radius is 50 cm. Find the area of the table.")).toBeNull();
+    // (The "d = 120 … coaster 10 cm across" pair moved to the ROUND-23 block: a span stated of
+    // a DIFFERENT object is a distractor, not a competing reading — it now ships 3600π.)
+    // ONE mention read at two tiers is the same object seen twice, and must still ship.
+    expect(ship("A circular disc is 7 cm in radius and the table it rests on is 100 cm wide. Find the area of the disc.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("The radius of a circular pizza whose crust is 2 cm wide is 15 cm. Find the area of the pizza.")).toBe("225π cm² ≈ 706.8583 cm²");
+  });
+
+  // (D) THE ASK CLAUSE governs the target; a target noun in the scenery does not. (nl/ask)
+  it("(D): target is read from the ask clause, not from scenery", () => {
+    expect(ship("A circular garden has a radius of 7 m. A fence runs along its perimeter. How much area does the garden cover?")).toBe("49π m² ≈ 153.938 m²");
+    expect(ship("A circular pizza of radius 10 inches has crust all round its circumference. What area of pizza is there?")).toBe("100π in² ≈ 314.1593 in²");
+    expect(ship("A circular lawn of radius 7 m lies inside the boundary of the park. How much area of turf is needed?")).toBe("49π m² ≈ 153.938 m²");
+    expect(ship("The area of the circle of radius 7 cm is given in the table. How long is the elastic that stretches exactly once round it?")).toBe("14π cm ≈ 43.9823 cm");
+    // The DUAL-AREA ambiguity is a whole-text property and must survive the scoping.
+    expect(parseCircle("The sector area is shown in the diagram and the central angle is 90 degrees. What is the area of the circle of radius 8 cm?")).toBeNull();
+  });
+
+  // (E) NON-CIRCLE figures the engine must not answer with πr²: a solid's side surface
+  // named without the words "curved surface", concentric circles (an annulus), any half,
+  // a shared-out portion, a SCALED dimension, and a polygon stated by its diagonals.
+  it("(E): non-circle and part-circle regions decline", () => {
+    expect(parseCircle("A circular flowerbed of radius 3 m sits at the centre of a circular lawn whose edge is 7 m from that centre. Find the area of the grass.")).toBeNull();
+    expect(parseCircle("A circular tin of radius 7 cm and height 10 cm is wrapped in a paper label that covers its side exactly. Find the area of the label.")).toBeNull();
+    expect(parseCircle("A party hat is made from card. Its circular base has radius 5 cm and its sloping side is 12 cm long. Find the area of the card used to make the curved part of the hat.")).toBeNull();
+    expect(parseCircle("A circular sheet of paper of radius 6 cm is cut straight through the middle. Find the area of the resulting half.")).toBeNull();
+    expect(parseCircle("A circular cake of radius 8 cm is shared by two friends equally. Find the area each gets.")).toBeNull();
+    expect(parseCircle("The radius of a circle is 5 cm. Find the area of the circle when the radius is tripled.")).toBeNull();
+    expect(parseCircle("A circle has radius 7 cm. Find the area of a circle with twice the radius.")).toBeNull();
+    expect(parseCircle("A kite has diagonals 10 cm and 8 cm and contains a circle of radius 2 cm. Find the area of the kite.")).toBeNull();
+    expect(parseCircle("A sector with a central angle of 90 degrees is drawn in a circle of radius 8 cm. What is the area of the circle within the sector?")).toBeNull();
+  });
+});
+
+/**
+ * ROUND-21 adversarial gate regressions.
+ *
+ * Every case below shipped a CONFIRMED WRONG value before these fixes. Two of them (the
+ * "Note: … is not what is being asked" family and the "Fig. 3" split) were regressions
+ * introduced by ROUND 20's own ask-clause scoping — the mechanism that stopped scenery
+ * from hijacking the target let a DISCLAIMER and a figure reference do exactly that.
+ */
+describe("circle — ROUND-21 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) A DISCLAIMER names the wrong quantity precisely in order to exclude it; a META
+  // sentence ("Note: …") comments rather than asks; an ABBREVIATION's full stop does not
+  // end a sentence; a trailing ", which …" describes the figure. All four made the WRONG
+  // noun the apparent ask, so the engine shipped the exact quantity the text ruled out.
+  it("(A): disclaimers, notes, abbreviations and descriptions never become the ask", () => {
+    expect(ship("Find the area of a circle of radius 7 cm. Note: the perimeter is not what is being asked.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("Find the circumference of a circle of radius 7 cm. Note which formula gives the area of the circle.")).toBe("14π cm ≈ 43.9823 cm");
+    expect(ship("Find the arc length of a sector of radius 6 cm with a central angle of 60 degrees. Note: the sector area is not what is being asked.")).toBe("2π cm ≈ 6.2832 cm");
+    expect(ship("Find the area of the sector of a circle of radius 6 cm with a central angle of 60 degrees. Which arc length is longer is not asked.")).toBe("6π cm² ≈ 18.8496 cm²");
+    expect(ship("Calculate the area of the circle of radius 7 cm shown in Fig. 3, which has its perimeter drawn in red.")).toBe("49π cm² ≈ 153.938 cm²");
+  });
+
+  // (B) TWO OBJECTS stated with the SAME "N across" idiom. The idiom was read with a
+  // non-global exec, so the FIRST match won regardless of which circle was asked about —
+  // and the two-object firewall could not see it, because it keys on the literal nouns
+  // "radius"/"diameter" and this idiom names neither.
+  // ROUND 23: two spans are no longer ambiguous BY COUNT — they are ambiguous only when the
+  // engine cannot tell which figure each belongs to. "A circular fountain stands in a PLAZA
+  // 30 m across. The FOUNTAIN is 6 m across" states both spans with their subjects, and the
+  // ask names the fountain, so it is determinate. A span whose subject cannot be recovered
+  // ("a circular table in IT is 90 cm across") still leaves the asked figure unmeasured.
+  it("(B): competing 'N across' readings resolve by SUBJECT, else decline", () => {
+    expect(ship("A circular fountain stands in a plaza 30 m across. The fountain is 6 m across. Find the area of the fountain.")).toBe("9π m² ≈ 28.2743 m²");
+    expect(ship("A river is 50 m across. A circular raft is 4 m across. Find the circumference of the raft.")).toBe("4π m ≈ 12.5664 m");
+    // ROUND 27: this one is no longer a decline either. "A circular table IN IT is 90 cm
+    // across" states the table's span perfectly clearly — the subject was unrecoverable only
+    // because the reader captured the word immediately before the copula, which a locative
+    // phrase displaces. Resolving the NP head recovers "table", the ask names the table, and
+    // the problem is determinate.
+    expect(ship("A hall is 4 m across. A circular table in it is 90 cm across. Find the area of the table.")).toBe(
+      "2025π cm² ≈ 6361.7251 cm²"
+    );
+  });
+
+  // (C) MANY FIGURES, or BOTH FACES of one: a total over N objects is not one circle's area.
+  it("(C): multiple figures and two-sided totals decline", () => {
+    expect(parseCircle("There are 5 circular tiles each of radius 3 cm. Find the total area of the tiles.")).toBeNull();
+    expect(parseCircle("Four identical circular badges each have a diameter of 6 cm. Find the total area of the four badges.")).toBeNull();
+    expect(parseCircle("Find the total area of both faces of a circular coin of radius 2 cm.")).toBeNull();
+  });
+
+  // (D) A FOLDED / CUT figure is a fraction of the disc, and a rug touching all four walls
+  // is a statement about the SQUARE room, not about the rug.
+  it("(D): partitioned figures and enclosing polygons decline", () => {
+    expect(parseCircle("A circular sheet of radius 6 cm is folded in four. Find the area of the shape obtained.")).toBeNull();
+    expect(parseCircle("A circular napkin of radius 8 cm is folded in three. Find the area of the resulting figure.")).toBeNull();
+    expect(parseCircle("A circular cake of radius 8 cm is cut into four. Find the area of the smallest resulting figure.")).toBeNull();
+    expect(parseCircle("A circular rug of radius 5 m exactly touches all four walls of a room. Find the area of the floor.")).toBeNull();
+  });
+
+  // (E) ANGLE notations the reader cannot fully consume. The Unicode superscript unit
+  // carries no caret, so "2ᶜ" (2 radians) was read as 2 DEGREES — a 28.6× error; and a
+  // COMPOUND angle's named part was read while its "+ 30 degrees" was silently dropped.
+  it("(E): unicode superscript units and compound angles decline", () => {
+    expect(parseCircle("The central angle of a sector of a circle of radius 14 cm is 2ᶜ. Find the arc length.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 10 cm has a central angle of 100ᵍ. Find the sector area.")).toBeNull();
+    expect(parseCircle("Find the sector area of a circle of radius 6 cm whose central angle is one right angle plus 30 degrees.")).toBeNull();
+    // A SIMPLE named angle is still read exactly — the guard must not swallow it.
+    expect(ship("An arc of a circle of radius 12 cm subtends 2 right angles. Find the arc length.")).toBe("12π cm ≈ 37.6991 cm");
+  });
+
+  // (F) REPRESENTABILITY. A double cannot carry every integer past 2^53, and the display
+  // underflows below 1e-12 — so the engine asserted a coefficient wrong in its last three
+  // digits, and asserted that a strictly positive area was ZERO. Both are confident wrong
+  // answers that the verify gate cannot catch, because it recomputes in the same doubles.
+  it("(F): values the display cannot represent decline", () => {
+    expect(ship("Find the area of a circle with radius 1234567891 cm")).toBeNull();
+    expect(ship("A circular bacterial colony has a radius of 0.0000006 m. Find its area.")).toBeNull();
+    // Ordinary magnitudes at both ends are unaffected.
+    expect(ship("Find the area of a circle of radius 0.5 m")).toBe("1/4 π m² ≈ 0.7854 m²");
+    expect(ship("Find the area of a circle of radius 1000 cm")).toBe("1000000π cm² ≈ 3141592.6536 cm²");
+  });
+});
+
+/**
+ * ROUND-22 adversarial gate regressions (first COMPLETE sweep: 39/39 agents, 0 errors).
+ *
+ * Eleven root causes. The two most instructive are at the ends of the pipeline: an angle
+ * modifier the reader silently dropped rather than declined, and a FRACTION RENDERER that
+ * printed a continued-fraction convergent as though it were the exact answer.
+ */
+describe("circle — ROUND-22 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) MULTIPLICATIVE and COMPARATIVE angle modifiers. "twice a right angle" fell past the
+  // multiplier guard (which demanded a digit) into the named-angle reader, which bound the
+  // DETERMINER "a" as its count — so it shipped 90° for a true 180°, exactly half, while the
+  // very same engine read "two right angles" and "180 degrees" correctly. It disagreed with
+  // itself, which is the signature of a dropped token rather than a convention dispute.
+  it("(A): multiplicative and comparative angle modifiers decline", () => {
+    expect(parseCircle("A sector of a circle of radius 8 cm subtends twice a right angle at the centre. Find the arc length.")).toBeNull();
+    expect(parseCircle("In a circle of radius 12 cm an arc subtends three times a right angle at the centre. Find the arc length.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 9 cm has a central angle three times 25 degrees. Find the sector area.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 10 cm has a central angle twice as large as 40 degrees. Find the sector area.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 12 cm has a central angle twice as big as 30°. Find the area of the sector.")).toBeNull();
+    expect(parseCircle("Find the arc length of a circle of radius 12 cm where the arc subtends an angle 30 degrees more than a right angle at the centre.")).toBeNull();
+    expect(parseCircle("Find the area of the sector of a circle of radius 10 cm whose central angle is 15 degrees less than a straight angle.")).toBeNull();
+    // The UNMODIFIED named angle must still be read exactly — the guard must not swallow it.
+    expect(ship("An arc of a circle of radius 8 cm subtends two right angles at the centre. Find the arc length.")).toBe("8π cm ≈ 25.1327 cm");
+  });
+
+  // (B) Angle SUB-UNITS (DMS) and non-standard units (artillery mils, whose definition is
+  // itself convention-dependent: 1/6400 vs 1/6000 turn). Only the leading number was consumed.
+  it("(B): DMS and mils decline", () => {
+    expect(parseCircle("Find the sector area of a circle of radius 6 cm with a central angle of 30 degrees 45 min.")).toBeNull();
+    expect(parseCircle("Find the sector area of a circle of radius 4 cm with a central angle of 200 mils.")).toBeNull();
+  });
+
+  // (C) SEMI-DIAMETER is the classical name for the RADIUS and embeds the token "diameter",
+  // so the value was halved. Normalised lexically before any dimension is read.
+  it("(C): semi-diameter reads as the radius", () => {
+    expect(ship("A circle has a semi-diameter of 5 cm. Find the area of the circle.")).toBe("25π cm² ≈ 78.5398 cm²");
+    expect(ship("Find the circumference of a circle whose semidiameter is 6 cm.")).toBe("12π cm ≈ 37.6991 cm");
+  });
+
+  // (D) The ATTRIBUTIVE anchor — "a 14 CM DIAMETER circle" — was the one premodifier form
+  // with no tier, so a later "whose diameter IS 90 cm" predicated the TABLE's size onto the
+  // circle. With the tier in place both readings surface and the two-object firewall fires.
+  it("(D): preposed dimension attributives are read, and conflicts decline", () => {
+    expect(parseCircle("A 14 cm diameter circle sits on a round table whose diameter is 90 cm. Find the area of the circle.")).toBeNull();
+    expect(parseCircle("A 5 cm radius circle is painted on a round tray whose diameter is 60 cm. Find the area of the circle.")).toBeNull();
+    // With no competing object the attributive is simply the given.
+    expect(ship("A 14 cm diameter circle is drawn. Find its area.")).toBe("49π cm² ≈ 153.938 cm²");
+  });
+
+  // (E) The dimension stated INDIRECTLY — as a fraction of itself, or as an unevaluated sum.
+  it("(E): indirect dimension givens decline", () => {
+    expect(parseCircle("A quarter of the diameter of a circle is 2 cm. Find the area.")).toBeNull();
+    expect(parseCircle("A quarter of the radius of a circle is 2 cm. Find the area.")).toBeNull();
+    expect(parseCircle("The diameter of the circle is 3 cm plus 5 cm. Find the area of the circle.")).toBeNull();
+  });
+
+  // (F) COVERING asks name a MATERIAL, not the word "area" — so the ask clause carried no
+  // area cue at all and a scenery boundary ("a cornice runs along the boundary", "a fence
+  // around the circle") won the target and shipped a LENGTH for an AREA question.
+  it("(F): covering asks are area asks", () => {
+    expect(ship("A circular ceiling has a radius of 3 m. A cornice runs along the boundary of the ceiling. How much paint is needed to cover the whole ceiling?")).toBe("9π m² ≈ 28.2743 m²");
+    expect(ship("A circular lawn has a radius of 7 m. The boundary of the lawn is painted white. How much turf is needed to cover the lawn?")).toBe("49π m² ≈ 153.938 m²");
+    expect(ship("A circular lawn of radius 8 m has a fence around the circle. How much turf is needed to cover the lawn?")).toBe("64π m² ≈ 201.0619 m²");
+    // …and the mirror image: a boundary ask whose scenery mentions the area.
+    expect(ship("A circular tray has a radius of 7 cm. The area of the circle is printed underneath. Find the length of the gold hoop fitted to its edge.")).toBe("14π cm ≈ 43.9823 cm");
+    expect(ship("A circular plate has a diameter of 20 cm. The area of the circle is stamped on the back. Find the length of the silver hoop soldered to it.")).toBe("20π cm ≈ 62.8319 cm");
+    // An INTERROGATIVE outranks a later instruction about a formula.
+    expect(ship("What is the circumference of a circle of radius 7 cm? State the area formula.")).toBe("14π cm ≈ 43.9823 cm");
+  });
+
+  // (G) Regions that are not the disc: a solid painted all over, an annular mown strip named
+  // by its width alone, and a rectangle whose length and width are both given.
+  it("(G): non-circle regions decline", () => {
+    expect(parseCircle("A circular drum of radius 3 m and height 2 m is to be painted all over. Find the area to be painted.")).toBeNull();
+    expect(parseCircle("A circular field has radius 20 m. A tractor mows a strip 3 m wide around the edge. Find the area mown.")).toBeNull();
+    expect(parseCircle("A circular pond of radius 7 m sits in a garden of length 20 m and width 15 m. Find the area of the garden.")).toBeNull();
+  });
+
+  // (H) A FRACTION of the figure named with an everyday noun, and N circuits of the boundary.
+  it("(H): fractions of the figure and multiple circuits decline", () => {
+    expect(parseCircle("A circular pizza has a radius of 12 cm. Ravi eats a third of the pizza. Find the area he eats.")).toBeNull();
+    expect(parseCircle("A circular window of radius 50 cm is a quarter covered by frost. Find the area covered by frost.")).toBeNull();
+    expect(parseCircle("Find the area of both faces of a circular coin of radius 2 cm.")).toBeNull();
+    expect(parseCircle("A circular running track has a radius of 40 m. Find the distance around it for 2 laps.")).toBeNull();
+  });
+
+  // (I) THE EXACT-RATIONAL RENDERER. mathjs `fraction()` returns the best continued-fraction
+  // CONVERGENT — an approximation. It was trusted, so r = 1000.2 printed 10003000000/9999 for
+  // a true 25010001/25: a WRONG EXACT RATIONAL that the substitution gate cannot catch,
+  // because the decimal it verifies against does agree. Terminating values now convert
+  // exactly from their own decimal expansion; a convergent is accepted only if it reproduces
+  // the value to full double precision, which is what keeps the genuine 100/3 working.
+  it("(I): rendered fractions are exact, not convergents", () => {
+    expect(ship("Find the area of a circle with radius 1000.2 cm")).toBe("25010001/25 π cm² ≈ 3142849.4163 cm²");
+    expect(ship("Find the sector area of a circle with radius 480.6 cm and a central angle of 179 degrees")).toBe("114846579/1000 π cm² ≈ 360801.1689 cm²");
+    // Too fine to reduce inside the fraction bound → an EXACT terminating decimal instead.
+    expect(ship("Find the sector area of a circle with radius 30.9 cm and a central angle of 111.4 degrees")).toBe("295.46065π cm² ≈ 928.217 cm²");
+    // Genuinely REPEATING rationals must still render as fractions.
+    expect(ship("A sector of a circle of radius 10 cm has angle 120. Find the sector area.")).toBe("100/3 π cm² ≈ 104.7198 cm²");
+    expect(ship("Find the area of a circle with radius 7⅑ cm")).toBe("4096/81 π cm² ≈ 158.8637 cm²");
+  });
+});
+
+describe("circle — ROUND-23 gate regressions", () => {
+  const ship = (latex: string) => {
+    const spec = parseCircle(latex);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  // (A) SUBJECT-BOUND SPANS. "N units wide/across/long" states a diameter, but the decisive
+  // question was never "what spans are stated?" — it is "does this span belong to the figure
+  // being ASKED about?". Count-based arbitration was simultaneously too weak (one span, on
+  // scenery, sized the wrong figure) and too strong (two spans, one plainly the asked figure,
+  // declined a determinate problem). nl/quantity now reads every span WITH its subject noun and
+  // nl/ask returns the asked figure's HEAD noun, so the two are directly comparable.
+  it("(A): a span sizes the figure it is predicated OF", () => {
+    expect(ship("A circular tabletop is 90 cm wide. A coaster on it has radius 5 cm. Find the area of the tabletop.")).toBe("2025π cm² ≈ 6361.7251 cm²");
+    expect(ship("A circular pond is 12 m wide. A stone of radius 3 m lies beside it. Find the area of the pond.")).toBe("36π m² ≈ 113.0973 m²");
+    expect(ship("A circular clock face is 24 cm wide. Its hour hand has radius 9 cm. Find the circumference of the clock face.")).toBe("24π cm ≈ 75.3982 cm");
+    expect(ship("A circular table is 120 cm wide. A plate on it is 24 cm across. Find the area of the table.")).toBe("3600π cm² ≈ 11309.7336 cm²");
+    // "LONG" is NOT a span (see nl/quantity SPAN_IDIOM): the same words read as a radial arm,
+    // a boundary, or a disc, so the lawn is unmeasured — and the POT's diameter, stated in a
+    // clause that introduces a competing circular figure, must not size it either.
+    expect(
+      parseCircle(
+        "A circular lawn is 30 m long. A circular pot of diameter 40 cm stands on it. Find the circumference of the lawn."
+      )
+    ).toBeNull();
+    // …and a span that belongs to scenery leaves the asked figure unmeasured.
+    expect(parseCircle("A circular fountain sits in a courtyard 40 m across. Find the area of the fountain.")).toBeNull();
+  });
+
+  // (B) COVERING asks. Making "cover" an AREA cue in ROUND 22 hijacked BOUNDARY asks: "how much
+  // fencing is needed to COVER THE BOUNDARY" shipped 25π m² for a true 10π m. What is covered
+  // decides the target, not the verb.
+  it("(B): 'cover the boundary/edge/outline' is a circumference ask", () => {
+    expect(ship("A circular pond has a radius of 5 m. How much fencing is needed to cover the boundary?")).toBe("10π m ≈ 31.4159 m");
+    expect(ship("A circular badge has a radius of 3 cm. How much gold wire is needed to cover its outline?")).toBe("6π cm ≈ 18.8496 cm");
+    expect(ship("A circular clock face has a diameter of 20 cm. How much tape is needed to cover its edge?")).toBe("20π cm ≈ 62.8319 cm");
+    expect(ship("What length of ribbon will cover the edge of a circular badge of radius 3 cm?")).toBe("6π cm ≈ 18.8496 cm");
+  });
+
+  // (C) PIE-CHART DISTRACTORS. The "angle at the centre" phrase reader stops at the first digit,
+  // so a count naming a DIFFERENT noun was captured as the angle: "the angle at the centre of the
+  // sector FOR 30 STUDENTS is 120 degrees" bound 30 (27/4 π for a true 27π). The stated angle is
+  // the one carrying the degree unit.
+  it("(C): a count label never outranks the degree-marked angle", () => {
+    expect(ship("A circle has radius 9 cm. The angle at the centre of the sector for 30 students is 120 degrees. Find the sector area.")).toBe("27π cm² ≈ 84.823 cm²");
+    expect(ship("A circle has radius 9 cm. The angle at the centre of the sector for 30 students is 120 degrees. Find the arc length.")).toBe("6π cm ≈ 18.8496 cm");
+    expect(ship("In a circle of radius 10 cm, the angle at the centre of sector 2 is 60 degrees. Find the sector area.")).toBe("50/3 π cm² ≈ 52.3599 cm²");
+    expect(ship("The angle at the center of the sector showing 20 cars is 90 degrees. The circle has radius 8 cm. Find the sector area.")).toBe("16π cm² ≈ 50.2655 cm²");
+  });
+
+  // (D) REGIONS THAT ARE NOT THE WHOLE FIGURE, restated in prose the earlier guards missed.
+  it("(D): partial regions and non-circle solids decline", () => {
+    expect(parseCircle("A sector of a circle of radius 12 cm has a central angle of 30 degrees. How much of the circle's area does the sector cover?")).toBeNull();
+    expect(parseCircle("A sector AOB of a circle of radius 10 cm has a central angle of 36 degrees. Find the area of the circle enclosed by OA, the arc AB and OB.")).toBeNull();
+    expect(parseCircle("A circle of radius 14 m has a sector of central angle 90 degrees. Calculate the area of the circle enclosed by the sector.")).toBeNull();
+    expect(parseCircle("The arc AB makes a right angle at the centre of a circle of radius 6 cm. Find the length of circumference cut off by the arc AB.")).toBeNull();
+    expect(parseCircle("Find the area of an octant of a circle of radius 8 cm")).toBeNull();
+    expect(parseCircle("A circular garden of radius 8 m is crossed by a hedge that goes right through the middle from edge to edge. Find the area of the garden on one side of the hedge.")).toBeNull();
+    expect(parseCircle("A circular tank of radius 3 m and height 5 m is made of metal. Find the area of the metal sheet needed to make its side.")).toBeNull();
+    expect(parseCircle("A circular flowerbed of radius 4 m sits inside a circular lawn whose edge is 9 m from the same point. Find the area of the lawn around the flowerbed.")).toBeNull();
+    expect(parseCircle("A circular ball of radius 7 cm is to be covered in leather. Find the area of leather needed.")).toBeNull();
+    expect(parseCircle("A circular pizza has a radius of 12 cm. Ravi eats a sixth. Find the area Ravi eats.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle twice the angle of 30 degrees. Find the sector area.")).toBeNull();
+  });
+
+  // (E) EXACT ARITHMETIC. A double coefficient holds ~15 significant digits, so r = 111111.1111
+  // squared to 12345679009.876543 and the renderer published 24691358019753/2000 — a confident
+  // WRONG exact rational (true: 1234567900987654321/100000000). The substitution gate cannot see
+  // it: it re-squares the same double and agrees with itself. The coefficient is now computed in
+  // exact integer arithmetic from the givens, and declines when the true value needs more digits
+  // than the display contract can carry.
+  it("(E): a coefficient that exceeds exact representation declines", () => {
+    expect(parseCircle("Find the area of a circle with radius 111111.1111 cm")).toBeTruthy();
+    expect(solveCircle(parseCircle("Find the area of a circle with radius 111111.1111 cm")!)).toBeNull();
+    expect(solveCircle(parseCircle("Find the area of a circle with radius 12345678.9 cm")!)).toBeNull();
+    // ROUND 27: scientific notation is no longer a decline. It used to be one because the
+    // reader took the MANTISSA and dropped the exponent, which is a misread, not a limitation —
+    // resolving "1.5 x 10^2" to 150 is an exact decimal-point shift with no second reading, so
+    // the given is now read faithfully and the answer ships.
+    expect(ship("Find the area of a circle of radius 1.5 x 10^2 cm")).toBe(
+      "22500π cm² ≈ 70685.8347 cm²"
+    );
+    // …while every exactly-representable rational still ships exactly.
+    expect(ship("Find the area of a circle with radius 7⅑ cm")).toBe("4096/81 π cm² ≈ 158.8637 cm²");
+    expect(ship("Find the area of a circle with radius 3⁄4 m")).toBe("9/16 π m² ≈ 1.7671 m²");
+    expect(ship("Find the area of a circle with radius 1000.2 cm")).toBe("25010001/25 π cm² ≈ 3142849.4163 cm²");
+  });
+});
+
+/**
+ * ROUND-24 adversarial gate (wf_9843c9e8-3d8, 30/30 agents, 22 confirmed violations).
+ *
+ * Two thirds of this round were MY OWN ROUND-23 regressions, and both have the same shape: a
+ * cue that looks decisive locally but carries several incompatible readings.
+ *   • "N units LONG" was admitted as a span. It is three different quantities — a RADIAL ARM
+ *     ("the minute hand is 14 cm long" → the radius), a BOUNDARY ("a circular path is 44 m
+ *     long" → the circumference, an inverse problem this engine declines), and a DISC ("a
+ *     circular lawn is 30 m long" → the diameter) — so reading it as one shipped
+ *     exactly-half and π-times-too-big answers as verified:true. It is now unread.
+ *   • A covering ask was targeted by the noun of the thing COVERED ("cover it up to the
+ *     EDGE" → circumference). The MATERIAL fixes the dimension far more reliably: fencing,
+ *     ribbon and wire are LENGTHS; turf, paint and carpet are AREAS.
+ */
+describe("circle — ROUND-24 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): 'N units long' is not a span — a radial arm is not a diameter", () => {
+    expect(
+      parseCircle(
+        "The minute hand of a clock is 14 cm long. Find the length of the arc it traces when it turns through 90 degrees."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A pendulum is 20 cm long. Find the length of the arc through which the bob swings for a central angle of 30 degrees."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A goat is tied to a post by a rope 7 m long and grazes a circular patch of grass. How much area can the goat graze?"
+      )
+    ).toBeNull();
+  });
+
+  it("(B): a stated BOUNDARY length is the inverse problem, never a diameter", () => {
+    expect(
+      parseCircle("A circular path around a pond is 44 m long. What is the circumference of the pond?")
+    ).toBeNull();
+    expect(parseCircle("A circular racetrack is 400 m long. Find the area it encloses.")).toBeNull();
+    expect(
+      parseCircle("A circular path around a lake is 88 m long. Find the area of the lake.")
+    ).toBeNull();
+    expect(
+      parseCircle("A circular moat is 50 m long around the castle. Find the area inside.")
+    ).toBeNull();
+    expect(
+      parseCircle("A wire is 88 cm long. It is bent into a circle. How much area does the circle enclose?")
+    ).toBeNull();
+  });
+
+  it("(C): a covering ask takes its dimension from the MATERIAL, not the covered noun", () => {
+    expect(ship("A circular lawn has a radius of 7 m. How much turf is needed to cover it right up to the edge?")).toBe(
+      "49π m² ≈ 153.938 m²"
+    );
+    expect(ship("How much paint is needed to cover a circular lid of diameter 12 cm right to its rim?")).toBe(
+      "36π cm² ≈ 113.0973 cm²"
+    );
+    expect(ship("How much fencing is needed to cover the outside of a circular pen of radius 5 m?")).toBe(
+      "10π m ≈ 31.4159 m"
+    );
+    expect(ship("How much ribbon is needed to cover the hem of a circular tablecloth of radius 7 cm?")).toBe(
+      "14π cm ≈ 43.9823 cm"
+    );
+  });
+
+  it("(D): angle units this engine does not convert, and angles that are RATES", () => {
+    expect(
+      parseCircle(
+        "A sector of a circle of radius 12 km has a central angle of 30 arc minutes. Find the length of the arc."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "Find the length of the arc of a circle of radius 9 cm with a central angle of 100 centesimal degrees."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A radar antenna at the centre of a circle of radius 10 km rotates through 15 degrees every second. Find the area of the sector it sweeps in 4 seconds."
+      )
+    ).toBeNull();
+  });
+
+  it("(E): partial regions, partitions, compound boundaries and solids", () => {
+    expect(
+      parseCircle(
+        "A sector of radius 6 cm has a central angle of 90 degrees. Find the total length of the arc and the two radii bounding it."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular flowerbed of radius 3 m sits in the middle of a circular lawn that is 20 m across. Find the area of the grass."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle("A circular field of radius 8 m is fenced into four equal plots. Find the area of one plot.")
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular cake of radius 10 cm is sliced right down the middle. Find the area of the top of one of the two resulting parts."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular pipe has radius 3 cm and length 100 cm. Find the area of paint needed to coat the outside of the pipe."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle("A circle of radius 6 cm is drawn on a quadrilateral of area 200 cm2. Find the area of the quadrilateral.")
+    ).toBeNull();
+  });
+
+  it("(F): a cylinder's height must be asserted in the MAIN clause to disqualify the circle", () => {
+    // The height sits in a relative clause DESCRIBING the tank; the ask is still a plain circle.
+    expect(ship("The diameter of a circular tank that measures 3 m tall is 10 m. Find the area.")).toBe(
+      "25π m² ≈ 78.5398 m²"
+    );
+  });
+
+  it("(G): the exact coefficient is shown only when the decimal cannot say it", () => {
+    // [ROUND 28] 841/800000 IS 0.00105125 exactly — it only looked inexpressible because the
+    // old printer used toFixed(6), which truncates every significant digit below 1e-6. The
+    // printer now measures SIGNIFICANT digits (toPrecision(15) + a length test), so a
+    // terminating value prints in full whatever its magnitude, and the readable form wins.
+    expect(ship("Find the sector area of a circle with radius 0.87 cm and central angle 0.5 degrees")).toBe(
+      "0.00105125π cm² ≈ 0.0033 cm²"
+    );
+    // 5909213/20000 IS its decimal exactly → show the readable form.
+    expect(ship("Find the sector area of a circle of radius 30.9 cm with a central angle of 111.4 degrees")).toBe(
+      "295.46065π cm² ≈ 928.217 cm²"
+    );
+  });
+});
+
+/**
+ * ROUND-25 adversarial gate (wf_29900e01-a34 — an INCOMPLETE sweep: 10/18 agents finished,
+ * 8 died on a session limit, so 7 confirmed is a floor, not a measurement). Two root causes.
+ *
+ *   • A ROTATION IS A SWEEP. The orientation-distractor list carried `rotat\w*(?!\s+through)`
+ *     to catch "the page is rotated 25°", and it discarded the real swept angle of every
+ *     problem phrased without the preposition — leaving the problem's ACTUAL distractor as the
+ *     only surviving candidate. What marks an orientation is the static mounting predicate
+ *     ("set at", "braced at"), not the verb.
+ *   • NON-DISC REGIONS. An annulus stated as a wall thickness or an offset from the edge, a
+ *     fold worded without "into two", and a half-disc under a flat floor level with the centre all
+ *     reached a bare πr².
+ */
+describe("circle — ROUND-25 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a swept angle beats a mounting angle, preposition or no preposition", () => {
+    expect(
+      ship(
+        "A sprinkler rotates 120 degrees to water a sector of a circle of radius 9 m. The feed pipe is set at 40 degrees to the ground. Find the area of the sector watered."
+      )
+    ).toBe("27π m² ≈ 84.823 m²");
+    expect(
+      ship(
+        "A radar antenna rotates 80 degrees, scanning a sector of a circle of radius 15 km. The mast is braced at 25 degrees. Find the area of the sector scanned."
+      )
+    ).toBe("50π km² ≈ 157.0796 km²");
+    expect(
+      ship(
+        "A wheel of radius 18 cm rotates 60 degrees. The axle is set at 20 degrees. Find the arc length of the sector turned through."
+      )
+    ).toBe("6π cm ≈ 18.8496 cm");
+    // …and the orientation distractor still loses to a stated angle, as it always did.
+    expect(
+      ship("A sector of a circle of radius 10 cm has angle 120. It is inclined at 30 degrees. Find the sector area.")
+    ).toBe("100/3 π cm² ≈ 104.7198 cm²");
+  });
+
+  it("(B): an annulus stated as a thickness or an edge offset is not a disc", () => {
+    expect(
+      parseCircle(
+        "A circular pipe has an internal radius of 4 cm and its metal wall is 1 cm thick. Find the area of the cross-section of the metal."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular pond of radius 5 m has a circular fence built 2 m out from its edge. Find the area enclosed by the fence."
+      )
+    ).toBeNull();
+  });
+
+  it("(C): a fold and a flat floor level with the centre both halve the disc", () => {
+    expect(
+      parseCircle(
+        "A circular pizza is folded once so the edges meet exactly. The radius is 12 cm. Find the area of the folded shape."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular tunnel entrance has a flat floor at the level of its centre. The circular arch above has radius 4 m. Find the area of the entrance."
+      )
+    ).toBeNull();
+  });
+});
+
+/**
+ * ROUND-26 adversarial gate (wf_ff93b9d8-6b8 — a COMPLETE sweep: 33/33 agents, 0 errors,
+ * 25 confirmed). Six root causes, four of them in the shared nl/ layer:
+ *
+ *   • THE TARGET BELONGS TO THE ASK. Every target cue scanned the whole problem, so a
+ *     quantity named in the SCENERY captured it — the exact failure nl/ask.ts was written
+ *     for, applied to the givens but never to the target.
+ *   • A relative clause was treated as governing the rest of its sentence, so a dimension
+ *     stated of one figure was disowned from the figure that followed it.
+ *   • "Fig. 2" — an abbreviating full stop the label-stripper could not cross, so the FIGURE
+ *     NUMBER became the radius; and "radius OA = 7 cm" had no reader at all.
+ *   • A fraction is an EXACTNESS CLAIM. The fallback printed a continued-fraction convergent.
+ */
+describe("circle — ROUND-26 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a mixed-number span keeps its whole part", () => {
+    expect(ship("A circular badge, 2½ cm across, is pinned on a shirt. Find the area.")).toBe(
+      "25/16 π cm² ≈ 4.9087 cm²"
+    );
+    expect(ship("A circular pond, 3 1/2 m across, lies in the park. Find the circumference.")).toBe(
+      "7/2 π m ≈ 10.9956 m"
+    );
+  });
+
+  it("(B): a relative clause governs its own clause, not the rest of the sentence", () => {
+    expect(
+      ship("A circular tray whose diameter is 20 cm holds a circular plate 6 cm across. Find the area of the plate.")
+    ).toBe("9π cm² ≈ 28.2743 cm²");
+    expect(
+      ship(
+        "A circular tray whose diameter is 20 cm holds a circular plate 6 cm across. Find the circumference of the plate."
+      )
+    ).toBe("6π cm ≈ 18.8496 cm");
+  });
+
+  it("(C): the target is read from the ASK, the givens from the whole text", () => {
+    expect(
+      ship("The area of a circular garden of radius 6 m is shown on the plan. Find the length of the hedge that surrounds it.")
+    ).toBe("12π m ≈ 37.6991 m");
+    expect(
+      ship(
+        "A plan shows the area of the circular lawn of radius 10 m. Find the length of the garland that will be laid along the edge."
+      )
+    ).toBe("20π m ≈ 62.8319 m");
+    expect(
+      ship("A ribbon runs around the edge of a circular rug of radius 3 m. How much space does the rug take up on the floor?")
+    ).toBe("9π m² ≈ 28.2743 m²");
+    expect(
+      ship("A rubber seal runs around the rim of a circular window of radius 5 m. How much glass is needed for the window?")
+    ).toBe("25π m² ≈ 78.5398 m²");
+    // …and an ANSWER-FORMAT sentence is not the ask, however many ask cues it carries.
+    expect(ship("Find the area of the circle with radius 7 cm. Give your answer in terms of π")).toBe(
+      "49π cm² ≈ 153.938 cm²"
+    );
+  });
+
+  it("(D): a figure caption's number is not a dimension; a point label does not hide one", () => {
+    expect(ship("In Fig. 2 radius OA = 7 cm. Find the area of the circle.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("In Fig. 3 diameter AB = 20 cm. Find the circumference of the circle.")).toBe("20π cm ≈ 62.8319 cm");
+    expect(ship("In Fig. 7 central angle POQ measures 90 degrees and the radius is 8 cm. Find the sector area.")).toBe(
+      "16π cm² ≈ 50.2655 cm²"
+    );
+    expect(
+      ship("In Fig. 2 central angle AOB measures 60 degrees. The radius of the circle is 10 cm. Find the length of the arc.")
+    ).toBe("10/3 π cm ≈ 10.472 cm");
+  });
+
+  it("(E): every spelling of π, and angle units glued to their digits", () => {
+    // U+1D70B MATHEMATICAL ITALIC SMALL PI — a radian angle no π-guard could see.
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle of 2𝜋/3. Find the sector area.")).toBeNull();
+    expect(parseCircle("Find the arc length of a circle of radius 9 cm whose central angle is 2𝜋/3.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle of 2rad. Find the sector area.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 9 cm has a central angle of 1.5rad. Find the arc length.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle of 100gon. Find the sector area.")).toBeNull();
+  });
+
+  it("(F): solids, encircling bands, and figures counted more than once", () => {
+    expect(
+      parseCircle(
+        "A circular pond has a radius of 5 m. A path 1 m in width runs around it. Find the total area of the pond and the path."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle("A circular candle has a radius of 3 cm and is 12 cm tall. Find the area of the wax on the side of the candle.")
+    ).toBeNull();
+    expect(parseCircle("Find the total area of the two faces of a circular coin of radius 1 cm.")).toBeNull();
+    expect(
+      parseCircle("How much fabric is needed to cover the top and the bottom of a circular cushion of radius 20 cm?")
+    ).toBeNull();
+    expect(parseCircle("A pair of circular badges each of radius 3 cm. Find the total area.")).toBeNull();
+    expect(parseCircle("A rope goes twice around a circular post of radius 3 cm. What length of rope is needed?")).toBeNull();
+    // …and a path that merely runs PAST the circle is still scenery, not a band around it.
+    expect(ship("A path 2 m wide runs past a circle of radius 14 cm; find the circumference of the circle")).toBe(
+      "28π cm ≈ 87.9646 cm"
+    );
+  });
+
+  it("(G): a printed fraction is an exactness claim — never a convergent", () => {
+    // The exact coefficient needs a 3.6-million denominator; the old fallback printed
+    // 960120/121 π, which is not the number.
+    // [ROUND-31] …and neither was the decimal this test used to expect. 28565553719/3600000
+    // REPEATS (the 9 in 3600000), so "7934.876033π" is a rounding wearing an exactness claim —
+    // the same defect as the convergent, just quieter. An ugly exact fraction is the only
+    // honest form for a repeating coefficient; terminating ones still print as decimals.
+    expect(ship("Find the sector area of a circle with radius 109.1 cm and central angle 239.99 degrees")).toBe(
+      "28565553719/3600000 π cm² ≈ 24928.1483 cm²"
+    );
+    expect(ship("Find the sector area of a circle with diameter 100.6580 cm and central angle 239.97 degrees")).toBe(
+      "20261532919759/12000000000 π cm² ≈ 5304.4569 cm²"
+    );
+  });
+});
+
+/**
+ * ROUND-27 adversarial gate (wf_c76d0b0e-23e — a COMPLETE sweep: 29/29 agents, 0 errors,
+ * 22 confirmed). Six root causes, four of them in the shared nl/ layer again:
+ *
+ *   • A LOCATIVE PHRASE DISPLACES THE SUBJECT. "A circular tin ON IT is 20 cm across"
+ *     captured "it", the reading was dropped, and a SHELF's width was left as the only span
+ *     in the text — so the shelf sized the tin. Dropping a reading is not the safe direction
+ *     when a competing one survives; resolve the NP head instead.
+ *   • THE ASK CAN NAME ITS OBJECT IN THE SUBJECT SLOT — "how much area DOES THE TIN COVER?"
+ *     is the same question as "the area OF THE TIN", and only one of them had a reader.
+ *   • AN EXPONENT IS PART OF THE NUMBER. "10²", "10^2", "1.5e2", "2^3", "1.5\times10^{2}" all
+ *     read as their MANTISSA — and the trailing unit, sitting behind the exponent, was lost
+ *     with it. Resolving is exact (decimal-point shifts, BigInt powers): no second reading.
+ *   • `\b` IS THE WRONG BOUNDARY FOR A TeX MACRO. A control word ends at the first NON-letter,
+ *     so `\sqrt2` and `\times20` slipped both parse-integrity guards written to stop them.
+ */
+describe("circle — ROUND-27 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a locative phrase does not steal the span's subject", () => {
+    expect(ship("A shelf is 60 cm wide. A circular tin on it is 20 cm across. How much area does the tin cover?")).toBe(
+      "100π cm² ≈ 314.1593 cm²"
+    );
+    expect(
+      ship("A bench is 150 cm wide. A circular plate on it is 24 cm across. How much area does the plate cover?")
+    ).toBe("144π cm² ≈ 452.3893 cm²");
+    // …and with the ask made by a PRONOUN, the head is unrecoverable — but only one of the two
+    // nouns is ever called circular, and a corridor's width is not a circle's diameter.
+    expect(ship("A corridor is 3 m wide. A circular rug in it is 120 cm across. Find its circumference.")).toBe(
+      "120π cm ≈ 376.9911 cm"
+    );
+    // The head noun is the NP's, never the locative phrase's object: the plate, not the table.
+    expect(ship("A circular plate on the table is 24 cm across. Find the area of the plate.")).toBe(
+      "144π cm² ≈ 452.3893 cm²"
+    );
+  });
+
+  it("(B): the SUPPLIED material fixes the dimension; a named unit outranks it", () => {
+    // "hedge" is a linear material — but it is what the turf is laid UP TO, not what is asked for.
+    expect(ship("A circular lawn has a radius of 5 m. How much turf is needed to cover the lawn up to the hedge?")).toBe(
+      "25π m² ≈ 78.5398 m²"
+    );
+    // …and mesh is sold by area, yet "HOW MANY METRES OF" states the answer's dimension outright.
+    expect(ship("How many metres of mesh are needed to go right round a circular pen of radius 4 m?")).toBe(
+      "8π m ≈ 25.1327 m"
+    );
+  });
+
+  it("(C): an angle written as a calculation, or stated 'at the centre' in radians", () => {
+    expect(parseCircle("A sector of a circle of radius 6 cm has central angle 2 x 30 degrees. Find the area of the sector.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 6 cm has a central angle of 3\\times20 degrees. Find the sector area.")).toBeNull();
+    // No angle word anywhere in this one — "at the centre" is what makes π/2 a central angle.
+    expect(parseCircle("A circular fan of radius 20 cm opens π/2 at the centre. Find the area it covers.")).toBeNull();
+  });
+
+  it("(D): the exponent is part of the number — and so is the unit behind it", () => {
+    expect(ship("Find the area of a circle with radius 10² cm")).toBe("10000π cm² ≈ 31415.9265 cm²");
+    expect(ship("Find the sector area of a circle with radius 10^2 cm and central angle 90 degrees")).toBe(
+      "2500π cm² ≈ 7853.9816 cm²"
+    );
+    expect(ship("Find the area of a circle with radius 1.5e2 cm")).toBe("22500π cm² ≈ 70685.8347 cm²");
+    expect(ship("Find the area of a circle with radius 2^3 cm")).toBe("64π cm² ≈ 201.0619 cm²");
+    expect(ship("A circle has a radius of 1.5\\times10^{2} cm. Find the area of the circle.")).toBe(
+      "22500π cm² ≈ 70685.8347 cm²"
+    );
+    // A SQUARED UNIT is not a power of a number, and the radian/gradian superscripts are not
+    // exponents either — none of them may be resolved away.
+    expect(ship("A circle has an area of 36 cm^2. Find the circumference.")).toBeNull();
+    expect(parseCircle("A sector of a circle of radius 9 cm has a central angle of 2^{c}. Find the arc length.")).toBeNull();
+  });
+
+  it("(E): an unbraced TeX macro is still that macro", () => {
+    expect(ship("A circle has a radius of \\frac12 cm. Find the area of the circle.")).toBe(
+      "1/4 π cm² ≈ 0.7854 cm²"
+    );
+    // …and an irrational given cannot survive the flatten, braces or no braces → decline.
+    expect(parseCircle("A circle has a radius of \\sqrt2 cm. Find the area of the circle.")).toBeNull();
+  });
+
+  it("(F): bands, overhangs, bisecting chords and counted multiplicities", () => {
+    expect(
+      parseCircle("A circular pond of radius 3 m is surrounded by a grass border of width 2 m. Find the area of the grass.")
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular fountain of radius 4 m is ringed by flagstones of width 1 m. Find the area covered by the flagstones."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular table of radius 40 cm is covered by a cloth which overhangs the edge by 10 cm. Find the area of the cloth."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular plate of radius 9 cm sits on a mat that extends 3 cm beyond it all the way round. Find the area of the mat."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular field of radius 30 m is separated by a straight fence running from one point on the rim to the point directly opposite. Sheep graze only the part of the field north of the fence. Find the area the sheep graze."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular flower bed has a radius of 7 m. Three strands of rope are to be run around it. Find the total length of rope needed."
+      )
+    ).toBeNull();
+    expect(parseCircle("The circular lid of a tin has a radius of 5 cm. Find the total area of the lid and the base.")).toBeNull();
+  });
+});
+
+/**
+ * ROUND-28 adversarial gate (wf_4efcf98e-625 — a COMPLETE sweep: 0 errors, 22 confirmed).
+ * Nine root causes, five of them in the shared nl/ layer:
+ *
+ *   • AN NP HEAD IS FINAL; A MODIFIER PP IS STRIPPED FROM THE RIGHT. Cutting the noun phrase
+ *     at the FIRST preposition scanning left-to-right kept "a circle is drawn" and returned
+ *     the PARTICIPLE "drawn" as a span's subject — which then passed the circular-subject
+ *     test by matching "circle is drawn". Strip a TRAILING PP instead, and only for the
+ *     COPULAR frame ("a circular table IN IT is 90 cm across"); the ATTRIBUTIVE frame
+ *     ("a card 40 cm wide") heads on the noun immediately before the span, not after it.
+ *   • A SPAN ON A SUBJECT THE TEXT NEVER MARKS CIRCULAR IS INADMISSIBLE, not merely lower
+ *     priority — unless that subject IS the ask object. A card's width is not a candidate
+ *     diameter for the circle drawn on it, however few other readings survive.
+ *   • AN INSTRUCTION *ABOUT* THE ANSWER IS NOT THE ASK — already true of "give your answer in
+ *     terms of π", and equally true of "What is the FORMULA for the circumference?": it names
+ *     a quantity in the abstract, with no figure and no givens, and hijacked the target from
+ *     the numeric question that had both. (nl/ask FORMULA_SENTENCE.)
+ *   • SPACE IS A THOUSANDS SEPARATOR TOO. "1 000 cm" is 1000 cm under SI and "1" followed by
+ *     a stray "000" otherwise — the same two-reading ambiguity the comma already declined.
+ *     (nl/numeric SPACE_GROUPED_NUMBER.)
+ *   • AN ATTRIBUTIVE GIVEN MUST NOT YIELD TO A BARE COPULA. The tier-A lookahead rejected
+ *     "a 6 cm radius IS DRAWN" and threw away the problem's only real given.
+ *   • AN EXPLICIT RELATION OUTRANKS THE MATERIAL. Tape is linear and felt is areal, but that
+ *     is a proxy; "go once ROUND the rim" and "cover the whole TOP" are facts about the
+ *     problem, and the proxy must lose to them.
+ *   • ARCMINUTES AND ARCSECONDS AT A DISTANCE FROM THE ANGLE NOUN. "an arc subtends 120' AT
+ *     THE CENTRE" was read as 120 DEGREES — a 20× error — because the guard only looked
+ *     directly adjacent to the unit.
+ *   • A TERMINATING DECIMAL BELOW 1 IS STILL EXACT. toFixed(6) truncates significant digits
+ *     by MAGNITUDE; toPrecision(15) measures them by SIGNIFICANCE.
+ *   • MORE SHAPE / VESSEL / BAND / CIRCUIT VOCABULARY: n-gon and dodecagon inscriptions, a
+ *     WELL's curved wall, a walk lying "just outside" a garden, wire "used to fence" a plot.
+ */
+describe("circle — ROUND-28 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a subregion phrased as the WHOLE circle's area is still a subregion", () => {
+    // "the area OF THE CIRCLE that the sector takes up" names the circle but asks for a part
+    // of it; each shipped the FULL disc. Both voices, active and passive.
+    expect(
+      parseCircle(
+        "A circle of radius 6 cm has a sector of central angle 60 degrees. Find the area of the circle that the sector takes up."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circle of radius 10 m has a sector of central angle 72 degrees. Find the area of the circle spanned by the sector."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circle of radius 6 cm has a sector of central angle 60 degrees. Find the area of the circle contained in that sector."
+      )
+    ).toBeNull();
+  });
+
+  it("(B): a span on non-circular scenery can never size the circle", () => {
+    // The card's width is not a candidate diameter — the circle's own radius is given.
+    expect(ship("A circle with a 6 cm radius is drawn on a card 40 cm wide. Find its area.")).toBe(
+      "36π cm² ≈ 113.0973 cm²"
+    );
+    expect(ship("A circle with a 10 cm diameter is drawn on a card 30 cm wide. Find its area.")).toBe(
+      "25π cm² ≈ 78.5398 cm²"
+    );
+    // …and with NO given for the circle at all, the shelf's width must not stand in for one.
+    expect(parseCircle("A circle is drawn on a shelf 60 cm wide. Find its area.")).toBeNull();
+    // The subject the span IS stated of still resolves — the head is the noun, not a
+    // participle picked up by truncating the phrase from the left.
+    expect(ship("A shelf is 60 cm wide. A circular tin on it is 20 cm across. How much area does the tin cover?")).toBe(
+      "100π cm² ≈ 314.1593 cm²"
+    );
+  });
+
+  it("(C): an explicit relation outranks the material's linear/areal proxy", () => {
+    expect(ship("How much tape is needed to cover the whole top of a circular lid of radius 10 cm?")).toBe(
+      "100π cm² ≈ 314.1593 cm²"
+    );
+    expect(ship("How much felt is needed to go once round the rim of a circular drum of radius 15 cm?")).toBe(
+      "30π cm ≈ 94.2478 cm"
+    );
+    expect(ship("How much netting is needed to go once round the rim of a circular pen of radius 5 m?")).toBe(
+      "10π m ≈ 31.4159 m"
+    );
+    // The proxy still governs when no relation contradicts it.
+    expect(ship("A circular lawn has a radius of 5 m. How much turf is needed to cover it right up to the edge?")).toBe(
+      "25π m² ≈ 78.5398 m²"
+    );
+    expect(ship("A circular pen has a radius of 5 m. How much fencing is needed to cover the outside?")).toBe(
+      "10π m ≈ 31.4159 m"
+    );
+  });
+
+  it("(D): arcminutes and arcseconds are never degrees, however far from the angle noun", () => {
+    expect(
+      parseCircle("In a circle of radius 6 cm, an arc subtends 120' at the centre. Find the length of the arc.")
+    ).toBeNull();
+    expect(parseCircle("In a circle of radius 6 cm the angle at the centre is 120'. Find the arc length.")).toBeNull();
+    expect(
+      parseCircle("In a circle of radius 6 cm, an arc subtends 30 minutes at the centre. Find the length of the arc.")
+    ).toBeNull();
+    expect(
+      parseCircle("In a circle of radius 9 cm, an arc subtends 45 seconds at the centre. Find the arc length.")
+    ).toBeNull();
+    // A DEGREE angle in the same frame is untouched.
+    expect(ship("An arc of a circle of radius 6 cm subtends 60 degrees at the centre. Find the length of the arc.")).toBe(
+      "2π cm ≈ 6.2832 cm"
+    );
+  });
+
+  it("(E): a formula question is an instruction about the answer, not the ask", () => {
+    expect(ship("Find the area of a circle with radius 10 cm. What is the formula for the circumference of a circle?")).toBe(
+      "100π cm² ≈ 314.1593 cm²"
+    );
+    expect(ship("What is the circumference of a circle of radius 7 cm? State the area formula.")).toBe(
+      "14π cm ≈ 43.9823 cm"
+    );
+  });
+
+  it("(F): space-grouped digits are as ambiguous as comma-grouped ones", () => {
+    expect(parseCircle("The radius of a circle is 1 000 cm. Find the area.")).toBeNull();
+    // Ungrouped, the same magnitude is unambiguous.
+    expect(ship("The radius of a circle is 1000 cm. Find the area.")).toBe("1000000π cm² ≈ 3141592.6536 cm²");
+  });
+
+  it("(G): more shape, vessel, band and circuit vocabulary", () => {
+    // A dodecagon circumscribing the circle is not the circle.
+    expect(
+      parseCircle(
+        "A circle of radius 7 cm is drawn inside a regular dodecagon so that it touches every side. Find the area of the dodecagon."
+      )
+    ).toBeNull();
+    // A WELL's wall is a cylinder's curved surface, not a disc.
+    expect(parseCircle("A circular well has a radius of 3 m and is 10 m deep. Find the area of its wall.")).toBeNull();
+    // Half a disc cut by a diameter, and the band lying JUST OUTSIDE the garden.
+    expect(
+      parseCircle(
+        "A circular field has a radius of 20 m. A fence runs along a diameter. Find the area of the ground on the east side."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "A circular garden has a radius of 10 m. A gravel walk 2 m broad runs just outside it. Find the area of the gravel walk."
+      )
+    ).toBeNull();
+    // Wire "USED TO FENCE" a plot is n circuits of it, not one.
+    expect(
+      parseCircle(
+        "Three strands of wire are used to fence a circular plot of radius 10 m. Find the total length of wire needed."
+      )
+    ).toBeNull();
+    // A path that merely RUNS PAST a circle is scenery, and must not decline it.
+    expect(ship("A path 2 m wide runs past a circle of radius 14 cm. Find the circumference of the circle.")).toBe(
+      "28π cm ≈ 87.9646 cm"
+    );
+  });
+
+  it("(H): a terminating coefficient prints in full at any magnitude", () => {
+    expect(ship("Find the area of a circle with radius 0.0323 cm")).toBe("0.00104329π cm² ≈ 0.0033 cm²");
+    expect(ship("Find the area of a circle with radius 2.5 cm")).toBe("25/4 π cm² ≈ 19.635 cm²");
+  });
+
+  it("(I): a band that is PART of the figure does not resize it", () => {
+    // The pizza's radius already includes its crust — asking for the PIZZA is unambiguous…
+    expect(ship("A circular pizza has a radius of 15 cm. The crust is 2 cm wide. Find the area of the pizza.")).toBe(
+      "225π cm² ≈ 706.8583 cm²"
+    );
+    // …and asking for the CRUST is the annulus this engine does not solve.
+    expect(
+      parseCircle("A circular pizza has a radius of 15 cm. The crust is 2 cm wide. Find the area of the crust.")
+    ).toBeNull();
+  });
+});
+
+/**
+ * ROUND-29 adversarial gate (wf_83660856-3dc — 26/33 agents; 7 died on a session limit, so the
+ * sweep is INCOMPLETE and cannot be a clean gate whatever it returned. 19 confirmed).
+ * Six root causes, three in the shared nl/ layer:
+ *
+ *   • THE COUNTED NOUN IS THE PHRASE HEAD, not the word after "circular". "two circular FLOWER
+ *     BEDS" and "two circular TABLE TOPS" both escaped the multiplicity guard because one
+ *     modifier sat between "circular" and the plural — and the engine sized ONE bed and shipped
+ *     it as the total. "each" and "total" also routinely sit in different SENTENCES.
+ *   • AN INTERROGATIVE IS NOT THE ASK BY KIND — POSITION DECIDES. Sweeping for "?" before
+ *     sweeping for cues inverted every lesson-style problem, because the teaching patter is a
+ *     question and the real ask is an imperative: "Which is bigger, the area or the
+ *     circumference? … Find the AREA." shipped a circumference. And patter that discusses the
+ *     mathematics rather than posing it ("What does the word circumference mean?", "Can you see
+ *     the diameter?") can never be the ask at all. (nl/ask RHETORICAL_SENTENCE.)
+ *   • A REFERENCE LABEL IS NOT A GIVEN. "In EXAMPLE 5 diameter AB = 14 cm" bound the 5.
+ *     (nl/numeric maskReferenceLabels — a label number is never an input, in any domain.)
+ *   • OWNERSHIP IS A PROPERTY OF THE NOUN, NOT THE CLAUSE. "A circular BADGE is pinned to a
+ *     BOARD whose diameter is 30 cm" states whose dimension it is, but the clause veto saw the
+ *     ask object in the same clause and let the board's 30 cm size the badge. (nl/quantity
+ *     dimensionOwner.) The same "of" ambiguity bites the ask-object reader: "of the circle"
+ *     names an object, "of radius 7 cm" names a value.
+ *   • A FUNCTION WORD ENDS A NOUN PHRASE. "a CIRCLE on a CARD 40 cm wide" made the CARD count as
+ *     circular, because the premodifier gap admitted "on a".
+ *   • THE VERTEX IS WHAT MAKES AN ANGLE CENTRAL. "at the circumference" is one phrasing of that
+ *     fact; "where C lies on the circumference", "at a point R on the circumference" and the
+ *     three-letter name "angle OAB" (vertex A, not the centre O) are others, and all three
+ *     shipped an inscribed angle as a central one.
+ *   • AN OUTWARD OFFSET NEEDS NO PARTICULAR VERB: "put up 3 m OUTSIDE IT", "hangs 20 cm OVER THE
+ *     EDGE", "pegged 1 m OUTSIDE THE EDGE" all name a second, larger circle.
+ */
+describe("circle — ROUND-29 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a counted plural is a multi-figure total however many modifiers it carries", () => {
+    expect(
+      parseCircle("Two circular flower beds each of radius 3 m are to be edged. Find the total length of edging.")
+    ).toBeNull();
+    expect(
+      parseCircle("Two circular table tops each of radius 4 m are to be polished. Find the total area to be polished.")
+    ).toBeNull();
+    expect(
+      parseCircle("Five circular flower beds each of radius 1.5 m are to be edged. Find the total length of edging.")
+    ).toBeNull();
+    expect(
+      parseCircle("Two circular garden beds each of diameter 10 m are to be fenced. Find the total length of fencing.")
+    ).toBeNull();
+    // ONE figure still ships.
+    expect(ship("A circular flower bed of radius 3 m is to be edged. Find the length of edging.")).toBe(
+      "6π m ≈ 18.8496 m"
+    );
+  });
+
+  it("(B): the ask is the LAST sentence that poses work, question mark or not", () => {
+    expect(
+      ship("Which is bigger, the area or the circumference? A circle has a radius of 9 m. Find the area of the circle.")
+    ).toBe("81π m² ≈ 254.469 m²");
+    expect(
+      ship(
+        "What is the area of a circle? A circular hoop has a radius of 7 cm. Find the length of the wire that goes around the hoop."
+      )
+    ).toBe("14π cm ≈ 43.9823 cm");
+    expect(
+      ship("Look at the diagram. Can you see the diameter? Now calculate the area of the circle, which has a radius of 7 cm.")
+    ).toBe("49π cm² ≈ 153.938 cm²");
+    expect(
+      ship("What does the word circumference mean? A circular tabletop has a diameter of 12 cm. Find the area of the tabletop.")
+    ).toBe("36π cm² ≈ 113.0973 cm²");
+    // …and the ROUND-22 case the "?"-first sweep was added for still resolves, because the
+    // formula instruction is skipped outright rather than out-ranked.
+    expect(ship("What is the circumference of a circle of radius 7 cm? State the area formula.")).toBe(
+      "14π cm ≈ 43.9823 cm"
+    );
+    expect(ship("Find the area of a circle with radius 7 cm. Give your answer in terms of π.")).toBe(
+      "49π cm² ≈ 153.938 cm²"
+    );
+  });
+
+  it("(C): a reference-label number is not a given", () => {
+    expect(ship("In Example 5 diameter AB = 14 cm. Find the area of the circle.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("In Fig. 3 the radius of a circle is 7 cm. Find the area.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("Question 12: the diameter of a circle is 20 cm. Find the area.")).toBe("100π cm² ≈ 314.1593 cm²");
+  });
+
+  it("(D): a dimension belongs to the noun the text says it belongs to", () => {
+    expect(
+      parseCircle("A circular badge is pinned to a board whose diameter is 30 cm. Find the area of the badge.")
+    ).toBeNull();
+    expect(
+      parseCircle("A button sits on a circular plate with a diameter of 30 cm. Find the area of the button.")
+    ).toBeNull();
+    expect(parseCircle("A circle on a card 40 cm wide. Find its area.")).toBeNull();
+    // A PART inherits its whole's radius — the owner veto must not touch it.
+    expect(ship("A sector of a circle of radius 6 cm has a central angle of 60 degrees. Find the area of the sector.")).toBe(
+      "6π cm² ≈ 18.8496 cm²"
+    );
+    // …and an ask object that is not a figure the text names ("how much area of TURF") vetoes
+    // nothing: the lawn's own radius is still the given.
+    expect(
+      ship("A circular lawn of radius 7 m lies inside the boundary of the park. How much area of turf is needed?")
+    ).toBe("49π m² ≈ 153.938 m²");
+  });
+
+  it("(E): an angle is central only when its vertex is the centre", () => {
+    expect(
+      parseCircle("A circle has radius 9 cm. Angle ACB is 40 degrees where C lies on the circumference. Find the length of arc AB.")
+    ).toBeNull();
+    expect(
+      parseCircle(
+        "An arc PQ of a circle of radius 18 cm subtends an angle of 30 degrees at a point R on the circumference. Find the area of the sector OPQ."
+      )
+    ).toBeNull();
+    expect(
+      parseCircle("OA and OB are radii of a circle of radius 10 cm and angle OAB is 50 degrees. Find the length of arc AB.")
+    ).toBeNull();
+    // A genuinely CENTRAL named angle still ships.
+    expect(ship("In a circle of radius 6 cm, angle AOB is 60 degrees where O is the centre. Find the length of arc AB.")).toBe(
+      "2π cm ≈ 6.2832 cm"
+    );
+  });
+
+  it("(F): an outward offset names a second, larger circle whatever verb carries it", () => {
+    expect(
+      parseCircle("A circular flower bed of radius 7 m has a fence put up 3 m outside it. Find the area enclosed by the fence.")
+    ).toBeNull();
+    expect(
+      parseCircle("A circular table of radius 70 cm is covered by a cloth that hangs 20 cm over the edge. Find the area of the cloth.")
+    ).toBeNull();
+    expect(
+      parseCircle("A circular pond of radius 7 m is covered by a net that hangs 2 m past the edge. Find the circumference of the net.")
+    ).toBeNull();
+    expect(
+      parseCircle("A circular pond of radius 6 m. A rope is pegged 1 m outside the edge all the way round. Find the length of the rope.")
+    ).toBeNull();
+    // A path that merely RUNS PAST the circle is not an offset.
+    expect(ship("A path 2 m wide runs past a circle of radius 14 cm. Find the circumference of the circle.")).toBe(
+      "28π cm ≈ 87.9646 cm"
+    );
+  });
+});
+
+/**
+ * ROUND-30 gate regressions — the 19 violations a COMPLETE 28-agent adversarial sweep
+ * confirmed against the ROUND-29 build. Nine root causes, six of them in the shared NL
+ * layer rather than in this engine:
+ *
+ *   (A) A MEASURED number is never a reference LABEL. "table", "step", "part" and "page"
+ *       are ordinary nouns as well as label words, so masking them deleted a real given
+ *       ("a circular TABLE 40 CM across"). The unit is the discriminator — and the digits
+ *       must be pinned WHOLE, or they backtrack until the unit guard is looking at a digit.
+ *   (B) The same backtrack, older: "A circle 12.5 cm in diameter" strip-matched the label
+ *       "circle 12" and left ".5".
+ *   (C) A SWEPT angle IS the central angle. The distractor list is written in NOUNS, and a
+ *       searchlight problem says "beam" in the sentence that states the sweep — so both
+ *       angles were disqualified and the bare "angle of N" fallback shipped the TOWER's tilt.
+ *   (D) DEEP is TALL. A main-clause depth beside a radius means a solid (2πrh), and both the
+ *       adjective and the noun form were missing from the general height guard.
+ *   (E) Every named ball is a ball: `\bball\b` does not match "football".
+ *   (F) A terminating decimal must print in FULL — a 12-significant-digit cap turned the
+ *       exact coefficient 3.99999960000001 into "4", a wrong exact value.
+ *   (G) A quantity welded to a FOREIGN unit is a foreign quantity ("resistance R = 4 ohms").
+ *   (H) Possession is stated by the VERB as often as by the preposition ("the box HAS a
+ *       diameter of 40 cm"), and "from one rim to the opposite rim" is a diameter said long.
+ *   (I) A guard must test the ASK, not the text. "The perimeter is fenced." — one bystander
+ *       sentence — switched off the dangling-angle guard and shipped a whole circumference
+ *       for an arc ask.
+ */
+describe("circle — ROUND-30 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a number carrying a UNIT is a dimension, not a reference label", () => {
+    expect(ship("A circular table 40 cm across stands on a circular mat. The mat's radius is 50 cm. Find the area of the table.")).toBe(
+      "400π cm² ≈ 1256.6371 cm²"
+    );
+    expect(ship("A circular table 40 cm across stands in a circular hall. The hall's radius is 9 m. Find the area of the table.")).toBe(
+      "400π cm² ≈ 1256.6371 cm²"
+    );
+    expect(ship("A circular table 40 cm across stands on a circular mat. The mat's radius is 50 cm. Find the circumference of the table.")).toBe(
+      "40π cm ≈ 125.6637 cm"
+    );
+    expect(ship("A circular step 30 cm across sits on a circular base. The base's radius is 50 cm. Find the area of the step.")).toBe(
+      "225π cm² ≈ 706.8583 cm²"
+    );
+    // A genuine label — no unit — is still masked.
+    expect(ship("In Example 5 diameter AB = 14 cm. Find the area of the circle.")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("Question 12: the diameter of a circle is 20 cm. Find the area.")).toBe("100π cm² ≈ 314.1593 cm²");
+  });
+
+  it("(B): the label stripper reads the number whole, so a decimal given survives", () => {
+    expect(ship("A circle 12.5 cm in diameter is drawn. Find its area.")).toBe("625/16 π cm² ≈ 122.7185 cm²");
+    expect(ship("A circle 20.4 cm in diameter. Find its circumference.")).toBe("102/5 π cm ≈ 64.0885 cm");
+    // …and a real ordinal label is still stripped.
+    expect(ship("In Fig. 3 the radius of a circle is 7 cm. Find the area.")).toBe("49π cm² ≈ 153.938 cm²");
+  });
+
+  it("(C): a swept angle beats a mounting angle, whatever nouns surround it", () => {
+    expect(ship("A searchlight has a beam that sweeps 150 degrees. Its beam has a radius of 30 m. The tower is inclined at an angle of 5 degrees. Find the area of the sector swept by the beam.")).toBe(
+      "375π m² ≈ 1178.0972 m²"
+    );
+    expect(ship("A lighthouse light sweeps through 90 degrees. Its beam has a radius of 12 m. The lamp is mounted 40 degrees above the horizontal. Find the length of the arc swept by the tip of the beam.")).toBe(
+      "6π m ≈ 18.8496 m"
+    );
+    expect(ship("A lighthouse light sweeps through 90 degrees. Its beam has a radius of 20 m. The lamp is mounted 30 degrees above the horizontal. Find the area of the sector swept.")).toBe(
+      "100π m² ≈ 314.1593 m²"
+    );
+    // A mounting angle with no sweep to fall back on fails CLOSED.
+    expect(
+      parseCircle("A circular sign of radius 6 m is inclined at an angle of 30 degrees. Find the area of the sector.")
+    ).toBeNull();
+  });
+
+  it("(D)+(E): a depth makes a solid; every named ball is a sphere", () => {
+    expect(
+      parseCircle("A circular swimming pool has a radius of 5 m and is 2 m deep. How much paint is needed to cover the wall around the inside of the pool?")
+    ).toBeNull();
+    expect(
+      parseCircle("A circular jar of radius 3 cm and depth 10 cm. Find the area of paper needed to go round the jar.")
+    ).toBeNull();
+    expect(
+      parseCircle("How much leather is needed to cover a circular football of radius 11 cm?")
+    ).toBeNull();
+  });
+
+  it("(F): a terminating coefficient prints every digit it carries", () => {
+    expect(ship("Find the area of a circle with radius 1.9999999 cm")).toBe(
+      "3.99999960000001π cm² ≈ 12.5664 cm²"
+    );
+    // A repeating expansion still rounds.
+    expect(ship("Find the sector area of a circle with radius 10 cm and central angle 120 degrees")).toBe(
+      "100/3 π cm² ≈ 104.7198 cm²"
+    );
+  });
+
+  it("(G): a value glued to a non-length unit is not a length", () => {
+    expect(
+      parseCircle("A circular loop of wire has resistance R = 4 ohms. Find the area of the loop.")
+    ).toBeNull();
+    // The symbol tier still reads a real radius.
+    expect(ship("A circle has r = 4 cm. Find the area.")).toBe("16π cm² ≈ 50.2655 cm²");
+  });
+
+  it("(H): 'X has a diameter of V' names X as the owner; rim-to-rim is a diameter", () => {
+    // The BOX's diameter must not become the TRAY's; the tray's own rim-to-rim span is read.
+    expect(ship("A circular tray measures 30 cm from one rim to the opposite rim. The box holding it has a diameter of 40 cm. Find the area of the tray.")).toBe(
+      "225π cm² ≈ 706.8583 cm²"
+    );
+  });
+
+  it("(I): a bystander sentence cannot switch off the dangling-angle guard", () => {
+    expect(
+      parseCircle("A circular field with centre O has radius 30 m. The perimeter is fenced. A cow walks along the arc from A to B, where angle AOB is 120. What distance does the cow walk around the edge?")
+    ).toBeNull();
+    expect(
+      parseCircle("The circumference of a circular pond with centre O is marked on the plan. Its radius is 8 m. A duck swims along the arc AB, where angle AOB is 45. How far does it swim around the edge?")
+    ).toBeNull();
+    // An ask that really does name the whole figure still ships.
+    expect(ship("Find the circumference of a circle of radius 7 cm")).toBe("14π cm ≈ 43.9823 cm");
+  });
+
+  it("(J): a surface relation outranks the unit the material is sold in", () => {
+    expect(ship("How many metres of carpet are needed to cover the whole floor of a circular room of radius 3 m?")).toBe(
+      "9π m² ≈ 28.2743 m²"
+    );
+    // …and an encircling relation still wins for an area material.
+    expect(ship("How much felt is needed to be sewn around the hem of a circular mat of radius 3 m?")).toBe(
+      "6π m ≈ 18.8496 m"
+    );
+  });
+});
+
+/**
+ * ROUND-31 gate regressions — the adversarial sweep after the ROUND-30 fixes. Root causes:
+ *
+ *   (A) A COVERAGE CLAUSE outranks the head noun it hangs on. "Find the area of the circle
+ *       IT WETS" (sprinkler sweeping 60°) matched "area of the circle" and shipped the whole
+ *       disc, 36π for a true 6π. The clause is restrictive: it names the ground the agent
+ *       reaches, so the ask is a sub-region even though the noun says "circle".
+ *   (B) A VULGAR or MIXED number is a given like any other — "a circle 3½ cm in radius",
+ *       "3 1/2 cm across", "1/2 cm in radius". The reference-label mask ate the digits before
+ *       any of them could be read (the label regex backtracked the number apart), so a
+ *       perfectly ordinary problem parsed as having no radius at all.
+ *   (C) COVERING a face is an AREA ask however the material is measured — "the AMOUNT OF TAPE
+ *       needed to cover the whole top", "how much tape to cover the lid COMPLETELY", "how many
+ *       METRES of carpet to cover a circular floor". A linear material name is not a linear ask.
+ *   (D) A figure that is ROTATED is re-oriented, not swept. The ROUND-30 sweep tier read
+ *       "the circle is then rotated through 120 degrees" as the central angle and beat the
+ *       real 40° subtended arc. A sweep needs a swept SUBJECT, not merely a turning verb.
+ *   (E) A NAMED FRACTION of a circle ("its north-eastern quarter", "one-quarter of the field
+ *       is planted", "a sixteenth") is a sub-region, not the disc — decline rather than ship
+ *       πr² for a quarter.
+ *   (F) The DISPLAYED coefficient must be derived from the EXACT rational, never read off the
+ *       double. 730303/720000000 π printed as "0.001014π" and 15999992000001/16000000000000 π
+ *       collapsed to "1π" — both confident wrong exact values. A terminating coefficient has
+ *       an exact finite decimal (compute it in BigInt); a repeating one has none, so the
+ *       fraction — however ugly — is the only honest form.
+ *   (G) A REACH stated inside the figure ("a sprinkler at the centre THROWS WATER 4 m" on a
+ *       12 m lawn), a SECOND comparative figure ("drawn inside a LARGER circle"), a rope wound
+ *       TWICE, and a COMPOUND mixed-unit given ("3 cm 5 mm") each mean the number in hand is
+ *       not the radius of the figure asked about. Decline.
+ */
+describe("circle — ROUND-31 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a coverage clause narrows the referent — the head noun does not decide", () => {
+    // Sub-region ask: the whole-disc 36π would be a confident wrong answer.
+    expect(ship("A lawn sprinkler at the centre of a circle of radius 6 m sweeps an arc of 60 degrees. Find the area of the circle it wets.")).toBeNull();
+    expect(ship("A sector of 60 degrees is marked on a circle of radius 12 cm. What area of the circle is taken by the sector?")).toBeNull();
+    // …but the clause must sit ON the noun. A plain whole-circle ask still ships.
+    expect(ship("Find the area of the circle of radius 7 cm")).toBe("49π cm² ≈ 153.938 cm²");
+    expect(ship("A sprinkler waters a lawn. Find the area of the circle of radius 7 cm.")).toBe(
+      "49π cm² ≈ 153.938 cm²"
+    );
+  });
+
+  it("(B): vulgar and mixed numbers are givens, not labels", () => {
+    expect(ship("Find the area of a circle 3½ cm in radius.")).toBe("49/4 π cm² ≈ 38.4845 cm²");
+    expect(ship("A circle 3 1/2 cm across. Find its area.")).toBe("49/16 π cm² ≈ 9.6211 cm²");
+    expect(ship("Find the arc length of a circle 2 1/2 cm in diameter with a central angle of 60 degrees.")).toBe(
+      "5/12 π cm ≈ 1.309 cm"
+    );
+    expect(ship("Draw a circle 1/2 cm in radius. Find its area.")).toBe("1/4 π cm² ≈ 0.7854 cm²");
+    expect(ship("A circle 10 1/2 cm in radius. Find the circumference.")).toBe("21π cm ≈ 65.9734 cm");
+    // The mask still has to work: a real reference label is stripped, digits and all.
+    expect(ship("In Example 5 diameter AB = 14 cm. Find the area of the circle.")).toBe(
+      "49π cm² ≈ 153.938 cm²"
+    );
+  });
+
+  it("(C): covering a face is an area ask whatever the material is measured in", () => {
+    expect(ship("A circular lid has a radius of 5 cm. Find the amount of tape needed to cover the whole top of the lid.")).toBe(
+      "25π cm² ≈ 78.5398 cm²"
+    );
+    expect(ship("A circular lid has a radius of 5 cm. How much tape is needed to cover the lid completely?")).toBe(
+      "25π cm² ≈ 78.5398 cm²"
+    );
+    expect(ship("How many metres of carpet are needed to cover a circular floor of radius 5 m?")).toBe(
+      "25π m² ≈ 78.5398 m²"
+    );
+    // The mirror still holds: material run ROUND a boundary stays a length ask.
+    expect(ship("How much felt is needed to go once round the rim of a circular drum of radius 15 cm?")).toBe(
+      "30π cm ≈ 94.2478 cm"
+    );
+  });
+
+  it("(D): a rotated figure is re-oriented, not swept", () => {
+    // Two candidate angles and no way to tell which governs → decline, never guess.
+    expect(ship("An arc AB of a circle of radius 9 cm subtends an angle of 40 degrees at the centre O. The circle is then rotated through 120 degrees about O. Find the length of arc AB.")).toBeNull();
+    expect(ship("A sector of a circle of radius 12 cm has an angle of 120 degrees at the centre. The disc is then turned through 40 degrees before the reading is taken. Find the area of the sector.")).toBeNull();
+    // A genuinely SWEPT beam still reads as the central angle (ROUND-30 (E) must survive).
+    expect(ship("A searchlight has a beam that sweeps 150 degrees. Its beam has a radius of 30 m. The tower is inclined at an angle of 5 degrees. Find the area of the sector swept by the beam.")).toBe(
+      "375π m² ≈ 1178.0972 m²"
+    );
+  });
+
+  it("(E): a named fraction of the circle is a sub-region", () => {
+    expect(ship("A circular garden has a radius of 14 m. Find the area of its north-eastern quarter.")).toBeNull();
+    expect(ship("A circular field has a radius of 12 m. One-quarter of the field is planted. Find the area planted.")).toBeNull();
+    expect(ship("A circular pond has a diameter of 20 m. Find the area of its southern quarter.")).toBeNull();
+    expect(ship("A circular field has a radius of 12 m. A sixteenth of the field is planted. Find the area planted.")).toBeNull();
+    expect(ship("A circular garden has a radius of 14 m. Find the perimeter of its north-eastern quarter.")).toBeNull();
+  });
+
+  it("(F): the exact coefficient decides the display — never the double", () => {
+    // Repeating expansion → the fraction is the only exact form (was "0.001014π" / "0.001π").
+    expect(ship("Find the area of the sector of a circle with radius 0.0323 cm and central angle 350 degrees")).toBe(
+      "730303/720000000 π cm² ≈ 0.0032 cm²"
+    );
+    expect(ship("Find the arc length of a circle with radius 0.6001 cm and central angle 0.3 degrees")).toBe(
+      "6001/6000000 π cm ≈ 0.0031 cm"
+    );
+    // Terminating expansion → the exact decimal, all 16 digits of it (was a flat "1π").
+    expect(ship("A circle has a diameter of 1.9999995 cm. Find its area.")).toBe(
+      "0.9999995000000625π cm² ≈ 3.1416 cm²"
+    );
+    // …and the readable cases are unmoved: small denominators stay fractions.
+    expect(ship("Find the area of a circle with radius 2.5 cm")).toBe("25/4 π cm² ≈ 19.635 cm²");
+    expect(ship("Find the sector area of a circle with radius 10 cm and central angle 120 degrees")).toBe(
+      "100/3 π cm² ≈ 104.7198 cm²"
+    );
+    expect(ship("Find the sector area of a circle with radius 0.87 cm and central angle 0.5 degrees")).toBe(
+      "0.00105125π cm² ≈ 0.0033 cm²"
+    );
+    expect(ship("Find the area of a circle with radius 1.9999999 cm")).toBe(
+      "3.99999960000001π cm² ≈ 12.5664 cm²"
+    );
+  });
+
+  it("(G): a reach, a second figure, a double wrap, and a compound given are all declines", () => {
+    expect(ship("A circular lawn has a radius of 12 m. A sprinkler at the centre throws water 4 m. Find the area the sprinkler waters.")).toBeNull();
+    expect(ship("A circle of radius 4 cm is drawn inside a larger circle. Find the area of the larger circle.")).toBeNull();
+    expect(ship("A circular mat has a radius of 4 m. A rope is wound around it twice. Find the total length of rope needed.")).toBeNull();
+    expect(ship("A circle has a radius of 3 cm 5 mm. Find its area.")).toBeNull();
+  });
+});
+
+/**
+ * ROUND-32 GATE REGRESSIONS.
+ *
+ * The thirty-first adversarial sweep of the circle engine. Every case below shipped a
+ * CONFIDENT WRONG value before the fix, and each names a place where a CLOSED VOCABULARY sat
+ * in a position that decides correctness — the recurring shape of this whole audit:
+ *
+ *   • A LIST OF FIGURE NOUNS decided whether a rotation was a sweep, and did not know "dish".
+ *   • A LIST OF THROWING VERBS decided whether a second radius had been stated, and did not
+ *     know that a TETHER states one with a noun.
+ *   • A LIST OF SPHERE NOUNS decided whether the ask was 3-D, and did not know "watermelon".
+ *   • A LIST OF COVERING VERBS decided whether an ask was a surface, and did not know "for".
+ *
+ * Each fix replaces the list with the FACT it was approximating: a turn is a sweep only when a
+ * SWEEPER turns; a skin/peel ask is a 3-D surface whatever the fruit; a three-letter angle name
+ * states its own vertex; a dimension attributively welded to a bystander noun belongs to that
+ * noun. Over-declining is honest; a confident wrong value is not.
+ */
+describe("circle — ROUND-32 gate regressions", () => {
+  const ship = (t: string): string | null => {
+    const spec = parseCircle(t);
+    if (!spec) return null;
+    return solveCircle(spec)?.answer.plain ?? null;
+  };
+
+  it("(A): a three-letter angle name states its own vertex", () => {
+    // "Angle AOB" is central when O is the centre; "angle OAB" is a base angle. The degree MARK
+    // sat on the DISTRACTOR, so the marked tier shipped the base angle as the central one.
+    expect(ship("O is the centre of a circle of radius 12 cm. Angle AOB is 40. Angle OAB is 70 degrees. Find the length of arc AB.")).toBe(
+      "8/3 π cm ≈ 8.3776 cm"
+    );
+    expect(ship("O is the centre of a circle of radius 10 cm. Angle AOB is 36. Angle OAB is 72 degrees. Find the area of the sector.")).toBe(
+      "10π cm² ≈ 31.4159 cm²"
+    );
+    expect(ship("O is the centre of a circle of radius 9 cm. Angle AOB is 120. Angle OAB is 30 degrees. Find the area of the sector.")).toBe(
+      "27π cm² ≈ 84.823 cm²"
+    );
+    // The single-name reading is unmoved.
+    expect(ship("In a circle of radius 6 cm, angle AOB is 60 degrees where O is the centre. Find the length of arc AB.")).toBe(
+      "2π cm ≈ 6.2832 cm"
+    );
+  });
+
+  it("(B): a turn is a sweep only when a sweeper turns", () => {
+    // The figure-noun list did not contain "dish", so a rigid re-orientation was read as the
+    // central angle (28π cm for a true 7π). Two competing angles → decline.
+    expect(ship("An arc of a circle of radius 21 cm subtends 60 degrees at the centre O. The dish is then turned through 240 degrees about O. Find the length of the arc.")).toBeNull();
+    // A real sweeper still states the swept angle, whatever scenery surrounds it.
+    expect(ship("A sprinkler rotates 120 degrees to water a sector of a circle of radius 9 m. The feed pipe is set at 40 degrees to the ground. Find the area of the sector watered.")).toBe(
+      "27π m² ≈ 84.823 m²"
+    );
+    expect(ship("A lighthouse light sweeps through 90 degrees. Its beam has a radius of 12 m. The lamp is mounted 40 degrees above the horizontal. Find the length of the arc swept by the tip of the beam.")).toBe(
+      "6π m ≈ 18.8496 m"
+    );
+  });
+
+  it("(C): a count riding the number is a label, not the central angle", () => {
+    // The phrase reader's gap stopped at the first digit, so the pie-chart tally ("for 8
+    // PUPILS") was bound and the bare stated angle ("is 90") lost — 4/5 π for a true 9π.
+    expect(ship("A sector of a circle of radius 6 cm: the angle at the centre of the sector for 8 pupils is 90. Find the area of the sector.")).toBe(
+      "9π cm² ≈ 28.2743 cm²"
+    );
+    // The degree-marked forms this reader already handled are unmoved.
+    expect(ship("An arc of a circle of radius 6 cm subtends 60 degrees at the centre. Find the length of the arc.")).toBe(
+      "2π cm ≈ 6.2832 cm"
+    );
+  });
+
+  it("(D): a skin, a peel and a part-of ask are not the disc", () => {
+    // SPHERE_FIGURE is a noun list; "watermelon" and "orange" were not in it. Match the ASK —
+    // a skin/peel wraps a SOLID, so its area is a 3-D surface whatever the figure is called.
+    expect(ship("A circular watermelon has a radius of 12 cm. Find the area of its skin.")).toBeNull();
+    expect(ship("A circular orange has a radius of 4 cm. Find the area of its peel.")).toBeNull();
+    // "the area of THE PART OF the face that …" carves a sub-region out of the whole figure.
+    expect(ship("A circular clock face has a radius of 10 cm. Find the area of the part of the face that the minute hand passes over in 15 minutes.")).toBeNull();
+    // A LATERAL surface asked with a verb of enclosing is the same 2πrh decline.
+    expect(ship("A circular tin of radius 5 cm is 12 cm thick. Find the area of the paper that wraps its side.")).toBeNull();
+  });
+
+  it("(E): a tether states a second radius, exactly as a throw does", () => {
+    expect(ship("A circular field has a radius of 20 m. A goat is tethered at its centre with a 5 m rope. Find the area the goat can graze.")).toBeNull();
+    // The throwing-verb form (ROUND-31 (G)) must survive.
+    expect(ship("A circular lawn has a radius of 12 m. A sprinkler at the centre throws water 4 m. Find the area the sprinkler waters.")).toBeNull();
+  });
+
+  it("(F): a dimension welded to a bystander noun never sizes the asked figure", () => {
+    // "A COIN 2 CM IN DIAMETER" and "A 2 CM DIAMETER COIN" both name their owner; neither frame
+    // existed, so an ownerless 2 cm sized the TABLE and the PLATE.
+    expect(ship("A coin 2 cm in diameter lies on a circular table of circumference 60 cm. Find the area of the table.")).toBeNull();
+    expect(ship("A 2 cm diameter coin lies on a circular plate. Find the area of the plate.")).toBeNull();
+    expect(ship("A tin lid 8 cm in diameter is placed on a circular table. Find the circumference of the table.")).toBeNull();
+    // The asked figure's OWN dimension, stated the same way, still reads.
+    expect(ship("A circular table 40 cm across stands on a circular mat. The mat's radius is 50 cm. Find the area of the table.")).toBe(
+      "400π cm² ≈ 1256.6371 cm²"
+    );
+  });
+
+  it("(G): a material supplied FOR a face is a surface relation", () => {
+    // No covering verb at all — the stated unit ("metres") set a length target for a plainly
+    // two-dimensional ask (6π m for a true 9π m²).
+    expect(ship("How many metres of carpet are needed for the floor of a circular room of radius 3 m?")).toBe(
+      "9π m² ≈ 28.2743 m²"
+    );
+    // …and a LINEAR material supplied for a boundary is untouched by the new arm.
+    expect(ship("How many metres of mesh are needed to go right round a circular pen of radius 4 m?")).toBe(
+      "8π m ≈ 25.1327 m"
+    );
+  });
+
+  // (H) THE HEAD-DIFFERENTIAL findings. Every probe set only guards cases a previous round
+  // already found, so broadening a reader can re-open a trap that used to fail CLOSED while
+  // the whole suite stays green. Running the corpus against PRODUCTION as the baseline is what
+  // surfaced these two: both were introduced by this round's own fixes.
+  it("(H): a sweeper standing at the centre introduces no second figure", () => {
+    // A subject-free "at the centre of a circular X" guard — meant for a figure INSIDE a figure
+    // — declined every genuine sweep in the corpus (40 of them), including the canonical one.
+    expect(
+      ship("A sprinkler at the centre of a circular field sweeps through 120 degrees. The field has a radius of 9 m. Find the area of the sector swept.")
+    ).toBe("27π m² ≈ 84.823 m²");
+    expect(
+      ship("A radar at the centre of a circular field rotates through 120 degrees. The field has a radius of 9 m. Find the area of the sector swept.")
+    ).toBe("27π m² ≈ 84.823 m²");
+    // …and the figure-inside-a-figure the guard was FOR still declines, on both locative nouns.
+    expect(
+      ship("A circular flowerbed of radius 3 m sits in the middle of a circular lawn that is 20 m across. Find the area of the grass.")
+    ).toBeNull();
+    expect(
+      ship("A circular flowerbed of radius 3 m sits at the centre of a circular lawn whose edge is 7 m from that centre. Find the area of the grass.")
+    ).toBeNull();
+  });
+
+  it("(H): a length unit and a length-only material outrank a surface relation", () => {
+    // A SURFACE relation beats the material, and beats a stated length unit, because area
+    // materials are sold by the metre. Both overrides at once is a contradiction — the ask
+    // demands metres and the relation demands an area — so decline instead of picking a side.
+    expect(ship("How many metres of fencing are needed to cover the floor of a circular room of radius 3 m?")).toBeNull();
+    expect(ship("How many metres of ribbon are needed to cover the top of a circular room of radius 3 m?")).toBeNull();
+    // Neither override alone is affected: no length unit → the relation still wins…
+    expect(ship("How much tape is needed to cover the whole top of a circular lid of radius 10 cm?")).toBe(
+      "100π cm² ≈ 314.1593 cm²"
+    );
+    // …and an AREA material with a length unit still reads as the face.
+    expect(ship("How many metres of carpet are needed to cover the floor of a circular room of radius 3 m?")).toBe(
+      "9π m² ≈ 28.2743 m²"
+    );
+  });
+});
