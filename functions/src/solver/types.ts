@@ -306,6 +306,7 @@ export type Strategy =
   | "limit" // lim x→a f(x) via a numeric convergence oracle (deterministic)
   | "bounded_trig" // T(x)=c on a closed interval, by enumerate-and-verify
   | "circle" // circle mensuration (area/circumference/arc/sector) — exact π-form
+  | "solid" // solid-geometry "show that …" / optimisation, proven by substitution
   | "ode_point_eval" // IVP evaluated at a point, y(b), by cross-checked numeric integration
   | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
@@ -409,6 +410,10 @@ export interface Classification {
   /** A circle-mensuration query — the strict-parsed spec (target, radius, given,
    * optional central angle, unit); solved in exact π-form and re-verified. */
   circle?: import("./circle").CircleSpec;
+  /** A solid-geometry word problem — a "show that h = …" derivation, or the
+   * optimisation that follows it. Proven by substituting back into the stated
+   * constraint, so a misread digit fails the gate instead of shipping. */
+  solid?: import("./solid").SolidSpec;
   /** An initial-value ODE evaluated at a point — the parsed IVP (residual, order,
    * initial conditions, target point); integrated numerically + cross-checked. */
   odePointEval?: import("./odePointEval").OdePointEvalQuery;

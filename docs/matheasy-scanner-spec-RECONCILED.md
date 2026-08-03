@@ -75,6 +75,39 @@ spend. Keys in Secret Manager, never in the bundle.
   first, peel outward) `[was: sequential per-rule passes]` — the sequential version
   mangled nested fractions including the quadratic formula shape; fixed in step 4.
 
+### 1.2 Solid-geometry word problems (`solver/solid.ts`, strategy `solid`)
+
+The exam page that arrives as a photograph: *"A drinking glass, in the shape of a
+cylinder, must hold 200 mℓ. Show that h = 200/πr². Hence find the r that minimises
+the surface area."* Parsed by `parseSolid` in `classify()` (alongside `parseCircle`,
+**before** the tutor-route return) and solved by `solveSolid` in `proxy/solve.ts`.
+
+- **`show_that` — the claim is the answer, so verification is pure substitution.**
+  The textbook states the result, so nothing is derived-and-trusted: the claimed
+  expression goes back into the constraint the problem states and the identity must
+  hold across 8 positive samples spanning two decades, each variable at its own
+  offset. `πr²·(200/πr²) = 200` everywhere ⇒ proven. A misread digit, a wrong
+  exponent, or the right answer for a *different* solid all break the identity at
+  the first sample and return `null` — an honest couldn't-verify. This is §1's
+  golden rule in its purest form.
+- **`optimize` — no printed answer, so a stricter bar.** Objective (preferably one
+  the problem states outright) → `derivative` → sign-change scan + bisection for the
+  critical point → residual check against a pole → second-derivative test that must
+  match the sense **asked for** → a 4000-point sweep confirming the extremum is
+  global. Any failure returns `null`. Exact form (`∛(100/π)`) is recovered from the
+  two-term stationary polynomial and shown beside the decimal.
+- **Deliberate declines** (each would otherwise be a confident wrong answer): two
+  solids named at once (a composite), a surface-area problem whose openness the text
+  never states (an open glass ≠ a sealed can), a self-referential claim, and a
+  show-that with no named solid — that last one is left to the tutor route rather
+  than converted into a worse "couldn't verify".
+- **Honest routing fix shipped with it:** `classify()` only labels a problem
+  `system_of_equations` when there is genuinely more than one equation. A single
+  equation carrying two variables (`πr²h = 200`) is `beyond_solver`. The client turns
+  the type into the words a student reads, and it had been explaining this problem as
+  *"this system of equations may have several solutions"* — a sentence in which every
+  claim is false.
+
 ---
 
 ## 2. Scanner (as-built)

@@ -14,6 +14,7 @@ import { parseOdePointEval } from "./odePointEval";
 import { parseLimit } from "./limit";
 import { parseBoundedTrig } from "./boundedTrig";
 import { parseCircle } from "./circle";
+import { parseSolid } from "./solid";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
 import {
@@ -174,6 +175,25 @@ export function classify(rawLatex: string): Classification {
   const circle = parseCircle(rawLatex);
   if (circle) {
     return base("circle_mensuration", "circle", "r", false, "none", { circle });
+  }
+
+  // --- Solid-geometry "show that …" + the optimisation that follows -------
+  // MUST run before the tutor-route return AND before the two-variable branch
+  // near the end of this function. "A cylinder holds 200 mℓ; show that
+  // h = 200/πr²" mentions two variables in one equation, which that branch reads
+  // as a system of equations — so the student was told "this system may have
+  // several solutions" about a problem that has no system and whose answer is
+  // printed in the question. There is nothing several about it. The parse is
+  // strict (one named solid, one stated constraint, one ask) and the solve is
+  // gated on substituting the claim back into the constraint, so a misread
+  // digit declines to null and falls through exactly as before.
+  const solid = parseSolid(rawLatex);
+  if (solid) {
+    const solidType =
+      solid.task.kind === "show_that" ? "formula_derivation" : "optimization";
+    const unknown =
+      solid.task.kind === "show_that" ? solid.task.target : solid.task.variable;
+    return base(solidType, "solid", unknown, false, "none", { solid });
   }
 
   // --- Multi-part / beyond-solver problems → the AI tutor -----------------
@@ -511,7 +531,20 @@ export function classify(rawLatex: string): Classification {
     // substitution gate can only confirm that ONE assignment satisfies the
     // equations — it can't prove that assignment is unique or complete — so
     // shipping it would be a confident wrong/partial answer. Route to the tutor.
-    return base("system_of_equations", "conceptual", pickUnknown(vars), true, "none");
+    //
+    // Only call it a SYSTEM when there really is more than one equation. The
+    // client turns this type into the words the student reads, and a lone
+    // equation carrying two variables ("πr²h = 200") was being explained as
+    // "this system of equations may have several solutions" — a sentence in
+    // which every claim is false. `beyond_solver` says the one true thing: this
+    // is past what can be solved and proven, so let's work through it together.
+    return base(
+      multiEquation ? "system_of_equations" : "beyond_solver",
+      "conceptual",
+      pickUnknown(vars),
+      true,
+      "none"
+    );
   }
 
   const unknown = pickUnknown(vars);

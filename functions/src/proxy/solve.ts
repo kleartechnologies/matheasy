@@ -44,6 +44,7 @@ import { solveDeterministic } from "../solver/deterministic";
 import { evaluateLimit } from "../solver/limit";
 import { solveBoundedTrig } from "../solver/boundedTrig";
 import { solveCircle } from "../solver/circle";
+import { solveSolid } from "../solver/solid";
 import { solveOdePointEval } from "../solver/odePointEval";
 import { odeAnswer, verifyOde } from "../solver/ode";
 import { exactForm } from "../solver/exact";
@@ -351,6 +352,25 @@ export async function solve(
   if (cls.strategy === "circle") {
     const result = cls.circle ? solveCircle(cls.circle) : null;
     if (!result) return couldNotVerify(cls, "circle_no_verify", onCouldNotVerify);
+    return {
+      problemLatex: cls.latex,
+      problemType: cls.problemType,
+      finalAnswer: result.answer,
+      verified: true,
+      methods: result.methods,
+      graph: null,
+    };
+  }
+
+  // Solid-geometry "show that …" / optimisation. The proof is INTERNAL to
+  // solveSolid: the claimed expression is substituted back into the constraint
+  // the problem states and must satisfy it identically across many samples (and
+  // an optimum must additionally pass the second-derivative test and beat every
+  // other point in the domain). A null is therefore an honest couldn't-verify —
+  // the OCR misread something, or the printed claim does not follow.
+  if (cls.strategy === "solid") {
+    const result = cls.solid ? solveSolid(cls.solid) : null;
+    if (!result) return couldNotVerify(cls, "solid_no_verify", onCouldNotVerify);
     return {
       problemLatex: cls.latex,
       problemType: cls.problemType,
