@@ -25,6 +25,7 @@ import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
 import 'package:matheasy/features/practice/presentation/practice_screen.dart';
 import 'package:matheasy/features/practice/presentation/practice_session_screen.dart';
+import 'package:matheasy/features/settings/application/settings_controller.dart';
 import 'package:matheasy/features/subscription/application/subscription_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,14 +73,29 @@ class _FixedPracticeService implements PracticeService {
       PracticeSession(request: request, questions: questions);
 }
 
-Future<ProviderContainer> _container({PracticeService? service}) async {
+/// Records the request the controller actually handed the engine — the seam the
+/// "my chosen difficulty was ignored" bug lived behind.
+class _RecordingPracticeService implements PracticeService {
+  PracticeRequest? seen;
+
+  @override
+  Future<PracticeSession> createSession(PracticeRequest request) async {
+    seen = request;
+    return PracticeSession(request: request, questions: const [_inputQ]);
+  }
+}
+
+Future<ProviderContainer> _container({
+  PracticeService? service,
+  bool isPro = false,
+}) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
       // The Practice dashboard's difficulty picker reads isPro at build.
-      isProProvider.overrideWithValue(false),
+      isProProvider.overrideWithValue(isPro),
       if (service != null)
         practiceServiceProvider.overrideWithValue(service),
     ],
@@ -203,6 +219,39 @@ void main() {
       expect(state.result!.total, 2);
       expect(state.result!.correct, 1);
       expect(state.result!.xpEarned, 10); // only the correct easy answer
+    });
+
+    test('the chosen difficulty applies however the session was launched',
+        () async {
+      // The level is a SETTING, so it must reach the engine from every entry
+      // point — not just the Practice tab's topic cards, which used to be the
+      // only caller that passed it. Everything else sent `difficulty: null`,
+      // the engine derived a level from (empty) mastery, and a learner who
+      // picked Hard got cold-start easy questions.
+      final service = _RecordingPracticeService();
+      final container = await _container(service: service, isPro: true);
+      _activate(container);
+      container
+          .read(settingsControllerProvider.notifier)
+          .setDifficulty(PracticeDifficulty.hard);
+      final controller = container.read(practiceControllerProvider.notifier);
+
+      // The daily challenge, "practice this" off a result, a Numi card…
+      await controller.start(PracticeRequest.dailyChallenge());
+      expect(service.seen!.difficulty, PracticeDifficulty.hard);
+
+      // …and a resumed session carrying a level saved before the setting moved.
+      await controller.start(const PracticeRequest(
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.veryEasy,
+      ));
+      expect(service.seen!.difficulty, PracticeDifficulty.hard);
+
+      // The session the UI renders reports the level it was actually built at.
+      expect(
+        container.read(practiceControllerProvider).session!.request.difficulty,
+        PracticeDifficulty.hard,
+      );
     });
 
     test('submit is ignored unless awaiting an answer', () async {

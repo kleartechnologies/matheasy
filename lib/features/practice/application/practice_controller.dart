@@ -14,6 +14,7 @@ import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_mistake.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
+import 'practice_difficulty_preference.dart';
 import 'practice_progress_controller.dart';
 import 'practice_service.dart';
 
@@ -98,7 +99,10 @@ class PracticeController extends _$PracticeController {
   /// [PracticePhase.locked] (the screen surfaces the paywall) rather than being
   /// interrupted mid-session. On success, the freshly generated questions are
   /// counted against the free-tier quota.
-  Future<void> start(PracticeRequest request) async {
+  Future<void> start(PracticeRequest rawRequest) async {
+    // The learner's saved level is the AUTHORITY, whatever launched the session
+    // (see [_atChosenDifficulty]).
+    final request = _atChosenDifficulty(rawRequest);
     if (!ref.read(usageSnapshotProvider).canGeneratePractice) {
       state = const PracticeSessionState(phase: PracticePhase.locked);
       return;
@@ -131,6 +135,18 @@ class PracticeController extends _$PracticeController {
         difficulty: request.difficulty?.name ?? 'adaptive',
         count: session.questions.length,
       )));
+      // The engine may have had to serve below the chosen level (a topic whose
+      // hardest concept sits under it, or an exhausted tier falling back to the
+      // bank). Log it rather than let the mismatch pass silently — this is the
+      // signal for "I picked Hard and got an easy question".
+      final served = session.questions.map((q) => q.difficulty).toSet();
+      if (request.difficulty != null &&
+          served.any((d) => d != request.difficulty)) {
+        LoggingService.warning(
+          'Practice served ${served.map((d) => d.name).join("/")} for a '
+          'requested ${request.difficulty!.name} ${request.topic.name} session',
+        );
+      }
       // Adaptive, weakness-targeted sessions are a Pro capability — track uptake.
       if (request.adaptive && ref.read(isProProvider)) {
         unawaited(analytics.logEvent(
@@ -143,6 +159,26 @@ class PracticeController extends _$PracticeController {
     } catch (_) {
       state = const PracticeSessionState(phase: PracticePhase.error);
     }
+  }
+
+  /// Stamps [request] with the learner's chosen practice difficulty.
+  ///
+  /// The level is a SETTING (Settings → Learning preferences → Practice
+  /// difficulty), not a per-launch choice, so it has to apply to every way a
+  /// session can start — the daily challenge, "practice this" off a solved
+  /// problem, a Numi practice card, a resumed session — not only the topic cards
+  /// on the Practice tab, which were previously the ONLY caller that passed it.
+  /// Every other entry point sent `difficulty: null`, which the engine reads as
+  /// "derive it from mastery", and a learner with little history cold-starts at
+  /// easy — so choosing Hard genuinely produced easy questions.
+  ///
+  /// A persisted `lastRequest` (the Continue card) is re-stamped for the same
+  /// reason: it carries whatever level was current when it was saved, which is
+  /// stale the moment the setting changes.
+  PracticeRequest _atChosenDifficulty(PracticeRequest request) {
+    final chosen = ref.read(selectedPracticeDifficultyProvider);
+    if (request.difficulty == chosen) return request;
+    return request.copyWith(difficulty: chosen);
   }
 
   /// Grades a submitted answer (an option's text, or typed input) and reveals

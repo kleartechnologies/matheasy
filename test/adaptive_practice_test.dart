@@ -14,6 +14,7 @@ import 'package:matheasy/features/practice/application/adaptive_practice_service
 import 'package:matheasy/features/practice/application/ai_practice_generator.dart';
 import 'package:matheasy/features/practice/application/engine/adaptive_engine.dart';
 import 'package:matheasy/features/practice/application/engine/difficulty_engine.dart';
+import 'package:matheasy/features/practice/application/engine/difficulty_validator.dart';
 import 'package:matheasy/features/practice/application/engine/generated_question.dart';
 import 'package:matheasy/features/practice/application/engine/parameter_generator.dart';
 import 'package:matheasy/features/practice/application/engine/practice_math.dart';
@@ -494,20 +495,12 @@ void main() {
       expect(skills, isNot(contains(PracticeSkill.linearOneStep)));
       expect(skills, isNot(contains(PracticeSkill.linearTwoStep)));
       expect(skills, isNot(contains(PracticeSkill.evaluateExpression)));
-      // ...only the advanced algebra concepts do.
-      const advanced = {
-        PracticeSkill.linearBothSides,
-        PracticeSkill.simultaneousEquations,
-        PracticeSkill.quadraticFactor,
-      };
-      expect(skills.every(advanced.contains), isTrue,
-          reason: 'got $skills');
+      // ...and neither do the GCSE ones: Hard is A-Level, so the session is the
+      // topic's purpose-built advanced skill, not a bigger-numbered quadratic.
+      expect(skills, {PracticeSkill.algebraAdvanced});
     });
 
-    test('Expert Algebra falls to the hardest concept the topic has, not '
-        'one-step linear', () {
-      // Algebra tops out at quadratics (Medium concept); Expert must still land
-      // there rather than reintroducing the easy skills.
+    test('Expert Algebra serves the advanced skill, not one-step linear', () {
       final plan = engine.plan(
         request: const PracticeRequest(
           topic: PracticeTopic.algebra,
@@ -520,6 +513,38 @@ void main() {
       final skills = plan.map((r) => r.skill).toSet();
       expect(skills, isNot(contains(PracticeSkill.linearOneStep)));
       expect(skills, isNot(contains(PracticeSkill.linearTwoStep)));
+      expect(skills, {PracticeSkill.algebraAdvanced});
+      // Held at the level the learner chose, never dropped to the skill's floor.
+      expect(
+        plan.map((r) => r.difficulty).toSet(),
+        {PracticeDifficulty.expert},
+      );
+    });
+
+    test('every school topic can serve a genuinely Hard concept', () {
+      for (final topic in PracticeTopic.values) {
+        // Geometry is the documented exception: its questions are drawn from a
+        // labelled figure and the AI tier has no figure guard, so it has no
+        // advanced skill to reach for (see practice_skill.dart / the guard in
+        // geometry_figure_test.dart). It still tops out at Pythagoras.
+        if (topic == PracticeTopic.geometry) continue;
+        final plan = engine.plan(
+          request: PracticeRequest(
+            topic: topic,
+            difficulty: PracticeDifficulty.hard,
+            questionCount: 4,
+          ),
+          progress: PracticeProgress.empty,
+          isPro: true,
+        );
+        for (final rec in plan) {
+          expect(
+            conceptFloor(rec.skill).index,
+            greaterThanOrEqualTo(PracticeDifficulty.hard.index),
+            reason: '$topic served ${rec.skill.id} at Hard',
+          );
+        }
+      }
     });
   });
 

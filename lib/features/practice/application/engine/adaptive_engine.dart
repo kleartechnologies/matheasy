@@ -134,20 +134,36 @@ class AdaptiveEngine {
       final level = request.difficulty!;
       final atLevel = pool.where((s) => skillAllowedAt(s, level)).toList();
       if (atLevel.isNotEmpty) {
-        // Prefer skills whose concept sits within one tier of the chosen level,
-        // but never empty the pool: clamp the lower bound to the hardest concept
-        // the topic actually offers at/under the level, so e.g. Expert + Algebra
-        // (which tops out at quadratics = Medium concept) still lands on
-        // quadratics/both-sides/simultaneous, never one-step linear.
-        final topFloor = atLevel
-            .map(conceptFloor)
-            .reduce((a, b) => a.index >= b.index ? a : b);
-        final minFloorIndex = (level.index - 1) < topFloor.index
-            ? (level.index - 1)
-            : topFloor.index;
-        pool = atLevel
-            .where((s) => conceptFloor(s).index >= minFloorIndex)
-            .toList();
+        // Hard (A-Level) and Expert (university) name a GRADE BAND that the
+        // on-device templates can't reach — they scale the numbers, not the
+        // mathematics. So above Medium, if the topic has a concept purpose-built
+        // at or above the level (its AI-generated advanced skill), serve ONLY
+        // that: an A-Level session must never be padded out with a GCSE
+        // quadratic wearing a "Hard" badge. At and below Medium the templates
+        // ARE the level, and a spread of concepts inside the band is variety.
+        final purposeBuilt = level.index > PracticeDifficulty.medium.index
+            ? atLevel
+                .where((s) => conceptFloor(s).index >= level.index)
+                .toList()
+            : const <PracticeSkill>[];
+        if (purposeBuilt.isNotEmpty) {
+          pool = purposeBuilt;
+        } else {
+          // Prefer skills whose concept sits within one tier of the chosen
+          // level, but never empty the pool: clamp the lower bound to the
+          // hardest concept the topic actually offers at/under the level, so
+          // e.g. Expert + Algebra still lands on the advanced skill rather than
+          // one-step linear.
+          final topFloor = atLevel
+              .map(conceptFloor)
+              .reduce((a, b) => a.index >= b.index ? a : b);
+          final minFloorIndex = (level.index - 1) < topFloor.index
+              ? (level.index - 1)
+              : topFloor.index;
+          pool = atLevel
+              .where((s) => conceptFloor(s).index >= minFloorIndex)
+              .toList();
+        }
       } else {
         // Impossible combo: the chosen level is below EVERY skill's floor in
         // this topic (e.g. Very Easy / Medium + Calculus). Keep the session

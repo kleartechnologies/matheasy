@@ -34,6 +34,14 @@ const Map<String, PracticeDifficulty> _skillConceptFloor = {
   'calc_derivative': PracticeDifficulty.hard,
   'calc_integral': PracticeDifficulty.hard,
   'adv_general': PracticeDifficulty.expert,
+  // The per-topic advanced skills: the only thing in a school topic that can
+  // honestly carry an A-Level+ label, so they float to the top of the pool the
+  // moment the learner asks for Hard or Expert.
+  'alg_advanced': PracticeDifficulty.hard,
+  'fr_advanced': PracticeDifficulty.hard,
+  'trig_advanced': PracticeDifficulty.hard,
+  'stat_advanced': PracticeDifficulty.hard,
+  'word_advanced': PracticeDifficulty.hard,
 };
 
 /// The concept floor for [skill] — the lowest difficulty it may be offered at.

@@ -8,6 +8,7 @@ import '../domain/practice_history.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
+import '../domain/practice_skill.dart';
 import '../domain/question_fingerprint.dart';
 import 'ai_practice_generator.dart';
 import 'engine/adaptive_engine.dart';
@@ -199,18 +200,60 @@ class AdaptivePracticeService implements PracticeService {
           return candidate;
         }
       }
-      // AI unavailable / exhausted → hand-authored bank for this topic.
+      // AI unavailable / exhausted (offline, backend failure, a free learner).
+      // Substitute the topic's HARDEST on-device concept at this level before
+      // the bank: a generated question at the requested level beats a
+      // hand-authored one from below it.
+      final substitute = _onDeviceSubstitute(rec);
+      if (substitute != null) {
+        final generated = _generateOnDeviceSlot(
+          substitute,
+          slotIndex,
+          slots,
+          rng,
+          storedHistory,
+          sessionValues,
+          sessionAnswers,
+          id,
+        );
+        if (generated != null) return generated;
+      }
       return _bankQuestion(rec, sessionValues, sessionAnswers, id);
     }
 
-    // Template / rule tiers: retry with fresh parameters to dodge repeats.
+    return _generateOnDeviceSlot(
+          rec,
+          slotIndex,
+          slots,
+          rng,
+          storedHistory,
+          sessionValues,
+          sessionAnswers,
+          id,
+        ) ??
+        _bankQuestion(rec, sessionValues, sessionAnswers, id);
+  }
+
+  /// The template / rule tiers: retry with fresh parameters to dodge repeats.
+  /// Returns `null` when this skill has no on-device generator or every attempt
+  /// failed the level check.
+  GeneratedQuestion? _generateOnDeviceSlot(
+    AdaptiveRecommendation rec,
+    int slotIndex,
+    int slots,
+    ParameterGenerator rng,
+    PracticeHistory storedHistory,
+    Set<String> sessionValues,
+    Set<String> sessionAnswers,
+    String id,
+  ) {
     GeneratedQuestion? last;
     for (var attempt = 0; attempt < _maxAttempts; attempt++) {
       final candidate = _generateOnDevice(rec, slotIndex, slots, rng, id);
       if (candidate == null) break;
       // Never keep a candidate that doesn't fit the requested level — discard
       // and regenerate (bounded). `last` only tracks VALID candidates, so the
-      // fallback below never accepts a wrong-level question.
+      // caller's fallback never accepts a wrong-level question.
       if (!validator.isValid(candidate.question, rec.difficulty)) continue;
       last = candidate;
       if (!_tooSimilar(candidate, storedHistory, sessionValues,
@@ -218,8 +261,27 @@ class AdaptivePracticeService implements PracticeService {
         return candidate;
       }
     }
-    // Give up de-duping (bounded) and accept the last attempt, or fall back.
-    return last ?? _bankQuestion(rec, sessionValues, sessionAnswers, id);
+    // Give up de-duping (bounded) and accept the last valid attempt.
+    return last;
+  }
+
+  /// The best on-device stand-in for an AI slot: the hardest concept in the same
+  /// topic that is still allowed at [rec]'s level. `null` when the topic is
+  /// AI-only (calculus), which is exactly when the bank is the right answer.
+  AdaptiveRecommendation? _onDeviceSubstitute(AdaptiveRecommendation rec) {
+    final candidates = PracticeSkill.forTopic(rec.skill.topic)
+        .where((s) =>
+            s.tier != GenerationTier.ai && skillAllowedAt(s, rec.difficulty))
+        .toList();
+    if (candidates.isEmpty) return null;
+    candidates.sort(
+      (a, b) => conceptFloor(b).index.compareTo(conceptFloor(a).index),
+    );
+    return AdaptiveRecommendation(
+      skill: candidates.first,
+      difficulty: rec.difficulty,
+      reason: rec.reason,
+    );
   }
 
   GeneratedQuestion? _generateOnDevice(

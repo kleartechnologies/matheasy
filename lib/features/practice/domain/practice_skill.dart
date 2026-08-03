@@ -193,6 +193,56 @@ enum PracticeSkill {
     proOnly: true,
   ),
 
+  // ---- Advanced (A-Level / university) — Pro (AI) --------------------------
+  // Every school topic tops out, on-device, at a GCSE-level CONCEPT: the
+  // templates scale the NUMBERS with difficulty but not the mathematics, so
+  // "Hard" (A-Level) and "Expert" (university) had nothing to serve but a
+  // bigger-numbered quadratic. These skills are the escape hatch — one per
+  // topic, generated server-side at the requested grade band, chosen only when
+  // the level is above what the topic's on-device concepts can honestly reach
+  // (see `conceptFloor` + `AdaptiveEngine._candidateSkills`).
+  algebraAdvanced(
+    'alg_advanced',
+    PracticeTopic.algebra,
+    'Advanced algebra (functions, logarithms, polynomials, series)',
+    GenerationTier.ai,
+    proOnly: true,
+  ),
+  fractionsAdvanced(
+    'fr_advanced',
+    PracticeTopic.fractions,
+    'Algebraic fractions and partial fractions',
+    GenerationTier.ai,
+    proOnly: true,
+  ),
+  // NOTE: there is deliberately NO geometry entry here. Geometry practice is
+  // drawn from a labelled figure, and the AI tier has no figure guard — an
+  // AI-written geometry question would say "the shape shown" with no shape.
+  // `geometry_figure_test.dart` guards that. So Hard/Expert geometry still tops
+  // out at its rule-based concepts (Pythagoras, quadrilateral angles); giving it
+  // real A-Level content means new rule templates, not a prompt.
+  trigonometryAdvanced(
+    'trig_advanced',
+    PracticeTopic.trigonometry,
+    'Advanced trigonometry (identities, radian equations, transformations)',
+    GenerationTier.ai,
+    proOnly: true,
+  ),
+  statisticsAdvanced(
+    'stat_advanced',
+    PracticeTopic.statistics,
+    'Advanced statistics (distributions, expectation, hypothesis testing)',
+    GenerationTier.ai,
+    proOnly: true,
+  ),
+  wordProblemsAdvanced(
+    'word_advanced',
+    PracticeTopic.wordProblems,
+    'Advanced applied problem solving (modelling, rates, optimisation)',
+    GenerationTier.ai,
+    proOnly: true,
+  ),
+
   // ---- Calculus & advanced — Pro (AI) ----
   calculusDerivative(
     'calc_derivative',
