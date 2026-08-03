@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi 已读出你的解题过程",
   "tutorImageNotMath": "这张照片里没有找到数学内容。发给我一道题，或者你的解题过程照片，我来看看。📷",
   "tutorImageUnreadable": "我没能看清楚。请在光线更好的地方重拍，让题目占满画面——或者直接输入，我马上帮你。",
-  "tutorImageFailed": "现在读不了这张照片。请检查网络连接后再试一次。"
+  "tutorImageFailed": "现在读不了这张照片。请检查网络连接后再试一次。",
+  "tutorLessonGoal": "目标",
+  "tutorLessonStepLabel": "第 {number} 步",
+  "tutorLessonWhy": "为什么这样做有效",
+  "tutorLessonMistake": "常见错误",
+  "tutorLessonAnswer": "最终答案",
+  "tutorLessonLabel": "Numi 的讲解"
 }

@@ -2030,4 +2030,24 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tutorImageFailed => '지금은 그 사진을 읽지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.';
+
+  @override
+  String get tutorLessonGoal => '목표';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '$number단계';
+  }
+
+  @override
+  String get tutorLessonWhy => '왜 이렇게 되나요';
+
+  @override
+  String get tutorLessonMistake => '흔한 실수';
+
+  @override
+  String get tutorLessonAnswer => '최종 답';
+
+  @override
+  String get tutorLessonLabel => 'Numi의 설명';
 }

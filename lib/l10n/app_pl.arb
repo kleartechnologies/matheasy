@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi odczytał Twoje obliczenia",
   "tutorImageNotMath": "Nie znajduję matematyki na tym zdjęciu. Wyślij mi zadanie albo zdjęcie swoich obliczeń, a się temu przyjrzę. 📷",
   "tutorImageUnreadable": "Nie udało mi się tego odczytać. Spróbuj ponownie przy lepszym świetle i tak, aby zadanie wypełniało kadr — albo wpisz je, a od razu pomogę.",
-  "tutorImageFailed": "Nie udało mi się teraz odczytać tego zdjęcia. Sprawdź połączenie i spróbuj ponownie."
+  "tutorImageFailed": "Nie udało mi się teraz odczytać tego zdjęcia. Sprawdź połączenie i spróbuj ponownie.",
+  "tutorLessonGoal": "Cel",
+  "tutorLessonStepLabel": "Krok {number}",
+  "tutorLessonWhy": "Dlaczego to działa",
+  "tutorLessonMistake": "Częsty błąd",
+  "tutorLessonAnswer": "Ostateczna odpowiedź",
+  "tutorLessonLabel": "Wyjaśnienie Numi"
 }

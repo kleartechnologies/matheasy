@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi hat deinen Rechenweg gelesen",
   "tutorImageNotMath": "Auf dem Foto finde ich keine Mathematik. Schick mir eine Aufgabe oder ein Bild von deinem Rechenweg, dann schaue ich es mir an. 📷",
   "tutorImageUnreadable": "Das konnte ich nicht ganz entziffern. Versuch es noch einmal mit mehr Licht und der Aufgabe formatfüllend — oder tipp sie ein, dann helfe ich sofort.",
-  "tutorImageFailed": "Ich konnte das Foto gerade nicht lesen. Prüfe deine Verbindung und versuch es noch einmal."
+  "tutorImageFailed": "Ich konnte das Foto gerade nicht lesen. Prüfe deine Verbindung und versuch es noch einmal.",
+  "tutorLessonGoal": "Ziel",
+  "tutorLessonStepLabel": "Schritt {number}",
+  "tutorLessonWhy": "Warum das funktioniert",
+  "tutorLessonMistake": "Häufiger Fehler",
+  "tutorLessonAnswer": "Endgültige Antwort",
+  "tutorLessonLabel": "Numis Erklärung"
 }

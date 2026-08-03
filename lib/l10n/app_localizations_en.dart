@@ -2096,4 +2096,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'I couldn\'t read that photo just now. Please check your connection and try again.';
+
+  @override
+  String get tutorLessonGoal => 'Goal';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Step $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Why this works';
+
+  @override
+  String get tutorLessonMistake => 'Common mistake';
+
+  @override
+  String get tutorLessonAnswer => 'Final answer';
+
+  @override
+  String get tutorLessonLabel => 'Numi\'s explanation';
 }

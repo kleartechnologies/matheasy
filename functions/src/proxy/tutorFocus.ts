@@ -141,7 +141,7 @@ export function findSpan(
 }
 
 /** Two LaTeX strings that differ only in whitespace are the same equation. */
-function sameLatex(a: string, b: string): boolean {
+export function sameLatex(a: string, b: string): boolean {
   return compact(a).text === compact(b).text;
 }
 

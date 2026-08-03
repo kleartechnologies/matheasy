@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi があなたの解き方を読み取りました",
   "tutorImageNotMath": "その写真には数学が見つかりません。問題か、解き方の写真を送ってくれれば見てみます。📷",
   "tutorImageUnreadable": "はっきり読み取れませんでした。明るいところで、問題が画面いっぱいに写るようにもう一度撮ってみてください。入力してくれてもすぐに手伝います。",
-  "tutorImageFailed": "いまその写真を読み取れませんでした。通信状態を確認して、もう一度お試しください。"
+  "tutorImageFailed": "いまその写真を読み取れませんでした。通信状態を確認して、もう一度お試しください。",
+  "tutorLessonGoal": "目標",
+  "tutorLessonStepLabel": "ステップ {number}",
+  "tutorLessonWhy": "なぜうまくいくのか",
+  "tutorLessonMistake": "よくある間違い",
+  "tutorLessonAnswer": "最終的な答え",
+  "tutorLessonLabel": "Numi の解説"
 }

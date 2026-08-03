@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi har lest utregningen din",
   "tutorImageNotMath": "Jeg finner ingen matematikk på det bildet. Send meg en oppgave eller et bilde av utregningen din, så tar jeg en titt. 📷",
   "tutorImageUnreadable": "Jeg klarte ikke helt å tyde det. Prøv igjen med mer lys og oppgaven godt i bildet — eller skriv den inn, så hjelper jeg deg med en gang.",
-  "tutorImageFailed": "Jeg klarte ikke å lese bildet akkurat nå. Sjekk tilkoblingen og prøv igjen."
+  "tutorImageFailed": "Jeg klarte ikke å lese bildet akkurat nå. Sjekk tilkoblingen og prøv igjen.",
+  "tutorLessonGoal": "Mål",
+  "tutorLessonStepLabel": "Trinn {number}",
+  "tutorLessonWhy": "Hvorfor dette fungerer",
+  "tutorLessonMistake": "Vanlig feil",
+  "tutorLessonAnswer": "Endelig svar",
+  "tutorLessonLabel": "Numis forklaring"
 }

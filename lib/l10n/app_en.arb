@@ -1129,5 +1129,18 @@
   "tutorImageNotMath": "I can't find any math in that photo. Send me a problem, or a picture of your working, and I'll take a look. 📷",
   "tutorImageUnreadable": "I couldn't quite make that out. Try again with more light and the problem filling the frame — or type it in and I'll help straight away.",
   "tutorImageFailed": "I couldn't read that photo just now. Please check your connection and try again.",
+  "tutorLessonGoal": "Goal",
+  "tutorLessonStepLabel": "Step {number}",
+  "@tutorLessonStepLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tutorLessonWhy": "Why this works",
+  "tutorLessonMistake": "Common mistake",
+  "tutorLessonAnswer": "Final answer",
+  "tutorLessonLabel": "Numi's explanation",
   "@_comment": "Math notation (x², sin, cos, π, ∫, Σ, dx, log) must NEVER be translated — only the surrounding instructional words. Placeholders {name} keep their braces."
 }

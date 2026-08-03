@@ -507,6 +507,10 @@ class TutorChatController extends _$TutorChatController {
         text: response.text,
         card: response.card,
         focus: response.focus,
+        // The structured explanation, when the mode renders one. Already
+        // gated server-side: every equation on it matched a verified line or
+        // is a closed identity, and the answer card is the app's own string.
+        lesson: response.lesson,
         suggestions: response.suggestions,
         // Where this turn points on the student's page. Already gated
         // server-side against the anchors the app itself derived.

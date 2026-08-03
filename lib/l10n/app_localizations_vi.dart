@@ -2095,4 +2095,24 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Bây giờ mình không đọc được ảnh đó. Hãy kiểm tra kết nối rồi thử lại.';
+
+  @override
+  String get tutorLessonGoal => 'Mục tiêu';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Bước $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Vì sao cách này đúng';
+
+  @override
+  String get tutorLessonMistake => 'Lỗi thường gặp';
+
+  @override
+  String get tutorLessonAnswer => 'Đáp án cuối cùng';
+
+  @override
+  String get tutorLessonLabel => 'Giải thích của Numi';
 }

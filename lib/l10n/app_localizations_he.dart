@@ -2070,4 +2070,24 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'לא הצלחתי לקרוא את התמונה כרגע. בדוק את החיבור ונסה שוב.';
+
+  @override
+  String get tutorLessonGoal => 'המטרה';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'שלב $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'למה זה עובד';
+
+  @override
+  String get tutorLessonMistake => 'טעות נפוצה';
+
+  @override
+  String get tutorLessonAnswer => 'התשובה הסופית';
+
+  @override
+  String get tutorLessonLabel => 'ההסבר של נומי';
 }

@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi راه‌حل تو را خواند",
   "tutorImageNotMath": "در این عکس هیچ ریاضی‌ای پیدا نمی‌کنم. یک مسئله یا عکسی از راه‌حلت بفرست تا نگاهی بیندازم. 📷",
   "tutorImageUnreadable": "نتوانستم درست بخوانمش. با نور بیشتر و مسئله در کل کادر دوباره امتحان کن — یا آن را تایپ کن تا فوراً کمکت کنم.",
-  "tutorImageFailed": "الان نتوانستم آن عکس را بخوانم. اتصالت را بررسی کن و دوباره تلاش کن."
+  "tutorImageFailed": "الان نتوانستم آن عکس را بخوانم. اتصالت را بررسی کن و دوباره تلاش کن.",
+  "tutorLessonGoal": "هدف",
+  "tutorLessonStepLabel": "گام {number}",
+  "tutorLessonWhy": "چرا این کار می‌کند",
+  "tutorLessonMistake": "اشتباه رایج",
+  "tutorLessonAnswer": "پاسخ نهایی",
+  "tutorLessonLabel": "توضیح نومی"
 }

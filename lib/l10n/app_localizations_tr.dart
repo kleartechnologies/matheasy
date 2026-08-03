@@ -2099,4 +2099,24 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Şu anda o fotoğrafı okuyamadım. Bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get tutorLessonGoal => 'Hedef';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '$number. adım';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Bu neden işe yarar';
+
+  @override
+  String get tutorLessonMistake => 'Sık yapılan hata';
+
+  @override
+  String get tutorLessonAnswer => 'Son cevap';
+
+  @override
+  String get tutorLessonLabel => 'Numi\'nin açıklaması';
 }

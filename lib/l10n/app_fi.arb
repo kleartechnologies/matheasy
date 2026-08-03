@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi luki laskusi",
   "tutorImageNotMath": "En löydä kuvasta matematiikkaa. Lähetä minulle tehtävä tai kuva laskuistasi, niin katson sen. 📷",
   "tutorImageUnreadable": "En saanut siitä selvää. Yritä uudelleen paremmassa valossa niin, että tehtävä täyttää kuvan — tai kirjoita se, niin autan heti.",
-  "tutorImageFailed": "En pystynyt lukemaan kuvaa juuri nyt. Tarkista yhteytesi ja yritä uudelleen."
+  "tutorImageFailed": "En pystynyt lukemaan kuvaa juuri nyt. Tarkista yhteytesi ja yritä uudelleen.",
+  "tutorLessonGoal": "Tavoite",
+  "tutorLessonStepLabel": "Vaihe {number}",
+  "tutorLessonWhy": "Miksi tämä toimii",
+  "tutorLessonMistake": "Yleinen virhe",
+  "tutorLessonAnswer": "Lopullinen vastaus",
+  "tutorLessonLabel": "Numin selitys"
 }

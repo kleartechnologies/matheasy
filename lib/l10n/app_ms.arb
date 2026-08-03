@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi telah membaca kerja anda",
   "tutorImageNotMath": "Saya tidak jumpa apa-apa matematik dalam foto itu. Hantar soalan atau gambar kerja anda dan saya akan lihat. 📷",
   "tutorImageUnreadable": "Saya tidak dapat membacanya dengan jelas. Cuba lagi dengan cahaya yang lebih terang dan soalan memenuhi bingkai — atau taipkannya dan saya bantu terus.",
-  "tutorImageFailed": "Saya tidak dapat membaca foto itu sekarang. Semak sambungan anda dan cuba lagi."
+  "tutorImageFailed": "Saya tidak dapat membaca foto itu sekarang. Semak sambungan anda dan cuba lagi.",
+  "tutorLessonGoal": "Matlamat",
+  "tutorLessonStepLabel": "Langkah {number}",
+  "tutorLessonWhy": "Kenapa ini berkesan",
+  "tutorLessonMistake": "Kesilapan biasa",
+  "tutorLessonAnswer": "Jawapan akhir",
+  "tutorLessonLabel": "Penjelasan Numi"
 }

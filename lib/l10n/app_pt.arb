@@ -614,5 +614,11 @@
   "tutorImageSawWork": "O Numi leu a sua resolução",
   "tutorImageNotMath": "Não encontro nenhuma matemática nessa foto. Me mande um problema ou uma foto da sua resolução que eu dou uma olhada. 📷",
   "tutorImageUnreadable": "Não consegui distinguir direito. Tente de novo com mais luz e com o problema preenchendo o enquadramento — ou digite e eu ajudo na hora.",
-  "tutorImageFailed": "Não consegui ler essa foto agora. Verifique sua conexão e tente de novo."
+  "tutorImageFailed": "Não consegui ler essa foto agora. Verifique sua conexão e tente de novo.",
+  "tutorLessonGoal": "Objetivo",
+  "tutorLessonStepLabel": "Passo {number}",
+  "tutorLessonWhy": "Por que funciona",
+  "tutorLessonMistake": "Erro comum",
+  "tutorLessonAnswer": "Resposta final",
+  "tutorLessonLabel": "Explicação da Numi"
 }

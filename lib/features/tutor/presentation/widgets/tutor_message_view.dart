@@ -10,6 +10,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/tutor_models.dart';
 import 'tutor_focus_card.dart';
+import 'tutor_lesson_view.dart';
 import 'tutor_page_overlay.dart';
 import 'tutor_practice_card.dart';
 import 'tutor_quiz_card.dart';
@@ -78,6 +79,7 @@ class TutorMessageView extends StatelessWidget {
   Widget _assistant(BuildContext context) {
     final card = message.card;
     final focus = message.focus;
+    final lesson = message.lesson;
     final page = this.page;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,6 +111,17 @@ class TutorMessageView extends StatelessWidget {
               top: AppSpacing.sm,
             ),
             child: TutorFocusCard(focus),
+          ),
+        // The explanation itself, as a stack of cards. It comes after the
+        // equation she is pointing at and before anything to act on: the
+        // bubble is what she SAYS, this is what she WROTE on the board.
+        if (lesson != null)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: _avatar + AppSpacing.sm,
+              top: AppSpacing.sm,
+            ),
+            child: TutorLessonView(lesson),
           ),
         if (card != null)
           Padding(

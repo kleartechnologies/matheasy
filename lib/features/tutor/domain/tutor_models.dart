@@ -214,6 +214,101 @@ class TutorFocus {
       highlights.isEmpty ? MathRole.aside : highlights.first.role;
 }
 
+/// One numbered card of a [TutorLesson] — a short heading, two or three
+/// sentences, and at most one equation on its own line.
+///
+/// [equation] is never the model's own writing. The server either replaced it
+/// with the app's verified copy or checked it as a closed arithmetic fact
+/// (`9 = 3^2`); anything else arrived here as null, and the card shows its words
+/// alone. See `functions/src/proxy/tutorLesson.ts`.
+@immutable
+class TutorLessonStep {
+  const TutorLessonStep({
+    required this.title,
+    this.explanation = '',
+    this.equation,
+  });
+
+  /// A few words, phrased as an instruction: "Undo the multiplication".
+  final String title;
+
+  /// At most two or three sentences. May carry inline `$…$` math.
+  final String explanation;
+
+  /// Pure LaTeX (no `$` wrappers) for the transformation this step performs.
+  final String? equation;
+}
+
+/// Numi's teaching for one turn, laid out as cards instead of a paragraph.
+///
+/// The redesign's core idea: a student cannot read a wall of chat prose, so the
+/// explanation arrives already broken into the parts a teacher would put on a
+/// board — what we're aiming at, the numbered moves, why it works, the trap,
+/// the answer — and the app renders each as its own card.
+///
+/// Every field is optional except [goal]. A turn that is a nudge or a question
+/// rather than a piece of teaching carries no lesson at all, and the chat looks
+/// exactly as it does today.
+@immutable
+class TutorLesson {
+  const TutorLesson({
+    required this.goal,
+    this.steps = const [],
+    this.concept,
+    this.commonMistake,
+    this.finalAnswer,
+  });
+
+  /// One short sentence: what we are trying to achieve.
+  final String goal;
+
+  /// The numbered moves. Empty in modes that must not hand over the route.
+  final List<TutorLessonStep> steps;
+
+  /// Why this works, in a sentence or two.
+  final String? concept;
+
+  /// The single most common slip here, kept very short.
+  final String? commonMistake;
+
+  /// The app's VERIFIED answer. Absent unless the turn genuinely reached it and
+  /// the mode is allowed to reveal it — the server substitutes its own copy, so
+  /// this can never be a number the model made up.
+  final String? finalAnswer;
+
+  /// Whether there is anything to draw. A goal on its own is a heading, not a
+  /// lesson, and the server drops that case — this is the client's own guard so
+  /// a hand-built or future payload can't render an empty page of cards.
+  bool get hasContent =>
+      steps.isNotEmpty ||
+      (concept?.isNotEmpty ?? false) ||
+      (commonMistake?.isNotEmpty ?? false) ||
+      (finalAnswer?.isNotEmpty ?? false);
+
+  /// The cards flattened back into one plain line, for the transcript sent up
+  /// with the next turn.
+  ///
+  /// Numi's turn now splits in two: a short spoken sentence and the teaching in
+  /// these cards. A history of only the spoken halves would hide everything
+  /// already covered, and she would re-teach step one forever. Never rendered —
+  /// this exists purely so the model remembers what it wrote on the board.
+  String get transcript {
+    final parts = <String>[
+      if (goal.isNotEmpty) 'Goal: $goal',
+      for (var i = 0; i < steps.length; i++)
+        [
+          'Step ${i + 1}: ${steps[i].title}',
+          if (steps[i].explanation.isNotEmpty) steps[i].explanation,
+          if (steps[i].equation?.isNotEmpty ?? false) steps[i].equation!,
+        ].join(' — '),
+      if (concept?.isNotEmpty ?? false) 'Why: ${concept!}',
+      if (commonMistake?.isNotEmpty ?? false) 'Watch out: ${commonMistake!}',
+      if (finalAnswer?.isNotEmpty ?? false) 'Answer: ${finalAnswer!}',
+    ];
+    return parts.join('\n');
+  }
+}
+
 /// A gesture Numi makes at the student's own scanned page.
 ///
 /// Each one is drawn as an overlay on the original photo — never a regenerated
@@ -359,6 +454,7 @@ class TutorMessage {
     required this.text,
     this.card,
     this.focus,
+    this.lesson,
     this.suggestions = const [],
     this.image,
     this.actions = const [],
@@ -372,6 +468,7 @@ class TutorMessage {
   })  : role = TutorRole.user,
         card = null,
         focus = null,
+        lesson = null,
         suggestions = const [],
         actions = const [];
 
@@ -380,6 +477,7 @@ class TutorMessage {
       : role = TutorRole.system,
         card = null,
         focus = null,
+        lesson = null,
         suggestions = const [],
         image = null,
         actions = const [];
@@ -388,6 +486,10 @@ class TutorMessage {
   final TutorRole role;
   final String text;
   final TutorCard? card;
+
+  /// The structured teaching for this turn, rendered as cards under the bubble.
+  /// Null for a short conversational turn — most of them.
+  final TutorLesson? lesson;
 
   /// The equation this turn is pointing at, if it is about a specific piece of
   /// one (spec Part 8).
@@ -414,6 +516,16 @@ class TutorMessage {
 
   /// Whether this turn has somewhere on the page to point.
   bool get hasActions => actions.isNotEmpty;
+
+  /// This turn as the model should re-read it next time: the spoken words plus
+  /// the teaching that was rendered as cards beside them. Wire-shape only.
+  String get transcriptText {
+    final lesson = this.lesson;
+    if (lesson == null) return text;
+    final flattened = lesson.transcript;
+    if (flattened.isEmpty) return text;
+    return text.isEmpty ? flattened : '$text\n$flattened';
+  }
 }
 
 /// What a photo the student sent Numi turned out to be (spec Part 2).
@@ -789,6 +901,7 @@ class TutorResponse {
     required this.text,
     this.card,
     this.focus,
+    this.lesson,
     this.suggestions = const [],
     this.meta = const TutorTurnMeta(),
     this.actions = const [],
@@ -800,6 +913,10 @@ class TutorResponse {
 
   /// The equation to highlight alongside this reply (spec Part 8).
   final TutorFocus? focus;
+
+  /// The structured teaching to lay out as cards under [text]. Null when this
+  /// turn is conversation rather than a lesson, and for the offline engine.
+  final TutorLesson? lesson;
   final List<SuggestionAction> suggestions;
 
   /// Learning signals folded into the session's [TutorMemory].

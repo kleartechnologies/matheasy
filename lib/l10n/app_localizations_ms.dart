@@ -2105,4 +2105,24 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Saya tidak dapat membaca foto itu sekarang. Semak sambungan anda dan cuba lagi.';
+
+  @override
+  String get tutorLessonGoal => 'Matlamat';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Langkah $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Kenapa ini berkesan';
+
+  @override
+  String get tutorLessonMistake => 'Kesilapan biasa';
+
+  @override
+  String get tutorLessonAnswer => 'Jawapan akhir';
+
+  @override
+  String get tutorLessonLabel => 'Penjelasan Numi';
 }

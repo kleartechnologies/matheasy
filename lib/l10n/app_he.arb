@@ -614,5 +614,11 @@
   "tutorImageSawWork": "‏Numi קרא את הפתרון שלך",
   "tutorImageNotMath": "אני לא מוצא מתמטיקה בתמונה הזאת. שלח לי תרגיל או תמונה של הפתרון שלך ואסתכל. 📷",
   "tutorImageUnreadable": "לא הצלחתי לפענח את זה. נסה שוב עם יותר אור וכשהתרגיל ממלא את הפריים — או הקלד אותו ואעזור מיד.",
-  "tutorImageFailed": "לא הצלחתי לקרוא את התמונה כרגע. בדוק את החיבור ונסה שוב."
+  "tutorImageFailed": "לא הצלחתי לקרוא את התמונה כרגע. בדוק את החיבור ונסה שוב.",
+  "tutorLessonGoal": "המטרה",
+  "tutorLessonStepLabel": "שלב {number}",
+  "tutorLessonWhy": "למה זה עובד",
+  "tutorLessonMistake": "טעות נפוצה",
+  "tutorLessonAnswer": "התשובה הסופית",
+  "tutorLessonLabel": "ההסבר של נומי"
 }

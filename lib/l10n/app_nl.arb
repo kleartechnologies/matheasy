@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi heeft je uitwerking gelezen",
   "tutorImageNotMath": "Ik zie geen wiskunde op die foto. Stuur me een opgave of een foto van je uitwerking, dan kijk ik ernaar. 📷",
   "tutorImageUnreadable": "Ik kon het niet goed lezen. Probeer het opnieuw met meer licht en de opgave beeldvullend — of typ hem in, dan help ik meteen.",
-  "tutorImageFailed": "Ik kon die foto nu niet lezen. Controleer je verbinding en probeer het opnieuw."
+  "tutorImageFailed": "Ik kon die foto nu niet lezen. Controleer je verbinding en probeer het opnieuw.",
+  "tutorLessonGoal": "Doel",
+  "tutorLessonStepLabel": "Stap {number}",
+  "tutorLessonWhy": "Waarom dit werkt",
+  "tutorLessonMistake": "Veelgemaakte fout",
+  "tutorLessonAnswer": "Eindantwoord",
+  "tutorLessonLabel": "Numi's uitleg"
 }

@@ -614,5 +614,11 @@
   "tutorImageSawWork": "A Numi elolvasta a levezetésedet",
   "tutorImageNotMath": "Nem találok matematikát azon a fényképen. Küldj egy feladatot vagy egy képet a levezetésedről, és megnézem. 📷",
   "tutorImageUnreadable": "Nem tudtam pontosan kiolvasni. Próbáld újra több fénnyel, és úgy, hogy a feladat kitöltse a képet — vagy írd be, és rögtön segítek.",
-  "tutorImageFailed": "Most nem tudtam elolvasni azt a fényképet. Ellenőrizd a kapcsolatot, és próbáld újra."
+  "tutorImageFailed": "Most nem tudtam elolvasni azt a fényképet. Ellenőrizd a kapcsolatot, és próbáld újra.",
+  "tutorLessonGoal": "Cél",
+  "tutorLessonStepLabel": "{number}. lépés",
+  "tutorLessonWhy": "Miért működik",
+  "tutorLessonMistake": "Gyakori hiba",
+  "tutorLessonAnswer": "Végső válasz",
+  "tutorLessonLabel": "Numi magyarázata"
 }

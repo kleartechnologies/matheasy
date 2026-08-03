@@ -2092,4 +2092,24 @@ class AppLocalizationsHr extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Sada nisam uspio pročitati tu fotografiju. Provjeri vezu i pokušaj ponovno.';
+
+  @override
+  String get tutorLessonGoal => 'Cilj';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Korak $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Zašto ovo radi';
+
+  @override
+  String get tutorLessonMistake => 'Česta pogreška';
+
+  @override
+  String get tutorLessonAnswer => 'Konačni odgovor';
+
+  @override
+  String get tutorLessonLabel => 'Numino objašnjenje';
 }

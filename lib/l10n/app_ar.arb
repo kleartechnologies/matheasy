@@ -614,5 +614,11 @@
   "tutorImageSawWork": "قرأ Numi خطواتك",
   "tutorImageNotMath": "لا أجد أي رياضيات في هذه الصورة. أرسل لي مسألة أو صورة لخطواتك وسألقي نظرة. 📷",
   "tutorImageUnreadable": "لم أتمكّن من قراءتها بوضوح. حاول مرة أخرى مع إضاءة أفضل والمسألة تملأ الإطار — أو اكتبها وسأساعدك فورًا.",
-  "tutorImageFailed": "لم أتمكّن من قراءة الصورة الآن. تحقّق من اتصالك وحاول مرة أخرى."
+  "tutorImageFailed": "لم أتمكّن من قراءة الصورة الآن. تحقّق من اتصالك وحاول مرة أخرى.",
+  "tutorLessonGoal": "الهدف",
+  "tutorLessonStepLabel": "الخطوة {number}",
+  "tutorLessonWhy": "لماذا ينجح هذا",
+  "tutorLessonMistake": "خطأ شائع",
+  "tutorLessonAnswer": "الإجابة النهائية",
+  "tutorLessonLabel": "شرح نومي"
 }

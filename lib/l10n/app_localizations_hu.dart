@@ -2101,4 +2101,24 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Most nem tudtam elolvasni azt a fényképet. Ellenőrizd a kapcsolatot, és próbáld újra.';
+
+  @override
+  String get tutorLessonGoal => 'Cél';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '$number. lépés';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Miért működik';
+
+  @override
+  String get tutorLessonMistake => 'Gyakori hiba';
+
+  @override
+  String get tutorLessonAnswer => 'Végső válasz';
+
+  @override
+  String get tutorLessonLabel => 'Numi magyarázata';
 }

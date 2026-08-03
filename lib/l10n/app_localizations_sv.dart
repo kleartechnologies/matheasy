@@ -2089,4 +2089,24 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Jag kunde inte läsa fotot just nu. Kolla din anslutning och försök igen.';
+
+  @override
+  String get tutorLessonGoal => 'Mål';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Steg $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Varför det fungerar';
+
+  @override
+  String get tutorLessonMistake => 'Vanligt misstag';
+
+  @override
+  String get tutorLessonAnswer => 'Slutligt svar';
+
+  @override
+  String get tutorLessonLabel => 'Numis förklaring';
 }

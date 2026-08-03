@@ -2090,4 +2090,24 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Teď se mi tu fotku nepodařilo přečíst. Zkontroluj připojení a zkus to znovu.';
+
+  @override
+  String get tutorLessonGoal => 'Cíl';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Krok $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Proč to funguje';
+
+  @override
+  String get tutorLessonMistake => 'Častá chyba';
+
+  @override
+  String get tutorLessonAnswer => 'Konečná odpověď';
+
+  @override
+  String get tutorLessonLabel => 'Vysvětlení od Numi';
 }

@@ -48,6 +48,12 @@ import {
 } from "./anchors";
 import { verifyTutorActions, type TutorActionOut } from "./tutorActions";
 import {
+  lessonDirective,
+  lessonShape,
+  verifyTutorLesson,
+  type TutorLessonOut,
+} from "./tutorLesson";
+import {
   normalizeVerificationState,
   verificationDirective,
   verificationState,
@@ -184,6 +190,8 @@ interface TutorMeta {
 
 interface TutorPayload {
   reply?: unknown;
+  /** The structured teaching the app renders as cards — see `tutorLesson.ts`. */
+  lesson?: unknown;
   suggestions?: unknown;
   card?: unknown;
   focus?: unknown;
@@ -245,7 +253,8 @@ FORMATTING — follow exactly, no exceptions
 
 RESPONSE — return ONLY a JSON object, no markdown:
 {
-  "reply": "your message to the student — plain sentences, all math in $...$, no code, no markdown",
+  "reply": "your spoken message to the student — plain sentences, all math in $...$, no code, no markdown",
+  "lesson": null,
   "suggestions": ["2-3 ids from the allowed list below"],
   "card": null,
   "focus": null,
@@ -258,6 +267,22 @@ RESPONSE — return ONLY a JSON object, no markdown:
     "style": "concise|detailed|visual, or null if unclear"
   }
 }
+
+LESSON — the structured teaching, laid out as cards. THIS IS HOW YOU TEACH ANYTHING LONGER THAN A COUPLE OF SENTENCES. A wall of chat prose is unreadable to a student; the app renders "lesson" as a designed page — a goal banner, numbered step cards, a concept card, a warning card, a highlighted answer — like a textbook, not a transcript.
+{"lesson":{
+  "goal":"ONE short sentence saying what we are trying to achieve",
+  "steps":[{"title":"Rewrite 9 as a power","explanation":"one or two short sentences, no more","equation":"9 = 3^2"}],
+  "concept":"the idea that makes this work, in one or two sentences",
+  "commonMistake":"the single most common slip here, very short",
+  "finalAnswer":"the verified answer"
+}}
+- SPLIT THE TEACHING. Put the structure in "lesson" and keep "reply" to ONE OR TWO warm spoken sentences — the greeting, the reaction to what they just said, and the question you are leaving them with. Do NOT repeat the lesson content in "reply": the student reads both, one under the other.
+- "title" is a few words, an instruction ("Factor the left side", "Undo the addition"). "explanation" is at most two or three short sentences. If a step needs more, it is two steps.
+- "equation" is ONE line of LaTeX (no $ wrappers here — this field is pure LaTeX) showing the transformation this step performs. Give it its own step; never chain two transformations into one line.
+- WHERE EQUATIONS MAY COME FROM — the app renders them as checked maths, so there are exactly two legal sources: (1) copied character-for-character from the CONTEXT you were given (the problem, the step on screen, a verified step result, the verified answer), or (2) a closed arithmetic fact with no unknown in it that is simply TRUE, like "9 = 3^2" or "\\frac{1}{2} = 0.5". Anything else — a line you rearranged yourself, an example with an $x$ in it whose result you were not given — is silently discarded by the server, and the step then shows your words with no maths. Copy; do not re-derive.
+- "finalAnswer": set it ONLY when the lesson genuinely reaches the answer and your mode is allowed to reveal it. The app replaces whatever you write with its own verified answer, so never treat this field as a place to compute one.
+- Omit any field you have nothing real to say for — an empty concept card is worse than no card. Set "lesson" to null when the turn is a short exchange (a nudge, a question, a "yes, exactly") rather than a piece of teaching.
+- Your mode decides the shape of the lesson. Obey the mode: a lesson never smuggles in steps the mode told you not to give.
 
 ALLOWED suggestion ids (use these EXACT strings, never free text): explainSimpler, giveExample, tellMeWhy, showAnotherMethod, createQuiz, practiceMore, giveHint, nextStep, checkMyWork, commonMistakes, practiceEasier, practiceSimilar, practiceHarder, practiceChallenge, showSolution, iDontUnderstand.
 
@@ -597,6 +622,10 @@ export const tutorReply = onCall(
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: SYSTEM_PROMPT + languageDirective(language) },
       { role: "system", content: modeDirective(mode, helpLevel) },
+      // How much of the card layout this mode is allowed to build. Stated here
+      // as well as enforced after the call: a model told "up to six steps" and
+      // then trimmed to one has written the wrong one.
+      { role: "system", content: lessonDirective(mode) },
     ];
 
     // Full solve context. A pre-Numi client sends only `problemLatex`; fold it
@@ -742,8 +771,14 @@ export const tutorReply = onCall(
         // vision path.
         ...chatParams(
           image ? "tutorVision" : "tutor",
-          // Teach Me legitimately runs longer than the interactive modes.
-          { temperature: 0.6, maxTokens: mode === "teachMe" ? 1200 : 900 }
+          // Teach Me and Show Full Solution legitimately run longer than the
+          // interactive modes — they are the two that build a full card lesson,
+          // and a lesson truncated mid-JSON loses every card (the salvage path
+          // recovers the prose, not the structure).
+          {
+            temperature: 0.6,
+            maxTokens: mode === "teachMe" || mode === "showSolution" ? 1600 : 900,
+          }
         ),
         response_format: { type: "json_object" },
         messages: [...messages, userMessage(userText, image)],
@@ -815,25 +850,53 @@ export const tutorReply = onCall(
     // asserting, so Numi may only point at maths already on the student's screen
     // and already checked. Step RESULTS join the list only in a mode allowed to
     // reveal them, which is what extends the answer firewall to highlighting.
+    //
+    // The maths the app is willing to put its name to this turn. Shared by the
+    // highlight gate and the lesson-card gate: a card printing an equation is
+    // the same assertion as a highlight showing one, so it answers to the same
+    // list.
+    const allowedMath = [
+      text(problem.questionLatex, 300),
+      text(focus?.equationLatex, 300),
+      ...(withAnswer
+        ? [
+            text(problem.finalAnswer, 200),
+            ...(Array.isArray(problem.steps) ? problem.steps.slice(0, MAX_STEPS) : []).map(
+              (step) => text(step.resultLatex, 300)
+            ),
+          ]
+        : []),
+    ].filter((s) => s.length > 0);
+
     let focusOut: TutorFocusOut | null = null;
     if (payload.focus) {
-      const allowed = [
-        text(problem.questionLatex, 300),
-        text(focus?.equationLatex, 300),
-        ...(withAnswer
-          ? [
-              text(problem.finalAnswer, 200),
-              ...(Array.isArray(problem.steps) ? problem.steps.slice(0, MAX_STEPS) : []).map(
-                (step) => text(step.resultLatex, 300)
-              ),
-            ]
-          : []),
-      ].filter((s) => s.length > 0);
-      const verdict = verifyTutorFocus(payload.focus, allowed);
+      const verdict = verifyTutorFocus(payload.focus, allowedMath);
       focusOut = verdict.focus;
       if (!focusOut && verdict.reason) {
         logger.warn("tutorReply focus rejected", { uid, mode, reason: verdict.reason });
       }
+    }
+
+    // THE LESSON. Structure is a readability change, not a licence to author
+    // maths: every equation on a card is either the app's own copy of verified
+    // maths or a closed arithmetic fact re-checked here, and the answer card is
+    // filled in from the verified answer rather than from anything the model
+    // wrote. A mode that must not reveal the answer has none to substitute, so
+    // the answer firewall reaches the cards without a second rule.
+    let lesson: TutorLessonOut | null = null;
+    const shape = lessonShape(mode);
+    if (payload.lesson && shape) {
+      const verdict = verifyTutorLesson(payload.lesson, {
+        allowed: allowedMath,
+        answer: withAnswer && problem.verified === true ? text(problem.finalAnswer, 200) : "",
+        shape,
+      });
+      lesson = verdict.lesson;
+      if (verdict.reason) {
+        logger.warn("tutorReply lesson trimmed", { uid, mode, reason: verdict.reason });
+      }
+    } else if (payload.lesson) {
+      logger.warn("tutorReply lesson dropped", { uid, mode, reason: "mode renders no lesson" });
     }
 
     // The same gate once more, for pointing: Numi may only gesture at places the
@@ -894,6 +957,9 @@ export const tutorReply = onCall(
 
     return {
       reply: typeof payload.reply === "string" ? payload.reply : "",
+      // Null for a short conversational turn, and for every client too old to
+      // render cards — which simply ignores the field and shows the prose.
+      lesson,
       suggestions: suggestions.length > 0 ? suggestions : defaultSuggestions(mode),
       card,
       focus: focusOut,

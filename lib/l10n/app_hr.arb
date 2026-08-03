@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi je pročitao tvoj postupak",
   "tutorImageNotMath": "Na toj fotografiji ne nalazim matematiku. Pošalji mi zadatak ili sliku svog postupka pa ću pogledati. 📷",
   "tutorImageUnreadable": "Nisam to uspio jasno pročitati. Pokušaj ponovno uz više svjetla i sa zadatkom preko cijelog kadra — ili ga upiši pa ću odmah pomoći.",
-  "tutorImageFailed": "Sada nisam uspio pročitati tu fotografiju. Provjeri vezu i pokušaj ponovno."
+  "tutorImageFailed": "Sada nisam uspio pročitati tu fotografiju. Provjeri vezu i pokušaj ponovno.",
+  "tutorLessonGoal": "Cilj",
+  "tutorLessonStepLabel": "Korak {number}",
+  "tutorLessonWhy": "Zašto ovo radi",
+  "tutorLessonMistake": "Česta pogreška",
+  "tutorLessonAnswer": "Konačni odgovor",
+  "tutorLessonLabel": "Numino objašnjenje"
 }

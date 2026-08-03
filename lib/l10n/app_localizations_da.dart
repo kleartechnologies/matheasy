@@ -2091,4 +2091,24 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Jeg kunne ikke læse det foto lige nu. Tjek din forbindelse, og prøv igen.';
+
+  @override
+  String get tutorLessonGoal => 'Mål';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Trin $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Hvorfor det virker';
+
+  @override
+  String get tutorLessonMistake => 'Almindelig fejl';
+
+  @override
+  String get tutorLessonAnswer => 'Endeligt svar';
+
+  @override
+  String get tutorLessonLabel => 'Numis forklaring';
 }

@@ -3851,6 +3851,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I couldn\'t read that photo just now. Please check your connection and try again.'**
   String get tutorImageFailed;
+
+  /// No description provided for @tutorLessonGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get tutorLessonGoal;
+
+  /// No description provided for @tutorLessonStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number}'**
+  String tutorLessonStepLabel(int number);
+
+  /// No description provided for @tutorLessonWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this works'**
+  String get tutorLessonWhy;
+
+  /// No description provided for @tutorLessonMistake.
+  ///
+  /// In en, this message translates to:
+  /// **'Common mistake'**
+  String get tutorLessonMistake;
+
+  /// No description provided for @tutorLessonAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Final answer'**
+  String get tutorLessonAnswer;
+
+  /// No description provided for @tutorLessonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi\'s explanation'**
+  String get tutorLessonLabel;
 }
 
 class _AppLocalizationsDelegate

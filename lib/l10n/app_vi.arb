@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi đã đọc bài làm của bạn",
   "tutorImageNotMath": "Mình không thấy toán nào trong ảnh đó. Gửi cho mình một bài toán hoặc ảnh bài làm của bạn, mình sẽ xem. 📷",
   "tutorImageUnreadable": "Mình không đọc rõ được. Hãy thử lại với ánh sáng tốt hơn và để đề bài chiếm trọn khung hình — hoặc gõ ra, mình sẽ giúp ngay.",
-  "tutorImageFailed": "Bây giờ mình không đọc được ảnh đó. Hãy kiểm tra kết nối rồi thử lại."
+  "tutorImageFailed": "Bây giờ mình không đọc được ảnh đó. Hãy kiểm tra kết nối rồi thử lại.",
+  "tutorLessonGoal": "Mục tiêu",
+  "tutorLessonStepLabel": "Bước {number}",
+  "tutorLessonWhy": "Vì sao cách này đúng",
+  "tutorLessonMistake": "Lỗi thường gặp",
+  "tutorLessonAnswer": "Đáp án cuối cùng",
+  "tutorLessonLabel": "Giải thích của Numi"
 }

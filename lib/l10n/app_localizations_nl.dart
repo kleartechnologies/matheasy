@@ -2097,4 +2097,24 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Ik kon die foto nu niet lezen. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get tutorLessonGoal => 'Doel';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Stap $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Waarom dit werkt';
+
+  @override
+  String get tutorLessonMistake => 'Veelgemaakte fout';
+
+  @override
+  String get tutorLessonAnswer => 'Eindantwoord';
+
+  @override
+  String get tutorLessonLabel => 'Numi\'s uitleg';
 }

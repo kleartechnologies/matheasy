@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi가 네 풀이를 읽었어요",
   "tutorImageNotMath": "그 사진에서는 수학을 찾지 못했어요. 문제나 풀이 사진을 보내주면 살펴볼게요. 📷",
   "tutorImageUnreadable": "잘 알아보지 못했어요. 더 밝은 곳에서 문제가 화면을 채우도록 다시 찍어보거나, 직접 입력해 주면 바로 도와줄게요.",
-  "tutorImageFailed": "지금은 그 사진을 읽지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요."
+  "tutorImageFailed": "지금은 그 사진을 읽지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.",
+  "tutorLessonGoal": "목표",
+  "tutorLessonStepLabel": "{number}단계",
+  "tutorLessonWhy": "왜 이렇게 되나요",
+  "tutorLessonMistake": "흔한 실수",
+  "tutorLessonAnswer": "최종 답",
+  "tutorLessonLabel": "Numi의 설명"
 }

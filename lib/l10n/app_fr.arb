@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi a lu ton raisonnement",
   "tutorImageNotMath": "Je ne trouve aucune mathématique sur cette photo. Envoie-moi un exercice ou une photo de ton raisonnement et j'y jette un œil. 📷",
   "tutorImageUnreadable": "Je n'ai pas réussi à bien le déchiffrer. Réessaie avec plus de lumière et l'exercice bien cadré — ou écris-le et je t'aide tout de suite.",
-  "tutorImageFailed": "Je n'ai pas pu lire cette photo pour le moment. Vérifie ta connexion et réessaie."
+  "tutorImageFailed": "Je n'ai pas pu lire cette photo pour le moment. Vérifie ta connexion et réessaie.",
+  "tutorLessonGoal": "Objectif",
+  "tutorLessonStepLabel": "Étape {number}",
+  "tutorLessonWhy": "Pourquoi ça marche",
+  "tutorLessonMistake": "Erreur fréquente",
+  "tutorLessonAnswer": "Réponse finale",
+  "tutorLessonLabel": "Explication de Numi"
 }

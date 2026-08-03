@@ -2021,4 +2021,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tutorImageFailed => 'いまその写真を読み取れませんでした。通信状態を確認して、もう一度お試しください。';
+
+  @override
+  String get tutorLessonGoal => '目標';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'ステップ $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'なぜうまくいくのか';
+
+  @override
+  String get tutorLessonMistake => 'よくある間違い';
+
+  @override
+  String get tutorLessonAnswer => '最終的な答え';
+
+  @override
+  String get tutorLessonLabel => 'Numi の解説';
 }

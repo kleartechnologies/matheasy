@@ -2096,4 +2096,24 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Зараз не вдалося прочитати це фото. Перевір з\'єднання та спробуй ще раз.';
+
+  @override
+  String get tutorLessonGoal => 'Мета';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Крок $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Чому це працює';
+
+  @override
+  String get tutorLessonMistake => 'Поширена помилка';
+
+  @override
+  String get tutorLessonAnswer => 'Остаточна відповідь';
+
+  @override
+  String get tutorLessonLabel => 'Пояснення Numi';
 }

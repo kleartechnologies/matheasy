@@ -2105,4 +2105,24 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'En pystynyt lukemaan kuvaa juuri nyt. Tarkista yhteytesi ja yritä uudelleen.';
+
+  @override
+  String get tutorLessonGoal => 'Tavoite';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Vaihe $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Miksi tämä toimii';
+
+  @override
+  String get tutorLessonMistake => 'Yleinen virhe';
+
+  @override
+  String get tutorLessonAnswer => 'Lopullinen vastaus';
+
+  @override
+  String get tutorLessonLabel => 'Numin selitys';
 }

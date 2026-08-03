@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi ha letto i tuoi passaggi",
   "tutorImageNotMath": "Non trovo matematica in quella foto. Mandami un problema o una foto dei tuoi passaggi e ci do un'occhiata. 📷",
   "tutorImageUnreadable": "Non sono riuscito a leggerlo bene. Riprova con più luce e con il problema che riempie l'inquadratura — oppure scrivilo e ti aiuto subito.",
-  "tutorImageFailed": "Non sono riuscito a leggere quella foto adesso. Controlla la connessione e riprova."
+  "tutorImageFailed": "Non sono riuscito a leggere quella foto adesso. Controlla la connessione e riprova.",
+  "tutorLessonGoal": "Obiettivo",
+  "tutorLessonStepLabel": "Passo {number}",
+  "tutorLessonWhy": "Perché funziona",
+  "tutorLessonMistake": "Errore comune",
+  "tutorLessonAnswer": "Risposta finale",
+  "tutorLessonLabel": "Spiegazione di Numi"
 }

@@ -2005,6 +2005,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tutorImageFailed => '现在读不了这张照片。请检查网络连接后再试一次。';
+
+  @override
+  String get tutorLessonGoal => '目标';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '第 $number 步';
+  }
+
+  @override
+  String get tutorLessonWhy => '为什么这样做有效';
+
+  @override
+  String get tutorLessonMistake => '常见错误';
+
+  @override
+  String get tutorLessonAnswer => '最终答案';
+
+  @override
+  String get tutorLessonLabel => 'Numi 的讲解';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4008,6 +4028,26 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tutorImageFailed => '现在读不了这张照片。请检查网络连接后再试一次。';
+
+  @override
+  String get tutorLessonGoal => '目标';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '第 $number 步';
+  }
+
+  @override
+  String get tutorLessonWhy => '为什么这样做有效';
+
+  @override
+  String get tutorLessonMistake => '常见错误';
+
+  @override
+  String get tutorLessonAnswer => '最终答案';
+
+  @override
+  String get tutorLessonLabel => 'Numi 的讲解';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -6011,4 +6051,24 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tutorImageFailed => '現在讀不了這張照片。請檢查網路連線後再試一次。';
+
+  @override
+  String get tutorLessonGoal => '目標';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return '第 $number 步';
+  }
+
+  @override
+  String get tutorLessonWhy => '為什麼這樣做有效';
+
+  @override
+  String get tutorLessonMistake => '常見錯誤';
+
+  @override
+  String get tutorLessonAnswer => '最終答案';
+
+  @override
+  String get tutorLessonLabel => 'Numi 的講解';
 }

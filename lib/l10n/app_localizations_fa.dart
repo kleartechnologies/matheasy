@@ -2086,4 +2086,24 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'الان نتوانستم آن عکس را بخوانم. اتصالت را بررسی کن و دوباره تلاش کن.';
+
+  @override
+  String get tutorLessonGoal => 'هدف';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'گام $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'چرا این کار می‌کند';
+
+  @override
+  String get tutorLessonMistake => 'اشتباه رایج';
+
+  @override
+  String get tutorLessonAnswer => 'پاسخ نهایی';
+
+  @override
+  String get tutorLessonLabel => 'توضیح نومی';
 }

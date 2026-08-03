@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi çözümünü okudu",
   "tutorImageNotMath": "O fotoğrafta matematik bulamıyorum. Bana bir soru ya da çözümünün fotoğrafını gönder, bakayım. 📷",
   "tutorImageUnreadable": "Tam olarak seçemedim. Daha aydınlık bir ortamda, soru kareyi dolduracak şekilde tekrar dene — ya da yazarak gönder, hemen yardım edeyim.",
-  "tutorImageFailed": "Şu anda o fotoğrafı okuyamadım. Bağlantını kontrol edip tekrar dene."
+  "tutorImageFailed": "Şu anda o fotoğrafı okuyamadım. Bağlantını kontrol edip tekrar dene.",
+  "tutorLessonGoal": "Hedef",
+  "tutorLessonStepLabel": "{number}. adım",
+  "tutorLessonWhy": "Bu neden işe yarar",
+  "tutorLessonMistake": "Sık yapılan hata",
+  "tutorLessonAnswer": "Son cevap",
+  "tutorLessonLabel": "Numi'nin açıklaması"
 }

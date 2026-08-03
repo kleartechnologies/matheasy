@@ -62,7 +62,10 @@ class FunctionsTutorService implements TutorService {
               'role': m.role == TutorRole.user ? 'user' : 'assistant',
               // A photo-only turn carries no text; send a marker rather than an
               // empty string so the transcript still reads as a turn.
-              'text': m.text.isEmpty && m.hasImage ? '[photo]' : m.text,
+              // `transcriptText` folds an assistant turn's lesson cards back
+              // into its words — otherwise the history would show only the
+              // short spoken line and hide everything already taught.
+              'text': m.text.isEmpty && m.hasImage ? '[photo]' : m.transcriptText,
             },
       ],
       if (context != null)
@@ -209,6 +212,7 @@ class TutorReplyMapper {
       text: text.isEmpty ? "Let's keep going!" : text,
       card: _card(json['card']),
       focus: _focus(json['focus']),
+      lesson: lesson(json['lesson']),
       suggestions: _suggestions(json['suggestions']),
       meta: _meta(json['meta']),
       actions: actions(json['actions']),
@@ -216,6 +220,50 @@ class TutorReplyMapper {
         json['verification'] is String ? json['verification'] as String : null,
       ),
     );
+  }
+
+  /// The structured teaching, as cards.
+  ///
+  /// Every equation here has already passed the server's golden-rule gate
+  /// (`tutorLesson.ts`): it is the app's own copy of verified maths, or a closed
+  /// arithmetic fact re-checked with mathjs, or it was dropped before it left
+  /// the server. The final answer is the app's verified string, substituted
+  /// there — the model's own answer never travels. So this only shapes what
+  /// arrived, and it drops rather than repairs: a lesson with no goal, or one
+  /// with nothing but a goal, renders as no cards and the prose stands alone.
+  static TutorLesson? lesson(Object? raw) {
+    if (raw is! Map) return null;
+    final map = raw.cast<String, dynamic>();
+    final goal = _nullable(map['goal']);
+    if (goal == null) return null;
+
+    final steps = <TutorLessonStep>[];
+    final rawSteps = map['steps'];
+    if (rawSteps is List) {
+      for (final item in rawSteps) {
+        if (item is! Map) continue;
+        final step = item.cast<String, dynamic>();
+        final title = _nullable(step['title']);
+        final explanation = _string(step['explanation']).trim();
+        if (title == null && explanation.isEmpty) continue;
+        steps.add(
+          TutorLessonStep(
+            title: title ?? explanation,
+            explanation: explanation,
+            equation: _nullable(step['equation']),
+          ),
+        );
+      }
+    }
+
+    final lesson = TutorLesson(
+      goal: goal,
+      steps: steps,
+      concept: _nullable(map['concept']),
+      commonMistake: _nullable(map['commonMistake']),
+      finalAnswer: _nullable(map['finalAnswer']),
+    );
+    return lesson.hasContent ? lesson : null;
   }
 
   /// The gestures at the scanned page.

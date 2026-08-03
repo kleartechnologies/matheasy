@@ -2099,4 +2099,24 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Nu am putut citi fotografia acum. Verifică-ți conexiunea și încearcă din nou.';
+
+  @override
+  String get tutorLessonGoal => 'Obiectiv';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Pasul $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'De ce funcționează';
+
+  @override
+  String get tutorLessonMistake => 'Greșeală frecventă';
+
+  @override
+  String get tutorLessonAnswer => 'Răspuns final';
+
+  @override
+  String get tutorLessonLabel => 'Explicația Numi';
 }

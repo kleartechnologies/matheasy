@@ -2091,4 +2091,24 @@ class AppLocalizationsSk extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Teraz sa mi tú fotku nepodarilo prečítať. Skontroluj pripojenie a skús to znova.';
+
+  @override
+  String get tutorLessonGoal => 'Cieľ';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Krok $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Prečo to funguje';
+
+  @override
+  String get tutorLessonMistake => 'Častá chyba';
+
+  @override
+  String get tutorLessonAnswer => 'Konečná odpoveď';
+
+  @override
+  String get tutorLessonLabel => 'Vysvetlenie od Numi';
 }

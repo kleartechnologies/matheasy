@@ -2105,4 +2105,24 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Nie udało mi się teraz odczytać tego zdjęcia. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get tutorLessonGoal => 'Cel';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Krok $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Dlaczego to działa';
+
+  @override
+  String get tutorLessonMistake => 'Częsty błąd';
+
+  @override
+  String get tutorLessonAnswer => 'Ostateczna odpowiedź';
+
+  @override
+  String get tutorLessonLabel => 'Wyjaśnienie Numi';
 }

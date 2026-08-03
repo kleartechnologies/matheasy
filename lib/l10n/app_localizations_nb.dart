@@ -2090,4 +2090,24 @@ class AppLocalizationsNb extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Jeg klarte ikke å lese bildet akkurat nå. Sjekk tilkoblingen og prøv igjen.';
+
+  @override
+  String get tutorLessonGoal => 'Mål';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Trinn $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Hvorfor dette fungerer';
+
+  @override
+  String get tutorLessonMistake => 'Vanlig feil';
+
+  @override
+  String get tutorLessonAnswer => 'Endelig svar';
+
+  @override
+  String get tutorLessonLabel => 'Numis forklaring';
 }

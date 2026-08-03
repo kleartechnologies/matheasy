@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi a citit rezolvarea ta",
   "tutorImageNotMath": "Nu găsesc matematică în fotografia aceea. Trimite-mi o problemă sau o poză cu rezolvarea ta și mă uit. 📷",
   "tutorImageUnreadable": "Nu am reușit să o descifrez. Încearcă din nou cu mai multă lumină și cu problema pe tot cadrul — sau scrie-o și te ajut imediat.",
-  "tutorImageFailed": "Nu am putut citi fotografia acum. Verifică-ți conexiunea și încearcă din nou."
+  "tutorImageFailed": "Nu am putut citi fotografia acum. Verifică-ți conexiunea și încearcă din nou.",
+  "tutorLessonGoal": "Obiectiv",
+  "tutorLessonStepLabel": "Pasul {number}",
+  "tutorLessonWhy": "De ce funcționează",
+  "tutorLessonMistake": "Greșeală frecventă",
+  "tutorLessonAnswer": "Răspuns final",
+  "tutorLessonLabel": "Explicația Numi"
 }

@@ -614,5 +614,11 @@
   "tutorImageSawWork": "Numi přečetl tvůj postup",
   "tutorImageNotMath": "Na té fotce nevidím žádnou matematiku. Pošli mi příklad nebo fotku svého postupu a podívám se na to. 📷",
   "tutorImageUnreadable": "Nepodařilo se mi to přečíst. Zkus to znovu s lepším světlem a s příkladem přes celý snímek — nebo ho napiš a hned ti pomůžu.",
-  "tutorImageFailed": "Teď se mi tu fotku nepodařilo přečíst. Zkontroluj připojení a zkus to znovu."
+  "tutorImageFailed": "Teď se mi tu fotku nepodařilo přečíst. Zkontroluj připojení a zkus to znovu.",
+  "tutorLessonGoal": "Cíl",
+  "tutorLessonStepLabel": "Krok {number}",
+  "tutorLessonWhy": "Proč to funguje",
+  "tutorLessonMistake": "Častá chyba",
+  "tutorLessonAnswer": "Konečná odpověď",
+  "tutorLessonLabel": "Vysvětlení od Numi"
 }

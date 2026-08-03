@@ -2095,4 +2095,24 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tutorImageFailed =>
       'Сейчас не получилось прочитать это фото. Проверь соединение и попробуй ещё раз.';
+
+  @override
+  String get tutorLessonGoal => 'Цель';
+
+  @override
+  String tutorLessonStepLabel(int number) {
+    return 'Шаг $number';
+  }
+
+  @override
+  String get tutorLessonWhy => 'Почему это работает';
+
+  @override
+  String get tutorLessonMistake => 'Частая ошибка';
+
+  @override
+  String get tutorLessonAnswer => 'Окончательный ответ';
+
+  @override
+  String get tutorLessonLabel => 'Объяснение Numi';
 }
