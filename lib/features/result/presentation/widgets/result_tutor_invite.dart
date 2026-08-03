@@ -7,7 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/result_models.dart';
-import 'math_text.dart';
+import 'problem_statement.dart';
 
 /// The "let's work through it together" state (spec §1 golden rule) — shown when
 /// `solve()` returns `routeToTutor:true` for a proof / abstract-algebra /
@@ -129,15 +129,7 @@ class _ProblemCard extends StatelessWidget {
             style: AppTypography.label.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.sm),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: MathText(
-              latex,
-              style: AppTypography.displaySmall
-                  .copyWith(color: colors.textPrimary),
-            ),
-          ),
+          ProblemStatement(latex: latex, minFontSize: 20, maxFontSize: 28),
         ],
       ),
     );

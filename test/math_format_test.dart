@@ -141,4 +141,90 @@ void main() {
       }
     });
   });
+
+  group('parseProblemStatement — worksheet layout, not source', () {
+    test('the reported bug: instruction becomes prose, maths stays maths', () {
+      final lines = parseProblemStatement(
+        r'\text{Solve the equation} \\ 9^{4x-3} =\frac{1}{3\sqrt{3}}',
+      );
+
+      expect(lines, hasLength(2));
+      expect(lines.first.isMath, isFalse);
+      expect(lines.first.content, 'Solve the equation');
+      expect(lines.last.isMath, isTrue);
+      expect(lines.last.content, r'9^{4x-3} =\frac{1}{3\sqrt{3}}');
+    });
+
+    test('a leading instruction without a line break still lifts out', () {
+      final lines = parseProblemStatement(r'\text{Find } x \text{ if } 2x = 8');
+      // Leading prose above, the maths below; the mid-expression \text stays
+      // put — pulling it out would reorder the sentence.
+      expect(lines.first.isMath, isFalse);
+      expect(lines.first.content, 'Find');
+      expect(lines[1].isMath, isTrue);
+      expect(lines[1].content, contains('2x = 8'));
+    });
+
+    test('a trailing instruction drops below the maths', () {
+      final lines =
+          parseProblemStatement(r'x^2 - 4 = 0 \\ \text{Give exact answers.}');
+      expect(lines.last.isMath, isFalse);
+      expect(lines.last.content, 'Give exact answers.');
+    });
+
+    test('matrix row breaks are NOT statement breaks', () {
+      const m = r'\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}';
+      final lines = parseProblemStatement(m);
+      expect(lines, hasLength(1));
+      expect(lines.single.isMath, isTrue);
+      expect(lines.single.content, m);
+    });
+
+    test('strips the wrapping math delimiters storage sometimes carries', () {
+      expect(parseProblemStatement(r'$x + 1$').single.content, 'x + 1');
+      expect(parseProblemStatement(r'\[x + 1\]').single.content, 'x + 1');
+    });
+
+    test('degrades to one math line rather than losing the problem', () {
+      expect(parseProblemStatement(r'\frac{1}{2').single.isMath, isTrue);
+      expect(parseProblemStatement('  '), isEmpty);
+    });
+  });
+
+  group('toReadableMath — the fallback a student can still read', () {
+    test('the reported bug never shows a backslash', () {
+      final out = toReadableMath(r'9^{4x-3} =\frac{1}{3\sqrt{3}}');
+      expect(out, '9^(4x-3) = 1/(3√3)');
+      expect(out, isNot(contains(r'\')));
+    });
+
+    test('folds fractions, roots and scripts into readable maths', () {
+      expect(toReadableMath(r'\frac{a+b}{2}'), '(a+b)/2');
+      expect(toReadableMath(r'\sqrt{2}'), '√2');
+      expect(toReadableMath(r'\sqrt[3]{8}'), '8^(1/3)');
+      expect(toReadableMath('x^2'), 'x²');
+      expect(toReadableMath('a_1'), 'a₁');
+    });
+
+    test('speaks symbols instead of commands', () {
+      expect(toReadableMath(r'\int_0^1 x \, dx'), contains('∫'));
+      expect(toReadableMath(r'\alpha + \beta \le \pi'), 'α + β ≤ π');
+      expect(toReadableMath(r'\sin\theta'), 'sinθ');
+      expect(toReadableMath(r'90^\circ'), '90°');
+    });
+
+    test('matrices read as rows, not as an environment', () {
+      expect(
+        toReadableMath(r'\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}'),
+        '[1, 2; 3, 4]',
+      );
+    });
+
+    test('malformed input degrades quietly and drops every backslash', () {
+      for (final s in [r'\frac{1}{2', r'\sqrt{', r'\begin{bmatrix} 1 & 2']) {
+        expect(() => toReadableMath(s), returnsNormally, reason: s);
+        expect(toReadableMath(s), isNot(contains(r'\')), reason: s);
+      }
+    });
+  });
 }

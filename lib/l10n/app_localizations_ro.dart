@@ -51,6 +51,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get actionRescan => 'Rescanează';
 
   @override
+  String get actionEdit => 'Editează';
+
+  @override
   String get commonNotSet => 'Nespecificat';
 
   @override
@@ -1272,6 +1275,15 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Problema pe care ai scanat-o';
+
+  @override
+  String get resultConfidenceHigh => 'Încredere ridicată';
+
+  @override
+  String get resultConfidenceMedium => 'Încredere medie';
+
+  @override
+  String get resultConfidenceReview => 'Verificare recomandată';
 
   @override
   String get resultEditProblem => 'Editează problema';

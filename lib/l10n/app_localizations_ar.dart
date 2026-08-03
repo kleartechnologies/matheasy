@@ -51,6 +51,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionRescan => 'إعادة المسح';
 
   @override
+  String get actionEdit => 'تعديل';
+
+  @override
   String get commonNotSet => 'غير محدد';
 
   @override
@@ -1258,6 +1261,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'المسألة التي مسحتها';
+
+  @override
+  String get resultConfidenceHigh => 'ثقة عالية';
+
+  @override
+  String get resultConfidenceMedium => 'ثقة متوسطة';
+
+  @override
+  String get resultConfidenceReview => 'يُنصح بالمراجعة';
 
   @override
   String get resultEditProblem => 'تعديل المسألة';

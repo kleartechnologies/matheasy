@@ -51,6 +51,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get actionRescan => 'फिर से स्कैन करें';
 
   @override
+  String get actionEdit => 'संपादित करें';
+
+  @override
   String get commonNotSet => 'सेट नहीं है';
 
   @override
@@ -1274,6 +1277,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'आपके द्वारा स्कैन की गई समस्या';
+
+  @override
+  String get resultConfidenceHigh => 'उच्च विश्वास';
+
+  @override
+  String get resultConfidenceMedium => 'मध्यम विश्वास';
+
+  @override
+  String get resultConfidenceReview => 'जाँच करने की सलाह';
 
   @override
   String get resultEditProblem => 'समस्या संपादित करें';

@@ -51,6 +51,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get actionRescan => 'Imbas semula';
 
   @override
+  String get actionEdit => 'Edit';
+
+  @override
   String get commonNotSet => 'Belum ditetapkan';
 
   @override
@@ -1280,6 +1283,15 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Soalan yang anda imbas';
+
+  @override
+  String get resultConfidenceHigh => 'Keyakinan tinggi';
+
+  @override
+  String get resultConfidenceMedium => 'Keyakinan sederhana';
+
+  @override
+  String get resultConfidenceReview => 'Semakan disyorkan';
 
   @override
   String get resultEditProblem => 'Edit soalan';

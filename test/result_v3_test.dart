@@ -108,7 +108,10 @@ void main() {
       await _pump(tester, ProblemCard(result: _result(), onRescan: () {}));
 
       expect(find.text('Linear Equation'), findsOneWidget);
-      expect(find.text('92%'), findsOneWidget);
+      // How the read went, as a state — never the raw percentage, which reads
+      // as a claim about the answer and isn't one.
+      expect(find.text('High confidence'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
       // No answer and no teaching leak into the problem card.
       expect(find.text('FINAL ANSWER'), findsNothing);
       expect(find.text('Start Learning'), findsNothing);

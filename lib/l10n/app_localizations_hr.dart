@@ -51,6 +51,9 @@ class AppLocalizationsHr extends AppLocalizations {
   String get actionRescan => 'Ponovno skeniraj';
 
   @override
+  String get actionEdit => 'Uredi';
+
+  @override
   String get commonNotSet => 'Nije postavljeno';
 
   @override
@@ -1269,6 +1272,15 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Zadatak koji si skenirao';
+
+  @override
+  String get resultConfidenceHigh => 'Visoka pouzdanost';
+
+  @override
+  String get resultConfidenceMedium => 'Srednja pouzdanost';
+
+  @override
+  String get resultConfidenceReview => 'Preporučena provjera';
 
   @override
   String get resultEditProblem => 'Uredi zadatak';

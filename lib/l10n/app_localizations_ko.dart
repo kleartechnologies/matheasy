@@ -51,6 +51,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionRescan => '다시 스캔';
 
   @override
+  String get actionEdit => '편집';
+
+  @override
   String get commonNotSet => '설정 안 함';
 
   @override
@@ -1224,6 +1227,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => '스캔한 문제';
+
+  @override
+  String get resultConfidenceHigh => '높은 신뢰도';
+
+  @override
+  String get resultConfidenceMedium => '보통 신뢰도';
+
+  @override
+  String get resultConfidenceReview => '확인을 권장합니다';
 
   @override
   String get resultEditProblem => '문제 편집';

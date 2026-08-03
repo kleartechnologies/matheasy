@@ -51,6 +51,9 @@ class AppLocalizationsSv extends AppLocalizations {
   String get actionRescan => 'Skanna om';
 
   @override
+  String get actionEdit => 'Redigera';
+
+  @override
   String get commonNotSet => 'Inte inställt';
 
   @override
@@ -1266,6 +1269,15 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Problemet du skannade';
+
+  @override
+  String get resultConfidenceHigh => 'Hög säkerhet';
+
+  @override
+  String get resultConfidenceMedium => 'Medelhög säkerhet';
+
+  @override
+  String get resultConfidenceReview => 'Kontroll rekommenderas';
 
   @override
   String get resultEditProblem => 'Redigera problemet';

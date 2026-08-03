@@ -51,6 +51,9 @@ class AppLocalizationsSk extends AppLocalizations {
   String get actionRescan => 'Skenovať znova';
 
   @override
+  String get actionEdit => 'Upraviť';
+
+  @override
   String get commonNotSet => 'Nenastavené';
 
   @override
@@ -1268,6 +1271,15 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Príklad, ktorý si naskenoval';
+
+  @override
+  String get resultConfidenceHigh => 'Vysoká istota';
+
+  @override
+  String get resultConfidenceMedium => 'Stredná istota';
+
+  @override
+  String get resultConfidenceReview => 'Odporúčame skontrolovať';
 
   @override
   String get resultEditProblem => 'Upraviť príklad';

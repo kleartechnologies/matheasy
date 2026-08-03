@@ -51,6 +51,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get actionRescan => 'Пересканировать';
 
   @override
+  String get actionEdit => 'Изменить';
+
+  @override
   String get commonNotSet => 'Не задано';
 
   @override
@@ -1272,6 +1275,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Задача, которую ты отсканировал';
+
+  @override
+  String get resultConfidenceHigh => 'Высокая точность';
+
+  @override
+  String get resultConfidenceMedium => 'Средняя точность';
+
+  @override
+  String get resultConfidenceReview => 'Рекомендуем проверить';
 
   @override
   String get resultEditProblem => 'Изменить задачу';

@@ -51,6 +51,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get actionRescan => 'Pindai ulang';
 
   @override
+  String get actionEdit => 'Edit';
+
+  @override
   String get commonNotSet => 'Belum diatur';
 
   @override
@@ -1273,6 +1276,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Soal yang kamu pindai';
+
+  @override
+  String get resultConfidenceHigh => 'Keyakinan tinggi';
+
+  @override
+  String get resultConfidenceMedium => 'Keyakinan sedang';
+
+  @override
+  String get resultConfidenceReview => 'Sebaiknya diperiksa';
 
   @override
   String get resultEditProblem => 'Edit soalnya';

@@ -386,8 +386,10 @@ void main() {
         ),
       );
 
-      // Low confidence → a "check this" prompt, not a confident "detected".
-      expect(find.textContaining('CHECK THIS'), findsOneWidget);
+      // Low confidence → a prompt to check the read, not a confident tick and
+      // not a percentage the student can do nothing with.
+      expect(find.text('Review recommended'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
       expect(find.textContaining('tap the problem to fix'), findsOneWidget);
       // The primary action reads "Solve".
       expect(find.text('Solve'), findsOneWidget);

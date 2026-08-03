@@ -51,6 +51,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get actionRescan => 'اسکن مجدد';
 
   @override
+  String get actionEdit => 'ویرایش';
+
+  @override
   String get commonNotSet => 'تنظیم نشده';
 
   @override
@@ -1266,6 +1269,15 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'سؤالی که اسکن کردید';
+
+  @override
+  String get resultConfidenceHigh => 'اطمینان بالا';
+
+  @override
+  String get resultConfidenceMedium => 'اطمینان متوسط';
+
+  @override
+  String get resultConfidenceReview => 'بررسی توصیه می‌شود';
 
   @override
   String get resultEditProblem => 'ویرایش سؤال';

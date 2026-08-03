@@ -51,6 +51,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionRescan => '重新扫描';
 
   @override
+  String get actionEdit => '编辑';
+
+  @override
   String get commonNotSet => '未设置';
 
   @override
@@ -1206,6 +1209,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => '你扫描的题目';
+
+  @override
+  String get resultConfidenceHigh => '高置信度';
+
+  @override
+  String get resultConfidenceMedium => '中等置信度';
+
+  @override
+  String get resultConfidenceReview => '建议核对';
 
   @override
   String get resultEditProblem => '编辑题目';
@@ -2042,6 +2054,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionRescan => '重新扫描';
 
   @override
+  String get actionEdit => '编辑';
+
+  @override
   String get commonNotSet => '未设置';
 
   @override
@@ -3199,6 +3214,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get resultScannedImageLabel => '你扫描的题目';
 
   @override
+  String get resultConfidenceHigh => '高置信度';
+
+  @override
+  String get resultConfidenceMedium => '中等置信度';
+
+  @override
+  String get resultConfidenceReview => '建议核对';
+
+  @override
   String get resultEditProblem => '编辑题目';
 
   @override
@@ -4031,6 +4055,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get actionRescan => '重新掃描';
+
+  @override
+  String get actionEdit => '編輯';
 
   @override
   String get commonNotSet => '尚未設定';
@@ -5188,6 +5215,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get resultScannedImageLabel => '你掃描的題目';
+
+  @override
+  String get resultConfidenceHigh => '高信心度';
+
+  @override
+  String get resultConfidenceMedium => '中等信心度';
+
+  @override
+  String get resultConfidenceReview => '建議核對';
 
   @override
   String get resultEditProblem => '編輯題目';

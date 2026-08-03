@@ -51,6 +51,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionRescan => 'Volver a escanear';
 
   @override
+  String get actionEdit => 'Editar';
+
+  @override
   String get commonNotSet => 'Sin definir';
 
   @override
@@ -1277,6 +1280,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'El problema que escaneaste';
+
+  @override
+  String get resultConfidenceHigh => 'Confianza alta';
+
+  @override
+  String get resultConfidenceMedium => 'Confianza media';
+
+  @override
+  String get resultConfidenceReview => 'Revisión recomendada';
 
   @override
   String get resultEditProblem => 'Editar el problema';

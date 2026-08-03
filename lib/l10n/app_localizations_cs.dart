@@ -51,6 +51,9 @@ class AppLocalizationsCs extends AppLocalizations {
   String get actionRescan => 'Skenovat znovu';
 
   @override
+  String get actionEdit => 'Upravit';
+
+  @override
   String get commonNotSet => 'Nenastaveno';
 
   @override
@@ -1268,6 +1271,15 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Příklad, který jsi naskenoval/a';
+
+  @override
+  String get resultConfidenceHigh => 'Vysoká jistota';
+
+  @override
+  String get resultConfidenceMedium => 'Střední jistota';
+
+  @override
+  String get resultConfidenceReview => 'Doporučujeme zkontrolovat';
 
   @override
   String get resultEditProblem => 'Upravit příklad';

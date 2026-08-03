@@ -51,6 +51,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get actionRescan => 'Yeniden tara';
 
   @override
+  String get actionEdit => 'Düzenle';
+
+  @override
   String get commonNotSet => 'Ayarlanmadı';
 
   @override
@@ -1276,6 +1279,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Taradığınız soru';
+
+  @override
+  String get resultConfidenceHigh => 'Yüksek güven';
+
+  @override
+  String get resultConfidenceMedium => 'Orta güven';
+
+  @override
+  String get resultConfidenceReview => 'Kontrol önerilir';
 
   @override
   String get resultEditProblem => 'Soruyu düzenle';

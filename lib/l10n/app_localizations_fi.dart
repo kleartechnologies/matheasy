@@ -51,6 +51,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get actionRescan => 'Skannaa uudelleen';
 
   @override
+  String get actionEdit => 'Muokkaa';
+
+  @override
   String get commonNotSet => 'Ei asetettu';
 
   @override
@@ -1279,6 +1282,15 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Skannaamasi tehtävä';
+
+  @override
+  String get resultConfidenceHigh => 'Suuri varmuus';
+
+  @override
+  String get resultConfidenceMedium => 'Kohtalainen varmuus';
+
+  @override
+  String get resultConfidenceReview => 'Tarkistus suositeltavaa';
 
   @override
   String get resultEditProblem => 'Muokkaa tehtävää';

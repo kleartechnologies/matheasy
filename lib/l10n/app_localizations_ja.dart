@@ -51,6 +51,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionRescan => '再スキャン';
 
   @override
+  String get actionEdit => '編集';
+
+  @override
   String get commonNotSet => '未設定';
 
   @override
@@ -1219,6 +1222,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'スキャンした問題';
+
+  @override
+  String get resultConfidenceHigh => '高い信頼度';
+
+  @override
+  String get resultConfidenceMedium => '中程度の信頼度';
+
+  @override
+  String get resultConfidenceReview => '確認をおすすめします';
 
   @override
   String get resultEditProblem => '問題を編集';

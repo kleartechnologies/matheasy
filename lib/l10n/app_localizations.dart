@@ -242,6 +242,12 @@ abstract class AppLocalizations {
   /// **'Rescan'**
   String get actionRescan;
 
+  /// No description provided for @actionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get actionEdit;
+
   /// No description provided for @commonNotSet.
   ///
   /// In en, this message translates to:
@@ -2539,6 +2545,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The problem you scanned'**
   String get resultScannedImageLabel;
+
+  /// No description provided for @resultConfidenceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High confidence'**
+  String get resultConfidenceHigh;
+
+  /// No description provided for @resultConfidenceMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium confidence'**
+  String get resultConfidenceMedium;
+
+  /// No description provided for @resultConfidenceReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review recommended'**
+  String get resultConfidenceReview;
 
   /// No description provided for @resultEditProblem.
   ///

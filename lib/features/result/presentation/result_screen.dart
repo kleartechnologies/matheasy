@@ -584,6 +584,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ProblemCard(
           result: result,
           onRescan: () => context.push(AppRoutes.scan),
+          // The same in-place repair the couldn't-verify state offers: a
+          // misread character is a five-second fix, not a re-scan.
+          onEdit: () => context.push(
+            AppRoutes.manualInput,
+            extra: ManualInputArgs(initialLatex: result.questionLatex),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         // §2 — the answer, and the three things you do with an answer.

@@ -51,6 +51,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get actionRescan => 'Quét lại';
 
   @override
+  String get actionEdit => 'Sửa';
+
+  @override
   String get commonNotSet => 'Chưa thiết lập';
 
   @override
@@ -1272,6 +1275,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'Bài toán bạn đã quét';
+
+  @override
+  String get resultConfidenceHigh => 'Độ tin cậy cao';
+
+  @override
+  String get resultConfidenceMedium => 'Độ tin cậy trung bình';
+
+  @override
+  String get resultConfidenceReview => 'Nên kiểm tra lại';
 
   @override
   String get resultEditProblem => 'Chỉnh sửa bài toán';

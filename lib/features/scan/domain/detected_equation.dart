@@ -17,6 +17,26 @@ enum EquationKind {
   final String label;
 }
 
+/// How far the recognizer's read can be trusted, expressed as something a
+/// student can act on.
+///
+/// A percentage is precision the number does not have — "99%" invites a student
+/// to read it as "the answer is 99% right", which is not what it measures, and
+/// "78%" tells them nothing about what to do. Three states do: it looks right,
+/// it probably looks right, or give it a glance before you trust it.
+enum ReadConfidence {
+  /// Read cleanly. Nothing for the student to do.
+  high,
+
+  /// Read, with a mark or two the recognizer was less sure of.
+  medium,
+
+  /// Worth comparing against the page before trusting the answer. Below
+  /// [DetectedEquation.lowConfidenceThreshold], where the scanner already
+  /// prompts a check.
+  review,
+}
+
 /// A recognized math problem.
 ///
 /// [latex] is the recognizer's output in LaTeX (ready for `flutter_math_fork`).
@@ -82,6 +102,20 @@ class DetectedEquation {
   final List<ScanAnchor> anchors;
 
   int get confidencePercent => (confidence * 100).round();
+
+  /// Below this the student is prompted to check the read rather than shown a
+  /// confident tick. Also the boundary of [ReadConfidence.review].
+  static const double lowConfidenceThreshold = 0.8;
+
+  /// Above this the read is clean enough to say so without qualification.
+  static const double highConfidenceThreshold = 0.9;
+
+  /// [confidence] as one of three states the student can act on.
+  ReadConfidence get readConfidence => switch (confidence) {
+        >= highConfidenceThreshold => ReadConfidence.high,
+        >= lowConfidenceThreshold => ReadConfidence.medium,
+        _ => ReadConfidence.review,
+      };
 
   Map<String, dynamic> toJson() => {
         'latex': latex,

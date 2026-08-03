@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/localization/l10n_extension.dart';
@@ -7,7 +6,12 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
+// The recognized-problem renderer is shared with the result screen (as the
+// history tile already shares its math widgets) — one place decides how a read
+// is shown to a student, so the scan sheet and the result card can't drift.
+import '../../../result/presentation/widgets/problem_statement.dart';
 import '../../domain/detected_equation.dart';
+import 'confidence_badge.dart';
 
 /// Bottom confirmation sheet after a capture: shows the recognized problem —
 /// rendered as real math and TAPPABLE to edit (spec §3 non-negotiable) — a
@@ -31,14 +35,13 @@ class CaptureConfirmation extends StatelessWidget {
 
   /// Below this recognition confidence we prompt the user to verify rather than
   /// showing a confident check.
-  static const double lowConfidenceThreshold = 0.8;
+  static const double lowConfidenceThreshold =
+      DetectedEquation.lowConfidenceThreshold;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final lowConfidence = equation.confidence < lowConfidenceThreshold;
-    final accent =
-        lowConfidence ? colors.onWarningContainer : colors.onSuccessContainer;
 
     return Container(
       width: double.infinity,
@@ -56,25 +59,12 @@ class CaptureConfirmation extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                lowConfidence
-                    ? Icons.error_outline_rounded
-                    : Icons.check_circle_rounded,
-                size: 16,
-                color: accent,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                lowConfidence
-                    ? context.l10n
-                        .scanConfirmCheckThisPercent(equation.confidencePercent)
-                    : context.l10n
-                        .scanConfirmDetectedPercent(equation.confidencePercent),
-                style: AppTypography.label.copyWith(color: accent),
-              ),
-            ],
+          // How the read went, as a state the student can act on — a percentage
+          // is precision this number doesn't have.
+          ConfidenceBadge(
+            equation.readConfidence,
+            prominent: true,
+            style: AppTypography.label,
           ),
           const SizedBox(height: AppSpacing.md),
           _EditableEquation(
@@ -159,21 +149,13 @@ class _EditableEquation extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // Typeset, never source: this is the student's one chance to
+              // check the read against the page in front of them.
               Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Math.tex(
-                    equation.latex,
-                    textStyle: AppTypography.displaySmall
-                        .copyWith(color: colors.textPrimary),
-                    mathStyle: MathStyle.text,
-                    onErrorFallback: (_) => Text(
-                      equation.latex,
-                      style: AppTypography.displaySmall
-                          .copyWith(color: colors.textPrimary),
-                    ),
-                  ),
+                child: ProblemStatement(
+                  latex: equation.latex,
+                  minFontSize: 20,
+                  maxFontSize: 28,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

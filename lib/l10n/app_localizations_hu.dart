@@ -51,6 +51,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get actionRescan => 'Újraszkennelés';
 
   @override
+  String get actionEdit => 'Szerkesztés';
+
+  @override
   String get commonNotSet => 'Nincs beállítva';
 
   @override
@@ -1275,6 +1278,15 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'A feladat, amit beszkenneltél';
+
+  @override
+  String get resultConfidenceHigh => 'Magas biztonság';
+
+  @override
+  String get resultConfidenceMedium => 'Közepes biztonság';
+
+  @override
+  String get resultConfidenceReview => 'Ellenőrzés ajánlott';
 
   @override
   String get resultEditProblem => 'Feladat szerkesztése';

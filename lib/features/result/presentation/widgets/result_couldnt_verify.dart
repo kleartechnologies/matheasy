@@ -7,7 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/result_models.dart';
-import 'math_text.dart';
+import 'problem_statement.dart';
 
 /// The honest "couldn't verify" state (spec §1.1 / §9) — shown when `solve()`
 /// returns `verified:false` because the answer failed its substitution check.
@@ -161,15 +161,11 @@ class _EditableProblem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: MathText(
-              latex,
-              style: AppTypography.displaySmall
-                  .copyWith(color: colors.textPrimary),
-            ),
-          ),
+          // Laid out like the page it came from — the instruction as prose, the
+          // maths typeset. Checking the read against the worksheet is the whole
+          // point of this card, and LaTeX source can't be checked against
+          // anything.
+          ProblemStatement(latex: latex, minFontSize: 20, maxFontSize: 28),
         ],
       ),
     );

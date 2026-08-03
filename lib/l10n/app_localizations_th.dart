@@ -51,6 +51,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get actionRescan => 'สแกนใหม่';
 
   @override
+  String get actionEdit => 'แก้ไข';
+
+  @override
   String get commonNotSet => 'ยังไม่ได้ตั้งค่า';
 
   @override
@@ -1259,6 +1262,15 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get resultScannedImageLabel => 'โจทย์ที่คุณสแกน';
+
+  @override
+  String get resultConfidenceHigh => 'ความมั่นใจสูง';
+
+  @override
+  String get resultConfidenceMedium => 'ความมั่นใจปานกลาง';
+
+  @override
+  String get resultConfidenceReview => 'แนะนำให้ตรวจสอบ';
 
   @override
   String get resultEditProblem => 'แก้ไขโจทย์';

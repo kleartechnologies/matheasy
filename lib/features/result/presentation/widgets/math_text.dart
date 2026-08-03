@@ -43,16 +43,20 @@ class MathText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final display = toDisplayLatex(latex);
+    final readable = toReadableMath(latex);
     final math = Math.tex(
       display,
       textStyle: style,
       mathStyle: MathStyle.text,
-      onErrorFallback: (_) => Text(display, style: style),
+      // When typesetting fails, the student gets readable maths — `1/(3√3)` —
+      // and never the source. A `\frac` on screen is our bug leaking out.
+      onErrorFallback: (_) => Text(readable, style: style),
     );
-    // Rendered math has no intrinsic semantics — expose the source expression
-    // so screen readers can announce it.
+    // Rendered math has no intrinsic semantics — expose the expression so screen
+    // readers can announce it. Spoken as readable maths, for the same reason:
+    // "backslash frac" is not what the student wrote.
     return Semantics(
-      label: latex,
+      label: readable,
       child: ExcludeSemantics(
         child: switch (fit) {
           // Long OCR/AI-recognized equations can exceed their bounded box, and
