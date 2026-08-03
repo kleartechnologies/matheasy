@@ -445,6 +445,24 @@ export async function solve(
     };
   }
 
+  // 1c) Applied differentiation the engine could not PROVE — a claim it failed
+  // to reproduce, a stationary set whose completeness isn't provable, a point
+  // where the symbolic derivative and the finite difference disagree. Before
+  // this engine existed every one of these routed to the tutor, so the tutor
+  // invite remains the honest outcome; a bare couldn't-verify here would be a
+  // regression on inputs the app already handled acceptably.
+  if (cls.strategy === "calculus" || cls.strategy === "complex") {
+    return {
+      problemLatex: cls.latex,
+      problemType: "beyond_solver",
+      finalAnswer: null,
+      verified: false,
+      methods: [],
+      graph: null,
+      routeToTutor: true,
+    };
+  }
+
   // 2) Constrained LLM candidate — still must pass the verification gate.
   if (cls.verifyMode === "none") {
     return couldNotVerify(cls, "no_verify_mode", onCouldNotVerify);

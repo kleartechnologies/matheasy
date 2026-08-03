@@ -10,6 +10,8 @@
 import * as mathsteps from "mathsteps";
 import { derivative, fraction, simplify } from "mathjs";
 
+import { solveCalculus } from "./calculus";
+import { solveComplex } from "./complex";
 import { equationParts } from "./classify";
 import { exactForm, resymbolize } from "./exact";
 import { asciiToLatex, variablesIn } from "./latex";
@@ -18,6 +20,11 @@ import { solveLinearSystem } from "./linsystem";
 import { solveSimultaneous } from "./simultaneous";
 import { solveStatistics } from "./statistics";
 import { solveTaylor } from "./taylor";
+import { solveVieta } from "./vieta";
+import { solveArcLength } from "./arclength";
+import { solveNumericRoot } from "./numroot";
+import { solveParamDet } from "./paramdet";
+import { solveModular } from "./modular";
 import {
   evalReal,
   verifyDerivative,
@@ -52,6 +59,20 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
       return solveSimultaneous(cls);
     case "taylor":
       return solveTaylor(cls);
+    case "vieta":
+      return solveVieta(cls);
+    case "arc_length":
+      return solveArcLength(cls);
+    case "numeric_root":
+      return solveNumericRoot(cls);
+    case "param_det":
+      return solveParamDet(cls);
+    case "modular":
+      return solveModular(cls);
+    case "calculus":
+      return solveCalculus(cls);
+    case "complex":
+      return solveComplex(cls);
     default:
       return null; // llm_candidate — handled by the orchestrator
   }

@@ -11,7 +11,13 @@
  * problem to the LLM-candidate tier — never to a wrong answer.
  */
 
-/** Function names both LaTeX (`\sin`) and ascii (`sin`) share. */
+/** Function names both LaTeX (`\sin`) and ascii (`sin`) share.
+ *
+ * The INVERSE and HYPERBOLIC-INVERSE names (`asinh`, `acot`, …) and `log10` must
+ * be listed too: `variablesIn` strips these names longest-first so their letters
+ * aren't read as variables, and without `asinh` here the shorter `asin` was
+ * peeled out of it, leaving a phantom variable `h` in every `\sinh^{-1} x`
+ * problem. */
 const FUNCTIONS = [
   "sin",
   "cos",
@@ -25,12 +31,21 @@ const FUNCTIONS = [
   "asin",
   "acos",
   "atan",
+  "acot",
+  "asec",
+  "acsc",
   "sinh",
   "cosh",
   "tanh",
+  "asinh",
+  "acosh",
+  "atanh",
   "log",
+  "log10",
   "ln",
   "sqrt",
+  "abs",
+  "nthRoot",
 ];
 
 /**
@@ -62,6 +77,24 @@ export function normalizeMacros(s: string): string {
   // classify's raw-LaTeX vector/matrix detectors (which read `×` as a cross
   // product), turning a cross into a multiply. They're converted in latexToAscii
   // instead, on the mathjs-bound path only, AFTER that structural detection.
+}
+
+/**
+ * Unwrap `\text{…}` so the PROSE and the math read as one plain string.
+ *
+ * Word-problem parsers key off English ("find the slope", "near x = 0", "for
+ * <fn>"), and the OCR wraps every English run in `\text{}`. Left in, the braces
+ * split the sentence: "near } x = 0 \text{ for" made the centre cue capture a
+ * bare `}` and the whole request declined. This is a PARSING view only — the
+ * display LaTeX keeps its `\text{}` untouched.
+ */
+export function unwrapProse(rawLatex: string): string {
+  return normalizeMacros(rawLatex)
+    .replace(/\\text(?:rm|it|bf|sf|tt|normal)?\s*\{([^{}]*)\}/g, " $1 ")
+    .replace(/\\mbox\s*\{([^{}]*)\}/g, " $1 ")
+    .replace(/\\left|\\right/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Strip cosmetic LaTeX that never carries meaning. */
@@ -328,7 +361,13 @@ function wrapFunctionArgs(s: string): string {
       continue;
     }
 
-    const wrapped = arg.startsWith("(") ? arg : `(${arg})`;
+    // A PARENTHESIZED argument is copied past the scan head (`i = a` below), so
+    // any prefix-style call NESTED inside it would never be wrapped — which is
+    // why `\cos^{-1}(\sin x)` came out as the unparseable `acos(sin x)`. Recurse
+    // into the group so inner calls get their parentheses too.
+    const wrapped = arg.startsWith("(")
+      ? `(${wrapFunctionArgs(arg.slice(1, -1))})`
+      : `(${arg})`;
     // Normalize the power for the inverse test: strip whitespace AND one layer of
     // wrapping parens, so `^{-1}` (→`^(-1)`) reads as "-1" and `\sin^{-1} x`
     // becomes the INVERSE function asin(x), never sin(x)^(-1)=csc (wrong problem).

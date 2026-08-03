@@ -15,8 +15,15 @@ import { parseLimit } from "./limit";
 import { parseBoundedTrig } from "./boundedTrig";
 import { parseCircle } from "./circle";
 import { parseSolid } from "./solid";
+import { calculusProblemType, parseCalculus } from "./calculus";
+import { complexProblemType, parseComplex } from "./complex";
 import { parseStatistics } from "./statistics";
 import { parseTaylor } from "./taylor";
+import { parseVieta } from "./vieta";
+import { parseArcLength } from "./arclength";
+import { parseNumericRoot } from "./numroot";
+import { parseParamDet } from "./paramdet";
+import { parseModular } from "./modular";
 import {
   Classification,
   Strategy,
@@ -77,6 +84,12 @@ export function equationParts(ascii: string): { lhs: string; rhs: string }[] {
 }
 
 export function classify(rawLatex: string): Classification {
+  // The problem EXACTLY as it arrived. `normalizeMacros` below drops styling
+  // wrappers as meaningless, and for one construct that is not true: `\mathbf{i}`
+  // is precisely what distinguishes a basis vector from the imaginary unit, and
+  // once it is folded to a bare `i` the difference is gone. Only the ijk vector
+  // reader looks at this; everything else uses the normalized form.
+  const decoratedLatex = rawLatex;
   // Fold display/text macro variants (\dfrac, \mathrm{d}x, \operatorname, unicode
   // ·×÷) onto their canonical spelling FIRST, so every raw-LaTeX detector below
   // (\int, \frac{d}{dx}, ODE, …) sees one form. cleanLatex re-applies it for the
@@ -105,6 +118,15 @@ export function classify(rawLatex: string): Classification {
   // as variables → a bogus system → decline). Strip a leading directive from the
   // SOLVING representation (never a conceptual / tutor-routed one) so the clean
   // math underneath classifies normally; the display `latex` above is untouched.
+  //
+  // But that strip removes the WHOLE leading `\text{…}` block, and a problem
+  // sheet loads that block with the specification, not just an imperative:
+  // "Find the three-term Taylor polynomial near " carries both the term count and
+  // the centre. Stripping it left "x = 1 \text{ for } \ln x", which classified as
+  // a logarithmic equation and declined. So keep the pre-strip text and hand it
+  // to the PROSE-AWARE parsers, which read English on purpose and are immune to
+  // the variable pollution the strip exists to prevent.
+  const proseLatex = rawLatex;
   if (!conceptual && !tutorRoute) {
     rawLatex = stripLeadingDirective(rawLatex);
   }
@@ -145,6 +167,40 @@ export function classify(rawLatex: string): Classification {
   // misleading "couldn't verify"), route to the tutor (routeToTutor state).
   if (conceptual) {
     return base("conceptual", "conceptual", "x", false, "none");
+  }
+
+  // --- Remainders ---------------------------------------------------------
+  // "the remainder when n² + 4 is divided by 7 for n = 3". Prose with an
+  // expression buried in it, so the whole family reached the tutor. It is one
+  // integer, arrived at two ways that share no arithmetic — form the number and
+  // divide, versus reduce modulo m at every step — so verifyMode is "none".
+  const modular = parseModular(proseLatex);
+  if (modular) {
+    return base("modular_arithmetic", "modular", "n", false, "none", { modular });
+  }
+
+  // --- A matrix with a parameter in it, asked when it is singular ---------
+  // "for what values of a does [ … a^2 … ] have determinant zero?". The numeric
+  // matrix reader rejects a symbolic cell, so this was not a matrix question at
+  // all and read as an expression. Ahead of the linear-algebra block, which
+  // would find no grid, and of the tutor return. The values are found from the
+  // determinant read as a polynomial in the parameter, then each is substituted
+  // back into the printed cells — so verifyMode is "none".
+  const paramDet = parseParamDet(proseLatex);
+  if (paramDet) {
+    return base("parametric_determinant", "param_det", paramDet.parameter, true, "none", { paramDet });
+  }
+
+  // --- A root asked for as a NUMBER ---------------------------------------
+  // "the positive root of sin x = ½x to 6 decimal places". Ahead of everything
+  // because the precision directive changes what the answer IS: the exact-
+  // equation route would return a closed form, and the transcendental ones went
+  // to the tutor. The gate is narrow on purpose — it needs an explicit "to N
+  // decimal places / significant figures", or a named numerical method, so a
+  // plain "solve x²−5x+6=0" never reaches it.
+  const numericRoot = parseNumericRoot(proseLatex);
+  if (numericRoot) {
+    return base("numeric_root", "numeric_root", numericRoot.variable, true, "none", { numericRoot });
   }
 
   // --- Bounded-range trig equation `T(x)=c` on `[lo,hi]` ------------------
@@ -196,6 +252,108 @@ export function classify(rawLatex: string): Classification {
     return base(solidType, "solid", unknown, false, "none", { solid });
   }
 
+  // --- Applied differentiation (Leibniz `dy/dx` over a defined function) ---
+  // MUST run before the tutor-route return. A problem sheet does not write
+  // `\frac{d}{dx}(\ln(1+x^2))`; it writes "If y = ln(1+x²), find dy/dx" — and
+  // every one of those was dead-ending at `beyond_solver`, because the derivative
+  // regexes below only ever matched the OPERATOR form. The same shape covers the
+  // slope/velocity/acceleration at a point, tangent + normal lines, the angle of
+  // inclination, and stationary points with their nature.
+  //
+  // The parse is strict — it needs an explicit `y = f(x)` definition whose body
+  // is free of the dependent variable (so `dy/dx = 2y` stays an ODE) and a
+  // recognised ask — and each solve is gated on a check independent of the
+  // engine that produced it, so anything unrecognised returns null and falls
+  // through to exactly the route it took before.
+  const calculus = parseCalculus(proseLatex);
+  if (calculus) {
+    return base(
+      calculusProblemType(calculus.task),
+      "calculus",
+      calculus.variable,
+      false,
+      "none",
+      { calculus }
+    );
+  }
+
+  // --- Linear algebra (determinant / inverse / eigenvalues / product) ------
+  // DETERMINISTIC via mathjs; the gap was parsing the matrix + a verify gate.
+  // Property-checked (A·A⁻¹=I, det(A−λI)=0, independent cofactor det, and an
+  // independent row×column recompute for the product).
+  //
+  // MUST run before the tutor-route return. "Find A² where A = (…)" reads as a
+  // two-part question to the multi-part detector — a definition plus an ask —
+  // so it was dead-ending at `beyond_solver` even though the matrix and the
+  // operation were both unambiguous. parseLinalg still declines on anything it
+  // can't pin down, and those fall straight through to the same route as before.
+  const linalg = parseLinalg(rawLatex);
+  if (linalg) {
+    const linalgType: Record<string, string> = {
+      multiply: "matrix_product",
+      add: "matrix_sum",
+      subtract: "matrix_difference",
+      transpose: "matrix_transpose",
+      trace: "matrix_trace",
+      power: "matrix_power",
+      element: "matrix_element",
+      symmetric_split: "matrix_symmetric_split",
+      both_products: "matrix_product",
+    };
+    return base(
+      linalgType[linalg.op] ?? "linalg",
+      "linalg",
+      "x",
+      false,
+      "none",
+      {
+        linalgOp: linalg.op,
+        matrixData: linalg.matrix,
+        matrixB: linalg.matrixB,
+        linalgArgs: linalg.args,
+      }
+    );
+  }
+
+  // --- Vectors (dot / cross / magnitude / angle / triple product / …) ------
+  // Also deterministic: mathjs computes it, then an independent recompute
+  // agrees (cross also proven ⊥ to both operands). Ahead of the tutor-route
+  // return for the same reason as the matrices above — "find the angle between
+  // a = (1,2,3) and b = (4,5,6)" names its operands before it asks, which the
+  // multi-part detector reads as two questions.
+  //
+  // It reads `proseLatex`, NOT the stripped `rawLatex`: "Find the unit vector in
+  // the direction of (3,4)" strips down to a bare "(3, 4)", which takes the
+  // question away with the directive — every cue this parser matches on lives in
+  // that sentence. (Matrices are unaffected because `\begin{pmatrix}` doesn't
+  // look like the start of an expression, so the strip declines to apply.)
+  const vectors = parseVectors(proseLatex, decoratedLatex);
+  if (vectors) {
+    return base("vector_" + vectors.op, "linalg", "x", false, "none", {
+      vectorOp: vectors.op,
+      vectorData: vectors.vectors,
+      vectorArgs: vectors.args,
+    });
+  }
+
+  // --- Complex numbers ----------------------------------------------------
+  // Also before the tutor-route return, and before the arithmetic/equation
+  // split further down: `(3+4i)(2-i)` was being handed to the ARITHMETIC engine,
+  // which has no imaginary unit, and "solve e^z = -1" was read as a linear
+  // equation. The parse declines unless the expression actually uses `i` (or the
+  // prose names a complex task), so no real-arithmetic problem is pulled in.
+  const complexSpec = parseComplex(proseLatex);
+  if (complexSpec) {
+    return base(
+      complexProblemType(complexSpec.task),
+      "complex",
+      "z",
+      false,
+      "none",
+      { complex: complexSpec }
+    );
+  }
+
   // --- Multi-part / beyond-solver problems → the AI tutor -----------------
   // A single problem gets ONE verified answer; a MULTI-PART question does not.
   // With the OCR now capturing the whole problem, inputs like "given 2x+5=15,
@@ -206,6 +364,30 @@ export function classify(rawLatex: string): Classification {
   // route it to the tutor rather than ship a confident wrong answer. The honest
   // problemType ("multi_part" vs "beyond_solver") rides along so the client's
   // message states what is TRUE — never "more than one thing" about one ask.
+  // --- Symmetric functions of a polynomial's roots ------------------------
+  // "the cubic … has roots α, β, γ. Find α + β + γ". Ahead of the tutor-route
+  // return below for the same reason the matrices are: stating an equation and
+  // then asking for a quantity built from its roots reads as two asks, so the
+  // whole family was going to the tutor. It is ONE ask, and a deterministic one
+  // — the roots are found numerically and multiplied back out to rebuild the
+  // printed polynomial, so verifyMode is "none" and an unparsed one declines
+  // rather than reaching the LLM.
+  const vieta = parseVieta(proseLatex);
+  if (vieta) {
+    return base("root_symmetric_function", "vieta", vieta.variable, false, "none", { vieta });
+  }
+
+  // --- Arc length ---------------------------------------------------------
+  // "the arc length of x(t) = t − sin t, y(t) = 1 − cos t for 0 ≤ t ≤ 2π" —
+  // two definitions and an interval, which reads as several asks, so it went to
+  // the tutor. It is one number. The integrand is built by symbolic
+  // differentiation and the quadrature is cross-checked by a second rule, so
+  // verifyMode is "none".
+  const arc = parseArcLength(proseLatex);
+  if (arc) {
+    return base("arc_length", "arc_length", arc.variable, false, "none", { arcLength: arc });
+  }
+
   if (tutorRoute) {
     return base(tutorRoute, "conceptual", "x", false, "none");
   }
@@ -214,7 +396,7 @@ export function classify(rawLatex: string): Classification {
   // Distinctive keyword, so detected first. Coefficients are built by repeated
   // differentiation and proven by an independent contact-order test; verifyMode
   // "none" so an unparsed request declines rather than hitting the LLM tier.
-  const taylor = parseTaylor(rawLatex);
+  const taylor = parseTaylor(proseLatex);
   if (taylor) {
     return base(
       taylor.center === 0 ? "maclaurin_series" : "taylor_series",
@@ -408,38 +590,6 @@ export function classify(rawLatex: string): Classification {
       ineqLhs: ineq.lhs,
       ineqRhs: ineq.rhs,
       ineqOp: ineq.op,
-    });
-  }
-
-  // --- Linear algebra (determinant / inverse / eigenvalues / product) ------
-  // DETERMINISTIC via mathjs; the gap was parsing the matrix + a verify gate.
-  // Property-checked (A·A⁻¹=I, det(A−λI)=0, independent cofactor det, and an
-  // independent row×column recompute for the product).
-  const linalg = parseLinalg(rawLatex);
-  if (linalg) {
-    const linalgType: Record<string, string> = {
-      multiply: "matrix_product",
-      add: "matrix_sum",
-      subtract: "matrix_difference",
-    };
-    return base(
-      linalgType[linalg.op] ?? "linalg",
-      "linalg",
-      "x",
-      false,
-      "none",
-      { linalgOp: linalg.op, matrixData: linalg.matrix, matrixB: linalg.matrixB }
-    );
-  }
-
-  // --- Vectors (dot / cross / magnitude) ----------------------------------
-  // Also deterministic: mathjs computes it, then an independent recompute
-  // agrees (cross also proven ⊥ to both operands).
-  const vectors = parseVectors(rawLatex);
-  if (vectors) {
-    return base("vector_" + vectors.op, "linalg", "x", false, "none", {
-      vectorOp: vectors.op,
-      vectorData: vectors.vectors,
     });
   }
 
@@ -652,18 +802,64 @@ const TEACHING_META: Record<string, [TeachingCategory, TeachingDifficulty]> = {
   circle_mensuration: ["geometry", "secondary"],
   maclaurin_series: ["calculus", "university"],
   taylor_series: ["calculus", "university"],
+  // applied differentiation (the calculus engine)
+  derivative_identity: ["calculus", "preUniversity"],
+  curve_gradient: ["calculus", "preUniversity"],
+  tangent_line: ["calculus", "preUniversity"],
+  normal_line: ["calculus", "preUniversity"],
+  angle_of_inclination: ["calculus", "preUniversity"],
+  stationary_points: ["calculus", "preUniversity"],
+  kinematics: ["calculus", "preUniversity"],
+  curve_asymptotes: ["functions", "preUniversity"],
+  rest_times: ["calculus", "preUniversity"],
+  implicit_derivative: ["calculus", "preUniversity"],
+  polar_gradient: ["calculus", "university"],
+  // complex numbers (the complex engine)
+  complex_standard_form: ["algebra", "preUniversity"],
+  complex_modulus: ["algebra", "preUniversity"],
+  complex_argument: ["algebra", "preUniversity"],
+  complex_conjugate: ["algebra", "preUniversity"],
+  complex_polar_form: ["algebra", "university"],
+  complex_part: ["algebra", "preUniversity"],
+  complex_roots: ["algebra", "university"],
+  complex_equation: ["algebra", "university"],
+  complex_quadratic: ["algebra", "university"],
   // differential equations
   differential_equation: ["differential_equations", "university"],
   // linear algebra
   matrix_product: ["linear_algebra", "university"],
   matrix_sum: ["linear_algebra", "university"],
   matrix_difference: ["linear_algebra", "university"],
+  matrix_transpose: ["linear_algebra", "university"],
+  matrix_trace: ["linear_algebra", "university"],
+  matrix_power: ["linear_algebra", "university"],
+  matrix_element: ["linear_algebra", "university"],
+  matrix_symmetric_split: ["linear_algebra", "university"],
   linalg: ["linear_algebra", "university"],
   vector_dot: ["linear_algebra", "university"],
   vector_cross: ["linear_algebra", "university"],
   vector_magnitude: ["linear_algebra", "university"],
   vector_independent: ["linear_algebra", "university"],
   vector_spans: ["linear_algebra", "university"],
+  vector_add: ["linear_algebra", "preUniversity"],
+  vector_subtract: ["linear_algebra", "preUniversity"],
+  vector_angle: ["linear_algebra", "preUniversity"],
+  vector_unit: ["linear_algebra", "preUniversity"],
+  vector_projection: ["linear_algebra", "university"],
+  vector_triple: ["linear_algebra", "university"],
+  vector_coplanar: ["linear_algebra", "university"],
+  vector_midpoint: ["geometry", "preUniversity"],
+  vector_section: ["geometry", "preUniversity"],
+  vector_distance_origin_line: ["geometry", "university"],
+  vector_line_distance: ["geometry", "university"],
+  root_symmetric_function: ["algebra", "university"],
+  arc_length: ["calculus", "university"],
+  numeric_root: ["calculus", "preUniversity"],
+  parametric_determinant: ["algebra", "university"],
+  modular_arithmetic: ["arithmetic", "secondary"],
+  vector_resolve: ["geometry", "preUniversity"],
+  vector_perpendicular_lambda: ["linear_algebra", "university"],
+  vector_basis_expansion: ["linear_algebra", "university"],
   // conceptual (proofs / multi-part → tutor)
   conceptual: ["conceptual", "university"],
   multi_part: ["conceptual", "secondary"],
@@ -704,6 +900,57 @@ function readBoundToken(s: string): { value: string; consumed: number } | null {
 }
 
 /**
+ * What can follow the `d` of a differential: a Latin letter, a Greek macro, or a
+ * Greek character. Restricted to these on purpose — a bare `[a-zA-Z]+` would
+ * read the tail of any word as the variable of integration.
+ */
+const VAR_TOKEN = "\\\\[a-zA-Z]+|[\\u0370-\\u03ff]|[a-zA-Z]";
+
+/** The Greek letters, by character, so `θ` and `\theta` end up the same name. */
+const GREEK_CHARS = "αβγδεζηθικλμνξρστυφχψω";
+const GREEK_NAMES = [
+  "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota",
+  "kappa", "lambda", "mu", "nu", "xi", "rho", "sigma", "tau", "upsilon", "phi",
+  "chi", "psi", "omega",
+];
+
+/**
+ * The name of the variable of integration, and the expression rewritten to use
+ * it.
+ *
+ * `∫₀^{π/2} cos⁵θ dθ` is a normal question and every sheet writes it that way,
+ * but `latexToAscii` leaves `\phi` and `θ` exactly as they are, and mathjs can
+ * read neither. The variable was silently defaulting to `x` — so the integrand
+ * held one symbol and the engine sampled a different one, and the integral was
+ * unverifiable no matter what the answer said.
+ */
+function normalizeIntegrationVariable(rest: string, token: string): { rest: string; name: string } {
+  // A Greek CHARACTER becomes the macro first, so there is only one shape to
+  // reason about below.
+  const ch = GREEK_CHARS.indexOf(token);
+  let macroToken = token;
+  if (ch >= 0) {
+    macroToken = `\\${GREEK_NAMES[ch]}`;
+    rest = rest.split(token).join(macroToken);
+  }
+
+  const macro = /^\\([a-zA-Z]+)$/.exec(macroToken);
+  if (!macro) return { rest, name: token };
+
+  const name = macro[1];
+  // `latexToAscii` already knows some of these — `\theta` comes out as `theta`,
+  // and `\sin\theta` as `sin(theta)`. Rewriting those by hand produced
+  // `\sintheta`, gluing the function name to its own argument. So only the
+  // macros it does NOT know are touched, and they are spaced apart rather than
+  // spliced in.
+  if (!latexToAscii(macroToken).includes("\\")) return { rest, name };
+  return {
+    rest: rest.replace(new RegExp(`\\\\${name}(?![a-zA-Z])`, "g"), ` ${name} `),
+    name,
+  };
+}
+
+/**
  * Rewrite `\frac{[NUM] d<var>}{DEN}` → `(NUM)/(DEN) d<var>` so the standard
  * trailing-differential extractor finds it. Reads BALANCED brace groups (a regex
  * couldn't, because DEN may nest braces like `x^{2}` or `\sqrt{x}`). Leaves a
@@ -722,7 +969,7 @@ function hoistFractionDifferential(s: string): string {
   const den = readBraceGroup(s, j);
   if (!den) return s;
   // Numerator must END in a differential d<var> (after an optional factor/space).
-  const dm = num.value.match(/^(.*?)(?:\\[,;:! ])?\s*d\s*([a-zA-Z])\s*$/s);
+  const dm = num.value.match(new RegExp(`^(.*?)(?:\\\\[,;:! ])?\\s*d\\s*(${VAR_TOKEN})\\s*$`, "s"));
   if (!dm) return s;
   const factor = dm[1].replace(/\\[,;:! ]/g, "").trim();
   return `${s.slice(0, idx)} (${factor || "1"})/(${den.value}) d${dm[2]} ${s.slice(den.end)}`;
@@ -781,10 +1028,37 @@ function parseIntegral(rawLatex: string): ParsedIntegral {
   // hoist it out of the fraction first (numerator without the dx → 1 if empty).
   rest = hoistFractionDifferential(rest);
 
+  // The differential is read from the RAW latex, before `latexToAscii` — `dθ`
+  // survives that conversion as `d theta`, which no single-letter pattern can
+  // see, so every integral in a Greek variable defaulted to `x` and then
+  // sampled a variable its own integrand did not contain.
+  const dm = rest.match(new RegExp(`^([\\s\\S]*?)(?:\\\\[,;:! ])*\\s*d\\s*(${VAR_TOKEN})\\s*$`));
+  let unknown: string;
+  if (dm) {
+    const normalized = normalizeIntegrationVariable(dm[1], dm[2]);
+    rest = normalized.rest;
+    unknown = normalized.name;
+  } else {
+    unknown = "x";
+  }
+
   const cleaned = latexToAscii(rest);
-  const m = cleaned.match(/^(.*?)\s*d\s*([a-zA-Z])\s*$/);
-  let integrand = (m ? m[1] : cleaned).trim();
-  const unknown = m ? m[2] : "x";
+  let integrand = cleaned.trim();
+  if (!dm) {
+    // The raw match is anchored to the end, so anything written AFTER the
+    // differential — a `= ?` trailer, most often — hides it. `latexToAscii`
+    // drops those, so the same look at ascii level still finds a plain `dx`.
+    const tail = integrand.match(/^(.*?)\s*d\s*([a-zA-Z])\s*$/);
+    if (tail) {
+      integrand = tail[1].trim();
+      unknown = tail[2];
+    } else {
+      // No differential written at all. One variable in the integrand is not an
+      // ambiguity — it is the variable of integration, whatever it is called.
+      const vars = variablesIn(integrand);
+      if (vars.length === 1) unknown = vars[0];
+    }
+  }
   const definite = lower !== undefined && upper !== undefined;
 
   // Apply the leading coefficient/sign as a factor on the integrand.
@@ -1067,6 +1341,11 @@ function asksForDerivedQuantity(rawLatex: string): boolean {
   // The plain SOLUTION — not derived, so a normal solve handles it: the roots /
   // solutions, a bare variable, or a variable list ("x and y", "x, y").
   if (/^(?:roots?|solutions?)\b/i.test(target)) return false;
+  // "the general/particular solution of dy/dx = …" is a differential equation's
+  // PLAIN solution, not a quantity derived from one — the `\frac` of its own
+  // Leibniz derivative would otherwise read as a derived-expression ask and send
+  // every ODE to the tutor.
+  if (/^(?:general|particular|complementary|complete)\s+solutions?\b/i.test(target)) return false;
   if (/^[a-zA-Z]$/.test(target)) return false;
   if (/^[a-zA-Z](?:\s*(?:,|and)\s*[a-zA-Z])+$/i.test(target)) return false;
   // A short all-letter token that isn't a common word is a VARIABLE PRODUCT (xy,

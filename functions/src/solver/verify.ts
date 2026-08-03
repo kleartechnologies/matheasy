@@ -280,10 +280,172 @@ export function stripIntegrationConstant(candidate: string): string {
 }
 
 /**
- * Definite integral of `integrand` d(unknown) from `a` to `b` by composite
- * Simpson's rule (exact for cubics, ~1e-9 otherwise). This is the deterministic
- * ENGINE that verifies a definite-integral candidate. Returns NaN if a bound or
- * any sample is non-finite (e.g. a singularity in range).
+ * A bound that may be infinite. `\infty`, `∞` and `infinity` are bounds a sheet
+ * actually writes; `evalReal` returns NaN for all of them, which made every
+ * improper integral unverifiable — and therefore unanswerable.
+ */
+function integralBound(raw: string): number {
+  const s = raw.trim();
+  const inf = /^([+-]?)\s*(?:\\infty|∞|infinity|inf)$/i.exec(s);
+  if (inf) return inf[1] === "-" ? -Infinity : Infinity;
+  return evalReal(s);
+}
+
+/** `integrand` as a function of one variable, parsed once instead of per sample. */
+function compileIntegrand(integrand: string, unknown: string): ((x: number) => number) | null {
+  let code: { evaluate: (scope: Record<string, number>) => unknown };
+  try {
+    code = parse(integrand).compile();
+  } catch {
+    return null;
+  }
+  const scope: Record<string, number> = {};
+  return (x: number) => {
+    scope[unknown] = x;
+    try {
+      const v = code.evaluate(scope);
+      const n = typeof v === "number" ? v : Number(v as unknown as number);
+      return Number.isFinite(n) ? n : NaN;
+    } catch {
+      return NaN;
+    }
+  };
+}
+
+/**
+ * Tanh–sinh (double-exponential) quadrature on (lo, hi).
+ *
+ * Chosen over Simpson because of what it never does: it never evaluates at an
+ * endpoint. `∫₁² dx/√(x²−1)` is a perfectly ordinary integral with an infinite
+ * integrand at `x = 1`, and Simpson's first sample there is `Infinity`, so the
+ * whole question was declined. The DE transform clusters nodes into the
+ * endpoints doubly-exponentially, which is exactly the shape an integrable
+ * endpoint singularity needs.
+ *
+ * Returns the value only once two successive halvings of the step agree — an
+ * integral that does not converge (a pole in the interior, a divergent tail)
+ * never produces a number.
+ */
+function tanhSinh(f: (x: number) => number, lo: number, hi: number): number {
+  const c = (lo + hi) / 2;
+  const d = (hi - lo) / 2;
+  const HALF_PI = Math.PI / 2;
+  // Past this the node has collapsed onto the endpoint in double precision and
+  // its true weight is doubly-exponentially small, so it contributes nothing.
+  const T_MAX = 6.5;
+
+  const at = (t: number): number => {
+    const s = Math.sinh(t);
+    const u = HALF_PI * s;
+    const ch = Math.cosh(u);
+    if (!Number.isFinite(ch)) return 0;
+    const x = c + d * Math.tanh(u);
+    if (x <= lo || x >= hi) return 0; // collapsed onto an endpoint
+    const w = (d * HALF_PI * Math.cosh(t)) / (ch * ch);
+    if (!Number.isFinite(w)) return 0;
+    const v = f(x);
+    if (!Number.isFinite(v)) return NaN;
+    const term = w * v;
+    return Number.isFinite(term) ? term : NaN;
+  };
+
+  let previous = NaN;
+  for (let level = 3; level <= 11; level++) {
+    const h = 2 ** -level;
+    let sum = at(0);
+    if (Number.isNaN(sum)) return NaN;
+    for (let j = 1; ; j++) {
+      const t = j * h;
+      if (t > T_MAX) break;
+      const right = at(t);
+      const left = at(-t);
+      if (Number.isNaN(right) || Number.isNaN(left)) return NaN;
+      sum += right + left;
+    }
+    const value = sum * h;
+    if (!Number.isFinite(value)) return NaN;
+    if (
+      Number.isFinite(previous) &&
+      Math.abs(value - previous) <= 1e-10 * Math.max(1, Math.abs(value))
+    ) {
+      return value;
+    }
+    previous = value;
+  }
+  return NaN; // never settled — not a value anyone should be told
+}
+
+/** Composite 10-point Gauss–Legendre. An independent rule, used as a check. */
+const GL_X = [
+  0.14887433898163121, 0.4333953941292472, 0.6794095682990244, 0.8650633666889845,
+  0.9739065285171717,
+];
+const GL_W = [
+  0.29552422471475287, 0.26926671930999635, 0.21908636251598204, 0.1494513491505806,
+  0.06667134430868814,
+];
+
+function gaussLegendre(f: (x: number) => number, lo: number, hi: number, panels: number): number {
+  const width = (hi - lo) / panels;
+  let total = 0;
+  for (let p = 0; p < panels; p++) {
+    const a = lo + p * width;
+    const c = a + width / 2;
+    const d = width / 2;
+    for (let k = 0; k < GL_X.length; k++) {
+      const l = f(c - d * GL_X[k]);
+      const r = f(c + d * GL_X[k]);
+      if (!Number.isFinite(l) || !Number.isFinite(r)) return NaN;
+      total += d * GL_W[k] * (l + r);
+    }
+  }
+  return total;
+}
+
+/**
+ * Whether `f` SETTLES as each endpoint is approached — whether it has a limit
+ * there.
+ *
+ * "Finite at the endpoint" is not the test: `1/√(x²−1)` at `x = 1 + 10⁻⁹` is a
+ * perfectly finite 22360, and Gauss–Legendre is still hopeless against it.
+ * Neither is "doesn't grow too fast": `ln x` climbs by the same 4.6 every decade
+ * — slowly, and forever.
+ *
+ * What a bounded continuous function does is converge: successive samples get
+ * closer together. What a singular one does is not. So that is what is measured,
+ * and it catches both shapes.
+ */
+function settlesAtEnds(f: (x: number) => number, lo: number, hi: number): boolean {
+  const width = hi - lo;
+  for (const end of [lo, hi]) {
+    const dir = end === lo ? 1 : -1;
+    const vs: number[] = [];
+    for (const scale of [1e-2, 1e-4, 1e-6, 1e-8]) {
+      const v = f(end + dir * width * scale);
+      if (!Number.isFinite(v)) return false;
+      vs.push(v);
+    }
+    const wide = Math.abs(vs[2] - vs[1]);
+    const tight = Math.abs(vs[3] - vs[2]);
+    if (tight > 0.5 * wide + 1e-12) return false;
+  }
+  return true;
+}
+
+/**
+ * Definite integral of `integrand` d(unknown) from `a` to `b`. This is the
+ * deterministic ENGINE that verifies a definite-integral candidate, so it must
+ * either be right or return NaN — a wrong number here would certify a wrong
+ * answer.
+ *
+ * An infinite bound is mapped onto a finite one by substitution before
+ * integrating, so `∫₃^∞` is a real question rather than a NaN.
+ *
+ * TWO RULES where a second rule means something. Tanh–sinh is the answer.
+ * Gauss–Legendre is run as an independent check, but only when the integrand is
+ * finite at both ends: against an endpoint singularity GL is simply the wrong
+ * tool, and its disagreement there would be evidence about GL rather than about
+ * the integral. Where the check does apply, disagreement returns NaN.
  */
 export function numericIntegrate(
   integrand: string,
@@ -291,21 +453,60 @@ export function numericIntegrate(
   a: string,
   b: string
 ): number {
-  const lo = evalReal(a);
-  const hi = evalReal(b);
+  const lo = integralBound(a);
+  const hi = integralBound(b);
   if (Number.isNaN(lo) || Number.isNaN(hi)) return NaN;
   if (lo === hi) return 0;
-  const N = 1000; // even
-  const h = (hi - lo) / N;
-  const f = (x: number) => evalReal(integrand, { [unknown]: x });
-  let sum = f(lo) + f(hi);
-  if (Number.isNaN(sum)) return NaN;
-  for (let i = 1; i < N; i++) {
-    const fx = f(lo + i * h);
-    if (Number.isNaN(fx)) return NaN;
-    sum += (i % 2 === 0 ? 2 : 4) * fx;
+  if (lo > hi) {
+    const flipped = numericIntegrate(integrand, unknown, b, a);
+    return Number.isNaN(flipped) ? NaN : -flipped;
   }
-  return (h / 3) * sum;
+
+  const raw = compileIntegrand(integrand, unknown);
+  if (!raw) return NaN;
+
+  // Map an infinite bound into a finite one. The substitution carries its own
+  // Jacobian, so what gets integrated below is a genuinely finite-interval
+  // problem and every rule here applies to it unchanged.
+  let f = raw;
+  let low = lo;
+  let high = hi;
+  if (lo === -Infinity && hi === Infinity) {
+    // x = t/(1−t²) over (−1, 1).
+    f = (t: number) => {
+      const q = 1 - t * t;
+      return (raw(t / q) * (1 + t * t)) / (q * q);
+    };
+    low = -1;
+    high = 1;
+  } else if (hi === Infinity) {
+    // x = lo + t/(1−t) over (0, 1).
+    f = (t: number) => {
+      const q = 1 - t;
+      return raw(lo + t / q) / (q * q);
+    };
+    low = 0;
+    high = 1;
+  } else if (lo === -Infinity) {
+    // x = hi − t/(1−t) over (0, 1).
+    f = (t: number) => {
+      const q = 1 - t;
+      return raw(hi - t / q) / (q * q);
+    };
+    low = 0;
+    high = 1;
+  }
+
+  const value = tanhSinh(f, low, high);
+  if (!Number.isFinite(value)) return NaN;
+
+  // The independent check, where it is a fair one.
+  if (settlesAtEnds(f, low, high)) {
+    const gl = gaussLegendre(f, low, high, 400);
+    if (!Number.isFinite(gl)) return NaN;
+    if (Math.abs(gl - value) > 1e-7 * Math.max(1, Math.abs(value))) return NaN;
+  }
+  return value;
 }
 
 /** Absolute-or-relative closeness, exported for cross-engine comparisons. */

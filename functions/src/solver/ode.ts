@@ -177,10 +177,29 @@ function buildResidual(odeText: string, dep: string, indep: string): string | nu
 
   const parts = s.split("=");
   if (parts.length !== 2) return null;
-  const lhs = latexToAscii(parts[0]).trim();
-  const rhs = latexToAscii(parts[1]).trim();
+  const lhs = separateProduct(latexToAscii(parts[0]).trim(), dep, indep);
+  const rhs = separateProduct(latexToAscii(parts[1]).trim(), dep, indep);
   if (!lhs || !rhs) return null;
   return `(${lhs}) - (${rhs})`;
+}
+
+/**
+ * `xy` written as juxtaposition is a PRODUCT; to mathjs it is one symbol called
+ * `xy`, and a symbol nothing ever binds evaluates to NaN.
+ *
+ * So `y' + xy = x` — the shape of every integrating-factor question there is —
+ * produced a residual that could not be evaluated at all, and the samples were
+ * all skipped. A correct answer then failed the gate for want of evidence, and
+ * the student was told it couldn't be verified.
+ *
+ * Only the two names this ODE actually has are split apart, in that order and
+ * nothing else, so a function name or a genuine multi-letter symbol is left
+ * exactly as it was.
+ */
+function separateProduct(ascii: string, dep: string, indep: string): string {
+  if (dep === indep) return ascii;
+  const pair = new RegExp(`\\b(${indep}${dep}|${dep}${indep})\\b`, "g");
+  return ascii.replace(pair, (m) => `${m[0]}*${m[1]}`);
 }
 
 // The RHS value of an initial condition, most-specific alternative FIRST — regex
@@ -408,16 +427,30 @@ function constantsIndependent(
 ): boolean {
   if (consts.length !== order) return false;
   if (order === 0) return true;
-  const xs = [0.3, 0.8, 1.5, 2.1, -0.5];
+  const xs = [0.3, 0.8, 1.5, 2.1, -0.5, -1.3, -0.9, 0.05];
   const base: Record<string, number> = {};
   consts.forEach((c, k) => {
     base[c] = CVALS[k % CVALS.length];
   });
   const h = 1e-4;
+  // A solution is not obliged to be defined everywhere. `y = -½ln(C − 2eˣ)` is
+  // the general solution of `y' = e^{x+2y}` and it exists only where the
+  // logarithm's argument is positive — so demanding a value at every probe point
+  // rejected a correct general solution for having a domain. Points outside it
+  // are skipped; independence is then judged on the ones that remain, and there
+  // have to be enough of them to judge it.
+  const usable = xs.filter((xv) =>
+    consts.every((c) =>
+      [base[c] + h, base[c] - h].every((cv) =>
+        Number.isFinite(evalReal(solution, { ...base, [c]: cv, [indep]: xv }))
+      )
+    )
+  );
+  if (usable.length < order) return false;
   const rows: number[][] = [];
   for (const c of consts) {
     const row: number[] = [];
-    for (const xv of xs) {
+    for (const xv of usable) {
       const up = evalReal(solution, { ...base, [c]: base[c] + h, [indep]: xv });
       const dn = evalReal(solution, { ...base, [c]: base[c] - h, [indep]: xv });
       if (!Number.isFinite(up) || !Number.isFinite(dn)) return false;

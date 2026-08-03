@@ -20,7 +20,7 @@
  */
 import { derivative, parse } from "mathjs";
 
-import { asciiToLatex, latexToAscii, variablesIn } from "./latex";
+import { asciiToLatex, latexToAscii, unwrapProse, variablesIn } from "./latex";
 import { FinalAnswer, RawStep, SolveCandidate } from "./types";
 import { evalReal } from "./verify";
 
@@ -38,7 +38,20 @@ export interface TaylorQuery {
 }
 
 /** Parse a Taylor/Maclaurin request → { fn, variable, center, order } or null. */
+/** Spelled-out counts, for "the four-term Taylor polynomial". */
+const WORD_NUMBERS = new Map<string, number>([
+  ["one", 1], ["two", 2], ["three", 3], ["four", 4], ["five", 5], ["six", 6],
+  ["seven", 7], ["eight", 8], ["nine", 9], ["ten", 10], ["eleven", 11],
+  ["twelve", 12],
+]);
+
 export function parseTaylor(rawLatex: string): TaylorQuery | null {
+  // Read the prose and the math as ONE string. A scanned sheet arrives as
+  // "\\text{Obtain the four-term Taylor polynomial near } x = 0 \\text{ for }
+  // (1+x)^{1/2}", where the braces cut the sentence in three: the centre cue
+  // captured a bare "}", `parseCenter` rejected it, and a question the engine
+  // can answer exactly declined instead.
+  rawLatex = unwrapProse(rawLatex);
   // The keyword must be a SERIES keyword — "taylor" alone is a common surname, so
   // require it adjacent to series/polynomial/expansion/approximation. "maclaurin"
   // is unambiguous. This stops a word problem ("Taylor drew a 5° angle…") from
@@ -49,22 +62,53 @@ export function parseTaylor(rawLatex: string): TaylorQuery | null {
   if (!isMaclaurin && !isTaylor) return null;
 
   // --- order: "order 4" / "degree 4" / "4th order" / "5 terms" (→ degree 4) ---
-  const orderRes = [
-    /(?:order|degree)\s*(\d+)/i,
-    /(\d+)\s*(?:st|nd|rd|th)?[-\s]*(?:order|degree)/i,
-    /(?:first\s+)?(\d+)\s*terms?/i,
+  // A problem sheet spells the count as a WORD at least as often as a digit —
+  // "obtain the four-term Taylor polynomial". Without the word forms that
+  // question found no order and declined outright.
+  //
+  // Two DIFFERENT things get spelled here and the number means the opposite in
+  // each: "5 terms" is a COUNT (degree 4), while "up to x^5" names the DEGREE
+  // itself. The degree patterns are tried FIRST and are exempt from the −1 —
+  // "…including the x^2 term" contains the word "term", so read as a count it
+  // silently returned one degree short of the question that was asked.
+  const orderRes: { re: RegExp; count: boolean }[] = [
+    // "…about x = 0 UP TO x⁴" is how a problem sheet actually states the order,
+    // and none of the count patterns sees it. Without these the whole family —
+    // sec, tan, sin, e^x, all of them — found no order, declined, and fell
+    // through to be read as a POLYNOMIAL EQUATION, which is not what was asked.
+    {
+      re: /(?:up\s+to|as\s+far\s+as|includ(?:ing|e))\s+(?:and\s+including\s+)?(?:the\s+)?(?:terms?\s+in\s+)?[a-zA-Z]\s*\^\s*\{?\s*(\d+)\s*\}?/i,
+      count: false,
+    },
+    {
+      re: /(?:terms?\s+)?(?:up\s+to|in)\s+(?:and\s+including\s+)?(?:the\s+)?[a-zA-Z]\s*\^\s*\{?\s*(\d+)\s*\}?\s*terms?/i,
+      count: false,
+    },
+    { re: /(?:order|degree)\s*(\d+)/i, count: false },
+    { re: /(\d+)\s*(?:st|nd|rd|th)?[-\s]*(?:order|degree)/i, count: false },
+    { re: /(?:first\s+)?(\d+)\s*[-\s]*terms?/i, count: true },
+    {
+      re: new RegExp(`(?:first\\s+)?(${[...WORD_NUMBERS.keys()].join("|")})\\s*[-\\s]*terms?`, "i"),
+      count: true,
+    },
+    {
+      re: new RegExp(`(${[...WORD_NUMBERS.keys()].join("|")})[-\\s]*(?:order|degree)`, "i"),
+      count: false,
+    },
   ];
   let om: RegExpMatchArray | null = null;
-  for (const re of orderRes) {
+  let isCount = false;
+  for (const { re, count } of orderRes) {
     const m = rawLatex.match(re);
     if (m) {
       om = m;
+      isCount = count;
       break;
     }
   }
   if (!om) return null;
-  let order = parseInt(om[1], 10);
-  if (/terms?/i.test(om[0])) order -= 1; // "n terms" → degree n−1
+  let order = WORD_NUMBERS.get(om[1].toLowerCase()) ?? parseInt(om[1], 10);
+  if (isCount) order -= 1; // "n terms" → degree n−1
   if (!Number.isInteger(order) || order < 1 || order > MAX_ORDER) return null;
 
   // Blank out the order phrase so "at 3rd order" / "at 4 terms" can never be
@@ -80,8 +124,11 @@ export function parseTaylor(rawLatex: string): TaylorQuery | null {
   let center = 0;
   let centerLatex = "0";
   if (!isMaclaurin) {
+    // "NEAR x = 0" is the standard problem-sheet wording and it MUST be a centre
+    // cue. While it wasn't, "near x = 1" matched no cue, silently fell back to
+    // centre 0, and returned a confident expansion about the wrong point.
     const cm = withoutOrder.match(
-      /(?:around|about|centered\s+(?:at|on)|center(?:ed)?(?:\s+(?:at|on))?|at)\s+(?:the\s+point\s+)?(?:[a-zA-Z]\s*=\s*)?([^\s,;]+(?:\s*[\/*]\s*[^\s,;]+)*)/i
+      /(?:around|about|near|centered\s+(?:at|on)|center(?:ed)?(?:\s+(?:at|on))?|at)\s+(?:the\s+point\s+)?(?:[a-zA-Z]\s*=\s*)?([^\s,;]+(?:\s*[\/*]\s*[^\s,;]+)*)/i
     );
     if (cm) {
       const parsed = parseCenter(cm[1]);
@@ -110,6 +157,11 @@ export function parseTaylor(rawLatex: string): TaylorQuery | null {
  * expanding about the wrong point.
  */
 function parseCenter(raw: string): { value: number; latex: string } | null {
+  // A centre written as a LaTeX fraction — "about x = \frac{\pi}{3}" — survives
+  // none of the stripping below (`frac{pi}{3}` is not an expression), so try the
+  // real converter first and keep the strip as the fallback it always was.
+  const viaLatex = evalReal(latexToAscii(raw).replace(/\\pi/gi, "pi").replace(/π/g, "pi"));
+  if (Number.isFinite(viaLatex)) return { value: viaLatex, latex: centerLatexOf(raw) };
   const norm = raw.trim().replace(/\\pi/gi, "pi").replace(/π/g, "pi").replace(/\\/g, "");
   const value = evalReal(norm);
   if (!Number.isFinite(value)) return null;
@@ -118,6 +170,9 @@ function parseCenter(raw: string): { value: number; latex: string } | null {
 
 /** A tidy LaTeX rendering of a center expression (fractions → \frac, π kept). */
 function centerLatexOf(raw: string): string {
+  // Already LaTeX — stripping backslashes would turn `\frac{\pi}{3}` into the
+  // literal text "frac{\pi}{3}", which renders as the word "frac".
+  if (/\\(?:frac|dfrac|tfrac|sqrt)\b/.test(raw)) return raw.trim().replace(/\s+/g, "");
   let s = raw.trim().replace(/\s+/g, "").replace(/\*/g, "");
   s = s.replace(/\\pi|π|pi/gi, "π").replace(/\\/g, "").replace(/π/g, "\\pi");
   const frac = s.match(/^(-?)(.+?)\/(.+)$/);
@@ -137,17 +192,28 @@ function extractFunction(rawLatex: string): string | null {
   if (eq) tails.push(eq[1]); // "f(x) = <expr>" is the strongest signal
   // Each "of"/"for" position independently — a greedy `(.+)` on the first "of"
   // would swallow a later "for <fn>", so take the substring after each keyword.
-  for (const m of rawLatex.matchAll(/\b(?:of|for)\b/gi)) {
+  // "EXPAND √(1+x) as a Maclaurin series" names the function with no preposition
+  // at all, so the verb has to be a keyword too.
+  for (const m of rawLatex.matchAll(/\b(?:of|for|expand)\b/gi)) {
     tails.push(rawLatex.slice((m.index ?? 0) + m[0].length));
   }
 
   for (const raw of tails) {
-    // Cut at the first center/order qualifier so only the function remains.
+    // Cut at the first center/order/series qualifier so only the function
+    // remains. The SERIES vocabulary has to be here too: in "the first 4 terms
+    // of the Maclaurin series for e^x" the tail after "of" is "the Maclaurin
+    // series for e^x", and without a cut that whole phrase survived — see the
+    // prose guard below for why that was worse than it looks.
     const cut = raw
       .split(
-        /,|\b(?:first|around|about|centered|center|at|to\s+order|up\s+to|order|degree|terms?)\b/i
+        /,|\b(?:first|around|about|near|centered|center|at|as|to\s+order|up\s+to|order|degree|terms?|with|where|valid|includ(?:ing|e)|maclaurin|taylor|series|polynomial|expansion|expand|approximation)\b/i
       )[0]
       .replace(/[,.;:]+\s*$/, "")
+      // A leading determiner is English, not a product of three variables. Left
+      // in, "the" survived every check below — `latexToAscii` reads it as t·h·e,
+      // whose letters are all single-character and so look exactly like real
+      // variables — and it was returned as the function to expand.
+      .replace(/^\s*(?:the|a|an|its|this|that)\s+/i, "")
       .trim();
     if (!cut) continue;
     const ascii = latexToAscii(cut).trim();
@@ -157,9 +223,28 @@ function extractFunction(rawLatex: string): string | null {
     } catch {
       continue;
     }
+    if (looksLikeProse(ascii)) continue;
     return ascii;
   }
   return null;
+}
+
+/**
+ * True when an "expression" is really leftover English. mathjs parses adjacent
+ * identifiers as implicit multiplication, so `parse()` ACCEPTS "the Maclaurin
+ * series for e^x" as the product the·Maclaurin·series·for·eˣ — it never throws,
+ * and the phrase sailed past the parse check above. Real math variables are
+ * single letters (or a named Greek/constant), so a multi-letter symbol that
+ * isn't one of those is a word, and the candidate must be rejected.
+ */
+function looksLikeProse(ascii: string): boolean {
+  const named = new Set([
+    ...CONSTS,
+    "theta", "phi", "alpha", "beta", "gamma", "lambda", "mu", "nu", "omega",
+    "sigma", "delta", "epsilon", "tau", "rho", "psi", "chi", "xi", "eta", "zeta",
+    "infinity", "Inf",
+  ]);
+  return variablesIn(ascii).some((v) => v.length > 1 && !named.has(v));
 }
 
 /** Solve a Taylor/Maclaurin request, gated by the contact-order verifier. */
@@ -270,8 +355,11 @@ function buildAnswer(
   const absC = centerLatex.replace(/^-/, "");
   const baseLatex =
     center === 0 ? variable : `\\left(${variable} ${center < 0 ? "+" : "-"} ${absC}\\right)`;
+  // The plain answer is read as text, not rendered — a `\frac{\pi}{3}` in it is
+  // just noise where "π/3" is the thing a student would write.
+  const absPlain = centerPlainOf(absC);
   const basePlain =
-    center === 0 ? variable : `(${variable} ${center < 0 ? "+" : "-"} ${absC})`;
+    center === 0 ? variable : `(${variable} ${center < 0 ? "+" : "-"} ${absPlain})`;
 
   let latex = "";
   let plain = "";
@@ -289,6 +377,15 @@ function buildAnswer(
   }
   if (latex === "") return { latex: "0", plain: "0" };
   return { latex, plain };
+}
+
+/** A centre built for LaTeX, respelled as plain text. */
+function centerPlainOf(latex: string): string {
+  return latex
+    .replace(/\\(?:d|t)?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "$1/$2")
+    .replace(/\\pi/g, "π")
+    .replace(/[{}]/g, "")
+    .replace(/\\/g, "");
 }
 
 function powLatex(k: number, base: string): string {

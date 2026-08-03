@@ -13,6 +13,11 @@
 import type { MsStep } from "mathsteps";
 
 import type { AnimationSchema } from "./animationSchema";
+import type { VietaQuery } from "./vieta";
+import type { ArcLengthQuery } from "./arclength";
+import type { NumericRootQuery } from "./numroot";
+import type { ParamDetQuery } from "./paramdet";
+import type { ModularQuery } from "./modular";
 
 // --- §4 wire contract -------------------------------------------------------
 
@@ -303,11 +308,18 @@ export type Strategy =
   | "linsystem" // a linear system Ax=b, solved via mathjs, verified by A·x=b
   | "simultaneous" // 2-var linear+quadratic pair: substitution, verified per-pair
   | "taylor" // Taylor/Maclaurin series via mathjs, proven by contact order
+  | "vieta" // symmetric functions of a polynomial's roots, proven by re-expansion
+  | "arc_length" // curve length, by two quadrature rules that must agree
+  | "numeric_root" // a root to N decimal places, bisection proven by Newton–Raphson
+  | "param_det" // when a parametrised matrix is singular, proven by substitution
+  | "modular" // a remainder, proven by reducing mod m along a second path
   | "limit" // lim x→a f(x) via a numeric convergence oracle (deterministic)
   | "bounded_trig" // T(x)=c on a closed interval, by enumerate-and-verify
   | "circle" // circle mensuration (area/circumference/arc/sector) — exact π-form
   | "solid" // solid-geometry "show that …" / optimisation, proven by substitution
   | "ode_point_eval" // IVP evaluated at a point, y(b), by cross-checked numeric integration
+  | "calculus" // applied differentiation (dy/dx, slope, tangent, stationary points)
+  | "complex" // complex numbers, cross-checked in the real 2×2 matrix representation
   | "conceptual" // a proof / abstract-algebra / analysis prompt → route to the tutor
   | "llm_candidate"; // engines can't solve it → constrained LLM, then verify
 
@@ -357,9 +369,15 @@ export interface Classification {
   linalgOp?: string;
   matrixData?: number[][];
   matrixB?: number[][];
+  /** Extra integer operands for a matrix op — the exponent of Aⁿ, or the
+   * (row, column) of the element aᵢⱼ. */
+  linalgArgs?: number[];
   /** A vector request: dot/cross/magnitude + the operand vector(s). */
   vectorOp?: string;
   vectorData?: number[][];
+  /** Extra numeric operands for a vector op — the (magnitude, angle) to resolve
+   * into components, or the m : n of a section point. */
+  vectorArgs?: number[];
   /** A linear system Ax=b: the coefficient matrix, the RHS, the unknown order,
    * and the original equations (for re-substitution) — solved deterministically
    * and verified by A·x=b AND against the original equations. */
@@ -383,6 +401,17 @@ export interface Classification {
   };
   /** A Taylor/Maclaurin request: the function (ascii), center + its display, and
    * order. The expansion variable is `unknown`. */
+  /** A symmetric function of a polynomial's roots — the polynomial, the root
+   * names, and the expression asked for. */
+  vieta?: VietaQuery;
+  /** An arc-length request: the √(x′²+y′²) integrand, its variable and bounds. */
+  arcLength?: ArcLengthQuery;
+  /** A root wanted as a number: `f`, the precision, and which root. */
+  numericRoot?: NumericRootQuery;
+  /** A parametrised matrix and the parameter its determinant depends on. */
+  paramDet?: ParamDetQuery;
+  /** A remainder question: the integer expression, its fixed values, the modulus. */
+  modular?: ModularQuery;
   taylorFn?: string;
   taylorCenter?: number;
   taylorCenterLatex?: string;
@@ -417,6 +446,16 @@ export interface Classification {
   /** An initial-value ODE evaluated at a point — the parsed IVP (residual, order,
    * initial conditions, target point); integrated numerically + cross-checked. */
   odePointEval?: import("./odePointEval").OdePointEvalQuery;
+  /** Applied differentiation: a function DEFINED as `y = f(x)` plus a question
+   * about its derivative in Leibniz notation — dy/dx, "show that dy/dx = …",
+   * the slope/velocity/acceleration at a point, a tangent or normal line, the
+   * angle of inclination, or the stationary points and their nature. */
+  calculus?: import("./calculus").CalculusSpec;
+  /** Complex numbers: standard form, modulus, argument, conjugate, polar form,
+   * nth roots, or an equation solved over ℂ. Arithmetic answers are re-computed
+   * in the real 2×2 matrix representation of ℂ, which shares no code path with
+   * mathjs's complex type. */
+  complex?: import("./complex").ComplexSpec;
 }
 
 /** A raw deterministic step, before the LLM adds the `why`. */
