@@ -50,6 +50,10 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# `build` is a SYMLINK here (to ~/.matheasy-build, off the iCloud-synced Desktop
+# — iCloud breaks codesigning). A trailing-slash pattern only matches real
+# directories, so the symlink itself needs this second, slashless entry.
+/build
 /coverage/
 
 # Symbolication related

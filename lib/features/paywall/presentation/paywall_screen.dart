@@ -565,7 +565,7 @@ class _LegalLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: document.title,
+      label: document.title(context.l10n),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).push(
@@ -581,7 +581,7 @@ class _LegalLink extends StatelessWidget {
               heightFactor: 1,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text(document.title, style: style),
+                child: Text(document.title(context.l10n), style: style),
               ),
             ),
           ),

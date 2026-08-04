@@ -2069,7 +2069,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'לא הצלחתי לקרוא את התמונה כרגע. בדוק את החיבור ונסה שוב.';
+      'לא הצלחתי לקרוא את התמונה הזו כרגע. נסה שוב בעוד רגע.';
+
+  @override
+  String get tutorUnreachable =>
+      'מצטער — לא הצלחתי להגיע למורה כרגע. נסה שוב בעוד רגע.';
 
   @override
   String get tutorLessonGoal => 'המטרה';
@@ -2090,4 +2094,117 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'ההסבר של נומי';
+
+  @override
+  String get profileDeleteCancelled =>
+      'המחיקה בוטלה — החשבון והנתונים שלך נשארו כפי שהיו.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'לא הצלחנו לאמת שזה אתה, ולכן שום דבר לא נמחק. היכנס שוב ונסה שנית.';
+
+  @override
+  String get legalPrivacyTitle => 'מדיניות פרטיות';
+
+  @override
+  String get legalTermsTitle => 'תנאי שימוש';
+
+  @override
+  String get legalLastUpdated => 'עודכן לאחרונה ב-4 באוגוסט 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'הגרסה הנוכחית מוצגת למעלה. המדיניות המעודכנת תמיד זמינה גם באינטרנט בכתובת';
+
+  @override
+  String get legalPrivacyDataTitle => 'היכן הנתונים שלך נשמרים';
+
+  @override
+  String get legalPrivacyDataBody =>
+      '‏Matheasy שומר את ההתקדמות, ההישגים, העדפות הלמידה וההגדרות שלך במכשיר הזה. כשנכנסים עם Google או Apple, נתוני הלמידה האלה מסתנכרנים גם עם החשבון שלך דרך חיבור מאובטח (באמצעות Google Firebase) — כך יש להם גיבוי והם עוברים איתך למכשיר חדש.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'מה אנחנו אוספים';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'כניסה עם Google או Apple מספקת לנו פרופיל בסיסי — השם, כתובת האימייל והתמונה שלך — כדי ליצור ולהתאים אישית את החשבון. כדי שהאפליקציה תפעל, אנחנו מעבדים את התרגילים שאתה סורק או מקליד, את פעילות התרגול שלך ואת ההתקדמות שלך. עבור משתמשים מחוברים, המידע נשמר בחשבון כדי שיסתנכרן בין המכשירים שלך. מעבר לכך איננו מבקשים דבר.';
+
+  @override
+  String get legalPrivacyAiTitle => 'עיבוד בבינה מלאכותית (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      '‏Matheasy מופעל על ידי בינה מלאכותית. כשאתה סורק תרגיל, מקליד משוואה, שואל את המורה החכם או פותח למידה חזותית, התוכן הזה — התמונה של הפתרון שלך, טקסט המשוואה או השאלה שלך — נשלח בחיבור מאובטח לספקית הבינה המלאכותית שלנו, OpenAI, כדי שתוכל לקרוא את התרגיל ולהפיק את הפתרון, ההסבר או התשובה. תמונות נבדקות אוטומטית לאיתור תוכן לא בטוח לפני העיבוד. התוכן משמש כדי להשיב לך; הוא לעולם אינו נמכר ואינו משמש למיקוד פרסומות. הטיפול של OpenAI בנתונים האלה כפוף למדיניות השימוש בנתוני ה-API שלה.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'פרסום ומדידה (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'אנחנו מפרסמים את Matheasy בפלטפורמות של Meta כמו Facebook ו-Instagram, ומשתמשים בערכת התוכנה של Meta כדי למדוד אם הפרסומות האלה באמת עובדות. אם תאשר מעקב, נשתף עם Meta חלק מהפעילות שלך באפליקציה: שהתקנת ופתחת את Matheasy, שיצרת חשבון, שסיימת את ההיכרות, שביצעת סריקה ראשונה, שפתחת את המורה החכם או את הלמידה החזותית, שהתחלת או סיימת תרגול, ושצפית במסך המנוי. אירועי מנוי נשלחים ל-Meta מהשרתים שלנו, לא מהאפליקציה. יחד עם זה אנחנו משתפים את מזהה הפרסום של המכשיר שלך ומזהה חשבון, ש-Meta משתמשת בהם כדי לקשר בינך לבין פרסומת שאולי ראית. ‏Meta רשאית להשתמש בנתונים האלה למדידה ולמיקוד פרסומות, גם בפלטפורמות שלה עצמה.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'הבחירה שלך לגבי מעקב';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'שום דבר מכל זה לא קורה בלי רשותך. קודם אנחנו שואלים לגילך, ואחר כך מבקשים אישור. אם תסרב — או תגיד לנו שאתה מתחת לגיל 13 — ערכת Meta לעולם לא תופעל: לא ייאסף שום מזהה פרסום ולא תישלח שום פעילות ל-Meta. ‏Matheasy עובד בדיוק אותו הדבר בשני המקרים; שום תכונה לא נמנעת ממך בגלל סירוב. אפשר לשנות את דעתך בכל רגע בהגדרות המכשיר, תחת פרטיות ואבטחה ← מעקב.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'ניתוח שימוש ודוחות קריסה';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'אנחנו משתמשים ב-Google Firebase כדי להבין באילו חלקים באפליקציה משתמשים ולקבל דוחות קריסה אוטומטיים, כדי שנוכל לתקן את מה שנשבר ולהחליט מה לבנות הלאה. המידע מקושר להתקנת האפליקציה ולא לפרופיל הפרסומי שלך, ולעולם אינו נמכר.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'פרטיות ילדים';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      '‏Matheasy נבנה ללומדים בכל הגילים, כולל תלמידים מתחת לגיל 13, וכל התכונות פתוחות בפניהם. מה שכן שונה הוא המעקב: אנחנו שואלים לגיל לפני שמאפשרים לתוכנת פרסום כלשהי לפעול, ולמי שמתחת לגיל 13 ערכת Meta לעולם לא מופעלת, לא נאסף מזהה פרסום ושום דבר לא משותף למיקוד פרסומי. מעבר לפרטי החשבון שתוארו למעלה, איננו אוספים ביודעין מידע אישי מילדים. אם נדמה לך שילד מסר לנו יותר מכך, פנה אלינו ונמחק זאת.';
+
+  @override
+  String get legalPrivacyControlTitle => 'השליטה בידיים שלך';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'אפשר לערוך או למחוק את העדפות הלמידה שלך בכל עת. מחיקת החשבון מוחקת לצמיתות את נתוני הלמידה המסונכרנים מהשרתים שלנו, יחד עם העותק השמור במכשיר הזה — לפני כן נבקש ממך להיכנס פעם נוספת, כדי לוודא שהחשבון אכן שלך. אפשר לבטל את הרשאת המעקב בכל רגע דרך הגדרות המכשיר.';
+
+  @override
+  String get legalPrivacyContactTitle => 'יצירת קשר';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'יש לך שאלות על המדיניות הזו, או שברצונך שנמחק את הנתונים שלך? כתוב לנו לכתובת $email ונשמח לעזור.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'שימוש ב-Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      '‏Matheasy עוזר לך ללמוד מתמטיקה באמצעות סריקה, פתרונות מודרכים, מורה חכם ותרגול. השתמש בו ללמידה שלך והתייחס לאחרים בכבוד.';
+
+  @override
+  String get legalTermsAccountTitle => 'החשבון שלך';
+
+  @override
+  String get legalTermsAccountBody =>
+      'אתה אחראי לפעילות שנעשית בחשבון שלך, אז שמור על פרטי הכניסה. אפשר למחוק את החשבון, ואת כל מה שמסונכרן אליו, מלשונית הפרופיל בכל עת.';
+
+  @override
+  String get legalTermsBillingTitle => 'מנויים וחיוב';
+
+  @override
+  String get legalTermsBillingBody =>
+      '‏Matheasy Pro הוא מנוי בחידוש אוטומטי שמחויב דרך חשבון חנות האפליקציות שלך. המחיר ותקופת החיוב מוצגים לפני האישור. המנוי מתחדש אוטומטית בסוף כל תקופה אלא אם תבטל לפחות 24 שעות מראש, ואפשר לנהל או לבטל אותו בכל עת בהגדרות חשבון החנות שלך.';
+
+  @override
+  String get legalTermsAiTitle => 'עזר ללמידה, לא ערובה';
+
+  @override
+  String get legalTermsAiBody =>
+      'התשובות נבדקות על ידי הצבתן חזרה בתרגיל המקורי, ו-Matheasy מודיע לך כשלא הצליח לאמת תשובה במקום להציג לך ניחוש בביטחון. עם זאת, ההסברים נוצרים אוטומטית ולא תמיד יהיו מושלמים. תמיד בדוק שוב עבודה שחשובה לך.';
 }

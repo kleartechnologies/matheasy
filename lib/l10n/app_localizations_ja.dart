@@ -2020,7 +2020,11 @@ class AppLocalizationsJa extends AppLocalizations {
       'はっきり読み取れませんでした。明るいところで、問題が画面いっぱいに写るようにもう一度撮ってみてください。入力してくれてもすぐに手伝います。';
 
   @override
-  String get tutorImageFailed => 'いまその写真を読み取れませんでした。通信状態を確認して、もう一度お試しください。';
+  String get tutorImageFailed => 'ただいまその写真を読み取れませんでした。少し時間をおいてからもう一度お試しください。';
+
+  @override
+  String get tutorUnreachable =>
+      '申し訳ありません。ただいまチューターに接続できませんでした。少し時間をおいてからもう一度お試しください。';
 
   @override
   String get tutorLessonGoal => '目標';
@@ -2041,4 +2045,116 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numi の解説';
+
+  @override
+  String get profileDeleteCancelled => '削除をキャンセルしました。アカウントとデータはそのままです。';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'ご本人であることを確認できなかったため、何も削除されていません。もう一度サインインしてからお試しください。';
+
+  @override
+  String get legalPrivacyTitle => 'プライバシーポリシー';
+
+  @override
+  String get legalTermsTitle => '利用規約';
+
+  @override
+  String get legalLastUpdated => '最終更新日：2026年8月4日';
+
+  @override
+  String get legalOnlineNote =>
+      '上に表示しているのが現在のバージョンです。常に最新のポリシーは次のページでもご覧いただけます：';
+
+  @override
+  String get legalPrivacyDataTitle => 'データの保存場所';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy は、学習の進捗、達成記録、学習の好み、設定をこの端末に保存します。Google または Apple でサインインすると、その学習データは安全な通信を通じてアカウントにも同期され（Google Firebase を使用）、バックアップとして残り、新しい端末でも引き継がれます。';
+
+  @override
+  String get legalPrivacyCollectTitle => '収集する情報';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Google または Apple でサインインすると、アカウントの作成とパーソナライズのために、お名前・メールアドレス・写真といった基本的なプロフィールを受け取ります。アプリの動作のために、スキャンまたは入力された問題、練習の履歴、学習の進捗を処理します。サインイン済みの場合、これらはアカウントに保存され、お使いの端末間で同期されます。それ以外の情報は求めません。';
+
+  @override
+  String get legalPrivacyAiTitle => 'AI による処理（OpenAI）';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy は AI で動作しています。問題をスキャンしたとき、数式を入力したとき、AI チューターに質問したとき、ビジュアル学習を開いたときに、その内容（答案の写真、数式のテキスト、ご質問）は安全な通信を通じて AI 提供元である OpenAI に送信され、問題を読み取って解答・解説・返答を生成します。写真は処理の前に、不適切な内容がないか自動的にチェックされます。この内容はあなたへの応答のためだけに使われ、販売されることも、広告のターゲティングに使われることもありません。OpenAI によるこれらのデータの取り扱いは、同社の API データ利用ポリシーに従います。';
+
+  @override
+  String get legalPrivacyAdsTitle => '広告と効果測定（Meta）';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      '当社は Facebook や Instagram などの Meta のプラットフォームで Matheasy を宣伝しており、その広告が実際に機能しているかを測定するために Meta のソフトウェアキットを利用しています。トラッキングを許可した場合、アプリ内の行動の一部を Meta と共有します：Matheasy をインストールして起動したこと、アカウントを作成したこと、はじめの案内を完了したこと、初回スキャンを行ったこと、AI チューターまたはビジュアル学習を開いたこと、練習を開始または完了したこと、サブスクリプション画面を表示したことです。サブスクリプション関連のイベントは、アプリではなく当社のサーバーから Meta に送信されます。あわせて端末の広告識別子とアカウント識別子を共有し、Meta はこれらを使って、あなたが見た可能性のある広告と結び付けます。Meta は自社プラットフォーム上を含め、これらのデータを広告の測定とターゲティングに利用することがあります。';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'トラッキングの選択';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      '以上のことは、あなたの許可なしには一切行われません。まず年齢をお尋ねし、その後に許可を求めます。拒否した場合、または13歳未満であるとお答えいただいた場合、Meta のソフトウェアキットは一切起動しません。広告識別子は収集されず、行動データが Meta に送信されることもありません。どちらを選んでも Matheasy の動作はまったく同じで、拒否したからといって使えなくなる機能はありません。設定は端末の「プライバシーとセキュリティ」→「トラッキング」からいつでも変更できます。';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => '利用状況の分析とクラッシュレポート';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'アプリのどの部分が使われているかを把握し、自動のクラッシュレポートを受け取るために Google Firebase を利用しています。これにより不具合を修正し、次に何を作るべきかを判断できます。これらはアプリのインストールに紐づくもので、広告プロフィールには紐づかず、販売されることもありません。';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'お子さまのプライバシー';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy は13歳未満の児童を含む、あらゆる年齢の学習者のために作られており、すべての機能をご利用いただけます。異なるのはトラッキングです。広告関連のソフトウェアを動かす前に必ず年齢をお尋ねし、13歳未満の場合、Meta のソフトウェアキットは一切起動せず、広告識別子も収集されず、広告ターゲティングのために何かが共有されることもありません。上記のアカウント情報を除き、児童から個人情報を故意に収集することはありません。お子さまがそれ以外の情報を提供したとお考えの場合は、ご連絡いただければ削除いたします。';
+
+  @override
+  String get legalPrivacyControlTitle => 'あなたが管理できます';
+
+  @override
+  String get legalPrivacyControlBody =>
+      '学習の好みはいつでも変更・削除できます。アカウントを削除すると、同期された学習データがサーバーから完全に消去され、この端末上のコピーも削除されます。その前に、アカウントがご本人のものであることを確認するため、もう一度サインインをお願いします。トラッキングの許可は、端末の設定からいつでも取り消せます。';
+
+  @override
+  String get legalPrivacyContactTitle => 'お問い合わせ';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'このポリシーについてのご質問、またはデータの削除をご希望の場合は、$email までご連絡ください。対応いたします。';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Matheasy の利用について';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy は、スキャン、段階的な解答、AI チューター、練習問題を通じて数学の学習をサポートします。ご自身の学習のためにお使いいただき、他の方への配慮をお願いします。';
+
+  @override
+  String get legalTermsAccountTitle => 'アカウントについて';
+
+  @override
+  String get legalTermsAccountBody =>
+      'ご自身のアカウントで行われた操作については、お客さまが責任を負います。サインイン情報は安全に管理してください。アカウントと、それに同期されているすべての内容は、いつでも「プロフィール」タブから削除できます。';
+
+  @override
+  String get legalTermsBillingTitle => 'サブスクリプションと請求';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro は自動更新のサブスクリプションで、お客さまのアプリストアのアカウントに課金されます。価格と請求期間は、確定前に表示されます。各期間の終了時に自動更新され、更新を止めるには少なくとも24時間前にキャンセルしてください。管理とキャンセルは、アプリストアのアカウント設定からいつでも行えます。';
+
+  @override
+  String get legalTermsAiTitle => '学習の助けであり、保証ではありません';
+
+  @override
+  String get legalTermsAiBody =>
+      '解答は元の問題に代入して検算され、検証できなかった場合、Matheasy は自信ありげに推測を示すのではなく、その旨をお伝えします。とはいえ解説は自動生成されるため、常に完璧とは限りません。大切な答案は必ずご自身でも確認してください。';
 }

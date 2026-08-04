@@ -2100,7 +2100,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Most nem tudtam elolvasni azt a fényképet. Ellenőrizd a kapcsolatot, és próbáld újra.';
+      'Most nem sikerült elolvasnom azt a fényképet. Próbáld meg újra egy kis idő múlva.';
+
+  @override
+  String get tutorUnreachable =>
+      'Sajnálom – most nem sikerült elérnem a tanárt. Próbáld meg újra egy kis idő múlva.';
 
   @override
   String get tutorLessonGoal => 'Cél';
@@ -2121,4 +2125,117 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numi magyarázata';
+
+  @override
+  String get profileDeleteCancelled =>
+      'A törlés megszakadt – a fiókod és az adataid érintetlenek.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Nem tudtuk megerősíteni, hogy te vagy az, ezért semmi sem törlődött. Jelentkezz be újra, és próbáld meg ismét.';
+
+  @override
+  String get legalPrivacyTitle => 'Adatvédelmi tájékoztató';
+
+  @override
+  String get legalTermsTitle => 'Felhasználási feltételek';
+
+  @override
+  String get legalLastUpdated => 'Utoljára frissítve: 2026. augusztus 4.';
+
+  @override
+  String get legalOnlineNote =>
+      'Fent az aktuális változat látható. A mindig naprakész tájékoztató online is elérhető itt:';
+
+  @override
+  String get legalPrivacyDataTitle => 'Hol vannak az adataid';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'A Matheasy a haladásodat, az eredményeidet, a tanulási beállításaidat és a beállításaidat ezen az eszközön tárolja. Ha Google- vagy Apple-fiókkal jelentkezel be, ezek a tanulási adatok biztonságos kapcsolaton keresztül a fiókodba is szinkronizálódnak (a Google Firebase segítségével), így biztonsági mentésük van, és veled együtt átkerülnek egy új eszközre.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Mit gyűjtünk';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'A Google- vagy Apple-fiókkal való bejelentkezés egy alapszintű profilt ad nekünk – a nevedet, az e-mail-címedet és a képedet –, hogy létrehozhassuk és személyre szabhassuk a fiókodat. Az alkalmazás működéséhez feldolgozzuk a beszkennelt vagy begépelt feladatokat, a gyakorlási tevékenységedet és a haladásodat. Bejelentkezett felhasználóknál ezek a fiókodban tárolódnak, hogy szinkronizálódhassanak az eszközeid között. Ezen túl semmit sem kérünk.';
+
+  @override
+  String get legalPrivacyAiTitle => 'MI-feldolgozás (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'A Matheasy mesterséges intelligenciával működik. Amikor beszkennelsz egy feladatot, begépelsz egy egyenletet, kérdezel az MI-tanártól, vagy megnyitod a Vizuális tanulást, az adott tartalom – a megoldásodról készült fénykép, az egyenlet szövege vagy a kérdésed – biztonságos kapcsolaton keresztül elmegy MI-szolgáltatónkhoz, az OpenAI-hoz, hogy el tudja olvasni a feladatot, és elkészítse a megoldást, a magyarázatot vagy a választ. A fényképeket feldolgozás előtt automatikusan ellenőrizzük nem biztonságos tartalom szempontjából. Ezt a tartalmat kizárólag a válaszadásra használjuk; soha nem adjuk el, és soha nem használjuk hirdetések célzására. Azt, hogy az OpenAI hogyan kezeli ezeket az adatokat, a saját API-adathasználati irányelvei szabályozzák.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Hirdetés és mérés (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'A Matheasyt a Meta platformjain – például a Facebookon és az Instagramon – hirdetjük, és a Meta szoftvercsomagját használjuk annak mérésére, hogy ezek a hirdetések valóban működnek-e. Ha engedélyezed a követést, az alkalmazáson belüli tevékenységed egy részét megosztjuk a Metával: hogy telepítetted és megnyitottad a Matheasyt, létrehoztál egy fiókot, végigmentél a bemutatón, elvégezted az első beolvasást, megnyitottad az MI-tanárt vagy a Vizuális tanulást, elkezdtél vagy befejeztél egy gyakorlást, és megnézted az előfizetési képernyőt. Az előfizetéssel kapcsolatos eseményeket a szervereink küldik a Metának, nem az alkalmazás. Ezekkel együtt megosztjuk az eszközöd hirdetési azonosítóját és egy fiókazonosítót, amelyekkel a Meta összekapcsol téged egy hirdetéssel, amelyet esetleg láttál. A Meta ezeket az adatokat hirdetések mérésére és célzására használhatja, a saját platformjain is.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'A te döntésed a követésről';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Ezek közül semmi sem történik meg az engedélyed nélkül. Először a korodat kérdezzük meg, és csak utána kérünk engedélyt. Ha nemet mondasz – vagy azt jelzed, hogy 13 évnél fiatalabb vagy –, a Meta csomagja soha nem indul el: semmilyen hirdetési azonosítót nem gyűjtünk, és semmilyen tevékenységet nem küldünk a Metának. A Matheasy mindkét esetben pontosan ugyanúgy működik; egyetlen funkciót sem vonunk meg attól, aki nemet mond. Bármikor meggondolhatod magad az eszköz beállításaiban, az Adatvédelem és biztonság → Követés menüpontban.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analitika és hibajelentések';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'A Google Firebase-t használjuk, hogy lássuk, az alkalmazás mely részeit használják, és hogy automatikus összeomlás-jelentéseket kapjunk – így ki tudjuk javítani, ami elromlik, és el tudjuk dönteni, mit építsünk ezután. Ez az alkalmazás telepítéséhez kötődik, nem a hirdetési profilodhoz, és soha nem adjuk el.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Gyermekek adatvédelme';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'A Matheasy minden korosztálynak készült, a 13 év alatti diákoknak is, és minden funkció nyitva áll előttük. Ami eltér, az a követés: még azelőtt megkérdezzük a kort, hogy bármilyen hirdetési szoftver egyáltalán elindulhatna, és 13 év alattiaknál a Meta csomagja soha nem indul el, semmilyen hirdetési azonosítót nem gyűjtünk, és semmit nem osztunk meg hirdetéscélzás céljából. A fent leírt fiókadatokon túl tudatosan nem gyűjtünk személyes adatokat gyermekektől. Ha úgy gondolod, hogy egy gyermek ennél többet adott meg nekünk, keress minket, és töröljük.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Nálad az irányítás';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'A tanulási beállításaidat bármikor módosíthatod vagy törölheted. A fiók törlése véglegesen eltávolítja a szinkronizált tanulási adataidat a szervereinkről, az ezen az eszközön tárolt másolattal együtt – előtte megkérünk, hogy jelentkezz be még egyszer, így ellenőrizzük, hogy a fiók valóban a tiéd. A követési engedélyt bármikor visszavonhatod az eszköz beállításaiban.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kapcsolat';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Kérdésed van a tájékoztatóval kapcsolatban, vagy szeretnéd töröltetni az adataidat? Írj nekünk a $email címre, és segítünk.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'A Matheasy használata';
+
+  @override
+  String get legalTermsUsingBody =>
+      'A Matheasy beolvasással, lépésről lépésre megoldásokkal, MI-tanárral és gyakorlással segít matematikát tanulni. Használd a saját tanulásodhoz, és légy tisztelettudó másokkal.';
+
+  @override
+  String get legalTermsAccountTitle => 'A fiókod';
+
+  @override
+  String get legalTermsAccountBody =>
+      'A fiókoddal végzett tevékenységért te felelsz, ezért tartsd biztonságban a bejelentkezési adataidat. A fiókodat – és mindent, ami hozzá szinkronizálódott – bármikor törölheted a Profil lapon.';
+
+  @override
+  String get legalTermsBillingTitle => 'Előfizetések és számlázás';
+
+  @override
+  String get legalTermsBillingBody =>
+      'A Matheasy Pro automatikusan megújuló előfizetés, amelyet az alkalmazásbolti fiókodon keresztül számlázunk. Az árat és a számlázási időszakot a megerősítés előtt megmutatjuk. Minden időszak végén automatikusan megújul, hacsak legalább 24 órával korábban nem mondod le; bármikor kezelheted vagy lemondhatod az alkalmazásbolti fiókod beállításaiban.';
+
+  @override
+  String get legalTermsAiTitle => 'Segítség a tanuláshoz, nem garancia';
+
+  @override
+  String get legalTermsAiBody =>
+      'A válaszokat úgy ellenőrizzük, hogy visszahelyettesítjük őket az eredeti feladatba, és a Matheasy szól, ha egy választ nem tudott ellenőrizni, ahelyett hogy magabiztosan mutatna egy tippet. A magyarázatok azonban automatikusan készülnek, és nem lesznek mindig tökéletesek. Amikor a munka igazán számít, mindig ellenőrizd le magad is.';
 }

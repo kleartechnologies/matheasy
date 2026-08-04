@@ -2104,7 +2104,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Nie udało mi się teraz odczytać tego zdjęcia. Sprawdź połączenie i spróbuj ponownie.';
+      'Nie udało mi się teraz odczytać tego zdjęcia. Spróbuj ponownie za chwilę.';
+
+  @override
+  String get tutorUnreachable =>
+      'Przepraszam — nie udało mi się teraz połączyć z korepetytorem. Spróbuj ponownie za chwilę.';
 
   @override
   String get tutorLessonGoal => 'Cel';
@@ -2125,4 +2129,117 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Wyjaśnienie Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Usuwanie anulowane — Twoje konto i dane pozostały nienaruszone.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Nie udało nam się potwierdzić Twojej tożsamości, więc nic nie zostało usunięte. Zaloguj się ponownie i spróbuj jeszcze raz.';
+
+  @override
+  String get legalPrivacyTitle => 'Polityka prywatności';
+
+  @override
+  String get legalTermsTitle => 'Regulamin';
+
+  @override
+  String get legalLastUpdated => 'Ostatnia aktualizacja: 4 sierpnia 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Powyżej znajduje się bieżąca wersja. Zawsze aktualna polityka jest też dostępna online pod adresem';
+
+  @override
+  String get legalPrivacyDataTitle => 'Gdzie są Twoje dane';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy przechowuje Twoje postępy, osiągnięcia, preferencje nauki i ustawienia na tym urządzeniu. Gdy zalogujesz się przez Google lub Apple, te dane nauki są dodatkowo synchronizowane z Twoim kontem przez bezpieczne połączenie (za pomocą Google Firebase) — dzięki temu masz kopię zapasową, a dane przeniosą się na nowe urządzenie.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Co zbieramy';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Logowanie przez Google lub Apple przekazuje nam podstawowy profil — imię i nazwisko, adres e-mail oraz zdjęcie — abyśmy mogli utworzyć i spersonalizować Twoje konto. Aby aplikacja działała, przetwarzamy zadania, które skanujesz lub wpisujesz, Twoją aktywność w ćwiczeniach oraz postępy. W przypadku zalogowanych użytkowników dane te są zapisywane na koncie, aby mogły synchronizować się między urządzeniami. O nic więcej nie prosimy.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Przetwarzanie przez SI (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy działa dzięki sztucznej inteligencji. Gdy skanujesz zadanie, wpisujesz równanie, pytasz korepetytora SI albo otwierasz Naukę wizualną, ta treść — zdjęcie Twojej pracy, tekst równania lub pytanie — jest wysyłana bezpiecznym połączeniem do naszego dostawcy SI, firmy OpenAI, aby mogła odczytać zadanie i przygotować rozwiązanie, wyjaśnienie lub odpowiedź. Zdjęcia są wcześniej automatycznie sprawdzane pod kątem niebezpiecznych treści. Te treści służą do udzielenia Ci odpowiedzi; nigdy nie są sprzedawane ani wykorzystywane do kierowania reklam. Sposób przetwarzania tych danych przez OpenAI regulują jej zasady korzystania z danych API.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Reklama i pomiary (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Reklamujemy Matheasy na platformach Meta, takich jak Facebook i Instagram, i korzystamy z oprogramowania Meta, aby zmierzyć, czy te reklamy naprawdę działają. Jeśli zezwolisz na śledzenie, udostępniamy Meta część Twojej aktywności w aplikacji: że zainstalowałeś i otworzyłeś Matheasy, założyłeś konto, ukończyłeś wprowadzenie, wykonałeś pierwsze skanowanie, otworzyłeś korepetytora SI lub Naukę wizualną, rozpocząłeś lub ukończyłeś ćwiczenie oraz wyświetliłeś ekran subskrypcji. Zdarzenia subskrypcyjne wysyłają do Meta nasze serwery, a nie aplikacja. Razem z tym udostępniamy identyfikator reklamowy Twojego urządzenia oraz identyfikator konta, których Meta używa, aby powiązać Cię z reklamą, którą mogłeś zobaczyć. Meta może wykorzystywać te dane do pomiaru i kierowania reklam, także na własnych platformach.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Twój wybór dotyczący śledzenia';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Nic z powyższych rzeczy nie dzieje się bez Twojej zgody. Najpierw pytamy o wiek, a potem o pozwolenie. Jeśli odmówisz — albo powiesz, że masz mniej niż 13 lat — oprogramowanie Meta nigdy się nie uruchomi: nie zbieramy identyfikatora reklamowego i nie wysyłamy do Meta żadnej aktywności. Matheasy działa dokładnie tak samo w obu przypadkach; odmowa nie odbiera Ci żadnej funkcji. Zdanie możesz zmienić w każdej chwili w ustawieniach urządzenia, w sekcji Prywatność i ochrona → Śledzenie.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analityka i raporty awarii';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Używamy Google Firebase, aby wiedzieć, z których części aplikacji korzystasz, i otrzymywać automatyczne raporty awarii — dzięki temu naprawiamy to, co się psuje, i decydujemy, co zbudować dalej. Dane te są powiązane z instalacją aplikacji, a nie z Twoim profilem reklamowym, i nigdy nie są sprzedawane.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Prywatność dzieci';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy jest przeznaczony dla uczących się w każdym wieku, w tym poniżej 13 lat, i wszystkie funkcje są dla nich dostępne. Różnica dotyczy śledzenia: pytamy o wiek, zanim pozwolimy uruchomić jakiekolwiek oprogramowanie reklamowe, a dla osób poniżej 13 lat oprogramowanie Meta nigdy się nie uruchamia, nie zbieramy identyfikatora reklamowego i nie udostępniamy niczego w celach reklamowych. Poza danymi konta opisanymi powyżej nie zbieramy świadomie danych osobowych od dziecka. Jeśli uważasz, że dziecko przekazało nam coś więcej, skontaktuj się z nami, a usuniemy te dane.';
+
+  @override
+  String get legalPrivacyControlTitle => 'To Ty decydujesz';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'W dowolnym momencie możesz zmienić lub usunąć swoje preferencje nauki. Usunięcie konta trwale kasuje zsynchronizowane dane nauki z naszych serwerów wraz z kopią na tym urządzeniu — najpierw poprosimy Cię o ponowne zalogowanie, aby potwierdzić, że to Twoje konto. Zgodę na śledzenie możesz wycofać w każdej chwili w ustawieniach urządzenia.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kontakt';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Masz pytania dotyczące tej polityki albo chcesz, byśmy usunęli Twoje dane? Napisz do nas na $email, a pomożemy.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Korzystanie z Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy pomaga uczyć się matematyki dzięki skanowaniu, rozwiązaniom krok po kroku, korepetytorowi SI i ćwiczeniom. Używaj go do własnej nauki i odnoś się do innych z szacunkiem.';
+
+  @override
+  String get legalTermsAccountTitle => 'Twoje konto';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Odpowiadasz za działania wykonane na swoim koncie, więc chroń swoje dane logowania. Konto — i wszystko, co jest z nim zsynchronizowane — możesz usunąć w każdej chwili w zakładce Profil.';
+
+  @override
+  String get legalTermsBillingTitle => 'Subskrypcje i płatności';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro to subskrypcja odnawiana automatycznie, rozliczana przez Twoje konto w sklepie z aplikacjami. Cenę i okres rozliczeniowy widzisz przed potwierdzeniem. Odnawia się automatycznie na koniec każdego okresu, chyba że anulujesz ją co najmniej 24 godziny wcześniej; zarządzać nią i anulować możesz w każdej chwili w ustawieniach konta w sklepie.';
+
+  @override
+  String get legalTermsAiTitle => 'Pomoc w nauce, nie gwarancja';
+
+  @override
+  String get legalTermsAiBody =>
+      'Odpowiedzi są sprawdzane przez podstawienie ich z powrotem do Twojego pierwotnego zadania, a Matheasy informuje, gdy nie udało się czegoś zweryfikować, zamiast pewnie pokazywać Ci zgadywankę. Mimo to wyjaśnienia są generowane automatycznie i nie zawsze będą doskonałe. Zawsze sprawdzaj pracę, na której Ci zależy.';
 }

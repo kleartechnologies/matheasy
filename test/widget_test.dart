@@ -81,9 +81,25 @@ void main() {
           AppRoutes.paywall);
     });
 
+    test('resolves universal links on both registered hosts', () {
+      // The apex 308-redirects to www in a browser, but a *shared* link may
+      // carry either host, and the OS matches on the host it was given.
+      expect(DeepLinkParser.resolve(Uri.parse('https://www.getmatheasy.com/scan')),
+          AppRoutes.scan);
+      expect(DeepLinkParser.resolve(Uri.parse('https://getmatheasy.com/practice')),
+          AppRoutes.practice);
+      // Hosts are case-insensitive per RFC 3986.
+      expect(DeepLinkParser.resolve(Uri.parse('https://WWW.GetMatheasy.com/tutor')),
+          AppRoutes.tutorChat);
+    });
+
     test('returns null for in-app and unknown links', () {
       expect(DeepLinkParser.resolve(Uri.parse('/home')), isNull);
       expect(DeepLinkParser.resolve(Uri.parse('matheasy://nope')), isNull);
+      // A look-alike host must never open the app.
+      expect(DeepLinkParser.resolve(Uri.parse('https://getmatheasy.com.evil.io/scan')),
+          isNull);
+      expect(DeepLinkParser.resolve(Uri.parse('https://matheasy.app/scan')), isNull);
     });
   });
 

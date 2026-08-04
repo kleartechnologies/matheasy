@@ -50,6 +50,10 @@ class AuthController extends _$AuthController {
   /// Ends the session (keeps any cloud account).
   Future<void> signOut() => ref.read(authRepositoryProvider).signOut();
 
+  /// Re-proves identity before a destructive action, if the session is stale.
+  Future<void> ensureRecentLogin() =>
+      ref.read(authRepositoryProvider).ensureRecentLogin();
+
   /// Permanently deletes the cloud account.
   Future<void> deleteSession() =>
       ref.read(authRepositoryProvider).deleteSession();

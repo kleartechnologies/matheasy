@@ -2112,7 +2112,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Ich konnte das Foto gerade nicht lesen. Prüfe deine Verbindung und versuch es noch einmal.';
+      'Ich konnte dieses Foto gerade nicht lesen. Bitte versuch es gleich noch einmal.';
+
+  @override
+  String get tutorUnreachable =>
+      'Entschuldige – ich konnte den Tutor gerade nicht erreichen. Bitte versuch es gleich noch einmal.';
 
   @override
   String get tutorLessonGoal => 'Ziel';
@@ -2133,4 +2137,117 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numis Erklärung';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Löschen abgebrochen – dein Konto und deine Daten sind unverändert.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Wir konnten deine Identität nicht bestätigen, deshalb wurde nichts gelöscht. Bitte melde dich erneut an und versuche es noch einmal.';
+
+  @override
+  String get legalPrivacyTitle => 'Datenschutzerklärung';
+
+  @override
+  String get legalTermsTitle => 'Nutzungsbedingungen';
+
+  @override
+  String get legalLastUpdated => 'Zuletzt aktualisiert am 4. August 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Oben siehst du die aktuelle Fassung. Die stets aktuelle Fassung findest du außerdem online unter';
+
+  @override
+  String get legalPrivacyDataTitle => 'Wo deine Daten liegen';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy speichert deinen Fortschritt, deine Erfolge, deine Lernvorlieben und deine Einstellungen auf diesem Gerät. Wenn du dich mit Google oder Apple anmeldest, werden diese Lerndaten über eine sichere Verbindung zusätzlich mit deinem Konto synchronisiert (über Google Firebase) – so sind sie gesichert und begleiten dich auf ein neues Gerät.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Was wir erheben';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Bei der Anmeldung mit Google oder Apple erhalten wir ein einfaches Profil – deinen Namen, deine E-Mail-Adresse und dein Foto –, um dein Konto anzulegen und zu personalisieren. Damit die App funktioniert, verarbeiten wir die Aufgaben, die du scannst oder eintippst, deine Übungsaktivität und deinen Fortschritt. Bei angemeldeten Nutzerinnen und Nutzern wird das in deinem Konto gespeichert, damit es sich zwischen deinen Geräten synchronisieren kann. Mehr fragen wir nicht ab.';
+
+  @override
+  String get legalPrivacyAiTitle => 'KI-Verarbeitung (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy arbeitet mit KI. Wenn du eine Aufgabe scannst, eine Gleichung eintippst, den KI-Tutor fragst oder Visuelles Lernen öffnest, wird dieser Inhalt – das Foto deiner Arbeit, der Gleichungstext oder deine Frage – über eine sichere Verbindung an unseren KI-Anbieter OpenAI gesendet, damit dieser die Aufgabe lesen und die Lösung, Erklärung oder Antwort erzeugen kann. Fotos werden vorher automatisch auf unsichere Inhalte geprüft. Diese Inhalte dienen dazu, dir zu antworten; sie werden niemals verkauft und niemals für Werbe-Targeting genutzt. Der Umgang von OpenAI mit diesen Daten richtet sich nach deren Richtlinien zur API-Datennutzung.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Werbung und Messung (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Wir bewerben Matheasy auf Meta-Plattformen wie Facebook und Instagram und nutzen das Software-Kit von Meta, um zu messen, ob diese Werbung tatsächlich wirkt. Wenn du Tracking erlaubst, teilen wir App-Aktivität mit Meta: dass du Matheasy installiert und geöffnet hast, ein Konto erstellt, die Einführung abgeschlossen, deinen ersten Scan gemacht, den KI-Tutor oder Visuelles Lernen geöffnet, eine Übung begonnen oder abgeschlossen und den Upgrade-Bildschirm gesehen hast. Abo-Ereignisse sendet unser Server an Meta, nicht die App. Zusätzlich teilen wir die Werbe-ID deines Geräts und eine Konto-Kennung, mit der Meta dich einer Anzeige zuordnen kann, die du gesehen haben könntest. Meta darf diese Daten zur Messung und Ausrichtung von Werbung verwenden, auch auf den eigenen Plattformen.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Deine Entscheidung über Tracking';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Nichts davon geschieht ohne deine Zustimmung. Wir fragen zuerst nach deinem Alter und dann nach deiner Erlaubnis. Wenn du ablehnst – oder angibst, jünger als 13 zu sein – wird das Meta-Kit nie aktiviert: Es wird keine Werbe-ID erhoben und keine App-Aktivität an Meta gesendet. Matheasy funktioniert in beiden Fällen genau gleich; für ein Nein wird dir keine Funktion vorenthalten. Du kannst deine Entscheidung jederzeit in den Geräteeinstellungen unter Datenschutz & Sicherheit → Tracking ändern.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analyse und Absturzberichte';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Wir nutzen Google Firebase, um zu verstehen, welche Teile der App genutzt werden, und um automatische Absturzberichte zu erhalten – damit wir beheben können, was kaputtgeht, und entscheiden, was als Nächstes entsteht. Das ist mit deiner App-Installation verknüpft, nicht mit deinem Werbeprofil, und wird niemals verkauft.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Datenschutz für Kinder';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy ist für Lernende jeden Alters gemacht, auch für Schülerinnen und Schüler unter 13 Jahren, und ihnen stehen alle Funktionen offen. Was sich unterscheidet, ist das Tracking: Wir fragen nach dem Alter, bevor Werbesoftware überhaupt laufen darf. Für unter 13-Jährige wird das Meta-Kit nie aktiviert, es wird keine Werbe-ID erhoben und nichts für Werbe-Targeting geteilt. Über die oben beschriebenen Kontodaten hinaus erheben wir wissentlich keine personenbezogenen Daten von Kindern. Wenn du glaubst, dass ein Kind mehr angegeben hat, melde dich bei uns – wir löschen es.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Du hast die Kontrolle';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Du kannst deine Lernvorlieben jederzeit ändern oder löschen. Beim Löschen deines Kontos werden deine synchronisierten Lerndaten dauerhaft von unseren Servern entfernt, zusammen mit der Kopie auf diesem Gerät – vorher bitten wir dich, dich noch einmal anzumelden, um nachzuweisen, dass es dein Konto ist. Die Tracking-Erlaubnis kannst du jederzeit in den Geräteeinstellungen widerrufen.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kontakt';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Fragen zu dieser Erklärung oder möchtest du deine Daten löschen lassen? Schreib uns an $email und wir helfen dir.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Matheasy nutzen';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy hilft dir beim Mathelernen – mit Scannen, geführten Lösungen, einem KI-Tutor und Übungen. Nutze es für dein eigenes Lernen und geh respektvoll mit anderen um.';
+
+  @override
+  String get legalTermsAccountTitle => 'Dein Konto';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Du bist für Aktivitäten unter deinem Konto verantwortlich – halte deine Anmeldedaten sicher. Du kannst dein Konto und alles, was damit synchronisiert ist, jederzeit im Profil-Tab löschen.';
+
+  @override
+  String get legalTermsBillingTitle => 'Abonnements und Abrechnung';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro ist ein automatisch verlängertes Abonnement, das über dein App-Store-Konto abgerechnet wird. Preis und Abrechnungszeitraum werden vor deiner Bestätigung angezeigt. Es verlängert sich am Ende jedes Zeitraums automatisch, sofern du nicht mindestens 24 Stunden vorher kündigst; verwalten oder kündigen kannst du es jederzeit in den Einstellungen deines App-Store-Kontos.';
+
+  @override
+  String get legalTermsAiTitle => 'Eine Lernhilfe, keine Garantie';
+
+  @override
+  String get legalTermsAiBody =>
+      'Antworten werden geprüft, indem sie in deine ursprüngliche Aufgabe eingesetzt werden, und Matheasy sagt dir, wenn eine Antwort nicht verifiziert werden konnte, statt dir eine selbstbewusste Vermutung zu zeigen. Trotzdem werden Erklärungen automatisch erzeugt und sind nicht immer perfekt. Prüfe wichtige Arbeiten immer noch einmal selbst nach.';
 }

@@ -2096,7 +2096,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Aku tidak bisa membaca foto itu sekarang. Periksa koneksimu lalu coba lagi.';
+      'Aku tidak bisa membaca foto itu barusan. Coba lagi sebentar lagi, ya.';
+
+  @override
+  String get tutorUnreachable =>
+      'Maaf — aku tidak bisa menghubungi tutor barusan. Coba lagi sebentar lagi, ya.';
 
   @override
   String get tutorLessonGoal => 'Tujuan';
@@ -2117,4 +2121,117 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Penjelasan Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Penghapusan dibatalkan — akun dan data kamu tetap utuh.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Kami tidak dapat memastikan bahwa ini kamu, jadi tidak ada yang dihapus. Masuk lagi, lalu coba sekali lagi.';
+
+  @override
+  String get legalPrivacyTitle => 'Kebijakan Privasi';
+
+  @override
+  String get legalTermsTitle => 'Ketentuan Layanan';
+
+  @override
+  String get legalLastUpdated => 'Terakhir diperbarui 4 Agustus 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Versi terkini ditampilkan di atas. Kebijakan yang selalu diperbarui juga tersedia daring di';
+
+  @override
+  String get legalPrivacyDataTitle => 'Tempat data kamu disimpan';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy menyimpan progres, pencapaian, preferensi belajar, dan pengaturan kamu di perangkat ini. Ketika kamu masuk dengan Google atau Apple, data belajar itu juga disinkronkan ke akunmu lewat koneksi aman (menggunakan Google Firebase), sehingga tercadangkan dan ikut berpindah ke perangkat baru.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Apa yang kami kumpulkan';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Masuk dengan Google atau Apple memberi kami profil dasar — nama, email, dan foto kamu — untuk membuat dan mempersonalisasi akunmu. Agar aplikasi berfungsi, kami memproses soal yang kamu pindai atau ketik, aktivitas latihanmu, dan progres belajarmu. Untuk pengguna yang sudah masuk, semua itu disimpan di akunmu agar bisa tersinkron antarperangkat. Selain itu, kami tidak meminta apa pun.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Pemrosesan AI (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy berjalan dengan AI. Saat kamu memindai soal, mengetik persamaan, bertanya kepada tutor AI, atau membuka Belajar Visual, konten itu — foto pekerjaanmu, teks persamaan, atau pertanyaanmu — dikirim lewat koneksi aman ke penyedia AI kami, OpenAI, agar dapat membaca soal dan menghasilkan penyelesaian, penjelasan, atau jawabannya. Foto diperiksa otomatis untuk konten yang tidak aman sebelum diproses. Konten ini dipakai untuk menjawab kamu; tidak pernah dijual dan tidak pernah dipakai untuk menargetkan iklan. Penanganan data ini oleh OpenAI tunduk pada kebijakan penggunaan data API mereka.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Iklan dan pengukuran (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Kami mengiklankan Matheasy di platform Meta seperti Facebook dan Instagram, dan kami memakai perangkat lunak Meta untuk mengukur apakah iklan itu benar-benar berhasil. Jika kamu mengizinkan pelacakan, kami membagikan sebagian aktivitas dalam aplikasi ke Meta: bahwa kamu memasang dan membuka Matheasy, membuat akun, menyelesaikan perkenalan, melakukan pemindaian pertama, membuka tutor AI atau Belajar Visual, memulai atau menyelesaikan latihan, dan melihat layar langganan. Peristiwa langganan dikirim ke Meta oleh server kami, bukan oleh aplikasi. Bersama itu kami membagikan pengenal iklan perangkatmu dan sebuah pengenal akun, yang dipakai Meta untuk menghubungkanmu dengan iklan yang mungkin pernah kamu lihat. Meta dapat memakai data ini untuk mengukur dan menargetkan iklan, termasuk di platform mereka sendiri.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Pilihanmu soal pelacakan';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Tidak satu pun dari hal di atas terjadi tanpa izinmu. Kami menanyakan usiamu lebih dulu, baru meminta izin. Jika kamu menolak — atau memberi tahu kami bahwa usiamu di bawah 13 tahun — perangkat lunak Meta tidak pernah dijalankan: tidak ada pengenal iklan yang dikumpulkan dan tidak ada aktivitas yang dikirim ke Meta. Matheasy bekerja persis sama pada kedua pilihan itu; tidak ada fitur yang ditahan hanya karena kamu menolak. Kamu bisa berubah pikiran kapan saja di pengaturan perangkat, pada Privasi & Keamanan → Pelacakan.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analitik dan laporan kerusakan';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Kami memakai Google Firebase untuk memahami bagian aplikasi mana yang dipakai dan menerima laporan kerusakan otomatis, agar kami bisa memperbaiki yang rusak dan menentukan apa yang dibangun berikutnya. Ini terkait dengan pemasangan aplikasimu, bukan profil iklanmu, dan tidak pernah dijual.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Privasi anak';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy dibuat untuk pelajar segala usia, termasuk yang berusia di bawah 13 tahun, dan semua fitur terbuka bagi mereka. Yang berbeda adalah pelacakan: kami menanyakan usia sebelum mengizinkan perangkat lunak iklan berjalan, dan bagi yang di bawah 13 tahun, perangkat lunak Meta tidak pernah dijalankan, tidak ada pengenal iklan yang dikumpulkan, dan tidak ada yang dibagikan untuk penargetan iklan. Di luar data akun yang dijelaskan di atas, kami tidak dengan sengaja mengumpulkan informasi pribadi dari anak. Jika kamu merasa seorang anak memberi kami lebih dari itu, hubungi kami dan akan kami hapus.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Kamu yang memegang kendali';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Kamu bisa mengubah atau menghapus preferensi belajarmu kapan saja. Menghapus akun akan menghapus permanen data belajar yang tersinkron dari server kami, beserta salinan yang tersimpan di perangkat ini — sebelum itu kami akan meminta kamu masuk sekali lagi, untuk memastikan akun itu memang milikmu. Izin pelacakan juga bisa kamu cabut kapan saja dari pengaturan perangkat.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Hubungi kami';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Ada pertanyaan tentang kebijakan ini, atau ingin datamu dihapus? Kirim email ke $email dan kami akan membantu.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Menggunakan Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy membantumu belajar matematika lewat pemindaian, penyelesaian bertahap, tutor AI, dan latihan. Pakailah untuk belajarmu sendiri dan tetaplah menghormati orang lain.';
+
+  @override
+  String get legalTermsAccountTitle => 'Akun kamu';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Kamu bertanggung jawab atas aktivitas yang dilakukan dengan akunmu, jadi jaga keamanan data masukmu. Kamu bisa menghapus akun, beserta semua yang tersinkron dengannya, dari tab Profil kapan saja.';
+
+  @override
+  String get legalTermsBillingTitle => 'Langganan dan penagihan';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro adalah langganan yang diperpanjang otomatis dan ditagihkan ke akun toko aplikasimu. Harga dan periode penagihan ditampilkan sebelum kamu mengonfirmasi. Langganan diperpanjang otomatis di akhir setiap periode kecuali kamu membatalkannya minimal 24 jam sebelumnya, dan kamu bisa mengelola atau membatalkannya kapan saja di pengaturan akun toko aplikasimu.';
+
+  @override
+  String get legalTermsAiTitle => 'Alat bantu belajar, bukan jaminan';
+
+  @override
+  String get legalTermsAiBody =>
+      'Jawaban diperiksa dengan memasukkannya kembali ke soal aslimu, dan Matheasy memberi tahu kamu ketika sebuah jawaban tidak bisa diverifikasi, alih-alih menyodorkan tebakan dengan penuh percaya diri. Meski begitu, penjelasan dibuat otomatis dan tidak selalu sempurna. Selalu periksa ulang pekerjaan yang penting bagimu.';
 }

@@ -2098,7 +2098,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Şu anda o fotoğrafı okuyamadım. Bağlantını kontrol edip tekrar dene.';
+      'Şu anda o fotoğrafı okuyamadım. Lütfen birazdan tekrar deneyin.';
+
+  @override
+  String get tutorUnreachable =>
+      'Üzgünüm — şu anda öğretmene ulaşamadım. Lütfen birazdan tekrar deneyin.';
 
   @override
   String get tutorLessonGoal => 'Hedef';
@@ -2119,4 +2123,117 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numi\'nin açıklaması';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Silme iptal edildi — hesabınız ve verileriniz olduğu gibi duruyor.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Kimliğinizi doğrulayamadık, bu yüzden hiçbir şey silinmedi. Lütfen yeniden giriş yapıp tekrar deneyin.';
+
+  @override
+  String get legalPrivacyTitle => 'Gizlilik Politikası';
+
+  @override
+  String get legalTermsTitle => 'Hizmet Koşulları';
+
+  @override
+  String get legalLastUpdated => 'Son güncelleme: 4 Ağustos 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Güncel sürüm yukarıda gösteriliyor. Her zaman güncel tutulan politikaya çevrimiçi olarak da şu adresten ulaşabilirsiniz:';
+
+  @override
+  String get legalPrivacyDataTitle => 'Verileriniz nerede duruyor';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy; ilerlemenizi, başarılarınızı, öğrenme tercihlerinizi ve ayarlarınızı bu cihazda saklar. Google ya da Apple ile giriş yaptığınızda bu öğrenme verileri güvenli bir bağlantı üzerinden hesabınıza da eşitlenir (Google Firebase kullanılarak); böylece yedeklenmiş olur ve yeni bir cihaza sizinle birlikte taşınır.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Neleri topluyoruz';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Google veya Apple ile giriş yapmanız bize temel bir profil verir — adınız, e-posta adresiniz ve fotoğrafınız — bunlarla hesabınızı oluşturur ve kişiselleştiririz. Uygulamanın çalışması için taradığınız veya yazdığınız soruları, alıştırma etkinliğinizi ve ilerlemenizi işleriz. Giriş yapmış kullanıcılarda bunlar, cihazlarınız arasında eşitlenebilmesi için hesabınızda saklanır. Bunun dışında hiçbir şey istemiyoruz.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Yapay zekâ işlemesi (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy yapay zekâ ile çalışır. Bir soruyu taradığınızda, bir denklem yazdığınızda, yapay zekâ öğretmenine soru sorduğunuzda veya Görsel Öğrenme\'yi açtığınızda; bu içerik — çözümünüzün fotoğrafı, denklemin metni veya sorunuz — soruyu okuyup çözümü, açıklamayı ya da yanıtı üretebilmesi için güvenli bir bağlantı üzerinden yapay zekâ sağlayıcımız OpenAI\'ye gönderilir. Fotoğraflar işlenmeden önce güvensiz içerik açısından otomatik olarak taranır. Bu içerik yalnızca size yanıt vermek için kullanılır; asla satılmaz ve reklam hedeflemesinde kullanılmaz. OpenAI\'nin bu verileri nasıl ele aldığı, kendi API veri kullanım politikalarına tabidir.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Reklam ve ölçümleme (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Matheasy\'yi Facebook ve Instagram gibi Meta platformlarında tanıtıyoruz ve bu reklamların gerçekten işe yarayıp yaramadığını ölçmek için Meta\'nın yazılım kitini kullanıyoruz. İzlemeye izin verirseniz uygulama içi etkinliğinizin bir bölümünü Meta ile paylaşırız: Matheasy\'yi kurup açtığınızı, bir hesap oluşturduğunuzu, tanıtımı tamamladığınızı, ilk taramanızı yaptığınızı, yapay zekâ öğretmenini veya Görsel Öğrenme\'yi açtığınızı, bir alıştırmaya başladığınızı ya da bitirdiğinizi ve abonelik ekranını gördüğünüzü. Abonelik olayları Meta\'ya uygulama tarafından değil, sunucularımız tarafından gönderilir. Bunlarla birlikte cihazınızın reklam kimliğini ve bir hesap kimliğini paylaşırız; Meta bunları sizi görmüş olabileceğiniz bir reklamla ilişkilendirmek için kullanır. Meta bu verileri, kendi platformları da dahil olmak üzere reklamları ölçmek ve hedeflemek için kullanabilir.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'İzleme konusundaki tercihiniz';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Bunların hiçbiri izniniz olmadan gerçekleşmez. Önce yaşınızı sorarız, sonra izin isteriz. Reddederseniz — ya da 13 yaşından küçük olduğunuzu belirtirseniz — Meta\'nın kiti hiçbir zaman çalıştırılmaz: hiçbir reklam kimliği toplanmaz ve Meta\'ya hiçbir etkinlik gönderilmez. Matheasy her iki durumda da tam olarak aynı şekilde çalışır; hayır dediğiniz için hiçbir özellik sizden esirgenmez. Fikrinizi istediğiniz zaman cihaz ayarlarınızdan, Gizlilik ve Güvenlik → İzleme bölümünden değiştirebilirsiniz.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analiz ve çökme raporları';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Uygulamanın hangi bölümlerinin kullanıldığını anlamak ve otomatik çökme raporları almak için Google Firebase kullanıyoruz; böylece bozulanı onarabiliyor ve sırada ne geliştireceğimize karar verebiliyoruz. Bunlar reklam profilinize değil uygulama kurulumunuza bağlıdır ve asla satılmaz.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Çocukların gizliliği';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy, 13 yaşın altındaki öğrenciler de dahil olmak üzere her yaştan öğrenen için tasarlandı ve tüm özellikler onlara açık. Farklı olan tek şey izleme: herhangi bir reklam yazılımının çalışmasına izin vermeden önce yaşı soruyoruz ve 13 yaşın altındakiler için Meta\'nın kiti hiç çalıştırılmıyor, hiçbir reklam kimliği toplanmıyor, reklam hedeflemesi için hiçbir şey paylaşılmıyor. Yukarıda anlatılan hesap bilgileri dışında bir çocuktan bilerek kişisel bilgi toplamıyoruz. Bir çocuğun bize bundan fazlasını verdiğini düşünüyorsanız bize ulaşın, silelim.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Kontrol sizde';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Öğrenme tercihlerinizi istediğiniz zaman düzenleyebilir veya silebilirsiniz. Hesabınızı silmek, eşitlenmiş öğrenme verilerinizi sunucularımızdan kalıcı olarak kaldırır ve bu cihazdaki kopyayı da siler — bundan önce, hesabın gerçekten sizin olduğunu doğrulamak için bir kez daha giriş yapmanızı isteriz. İzleme iznini de istediğiniz zaman cihaz ayarlarınızdan geri çekebilirsiniz.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Bize ulaşın';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Bu politikayla ilgili sorularınız mı var ya da verilerinizin silinmesini mi istiyorsunuz? $email adresine yazın, yardımcı olalım.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Matheasy\'yi kullanmak';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy; tarama, adım adım çözümler, yapay zekâ öğretmeni ve alıştırmalarla matematik öğrenmenize yardımcı olur. Kendi öğrenmeniz için kullanın ve başkalarına saygılı olun.';
+
+  @override
+  String get legalTermsAccountTitle => 'Hesabınız';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Hesabınız altında yapılan işlemlerden siz sorumlusunuz; bu yüzden giriş bilgilerinizi güvende tutun. Hesabınızı ve onunla eşitlenen her şeyi istediğiniz zaman Profil sekmesinden silebilirsiniz.';
+
+  @override
+  String get legalTermsBillingTitle => 'Abonelikler ve ödeme';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro, uygulama mağazası hesabınızdan tahsil edilen, kendini otomatik yenileyen bir aboneliktir. Fiyat ve fatura dönemi, siz onaylamadan önce gösterilir. En az 24 saat önce iptal etmediğiniz sürece her dönemin sonunda otomatik olarak yenilenir; mağaza hesabı ayarlarınızdan dilediğiniz zaman yönetebilir veya iptal edebilirsiniz.';
+
+  @override
+  String get legalTermsAiTitle => 'Öğrenmeye yardımcı, garanti değil';
+
+  @override
+  String get legalTermsAiBody =>
+      'Cevaplar, özgün sorunuzda yerine konularak denetlenir ve Matheasy bir cevabı doğrulayamadığında size kendinden emin bir tahmin sunmak yerine bunu açıkça söyler. Yine de açıklamalar otomatik üretilir ve her zaman kusursuz olmayacaktır. Sizin için önemli olan çalışmaları her zaman bir kez daha kontrol edin.';
 }

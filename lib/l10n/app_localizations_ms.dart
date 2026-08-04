@@ -2104,7 +2104,11 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Saya tidak dapat membaca foto itu sekarang. Semak sambungan anda dan cuba lagi.';
+      'Saya tidak dapat membaca foto itu sebentar tadi. Sila cuba lagi sebentar lagi.';
+
+  @override
+  String get tutorUnreachable =>
+      'Maaf — saya tidak dapat menghubungi tutor sebentar tadi. Sila cuba lagi sebentar lagi.';
 
   @override
   String get tutorLessonGoal => 'Matlamat';
@@ -2125,4 +2129,117 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Penjelasan Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Pemadaman dibatalkan — akaun dan data anda kekal utuh.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Kami tidak dapat mengesahkan bahawa ini anda, jadi tiada apa-apa yang dipadamkan. Sila log masuk semula dan cuba lagi.';
+
+  @override
+  String get legalPrivacyTitle => 'Dasar Privasi';
+
+  @override
+  String get legalTermsTitle => 'Terma Perkhidmatan';
+
+  @override
+  String get legalLastUpdated => 'Dikemas kini pada 4 Ogos 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Versi semasa dipaparkan di atas. Dasar yang sentiasa terkini juga boleh didapati dalam talian di';
+
+  @override
+  String get legalPrivacyDataTitle => 'Di mana data anda disimpan';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy menyimpan kemajuan, pencapaian, keutamaan pembelajaran dan tetapan anda pada peranti ini. Apabila anda log masuk dengan Google atau Apple, data pembelajaran itu turut disegerakkan ke akaun anda melalui sambungan selamat (menggunakan Google Firebase), supaya ia tersandar dan ikut berpindah ke peranti baharu.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Apa yang kami kumpulkan';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Log masuk dengan Google atau Apple memberikan kami profil asas — nama, e-mel dan foto anda — untuk mencipta dan memperibadikan akaun anda. Untuk membolehkan apl berfungsi, kami memproses soalan yang anda imbas atau taip, aktiviti latihan anda dan kemajuan anda. Bagi pengguna yang telah log masuk, semua ini disimpan dalam akaun anda supaya boleh disegerakkan antara peranti. Selain itu, kami tidak meminta apa-apa lagi.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Pemprosesan AI (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy berjalan dengan AI. Apabila anda mengimbas soalan, menaip persamaan, bertanya kepada tutor AI atau membuka Pembelajaran Visual, kandungan itu — foto kerja anda, teks persamaan atau soalan anda — dihantar melalui sambungan selamat kepada penyedia AI kami, OpenAI, supaya ia dapat membaca soalan dan menghasilkan penyelesaian, penerangan atau jawapan. Foto disemak secara automatik untuk kandungan tidak selamat sebelum diproses. Kandungan ini digunakan untuk menjawab anda; ia tidak pernah dijual dan tidak pernah digunakan untuk mensasarkan iklan. Pengendalian data ini oleh OpenAI tertakluk kepada dasar penggunaan data API mereka.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Pengiklanan dan pengukuran (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Kami mengiklankan Matheasy di platform Meta seperti Facebook dan Instagram, dan kami menggunakan kit perisian Meta untuk mengukur sama ada iklan itu benar-benar berkesan. Jika anda membenarkan penjejakan, kami berkongsi sebahagian aktiviti anda dalam apl dengan Meta: bahawa anda memasang dan membuka Matheasy, mencipta akaun, menamatkan pengenalan, membuat imbasan pertama, membuka tutor AI atau Pembelajaran Visual, memulakan atau menamatkan latihan, dan melihat skrin langganan. Peristiwa langganan dihantar ke Meta oleh pelayan kami, bukan oleh apl. Bersama itu kami berkongsi pengecam pengiklanan peranti anda dan satu pengecam akaun, yang digunakan Meta untuk mengaitkan anda dengan iklan yang mungkin anda lihat. Meta boleh menggunakan data ini untuk mengukur dan mensasarkan iklan, termasuk di platform mereka sendiri.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Pilihan anda tentang penjejakan';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Tiada satu pun daripada perkara di atas berlaku tanpa kebenaran anda. Kami bertanya umur anda dahulu, kemudian barulah meminta kebenaran. Jika anda menolak — atau memberitahu kami bahawa anda berumur bawah 13 tahun — kit Meta tidak pernah dijalankan: tiada pengecam pengiklanan dikumpulkan dan tiada aktiviti dihantar ke Meta. Matheasy berfungsi sama sahaja dalam kedua-dua keadaan; tiada ciri yang ditahan kerana anda menolak. Anda boleh berubah fikiran bila-bila masa dalam tetapan peranti, di bawah Privasi & Keselamatan → Penjejakan.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analitis dan laporan ranap';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Kami menggunakan Google Firebase untuk memahami bahagian apl mana yang digunakan dan menerima laporan ranap automatik, supaya kami dapat membaiki apa yang rosak dan menentukan apa yang perlu dibina seterusnya. Ini dikaitkan dengan pemasangan apl anda, bukan profil pengiklanan anda, dan tidak pernah dijual.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Privasi kanak-kanak';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy dibina untuk pelajar semua peringkat umur, termasuk mereka yang berumur bawah 13 tahun, dan semua ciri terbuka kepada mereka. Yang berbeza ialah penjejakan: kami bertanya umur sebelum membenarkan sebarang perisian pengiklanan berjalan, dan bagi yang berumur bawah 13 tahun, kit Meta tidak pernah dijalankan, tiada pengecam pengiklanan dikumpulkan, dan tiada apa-apa dikongsi untuk pensasaran iklan. Selain data akaun yang diterangkan di atas, kami tidak mengumpulkan maklumat peribadi kanak-kanak secara sedar. Jika anda rasa seorang kanak-kanak telah memberikan lebih daripada itu kepada kami, hubungi kami dan kami akan memadamkannya.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Anda yang mengawal';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Anda boleh mengubah atau memadamkan keutamaan pembelajaran anda pada bila-bila masa. Memadamkan akaun anda akan menghapuskan data pembelajaran yang disegerakkan daripada pelayan kami secara kekal, bersama salinan yang tersimpan pada peranti ini — sebelum itu kami akan meminta anda log masuk sekali lagi, untuk mengesahkan bahawa akaun itu memang milik anda. Kebenaran penjejakan pula boleh anda tarik balik pada bila-bila masa melalui tetapan peranti.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Hubungi kami';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Ada pertanyaan tentang dasar ini, atau mahu data anda dipadamkan? E-mel kami di $email dan kami akan membantu.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Menggunakan Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy membantu anda belajar matematik melalui pengimbasan, penyelesaian berpandu, tutor AI dan latihan. Gunakannya untuk pembelajaran anda sendiri dan hormatilah orang lain.';
+
+  @override
+  String get legalTermsAccountTitle => 'Akaun anda';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Anda bertanggungjawab atas aktiviti yang dilakukan dengan akaun anda, jadi pastikan maklumat log masuk anda selamat. Anda boleh memadamkan akaun, dan semua yang disegerakkan dengannya, daripada tab Profil pada bila-bila masa.';
+
+  @override
+  String get legalTermsBillingTitle => 'Langganan dan bil';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro ialah langganan pembaharuan automatik yang dicaj kepada akaun gedung apl anda. Harga dan tempoh pengebilan dipaparkan sebelum anda mengesahkan. Ia diperbaharui secara automatik pada penghujung setiap tempoh melainkan anda membatalkannya sekurang-kurangnya 24 jam lebih awal, dan anda boleh mengurus atau membatalkannya bila-bila masa dalam tetapan akaun gedung apl anda.';
+
+  @override
+  String get legalTermsAiTitle => 'Bantuan pembelajaran, bukan jaminan';
+
+  @override
+  String get legalTermsAiBody =>
+      'Jawapan disemak dengan menggantikannya semula ke dalam soalan asal anda, dan Matheasy memberitahu anda apabila ia tidak dapat mengesahkan sesuatu jawapan, bukannya menunjukkan tekaan dengan penuh yakin. Namun begitu, penerangan dijana secara automatik dan tidak semestinya sempurna. Sentiasa semak semula kerja yang penting bagi anda.';
 }

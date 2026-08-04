@@ -2090,7 +2090,11 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Teraz sa mi tú fotku nepodarilo prečítať. Skontroluj pripojenie a skús to znova.';
+      'Túto fotku sa mi teraz nepodarilo prečítať. Skús to prosím o chvíľu znova.';
+
+  @override
+  String get tutorUnreachable =>
+      'Prepáč – k lektorovi som sa teraz nedostal. Skús to prosím o chvíľu znova.';
 
   @override
   String get tutorLessonGoal => 'Cieľ';
@@ -2111,4 +2115,117 @@ class AppLocalizationsSk extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Vysvetlenie od Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Odstránenie bolo zrušené – tvoj účet aj údaje zostávajú nedotknuté.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Nepodarilo sa nám overiť, že si to ty, takže sa nič neodstránilo. Prihlás sa znova a skús to ešte raz.';
+
+  @override
+  String get legalPrivacyTitle => 'Zásady ochrany súkromia';
+
+  @override
+  String get legalTermsTitle => 'Podmienky používania';
+
+  @override
+  String get legalLastUpdated => 'Naposledy aktualizované 4. augusta 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Vyššie je zobrazená aktuálna verzia. Vždy aktuálne znenie nájdeš aj online na';
+
+  @override
+  String get legalPrivacyDataTitle => 'Kde sú tvoje údaje';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy uchováva tvoj pokrok, úspechy, predvoľby učenia a nastavenia v tomto zariadení. Keď sa prihlásiš cez Google alebo Apple, tieto údaje o učení sa cez zabezpečené spojenie navyše synchronizujú s tvojím účtom (pomocou Google Firebase) – takže sú zálohované a prenesú sa s tebou do nového zariadenia.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Čo zhromažďujeme';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Prihlásenie cez Google alebo Apple nám poskytne základný profil – tvoje meno, e-mail a fotku –, aby sme mohli vytvoriť a prispôsobiť tvoj účet. Aby aplikácia fungovala, spracúvame úlohy, ktoré naskenuješ alebo napíšeš, tvoju aktivitu pri precvičovaní a tvoj pokrok. U prihlásených používateľov sa to ukladá do účtu, aby sa to mohlo synchronizovať medzi tvojimi zariadeniami. O nič viac nežiadame.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Spracovanie pomocou UI (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy beží na umelej inteligencii. Keď naskenuješ úlohu, napíšeš rovnicu, spýtaš sa AI lektora alebo otvoríš Vizuálne učenie, tento obsah – fotka tvojej práce, text rovnice alebo tvoja otázka – sa cez zabezpečené spojenie odošle nášmu poskytovateľovi UI, spoločnosti OpenAI, aby mohla úlohu prečítať a vytvoriť riešenie, vysvetlenie alebo odpoveď. Fotky sa pred spracovaním automaticky kontrolujú na nevhodný obsah. Tento obsah slúži na to, aby sme ti odpovedali; nikdy sa nepredáva ani nepoužíva na cielenie reklamy. To, ako s týmito údajmi nakladá OpenAI, sa riadi jej zásadami používania údajov API.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Reklama a meranie (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Matheasy propagujeme na platformách Meta, ako sú Facebook a Instagram, a používame softvérovú súpravu Meta, aby sme zmerali, či tie reklamy naozaj fungujú. Ak povolíš sledovanie, zdieľame s Metou časť tvojej aktivity v aplikácii: že si si Matheasy nainštaloval a otvoril, vytvoril účet, dokončil úvodné zoznámenie, spravil prvé skenovanie, otvoril AI lektora alebo Vizuálne učenie, začal či dokončil precvičovanie a zobrazil si obrazovku predplatného. Udalosti spojené s predplatným posielajú Mete naše servery, nie aplikácia. Spolu s tým zdieľame reklamný identifikátor tvojho zariadenia a identifikátor účtu, ktoré Meta používa na prepojenie tvojej osoby s reklamou, ktorú si možno videl. Meta môže tieto údaje používať na meranie a cielenie reklamy, aj na vlastných platformách.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Tvoja voľba o sledovaní';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Nič z toho sa nedeje bez tvojho súhlasu. Najprv sa spýtame na tvoj vek a až potom požiadame o povolenie. Ak odmietneš – alebo nám povieš, že máš menej ako 13 rokov – súprava Meta sa nikdy nespustí: nezbiera sa žiadny reklamný identifikátor a Mete sa neodosiela žiadna aktivita. Matheasy funguje v oboch prípadoch úplne rovnako; za odmietnutie ti nie je odopretá žiadna funkcia. Rozhodnutie môžeš kedykoľvek zmeniť v nastaveniach zariadenia, v časti Súkromie a zabezpečenie → Sledovanie.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analytika a hlásenia o zlyhaní';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Používame Google Firebase, aby sme vedeli, ktoré časti aplikácie sa používajú, a aby sme dostávali automatické hlásenia o zlyhaniach – vďaka tomu opravujeme, čo sa pokazí, a rozhodujeme, čo postaviť ďalej. Tieto údaje sú viazané na inštaláciu aplikácie, nie na tvoj reklamný profil, a nikdy sa nepredávajú.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Súkromie detí';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy je určený pre študujúcich každého veku vrátane detí mladších ako 13 rokov a všetky funkcie sú im otvorené. Líši sa len sledovanie: na vek sa pýtame skôr, než vôbec dovolíme spustiť akýkoľvek reklamný softvér, a u detí mladších ako 13 rokov sa súprava Meta nikdy nespustí, nezbiera sa žiadny reklamný identifikátor a nič sa nezdieľa na cielenie reklamy. Okrem údajov o účte opísaných vyššie vedome nezhromažďujeme osobné údaje detí. Ak si myslíš, že nám dieťa poskytlo viac, ozvi sa nám a vymažeme to.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Kontrolu máš ty';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Svoje predvoľby učenia môžeš kedykoľvek upraviť alebo vymazať. Odstránením účtu sa natrvalo vymažú tvoje synchronizované údaje o učení z našich serverov spolu s kópiou uloženou v tomto zariadení – predtým ťa požiadame, aby si sa ešte raz prihlásil a overil, že účet je naozaj tvoj. Súhlas so sledovaním môžeš kedykoľvek odvolať v nastaveniach zariadenia.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kontakt';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Máš otázku k týmto zásadám alebo chceš vymazať svoje údaje? Napíš nám na $email a pomôžeme ti.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Používanie Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy ti pomáha učiť sa matematiku pomocou skenovania, riešení krok za krokom, AI lektora a precvičovania. Používaj ho na vlastné učenie a správaj sa k ostatným s rešpektom.';
+
+  @override
+  String get legalTermsAccountTitle => 'Tvoj účet';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Za aktivitu vykonanú pod tvojím účtom zodpovedáš ty, preto si prihlasovacie údaje dobre chráň. Účet aj všetko, čo je s ním synchronizované, môžeš kedykoľvek odstrániť na karte Profil.';
+
+  @override
+  String get legalTermsBillingTitle => 'Predplatné a platby';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro je automaticky obnovované predplatné účtované cez tvoj účet v obchode s aplikáciami. Cena aj fakturačné obdobie sa zobrazia skôr, než potvrdíš. Na konci každého obdobia sa automaticky obnoví, ak ho nezrušíš aspoň 24 hodín vopred; spravovať alebo zrušiť ho môžeš kedykoľvek v nastaveniach účtu obchodu.';
+
+  @override
+  String get legalTermsAiTitle => 'Pomoc pri učení, nie záruka';
+
+  @override
+  String get legalTermsAiBody =>
+      'Odpovede sa overujú dosadením späť do tvojej pôvodnej úlohy a Matheasy ti povie, keď sa odpoveď overiť nepodarilo, namiesto toho, aby ti sebavedomo ukázal odhad. Aj tak sú vysvetlenia generované automaticky a nebudú vždy dokonalé. Prácu, na ktorej ti záleží, si vždy skontroluj.';
 }

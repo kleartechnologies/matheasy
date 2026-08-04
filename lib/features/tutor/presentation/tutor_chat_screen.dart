@@ -137,7 +137,10 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   void _send(String text) {
     if (!_ensureTutorQuota()) return;
     _recordTutorUse();
-    unawaited(ref.read(tutorChatControllerProvider.notifier).send(text));
+    unawaited(ref.read(tutorChatControllerProvider.notifier).send(
+          text,
+          unreachableMessage: context.l10n.tutorUnreachable,
+        ));
   }
 
   void _sendAction(SuggestionAction action) {

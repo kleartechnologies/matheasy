@@ -2108,7 +2108,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Não consegui ler essa foto agora. Verifique sua conexão e tente de novo.';
+      'Não consegui ler essa foto agora. Tente de novo daqui a pouco.';
+
+  @override
+  String get tutorUnreachable =>
+      'Desculpe — não consegui falar com o tutor agora. Tente de novo daqui a pouco.';
 
   @override
   String get tutorLessonGoal => 'Objetivo';
@@ -2129,4 +2133,117 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Explicação da Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Exclusão cancelada — sua conta e seus dados estão intactos.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Não conseguimos confirmar que é você, então nada foi excluído. Entre novamente e tente de novo.';
+
+  @override
+  String get legalPrivacyTitle => 'Política de Privacidade';
+
+  @override
+  String get legalTermsTitle => 'Termos de Serviço';
+
+  @override
+  String get legalLastUpdated => 'Última atualização: 4 de agosto de 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'A versão atual é mostrada acima. A política sempre atualizada também está disponível on-line em';
+
+  @override
+  String get legalPrivacyDataTitle => 'Onde ficam seus dados';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'O Matheasy mantém seu progresso, suas conquistas, suas preferências de aprendizado e suas configurações neste dispositivo. Quando você entra com o Google ou a Apple, esses dados de aprendizado também são sincronizados com sua conta por uma conexão segura (usando o Google Firebase), assim ficam salvos e acompanham você em um novo dispositivo.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'O que coletamos';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Entrar com o Google ou a Apple nos dá um perfil básico — seu nome, seu e-mail e sua foto — para criar e personalizar sua conta. Para o app funcionar, processamos os problemas que você escaneia ou digita, sua atividade de prática e seu progresso. Para quem está conectado, isso fica guardado na sua conta para sincronizar entre seus dispositivos. Não pedimos mais nada.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Processamento por IA (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'O Matheasy funciona com IA. Quando você escaneia um problema, digita uma equação, pergunta ao tutor de IA ou abre o Aprendizado Visual, esse conteúdo — a foto do seu trabalho, o texto da equação ou sua pergunta — é enviado por uma conexão segura ao nosso provedor de IA, a OpenAI, para que ele possa ler o problema e gerar a solução, a explicação ou a resposta. As fotos passam antes por uma verificação automática de conteúdo impróprio. Esse conteúdo é usado para responder a você; nunca é vendido nem usado para direcionar publicidade. O tratamento desses dados pela OpenAI é regido pelas políticas de uso de dados da API dela.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Publicidade e mensuração (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Anunciamos o Matheasy em plataformas da Meta, como Facebook e Instagram, e usamos o kit de software da Meta para medir se esses anúncios realmente funcionam. Se você permitir o rastreamento, compartilhamos parte da sua atividade no app com a Meta: que você instalou e abriu o Matheasy, criou uma conta, concluiu a introdução, fez seu primeiro escaneamento, abriu o tutor de IA ou o Aprendizado Visual, começou ou concluiu uma prática e viu a tela de assinatura. Os eventos de assinatura são enviados à Meta pelos nossos servidores, e não pelo app. Junto disso, compartilhamos o identificador de publicidade do seu dispositivo e um identificador de conta, que a Meta usa para associar você a um anúncio que possa ter visto. A Meta pode usar esses dados para medir e direcionar publicidade, inclusive nas próprias plataformas dela.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Sua escolha sobre rastreamento';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Nada disso acontece sem a sua permissão. Primeiro perguntamos sua idade e depois pedimos autorização. Se você recusar — ou nos disser que tem menos de 13 anos — o kit da Meta nunca é ativado: nenhum identificador de publicidade é coletado e nenhuma atividade é enviada à Meta. O Matheasy funciona exatamente igual dos dois jeitos; nenhum recurso é retirado por você dizer não. Você pode mudar de ideia quando quiser nas configurações do seu dispositivo, em Privacidade e Segurança → Rastreamento.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Análises e relatórios de falhas';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Usamos o Google Firebase para entender quais partes do app são usadas e para receber relatórios automáticos de falhas, assim conseguimos consertar o que quebra e decidir o que construir a seguir. Isso fica ligado à instalação do app, não ao seu perfil publicitário, e nunca é vendido.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Privacidade de crianças';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'O Matheasy é feito para estudantes de todas as idades, incluindo menores de 13 anos, e todos os recursos estão disponíveis para eles. O que muda é o rastreamento: perguntamos a idade antes de permitir que qualquer software de publicidade seja executado e, para menores de 13 anos, o kit da Meta nunca é ativado, nenhum identificador de publicidade é coletado e nada é compartilhado para direcionamento de anúncios. Além dos dados de conta descritos acima, não coletamos conscientemente informações pessoais de crianças. Se você acredita que uma criança forneceu mais do que isso, fale conosco e apagaremos.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Você está no controle';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Você pode editar ou apagar suas preferências de aprendizado quando quiser. Excluir sua conta remove permanentemente os dados de aprendizado sincronizados dos nossos servidores, junto com a cópia guardada neste dispositivo — antes disso, vamos pedir que você entre mais uma vez, para confirmar que a conta é sua. Você também pode retirar a permissão de rastreamento a qualquer momento nas configurações do seu dispositivo.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Fale conosco';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Dúvidas sobre esta política ou quer que seus dados sejam excluídos? Escreva para $email e vamos ajudar.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Usando o Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'O Matheasy ajuda você a aprender matemática com escaneamento, soluções guiadas, um tutor de IA e prática. Use para o seu próprio aprendizado e seja respeitoso com os outros.';
+
+  @override
+  String get legalTermsAccountTitle => 'Sua conta';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Você é responsável pela atividade feita na sua conta, então mantenha seu acesso seguro. Você pode excluir sua conta, e tudo o que estiver sincronizado com ela, na aba Perfil a qualquer momento.';
+
+  @override
+  String get legalTermsBillingTitle => 'Assinaturas e cobrança';
+
+  @override
+  String get legalTermsBillingBody =>
+      'O Matheasy Pro é uma assinatura de renovação automática cobrada na sua conta da loja de aplicativos. O preço e o período de cobrança aparecem antes de você confirmar. Ela é renovada automaticamente ao fim de cada período, a menos que você cancele com pelo menos 24 horas de antecedência, e você pode gerenciar ou cancelar quando quiser nas configurações da sua conta da loja.';
+
+  @override
+  String get legalTermsAiTitle => 'Uma ajuda para aprender, não uma garantia';
+
+  @override
+  String get legalTermsAiBody =>
+      'As respostas são conferidas substituindo-as de volta no seu problema original, e o Matheasy avisa quando não conseguiu verificar alguma, em vez de mostrar um palpite com ar de certeza. Ainda assim, as explicações são geradas automaticamente e nem sempre serão perfeitas. Sempre confira o trabalho que importa.';
 }

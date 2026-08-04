@@ -2,23 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/localization/l10n_extension.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// The legal documents surfaced in Settings → About.
 enum LegalDocument {
-  privacy('Privacy Policy', AppConstants.privacyUrl),
-  terms('Terms of Service', AppConstants.termsUrl);
+  privacy(AppConstants.privacyUrl),
+  terms(AppConstants.termsUrl);
 
-  const LegalDocument(this.title, this.url);
+  const LegalDocument(this.url);
 
-  final String title;
   final String url;
+
+  /// The document's title in the reader's language.
+  String title(AppLocalizations l10n) => switch (this) {
+        LegalDocument.privacy => l10n.legalPrivacyTitle,
+        LegalDocument.terms => l10n.legalTermsTitle,
+      };
 }
 
 /// Renders a static legal document (Privacy Policy / Terms of Service) with a
 /// link to the authoritative online version.
+///
+/// The copy here is the version the App Store / Play reviewer reads, so it must
+/// describe what the app ACTUALLY does — including the parts that are least
+/// flattering. Every claim below is traceable to code: the Meta disclosure to
+/// `MetaAnalyticsService` + `MetaEventMapper`, the age gate to
+/// `AgeGateController`, and the sign-in-before-delete promise to
+/// `FirebaseAuthService.ensureRecentLogin`.
 class LegalDocumentScreen extends StatelessWidget {
   const LegalDocumentScreen({super.key, required this.document});
 
@@ -27,8 +41,9 @@ class LegalDocumentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(document.title)),
+      appBar: AppBar(title: Text(document.title(l10n))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenH,
@@ -38,11 +53,11 @@ class LegalDocumentScreen extends StatelessWidget {
         ),
         children: [
           Text(
-            'Last updated 8 July 2026',
+            l10n.legalLastUpdated,
             style: AppTypography.caption.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
-          for (final section in _sections(document)) ...[
+          for (final section in _sections(l10n)) ...[
             Text(
               section.$1,
               style:
@@ -64,69 +79,29 @@ class LegalDocumentScreen extends StatelessWidget {
     );
   }
 
-  List<(String, String)> _sections(LegalDocument document) {
+  List<(String, String)> _sections(AppLocalizations l10n) {
     switch (document) {
       case LegalDocument.privacy:
-        return const [
+        return [
+          (l10n.legalPrivacyDataTitle, l10n.legalPrivacyDataBody),
+          (l10n.legalPrivacyCollectTitle, l10n.legalPrivacyCollectBody),
+          (l10n.legalPrivacyAiTitle, l10n.legalPrivacyAiBody),
+          (l10n.legalPrivacyAdsTitle, l10n.legalPrivacyAdsBody),
+          (l10n.legalPrivacyAdsChoiceTitle, l10n.legalPrivacyAdsChoiceBody),
+          (l10n.legalPrivacyAnalyticsTitle, l10n.legalPrivacyAnalyticsBody),
+          (l10n.legalPrivacyChildrenTitle, l10n.legalPrivacyChildrenBody),
+          (l10n.legalPrivacyControlTitle, l10n.legalPrivacyControlBody),
           (
-            'Where your data lives',
-            'Matheasy keeps your progress, achievements, learning preferences '
-                'and settings on this device. When you sign in with Google or '
-                'Apple, this learning data is also securely synced to your '
-                'account (via Google Firebase) so it is backed up and stays '
-                'with you across sessions. In guest mode everything stays on '
-                'this device only. Nothing you do in Matheasy is sold or shared '
-                'with advertisers.',
-          ),
-          (
-            'What we collect',
-            'When you sign in with Google or Apple we receive a basic profile '
-                '(name, email and photo) to create and personalise your '
-                'account. To run the app we process what you scan and your '
-                'practice activity; for signed-in users this learning data is '
-                'stored in your account so it can sync across devices. Guest '
-                'mode collects no identifying information at all.',
-          ),
-          (
-            'AI processing (OpenAI)',
-            'Matheasy is powered by AI. When you scan a problem, type an '
-                'equation, ask the AI tutor, or open Visual Learning, that '
-                'content — the photo of your work, the equation text, or your '
-                'question — is sent over a secure connection to our AI provider, '
-                'OpenAI, so it can recognise the problem and generate the '
-                'solution, explanation or reply. This content is used only to '
-                'answer you; it is never sold, never shown to advertisers, and '
-                "not used to build advertising profiles. OpenAI's handling of "
-                'this data is governed by their API data-usage policies.',
-          ),
-          (
-            'You are in control',
-            'You can edit or clear your preferences at any time. Deleting your '
-                'account removes your synced learning data from our servers '
-                'along with the copy on this device. Prefer to keep everything '
-                'local? Use Matheasy in guest mode.',
+            l10n.legalPrivacyContactTitle,
+            l10n.legalPrivacyContactBody(AppConstants.supportEmail),
           ),
         ];
       case LegalDocument.terms:
-        return const [
-          (
-            'Using Matheasy',
-            'Matheasy helps you learn maths through scanning, guided solutions, '
-                'an AI tutor and practice. Use it for your own learning and be '
-                'respectful of others.',
-          ),
-          (
-            'Your account',
-            'You are responsible for activity under your account. Guest '
-                'sessions are local to this device and are not recoverable if '
-                'the app is removed.',
-          ),
-          (
-            'Learning aid, not a guarantee',
-            'Solutions and explanations are generated to help you understand '
-                'maths, and may not always be perfect. Always double-check '
-                'important work.',
-          ),
+        return [
+          (l10n.legalTermsUsingTitle, l10n.legalTermsUsingBody),
+          (l10n.legalTermsAccountTitle, l10n.legalTermsAccountBody),
+          (l10n.legalTermsBillingTitle, l10n.legalTermsBillingBody),
+          (l10n.legalTermsAiTitle, l10n.legalTermsAiBody),
         ];
     }
   }
@@ -146,8 +121,7 @@ class _OnlineLink extends StatelessWidget {
           Icon(Icons.shield_moon_outlined, size: 20, color: colors.textMuted),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'The current version is shown above. The always-up-to-date policy '
-            'also lives online at',
+            context.l10n.legalOnlineNote,
             textAlign: TextAlign.center,
             style: AppTypography.caption.copyWith(color: colors.textMuted),
           ),

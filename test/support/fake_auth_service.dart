@@ -65,6 +65,12 @@ class FakeAuthService implements AuthService {
   int signOutCount = 0;
   int deleteCount = 0;
   int anonymousSessionCount = 0;
+  int recentLoginCount = 0;
+
+  /// Set to model the user cancelling (or failing) the re-authentication sheet
+  /// that guards account deletion. When non-null [ensureRecentLogin] throws it,
+  /// which must abort the delete with nothing destroyed.
+  AuthFailure? recentLoginError;
 
   /// The uid [ensureAnonymousSession] hands back, and what a subsequent sign-in
   /// reports as [lastAnonymousUid]. `null` models a device that couldn't get an
@@ -117,6 +123,13 @@ class FakeAuthService implements AuthService {
     signOutCount++;
     _current = null;
     _controller.add(null);
+  }
+
+  @override
+  Future<void> ensureRecentLogin() async {
+    recentLoginCount++;
+    final error = recentLoginError;
+    if (error != null) throw error;
   }
 
   @override

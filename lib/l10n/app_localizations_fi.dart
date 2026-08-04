@@ -2104,7 +2104,11 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'En pystynyt lukemaan kuvaa juuri nyt. Tarkista yhteytesi ja yritä uudelleen.';
+      'En pystynyt lukemaan tuota kuvaa juuri nyt. Yritä hetken kuluttua uudelleen.';
+
+  @override
+  String get tutorUnreachable =>
+      'Pahoittelut – en saanut juuri nyt yhteyttä opettajaan. Yritä hetken kuluttua uudelleen.';
 
   @override
   String get tutorLessonGoal => 'Tavoite';
@@ -2125,4 +2129,117 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numin selitys';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Poisto peruttiin – tilisi ja tietosi ovat ennallaan.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Emme voineet varmistaa, että kyseessä olet sinä, joten mitään ei poistettu. Kirjaudu sisään uudelleen ja yritä toistamiseen.';
+
+  @override
+  String get legalPrivacyTitle => 'Tietosuojakäytäntö';
+
+  @override
+  String get legalTermsTitle => 'Käyttöehdot';
+
+  @override
+  String get legalLastUpdated => 'Päivitetty viimeksi 4. elokuuta 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Yllä näkyy nykyinen versio. Aina ajantasainen käytäntö on saatavilla myös verkossa osoitteessa';
+
+  @override
+  String get legalPrivacyDataTitle => 'Missä tietosi sijaitsevat';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy säilyttää edistymisesi, saavutuksesi, oppimisasetuksesi ja asetuksesi tällä laitteella. Kun kirjaudut sisään Googlella tai Applella, nämä oppimistiedot synkronoidaan lisäksi tilillesi suojatun yhteyden kautta (Google Firebasen avulla), joten niistä on varmuuskopio ja ne siirtyvät mukanasi uuteen laitteeseen.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Mitä keräämme';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Googlella tai Applella kirjautuminen antaa meille perusprofiilin – nimesi, sähköpostiosoitteesi ja kuvasi – tilisi luomista ja personointia varten. Jotta sovellus toimisi, käsittelemme skannaamiasi tai kirjoittamiasi tehtäviä, harjoitteluasi ja edistymistäsi. Kirjautuneilla käyttäjillä nämä tallennetaan tilillesi, jotta ne synkronoituvat laitteidesi välillä. Muuta emme pyydä.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Tekoälykäsittely (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy toimii tekoälyllä. Kun skannaat tehtävän, kirjoitat yhtälön, kysyt tekoälyopettajalta tai avaat Visuaalisen oppimisen, tuo sisältö – kuva työstäsi, yhtälön teksti tai kysymyksesi – lähetetään suojatun yhteyden kautta tekoälykumppanillemme OpenAI:lle, jotta se voi lukea tehtävän ja tuottaa ratkaisun, selityksen tai vastauksen. Kuvat tarkistetaan automaattisesti turvattoman sisällön varalta ennen käsittelyä. Tätä sisältöä käytetään vain vastaamiseen; sitä ei koskaan myydä eikä käytetä mainosten kohdentamiseen. OpenAI:n tapaa käsitellä näitä tietoja ohjaavat sen API-tietojen käyttökäytännöt.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Mainonta ja mittaus (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Mainostamme Matheasya Metan alustoilla, kuten Facebookissa ja Instagramissa, ja käytämme Metan ohjelmistopakettia mitataksemme, toimivatko mainokset todella. Jos sallit seurannan, jaamme osan sovelluksen sisäisestä toiminnastasi Metalle: että olet asentanut ja avannut Matheasyn, luonut tilin, käynyt esittelyn läpi, tehnyt ensimmäisen skannauksen, avannut tekoälyopettajan tai Visuaalisen oppimisen, aloittanut tai suorittanut harjoituksen ja katsonut tilausnäkymän. Tilaustapahtumat lähettää Metalle palvelimemme, ei sovellus. Näiden ohella jaamme laitteesi mainostunnisteen ja tilitunnisteen, joita Meta käyttää yhdistääkseen sinut mainokseen, jonka olet ehkä nähnyt. Meta voi käyttää näitä tietoja mainosten mittaamiseen ja kohdentamiseen, myös omilla alustoillaan.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Sinun valintasi seurannasta';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Mitään edellä kuvatusta ei tapahdu ilman lupaasi. Kysymme ensin ikäsi ja vasta sitten lupaa. Jos kieltäydyt – tai kerrot olevasi alle 13-vuotias – Metan pakettia ei koskaan käynnistetä: mainostunnistetta ei kerätä eikä Metalle lähetetä mitään toimintatietoja. Matheasy toimii täsmälleen samalla tavalla kummassakin tapauksessa; mitään ominaisuutta ei pidätetä siksi, että sanot ei. Voit muuttaa mieltäsi milloin tahansa laitteesi asetuksissa kohdassa Tietosuoja ja turvallisuus → Seuranta.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analytiikka ja kaatumisraportit';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Käytämme Google Firebasea ymmärtääksemme, mitä sovelluksen osia käytetään, ja saadaksemme automaattisia kaatumisraportteja, jotta voimme korjata rikkoutuneen ja päättää, mitä rakennamme seuraavaksi. Nämä tiedot liittyvät sovelluksen asennukseen eivätkä mainosprofiiliisi, eikä niitä koskaan myydä.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Lasten yksityisyys';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy on tehty kaikenikäisille oppijoille, myös alle 13-vuotiaille, ja kaikki ominaisuudet ovat heidän käytettävissään. Ero on seurannassa: kysymme iän ennen kuin annamme minkään mainosohjelmiston käynnistyä, ja alle 13-vuotiailla Metan pakettia ei koskaan käynnistetä, mainostunnistetta ei kerätä eikä mitään jaeta mainosten kohdentamista varten. Yllä kuvattujen tilitietojen lisäksi emme tietoisesti kerää lapselta henkilötietoja. Jos uskot lapsen antaneen meille enemmän, ota yhteyttä, niin poistamme ne.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Sinä päätät';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Voit muokata tai poistaa oppimisasetuksiasi milloin tahansa. Tilin poistaminen pyyhkii synkronoidut oppimistietosi pysyvästi palvelimiltamme sekä tälle laitteelle tallennetun kopion – sitä ennen pyydämme sinua kirjautumaan vielä kerran, jotta voimme varmistaa tilin olevan sinun. Voit peruuttaa seurantaluvan koska tahansa laitteesi asetuksista.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Ota yhteyttä';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Onko sinulla kysyttävää tästä käytännöstä tai haluatko tietosi poistettavan? Lähetä viesti osoitteeseen $email, niin autamme.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Matheasyn käyttäminen';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy auttaa sinua oppimaan matematiikkaa skannauksen, ohjattujen ratkaisujen, tekoälyopettajan ja harjoitusten avulla. Käytä sitä omaan oppimiseesi ja ole kunnioittava muita kohtaan.';
+
+  @override
+  String get legalTermsAccountTitle => 'Tilisi';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Vastaat tililläsi tehdystä toiminnasta, joten säilytä kirjautumistietosi turvassa. Voit poistaa tilisi ja kaiken siihen synkronoidun milloin tahansa Profiili-välilehdeltä.';
+
+  @override
+  String get legalTermsBillingTitle => 'Tilaukset ja laskutus';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro on automaattisesti uusiutuva tilaus, joka veloitetaan sovelluskauppatililtäsi. Hinta ja laskutusjakso näytetään ennen vahvistusta. Se uusiutuu automaattisesti kunkin jakson lopussa, ellet peru sitä vähintään 24 tuntia aiemmin, ja voit hallita tai perua sen milloin tahansa sovelluskauppatilisi asetuksista.';
+
+  @override
+  String get legalTermsAiTitle => 'Apu oppimiseen, ei takuu';
+
+  @override
+  String get legalTermsAiBody =>
+      'Vastaukset tarkistetaan sijoittamalla ne takaisin alkuperäiseen tehtävääsi, ja Matheasy kertoo, kun vastausta ei voitu varmistaa, sen sijaan että näyttäisi sinulle itsevarman arvauksen. Silti selitykset tuotetaan automaattisesti eivätkä ne ole aina täydellisiä. Tarkista aina itse työ, jolla on merkitystä.';
 }

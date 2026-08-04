@@ -36,7 +36,7 @@ class RouteGuard {
     required bool onboardingComplete,
     required bool isPremium,
   }) {
-    // 0) External deep links (matheasy:// or https://matheasy.app) resolve to
+    // 0) External deep links (matheasy:// or https://getmatheasy.com) resolve to
     //    an in-app location before the session gates run.
     final deepLinkTarget = DeepLinkParser.resolve(uri);
     if (deepLinkTarget != null && deepLinkTarget != matchedLocation) {

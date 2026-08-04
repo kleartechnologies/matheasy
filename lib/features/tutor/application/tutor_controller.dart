@@ -159,7 +159,11 @@ class TutorChatController extends _$TutorChatController {
 
   /// Sends a free-text [rawText] turn and appends Numi's reply. Ignored while
   /// Numi is already thinking, so a double-tap can't interleave turns.
-  Future<void> send(String rawText) async {
+  ///
+  /// [unreachableMessage] is the localized line to post if the request fails —
+  /// resolved at the call site, where a [BuildContext] exists, like the rest of
+  /// the tutor's copy.
+  Future<void> send(String rawText, {String? unreachableMessage}) async {
     final text = rawText.trim();
     if (text.isEmpty || state.isTyping) return;
 
@@ -192,14 +196,22 @@ class TutorChatController extends _$TutorChatController {
     } catch (error, stackTrace) {
       // Never leave the composer stuck in "typing" — surface a friendly,
       // retryable message and always clear the typing state.
+      //
+      // This catch covers server 5xx/429 as well as real connectivity loss, so
+      // the copy must NOT assert whose fault it is. During the outage that took
+      // the backend down, the old "check your connection" line told every user
+      // their own network was broken — which reads as a 1-star bug in the app.
       LoggingService.error('Tutor reply failed',
           error: error, stackTrace: stackTrace);
-      _appendAssistant(
-        "Sorry — I couldn't reach the tutor just now. Please check your "
-        'connection and try again.',
-      );
+      _appendAssistant(unreachableMessage ?? _fallbackUnreachable);
     }
   }
+
+  /// Last-resort English used only when no localized copy was supplied (tests,
+  /// or a call site with no [BuildContext]).
+  static const String _fallbackUnreachable =
+      "Sorry — I couldn't get through to the tutor just now. Please try again "
+      'in a moment.';
 
   /// Sends a photo the student attached in chat (spec Parts 2 and 12).
   ///

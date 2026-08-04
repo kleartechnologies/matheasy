@@ -15,16 +15,23 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   static const String appBuildNumber = '1';
 
-  // Support & legal
-  static const String supportEmail = 'support@matheasy.app';
-  static const String privacyUrl = 'https://matheasy.app/privacy';
-  static const String termsUrl = 'https://matheasy.app/terms';
-  static const String helpCenterUrl = 'https://matheasy.app/help';
+  // Support & legal. These are shown in-app AND submitted as store metadata, so
+  // every one of them must resolve before review — a dead privacy URL is a
+  // rejection on both stores. The domain is getmatheasy.com (matheasy.app was
+  // never registered). Verified live 2026-08-04; the canonical host is `www.`
+  // (the apex 308-redirects there, so link www directly and skip the hop).
+  static const String supportEmail = 'support@getmatheasy.com';
+  static const String privacyUrl = 'https://www.getmatheasy.com/privacy';
+  static const String termsUrl = 'https://www.getmatheasy.com/terms';
+
+  // NOT LIVE — /help still 404s. Deliberately unreferenced: wire it into a
+  // screen only once the page exists, or review will follow it into a dead end.
+  static const String helpCenterUrl = 'https://www.getmatheasy.com/help';
 
   // Store / marketing
   static const String appStoreUrl = 'https://apps.apple.com/app/matheasy';
   static const String playStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.matheasy';
+      'https://play.google.com/store/apps/details?id=com.matheasy.matheasy';
 
   // Product limits (free tier) — surfaced by the paywall in later stages.
   static const int freeDailyScans = 3;

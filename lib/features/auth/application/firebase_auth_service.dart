@@ -26,6 +26,12 @@ class FirebaseAuthService implements AuthService {
   final FirebaseAuth _auth;
   final GoogleSignIn _google;
 
+  /// How long a sign-in counts as "recent" for a destructive operation. Firebase
+  /// doesn't publish the exact threshold; this is deliberately shorter than any
+  /// observed window, so we re-authenticate a little too eagerly rather than
+  /// discover the session was stale after the data is already gone.
+  static const Duration _recentLoginWindow = Duration(minutes: 2);
+
   /// google_sign_in v7 requires a one-time [GoogleSignIn.initialize]; cache the
   /// future so concurrent taps don't double-initialize.
   Future<void>? _googleInit;
@@ -81,12 +87,7 @@ class FirebaseAuthService implements AuthService {
   Future<AppUser> signInWithGoogle() async {
     _rememberAnonymousUid();
     try {
-      await _ensureGoogleInit();
-      final account = await _google.authenticate();
-      final idToken = account.authentication.idToken;
-      if (idToken == null) throw const AuthFailure.google();
-
-      final credential = GoogleAuthProvider.credential(idToken: idToken);
+      final credential = await _googleCredential();
       final result = await _auth.signInWithCredential(credential);
       return _requireUser(result, AuthProviderType.google);
     } catch (error, stack) {
@@ -98,30 +99,80 @@ class FirebaseAuthService implements AuthService {
   Future<AppUser> signInWithApple() async {
     _rememberAnonymousUid();
     try {
-      // A nonce binds this request to the returned id-token, mitigating replay.
-      final rawNonce = _generateNonce();
-      final hashedNonce = _sha256(rawNonce);
-
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: const [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: hashedNonce,
-      );
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
-        accessToken: appleCredential.authorizationCode,
-      );
-
-      final result = await _auth.signInWithCredential(oauthCredential);
-      final user = await _applyAppleName(result, appleCredential);
+      final (credential, apple) = await _appleCredential();
+      final result = await _auth.signInWithCredential(credential);
+      final user = await _applyAppleName(result, apple);
       return _requireUser(result, AuthProviderType.apple, override: user);
     } catch (error, stack) {
       throw _mapError(error, stack, AuthProviderType.apple);
     }
+  }
+
+  @override
+  Future<void> ensureRecentLogin() async {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    // Firebase only accepts a destructive operation behind a "recent" login.
+    // The window it enforces is a few minutes; re-proving identity early — and
+    // BEFORE the caller destroys anything — is what stops a delete from failing
+    // half-way through, with the data already gone and the account still alive.
+    final lastSignIn = user.metadata.lastSignInTime;
+    if (lastSignIn != null &&
+        DateTime.now().difference(lastSignIn) < _recentLoginWindow) {
+      return;
+    }
+    await _reauthenticate(user);
+  }
+
+  /// Re-proves identity with whichever provider the account was created with.
+  /// Surfaces a typed [AuthFailure] (including a silent `cancelled`) so the
+  /// caller can abort cleanly rather than guess.
+  Future<void> _reauthenticate(User user) async {
+    final provider = _providerOf(user);
+    try {
+      final credential = switch (provider) {
+        AuthProviderType.apple => (await _appleCredential()).$1,
+        _ => await _googleCredential(),
+      };
+      await user.reauthenticateWithCredential(credential);
+    } catch (error, stack) {
+      throw _mapError(error, stack, provider);
+    }
+  }
+
+  Future<AuthCredential> _googleCredential() async {
+    await _ensureGoogleInit();
+    final account = await _google.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) throw const AuthFailure.google();
+    return GoogleAuthProvider.credential(idToken: idToken);
+  }
+
+  /// Returns the Firebase credential plus the raw Apple credential — the latter
+  /// carries the name, which Apple only ever sends on the FIRST authorization.
+  Future<(AuthCredential, AuthorizationCredentialAppleID)>
+      _appleCredential() async {
+    // A nonce binds this request to the returned id-token, mitigating replay.
+    final rawNonce = _generateNonce();
+    final hashedNonce = _sha256(rawNonce);
+
+    final apple = await SignInWithApple.getAppleIDCredential(
+      scopes: const [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
+
+    return (
+      OAuthProvider('apple.com').credential(
+        idToken: apple.identityToken,
+        rawNonce: rawNonce,
+        accessToken: apple.authorizationCode,
+      ),
+      apple,
+    );
   }
 
   @override
@@ -133,18 +184,26 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<void> deleteSession() async {
     final user = _auth.currentUser;
-    await _signOutGoogle();
-    if (user == null) return;
+    if (user == null) {
+      await _signOutGoogle();
+      return;
+    }
     try {
-      await user.delete();
-    } on FirebaseAuthException catch (e) {
-      // Deleting an old session requires a fresh login; fall back to sign-out
-      // so the local session still ends cleanly.
-      if (e.code == 'requires-recent-login') {
-        await _auth.signOut();
-        return;
+      try {
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'requires-recent-login') rethrow;
+        // The session went stale between [ensureRecentLogin] and here (or the
+        // caller skipped it). Re-prove identity and delete for real — signing
+        // out instead would end the session while leaving the account, and its
+        // PII, alive on a "delete my account" tap.
+        await _reauthenticate(user);
+        await (_auth.currentUser ?? user).delete();
       }
-      rethrow;
+    } finally {
+      // Always drop the local Google session, deleted or not, so a failed
+      // delete doesn't leave a half-signed-in state behind.
+      await _signOutGoogle();
     }
   }
 

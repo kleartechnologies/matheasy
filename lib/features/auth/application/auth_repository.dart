@@ -58,6 +58,8 @@ class AuthRepository {
     _emit();
   }
 
+  Future<void> ensureRecentLogin() => _service.ensureRecentLogin();
+
   Future<void> deleteSession() async {
     await _service.deleteSession();
     await _prefs.clearSession();

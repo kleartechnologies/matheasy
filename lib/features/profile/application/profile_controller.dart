@@ -74,6 +74,12 @@ class ProfileController extends _$ProfileController {
     // Best-effort: local deletion proceeds even if the cloud wipe fails.
     final user = ref.read(currentUserProvider);
     if (user != null && !user.isGuest) {
+      // Re-prove identity FIRST. Firebase refuses to delete an account behind a
+      // stale session, and discovering that after the wipe would leave the
+      // account — and its PII — alive with the learning data already gone.
+      // Throws (including a silent cancel) if the user can't or won't confirm,
+      // which aborts the whole deletion with nothing yet destroyed.
+      await ref.read(authControllerProvider.notifier).ensureRecentLogin();
       try {
         await ref.read(syncServiceProvider).wipe(user.id);
       } catch (_) {

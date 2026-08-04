@@ -2096,7 +2096,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Ik kon die foto nu niet lezen. Controleer je verbinding en probeer het opnieuw.';
+      'Ik kon die foto zojuist niet lezen. Probeer het zo nog eens.';
+
+  @override
+  String get tutorUnreachable =>
+      'Sorry — ik kon de tutor zojuist niet bereiken. Probeer het zo nog eens.';
 
   @override
   String get tutorLessonGoal => 'Doel';
@@ -2117,4 +2121,117 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numi\'s uitleg';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Verwijderen geannuleerd — je account en gegevens zijn onaangetast.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'We konden niet bevestigen dat jij het bent, dus er is niets verwijderd. Meld je opnieuw aan en probeer het nog eens.';
+
+  @override
+  String get legalPrivacyTitle => 'Privacybeleid';
+
+  @override
+  String get legalTermsTitle => 'Servicevoorwaarden';
+
+  @override
+  String get legalLastUpdated => 'Laatst bijgewerkt op 4 augustus 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Hierboven staat de huidige versie. Het altijd actuele beleid vind je ook online op';
+
+  @override
+  String get legalPrivacyDataTitle => 'Waar je gegevens staan';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy bewaart je voortgang, prestaties, leervoorkeuren en instellingen op dit apparaat. Als je inlogt met Google of Apple, worden die leergegevens via een beveiligde verbinding ook met je account gesynchroniseerd (via Google Firebase), zodat ze zijn opgeslagen en met je meegaan naar een nieuw apparaat.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Wat we verzamelen';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Bij het inloggen met Google of Apple krijgen we een basisprofiel — je naam, e-mailadres en foto — om je account aan te maken en persoonlijk te maken. Om de app te laten werken, verwerken we de opgaven die je scant of typt, je oefenactiviteit en je voortgang. Voor ingelogde gebruikers wordt dit in je account bewaard, zodat het tussen je apparaten kan synchroniseren. Meer vragen we niet.';
+
+  @override
+  String get legalPrivacyAiTitle => 'AI-verwerking (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy werkt op AI. Wanneer je een opgave scant, een vergelijking typt, de AI-tutor iets vraagt of Visueel leren opent, wordt die inhoud — de foto van je werk, de tekst van de vergelijking of je vraag — via een beveiligde verbinding naar onze AI-leverancier OpenAI gestuurd, zodat die de opgave kan lezen en de oplossing, uitleg of het antwoord kan maken. Foto\'s worden vooraf automatisch gecontroleerd op onveilige inhoud. Deze inhoud wordt gebruikt om jou te antwoorden; ze wordt nooit verkocht en nooit gebruikt om advertenties te richten. Hoe OpenAI met deze gegevens omgaat, valt onder hun beleid voor API-gegevensgebruik.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Advertenties en meting (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'We adverteren Matheasy op Meta-platforms zoals Facebook en Instagram, en we gebruiken de software van Meta om te meten of die advertenties echt werken. Als je tracking toestaat, delen we app-activiteit met Meta: dat je Matheasy hebt geïnstalleerd en geopend, een account hebt aangemaakt, de introductie hebt afgerond, je eerste scan hebt gemaakt, de AI-tutor of Visueel leren hebt geopend, een oefening bent begonnen of hebt afgerond en het abonnementsscherm hebt gezien. Abonnementsgebeurtenissen worden door onze servers naar Meta gestuurd, niet door de app. Daarnaast delen we de advertentie-ID van je apparaat en een account-ID, waarmee Meta jou kan koppelen aan een advertentie die je mogelijk hebt gezien. Meta mag deze gegevens gebruiken om advertenties te meten en te richten, ook op hun eigen platforms.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Jouw keuze over tracking';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Niets hiervan gebeurt zonder jouw toestemming. We vragen eerst je leeftijd en daarna je toestemming. Als je weigert — of aangeeft jonger dan 13 te zijn — wordt de software van Meta nooit gestart: er wordt geen advertentie-ID verzameld en er gaat geen activiteit naar Meta. Matheasy werkt in beide gevallen precies hetzelfde; je verliest geen enkele functie door nee te zeggen. Je kunt je altijd bedenken via de instellingen van je apparaat, onder Privacy en beveiliging → Tracking.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Statistieken en crashrapporten';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'We gebruiken Google Firebase om te begrijpen welke delen van de app worden gebruikt en om automatische crashrapporten te ontvangen, zodat we kunnen repareren wat stukgaat en kunnen bepalen wat we hierna bouwen. Dit is gekoppeld aan je app-installatie, niet aan je advertentieprofiel, en wordt nooit verkocht.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Privacy van kinderen';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy is gemaakt voor leerlingen van alle leeftijden, ook onder de 13, en alle functies staan voor hen open. Wat verschilt, is tracking: we vragen naar de leeftijd voordat advertentiesoftware überhaupt mag draaien, en voor kinderen onder de 13 wordt de software van Meta nooit gestart, wordt er geen advertentie-ID verzameld en wordt er niets gedeeld voor gerichte advertenties. Naast de hierboven beschreven accountgegevens verzamelen we niet bewust persoonsgegevens van een kind. Denk je dat een kind meer heeft gedeeld? Neem contact met ons op en we verwijderen het.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Jij hebt de regie';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Je kunt je leervoorkeuren altijd aanpassen of wissen. Als je je account verwijdert, worden je gesynchroniseerde leergegevens definitief van onze servers gewist, samen met de kopie op dit apparaat — we vragen je eerst nog één keer in te loggen, om te bevestigen dat het jouw account is. Je kunt je toestemming voor tracking op elk moment intrekken via de instellingen van je apparaat.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Contact';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Vragen over dit beleid, of wil je dat je gegevens worden verwijderd? Mail ons op $email en we helpen je verder.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Matheasy gebruiken';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy helpt je wiskunde te leren met scannen, begeleide oplossingen, een AI-tutor en oefeningen. Gebruik het voor je eigen leerproces en ga respectvol met anderen om.';
+
+  @override
+  String get legalTermsAccountTitle => 'Je account';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Je bent verantwoordelijk voor activiteit onder je account, dus houd je inloggegevens veilig. Je kunt je account, en alles wat ermee is gesynchroniseerd, op elk moment verwijderen via het tabblad Profiel.';
+
+  @override
+  String get legalTermsBillingTitle => 'Abonnementen en betaling';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro is een automatisch verlengend abonnement dat via je app store-account wordt afgerekend. De prijs en de betaalperiode zie je voordat je bevestigt. Het wordt aan het einde van elke periode automatisch verlengd, tenzij je minstens 24 uur van tevoren opzegt; beheren of opzeggen kan altijd in de instellingen van je app store-account.';
+
+  @override
+  String get legalTermsAiTitle => 'Een leerhulp, geen garantie';
+
+  @override
+  String get legalTermsAiBody =>
+      'Antwoorden worden gecontroleerd door ze terug in je oorspronkelijke opgave in te vullen, en Matheasy zegt het wanneer een antwoord niet geverifieerd kon worden, in plaats van je zelfverzekerd een gok voor te schotelen. Toch worden uitleg en toelichting automatisch gegenereerd en zijn ze niet altijd perfect. Controleer werk dat er echt toe doet altijd zelf.';
 }

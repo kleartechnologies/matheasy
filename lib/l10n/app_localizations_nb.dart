@@ -2089,7 +2089,11 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Jeg klarte ikke å lese bildet akkurat nå. Sjekk tilkoblingen og prøv igjen.';
+      'Jeg klarte ikke å lese det bildet akkurat nå. Prøv igjen om litt.';
+
+  @override
+  String get tutorUnreachable =>
+      'Beklager – jeg fikk ikke tak i læreren akkurat nå. Prøv igjen om litt.';
 
   @override
   String get tutorLessonGoal => 'Mål';
@@ -2110,4 +2114,117 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numis forklaring';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Slettingen ble avbrutt – kontoen og dataene dine er urørt.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Vi klarte ikke å bekrefte at det var deg, så ingenting ble slettet. Logg inn på nytt og prøv igjen.';
+
+  @override
+  String get legalPrivacyTitle => 'Personvernerklæring';
+
+  @override
+  String get legalTermsTitle => 'Vilkår for bruk';
+
+  @override
+  String get legalLastUpdated => 'Sist oppdatert 4. august 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Gjeldende versjon vises ovenfor. Den alltid oppdaterte erklæringen finner du også på nett på';
+
+  @override
+  String get legalPrivacyDataTitle => 'Hvor dataene dine ligger';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy lagrer fremgangen din, prestasjonene dine, læringspreferansene dine og innstillingene dine på denne enheten. Når du logger inn med Google eller Apple, synkroniseres disse læringsdataene også til kontoen din via en sikker tilkobling (med Google Firebase), slik at de er sikkerhetskopiert og følger med deg til en ny enhet.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Hva vi samler inn';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Når du logger inn med Google eller Apple, får vi en enkel profil – navnet ditt, e-postadressen din og bildet ditt – for å opprette og tilpasse kontoen din. For at appen skal fungere behandler vi oppgavene du skanner eller skriver inn, øvingsaktiviteten din og fremgangen din. For innloggede brukere lagres dette på kontoen din, slik at det kan synkroniseres mellom enhetene dine. Vi ber ikke om noe mer.';
+
+  @override
+  String get legalPrivacyAiTitle => 'KI-behandling (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy drives av KI. Når du skanner en oppgave, skriver inn en likning, spør KI-læreren eller åpner Visuell læring, sendes innholdet – bildet av arbeidet ditt, likningsteksten eller spørsmålet ditt – via en sikker tilkobling til KI-leverandøren vår, OpenAI, slik at den kan lese oppgaven og lage løsningen, forklaringen eller svaret. Bilder sjekkes automatisk for utrygt innhold før de behandles. Innholdet brukes til å svare deg; det selges aldri og brukes aldri til å målrette annonser. Hvordan OpenAI håndterer disse dataene, følger deres retningslinjer for API-databruk.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Annonsering og måling (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Vi annonserer for Matheasy på Metas plattformer som Facebook og Instagram, og vi bruker Metas programvarepakke for å måle om annonsene faktisk virker. Hvis du tillater sporing, deler vi noe av aktiviteten din i appen med Meta: at du har installert og åpnet Matheasy, opprettet en konto, fullført introduksjonen, gjort din første skanning, åpnet KI-læreren eller Visuell læring, startet eller fullført en øving, og sett abonnementsskjermen. Abonnementshendelser sendes til Meta av serverne våre, ikke av appen. Sammen med dette deler vi enhetens annonse-ID og en konto-ID, som Meta bruker til å knytte deg til en annonse du kan ha sett. Meta kan bruke disse dataene til å måle og målrette annonser, også på sine egne plattformer.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Ditt valg om sporing';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Ingenting av dette skjer uten tillatelsen din. Vi spør først om alderen din, og ber deretter om tillatelse. Hvis du sier nei – eller forteller oss at du er under 13 år – kjører Metas programvare aldri: ingen annonse-ID samles inn, og ingen aktivitet sendes til Meta. Matheasy fungerer helt likt uansett; ingen funksjoner holdes tilbake fordi du sier nei. Du kan ombestemme deg når som helst i innstillingene på enheten, under Personvern og sikkerhet → Sporing.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analyse og krasjrapporter';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Vi bruker Google Firebase for å forstå hvilke deler av appen som brukes, og for å få automatiske krasjrapporter, slik at vi kan fikse det som ryker og bestemme hva vi skal bygge videre. Dette er knyttet til app-installasjonen din, ikke til annonseprofilen din, og selges aldri.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Barns personvern';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy er laget for elever i alle aldre, også de under 13 år, og alle funksjoner er åpne for dem. Det som er annerledes, er sporing: vi spør om alder før noen annonseprogramvare i det hele tatt får kjøre, og for barn under 13 kjører Metas programvare aldri, ingen annonse-ID samles inn, og ingenting deles for annonsemålretting. Utover kontoopplysningene beskrevet ovenfor samler vi ikke bevisst inn personopplysninger fra barn. Hvis du tror at et barn har gitt oss mer enn det, ta kontakt, så sletter vi det.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Du bestemmer';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Du kan endre eller slette læringspreferansene dine når du vil. Når du sletter kontoen din, fjernes de synkroniserte læringsdataene dine permanent fra serverne våre, sammen med kopien som ligger på denne enheten – først ber vi deg logge inn én gang til, for å bekrefte at kontoen er din. Du kan trekke tilbake tillatelsen til sporing når som helst i innstillingene på enheten.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kontakt oss';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Har du spørsmål om denne erklæringen, eller vil du at dataene dine skal slettes? Send oss en e-post på $email, så hjelper vi deg.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Å bruke Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy hjelper deg å lære matematikk gjennom skanning, veiledede løsninger, en KI-lærer og øving. Bruk det til din egen læring, og vis respekt for andre.';
+
+  @override
+  String get legalTermsAccountTitle => 'Kontoen din';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Du er ansvarlig for aktivitet som skjer med kontoen din, så hold påloggingsinformasjonen trygg. Du kan slette kontoen, og alt som er synkronisert til den, fra Profil-fanen når som helst.';
+
+  @override
+  String get legalTermsBillingTitle => 'Abonnement og betaling';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro er et abonnement som fornyes automatisk og belastes app store-kontoen din. Pris og betalingsperiode vises før du bekrefter. Det fornyes automatisk ved slutten av hver periode med mindre du sier opp minst 24 timer i forveien, og du kan administrere eller si det opp når som helst i innstillingene for app store-kontoen din.';
+
+  @override
+  String get legalTermsAiTitle => 'En hjelp til å lære, ikke en garanti';
+
+  @override
+  String get legalTermsAiBody =>
+      'Svar kontrolleres ved å settes tilbake i den opprinnelige oppgaven din, og Matheasy sier ifra når et svar ikke kunne verifiseres, i stedet for å vise deg en selvsikker gjetning. Likevel genereres forklaringene automatisk, og de blir ikke alltid perfekte. Dobbeltsjekk alltid arbeid som betyr noe.';
 }

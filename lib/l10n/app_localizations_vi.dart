@@ -2094,7 +2094,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Bây giờ mình không đọc được ảnh đó. Hãy kiểm tra kết nối rồi thử lại.';
+      'Tôi vừa không đọc được ảnh đó. Bạn hãy thử lại sau giây lát nhé.';
+
+  @override
+  String get tutorUnreachable =>
+      'Xin lỗi — tôi vừa không kết nối được với gia sư. Bạn hãy thử lại sau giây lát nhé.';
 
   @override
   String get tutorLessonGoal => 'Mục tiêu';
@@ -2115,4 +2119,117 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Giải thích của Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Đã hủy việc xóa — tài khoản và dữ liệu của bạn vẫn nguyên vẹn.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Chúng tôi không xác minh được đúng là bạn, nên chưa xóa gì cả. Hãy đăng nhập lại rồi thử lần nữa.';
+
+  @override
+  String get legalPrivacyTitle => 'Chính sách quyền riêng tư';
+
+  @override
+  String get legalTermsTitle => 'Điều khoản dịch vụ';
+
+  @override
+  String get legalLastUpdated => 'Cập nhật lần cuối ngày 4 tháng 8 năm 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'Phiên bản hiện tại được hiển thị ở trên. Chính sách luôn được cập nhật cũng có sẵn trực tuyến tại';
+
+  @override
+  String get legalPrivacyDataTitle => 'Dữ liệu của bạn được lưu ở đâu';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy lưu tiến độ, thành tích, tùy chọn học tập và cài đặt của bạn trên thiết bị này. Khi bạn đăng nhập bằng Google hoặc Apple, dữ liệu học tập đó còn được đồng bộ với tài khoản của bạn qua kết nối bảo mật (dùng Google Firebase), nhờ vậy dữ liệu được sao lưu và theo bạn sang thiết bị mới.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Chúng tôi thu thập những gì';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Đăng nhập bằng Google hoặc Apple cung cấp cho chúng tôi hồ sơ cơ bản — tên, email và ảnh của bạn — để tạo và cá nhân hóa tài khoản. Để ứng dụng hoạt động, chúng tôi xử lý những bài toán bạn quét hoặc nhập, hoạt động luyện tập và tiến độ của bạn. Với người dùng đã đăng nhập, những dữ liệu này được lưu trong tài khoản để đồng bộ giữa các thiết bị. Ngoài ra chúng tôi không hỏi gì thêm.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Xử lý bằng AI (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy vận hành bằng AI. Khi bạn quét một bài toán, nhập một phương trình, hỏi gia sư AI hoặc mở Học trực quan, nội dung đó — ảnh bài làm, chữ trong phương trình hoặc câu hỏi của bạn — được gửi qua kết nối bảo mật đến nhà cung cấp AI của chúng tôi là OpenAI, để đọc đề bài và tạo ra lời giải, lời giải thích hoặc câu trả lời. Ảnh được tự động kiểm tra nội dung không an toàn trước khi xử lý. Nội dung này chỉ dùng để trả lời bạn; không bao giờ bị bán và không bao giờ dùng để nhắm quảng cáo. Cách OpenAI xử lý dữ liệu này tuân theo chính sách sử dụng dữ liệu API của họ.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Quảng cáo và đo lường (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Chúng tôi quảng cáo Matheasy trên các nền tảng của Meta như Facebook và Instagram, và dùng bộ phần mềm của Meta để đo xem những quảng cáo đó có thực sự hiệu quả hay không. Nếu bạn cho phép theo dõi, chúng tôi chia sẻ một phần hoạt động trong ứng dụng với Meta: rằng bạn đã cài đặt và mở Matheasy, đã tạo tài khoản, đã hoàn thành phần giới thiệu, đã quét lần đầu, đã mở gia sư AI hoặc Học trực quan, đã bắt đầu hoặc hoàn thành một buổi luyện tập, và đã xem màn hình đăng ký. Các sự kiện đăng ký do máy chủ của chúng tôi gửi đến Meta, không phải do ứng dụng. Cùng với đó, chúng tôi chia sẻ mã nhận dạng quảng cáo của thiết bị và một mã nhận dạng tài khoản, để Meta liên kết bạn với quảng cáo mà bạn có thể đã xem. Meta có thể dùng dữ liệu này để đo lường và nhắm mục tiêu quảng cáo, kể cả trên chính nền tảng của họ.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Lựa chọn của bạn về theo dõi';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Không điều nào ở trên xảy ra nếu bạn không cho phép. Chúng tôi hỏi tuổi của bạn trước, rồi mới xin phép. Nếu bạn từ chối — hoặc cho biết mình dưới 13 tuổi — bộ phần mềm của Meta sẽ không bao giờ chạy: không thu thập mã nhận dạng quảng cáo nào và không gửi hoạt động nào đến Meta. Matheasy hoạt động y hệt nhau trong cả hai trường hợp; bạn không bị giữ lại tính năng nào chỉ vì đã từ chối. Bạn có thể đổi ý bất cứ lúc nào trong cài đặt thiết bị, ở mục Quyền riêng tư & Bảo mật → Theo dõi.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Phân tích và báo cáo sự cố';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Chúng tôi dùng Google Firebase để biết những phần nào của ứng dụng đang được sử dụng và nhận báo cáo sự cố tự động, nhờ đó sửa được chỗ hỏng và quyết định nên xây dựng gì tiếp theo. Dữ liệu này gắn với lượt cài đặt ứng dụng chứ không gắn với hồ sơ quảng cáo của bạn, và không bao giờ bị bán.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Quyền riêng tư của trẻ em';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy được xây dựng cho người học ở mọi lứa tuổi, kể cả học sinh dưới 13 tuổi, và mọi tính năng đều dành cho các em. Điều khác biệt là việc theo dõi: chúng tôi hỏi tuổi trước khi cho phép bất kỳ phần mềm quảng cáo nào chạy, và với người dưới 13 tuổi, bộ phần mềm của Meta không bao giờ chạy, không thu thập mã nhận dạng quảng cáo và không chia sẻ bất cứ điều gì cho mục đích nhắm quảng cáo. Ngoài dữ liệu tài khoản nêu trên, chúng tôi không cố ý thu thập thông tin cá nhân của trẻ em. Nếu bạn cho rằng một trẻ đã cung cấp cho chúng tôi nhiều hơn thế, hãy liên hệ và chúng tôi sẽ xóa.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Bạn nắm quyền quyết định';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Bạn có thể chỉnh sửa hoặc xóa tùy chọn học tập của mình bất cứ lúc nào. Xóa tài khoản sẽ xóa vĩnh viễn dữ liệu học tập đã đồng bộ khỏi máy chủ của chúng tôi, cùng với bản sao lưu trên thiết bị này — trước đó chúng tôi sẽ yêu cầu bạn đăng nhập thêm một lần nữa, để xác nhận tài khoản đúng là của bạn. Bạn cũng có thể rút lại quyền theo dõi bất cứ lúc nào trong cài đặt thiết bị.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Liên hệ';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Bạn có thắc mắc về chính sách này, hoặc muốn xóa dữ liệu của mình? Hãy gửi email tới $email và chúng tôi sẽ hỗ trợ.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Sử dụng Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy giúp bạn học toán bằng cách quét đề, giải từng bước, gia sư AI và luyện tập. Hãy dùng cho việc học của chính bạn và tôn trọng người khác.';
+
+  @override
+  String get legalTermsAccountTitle => 'Tài khoản của bạn';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Bạn chịu trách nhiệm về hoạt động được thực hiện dưới tài khoản của mình, vì vậy hãy giữ an toàn thông tin đăng nhập. Bạn có thể xóa tài khoản, cùng mọi thứ đã đồng bộ với nó, tại thẻ Hồ sơ bất cứ lúc nào.';
+
+  @override
+  String get legalTermsBillingTitle => 'Gói đăng ký và thanh toán';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro là gói đăng ký tự động gia hạn, được tính phí qua tài khoản cửa hàng ứng dụng của bạn. Giá và kỳ thanh toán được hiển thị trước khi bạn xác nhận. Gói tự động gia hạn vào cuối mỗi kỳ trừ khi bạn hủy trước ít nhất 24 giờ, và bạn có thể quản lý hoặc hủy bất cứ lúc nào trong cài đặt tài khoản cửa hàng.';
+
+  @override
+  String get legalTermsAiTitle => 'Một trợ thủ học tập, không phải lời bảo đảm';
+
+  @override
+  String get legalTermsAiBody =>
+      'Đáp án được kiểm tra bằng cách thế ngược vào đề bài gốc của bạn, và khi không kiểm chứng được, Matheasy sẽ nói thẳng điều đó thay vì đưa ra một phỏng đoán đầy tự tin. Dù vậy, phần giải thích được tạo tự động nên không phải lúc nào cũng hoàn hảo. Hãy luôn kiểm tra lại những bài làm quan trọng.';
 }

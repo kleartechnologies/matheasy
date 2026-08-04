@@ -54,6 +54,16 @@ abstract interface class AuthService {
   /// Ends the cloud session (keeps the account).
   Future<void> signOut();
 
+  /// Re-proves the user's identity with their original provider if the cached
+  /// session is too old for a destructive operation; a no-op when it is fresh
+  /// (and for guest/anonymous sessions, which have nothing to re-prove).
+  ///
+  /// Call this BEFORE destroying anything. Firebase refuses to delete an account
+  /// behind a stale session, and finding that out afterwards leaves the account
+  /// alive with its data already wiped. Throws [AuthFailure] — including a silent
+  /// `cancelled` — if the user backs out, so the caller can abort untouched.
+  Future<void> ensureRecentLogin();
+
   /// Permanently deletes the cloud account and ends the session.
   Future<void> deleteSession();
 }
@@ -100,6 +110,9 @@ class UnconfiguredAuthService implements AuthService {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<void> ensureRecentLogin() async {}
 
   @override
   Future<void> deleteSession() async {}

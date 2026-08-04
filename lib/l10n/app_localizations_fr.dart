@@ -2108,7 +2108,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Je n\'ai pas pu lire cette photo pour le moment. Vérifie ta connexion et réessaie.';
+      'Je n\'ai pas réussi à lire cette photo à l\'instant. Réessaie dans un moment.';
+
+  @override
+  String get tutorUnreachable =>
+      'Désolé, je n\'ai pas réussi à joindre le tuteur à l\'instant. Réessaie dans un moment.';
 
   @override
   String get tutorLessonGoal => 'Objectif';
@@ -2129,4 +2133,119 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Explication de Numi';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Suppression annulée — ton compte et tes données sont intacts.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Nous n\'avons pas pu confirmer ton identité : rien n\'a été supprimé. Reconnecte-toi, puis réessaie.';
+
+  @override
+  String get legalPrivacyTitle => 'Politique de confidentialité';
+
+  @override
+  String get legalTermsTitle => 'Conditions d\'utilisation';
+
+  @override
+  String get legalLastUpdated => 'Dernière mise à jour : 4 août 2026';
+
+  @override
+  String get legalOnlineNote =>
+      'La version actuelle est affichée ci-dessus. La politique toujours à jour est également disponible en ligne à l\'adresse';
+
+  @override
+  String get legalPrivacyDataTitle => 'Où vivent tes données';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy conserve ta progression, tes réussites, tes préférences d\'apprentissage et tes réglages sur cet appareil. Lorsque tu te connectes avec Google ou Apple, ces données d\'apprentissage sont également synchronisées avec ton compte via une connexion sécurisée (Google Firebase) : elles sont ainsi sauvegardées et te suivent sur un nouvel appareil.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Ce que nous collectons';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'La connexion avec Google ou Apple nous transmet un profil de base — ton nom, ton adresse e-mail et ta photo — pour créer et personnaliser ton compte. Pour faire fonctionner l\'application, nous traitons les problèmes que tu scannes ou saisis, ton activité d\'entraînement et ta progression. Pour les utilisateurs connectés, ces données sont stockées dans ton compte afin de se synchroniser entre tes appareils. Nous ne demandons rien d\'autre.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Traitement par IA (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy fonctionne grâce à l\'IA. Lorsque tu scannes un problème, saisis une équation, interroges le tuteur IA ou ouvres l\'Apprentissage visuel, ce contenu — la photo de ton travail, le texte de l\'équation ou ta question — est envoyé via une connexion sécurisée à notre fournisseur d\'IA, OpenAI, afin qu\'il puisse lire le problème et générer la solution, l\'explication ou la réponse. Les photos sont analysées automatiquement à la recherche de contenus inappropriés avant tout traitement. Ce contenu sert à te répondre ; il n\'est jamais vendu ni utilisé pour cibler de la publicité. Le traitement de ces données par OpenAI est régi par ses politiques d\'utilisation des données de l\'API.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Publicité et mesure (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Nous faisons la publicité de Matheasy sur les plateformes de Meta, comme Facebook et Instagram, et nous utilisons le kit logiciel de Meta pour mesurer si ces publicités fonctionnent réellement. Si tu autorises le suivi, nous partageons avec Meta une partie de ton activité dans l\'application : l\'installation et l\'ouverture de Matheasy, la création d\'un compte, la fin de l\'introduction, ton premier scan, l\'ouverture du tuteur IA ou de l\'Apprentissage visuel, le début ou la fin d\'un entraînement, et l\'affichage de l\'écran d\'abonnement. Les événements liés à l\'abonnement sont envoyés à Meta par nos serveurs, et non par l\'application. Nous partageons également l\'identifiant publicitaire de ton appareil et un identifiant de compte, que Meta utilise pour t\'associer à une publicité que tu as pu voir. Meta peut utiliser ces données pour mesurer et cibler la publicité, y compris sur ses propres plateformes.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Ton choix concernant le suivi';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Rien de ce qui précède ne se produit sans ton accord. Nous te demandons d\'abord ton âge, puis ton autorisation. Si tu refuses — ou si tu nous indiques avoir moins de 13 ans — le kit Meta n\'est jamais activé : aucun identifiant publicitaire n\'est collecté et aucune activité n\'est transmise à Meta. Matheasy fonctionne exactement de la même manière dans les deux cas ; aucune fonctionnalité n\'est retirée si tu refuses. Tu peux changer d\'avis à tout moment dans les réglages de ton appareil, sous Confidentialité et sécurité → Suivi.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle =>
+      'Statistiques et rapports de plantage';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Nous utilisons Google Firebase pour comprendre quelles parties de l\'application sont utilisées et pour recevoir des rapports de plantage automatiques, afin de corriger ce qui ne fonctionne pas et de décider quoi construire ensuite. Ces données sont liées à l\'installation de l\'application et non à ton profil publicitaire, et elles ne sont jamais vendues.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Confidentialité des enfants';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy est conçu pour les apprenants de tous âges, y compris les élèves de moins de 13 ans, et toutes les fonctionnalités leur sont accessibles. Ce qui change, c\'est le suivi : nous demandons l\'âge avant d\'autoriser l\'exécution de tout logiciel publicitaire et, pour les moins de 13 ans, le kit Meta n\'est jamais activé, aucun identifiant publicitaire n\'est collecté et rien n\'est partagé à des fins de ciblage publicitaire. Au-delà des informations de compte décrites ci-dessus, nous ne collectons pas sciemment de données personnelles auprès d\'un enfant. Si tu penses qu\'un enfant nous en a communiqué davantage, contacte-nous et nous les supprimerons.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Tu gardes le contrôle';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Tu peux modifier ou effacer tes préférences d\'apprentissage à tout moment. La suppression de ton compte efface définitivement tes données d\'apprentissage synchronisées de nos serveurs ainsi que la copie présente sur cet appareil — nous te demanderons d\'abord de te reconnecter une fois, pour vérifier que le compte est bien le tien. Tu peux retirer ton autorisation de suivi quand tu le souhaites depuis les réglages de ton appareil.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Nous contacter';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Des questions sur cette politique, ou tu souhaites la suppression de tes données ? Écris-nous à $email et nous t\'aiderons.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Utiliser Matheasy';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy t\'aide à apprendre les mathématiques grâce au scan, à des solutions guidées, à un tuteur IA et à des exercices. Utilise-le pour ton propre apprentissage et reste respectueux des autres.';
+
+  @override
+  String get legalTermsAccountTitle => 'Ton compte';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Tu es responsable de l\'activité effectuée depuis ton compte : garde tes identifiants en sécurité. Tu peux supprimer ton compte, et tout ce qui y est synchronisé, depuis l\'onglet Profil à tout moment.';
+
+  @override
+  String get legalTermsBillingTitle => 'Abonnements et facturation';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro est un abonnement à renouvellement automatique facturé sur ton compte de boutique d\'applications. Le prix et la période de facturation sont affichés avant ta confirmation. Il se renouvelle automatiquement à la fin de chaque période, sauf si tu l\'annules au moins 24 heures à l\'avance ; tu peux le gérer ou l\'annuler à tout moment dans les réglages de ton compte de boutique.';
+
+  @override
+  String get legalTermsAiTitle =>
+      'Une aide à l\'apprentissage, pas une garantie';
+
+  @override
+  String get legalTermsAiBody =>
+      'Les réponses sont vérifiées en les réinjectant dans ton problème d\'origine, et Matheasy te prévient lorsqu\'il n\'a pas pu en vérifier une plutôt que de te présenter une supposition avec assurance. Malgré tout, les explications sont générées automatiquement et ne seront pas toujours parfaites. Vérifie toujours un travail qui compte.';
 }

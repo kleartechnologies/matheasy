@@ -967,7 +967,10 @@ void main() {
       // already read is worse than letting them see where it stopped.
       expect(session.messages[session.messages.length - 2].text,
           'Start by isol');
-      expect(session.messages.last.text, contains("couldn't reach"));
+      // …followed by an honest admission that owns the failure rather than
+      // blaming the student's connection for our outage.
+      expect(session.messages.last.text, contains("couldn't get through"));
+      expect(session.messages.last.text, isNot(contains('connection')));
       expect(session.isTyping, isFalse);
     });
 

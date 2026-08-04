@@ -2091,7 +2091,11 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String get tutorImageFailed =>
-      'Sada nisam uspio pročitati tu fotografiju. Provjeri vezu i pokušaj ponovno.';
+      'Trenutačno nisam uspio pročitati tu fotografiju. Pokušaj ponovno za koji trenutak.';
+
+  @override
+  String get tutorUnreachable =>
+      'Žao mi je — trenutačno nisam uspio doći do mentora. Pokušaj ponovno za koji trenutak.';
 
   @override
   String get tutorLessonGoal => 'Cilj';
@@ -2112,4 +2116,117 @@ class AppLocalizationsHr extends AppLocalizations {
 
   @override
   String get tutorLessonLabel => 'Numino objašnjenje';
+
+  @override
+  String get profileDeleteCancelled =>
+      'Brisanje je otkazano — tvoj račun i podaci ostali su netaknuti.';
+
+  @override
+  String get profileDeleteVerifyFailed =>
+      'Nismo mogli potvrditi da si to ti, pa ništa nije obrisano. Prijavi se ponovno pa pokušaj još jednom.';
+
+  @override
+  String get legalPrivacyTitle => 'Pravila privatnosti';
+
+  @override
+  String get legalTermsTitle => 'Uvjeti korištenja';
+
+  @override
+  String get legalLastUpdated => 'Zadnje ažuriranje: 4. kolovoza 2026.';
+
+  @override
+  String get legalOnlineNote =>
+      'Iznad je prikazana trenutačna verzija. Uvijek ažurna pravila dostupna su i na internetu na';
+
+  @override
+  String get legalPrivacyDataTitle => 'Gdje su tvoji podaci';
+
+  @override
+  String get legalPrivacyDataBody =>
+      'Matheasy čuva tvoj napredak, postignuća, postavke učenja i ostale postavke na ovom uređaju. Kad se prijaviš Googleom ili Appleom, ti se podaci o učenju sigurnom vezom dodatno sinkroniziraju s tvojim računom (putem Google Firebasea), pa imaju sigurnosnu kopiju i prelaze s tobom na novi uređaj.';
+
+  @override
+  String get legalPrivacyCollectTitle => 'Što prikupljamo';
+
+  @override
+  String get legalPrivacyCollectBody =>
+      'Prijava Googleom ili Appleom daje nam osnovni profil — tvoje ime, e-poštu i fotografiju — kako bismo stvorili i prilagodili tvoj račun. Da bi aplikacija radila, obrađujemo zadatke koje skeniraš ili upišeš, tvoju aktivnost vježbanja i tvoj napredak. Za prijavljene korisnike to se pohranjuje na račun kako bi se moglo sinkronizirati među tvojim uređajima. Ništa više ne tražimo.';
+
+  @override
+  String get legalPrivacyAiTitle => 'Obrada umjetnom inteligencijom (OpenAI)';
+
+  @override
+  String get legalPrivacyAiBody =>
+      'Matheasy radi na umjetnoj inteligenciji. Kad skeniraš zadatak, upišeš jednadžbu, pitaš AI mentora ili otvoriš Vizualno učenje, taj se sadržaj — fotografija tvojeg rada, tekst jednadžbe ili tvoje pitanje — sigurnom vezom šalje našem pružatelju umjetne inteligencije, tvrtki OpenAI, kako bi mogla pročitati zadatak i izraditi rješenje, objašnjenje ili odgovor. Fotografije se prije obrade automatski provjeravaju zbog neprimjerenog sadržaja. Taj se sadržaj koristi da bismo ti odgovorili; nikad se ne prodaje niti koristi za ciljanje oglasa. Način na koji OpenAI postupa s tim podacima uređen je njezinim pravilima o korištenju podataka API-ja.';
+
+  @override
+  String get legalPrivacyAdsTitle => 'Oglašavanje i mjerenje (Meta)';
+
+  @override
+  String get legalPrivacyAdsBody =>
+      'Matheasy oglašavamo na Metinim platformama poput Facebooka i Instagrama te koristimo Metin softverski paket kako bismo izmjerili djeluju li ti oglasi doista. Ako dopustiš praćenje, s Metom dijelimo dio tvoje aktivnosti u aplikaciji: da si instalirao i otvorio Matheasy, izradio račun, prošao uvod, napravio prvo skeniranje, otvorio AI mentora ili Vizualno učenje, započeo ili dovršio vježbu te pogledao zaslon pretplate. Događaje vezane uz pretplatu Meti šalju naši poslužitelji, a ne aplikacija. Uz to dijelimo oglasni identifikator tvojeg uređaja i identifikator računa, koje Meta koristi da te poveže s oglasom koji si možda vidio. Meta te podatke može upotrijebiti za mjerenje i ciljanje oglasa, uključujući na vlastitim platformama.';
+
+  @override
+  String get legalPrivacyAdsChoiceTitle => 'Tvoj izbor o praćenju';
+
+  @override
+  String get legalPrivacyAdsChoiceBody =>
+      'Ništa se od navedenog ne događa bez tvojeg dopuštenja. Prvo te pitamo za dob, a tek onda tražimo dopuštenje. Ako odbiješ — ili nam kažeš da imaš manje od 13 godina — Metin se paket nikad ne pokreće: ne prikuplja se nikakav oglasni identifikator i Meti se ne šalje nikakva aktivnost. Matheasy radi potpuno jednako u oba slučaja; nijedna ti značajka nije uskraćena zato što si rekao ne. Predomisliti se možeš bilo kada u postavkama uređaja, pod Privatnost i sigurnost → Praćenje.';
+
+  @override
+  String get legalPrivacyAnalyticsTitle => 'Analitika i izvješća o rušenju';
+
+  @override
+  String get legalPrivacyAnalyticsBody =>
+      'Koristimo Google Firebase kako bismo razumjeli koji se dijelovi aplikacije koriste i primali automatska izvješća o rušenju, da možemo popraviti ono što se pokvari i odlučiti što graditi dalje. To je vezano uz instalaciju aplikacije, a ne uz tvoj oglasni profil, i nikad se ne prodaje.';
+
+  @override
+  String get legalPrivacyChildrenTitle => 'Privatnost djece';
+
+  @override
+  String get legalPrivacyChildrenBody =>
+      'Matheasy je napravljen za učenike svih dobi, uključujući one mlađe od 13 godina, i sve su im značajke otvorene. Razlikuje se jedino praćenje: pitamo za dob prije nego što uopće dopustimo pokretanje bilo kakvog oglasnog softvera, a za mlađe od 13 godina Metin se paket nikad ne pokreće, ne prikuplja se oglasni identifikator i ništa se ne dijeli radi ciljanja oglasa. Osim podataka o računu opisanih gore, svjesno ne prikupljamo osobne podatke od djeteta. Ako misliš da nam je dijete dalo više od toga, javi nam se i obrisat ćemo to.';
+
+  @override
+  String get legalPrivacyControlTitle => 'Ti odlučuješ';
+
+  @override
+  String get legalPrivacyControlBody =>
+      'Postavke učenja možeš urediti ili izbrisati kad god želiš. Brisanjem računa trajno se uklanjaju tvoji sinkronizirani podaci o učenju s naših poslužitelja, zajedno s kopijom pohranjenom na ovom uređaju — prije toga zamolit ćemo te da se prijaviš još jednom, kako bismo provjerili da je račun doista tvoj. Dopuštenje za praćenje možeš povući bilo kada u postavkama uređaja.';
+
+  @override
+  String get legalPrivacyContactTitle => 'Kontaktiraj nas';
+
+  @override
+  String legalPrivacyContactBody(String email) {
+    return 'Imaš pitanja o ovim pravilima ili želiš da ti izbrišemo podatke? Piši nam na $email i pomoći ćemo ti.';
+  }
+
+  @override
+  String get legalTermsUsingTitle => 'Korištenje Matheasyja';
+
+  @override
+  String get legalTermsUsingBody =>
+      'Matheasy ti pomaže učiti matematiku skeniranjem, rješenjima korak po korak, AI mentorom i vježbanjem. Koristi ga za vlastito učenje i budi pristojan prema drugima.';
+
+  @override
+  String get legalTermsAccountTitle => 'Tvoj račun';
+
+  @override
+  String get legalTermsAccountBody =>
+      'Odgovoran si za aktivnosti obavljene tvojim računom, pa čuvaj podatke za prijavu na sigurnom. Račun i sve što je s njim sinkronizirano možeš izbrisati u kartici Profil u bilo kojem trenutku.';
+
+  @override
+  String get legalTermsBillingTitle => 'Pretplate i naplata';
+
+  @override
+  String get legalTermsBillingBody =>
+      'Matheasy Pro pretplata je koja se automatski obnavlja, a naplaćuje se preko tvojeg računa u trgovini aplikacija. Cijena i razdoblje naplate prikazuju se prije nego što potvrdiš. Obnavlja se automatski na kraju svakog razdoblja, osim ako je otkažeš najmanje 24 sata unaprijed, a možeš je u svakom trenutku urediti ili otkazati u postavkama računa u trgovini.';
+
+  @override
+  String get legalTermsAiTitle => 'Pomoć u učenju, a ne jamstvo';
+
+  @override
+  String get legalTermsAiBody =>
+      'Odgovori se provjeravaju uvrštavanjem natrag u tvoj izvorni zadatak, a Matheasy ti kaže kad odgovor nije mogao provjeriti, umjesto da ti samouvjereno pokaže nagađanje. Ipak, objašnjenja se izrađuju automatski i neće uvijek biti savršena. Rad koji ti je važan uvijek provjeri i sam.';
 }

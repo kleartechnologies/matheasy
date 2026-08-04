@@ -3849,8 +3849,14 @@ abstract class AppLocalizations {
   /// No description provided for @tutorImageFailed.
   ///
   /// In en, this message translates to:
-  /// **'I couldn\'t read that photo just now. Please check your connection and try again.'**
+  /// **'I couldn\'t read that photo just now. Please try again in a moment.'**
   String get tutorImageFailed;
+
+  /// No description provided for @tutorUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry — I couldn\'t get through to the tutor just now. Please try again in a moment.'**
+  String get tutorUnreachable;
 
   /// No description provided for @tutorLessonGoal.
   ///
@@ -3887,6 +3893,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Numi\'s explanation'**
   String get tutorLessonLabel;
+
+  /// No description provided for @profileDeleteCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion cancelled — your account and data are untouched.'**
+  String get profileDeleteCancelled;
+
+  /// No description provided for @profileDeleteVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t confirm it\'s you, so nothing was deleted. Please sign in again and retry.'**
+  String get profileDeleteVerifyFailed;
+
+  /// No description provided for @legalPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get legalPrivacyTitle;
+
+  /// No description provided for @legalTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get legalTermsTitle;
+
+  /// No description provided for @legalLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated 4 August 2026'**
+  String get legalLastUpdated;
+
+  /// No description provided for @legalOnlineNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The current version is shown above. The always-up-to-date policy also lives online at'**
+  String get legalOnlineNote;
+
+  /// No description provided for @legalPrivacyDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where your data lives'**
+  String get legalPrivacyDataTitle;
+
+  /// No description provided for @legalPrivacyDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy keeps your progress, achievements, learning preferences and settings on this device. When you sign in with Google or Apple, that learning data is also synced to your account over a secure connection (using Google Firebase), so it is backed up and follows you to a new device.'**
+  String get legalPrivacyDataBody;
+
+  /// No description provided for @legalPrivacyCollectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What we collect'**
+  String get legalPrivacyCollectTitle;
+
+  /// No description provided for @legalPrivacyCollectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in with Google or Apple gives us a basic profile — your name, email address and photo — to create and personalise your account. To run the app we process the problems you scan or type, your practice activity and your progress. For signed-in users this is stored in your account so it can sync across your devices. We don\'t ask for anything else.'**
+  String get legalPrivacyCollectBody;
+
+  /// No description provided for @legalPrivacyAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI processing (OpenAI)'**
+  String get legalPrivacyAiTitle;
+
+  /// No description provided for @legalPrivacyAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy is powered by AI. When you scan a problem, type an equation, ask the AI tutor or open Visual Learning, that content — the photo of your work, the equation text, or your question — is sent over a secure connection to our AI provider, OpenAI, so it can read the problem and generate the solution, explanation or reply. Photos are screened automatically for unsafe content first. This content is used to answer you; it is never sold, and it is never used to target advertising. OpenAI\'s handling of it is governed by their API data-usage policies.'**
+  String get legalPrivacyAiBody;
+
+  /// No description provided for @legalPrivacyAdsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertising and measurement (Meta)'**
+  String get legalPrivacyAdsTitle;
+
+  /// No description provided for @legalPrivacyAdsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We advertise Matheasy on Meta platforms such as Facebook and Instagram, and we use Meta\'s software kit to measure whether those ads actually work. If you allow tracking, we share app activity with Meta: that you installed and opened Matheasy, created an account, finished onboarding, ran your first scan, opened the AI tutor or Visual Learning, started or completed practice, and saw the upgrade screen. Subscription events are sent to Meta by our servers rather than by the app. Alongside these we share your device\'s advertising identifier and an account identifier, which Meta uses to match you to an ad you may have seen. Meta may use this data to measure and target advertising, including on its own platforms.'**
+  String get legalPrivacyAdsBody;
+
+  /// No description provided for @legalPrivacyAdsChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice about tracking'**
+  String get legalPrivacyAdsChoiceTitle;
+
+  /// No description provided for @legalPrivacyAdsChoiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing above happens unless you agree to it. We ask your age first, then ask your permission. If you decline — or if you tell us you are under 13 — the Meta kit is never activated: no advertising identifier is collected and no app activity is sent to Meta at all. Matheasy works exactly the same either way; no feature is withheld for saying no. You can change your mind at any time in your device settings, under Privacy & Security → Tracking.'**
+  String get legalPrivacyAdsChoiceBody;
+
+  /// No description provided for @legalPrivacyAnalyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics and crash reports'**
+  String get legalPrivacyAnalyticsTitle;
+
+  /// No description provided for @legalPrivacyAnalyticsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use Google Firebase to understand which parts of the app get used and to receive automatic crash reports, so we can fix what breaks and decide what to build next. This is tied to your app installation rather than to your advertising profile, and it is never sold.'**
+  String get legalPrivacyAnalyticsBody;
+
+  /// No description provided for @legalPrivacyChildrenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Children\'s privacy'**
+  String get legalPrivacyChildrenTitle;
+
+  /// No description provided for @legalPrivacyChildrenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy is built for learners of every age, including students under 13, and every feature is available to them. What changes is tracking: we ask your age before any advertising software is allowed to run, and for under-13 learners the Meta kit is never activated, no advertising identifier is collected, and nothing is shared for ad targeting. Beyond the account details described above, we do not knowingly collect personal information from a child. If you believe a child has provided more than that, contact us and we will delete it.'**
+  String get legalPrivacyChildrenBody;
+
+  /// No description provided for @legalPrivacyControlTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are in control'**
+  String get legalPrivacyControlTitle;
+
+  /// No description provided for @legalPrivacyControlBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit or clear your learning preferences at any time. Deleting your account permanently removes your synced learning data from our servers along with the copy on this device — we\'ll ask you to sign in once more first, to prove the account is yours. You can withdraw tracking permission whenever you like from your device settings.'**
+  String get legalPrivacyControlBody;
+
+  /// No description provided for @legalPrivacyContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get legalPrivacyContactTitle;
+
+  /// Privacy policy contact section. {email} is the support address and must not be translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions about this policy, or want your data deleted? Email us at {email} and we\'ll help.'**
+  String legalPrivacyContactBody(String email);
+
+  /// No description provided for @legalTermsUsingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using Matheasy'**
+  String get legalTermsUsingTitle;
+
+  /// No description provided for @legalTermsUsingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy helps you learn maths through scanning, guided solutions, an AI tutor and practice. Use it for your own learning, and be respectful of others.'**
+  String get legalTermsUsingBody;
+
+  /// No description provided for @legalTermsAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get legalTermsAccountTitle;
+
+  /// No description provided for @legalTermsAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are responsible for activity under your account, so keep your sign-in secure. You can delete your account, and everything synced to it, from the Profile tab at any time.'**
+  String get legalTermsAccountBody;
+
+  /// No description provided for @legalTermsBillingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions and billing'**
+  String get legalTermsBillingTitle;
+
+  /// No description provided for @legalTermsBillingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy Pro is an auto-renewing subscription billed to your app store account. The price and billing period are shown before you confirm. It renews automatically at the end of each period unless you cancel at least 24 hours beforehand, and you can manage or cancel it any time in your app store account settings.'**
+  String get legalTermsBillingBody;
+
+  /// No description provided for @legalTermsAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A learning aid, not a guarantee'**
+  String get legalTermsAiTitle;
+
+  /// No description provided for @legalTermsAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers are checked by substituting them back into your original problem, and Matheasy tells you when it couldn\'t verify one rather than showing you a confident guess. Even so, explanations are generated and won\'t always be perfect. Always double-check work that matters.'**
+  String get legalTermsAiBody;
 }
 
 class _AppLocalizationsDelegate

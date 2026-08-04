@@ -11,6 +11,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../auth/domain/auth_failure.dart';
 import '../../settings/presentation/widgets/settings_section.dart';
 import '../../settings/presentation/widgets/settings_tile.dart';
 import '../../sync/presentation/profile_sync_tile.dart';
@@ -86,8 +87,26 @@ class ProfileScreen extends ConsumerWidget {
     );
     if (!(confirmed ?? false) || !context.mounted) return;
 
-    // Step 3 — final action.
-    await ref.read(profileControllerProvider.notifier).deleteAccount();
+    // Step 3 — final action. Deleting a cloud account re-proves identity with
+    // the original provider first; if the user backs out of that sheet, or it
+    // fails, NOTHING has been destroyed yet and we must say so rather than let
+    // the tap look like it worked.
+    try {
+      await ref.read(profileControllerProvider.notifier).deleteAccount();
+    } on AuthFailure catch (failure) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              failure.isSilent
+                  ? context.l10n.profileDeleteCancelled
+                  : context.l10n.profileDeleteVerifyFailed,
+            ),
+          ),
+        );
+    }
   }
 
   @override

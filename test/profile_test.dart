@@ -14,6 +14,7 @@ import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/features/auth/application/auth_controller.dart';
 import 'package:matheasy/features/auth/application/auth_service.dart';
 import 'package:matheasy/features/auth/domain/app_user.dart';
+import 'package:matheasy/features/auth/domain/auth_failure.dart';
 import 'package:matheasy/features/practice/application/practice_progress_controller.dart';
 import 'package:matheasy/features/profile/application/profile_controller.dart';
 import 'package:matheasy/features/profile/application/profile_service.dart';
@@ -29,7 +30,11 @@ import 'support/fake_auth_service.dart';
 
 final _fixedNow = DateTime(2026, 7, 8);
 
-Future<ProviderContainer> _container({bool guest = false, AppUser? signedIn}) async {
+Future<ProviderContainer> _container({
+  bool guest = false,
+  AppUser? signedIn,
+  FakeAuthService? authService,
+}) async {
   SharedPreferences.setMockInitialValues({
     'session.onboarding_complete': true,
     if (guest) 'session.guest_mode': true,
@@ -38,7 +43,9 @@ Future<ProviderContainer> _container({bool guest = false, AppUser? signedIn}) as
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
-      authServiceProvider.overrideWithValue(FakeAuthService(initialUser: signedIn)),
+      authServiceProvider.overrideWithValue(
+        authService ?? FakeAuthService(initialUser: signedIn),
+      ),
       clockProvider.overrideWithValue(() => _fixedNow),
     ],
   );
@@ -149,7 +156,8 @@ void main() {
     });
 
     test('deleteAccount ends the session and wipes local data', () async {
-      final container = await _container(signedIn: googleTestUser());
+      final auth = FakeAuthService(initialUser: googleTestUser());
+      final container = await _container(authService: auth);
       _activate(container);
       await _settle();
 
@@ -173,8 +181,54 @@ void main() {
         ProfileSettings.defaults,
       );
       expect(container.read(practiceProgressControllerProvider).totalXp, 0);
+      expect(auth.recentLoginCount, 1,
+          reason: 'identity must be re-proven before anything is destroyed');
     });
 
+    test('cancelled re-authentication aborts the delete, destroying nothing',
+        () async {
+      final auth = FakeAuthService(initialUser: googleTestUser())
+        ..recentLoginError = const AuthFailure.cancelled();
+      final container = await _container(authService: auth);
+      _activate(container);
+      await _settle();
+
+      container.read(practiceProgressControllerProvider.notifier).awardXp(50);
+      await _settle();
+
+      await expectLater(
+        container.read(profileControllerProvider.notifier).deleteAccount(),
+        throwsA(isA<AuthFailure>()
+            .having((e) => e.type, 'type', AuthFailureType.cancelled)),
+      );
+      await _settle();
+
+      // Still signed in, still has their data: a cancelled confirmation is a
+      // no-op, not a half-finished deletion.
+      expect(container.read(authStatusProvider), AuthStatus.authenticated);
+      expect(auth.deleteCount, 0);
+      expect(container.read(practiceProgressControllerProvider).totalXp, 50);
+      expect(container.read(preferencesStoreProvider).practiceProgressJson,
+          isNotNull);
+    });
+
+    test('failed re-authentication also leaves the account intact', () async {
+      final auth = FakeAuthService(initialUser: appleTestUser())
+        ..recentLoginError = const AuthFailure.expired();
+      final container = await _container(authService: auth);
+      _activate(container);
+      await _settle();
+
+      await expectLater(
+        container.read(profileControllerProvider.notifier).deleteAccount(),
+        throwsA(isA<AuthFailure>()
+            .having((e) => e.type, 'type', AuthFailureType.expiredSession)),
+      );
+      await _settle();
+
+      expect(container.read(authStatusProvider), AuthStatus.authenticated);
+      expect(auth.deleteCount, 0);
+    });
   });
 
   group('Widgets', () {
