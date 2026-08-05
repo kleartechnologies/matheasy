@@ -10,6 +10,7 @@
 import * as mathsteps from "mathsteps";
 import { derivative, fraction, rationalize, simplify } from "mathjs";
 
+import { atomizeMethods } from "./atomize";
 import { solveCalculus } from "./calculus";
 import { solveComplex } from "./complex";
 import { equationParts } from "./classify";
@@ -333,7 +334,18 @@ function solveViaMathsteps(
 
   const quad = extractQuadratic(parts[0], cls.unknown);
   const factored = steps.some((s) => /FACTOR/.test(s.changeType));
-  const methods = buildEquationMethods(cls, rawSteps, quad, factored);
+  // Atomic Step Engine: refine any step that leaps. Every sub-step must prove
+  // out against these verified roots and land on the coarse step's own ascii,
+  // else that step ships unrefined — granularity can never cost correctness.
+  const methods = atomizeMethods(
+    buildEquationMethods(cls, rawSteps, quad, factored),
+    {
+      unknown: cls.unknown,
+      originalAscii: cls.ascii,
+      roots: roots.values,
+      quadratic: quad,
+    },
+  );
 
   return {
     answer: rootsAnswer(cls.unknown, roots),
@@ -619,20 +631,27 @@ function solveDerivative(cls: Classification): SolveCandidate | null {
   const opLatex = order > 1 ? `d^${order}/d${cls.unknown}^${order}` : `d/d${cls.unknown}`;
   return {
     answer: { latex: asciiToLatex(display), plain: display },
-    methods: [
-      {
-        id: "differentiate",
-        name: "Differentiate",
-        examPick: true,
-        steps: [
-          {
-            ascii: `${opLatex}(${target})`,
-            operationCode: "DIFFERENTIATE",
-          },
-          { ascii: display, operationCode: "RESULT" },
-        ],
-      },
-    ],
+    // `d/dx(x^3 sin x) → 3x^2 sin x + x^3 cos x` is one leap over the entire
+    // product rule. The Atomic Step Engine names the rule, differentiates each
+    // piece, and assembles it — each sub-step proved against a difference
+    // quotient before it ships, and dropped wholesale if any of it fails.
+    methods: atomizeMethods(
+      [
+        {
+          id: "differentiate",
+          name: "Differentiate",
+          examPick: true,
+          steps: [
+            {
+              ascii: `${opLatex}(${target})`,
+              operationCode: "DIFFERENTIATE",
+            },
+            { ascii: display, operationCode: "RESULT" },
+          ],
+        },
+      ],
+      { unknown: cls.unknown, originalAscii: cls.ascii, roots: [], quadratic: null },
+    ),
     plotExpression: variablesIn(target).length === 1 ? target : null,
     verify: () => verifyDerivative(penult, d, cls.unknown),
   };
