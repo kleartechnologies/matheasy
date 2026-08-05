@@ -966,23 +966,8 @@ class AppLocalizationsNb extends AppLocalizations {
   String get scanGalleryFailed => 'Kunne ikke åpne bildene dine.';
 
   @override
-  String get scanHintHoldSteady => 'Hold rolig på spørsmålet — jeg tar bildet';
-
-  @override
   String get scanHintLineUp =>
       'Få med hele spørsmålet, trykk deretter for å ta bildet';
-
-  @override
-  String get scanAutoCaptureOn => 'Autofotografering på';
-
-  @override
-  String get scanAutoCaptureOff => 'Autofotografering av';
-
-  @override
-  String get scanAutoOn => 'Auto på';
-
-  @override
-  String get scanAutoOff => 'Auto av';
 
   @override
   String get scanCloseScanner => 'Lukk skanner';
@@ -1107,7 +1092,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get cropPreparing => 'Forbereder…';
 
   @override
-  String get cropUsePhoto => 'Bruk bilde';
+  String get cropRotate => 'Roter';
 
   @override
   String get keyboardMoveLeft => 'Flytt venstre';

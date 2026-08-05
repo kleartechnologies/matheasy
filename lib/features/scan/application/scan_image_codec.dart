@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
@@ -49,6 +48,29 @@ Uint8List encodeScanJpeg(Uint8List bytes) {
   }
 }
 
+/// Rotates a scan 90° clockwise and re-encodes it as JPEG at full resolution.
+///
+/// Pure and isolate-safe — call it through `compute`. The EXIF orientation is
+/// baked before rotating so the flag can't re-apply on top of the rotated
+/// pixels after re-encode. Falls back to the input bytes if the image can't be
+/// decoded, so a rotate can never lose the capture.
+///
+/// Deliberately does NOT downscale to [kScanMaxSide]: rotation happens on the
+/// crop screen, before the crop, and shrinking the source here would cost the
+/// crop its resolution. The crop result is bounded on its own way out.
+Uint8List rotateScanJpeg(Uint8List bytes) {
+  try {
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) return bytes;
+    final oriented = img.bakeOrientation(decoded);
+    final rotated = img.copyRotate(oriented, angle: 90);
+    return Uint8List.fromList(
+        img.encodeJpg(rotated, quality: kScanJpegQuality));
+  } catch (_) {
+    return bytes;
+  }
+}
+
 /// Base64-encodes scan [bytes] for the `recognizeEquation` payload.
 ///
 /// Pure and isolate-safe — call it through `compute`. This exists as its own
@@ -57,71 +79,3 @@ Uint8List encodeScanJpeg(Uint8List bytes) {
 /// frames at the precise moment the user is watching for the app to respond to
 /// their capture.
 String encodeScanBase64(Uint8List bytes) => base64Encode(bytes);
-
-/// A capture plus the normalised rectangle to cut out of it.
-///
-/// One argument because `compute` takes one. Immutable and made only of a byte
-/// list and four doubles, so it crosses the isolate boundary cheaply.
-@immutable
-class ScanCropRequest {
-  const ScanCropRequest(this.bytes, this.rect);
-
-  final Uint8List bytes;
-
-  /// Normalised `0..1` of the SOURCE image, origin top-left.
-  final Rect rect;
-}
-
-/// Crops [request] to its normalised rectangle and returns a compact JPEG.
-///
-/// Pure and isolate-safe — call it through `compute`. Returns the input bytes
-/// unchanged if the image can't be decoded, if the rectangle is degenerate, or
-/// if anything throws: a scan that uploads the whole page still gets solved,
-/// whereas a scan that fails here would be a capture the user has to repeat.
-///
-/// The orientation is BAKED before cropping. A phone camera stores its picture
-/// in sensor order plus an EXIF rotation flag, but the rectangle arrives in
-/// *display* coordinates — the space the detector and the user's own eyes see.
-/// Cropping the unbaked pixels with a display-space rectangle would cut a
-/// sideways rectangle out of the page and hand the server a slice of margin.
-Uint8List cropScanJpeg(ScanCropRequest request) {
-  final bytes = request.bytes;
-  try {
-    final decoded = img.decodeImage(bytes);
-    if (decoded == null) return bytes;
-    final oriented = img.bakeOrientation(decoded);
-
-    final rect = request.rect;
-    final left = (rect.left * oriented.width).round().clamp(0, oriented.width);
-    final top = (rect.top * oriented.height).round().clamp(0, oriented.height);
-    final right = (rect.right * oriented.width).round().clamp(0, oriented.width);
-    final bottom =
-        (rect.bottom * oriented.height).round().clamp(0, oriented.height);
-    final width = right - left;
-    final height = bottom - top;
-    // Guard against a detector that returned nonsense. Anything this small is a
-    // misdetection, not a problem written very small, and cropping to it would
-    // destroy the scan.
-    if (width < 32 || height < 32) return encodeScanJpeg(bytes);
-
-    final cropped = img.copyCrop(
-      oriented,
-      x: left,
-      y: top,
-      width: width,
-      height: height,
-    );
-    final longest =
-        cropped.width > cropped.height ? cropped.width : cropped.height;
-    final resized = longest > kScanMaxSide
-        ? img.copyResize(
-            cropped,
-            width: cropped.width >= cropped.height ? kScanMaxSide : null,
-            height: cropped.height > cropped.width ? kScanMaxSide : null,
-          )
-        : cropped;
-    return Uint8List.fromList(img.encodeJpg(resized, quality: kScanJpegQuality));
-  } catch (_) {
-    return bytes;
-  }
-}

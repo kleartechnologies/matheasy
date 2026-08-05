@@ -976,24 +976,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get scanGalleryFailed => 'Nie udało się otworzyć Twoich zdjęć.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Trzymaj stabilnie nad pytaniem — zrobię za Ciebie zdjęcie';
-
-  @override
   String get scanHintLineUp =>
       'Ustaw całe pytanie w kadrze, a następnie dotknij, aby zrobić zdjęcie';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatyczne zdjęcie włączone';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatyczne zdjęcie wyłączone';
-
-  @override
-  String get scanAutoOn => 'Auto wł.';
-
-  @override
-  String get scanAutoOff => 'Auto wył.';
 
   @override
   String get scanCloseScanner => 'Zamknij skaner';
@@ -1120,7 +1104,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get cropPreparing => 'Przygotowywanie…';
 
   @override
-  String get cropUsePhoto => 'Użyj zdjęcia';
+  String get cropRotate => 'Obróć';
 
   @override
   String get keyboardMoveLeft => 'Przesuń w lewo';

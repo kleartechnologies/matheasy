@@ -964,23 +964,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get scanGalleryFailed => 'Tvé fotky se nepodařilo otevřít.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Drž telefon klidně na příkladu — vyfotím ho za tebe';
-
-  @override
   String get scanHintLineUp => 'Zarovnej celý příklad a poté klepnutím vyfoť';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatické focení zapnuto';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatické focení vypnuto';
-
-  @override
-  String get scanAutoOn => 'Auto zapnuto';
-
-  @override
-  String get scanAutoOff => 'Auto vypnuto';
 
   @override
   String get scanCloseScanner => 'Zavřít skener';
@@ -1106,7 +1090,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get cropPreparing => 'Připravuje se…';
 
   @override
-  String get cropUsePhoto => 'Použít fotku';
+  String get cropRotate => 'Otočit';
 
   @override
   String get keyboardMoveLeft => 'Posunout doleva';

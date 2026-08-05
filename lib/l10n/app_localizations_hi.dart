@@ -970,24 +970,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get scanGalleryFailed => 'आपकी फ़ोटो नहीं खोल सके।';
 
   @override
-  String get scanHintHoldSteady =>
-      'प्रश्न पर स्थिर रखें — मैं इसे कैप्चर कर लूँगा';
-
-  @override
   String get scanHintLineUp =>
       'पूरा प्रश्न सही से लाएँ, फिर कैप्चर करने के लिए टैप करें';
-
-  @override
-  String get scanAutoCaptureOn => 'ऑटो कैप्चर चालू';
-
-  @override
-  String get scanAutoCaptureOff => 'ऑटो कैप्चर बंद';
-
-  @override
-  String get scanAutoOn => 'ऑटो चालू';
-
-  @override
-  String get scanAutoOff => 'ऑटो बंद';
 
   @override
   String get scanCloseScanner => 'स्कैनर बंद करें';
@@ -1112,7 +1096,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cropPreparing => 'तैयार हो रहा है…';
 
   @override
-  String get cropUsePhoto => 'फ़ोटो का उपयोग करें';
+  String get cropRotate => 'घुमाएँ';
 
   @override
   String get keyboardMoveLeft => 'बाएँ जाएँ';

@@ -968,24 +968,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanGalleryFailed => 'Không thể mở ảnh của bạn.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Giữ yên camera vào câu hỏi — tôi sẽ chụp lại';
-
-  @override
   String get scanHintLineUp =>
       'Canh chỉnh toàn bộ câu hỏi, sau đó chạm để chụp';
-
-  @override
-  String get scanAutoCaptureOn => 'Đã bật chụp tự động';
-
-  @override
-  String get scanAutoCaptureOff => 'Đã tắt chụp tự động';
-
-  @override
-  String get scanAutoOn => 'Tự động: bật';
-
-  @override
-  String get scanAutoOff => 'Tự động: tắt';
 
   @override
   String get scanCloseScanner => 'Đóng máy quét';
@@ -1110,7 +1094,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cropPreparing => 'Đang chuẩn bị…';
 
   @override
-  String get cropUsePhoto => 'Dùng ảnh này';
+  String get cropRotate => 'Xoay';
 
   @override
   String get keyboardMoveLeft => 'Di chuyển sang trái';

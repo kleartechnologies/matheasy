@@ -960,22 +960,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get scanGalleryFailed => 'เปิดรูปภาพของคุณไม่ได้';
 
   @override
-  String get scanHintHoldSteady => 'ถือนิ่งๆ ที่โจทย์ — ฉันจะถ่ายให้เอง';
-
-  @override
   String get scanHintLineUp => 'จัดให้เห็นโจทย์ทั้งหมด แล้วแตะเพื่อถ่าย';
-
-  @override
-  String get scanAutoCaptureOn => 'ถ่ายอัตโนมัติ: เปิด';
-
-  @override
-  String get scanAutoCaptureOff => 'ถ่ายอัตโนมัติ: ปิด';
-
-  @override
-  String get scanAutoOn => 'อัตโนมัติ: เปิด';
-
-  @override
-  String get scanAutoOff => 'อัตโนมัติ: ปิด';
 
   @override
   String get scanCloseScanner => 'ปิดตัวสแกน';
@@ -1098,7 +1083,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get cropPreparing => 'กำลังเตรียม…';
 
   @override
-  String get cropUsePhoto => 'ใช้รูปนี้';
+  String get cropRotate => 'หมุน';
 
   @override
   String get keyboardMoveLeft => 'เลื่อนไปทางซ้าย';

@@ -971,23 +971,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get scanGalleryFailed => 'Kon je foto\'s niet openen.';
 
   @override
-  String get scanHintHoldSteady => 'Houd de vraag stil — ik leg hem vast';
-
-  @override
   String get scanHintLineUp =>
       'Lijn de hele vraag uit en tik dan om vast te leggen';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatisch vastleggen aan';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatisch vastleggen uit';
-
-  @override
-  String get scanAutoOn => 'Auto aan';
-
-  @override
-  String get scanAutoOff => 'Auto uit';
 
   @override
   String get scanCloseScanner => 'Scanner sluiten';
@@ -1112,7 +1097,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cropPreparing => 'Voorbereiden…';
 
   @override
-  String get cropUsePhoto => 'Gebruik foto';
+  String get cropRotate => 'Draaien';
 
   @override
   String get keyboardMoveLeft => 'Naar links';

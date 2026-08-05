@@ -966,23 +966,8 @@ class AppLocalizationsHr extends AppLocalizations {
   String get scanGalleryFailed => 'Nismo mogli otvoriti tvoje fotografije.';
 
   @override
-  String get scanHintHoldSteady => 'Drži mirno na pitanju — snimit ću ga';
-
-  @override
   String get scanHintLineUp =>
       'Poravnaj cijelo pitanje, zatim dodirni za snimanje';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatsko snimanje uključeno';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatsko snimanje isključeno';
-
-  @override
-  String get scanAutoOn => 'Automatski uključeno';
-
-  @override
-  String get scanAutoOff => 'Automatski isključeno';
 
   @override
   String get scanCloseScanner => 'Zatvori skener';
@@ -1108,7 +1093,7 @@ class AppLocalizationsHr extends AppLocalizations {
   String get cropPreparing => 'Priprema…';
 
   @override
-  String get cropUsePhoto => 'Koristi fotografiju';
+  String get cropRotate => 'Zakreni';
 
   @override
   String get keyboardMoveLeft => 'Pomakni ulijevo';

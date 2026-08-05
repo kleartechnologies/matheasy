@@ -970,24 +970,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get scanGalleryFailed => 'Tidak bisa membuka fotomu.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Tahan stabil di soal — aku akan menangkapnya';
-
-  @override
   String get scanHintLineUp =>
       'Posisikan seluruh soal, lalu ketuk untuk mengambil';
-
-  @override
-  String get scanAutoCaptureOn => 'Ambil otomatis aktif';
-
-  @override
-  String get scanAutoCaptureOff => 'Ambil otomatis nonaktif';
-
-  @override
-  String get scanAutoOn => 'Otomatis aktif';
-
-  @override
-  String get scanAutoOff => 'Otomatis nonaktif';
 
   @override
   String get scanCloseScanner => 'Tutup pemindai';
@@ -1112,7 +1096,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get cropPreparing => 'Menyiapkan…';
 
   @override
-  String get cropUsePhoto => 'Gunakan foto';
+  String get cropRotate => 'Putar';
 
   @override
   String get keyboardMoveLeft => 'Geser kiri';

@@ -978,24 +978,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanGalleryFailed => 'Impossible d\'ouvrir tes photos.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Reste stable sur la question — je vais la capturer';
-
-  @override
   String get scanHintLineUp =>
       'Cadre la question entière, puis appuie pour capturer';
-
-  @override
-  String get scanAutoCaptureOn => 'Capture automatique activée';
-
-  @override
-  String get scanAutoCaptureOff => 'Capture automatique désactivée';
-
-  @override
-  String get scanAutoOn => 'Auto activé';
-
-  @override
-  String get scanAutoOff => 'Auto désactivé';
 
   @override
   String get scanCloseScanner => 'Fermer le scanner';
@@ -1122,7 +1106,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cropPreparing => 'Préparation…';
 
   @override
-  String get cropUsePhoto => 'Utiliser la photo';
+  String get cropRotate => 'Pivoter';
 
   @override
   String get keyboardMoveLeft => 'Déplacer à gauche';

@@ -50,8 +50,9 @@ method switching, a graph, explanations, adaptive practice, and an AI tutor.
   screens images before the paid vision call (COPPA).
 - **Billing = RevenueCat** (entitlement `pro`); the server is authoritative.
 - Math rendering: `flutter_math_fork` (via the shared `MathText` widget).
-- Native helpers: `permission_handler` (only `openAppSettings()`), `sensors_plus`
-  (auto-capture steadiness), `camera`, `image_picker`, `crop_your_image`.
+- Native helpers: `permission_handler` (only `openAppSettings()`), `camera`,
+  `image_picker`, `crop_your_image`. (`sensors_plus` was removed with
+  auto-capture — the scanner is manual-capture only.)
 
 **This app is NOT React Native, NOT Expo, NOT Supabase, and does NOT use Mathpix
 or Isar.** If any doc, comment, or memory says otherwise, it is wrong — trust the

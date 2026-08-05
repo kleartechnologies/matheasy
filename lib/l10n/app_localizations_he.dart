@@ -955,22 +955,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get scanGalleryFailed => 'לא הצלחנו לפתוח את התמונות שלך.';
 
   @override
-  String get scanHintHoldSteady => 'החזק יציב מעל השאלה — אני אצלם אותה';
-
-  @override
   String get scanHintLineUp => 'יישר את כל השאלה, ואז הקש כדי לצלם';
-
-  @override
-  String get scanAutoCaptureOn => 'צילום אוטומטי פעיל';
-
-  @override
-  String get scanAutoCaptureOff => 'צילום אוטומטי כבוי';
-
-  @override
-  String get scanAutoOn => 'אוטומטי פעיל';
-
-  @override
-  String get scanAutoOff => 'אוטומטי כבוי';
 
   @override
   String get scanCloseScanner => 'סגור את הסורק';
@@ -1093,7 +1078,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get cropPreparing => 'מכין…';
 
   @override
-  String get cropUsePhoto => 'השתמש בתמונה';
+  String get cropRotate => 'סיבוב';
 
   @override
   String get keyboardMoveLeft => 'הזז שמאלה';

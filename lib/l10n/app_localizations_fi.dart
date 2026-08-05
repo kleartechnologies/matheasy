@@ -974,24 +974,8 @@ class AppLocalizationsFi extends AppLocalizations {
   String get scanGalleryFailed => 'Kuviesi avaaminen epäonnistui.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Pidä kamera paikallaan tehtävän kohdalla — otan kuvan';
-
-  @override
   String get scanHintLineUp =>
       'Aseta koko tehtävä kehykseen ja napauta ottaaksesi kuvan';
-
-  @override
-  String get scanAutoCaptureOn => 'Automaattikuvaus päällä';
-
-  @override
-  String get scanAutoCaptureOff => 'Automaattikuvaus pois päältä';
-
-  @override
-  String get scanAutoOn => 'Auto päällä';
-
-  @override
-  String get scanAutoOff => 'Auto pois';
 
   @override
   String get scanCloseScanner => 'Sulje skanneri';
@@ -1118,7 +1102,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get cropPreparing => 'Valmistellaan…';
 
   @override
-  String get cropUsePhoto => 'Käytä kuvaa';
+  String get cropRotate => 'Käännä';
 
   @override
   String get keyboardMoveLeft => 'Siirry vasemmalle';

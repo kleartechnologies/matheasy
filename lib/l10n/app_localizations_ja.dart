@@ -930,22 +930,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get scanGalleryFailed => '写真を開けませんでした。';
 
   @override
-  String get scanHintHoldSteady => '問題にしっかり合わせてください。自動で撮影します';
-
-  @override
   String get scanHintLineUp => '問題全体を枠に合わせて、タップして撮影';
-
-  @override
-  String get scanAutoCaptureOn => '自動撮影オン';
-
-  @override
-  String get scanAutoCaptureOff => '自動撮影オフ';
-
-  @override
-  String get scanAutoOn => '自動オン';
-
-  @override
-  String get scanAutoOff => '自動オフ';
 
   @override
   String get scanCloseScanner => 'スキャナーを閉じる';
@@ -1066,7 +1051,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cropPreparing => '準備中…';
 
   @override
-  String get cropUsePhoto => '写真を使う';
+  String get cropRotate => '回転';
 
   @override
   String get keyboardMoveLeft => '左へ移動';

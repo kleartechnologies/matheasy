@@ -923,22 +923,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanGalleryFailed => '无法打开你的照片。';
 
   @override
-  String get scanHintHoldSteady => '对准题目稳住——我来帮你拍下';
-
-  @override
   String get scanHintLineUp => '对齐整道题目，然后点击拍摄';
-
-  @override
-  String get scanAutoCaptureOn => '自动拍摄已开启';
-
-  @override
-  String get scanAutoCaptureOff => '自动拍摄已关闭';
-
-  @override
-  String get scanAutoOn => '自动开';
-
-  @override
-  String get scanAutoOff => '自动关';
 
   @override
   String get scanCloseScanner => '关闭扫描器';
@@ -1055,7 +1040,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cropPreparing => '准备中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋转';
 
   @override
   String get keyboardMoveLeft => '左移';
@@ -3095,22 +3080,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get scanGalleryFailed => '无法打开你的照片。';
 
   @override
-  String get scanHintHoldSteady => '对准题目稳住——我来帮你拍下';
-
-  @override
   String get scanHintLineUp => '对齐整道题目，然后点击拍摄';
-
-  @override
-  String get scanAutoCaptureOn => '自动拍摄已开启';
-
-  @override
-  String get scanAutoCaptureOff => '自动拍摄已关闭';
-
-  @override
-  String get scanAutoOn => '自动开';
-
-  @override
-  String get scanAutoOff => '自动关';
 
   @override
   String get scanCloseScanner => '关闭扫描器';
@@ -3227,7 +3197,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get cropPreparing => '准备中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋转';
 
   @override
   String get keyboardMoveLeft => '左移';
@@ -5267,22 +5237,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get scanGalleryFailed => '無法開啟你的照片。';
 
   @override
-  String get scanHintHoldSteady => '把鏡頭穩定對準題目——我來幫你拍下';
-
-  @override
   String get scanHintLineUp => '把整道題目對齊，然後點按拍攝';
-
-  @override
-  String get scanAutoCaptureOn => '自動拍攝開啟';
-
-  @override
-  String get scanAutoCaptureOff => '自動拍攝關閉';
-
-  @override
-  String get scanAutoOn => '自動開';
-
-  @override
-  String get scanAutoOff => '自動關';
 
   @override
   String get scanCloseScanner => '關閉掃描器';
@@ -5399,7 +5354,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get cropPreparing => '準備中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋轉';
 
   @override
   String get keyboardMoveLeft => '向左移';

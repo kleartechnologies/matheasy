@@ -971,24 +971,8 @@ class AppLocalizationsHu extends AppLocalizations {
   String get scanGalleryFailed => 'Nem sikerült megnyitni a fotóidat.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Tartsd stabilan a kérdés fölött — máris lefotózom';
-
-  @override
   String get scanHintLineUp =>
       'Igazítsd be a teljes kérdést, majd koppints a fotózáshoz';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatikus fotózás bekapcsolva';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatikus fotózás kikapcsolva';
-
-  @override
-  String get scanAutoOn => 'Automatikus be';
-
-  @override
-  String get scanAutoOff => 'Automatikus ki';
 
   @override
   String get scanCloseScanner => 'Szkenner bezárása';
@@ -1113,7 +1097,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get cropPreparing => 'Előkészítés…';
 
   @override
-  String get cropUsePhoto => 'Fotó használata';
+  String get cropRotate => 'Forgatás';
 
   @override
   String get keyboardMoveLeft => 'Mozgatás balra';

@@ -200,105 +200,27 @@ void main() {
     });
   });
 
-  group('projectCover', () {
-    test('a full-frame region covers the whole target', () {
-      final rect = projectCover(
-        const Rect.fromLTRB(0, 0, 1, 1),
-        const Size(1, 2),
-        const Size(100, 200),
-      );
-      expect(rect, const Rect.fromLTRB(0, 0, 100, 200));
-    });
-
-    test('accounts for the part of the frame cropped off screen', () {
-      // A 1:2 frame shown in a 1:1 box: the preview is scaled to fill the
-      // width, so a quarter of the frame runs off the top and a quarter off
-      // the bottom. A box drawn as a plain percentage would be half its
-      // correct height and in the wrong place.
-      final rect = projectCover(
-        const Rect.fromLTRB(0, 0.25, 1, 0.75),
-        const Size(1, 2),
-        const Size(100, 100),
-      );
-      expect(rect.top, closeTo(0, 1e-9));
-      expect(rect.bottom, closeTo(100, 1e-9));
-    });
-
-    test('degenerate sizes project to nothing', () {
-      expect(projectCover(const Rect.fromLTRB(0, 0, 1, 1), Size.zero,
-          const Size(10, 10)), Rect.zero);
-      expect(projectCover(const Rect.fromLTRB(0, 0, 1, 1),
-          const Size(10, 10), Size.zero), Rect.zero);
-    });
-  });
-
-  group('cropScanJpeg', () {
-    Uint8List sourceJpeg({int width = 800, int height = 600}) {
-      final image = img.Image(width: width, height: height);
+  group('rotateScanJpeg', () {
+    test('turns the image a quarter clockwise at full resolution', () {
+      // A wide white image with a black LEFT half: after a clockwise quarter
+      // turn it must be tall with a black TOP half — proving both the turn and
+      // its direction, not just the swapped dimensions.
+      final image = img.Image(width: 400, height: 200);
       img.fill(image, color: img.ColorRgb8(255, 255, 255));
-      // A black square in the top-left quadrant, so a crop can be proven to
-      // have taken the right part rather than merely the right size.
       img.fillRect(image,
-          x1: 0,
-          y1: 0,
-          x2: width ~/ 2,
-          y2: height ~/ 2,
-          color: img.ColorRgb8(0, 0, 0));
-      return Uint8List.fromList(img.encodeJpg(image));
-    }
+          x1: 0, y1: 0, x2: 199, y2: 199, color: img.ColorRgb8(0, 0, 0));
+      final source = Uint8List.fromList(img.encodeJpg(image));
 
-    test('cuts out the requested rectangle', () {
-      final source = sourceJpeg();
-      final cropped = cropScanJpeg(
-        ScanCropRequest(source, const Rect.fromLTRB(0, 0, 0.5, 0.5)),
-      );
-      final decoded = img.decodeImage(cropped)!;
-      expect(decoded.width, closeTo(400, 2));
-      expect(decoded.height, closeTo(300, 2));
-      // The black quadrant, not the white page around it.
-      final pixel = decoded.getPixel(decoded.width ~/ 2, decoded.height ~/ 2);
-      expect(pixel.r, lessThan(40));
-    });
-
-    test('a full-frame rectangle keeps the whole image', () {
-      final source = sourceJpeg();
-      final result = cropScanJpeg(
-        ScanCropRequest(source, const Rect.fromLTRB(0, 0, 1, 1)),
-      );
-      final decoded = img.decodeImage(result)!;
-      expect(decoded.width, 800);
-      expect(decoded.height, 600);
-    });
-
-    test('downscales a crop that is still bigger than the upload cap', () {
-      final source = sourceJpeg(width: 4000, height: 3000);
-      final result = cropScanJpeg(
-        ScanCropRequest(source, const Rect.fromLTRB(0, 0, 1, 1)),
-      );
-      final decoded = img.decodeImage(result)!;
-      expect(decoded.width, kScanMaxSide);
-    });
-
-    test('a degenerate rectangle falls back to the whole image', () {
-      // The important half of the contract: a detector that returns nonsense
-      // must cost the user nothing. Cropping to a sliver would send the server
-      // a strip of margin and produce an honest "couldn't read that" for a
-      // photo that was perfectly readable.
-      final source = sourceJpeg();
-      final result = cropScanJpeg(
-        ScanCropRequest(source, const Rect.fromLTRB(0.5, 0.5, 0.501, 0.501)),
-      );
-      final decoded = img.decodeImage(result)!;
-      expect(decoded.width, 800);
-      expect(decoded.height, 600);
+      final rotated = img.decodeImage(rotateScanJpeg(source))!;
+      expect(rotated.width, 200);
+      expect(rotated.height, 400);
+      expect(rotated.getPixel(100, 100).r, lessThan(40)); // top: was left
+      expect(rotated.getPixel(100, 300).r, greaterThan(200)); // bottom: white
     });
 
     test('undecodable bytes come back untouched rather than throwing', () {
       final junk = Uint8List.fromList(List.filled(64, 7));
-      expect(
-        cropScanJpeg(ScanCropRequest(junk, const Rect.fromLTRB(0, 0, 1, 1))),
-        junk,
-      );
+      expect(rotateScanJpeg(junk), junk);
     });
   });
 }

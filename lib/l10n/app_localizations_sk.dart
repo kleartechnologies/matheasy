@@ -965,23 +965,8 @@ class AppLocalizationsSk extends AppLocalizations {
   String get scanGalleryFailed => 'Tvoje fotografie sa nepodarilo otvoriť.';
 
   @override
-  String get scanHintHoldSteady => 'Podrž pevne na otázke — odfotím ju';
-
-  @override
   String get scanHintLineUp =>
       'Zarovnaj celú otázku a potom ťukni na odfotenie';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatické odfotenie zapnuté';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatické odfotenie vypnuté';
-
-  @override
-  String get scanAutoOn => 'Auto zapnuté';
-
-  @override
-  String get scanAutoOff => 'Auto vypnuté';
 
   @override
   String get scanCloseScanner => 'Zavrieť skener';
@@ -1107,7 +1092,7 @@ class AppLocalizationsSk extends AppLocalizations {
   String get cropPreparing => 'Pripravuje sa…';
 
   @override
-  String get cropUsePhoto => 'Použiť fotografiu';
+  String get cropRotate => 'Otočiť';
 
   @override
   String get keyboardMoveLeft => 'Posunúť doľava';

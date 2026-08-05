@@ -964,24 +964,8 @@ class AppLocalizationsSv extends AppLocalizations {
   String get scanGalleryFailed => 'Kunde inte öppna dina foton.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Håll kameran still på frågan — jag fångar den';
-
-  @override
   String get scanHintLineUp =>
       'Rikta in hela frågan, tryck sedan för att fånga den';
-
-  @override
-  String get scanAutoCaptureOn => 'Automatisk fångst på';
-
-  @override
-  String get scanAutoCaptureOff => 'Automatisk fångst av';
-
-  @override
-  String get scanAutoOn => 'Auto på';
-
-  @override
-  String get scanAutoOff => 'Auto av';
 
   @override
   String get scanCloseScanner => 'Stäng skannern';
@@ -1105,7 +1089,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get cropPreparing => 'Förbereder…';
 
   @override
-  String get cropUsePhoto => 'Använd foto';
+  String get cropRotate => 'Rotera';
 
   @override
   String get keyboardMoveLeft => 'Flytta vänster';

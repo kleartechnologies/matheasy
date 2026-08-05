@@ -933,22 +933,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scanGalleryFailed => '사진을 열 수 없어요.';
 
   @override
-  String get scanHintHoldSteady => '문제 위에서 흔들리지 않게 유지하면 자동으로 찍을게요';
-
-  @override
   String get scanHintLineUp => '문제 전체를 맞춘 뒤 탭해서 촬영하세요';
-
-  @override
-  String get scanAutoCaptureOn => '자동 촬영 켜짐';
-
-  @override
-  String get scanAutoCaptureOff => '자동 촬영 꺼짐';
-
-  @override
-  String get scanAutoOn => '자동 켜짐';
-
-  @override
-  String get scanAutoOff => '자동 꺼짐';
 
   @override
   String get scanCloseScanner => '스캐너 닫기';
@@ -1069,7 +1054,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cropPreparing => '준비 중…';
 
   @override
-  String get cropUsePhoto => '사진 사용';
+  String get cropRotate => '회전';
 
   @override
   String get keyboardMoveLeft => '왼쪽으로 이동';

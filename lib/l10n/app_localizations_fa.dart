@@ -963,24 +963,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get scanGalleryFailed => 'نتوانستیم عکس‌های شما را باز کنیم.';
 
   @override
-  String get scanHintHoldSteady =>
-      'دستتان را روی سؤال ثابت نگه دارید — من آن را می‌گیرم';
-
-  @override
   String get scanHintLineUp =>
       'کل سؤال را در قاب قرار دهید، سپس برای گرفتن عکس ضربه بزنید';
-
-  @override
-  String get scanAutoCaptureOn => 'گرفتن خودکار روشن';
-
-  @override
-  String get scanAutoCaptureOff => 'گرفتن خودکار خاموش';
-
-  @override
-  String get scanAutoOn => 'خودکار روشن';
-
-  @override
-  String get scanAutoOff => 'خودکار خاموش';
 
   @override
   String get scanCloseScanner => 'بستن اسکنر';
@@ -1105,7 +1089,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get cropPreparing => 'در حال آماده‌سازی…';
 
   @override
-  String get cropUsePhoto => 'استفاده از عکس';
+  String get cropRotate => 'چرخاندن';
 
   @override
   String get keyboardMoveLeft => 'حرکت به چپ';

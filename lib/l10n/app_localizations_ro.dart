@@ -967,24 +967,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get scanGalleryFailed => 'Nu am putut deschide pozele tale.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Ține telefonul nemișcat pe întrebare — o voi captura';
-
-  @override
   String get scanHintLineUp =>
       'Aliniază întreaga întrebare, apoi atinge pentru a captura';
-
-  @override
-  String get scanAutoCaptureOn => 'Captură automată activată';
-
-  @override
-  String get scanAutoCaptureOff => 'Captură automată dezactivată';
-
-  @override
-  String get scanAutoOn => 'Auto activat';
-
-  @override
-  String get scanAutoOff => 'Auto dezactivat';
 
   @override
   String get scanCloseScanner => 'Închide scanerul';
@@ -1111,7 +1095,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get cropPreparing => 'Se pregătește…';
 
   @override
-  String get cropUsePhoto => 'Folosește poza';
+  String get cropRotate => 'Rotește';
 
   @override
   String get keyboardMoveLeft => 'Mută la stânga';

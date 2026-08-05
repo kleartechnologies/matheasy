@@ -972,23 +972,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scanGalleryFailed => 'Fotoğraflarınız açılamadı.';
 
   @override
-  String get scanHintHoldSteady => 'Soruyu sabit tutun — onu yakalayacağım';
-
-  @override
   String get scanHintLineUp =>
       'Sorunun tamamını hizalayın, ardından yakalamak için dokunun';
-
-  @override
-  String get scanAutoCaptureOn => 'Otomatik yakalama açık';
-
-  @override
-  String get scanAutoCaptureOff => 'Otomatik yakalama kapalı';
-
-  @override
-  String get scanAutoOn => 'Otomatik açık';
-
-  @override
-  String get scanAutoOff => 'Otomatik kapalı';
 
   @override
   String get scanCloseScanner => 'Tarayıcıyı kapat';
@@ -1115,7 +1100,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cropPreparing => 'Hazırlanıyor…';
 
   @override
-  String get cropUsePhoto => 'Fotoğrafı kullan';
+  String get cropRotate => 'Döndür';
 
   @override
   String get keyboardMoveLeft => 'Sola taşı';

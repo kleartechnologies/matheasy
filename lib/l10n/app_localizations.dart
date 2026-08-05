@@ -1970,41 +1970,11 @@ abstract class AppLocalizations {
   /// **'Couldn\'t open your photos.'**
   String get scanGalleryFailed;
 
-  /// No description provided for @scanHintHoldSteady.
-  ///
-  /// In en, this message translates to:
-  /// **'Hold steady on the question — I’ll capture it'**
-  String get scanHintHoldSteady;
-
   /// No description provided for @scanHintLineUp.
   ///
   /// In en, this message translates to:
   /// **'Line up the whole question, then tap to capture'**
   String get scanHintLineUp;
-
-  /// No description provided for @scanAutoCaptureOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto capture on'**
-  String get scanAutoCaptureOn;
-
-  /// No description provided for @scanAutoCaptureOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto capture off'**
-  String get scanAutoCaptureOff;
-
-  /// No description provided for @scanAutoOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto on'**
-  String get scanAutoOn;
-
-  /// No description provided for @scanAutoOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto off'**
-  String get scanAutoOff;
 
   /// No description provided for @scanCloseScanner.
   ///
@@ -2234,11 +2204,11 @@ abstract class AppLocalizations {
   /// **'Preparing…'**
   String get cropPreparing;
 
-  /// No description provided for @cropUsePhoto.
+  /// No description provided for @cropRotate.
   ///
   /// In en, this message translates to:
-  /// **'Use photo'**
-  String get cropUsePhoto;
+  /// **'Rotate'**
+  String get cropRotate;
 
   /// No description provided for @keyboardMoveLeft.
   ///

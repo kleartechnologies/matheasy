@@ -957,22 +957,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scanGalleryFailed => 'تعذّر فتح صورك.';
 
   @override
-  String get scanHintHoldSteady => 'ثبّت الكاميرا على السؤال — سألتقطه';
-
-  @override
   String get scanHintLineUp => 'ضع السؤال كاملًا داخل الإطار، ثم اضغط للالتقاط';
-
-  @override
-  String get scanAutoCaptureOn => 'الالتقاط التلقائي مفعّل';
-
-  @override
-  String get scanAutoCaptureOff => 'الالتقاط التلقائي معطّل';
-
-  @override
-  String get scanAutoOn => 'تلقائي: مفعّل';
-
-  @override
-  String get scanAutoOff => 'تلقائي: معطّل';
 
   @override
   String get scanCloseScanner => 'إغلاق الماسح';
@@ -1097,7 +1082,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cropPreparing => 'جارٍ التحضير…';
 
   @override
-  String get cropUsePhoto => 'استخدام الصورة';
+  String get cropRotate => 'تدوير';
 
   @override
   String get keyboardMoveLeft => 'تحريك لليسار';

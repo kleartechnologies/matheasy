@@ -968,24 +968,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scanGalleryFailed => 'Не удалось открыть галерею.';
 
   @override
-  String get scanHintHoldSteady =>
-      'Держи камеру ровно над задачей — я сфотографирую';
-
-  @override
   String get scanHintLineUp =>
       'Помести всю задачу в кадр и нажми, чтобы сфотографировать';
-
-  @override
-  String get scanAutoCaptureOn => 'Автосъёмка включена';
-
-  @override
-  String get scanAutoCaptureOff => 'Автосъёмка выключена';
-
-  @override
-  String get scanAutoOn => 'Авто вкл.';
-
-  @override
-  String get scanAutoOff => 'Авто выкл.';
 
   @override
   String get scanCloseScanner => 'Закрыть сканер';
@@ -1111,7 +1095,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cropPreparing => 'Подготовка…';
 
   @override
-  String get cropUsePhoto => 'Использовать фото';
+  String get cropRotate => 'Повернуть';
 
   @override
   String get keyboardMoveLeft => 'Сдвинуть влево';
