@@ -123,7 +123,13 @@
 			</array>
 		</dict>
 
-		<!-- Screen/feature usage: Firebase Analytics, and Meta once permitted. -->
+		<!-- Screen/feature usage: Firebase Analytics, and Meta once permitted.
+		     Also PERSONALIZATION: the adaptive practice engine plans each
+		     session's (skill, difficulty) slots from measured per-skill
+		     accuracy/mastery, so answering practice questions changes which
+		     questions the learner is served next. That is Apple's
+		     "customizing what the user sees", and it must be declared even
+		     though the tailoring happens for the learner's own benefit. -->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeProductInteraction</string>
@@ -135,6 +141,7 @@
 			<array>
 				<string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
 				<string>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</string>
+				<string>NSPrivacyCollectedDataTypePurposeProductPersonalization</string>
 				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
 			</array>
 		</dict>
