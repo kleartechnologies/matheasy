@@ -66,3 +66,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iCloud conflict copies ("name 2.ext") — must never be committed
+* 2
+* 2.*
