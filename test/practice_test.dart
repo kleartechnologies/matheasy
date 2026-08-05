@@ -158,6 +158,19 @@ void main() {
     });
   });
 
+  group('PracticeRequest.copyWith', () {
+    test('can explicitly null the difficulty (adaptive reset)', () {
+      const fixed = PracticeRequest(
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.hard,
+      );
+      expect(fixed.copyWith(difficulty: null).difficulty, isNull);
+      // Omitting the parameter still preserves it.
+      expect(fixed.copyWith(questionCount: 3).difficulty,
+          PracticeDifficulty.hard);
+    });
+  });
+
   group('XP + mastery math', () {
     test('difficulty carries the spec XP values', () {
       expect(PracticeDifficulty.easy.baseXp, 10);
