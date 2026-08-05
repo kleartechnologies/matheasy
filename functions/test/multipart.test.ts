@@ -190,19 +190,28 @@ describe("no over-routing: solvable phrasings reach their engines", () => {
 });
 
 describe("integral with a leading coefficient/sign is not dropped", () => {
-  it("-∫₀¹ x² dx verifies -1/3 and REJECTS +1/3", async () => {
+  // Polynomial integrands now solve DETERMINISTICALLY (solver/integral.ts), so
+  // the folded coefficient is proven by the engine itself: a planted wrong LLM
+  // answer never gets consulted.
+  it("-∫₀¹ x² dx answers -1/3 deterministically, ignoring a planted +1/3", async () => {
     const neg = classify("-\\int_0^1 x^2 \\, dx");
-    const good = await solve(neg, completerWith({ answerLatex: "-\\frac{1}{3}", answerPlain: "-0.3333333333" }));
-    expect(good.verified).toBe(true);
-    const bad = await solve(neg, completerWith({ answerLatex: "\\frac{1}{3}", answerPlain: "0.3333333333" }));
-    expect(bad.verified).toBe(false); // the sign-wrong value must NOT verify
+    const p = await solve(neg, completerWith({ answerLatex: "\\frac{1}{3}", answerPlain: "0.3333333333" }));
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("-1/3");
   });
-  it("½∫₀² x² dx verifies 4/3, not the bare 8/3", async () => {
+  it("½∫₀² x² dx answers 4/3 deterministically, not the bare 8/3", async () => {
     const cls = classify("\\frac{1}{2}\\int_0^2 x^2 \\, dx");
-    const good = await solve(cls, completerWith({ answerLatex: "\\frac{4}{3}", answerPlain: "1.3333333333" }));
+    const p = await solve(cls, completerWith({ answerLatex: "\\frac{8}{3}", answerPlain: "2.6666666667" }));
+    expect(p.verified).toBe(true);
+    expect(p.finalAnswer?.plain).toBe("4/3");
+  });
+  // The LLM gate still owns the coefficient for integrands the engine declines.
+  it("-∫₀¹ x·e^(x²) dx REJECTS the sign-wrong LLM value", async () => {
+    const neg = classify("-\\int_0^1 x e^{x^2} \\, dx");
+    const good = await solve(neg, completerWith({ answerLatex: "-0.8591", answerPlain: "-0.8591409142" }));
     expect(good.verified).toBe(true);
-    const bad = await solve(cls, completerWith({ answerLatex: "\\frac{8}{3}", answerPlain: "2.6666666667" }));
-    expect(bad.verified).toBe(false);
+    const bad = await solve(neg, completerWith({ answerLatex: "0.8591", answerPlain: "0.8591409142" }));
+    expect(bad.verified).toBe(false); // the sign-wrong value must NOT verify
   });
 });
 

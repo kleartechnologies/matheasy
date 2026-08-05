@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   asciiToLatex,
+  assumeDegreesForBareTrig,
   cleanLatex,
   latexToAscii,
   normalizeMacros,
@@ -253,6 +254,66 @@ describe("asciiToLatex", () => {
   it("leaves a slash inside prose alone", () => {
     expect(asciiToLatex("\\text{a/b in words} + 1/2")).toBe(
       "\\text{a/b in words} + \\frac{1}{2}"
+    );
+  });
+});
+
+describe("degrees vs radians", () => {
+  it("converts a degree mark inside a trig problem", () => {
+    // `\sin 30^\circ` used to shatter into the unparseable `sin(30^)\circ`, so
+    // the one form that states its unit was the one form that couldn't be solved.
+    expect(latexToAscii("\\sin 30^\\circ")).toBe("sin(30 * pi / 180)");
+    expect(latexToAscii("\\cos(60^{\\circ})")).toBe("cos((60 * pi / 180))");
+    expect(latexToAscii("\\tan 45°")).toBe("tan(45 * pi / 180)");
+  });
+
+  it("leaves a degree mark alone when there is no trigonometry", () => {
+    // "the angle is 30°" wants 30 back, not 0.5236 — converting an angle MEASURE
+    // would corrupt the answer rather than fix it.
+    expect(latexToAscii("30^\\circ + 45^\\circ")).toContain("30^");
+    expect(latexToAscii("30^\\circ + 45^\\circ")).not.toContain("pi");
+  });
+
+  it("reads a bare integer argument beyond one turn as degrees", () => {
+    // 2π ≈ 6.28, so a whole number of 7 or more is past a full revolution and
+    // nobody writes that in radians without a π.
+    expect(assumeDegreesForBareTrig("sin(30) + cos(60)")).toBe(
+      "sin((30 * pi / 180)) + cos((60 * pi / 180))",
+    );
+    expect(assumeDegreesForBareTrig("tan(45)")).toBe("tan((45 * pi / 180))");
+  });
+
+  it("leaves genuine radian arguments untouched", () => {
+    for (const a of ["sin(1)", "cos(2)", "sin(0.5)", "sin(pi/6)", "cos(6)", "asin(30)"]) {
+      expect(assumeDegreesForBareTrig(a), a).toBe(a);
+    }
+  });
+});
+
+describe("absolute value survives the round trip", () => {
+  it("renders abs() back as bars", () => {
+    // latexToAscii turns every |…| into abs(…) so mathjs can parse it; nothing
+    // turned it back, so any modulus problem printed the function name.
+    expect(asciiToLatex("abs(x + 1) = 3")).toBe("\\left|x + 1\\right| = 3");
+    expect(asciiToLatex("abs(2x - 3)")).toBe("\\left|2x - 3\\right|");
+  });
+
+  it("drops the grouping bracket the ascii form needs", () => {
+    // `5|x|` has to become `5(abs(x))` to keep its precedence; bars group on
+    // their own, so the wrapper would print as stray brackets.
+    expect(asciiToLatex("(abs(x - 4)) = 0")).toBe("\\left|x - 4\\right| = 0");
+    expect(asciiToLatex("(abs(x)) + 1 = 4")).toBe("\\left|x\\right| + 1 = 4");
+  });
+
+  it("keeps a bracket that is not the wrapper", () => {
+    expect(asciiToLatex("(abs(x) + 1) / 2")).toBe(
+      "\\frac{\\left|x\\right| + 1}{2}"
+    );
+  });
+
+  it("survives a round trip from the LaTeX a student writes", () => {
+    expect(asciiToLatex(latexToAscii("|2x - 3| = 7"))).toBe(
+      "\\left|2x - 3\\right| = 7"
     );
   });
 });

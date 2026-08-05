@@ -195,8 +195,10 @@ describe("Gap A — definite integrals verify by numeric integration", () => {
     expect(p.finalAnswer?.plain).toBe("8/3");
   });
   it("rejects a wrong definite-integral value", async () => {
+    // An integrand the deterministic engine declines (substitution), so the
+    // planted LLM value actually reaches the quadrature gate.
     const p = await run(
-      "\\int_{0}^{2} x^2 \\, dx",
+      "\\int_{0}^{2} x e^{x^2} \\, dx",
       candidate({ answerLatex: "3", answerPlain: "3", solutions: [], methods: [] })
     );
     expect(p.verified).toBe(false);

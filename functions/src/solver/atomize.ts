@@ -28,7 +28,8 @@
  * firewall in `teach.ts`.
  */
 
-import { derivative } from "mathjs";
+import { derivative, parse, type MathNode } from "mathjs";
+
 import { asciiToLatex } from "./latex";
 import { evalReal } from "./verify";
 import type { RawMethod, RawStep } from "./types";
@@ -41,6 +42,15 @@ export interface AtomizeContext {
   /** Roots the verify gate proved. An expansion may never add to or drop from this. */
   roots: number[];
   quadratic?: { a: number; b: number; c: number } | null;
+  /**
+   * The statistic being computed and its data, passed through from the
+   * classification. Handed over as TYPED VALUES rather than sniffed out of the
+   * `COMPUTE` step's label — that label is display prose ("population standard
+   * deviation (σ)") and parsing it would make the lesson depend on wording.
+   */
+  stat?: { kind: string; data: number[] } | null;
+  /** The linear-algebra operation and its operands, same reasoning as `stat`. */
+  matrix?: { op: string; a: number[][]; b?: number[][] | null } | null;
 }
 
 /** The provable assertion a sub-step makes. `none` is for pure labels. */
@@ -458,109 +468,129 @@ function dependsOn(expr: string, unknown: string): boolean {
   return Math.abs(a - b) > 1e-9;
 }
 
-/** Split `a * b` / `a / b` at the TOP level only, respecting parentheses. */
-function splitBinary(s: string, op: "*" | "/"): [string, string] | null {
-  let depth = 0;
-  for (let i = s.length - 1; i >= 0; i--) {
-    const ch = s[i];
-    if (ch === ")") depth++;
-    else if (ch === "(") depth--;
-    else if (ch === op && depth === 0) {
-      const l = s.slice(0, i).trim();
-      const r = s.slice(i + 1).trim();
-      if (l && r) return [l, r];
-    }
+/** Drop `ParenthesisNode` wrappers so the top-level operator is visible. */
+function unwrap(n: MathNode): MathNode {
+  let node = n;
+  while (node.type === "ParenthesisNode") {
+    node = (node as unknown as { content: MathNode }).content;
   }
-  return null;
+  return node;
 }
 
 /**
- * Which rule the top level of `target` calls for. Returns null when it is a
- * standard derivative (power/trig/exp) that a single step already teaches
- * honestly — refining `d/dx(x^3)` into sub-steps would be noise, not teaching.
+ * The chain rule, built from an outer function written against a placeholder.
+ * Differentiating the outer at the placeholder and putting the inner function
+ * back IS the `f'(u)` factor — the same move a student makes on paper.
+ */
+function chainOn(
+  outer: (u: string) => string,
+  inner: string,
+  unknown: string,
+): Decomposition | null {
+  if (inner === unknown || !dependsOn(inner, unknown)) return null;
+  const PH = "chainu";
+  let outerD: string;
+  try {
+    outerD = derivative(outer(PH), PH).toString();
+  } catch {
+    return null;
+  }
+  if (!outerD.includes(PH)) return null; // outer derivative is constant: no lesson
+  return {
+    code: "RULE_CHAIN",
+    ruleLatex: "\\big(f(u)\\big)' = f'(u)\\cdot u'",
+    parts: [{ name: "u", expr: inner }],
+    recombine: outer(`(${inner})`),
+    assemble: ([du]) => `(${outerD.split(PH).join(`(${inner})`)}) * (${du})`,
+  };
+}
+
+/**
+ * Which rule the top level of `target` calls for. Reads the mathjs AST rather
+ * than the string, because `x^3 sin(x)` is a product with no `*` in it at all.
+ *
+ * Returns null for a standard derivative (`d/dx(x^3)`, `d/dx(sin x)`) — those
+ * are already one honest step, and splitting them would be noise, not teaching.
  */
 function decompose(target: string, unknown: string): Decomposition | null {
-  const t = stripParens(target);
-
-  const quot = splitBinary(t, "/");
-  if (quot && dependsOn(quot[1], unknown)) {
-    const [u, v] = quot;
-    return {
-      code: "RULE_QUOTIENT",
-      ruleLatex: "\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}",
-      parts: [
-        { name: "u", expr: u },
-        { name: "v", expr: v },
-      ],
-      recombine: `(${u}) / (${v})`,
-      assemble: ([du, dv]) => `((${du}) * (${v}) - (${u}) * (${dv})) / (${v})^2`,
-    };
+  let node: MathNode;
+  try {
+    node = unwrap(parse(target));
+  } catch {
+    return null;
   }
+  const src = (n: MathNode) => unwrap(n).toString();
 
-  const prod = splitBinary(t, "*");
-  if (prod && dependsOn(prod[0], unknown) && dependsOn(prod[1], unknown)) {
-    const [u, v] = prod;
-    return {
-      code: "RULE_PRODUCT",
-      ruleLatex: "(uv)' = u'v + uv'",
-      parts: [
-        { name: "u", expr: u },
-        { name: "v", expr: v },
-      ],
-      recombine: `(${u}) * (${v})`,
-      assemble: ([du, dv]) => `(${du}) * (${v}) + (${u}) * (${dv})`,
-    };
-  }
+  if (node.type === "OperatorNode") {
+    const op = node as unknown as { op: string; args: MathNode[] };
+    if (op.args.length !== 2) return null;
+    const [a, b] = op.args.map(src);
 
-  // Chain rule: `f(u)` where the argument is not the bare variable.
-  const fn = /^([a-z]+)\s*\((.+)\)$/i.exec(t);
-  if (fn) {
-    const inner = stripParens(fn[2].trim());
-    if (inner !== unknown && dependsOn(inner, unknown)) {
-      // Differentiate the OUTER function at a placeholder, then put the inner
-      // function back — that substitution IS the chain rule's first factor.
-      const PH = "chainu";
-      let outerD: string;
-      try {
-        outerD = derivative(`${fn[1]}(${PH})`, PH).toString();
-      } catch {
-        return null;
-      }
-      if (!outerD.includes(PH)) return null; // outer derivative is constant: no lesson
+    if (op.op === "/" && dependsOn(b, unknown)) {
       return {
-        code: "RULE_CHAIN",
-        ruleLatex: "\\big(f(u)\\big)' = f'(u)\\cdot u'",
-        parts: [{ name: "u", expr: inner }],
-        recombine: `${fn[1]}(${inner})`,
-        assemble: ([du]) => `(${outerD.split(PH).join(`(${inner})`)}) * (${du})`,
+        code: "RULE_QUOTIENT",
+        ruleLatex: "\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}",
+        parts: [
+          { name: "u", expr: a },
+          { name: "v", expr: b },
+        ],
+        recombine: `(${a}) / (${b})`,
+        assemble: ([du, dv]) => `((${du}) * (${b}) - (${a}) * (${dv})) / (${b})^2`,
       };
     }
+
+    if (op.op === "*" && dependsOn(a, unknown) && dependsOn(b, unknown)) {
+      return {
+        code: "RULE_PRODUCT",
+        ruleLatex: "(uv)' = u'v + uv'",
+        parts: [
+          { name: "u", expr: a },
+          { name: "v", expr: b },
+        ],
+        recombine: `(${a}) * (${b})`,
+        assemble: ([du, dv]) => `(${du}) * (${b}) + (${a}) * (${dv})`,
+      };
+    }
+
+    // `(inner)^k` is the power-with-a-chain case; `k^(inner)` the exponential one.
+    if (op.op === "^") {
+      if (!dependsOn(b, unknown)) return chainOn((u) => `(${u})^(${b})`, a, unknown);
+      if (!dependsOn(a, unknown)) return chainOn((u) => `(${a})^(${u})`, b, unknown);
+      return null; // x^x — neither rule alone explains it
+    }
+    return null;
   }
-  return null;
+
+  // `f(inner)` — chain rule whenever the argument is not the bare variable.
+  if (node.type !== "FunctionNode") return null;
+  const fn = node as unknown as { fn: { name?: string }; args: MathNode[] };
+  const name = fn.fn?.name;
+  if (!name || fn.args.length !== 1) return null;
+  return chainOn((u) => `${name}(${u})`, src(fn.args[0]), unknown);
 }
 
 /**
- * `d/dx(x^3 * sin(x)) → 3x^2 sin(x) + x^3 cos(x)` becomes
+ * The rule, written out: name it, differentiate each piece, assemble.
+ *
  *   RULE_PRODUCT        (uv)' = u'v + uv' with u = x^3, v = sin(x)
  *   DIFFERENTIATE_PARTS u' = 3x^2, v' = cos(x)
  *   APPLY_RULE          u'v + uv', assembled
- *   RESULT              the engine's own answer            [= the coarse step]
+ *   <coarse>            the engine's own answer, untouched
  *
- * Expands the RESULT step (reading the preceding `d/dx(...)` step for its
- * target), because the leap happens BETWEEN those two, not inside either one.
+ * `answer` is what the coarse step lands on and `lhs` the label it wears
+ * (`dy/dx`), so the same three steps serve both step shapes below.
  *
  * Note the DIFFERENTIATE_PARTS claim: mathjs produced those part derivatives,
  * but they are checked against a difference quotient, so mathjs is never the
  * thing agreeing with itself.
  */
-const expandDerivative: Expander = (coarse, prev, ctx) => {
-  if (!prev || prev.operationCode !== "DIFFERENTIATE") return null;
-  const raw = prev.ascii.trim();
-  // Higher-order (`d^2/dx^2`) leaps over several differentiations at once; one
-  // rule application can't land on that answer, so leave it unrefined.
-  const m = /^d\/d[a-z]\s*\((.+)\)$/i.exec(raw);
-  if (!m) return null;
-  const target = m[1];
+function ruleSteps(
+  target: string,
+  answer: string,
+  lhs: string | null,
+  coarse: RawStep,
+  ctx: AtomizeContext,
+): AtomicStep[] | null {
   const d = decompose(target, ctx.unknown);
   if (!d) return null;
 
@@ -577,9 +607,9 @@ const expandDerivative: Expander = (coarse, prev, ctx) => {
     return null;
   }
   const assembled = d.assemble(partDs);
-
   const named = (n: string, e: string) => `${n} = ${e}`;
   const namedLatex = (n: string, e: string) => `${n} = ${asciiToLatex(e)}`;
+  const prefix = lhs ? `${lhs} = ` : "";
 
   return [
     {
@@ -599,18 +629,975 @@ const expandDerivative: Expander = (coarse, prev, ctx) => {
       claim: { kind: "derivative", is: partDs[0], of: d.parts[0].expr },
     },
     {
-      ascii: assembled,
-      latex: asciiToLatex(assembled),
+      ascii: `${prefix}${assembled}`,
+      latex: `${lhs ? `${lhs} = ` : ""}${asciiToLatex(assembled)}`,
       operationCode: "APPLY_RULE",
       // The payoff check: the rule, assembled by hand, equals the VERIFIED answer.
-      claim: { kind: "expression", ascii: assembled, equivalentTo: coarse.ascii },
+      claim: { kind: "expression", ascii: assembled, equivalentTo: answer },
     },
     { ...coarse, claim: { kind: "none" } },
   ];
+}
+
+/**
+ * `d/dx(x^3 sin(x))` then `3x^2 sin(x) + x^3 cos(x)` — the plain derivative
+ * engine. The leap sits BETWEEN the two steps, so the RESULT step is the one
+ * expanded, reading its target off the `d/dx(...)` step before it.
+ */
+const expandDerivativeResult: Expander = (coarse, prev, ctx) => {
+  if (!prev || prev.operationCode !== "DIFFERENTIATE") return null;
+  // Higher-order (`d^2/dx^2`) leaps over several differentiations at once; one
+  // rule application can't land on that answer, so leave it unrefined.
+  const m = /^d\/d[a-z]\s*\((.+)\)$/i.exec(prev.ascii.trim());
+  if (!m) return null;
+  return ruleSteps(m[1], coarse.ascii, null, coarse, ctx);
+};
+
+/**
+ * `y = x^2 sin(x)` then `dy/dx = 2x sin(x) + x^2 cos(x)` — the shape the
+ * calculus engines use (tangent lines, stationary points, optimisation). Here
+ * the whole rule is inside ONE step, so that step is what gets expanded.
+ */
+const expandDerivativeAssignment: Expander = (coarse, prev, ctx) => {
+  if (!prev) return null;
+  const eq = coarse.ascii.indexOf("=");
+  const src = prev.ascii.indexOf("=");
+  if (eq === -1 || src === -1) return null;
+  const lhs = coarse.ascii.slice(0, eq).trim();
+  // First order only, and only when the previous step really is `y = f(x)`.
+  if (!/^\\?(frac\{)?d\s*y?/i.test(lhs.replace(/\\/g, "")) || /\^\s*\{?[2-9]/.test(lhs)) {
+    return null;
+  }
+  return ruleSteps(
+    prev.ascii.slice(src + 1).trim(),
+    coarse.ascii.slice(eq + 1).trim(),
+    lhs,
+    coarse,
+    ctx,
+  );
+};
+
+// --- arithmetic -------------------------------------------------------------
+
+function gcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) [x, y] = [y, x % y];
+  return x || 1;
+}
+const lcm = (a: number, b: number) => Math.abs(a * b) / gcd(a, b);
+
+/** An integer node's value, seeing through parentheses. Null if it isn't one. */
+function intValue(n: MathNode): number | null {
+  const node = unwrap(n);
+  if (node.type === "UnaryNode" || node.type === "OperatorNode") {
+    const op = node as unknown as { op: string; args: MathNode[] };
+    if (op.op === "-" && op.args.length === 1) {
+      const inner = intValue(op.args[0]);
+      return inner === null ? null : -inner;
+    }
+    return null;
+  }
+  if (node.type !== "ConstantNode") return null;
+  const v = (node as unknown as { value: unknown }).value;
+  return typeof v === "number" && Number.isInteger(v) ? v : null;
+}
+
+interface Term {
+  n: number;
+  d: number;
+}
+
+/** `1/2 + 1/3 - 1` as signed integer fractions. Null if any term isn't one. */
+function fractionTerms(node: MathNode, sign = 1): Term[] | null {
+  const n = unwrap(node);
+  if (n.type === "OperatorNode") {
+    const op = n as unknown as { op: string; args: MathNode[] };
+    if (op.args.length === 2 && (op.op === "+" || op.op === "-")) {
+      const l = fractionTerms(op.args[0], sign);
+      const r = fractionTerms(op.args[1], op.op === "-" ? -sign : sign);
+      return l && r ? [...l, ...r] : null;
+    }
+    if (op.args.length === 2 && op.op === "/") {
+      const a = intValue(op.args[0]);
+      const b = intValue(op.args[1]);
+      if (a === null || b === null || b === 0) return null;
+      return [{ n: sign * a, d: b }];
+    }
+    if (op.args.length === 1 && op.op === "-") return fractionTerms(op.args[0], -sign);
+    return null;
+  }
+  const v = intValue(n);
+  return v === null ? null : [{ n: sign * v, d: 1 }];
+}
+
+const fracLatex = (n: number, d: number) =>
+  d === 1 ? String(n) : `${n < 0 ? "-" : ""}\\frac{${Math.abs(n)}}{${d}}`;
+
+/** `a/b + c/d` joined with the signs a student would write. */
+const termsLatex = (ts: Term[]) =>
+  ts
+    .map((t, i) =>
+      i === 0
+        ? fracLatex(t.n, t.d)
+        : `${t.n < 0 ? " - " : " + "}${fracLatex(Math.abs(t.n), t.d)}`,
+    )
+    .join("");
+
+const termsAscii = (ts: Term[]) =>
+  ts
+    .map((t, i) => {
+      const body = t.d === 1 ? String(Math.abs(t.n)) : `${Math.abs(t.n)}/${t.d}`;
+      if (i === 0) return t.n < 0 ? `-${body}` : body;
+      return `${t.n < 0 ? " - " : " + "}${body}`;
+    })
+    .join("");
+
+/**
+ * The lesson `1/2 + 1/3 → 5/6` skips entirely: find the common denominator,
+ * rewrite both fractions over it, then add the numerators. Without those the
+ * student is shown an answer with no way to reach it.
+ */
+function fractionSteps(source: string, coarse: RawStep, ctx: AtomizeContext): AtomicStep[] | null {
+  let terms: Term[] | null;
+  try {
+    terms = fractionTerms(parse(source));
+  } catch {
+    return null;
+  }
+  if (!terms || terms.length < 2) return null;
+  if (!terms.some((t) => t.d > 1)) return null; // whole numbers: not this lesson
+
+  const denominators = terms.map((t) => t.d);
+  const common = denominators.reduce(lcm, 1);
+  if (!Number.isFinite(common) || common > 10_000) return null;
+
+  const steps: AtomicStep[] = [];
+  const rewritten = terms.map((t) => ({ n: (t.n * common) / t.d, d: common }));
+
+  // Only worth stating when the denominators actually differ.
+  if (new Set(denominators).size > 1) {
+    steps.push({
+      ascii: `LCM(${denominators.join(", ")}) = ${common}`,
+      latex: `\\text{LCM}(${denominators.join(", ")}) = ${common}`,
+      operationCode: "COMMON_DENOMINATOR",
+      // Divisibility by every denominator, and leastness, both checked.
+      claim: {
+        kind: "identity",
+        pairs: [
+          ...denominators.map((d) => [common % d, 0] as [number, number]),
+          [common, denominators.reduce(lcm, 1)],
+        ],
+      },
+    });
+    steps.push({
+      ascii: termsAscii(rewritten),
+      latex: termsLatex(rewritten),
+      operationCode: "REWRITE_EQUIVALENT",
+      claim: { kind: "expression", ascii: termsAscii(rewritten), equivalentTo: source },
+    });
+  }
+
+  // `(3 + 2)/6` — the numerators lined up over the shared denominator.
+  const sum = rewritten.reduce((a, t) => a + t.n, 0);
+  const numerators = rewritten
+    .map((t, i) => (i === 0 ? String(t.n) : `${t.n < 0 ? "- " : "+ "}${Math.abs(t.n)}`))
+    .join(" ");
+  steps.push({
+    ascii: `(${numerators})/${common}`,
+    latex: `\\frac{${numerators}}{${common}}`,
+    operationCode: "COMBINE_NUMERATORS",
+    claim: { kind: "expression", ascii: `(${numerators})/${common}`, equivalentTo: source },
+  });
+
+  // If it doesn't reduce, the coarse step already IS this — don't say it twice.
+  const g = gcd(sum, common);
+  if (g > 1 || Math.abs(sum) % common === 0) {
+    steps.push({
+      ascii: `${sum}/${common}`,
+      latex: fracLatex(sum, common),
+      operationCode: "ADD_NUMERATORS",
+      claim: { kind: "expression", ascii: `${sum}/${common}`, equivalentTo: source },
+    });
+    // The coarse step is now doing one job — cancelling — so label it that way.
+    steps.push({ ...coarse, operationCode: "SIMPLIFY_FRACTION", claim: { kind: "none" } });
+  } else {
+    steps.push({ ...coarse, claim: { kind: "none" } });
+  }
+  void ctx;
+  return steps;
+}
+
+/** One fraction, or null if the node is a sum, a variable, or anything messier. */
+function singleFraction(node: MathNode): Term | null {
+  const ts = fractionTerms(node);
+  return ts && ts.length === 1 ? ts[0] : null;
+}
+
+/**
+ * `2/3 × 3/5` and `2/3 ÷ 4/9`. Dividing by a fraction is the one every student
+ * gets wrong, and "flip the second fraction and multiply" is the step that was
+ * missing entirely — the old method jumped from the question to `3/2`.
+ */
+function fractionProductSteps(
+  source: string,
+  coarse: RawStep,
+  ctx: AtomizeContext,
+): AtomicStep[] | null {
+  let root: MathNode;
+  try {
+    root = unwrap(parse(source));
+  } catch {
+    return null;
+  }
+  if (root.type !== "OperatorNode") return null;
+  const op = root as unknown as { op: string; args: MathNode[] };
+  if (op.args.length !== 2 || (op.op !== "*" && op.op !== "/")) return null;
+  const a = singleFraction(op.args[0]);
+  let b = singleFraction(op.args[1]);
+  if (!a || !b) return null;
+  if (a.d === 1 && b.d === 1) return null; // whole numbers: nothing to teach here
+
+  const steps: AtomicStep[] = [];
+  if (op.op === "/") {
+    if (b.n === 0) return null;
+    b = { n: b.d * Math.sign(b.n), d: Math.abs(b.n) }; // flip, keeping the sign on top
+    steps.push({
+      ascii: `${termsAscii([a])} * ${termsAscii([b])}`,
+      latex: `${fracLatex(a.n, a.d)} \\times ${fracLatex(b.n, b.d)}`,
+      operationCode: "MULTIPLY_BY_RECIPROCAL",
+      claim: {
+        kind: "expression",
+        ascii: `(${a.n}/${a.d}) * (${b.n}/${b.d})`,
+        equivalentTo: source,
+      },
+    });
+  }
+
+  const n = a.n * b.n;
+  const d = a.d * b.d;
+  steps.push({
+    ascii: `(${a.n} * ${b.n})/(${a.d} * ${b.d})`,
+    latex: `\\frac{${a.n} \\times ${b.n}}{${a.d} \\times ${b.d}}`,
+    operationCode: "MULTIPLY_FRACTIONS",
+    claim: {
+      kind: "expression",
+      ascii: `(${a.n} * ${b.n})/(${a.d} * ${b.d})`,
+      equivalentTo: source,
+    },
+  });
+
+  if (gcd(n, d) > 1) {
+    steps.push({
+      ascii: `${n}/${d}`,
+      latex: fracLatex(n, d),
+      operationCode: "MULTIPLY_OUT",
+      claim: { kind: "expression", ascii: `${n}/${d}`, equivalentTo: source },
+    });
+    steps.push({ ...coarse, operationCode: "SIMPLIFY_FRACTION", claim: { kind: "none" } });
+  } else {
+    steps.push({ ...coarse, claim: { kind: "none" } });
+  }
+  void ctx;
+  return steps;
+}
+
+const PRECEDENCE: Record<string, number> = {
+  "^": 3,
+  "*": 2,
+  "/": 2,
+  "+": 1,
+  "-": 1,
+};
+
+/**
+ * Integers only. A fractional intermediate would have to be substituted back as
+ * `(3/4)`, which is itself a division of two constants — the walk would pick it
+ * up again next pass and reduce forever. Fraction arithmetic has its own lesson
+ * above; this one is for whole numbers, which is where it is actually taught.
+ */
+function constText(v: number): string | null {
+  return Number.isFinite(v) && Number.isInteger(v) ? String(v) : null;
+}
+
+interface Reducible {
+  node: MathNode;
+  op: string;
+  depth: number;
+  /** True when the operation sits inside brackets — BIDMAS does those first. */
+  bracketed: boolean;
+}
+
+/** The one operation order-of-operations says to do next, or null when done. */
+function nextOperation(root: MathNode): Reducible | null {
+  const found: Reducible[] = [];
+  const walk = (n: MathNode, depth: number, bracketed: boolean) => {
+    if (n.type === "ParenthesisNode") {
+      walk((n as unknown as { content: MathNode }).content, depth + 1, true);
+      return;
+    }
+    if (n.type === "OperatorNode") {
+      const op = n as unknown as { op: string; args: MathNode[] };
+      for (const a of op.args) walk(a, depth + 1, bracketed);
+      if (op.args.length === 2 && op.args.every((a) => intValue(a) !== null || isConst(a))) {
+        found.push({ node: n, op: op.op, depth, bracketed });
+      }
+    }
+  };
+  walk(root, 0, false);
+  if (!found.length) return null;
+  // Deepest first (that IS "innermost brackets first"), then by precedence,
+  // then leftmost — exactly the order BIDMAS prescribes.
+  found.sort(
+    (a, b) => b.depth - a.depth || (PRECEDENCE[b.op] ?? 0) - (PRECEDENCE[a.op] ?? 0),
+  );
+  return found[0];
+}
+
+function isConst(n: MathNode): boolean {
+  const node = unwrap(n);
+  return node.type === "ConstantNode" || intValue(node) !== null;
+}
+
+const REDUCTION_CODE: Record<string, string> = {
+  "^": "INDICES",
+  "*": "MULTIPLY_DIVIDE",
+  "/": "MULTIPLY_DIVIDE",
+  "+": "ADD_SUBTRACT",
+  "-": "ADD_SUBTRACT",
+};
+
+/**
+ * `2^3 + 4 × (7 − 5) → 16` in one step teaches nothing about the order the
+ * operations had to happen in. This performs exactly ONE of them per step,
+ * brackets → indices → ×÷ → +−, which is the whole lesson.
+ */
+function orderOfOperationsSteps(
+  source: string,
+  coarse: RawStep,
+  ctx: AtomizeContext,
+): AtomicStep[] | null {
+  let node: MathNode;
+  try {
+    node = parse(source);
+  } catch {
+    return null;
+  }
+  const steps: AtomicStep[] = [];
+  for (let guard = 0; guard < 12; guard++) {
+    const next = nextOperation(node);
+    if (!next) break;
+    const value = evalReal(next.node.toString());
+    const text = constText(value);
+    if (text === null) return null; // an ugly intermediate helps nobody
+    try {
+      // Negatives keep their brackets (`5 * (-3)`); positives never need them.
+      const sub = parse(value < 0 ? `(${text})` : text);
+      node = node.transform((n: MathNode) => (n === next.node ? sub : n)) as MathNode;
+      // A bracket around a lone positive number has stopped meaning anything;
+      // drop it in the same step rather than spending a step on punctuation.
+      node = node.transform((n: MathNode) => {
+        if (n.type !== "ParenthesisNode") return n;
+        const inner = (n as unknown as { content: MathNode }).content;
+        const v = intValue(inner);
+        return v !== null && v >= 0 ? inner : n;
+      }) as MathNode;
+    } catch {
+      return null;
+    }
+    const ascii = node.toString();
+    // The last reduction lands on a bare number — that IS the coarse step.
+    if (isConst(node)) break;
+    steps.push({
+      ascii,
+      latex: asciiToLatex(ascii),
+      operationCode: next.bracketed ? "BRACKETS_FIRST" : REDUCTION_CODE[next.op] ?? "COMPUTE",
+      // Every intermediate state must still be worth the same as the problem.
+      claim: { kind: "expression", ascii, equivalentTo: source },
+    });
+  }
+  if (!steps.length) return null;
+  void ctx;
+  return [...steps, { ...coarse, claim: { kind: "none" } }];
+}
+
+// --- decimals ---------------------------------------------------------------
+
+/** Digits after the point, or null if this isn't a plain decimal literal. */
+function decimalPlaces(text: string): number | null {
+  if (!/^-?\d+(?:\.\d+)?$/.test(text)) return null;
+  const dot = text.indexOf(".");
+  return dot === -1 ? 0 : text.length - dot - 1;
+}
+
+/** The two operands of a top-level `a op b`, as they were WRITTEN. */
+function binaryLiterals(
+  source: string,
+): { op: string; left: string; right: string; lp: number; rp: number } | null {
+  const m = /^\s*(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)\s*$/.exec(source);
+  if (!m) return null;
+  const [, left, op, right] = m;
+  const lp = decimalPlaces(left);
+  const rp = decimalPlaces(right);
+  if (lp === null || rp === null) return null;
+  if (lp === 0 && rp === 0) return null; // whole numbers are a different lesson
+  return { op, left, right, lp, rp };
+}
+
+/**
+ * `0.25 + 0.5` used to be `START → COMPUTE`, with the whole of decimal arithmetic
+ * — the part students actually get wrong — invisible.
+ *
+ * The lesson is the same one in every textbook: scale the decimals up to whole
+ * numbers, do the easy arithmetic, then scale back. Written that way the "count
+ * the decimal places" rule for × stops being a trick to memorise and becomes
+ * visibly just the ÷100.
+ *
+ * Deliberately ONE binary operation. Mixing decimals into the BIDMAS reducer
+ * would reintroduce the non-terminating substitution that made `constText`
+ * integers-only in the first place.
+ */
+function decimalSteps(source: string, coarse: RawStep): AtomicStep[] | null {
+  const b = binaryLiterals(source);
+  if (!b) return null;
+  const { op, left, right, lp, rp } = b;
+
+  const steps: AtomicStep[] = [];
+  /** Don't restate the coarse step: `0.1 + 0.2` reaches `3 / 10`, which IS `3/10`. */
+  const bare = (s: string) => s.replace(/\s+/g, "");
+  const pushUnlessCoarse = (step: AtomicStep) => {
+    if (bare(step.ascii) !== bare(coarse.ascii)) steps.push(step);
+  };
+  let scaled: string;
+  let scale: number;
+
+  if (op === "+" || op === "-") {
+    const places = Math.max(lp, rp);
+    scale = 10 ** places;
+    const L = Math.round(Number(left) * scale);
+    const R = Math.round(Number(right) * scale);
+    // Same number of decimal places first — the alignment IS the lesson for ±.
+    if (lp !== rp) {
+      const pad = (v: string, p: number) =>
+        (p === 0 ? `${v}.` : v) + "0".repeat(places - p);
+      const aligned = `${pad(left, lp)} ${op} ${pad(right, rp)}`;
+      pushUnlessCoarse({
+        ascii: aligned,
+        latex: aligned,
+        operationCode: "ALIGN_DECIMALS",
+        claim: { kind: "identity", pairs: [[evalReal(aligned), evalReal(source)]] },
+      });
+    }
+    scaled = `(${L} ${op} ${R}) / ${scale}`;
+    pushUnlessCoarse({
+      ascii: scaled,
+      latex: `\\frac{${L} ${op} ${R}}{${scale}}`,
+      operationCode: "SCALE_TO_WHOLE",
+      claim: { kind: "identity", pairs: [[evalReal(scaled), evalReal(source)]] },
+    });
+    const combined = `${L + (op === "+" ? R : -R)} / ${scale}`;
+    pushUnlessCoarse({
+      ascii: combined,
+      latex: `\\frac{${L + (op === "+" ? R : -R)}}{${scale}}`,
+      operationCode: "COMPUTE_WHOLE",
+      claim: { kind: "identity", pairs: [[evalReal(combined), evalReal(source)]] },
+    });
+  } else if (op === "*") {
+    scale = 10 ** (lp + rp);
+    const L = Math.round(Number(left) * 10 ** lp);
+    const R = Math.round(Number(right) * 10 ** rp);
+    scaled = `(${L} * ${R}) / ${scale}`;
+    pushUnlessCoarse({
+      ascii: scaled,
+      latex: `\\frac{${L} \\times ${R}}{${scale}}`,
+      operationCode: "SCALE_TO_WHOLE",
+      claim: { kind: "identity", pairs: [[evalReal(scaled), evalReal(source)]] },
+    });
+    const product = `${L * R} / ${scale}`;
+    pushUnlessCoarse({
+      ascii: product,
+      latex: `\\frac{${L * R}}{${scale}}`,
+      operationCode: "COMPUTE_WHOLE",
+      claim: { kind: "identity", pairs: [[evalReal(product), evalReal(source)]] },
+    });
+  } else {
+    // Division: scale BOTH by the same power, so the quotient is unchanged and
+    // the divisor becomes a whole number — "move both points the same way".
+    const places = Math.max(lp, rp);
+    scale = 10 ** places;
+    const L = Math.round(Number(left) * scale);
+    const R = Math.round(Number(right) * scale);
+    if (R === 0) return null;
+    scaled = `${L} / ${R}`;
+    pushUnlessCoarse({
+      ascii: scaled,
+      latex: `\\frac{${L}}{${R}}`,
+      operationCode: "SCALE_TO_WHOLE",
+      claim: { kind: "identity", pairs: [[evalReal(scaled), evalReal(source)]] },
+    });
+  }
+
+  if (steps.length === 0) return null;
+  steps.push({ ...coarse, claim: { kind: "none" } });
+  return steps;
+}
+
+/**
+ * `START → COMPUTE` is the entire arithmetic method today. Which lesson is
+ * missing depends on the problem: adding fractions is about the common
+ * denominator, decimals are about scaling to whole numbers, and everything else
+ * is about the order the operations happen in.
+ */
+const expandArithmetic: Expander = (coarse, prev, ctx) => {
+  if (!prev || prev.operationCode !== "START") return null;
+  const source = prev.ascii;
+  return (
+    fractionSteps(source, coarse, ctx) ??
+    fractionProductSteps(source, coarse, ctx) ??
+    decimalSteps(source, coarse) ??
+    orderOfOperationsSteps(source, coarse, ctx)
+  );
+};
+
+// --- statistics -------------------------------------------------------------
+
+/**
+ * Matches `statistics.ts`'s own formatter exactly. The landing sub-step has to be
+ * byte-identical to the coarse answer, so a second rounding rule here would fail
+ * the gate on every problem whose result is not an integer.
+ */
+function statNum(v: number): string {
+  return String(Math.round(v * 1e10) / 1e10);
+}
+
+/** `4 + 8 - 3`, never `4 + 8 + -3`. */
+function joinSum(values: number[]): string {
+  return values
+    .map((v, i) => (i === 0 ? statNum(v) : v < 0 ? `- ${statNum(-v)}` : `+ ${statNum(v)}`))
+    .join(" ");
+}
+
+/**
+ * Prove the line EXACTLY as printed: split it on `=` and evaluate both sides.
+ * A line with no `=` yields a claim that cannot hold, so it is rejected rather
+ * than waved through — a sub-step that asserts nothing must not ship as if it did.
+ */
+function printedIdentity(ascii: string): Claim {
+  const i = ascii.indexOf("=");
+  if (i === -1) return { kind: "identity", pairs: [[0, 1]] };
+  return {
+    kind: "identity",
+    pairs: [[evalReal(ascii.slice(0, i)), evalReal(ascii.slice(i + 1))]],
+  };
+}
+
+/** A step whose printed line is its own proof. */
+function shownStep(operationCode: string, ascii: string, latex: string): AtomicStep {
+  return { operationCode, ascii, latex, claim: printedIdentity(ascii) };
+}
+
+function texList(values: number[]): string {
+  return values.map(statNum).join(",\\; ");
+}
+
+/**
+ * The mean, shown as work rather than asserted. Returned as sub-steps so both the
+ * `mean` lesson and the variance/σ lessons (which need the mean first) share it.
+ */
+function meanSteps(data: number[]): { steps: AtomicStep[]; mean: number } | null {
+  const total = data.reduce((a, b) => a + b, 0);
+  const m = total / data.length;
+  if (!Number.isFinite(m)) return null;
+  const sumLine = `${joinSum(data)} = ${statNum(total)}`;
+  return {
+    mean: Number(statNum(m)),
+    steps: [
+      shownStep("ADD_VALUES", sumLine, `\\sum x = ${sumLine.replace("=", "=")}`),
+      shownStep(
+        "DIVIDE_BY_COUNT",
+        `${statNum(total)} / ${data.length} = ${statNum(m)}`,
+        `\\bar{x} = \\frac{${statNum(total)}}{${data.length}} = ${statNum(m)}`,
+      ),
+    ],
+  };
+}
+
+/**
+ * `START → COMPUTE(formula) → RESULT(answer)` hides the whole calculation inside
+ * the last step. This replaces that one step with the working, leaving the formula
+ * above it: state the rule, then carry it out.
+ *
+ * Declines for `mode` (the answer is a set, not a value, so the identity machinery
+ * does not apply) and for `min`/`max` (picking the smallest number is not a
+ * calculation a step could usefully split).
+ */
+const expandStatistic: Expander = (coarse, prev, ctx) => {
+  const stat = ctx.stat;
+  if (!stat || !prev || prev.operationCode !== "COMPUTE") return null;
+  const data = stat.data;
+  if (data.length < 2 || !data.every(Number.isFinite)) return null;
+
+  const body: AtomicStep[] = [];
+  /** What the working arrives at — checked against the already-verified answer. */
+  let value: number;
+
+  switch (stat.kind) {
+    case "sum": {
+      const total = data.reduce((a, b) => a + b, 0);
+      const line = `${joinSum(data)} = ${statNum(total)}`;
+      body.push(shownStep("ADD_VALUES", line, `\\sum x = ${line}`));
+      value = total;
+      break;
+    }
+    case "mean": {
+      const built = meanSteps(data);
+      if (!built) return null;
+      body.push(...built.steps);
+      value = built.mean;
+      break;
+    }
+    case "range": {
+      const hi = Math.max(...data);
+      const lo = Math.min(...data);
+      body.push({
+        operationCode: "FIND_EXTREMES",
+        ascii: `max = ${statNum(hi)}, min = ${statNum(lo)}`,
+        latex: `\\max = ${statNum(hi)},\\quad \\min = ${statNum(lo)}`,
+        // Not an `=` line: proved by construction below, where the subtraction
+        // that uses these two numbers is itself checked as printed.
+        claim: { kind: "none" },
+      });
+      const line = `${statNum(hi)} - ${statNum(lo)} = ${statNum(hi - lo)}`;
+      body.push(shownStep("SUBTRACT_EXTREMES", line, `\\max - \\min = ${line}`));
+      value = hi - lo;
+      break;
+    }
+    case "median": {
+      // A permutation by construction, so there is no arithmetic claim to make —
+      // what the sort has to earn is the value it puts in the middle, and that is
+      // what the landing check below tests.
+      const sorted = [...data].sort((a, b) => a - b);
+      body.push({
+        operationCode: "SORT_DATA",
+        ascii: sorted.map(statNum).join(", "),
+        latex: `${texList(sorted)}`,
+        claim: { kind: "none" },
+      });
+      const mid = Math.floor(sorted.length / 2);
+      if (sorted.length % 2) {
+        // Pure arithmetic — a printed line is only proved if every token in it
+        // evaluates, so the word "position" belongs in the LaTeX, not the ascii.
+        const line = `(${sorted.length} + 1) / 2 = ${mid + 1}`;
+        body.push(
+          shownStep(
+            "PICK_MIDDLE",
+            line,
+            `\\text{middle position} = \\frac{${sorted.length} + 1}{2} = ${mid + 1}`,
+          ),
+        );
+        value = sorted[mid];
+      } else {
+        const a = sorted[mid - 1];
+        const b = sorted[mid];
+        const line = `(${statNum(a)} + ${statNum(b)}) / 2 = ${statNum((a + b) / 2)}`;
+        body.push(
+          shownStep(
+            "PICK_MIDDLE",
+            line,
+            `\\frac{${statNum(a)} + ${statNum(b)}}{2} = ${statNum((a + b) / 2)}`,
+          ),
+        );
+        value = (a + b) / 2;
+      }
+      break;
+    }
+    case "variance":
+    case "std": {
+      const built = meanSteps(data);
+      if (!built) return null;
+      body.push(...built.steps);
+      const m = built.mean;
+      const devs = data.map((x) => Number(statNum(x - m)));
+      const squares = devs.map((d) => Number(statNum(d * d)));
+      body.push({
+        operationCode: "DEVIATIONS",
+        ascii: devs.map(statNum).join(", "),
+        latex: `x - \\bar{x}:\\quad ${texList(devs)}`,
+        claim: { kind: "identity", pairs: data.map((x, i) => [x - m, devs[i]] as [number, number]) },
+      });
+      body.push({
+        operationCode: "SQUARE_DEVIATIONS",
+        ascii: squares.map(statNum).join(", "),
+        latex: `(x - \\bar{x})^2:\\quad ${texList(squares)}`,
+        claim: {
+          kind: "identity",
+          pairs: devs.map((d, i) => [d * d, squares[i]] as [number, number]),
+        },
+      });
+      const total = squares.reduce((a, b) => a + b, 0);
+      const sumLine = `${joinSum(squares)} = ${statNum(total)}`;
+      body.push(
+        shownStep("SUM_SQUARES", sumLine, `\\sum (x - \\bar{x})^2 = ${sumLine}`),
+      );
+      const varLine = `${statNum(total)} / ${data.length} = ${statNum(total / data.length)}`;
+      body.push(
+        shownStep(
+          "DIVIDE_BY_COUNT",
+          varLine,
+          `\\sigma^2 = \\frac{${statNum(total)}}{${data.length}} = ${statNum(total / data.length)}`,
+        ),
+      );
+      const v = Number(statNum(total / data.length));
+      value = v;
+      if (stat.kind === "std") {
+        const line = `sqrt(${statNum(v)}) = ${statNum(Math.sqrt(v))}`;
+        body.push(
+          shownStep(
+            "SQUARE_ROOT",
+            line,
+            `\\sigma = \\sqrt{${statNum(v)}} = ${statNum(Math.sqrt(v))}`,
+          ),
+        );
+        value = Math.sqrt(v);
+      }
+      break;
+    }
+    default:
+      return null;
+  }
+
+  // The working must arrive at the answer that was already verified. When it does
+  // not — data whose mean is non-terminating, so the printed deviations round away
+  // from the exact result — the lesson is discarded and the coarse step ships. A
+  // walkthrough that ends somewhere other than the answer teaches the wrong thing.
+  if (statNum(value) !== coarse.ascii) return null;
+
+  body.push({ ...coarse, claim: { kind: "none" } });
+  return body;
+};
+
+// --- linear algebra ---------------------------------------------------------
+
+/** Matches `linalg.ts`'s formatter — the working has to land on its exact strings. */
+function matNum(v: number): string {
+  return String(Math.round(v * 1e10) / 1e10);
+}
+
+function matTex(g: number[][]): string {
+  return (
+    "\\begin{pmatrix}" +
+    g.map((row) => row.map(matNum).join(" & ")).join(" \\\\ ") +
+    "\\end{pmatrix}"
+  );
+}
+
+/** `2 * 5` for a positive entry, `2 * (-5)` for a negative one. */
+function factor(v: number): string {
+  return v < 0 ? `(${matNum(v)})` : matNum(v);
+}
+
+/** A running sum written the way it is read: `1 * 5 + 2 * 7`. */
+function dotLine(left: number[], right: number[]): string {
+  return left.map((v, k) => `${factor(v)} * ${factor(right[k])}`).join(" + ");
+}
+
+/**
+ * More entries than this and the walkthrough stops teaching and starts repeating —
+ * a 4×4 product is sixteen indistinguishable dot-product lines. Past the cap the
+ * coarse step ships, exactly as it does today.
+ */
+const MAX_SHOWN_ENTRIES = 9;
+
+/** The 2×2 determinant, as the line a student would write. */
+function det2Line(m: number[][]): { line: string; value: number } {
+  const v = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+  return {
+    line: `${factor(m[0][0])} * ${factor(m[1][1])} - ${factor(m[0][1])} * ${factor(m[1][0])} = ${matNum(v)}`,
+    value: v,
+  };
+}
+
+function minorAt(m: number[][], row: number, col: number): number[][] {
+  return m.filter((_, i) => i !== row).map((r) => r.filter((_, j) => j !== col));
+}
+
+/**
+ * `START(A) → RESULT(the answer)` is the whole of every matrix method, so the
+ * row-by-column work — which IS the topic — is never shown. This expands the
+ * result into that work, and shows `B` on the way, which the coarse steps omit
+ * entirely for the two-operand operations.
+ */
+const expandMatrix: Expander = (coarse, prev, ctx) => {
+  const mx = ctx.matrix;
+  if (!mx || !prev || prev.operationCode !== "START") return null;
+  const A = mx.a;
+  const B = mx.b ?? null;
+  if (!A.length || !A[0].length) return null;
+
+  const body: AtomicStep[] = [];
+  /** The answer this working arrives at, formatted as `linalg.ts` formats it. */
+  let landed: string;
+
+  const showB = () =>
+    body.push({
+      operationCode: "SECOND_MATRIX",
+      ascii: "B",
+      latex: "B = " + matTex(B!),
+      // A restatement of an operand, not a claim about it.
+      claim: { kind: "none" },
+    });
+
+  switch (mx.op) {
+    case "multiply": {
+      if (!B || A[0].length !== B.length) return null;
+      const rows = A.length;
+      const cols = B[0].length;
+      if (rows * cols > MAX_SHOWN_ENTRIES) return null;
+      showB();
+      const out: number[][] = [];
+      for (let i = 0; i < rows; i++) {
+        out.push([]);
+        for (let j = 0; j < cols; j++) {
+          const col = B.map((r) => r[j]);
+          const v = A[i].reduce((acc, x, k) => acc + x * col[k], 0);
+          out[i].push(v);
+          const line = `${dotLine(A[i], col)} = ${matNum(v)}`;
+          body.push(
+            shownStep(
+              "ENTRY_ROW_BY_COLUMN",
+              line,
+              `c_{${i + 1}${j + 1}} = ${line.replace(/\*/g, "\\cdot ")}`,
+            ),
+          );
+        }
+      }
+      landed = matTex(out);
+      break;
+    }
+    case "add":
+    case "subtract": {
+      if (!B || A.length !== B.length || A[0].length !== B[0].length) return null;
+      if (A.length * A[0].length > MAX_SHOWN_ENTRIES) return null;
+      showB();
+      const sign = mx.op === "add" ? 1 : -1;
+      const symbol = mx.op === "add" ? "+" : "-";
+      const out = A.map((row, i) => row.map((v, j) => v + sign * B[i][j]));
+      for (let i = 0; i < A.length; i++) {
+        for (let j = 0; j < A[0].length; j++) {
+          const line = `${matNum(A[i][j])} ${symbol} ${factor(B[i][j])} = ${matNum(out[i][j])}`;
+          body.push(shownStep("COMBINE_ENTRY", line, `c_{${i + 1}${j + 1}} = ${line}`));
+        }
+      }
+      landed = matTex(out);
+      break;
+    }
+    case "determinant": {
+      if (A.length !== A[0].length) return null;
+      if (A.length === 2) {
+        const { line, value } = det2Line(A);
+        body.push(
+          shownStep("CROSS_MULTIPLY", line, `\\det = ad - bc = ${line.replace(/\*/g, "\\cdot ")}`),
+        );
+        landed = matNum(value);
+      } else if (A.length === 3) {
+        // Cofactor expansion along the first row: each 2×2 minor gets its own
+        // step, then one line combines them with the alternating signs.
+        const minors = [0, 1, 2].map((j) => det2Line(minorAt(A, 0, j)));
+        minors.forEach((m, j) => {
+          body.push(
+            shownStep("MINOR", m.line, `M_{1${j + 1}} = ${m.line.replace(/\*/g, "\\cdot ")}`),
+          );
+        });
+        const value =
+          A[0][0] * minors[0].value - A[0][1] * minors[1].value + A[0][2] * minors[2].value;
+        const line =
+          `${factor(A[0][0])} * ${factor(minors[0].value)}` +
+          ` - ${factor(A[0][1])} * ${factor(minors[1].value)}` +
+          ` + ${factor(A[0][2])} * ${factor(minors[2].value)} = ${matNum(value)}`;
+        body.push(
+          shownStep(
+            "COFACTOR_EXPANSION",
+            line,
+            `\\det = a_{11}M_{11} - a_{12}M_{12} + a_{13}M_{13} = ${line.replace(/\*/g, "\\cdot ")}`,
+          ),
+        );
+        landed = matNum(value);
+      } else {
+        return null;
+      }
+      break;
+    }
+    case "inverse": {
+      // Only 2×2: the swap-and-negate formula IS the lesson. Larger inverses go
+      // by row reduction, which is a different walkthrough entirely.
+      if (A.length !== 2 || A[0].length !== 2) return null;
+      const { line, value: d } = det2Line(A);
+      if (Math.abs(d) < 1e-12) return null;
+      body.push(
+        shownStep("CROSS_MULTIPLY", line, `\\det = ad - bc = ${line.replace(/\*/g, "\\cdot ")}`),
+      );
+      const adj = [
+        [A[1][1], -A[0][1]],
+        [-A[1][0], A[0][0]],
+      ];
+      body.push({
+        operationCode: "ADJUGATE",
+        ascii: adj.map((r) => r.map(matNum).join(", ")).join("; "),
+        latex:
+          `\\operatorname{adj}(A) = \\begin{pmatrix}d & -b \\\\ -c & a\\end{pmatrix} = ` +
+          matTex(adj),
+        // Each entry is a claim about where it came from in A, not free-floating.
+        claim: {
+          kind: "identity",
+          pairs: [
+            [A[1][1], adj[0][0]],
+            [-A[0][1], adj[0][1]],
+            [-A[1][0], adj[1][0]],
+            [A[0][0], adj[1][1]],
+          ] as [number, number][],
+        },
+      });
+      const out = adj.map((r) => r.map((v) => v / d));
+      for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 2; j++) {
+          const l = `${factor(adj[i][j])} / ${factor(d)} = ${matNum(out[i][j])}`;
+          body.push(shownStep("DIVIDE_BY_DET", l, `\\frac{${matNum(adj[i][j])}}{${matNum(d)}} = ${matNum(out[i][j])}`));
+        }
+      }
+      landed = matTex(out);
+      break;
+    }
+    case "trace": {
+      if (A.length !== A[0].length || A.length < 2) return null;
+      const diag = A.map((row, i) => row[i]);
+      const value = diag.reduce((a, b) => a + b, 0);
+      const line = `${joinSum(diag)} = ${matNum(value)}`;
+      body.push(
+        shownStep("SUM_DIAGONAL", line, `\\operatorname{tr}(A) = ${line}`),
+      );
+      landed = matNum(value);
+      break;
+    }
+    default:
+      return null;
+  }
+
+  // The coarse result carries its own prefix (`AB = `, `\det = `, …). Requiring
+  // the working to end in exactly that answer ties the lesson to the shipped,
+  // already-verified result without re-deriving how the prefix is written.
+  if (!coarse.ascii.endsWith(landed)) return null;
+
+  body.push({ ...coarse, claim: { kind: "none" } });
+  return body;
 };
 
 const EXPANDERS: Record<string, Expander> = {
-  RESULT: expandDerivative,
+  RESULT: (coarse, prev, ctx) =>
+    expandDerivativeResult(coarse, prev, ctx) ??
+    expandStatistic(coarse, prev, ctx) ??
+    expandMatrix(coarse, prev, ctx),
+  DIFFERENTIATE: expandDerivativeAssignment,
+  COMPUTE: expandArithmetic,
   FACTOR_SUM_PRODUCT_RULE: expandFactor,
   FACTOR_DIFFERENCE_OF_SQUARES: expandFactor,
   FACTOR_PERFECT_SQUARE: expandFactor,

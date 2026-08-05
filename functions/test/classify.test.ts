@@ -34,7 +34,8 @@ describe("classify", () => {
     // A LINEAR system now solves deterministically (Ax=b, verified A·x=b).
     ["2x + 3y = 6, x - y = 3", "linear_system", "linsystem"],
     ["\\frac{d}{dx}(x^3 + 2x)", "derivative", "derivative"],
-    ["\\int x^2 dx", "integral", "llm_candidate"],
+    ["\\int x^2 dx", "integral", "integral"], // deterministic engine (integral.ts) tries first
+    ["\\int x \\cos x \\, dx", "integral", "integral"], // engine declines → LLM tier, same verifyMode
   ];
   for (const [input, type, strategy] of cases) {
     it(`${input} → ${type}/${strategy}`, () => {

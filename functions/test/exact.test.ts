@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { exactForm, resymbolize } from "../src/solver/exact";
+import {
+  exactForm,
+  quadraticSurdRoots,
+  resymbolize,
+  squareFreeSplit,
+} from "../src/solver/exact";
 import { classify } from "../src/solver/classify";
 import { solve } from "../src/proxy/solve";
 import { JsonCompleter } from "../src/solver/narrate";
@@ -77,5 +82,67 @@ describe("solve() display — exact form end to end (verify gate unchanged)", ()
     expect(p.finalAnswer?.latex).toContain("\\sqrt{2}");
     expect(p.finalAnswer?.latex).not.toMatch(/1\.414/);
     expect(p.finalAnswer?.plain).toContain("√2");
+  });
+});
+
+describe("squareFreeSplit", () => {
+  it("pulls the largest square factor out", () => {
+    expect(squareFreeSplit(12)).toEqual({ k: 2, m: 3 });
+    expect(squareFreeSplit(48)).toEqual({ k: 4, m: 3 });
+    expect(squareFreeSplit(8)).toEqual({ k: 2, m: 2 });
+    expect(squareFreeSplit(5)).toEqual({ k: 1, m: 5 });
+    expect(squareFreeSplit(36)).toEqual({ k: 6, m: 1 });
+  });
+
+  it("declines what is not a positive integer", () => {
+    expect(squareFreeSplit(0)).toBeNull();
+    expect(squareFreeSplit(-4)).toBeNull();
+    expect(squareFreeSplit(2.5)).toBeNull();
+  });
+});
+
+describe("quadraticSurdRoots — the surd is built from the algebra, never the float", () => {
+  it("x² + 4x + 1: the classic −2 ± √3", () => {
+    const roots = quadraticSurdRoots(1, 4, 1)!;
+    expect(roots.map((r) => r.plain)).toEqual(["-2 - √3", "-2 + √3"]);
+    expect(roots.map((r) => r.latex)).toEqual([
+      "-2 - \\sqrt{3}",
+      "-2 + \\sqrt{3}",
+    ]);
+    // The values must be the actual roots — the answer path matches on them.
+    expect(roots[0].value).toBeCloseTo(-2 - Math.sqrt(3), 12);
+    expect(roots[1].value).toBeCloseTo(-2 + Math.sqrt(3), 12);
+  });
+
+  it("keeps the fraction when nothing cancels", () => {
+    const roots = quadraticSurdRoots(1, 1, -1)!;
+    expect(roots.map((r) => r.plain)).toEqual(["(-1 - √5)/2", "(-1 + √5)/2"]);
+  });
+
+  it("cancels the common factor across the whole fraction", () => {
+    // (−4 ± 2√6)/4 → (−2 ± √6)/2, not left half-reduced.
+    const roots = quadraticSurdRoots(2, 4, -1)!;
+    expect(roots.map((r) => r.plain)).toEqual(["(-2 - √6)/2", "(-2 + √6)/2"]);
+  });
+
+  it("b = 0 gives a bare surd with no stray zero", () => {
+    const roots = quadraticSurdRoots(1, 0, -2)!;
+    expect(roots.map((r) => r.plain)).toEqual(["-√2", "√2"]);
+  });
+
+  it("a negative leading coefficient still lists roots in value order", () => {
+    const roots = quadraticSurdRoots(-1, 0, 2)!;
+    expect(roots[0].value).toBeLessThan(roots[1].value);
+    for (const r of roots) {
+      expect(Math.abs(r.value * r.value - 2)).toBeLessThan(1e-9);
+    }
+  });
+
+  it("declines when a surd adds nothing", () => {
+    expect(quadraticSurdRoots(1, -5, 6)).toBeNull(); // perfect square disc — rational
+    expect(quadraticSurdRoots(1, 2, 5)).toBeNull(); // negative disc — no real roots
+    expect(quadraticSurdRoots(1, 4, 4)).toBeNull(); // repeated rational root
+    expect(quadraticSurdRoots(0, 2, 1)).toBeNull(); // not a quadratic
+    expect(quadraticSurdRoots(1, 0.5, -1)).toBeNull(); // non-integer coefficients
   });
 });

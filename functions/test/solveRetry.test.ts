@@ -37,8 +37,11 @@ function candidateSequence(...candidates: Record<string, unknown>[]): {
 
 /** `x^2 + 1 = 0` has no real root, so any real candidate is rejected by the gate. */
 const NO_REAL_ROOTS = "x^2 + 1 = 0";
-/** An indefinite integral — verified by differentiating the answer back. */
-const INTEGRAL = "\\int 2x \\, dx";
+/** An indefinite integral the DETERMINISTIC engine declines (integration by
+ * parts), so the LLM-candidate + retry path actually runs — `∫2x dx` no longer
+ * exercises it, since solver/integral.ts answers that itself. Still verified by
+ * differentiating the answer back. */
+const INTEGRAL = "\\int x \\cos x \\, dx";
 
 async function run(latex: string, completer: JsonCompleter) {
   return solve(classify(latex), completer);
@@ -47,23 +50,23 @@ async function run(latex: string, completer: JsonCompleter) {
 describe("solve — retry after a failed verification", () => {
   it("accepts a retry candidate that passes the gate the first one failed", async () => {
     const { completer, calls } = candidateSequence(
-      // Wrong antiderivative: d/dx(x^2 + x) = 2x + 1 ≠ 2x → rejected.
-      { answerLatex: "x^2 + x", answerPlain: "x^2 + x" },
-      // Correct: d/dx(x^2) = 2x → passes.
-      { answerLatex: "x^2", answerPlain: "x^2" }
+      // Wrong: d/dx(x·sin x) = sin x + x·cos x ≠ x·cos x → rejected.
+      { answerLatex: "x \\sin x", answerPlain: "x sin(x)" },
+      // Correct: d/dx(x·sin x + cos x) = x·cos x → passes.
+      { answerLatex: "x \\sin x + \\cos x", answerPlain: "x sin(x) + cos(x)" }
     );
 
     const p = await run(INTEGRAL, completer);
 
     expect(p.verified).toBe(true);
-    expect(p.finalAnswer?.plain).toBe("x^2");
+    expect(p.finalAnswer?.plain).toBe("x sin(x) + cos(x)");
     expect(calls()).toHaveLength(2);
   });
 
   it("marks the second attempt as a retry so the proxy can escalate the model", async () => {
     const { completer, calls } = candidateSequence(
-      { answerLatex: "x^2 + x", answerPlain: "x^2 + x" },
-      { answerLatex: "x^2", answerPlain: "x^2" }
+      { answerLatex: "x \\sin x", answerPlain: "x sin(x)" },
+      { answerLatex: "x \\sin x + \\cos x", answerPlain: "x sin(x) + cos(x)" }
     );
 
     await run(INTEGRAL, completer);
@@ -74,14 +77,14 @@ describe("solve — retry after a failed verification", () => {
 
   it("tells the retry which answer was rejected, so it cannot just repeat it", async () => {
     const { completer, calls } = candidateSequence(
-      { answerLatex: "x^2 + x", answerPlain: "x^2 + x" },
-      { answerLatex: "x^2", answerPlain: "x^2" }
+      { answerLatex: "x \\sin x", answerPlain: "x sin(x)" },
+      { answerLatex: "x \\sin x + \\cos x", answerPlain: "x sin(x) + cos(x)" }
     );
 
     await run(INTEGRAL, completer);
 
     const retryPrompt = calls()[1].user;
-    expect(retryPrompt).toContain("x^2 + x");
+    expect(retryPrompt).toContain("x sin(x)");
     expect(retryPrompt).toContain("FAILED verification");
     // The first attempt must NOT carry the correction text.
     expect(calls()[0].user).not.toContain("FAILED verification");
@@ -102,10 +105,10 @@ describe("solve — retry after a failed verification", () => {
   });
 
   it("never returns the retry's answer unless the retry itself verified", async () => {
-    // Second candidate is also wrong (d/dx(3x^2) = 6x ≠ 2x). Neither may surface.
+    // Second candidate is also wrong (d/dx(x²) = 2x ≠ x·cos x). Neither may surface.
     const { completer } = candidateSequence(
-      { answerLatex: "x^2 + x", answerPlain: "x^2 + x" },
-      { answerLatex: "3x^2", answerPlain: "3x^2" }
+      { answerLatex: "x \\sin x", answerPlain: "x sin(x)" },
+      { answerLatex: "x^2", answerPlain: "x^2" }
     );
 
     const p = await run(INTEGRAL, completer);
@@ -129,8 +132,8 @@ describe("solve — retry after a failed verification", () => {
   it("does not retry when the FIRST candidate already verified", async () => {
     // The retry is a failure path only; a good first answer must cost one call.
     const { completer, calls } = candidateSequence({
-      answerLatex: "x^2",
-      answerPlain: "x^2",
+      answerLatex: "x \\sin x + \\cos x",
+      answerPlain: "x sin(x) + cos(x)",
     });
 
     const p = await run(INTEGRAL, completer);

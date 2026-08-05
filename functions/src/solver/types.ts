@@ -316,6 +316,8 @@ export type Strategy =
   | "limit" // lim x→a f(x) via a numeric convergence oracle (deterministic)
   | "bounded_trig" // T(x)=c on a closed interval, by enumerate-and-verify
   | "circle" // circle mensuration (area/circumference/arc/sector) — exact π-form
+  | "percent" // percentages + ratios (percent-of, share, simplify, proportion)
+  | "integral" // symbolic antiderivative (school core), gated by derivative-back / quadrature
   | "solid" // solid-geometry "show that …" / optimisation, proven by substitution
   | "subject" // change of subject: a formula rearranged, proven by numeric resubstitution
   | "ode_point_eval" // IVP evaluated at a point, y(b), by cross-checked numeric integration
@@ -447,6 +449,8 @@ export interface Classification {
   /** A circle-mensuration query — the strict-parsed spec (target, radius, given,
    * optional central angle, unit); solved in exact π-form and re-verified. */
   circle?: import("./circle").CircleSpec;
+  /** Parsed percentage/ratio task ("percent" strategy). */
+  percent?: import("./percent").PercentTask;
   /** A solid-geometry word problem — a "show that h = …" derivation, or the
    * optimisation that follows it. Proven by substituting back into the stated
    * constraint, so a misread digit fails the gate instead of shipping. */

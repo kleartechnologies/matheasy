@@ -98,6 +98,94 @@ export function exactForm(x: number): ExactForm | null {
   return null;
 }
 
+// --- Quadratic roots, built from the coefficients ---------------------------
+//
+// `exactForm` works backwards from a float, so it can only find things that are
+// a single multiple of one unit. A quadratic root is usually a SUM — `x²+4x+1=0`
+// has roots −2 ± √3 — and searching floats for sums is both slow and prone to
+// finding coincidences. The algebra already knows the answer: the roots ARE
+// (−b ± √(b²−4ac)) / 2a, so build the surd from a, b, c and never sniff at all.
+
+/** `√48 = 4√3`: the largest square dividing `d`, and what is left. */
+export function squareFreeSplit(d: number): { k: number; m: number } | null {
+  if (!Number.isInteger(d) || d <= 0 || d > 1e8) return null;
+  for (let k = Math.floor(Math.sqrt(d)); k >= 1; k--) {
+    if (d % (k * k) === 0) return { k, m: d / (k * k) };
+  }
+  return null;
+}
+
+export interface SurdRoot {
+  value: number;
+  ascii: string;
+  latex: string;
+  plain: string;
+}
+
+/**
+ * The two roots of `ax² + bx + c` in exact surd form, or null when there is
+ * nothing a surd would add — a negative or zero discriminant (no two real
+ * roots), a perfect square (the roots are rational, and the caller's fraction
+ * form is already the exact answer), or non-integer coefficients.
+ */
+export function quadraticSurdRoots(
+  a: number,
+  b: number,
+  c: number
+): [SurdRoot, SurdRoot] | null {
+  if (![a, b, c].every((v) => Number.isInteger(v)) || a === 0) return null;
+  const disc = b * b - 4 * a * c;
+  if (disc <= 0) return null;
+  const split = squareFreeSplit(disc);
+  if (!split || split.m === 1) return null;
+
+  // Normalise so the denominator is positive, then cancel the common factor —
+  // `(−4 ± 2√3)/2` is not an answer, `−2 ± √3` is.
+  let p = -b;
+  let k = split.k;
+  let den = 2 * a;
+  if (den < 0) {
+    p = -p;
+    k = -k;
+    den = -den;
+  }
+  const g = gcd(gcd(Math.abs(p), Math.abs(k)), den) || 1;
+  p /= g;
+  k /= g;
+  den /= g;
+  const flip = k < 0; // a negative √-coefficient just swaps which root is which
+  const mag = Math.abs(k);
+
+  const build = (plus: boolean): SurdRoot => {
+    const positive = flip ? !plus : plus;
+    const surdAscii = mag === 1 ? `sqrt(${split.m})` : `${mag}*sqrt(${split.m})`;
+    const surdLatex = mag === 1 ? `\\sqrt{${split.m}}` : `${mag}\\sqrt{${split.m}}`;
+    const surdPlain = mag === 1 ? `√${split.m}` : `${mag}√${split.m}`;
+    const op = positive ? "+" : "-";
+    const numAscii =
+      p === 0 ? `${positive ? "" : "-"}${surdAscii}` : `${p} ${op} ${surdAscii}`;
+    const numLatex =
+      p === 0 ? `${positive ? "" : "-"}${surdLatex}` : `${p} ${op} ${surdLatex}`;
+    const numPlain =
+      p === 0 ? `${positive ? "" : "-"}${surdPlain}` : `${p} ${op} ${surdPlain}`;
+    const value = (p + (positive ? mag : -mag) * Math.sqrt(split.m)) / den;
+    if (den === 1) {
+      return { value, ascii: numAscii, latex: numLatex, plain: numPlain };
+    }
+    return {
+      value,
+      ascii: `(${numAscii})/${den}`,
+      latex: `\\tfrac{${numLatex}}{${den}}`,
+      plain: p === 0 ? `${numPlain}/${den}` : `(${numPlain})/${den}`,
+    };
+  };
+  const pair: [SurdRoot, SurdRoot] = [build(false), build(true)];
+  // `flip` swaps which branch is smaller; every caller matches by value, and the
+  // answer line lists roots ascending, so hand them over already ordered.
+  pair.sort((u, v) => u.value - v.value);
+  return pair;
+}
+
 /**
  * Replace mathjs-emitted irrational decimals inside an ascii expression with
  * their exact form (so a differentiated / simplified result shows `sqrt(2)`, not

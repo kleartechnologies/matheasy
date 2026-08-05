@@ -160,6 +160,25 @@ export function latexToAscii(
     .replace(/[−–—]/g, "-");
   s = s.replace(/\\pi\b/g, "pi").replace(/\\theta\b/g, "theta");
 
+  // Degree marks. `\sin 30^\circ` used to shatter into `sin(30^)\circ` — an
+  // unparseable string, so the ONE form that states its unit unambiguously was
+  // the one form that could not be solved.
+  //
+  // The conversion is written out as `(30 * pi / 180)` rather than handed to
+  // mathjs as its `30 deg` unit, because `deg` is three letters: `variablesIn`
+  // reads them as variables (flipping the problem to the "simplify" strategy) and
+  // the implicit-product splitter shatters them into `d*e*g`. Spelling the
+  // conversion in ordinary arithmetic keeps every downstream stage working, and
+  // it shows the student the step they are meant to learn. Applied here, before
+  // trig arguments are wrapped, so `\sin 30^\circ` becomes `\sin (30*pi/180)`.
+  // Gated on the problem actually containing trigonometry. Outside a trig call a
+  // degree mark is an angle MEASURE — "the angle is 30°" wants 30 back, not
+  // 0.5236 — so converting it there would corrupt the answer rather than fix it.
+  if (/\\?(?:sin|cos|tan|sec|csc|cot)\b/.test(s)) {
+    const DEGREE_MARK = /(\d+(?:\.\d+)?)\s*(?:\^\s*\{?\s*(?:\\circ|\\degree)\s*\}?|°)/g;
+    s = s.replace(DEGREE_MARK, "($1 * pi / 180)");
+  }
+
   // Logarithms: mathjs's natural log is `log`, base-10 is `log10`.
   //   \ln → log ;  \log_b(arg) → (log(arg)/log(b)) ;  bare \log → log10
   // Order matters: resolve \ln and explicit-base \log_b BEFORE bare \log.
@@ -515,6 +534,7 @@ export function asciiToLatex(ascii: string): string {
   let s = fracify(ascii.trim());
   s = s.replace(/\bnthRoot\(([^,()]*),\s*([^()]*)\)/g, "\\sqrt[$2]{$1}");
   s = sqrtify(s);
+  s = absify(s);
   // sin(...) → \sin(...) for nicer typesetting.
   for (const fn of ["sin", "cos", "tan", "cot", "sec", "csc"]) {
     s = s.replace(new RegExp(`\\b${fn}\\b`, "g"), `\\${fn} `);
@@ -705,9 +725,45 @@ function sqrtify(input: string): string {
       i += 5;
       continue;
     }
-    const radicand = `\\sqrt{${unwrap(s.slice(i + 5, close))}}`;
+    // Recurse into the radicand: `sqrt((1 - sqrt(5))/2)` carries a nested call,
+    // and the outer replacement used to skip straight past it.
+    const radicand = `\\sqrt{${sqrtify(unwrap(s.slice(i + 5, close)))}}`;
     s = s.slice(0, i) + radicand + s.slice(close + 1);
     i += radicand.length;
+  }
+  return s;
+}
+
+/**
+ * `abs(x + 1)` → `\left|x + 1\right|`.
+ *
+ * `latexToAscii` turns every `|…|` into `abs(…)` so mathjs can parse it, and
+ * nothing turned it back — so any absolute-value problem printed the function
+ * name at the student. Balanced-paren scan rather than a regex, for the same
+ * reason `sqrtify` is one: the argument can contain brackets of its own.
+ */
+function absify(input: string): string {
+  let s = input;
+  for (let i = 0; (i = s.indexOf("abs(", i)) >= 0; ) {
+    if (i > 0 && WORD.test(s[i - 1])) {
+      i += 4; // part of a longer name
+      continue;
+    }
+    const close = matchForward(s, i + 3);
+    if (close < 0) {
+      i += 4;
+      continue;
+    }
+    const bars = `\\left|${unwrap(s.slice(i + 4, close))}\\right|`;
+    // `latexToAscii` wraps the call as `(abs(x))` so that `5|x|` keeps its
+    // precedence. Bars carry that grouping themselves, so the wrapper would only
+    // print as a stray pair of brackets around the modulus.
+    const wrapped =
+      i > 0 && s[i - 1] === "(" && matchForward(s, i - 1) === close + 1;
+    const from = wrapped ? i - 1 : i;
+    const to = wrapped ? close + 2 : close + 1;
+    s = s.slice(0, from) + bars + s.slice(to);
+    i = from + bars.length;
   }
   return s;
 }
@@ -735,4 +791,30 @@ function fracify(input: string): string {
   }
 
   return s.replace(/PROSE(\d+)TOKEN/g, (_, n) => prose[Number(n)]);
+}
+
+/**
+ * `sin(30)` means 30 DEGREES to the student who typed it and 30 RADIANS to
+ * mathjs — and the substitution gate cannot tell them apart, because it
+ * re-evaluates under the same convention it was given. So `\sin(30) + \cos(60)`
+ * shipped as `-1.940445` marked `verified: true`: a confidently wrong answer,
+ * which is exactly what the golden rule exists to prevent.
+ *
+ * The repo's own precedent (`boundedTrig.detectUnit`) is to decline rather than
+ * guess. That is right for SOLVING, where a wrong unit yields wrong roots over
+ * an interval. For EVALUATING a constant this rule is narrow enough to be safe
+ * instead: one full turn is 2π ≈ 6.28, so a whole-number argument of 7 or more
+ * is beyond a complete revolution and no one writes that in radians without a π.
+ * Below 7, and for every non-integer, radians stand — `sin(1)` and `sin(0.5)`
+ * are untouched, as is `sin(pi/6)` (the argument is not a bare integer).
+ *
+ * The conversion is written out rather than folded into a number, so the
+ * assumption appears in the working where a student can see and correct it.
+ */
+export function assumeDegreesForBareTrig(ascii: string): string {
+  return ascii.replace(
+    /\b(sin|cos|tan|sec|csc|cot)\s*\(\s*(-?\d+)\s*\)/g,
+    (whole, fn: string, arg: string) =>
+      Math.abs(Number(arg)) >= 7 ? `${fn}((${arg} * pi / 180))` : whole,
+  );
 }

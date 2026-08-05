@@ -151,7 +151,9 @@ describe("solve — integral via differentiate-back", () => {
   });
 
   it("rejects a wrong antiderivative", async () => {
-    const p = await run("\\int x^2 dx", completerWith({
+    // ∫x·cos x needs parts, so the deterministic engine declines and the
+    // planted wrong answer reaches the differentiate-back gate.
+    const p = await run("\\int x \\cos x \\, dx", completerWith({
       answerLatex: "\\frac{x^2}{2} + C",
       answerPlain: "x^2/2 + C",
       solutions: [],
@@ -249,8 +251,10 @@ describe("solve — calculus/scanner robustness (adversarial audit fixes)", () =
   });
 
   it("still REJECTS a wrong antiderivative after all the parsing fixes (golden rule)", async () => {
+    // `\sin x \cos x` is the scanner notation this describe exists for, and a
+    // product of variable factors is one the deterministic engine declines.
     const p = await run(
-      "\\int \\cos x dx",
+      "\\int \\sin x \\cos x \\, dx",
       completerWith({ answerLatex: "2\\sin x", answerPlain: "2 sin(x)" })
     );
     expect(p.verified).toBe(false);

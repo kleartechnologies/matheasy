@@ -14,6 +14,7 @@ import { parseOdePointEval } from "./odePointEval";
 import { parseLimit } from "./limit";
 import { parseBoundedTrig } from "./boundedTrig";
 import { parseCircle } from "./circle";
+import { parsePercent } from "./percent";
 import { parseSolid } from "./solid";
 import { calculusProblemType, parseCalculus } from "./calculus";
 import { complexProblemType, parseComplex } from "./complex";
@@ -34,6 +35,7 @@ import {
   VerifyMode,
 } from "./types";
 import {
+  assumeDegreesForBareTrig,
   cleanLatex,
   latexToAscii,
   normalizeMacros,
@@ -143,7 +145,12 @@ export function classify(rawLatex: string): Classification {
     .replace(/\\end\s*\{\s*(?:cases|aligned|split|gather)\s*\}/gi, " ")
     .replace(/\\\\/g, " ; ")
     .replace(/&/g, " ");
-  const ascii = latexToAscii(rawForAscii);
+  const rawAscii = latexToAscii(rawForAscii);
+  // Only where there is nothing to solve FOR. An unknown means the trig is being
+  // rearranged, not evaluated, and `boundedTrig` already decides degrees-vs-radians
+  // there from the interval — this must not reach it.
+  const ascii =
+    variablesIn(rawAscii).length === 0 ? assumeDegreesForBareTrig(rawAscii) : rawAscii;
 
   const base = (
     problemType: string,
@@ -224,6 +231,25 @@ export function classify(rawLatex: string): Classification {
       true,
       "none",
       { boundedTrig }
+    );
+  }
+
+  // --- Percentages + ratios ------------------------------------------------
+  // "20% of 80", "increase 240 by 15%", "share 60 in the ratio 2:3",
+  // "x : 12 = 3 : 4" — every one previously returned NO CANDIDATE (the prose
+  // letters read as variables, ratio colons were mangled). Parses the PRE-STRIP
+  // text: the leading word IS the task for "increase"/"share"/"simplify".
+  // Strict gate; anything unclear returns null and falls through unchanged.
+  const percent = parsePercent(proseLatex);
+  if (percent) {
+    const isProportion = percent.kind === "proportion";
+    return base(
+      isProportion ? "ratio_proportion" : percent.kind.startsWith("share") || percent.kind.startsWith("simplify") ? "ratio" : "percentage",
+      "percent",
+      isProportion ? percent.unknown : "x",
+      isProportion,
+      "none",
+      { percent }
     );
   }
 
@@ -454,9 +480,11 @@ export function classify(rawLatex: string): Classification {
     if (parsed.definite) {
       // Verified by NUMERIC integration (a deterministic engine) agreeing with
       // the candidate value — see verifyCandidate.
+      // The deterministic engine (solver/integral.ts) tries first; when it
+      // declines, solve.ts falls to the LLM tier under this same verifyMode.
       return base(
         "definite_integral",
-        "llm_candidate",
+        "integral",
         parsed.unknown,
         false,
         "definite_integral",
@@ -468,7 +496,7 @@ export function classify(rawLatex: string): Classification {
       );
     }
     // Indefinite: verified by differentiating the antiderivative back.
-    return base("integral", "llm_candidate", parsed.unknown, false, "derivative_back", {
+    return base("integral", "integral", parsed.unknown, false, "derivative_back", {
       integrand: parsed.integrand,
     });
   }

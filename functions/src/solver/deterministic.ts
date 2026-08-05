@@ -8,13 +8,19 @@
  * candidate, so the caller can fall back to the LLM-candidate tier.
  */
 import * as mathsteps from "mathsteps";
-import { derivative, fraction, rationalize, simplify } from "mathjs";
+import { derivative, fraction, parse, rationalize, simplify } from "mathjs";
 
 import { atomizeMethods } from "./atomize";
 import { solveCalculus } from "./calculus";
 import { solveComplex } from "./complex";
 import { equationParts } from "./classify";
-import { exactForm, resymbolize } from "./exact";
+import {
+  exactForm,
+  quadraticSurdRoots,
+  resymbolize,
+  squareFreeSplit,
+  type SurdRoot,
+} from "./exact";
 import { asciiToLatex, variablesIn } from "./latex";
 import { solveLinalg, solveVectors } from "./linalg";
 import { solveLinearSystem } from "./linsystem";
@@ -27,6 +33,13 @@ import { solveNumericRoot } from "./numroot";
 import { solveParamDet } from "./paramdet";
 import { solveModular } from "./modular";
 import { solveChangeOfSubject } from "./subject";
+import { solvePercent } from "./percent";
+import { solveIntegral } from "./integral";
+import {
+  solveAbsoluteEquation,
+  solveRadicalEquation,
+  type RootsResult,
+} from "./radical";
 import {
   canonicalPolynomial,
   factorPolynomial,
@@ -47,7 +60,38 @@ import {
   SolveCandidate,
 } from "./types";
 
+/**
+ * Run the engine, then put its steps through the Atomic Step Engine.
+ *
+ * Refining centrally rather than per-engine matters: `DIFFERENTIATE → RESULT`
+ * leaps over an entire product rule in a dozen calculus paths, and none of them
+ * would have been reached by wiring one engine at a time. Sub-steps that fail
+ * their claims are discarded and the coarse step ships exactly as before, so
+ * this can add clarity but never change an answer.
+ */
 export function solveDeterministic(cls: Classification): SolveCandidate | null {
+  const candidate = runEngine(cls);
+  if (!candidate) return null;
+  return {
+    ...candidate,
+    methods: atomizeMethods(candidate.methods, {
+      unknown: cls.unknown,
+      originalAscii: cls.ascii,
+      roots: candidate.roots ?? [],
+      quadratic: candidate.quadratic ?? null,
+      stat:
+        cls.statKind && cls.statData
+          ? { kind: cls.statKind, data: cls.statData }
+          : null,
+      matrix:
+        cls.linalgOp && cls.matrixData
+          ? { op: cls.linalgOp, a: cls.matrixData, b: cls.matrixB ?? null }
+          : null,
+    }),
+  };
+}
+
+function runEngine(cls: Classification): SolveCandidate | null {
   switch (cls.strategy) {
     case "equation":
       return solveEquation(cls);
@@ -79,6 +123,10 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
       return solveModular(cls);
     case "subject":
       return solveChangeOfSubject(cls);
+    case "percent":
+      return cls.percent ? solvePercent(cls.percent) : null;
+    case "integral":
+      return solveIntegral(cls);
     case "calculus":
       return solveCalculus(cls);
     case "complex":
@@ -108,14 +156,49 @@ function solveEquation(cls: Classification): SolveCandidate | null {
   // stop there and never reach the tier that can do it. The last unverified
   // candidate is still returned if every tier fails, so the honest
   // "couldn't verify" state is unchanged.
+  //
+  // The last two tiers are for the shapes no amount of rearranging reaches: a
+  // square root or a modulus has to be REMOVED first, and the move that removes
+  // it can invent solutions. Those engines hand back roots + steps and are
+  // wrapped here, so they share this file's answer formatting and gate.
   let fallback: SolveCandidate | null = null;
-  for (const attempt of [solveViaMathsteps, solveQuadraticDirect, solveRationalEquation]) {
+  for (const attempt of [
+    solveViaMathsteps,
+    solveQuadraticDirect,
+    solveRationalEquation,
+    viaRoots(solveRadicalEquation),
+    viaRoots(solveAbsoluteEquation),
+  ]) {
     const candidate = attempt(cls, parts);
     if (!candidate) continue;
     if (candidate.verify()) return candidate;
     fallback ??= candidate;
   }
   return fallback;
+}
+
+/** Adapt a roots-and-steps engine into the tier shape `solveEquation` iterates. */
+function viaRoots(
+  engine: (
+    cls: Classification,
+    parts: { lhs: string; rhs: string }[]
+  ) => RootsResult | null
+) {
+  return (
+    cls: Classification,
+    parts: { lhs: string; rhs: string }[]
+  ): SolveCandidate | null => {
+    const found = engine(cls, parts);
+    if (!found) return null;
+    return {
+      answer: exactRootsAnswer(cls.unknown, found.roots, found.surds),
+      methods: found.methods,
+      roots: found.roots,
+      quadratic: found.quadratic ?? undefined,
+      plotExpression: found.plotExpression,
+      verify: () => verifyRoots(parts, cls.unknown, found.roots),
+    };
+  };
 }
 
 /**
@@ -210,7 +293,7 @@ function solveQuadraticDirect(
     // Format each root by its EXACT symbolic form where recognizable (√2, a
     // fraction) — same as the LLM path — so an irrational root shows √2, not
     // 1.414. The gate still verifies the numeric values.
-    answer: exactRootsAnswer(cls.unknown, values),
+    answer: exactRootsAnswer(cls.unknown, values, quadraticSurdRoots(quad.a, quad.b, quad.c)),
     methods: method ? [{ ...method, examPick: true }] : [],
     roots: values,
     quadratic: quad,
@@ -219,10 +302,22 @@ function solveQuadraticDirect(
   };
 }
 
-/** A §4 answer from verified numeric roots, each in exact symbolic form. */
-function exactRootsAnswer(unknown: string, values: number[]): FinalAnswer {
+/** A §4 answer from verified numeric roots, each in exact symbolic form.
+ *
+ * When the roots' surd forms are known — BUILT from the equation's integer
+ * coefficients, never sniffed from the float — `x²+4x+1=0` answers `−2 ± √3`,
+ * not `-3.732051`. Each value is matched to its surd numerically, so a caller
+ * that kept only one root of the conjugate pair (a radical equation after
+ * sifting) still formats it exactly. */
+function exactRootsAnswer(
+  unknown: string,
+  values: number[],
+  surds?: readonly SurdRoot[] | null
+): FinalAnswer {
   const fmt = (n: number): { latex: string; plain: string } => {
     if (Number.isInteger(n)) return { latex: String(n), plain: String(n) };
+    const surd = surds?.find((s) => Math.abs(s.value - n) < 1e-9);
+    if (surd) return { latex: surd.latex, plain: surd.plain };
     const exact = exactForm(n);
     if (exact) return { latex: exact.latex, plain: exact.plain };
     // A worksheet's answer is `7/3`, not `2.333333`. The root came out of the
@@ -307,6 +402,37 @@ function distinctSorted(values: number[]): number[] {
   return out.sort((a, b) => a - b);
 }
 
+/** Both sides re-printed without explicit ParenthesisNodes, or null. */
+function stripExplicitParens(part: { lhs: string; rhs: string }): string | null {
+  const clean = (side: string): string | null => {
+    try {
+      type Node = {
+        type?: string;
+        content?: Node;
+        toString(): string;
+        transform(cb: (n: Node) => Node): Node;
+      };
+      let node = parse(side) as unknown as Node;
+      for (let changed = true; changed; ) {
+        changed = false;
+        node = node.transform((n) => {
+          if (n.type === "ParenthesisNode" && n.content) {
+            changed = true;
+            return n.content;
+          }
+          return n;
+        });
+      }
+      return node.toString();
+    } catch {
+      return null;
+    }
+  };
+  const l = clean(part.lhs);
+  const r = clean(part.rhs);
+  return l !== null && r !== null ? `${l} = ${r}` : null;
+}
+
 function solveViaMathsteps(
   cls: Classification,
   parts: { lhs: string; rhs: string }[]
@@ -315,7 +441,19 @@ function solveViaMathsteps(
   try {
     steps = mathsteps.solveEquation(cls.ascii);
   } catch {
-    return null;
+    // `\frac{x}{12} = \frac{3}{4}` arrives as `((x)/(12)) = ((3)/(4))` and
+    // mathsteps throws "Unsupported node type: ParenthesisNode" on that
+    // wrapping — which lost every plain proportion written with fraction bars.
+    // Retry ONCE with the brackets rebuilt by mathjs (drop every explicit
+    // ParenthesisNode; toString re-inserts only what precedence needs). Only on
+    // throw, so input that already works keeps its exact byte form.
+    const rebuilt = stripExplicitParens(parts[0]);
+    if (!rebuilt) return null;
+    try {
+      steps = mathsteps.solveEquation(rebuilt);
+    } catch {
+      return null;
+    }
   }
   if (!steps || steps.length === 0) return null;
 
@@ -334,18 +472,7 @@ function solveViaMathsteps(
 
   const quad = extractQuadratic(parts[0], cls.unknown);
   const factored = steps.some((s) => /FACTOR/.test(s.changeType));
-  // Atomic Step Engine: refine any step that leaps. Every sub-step must prove
-  // out against these verified roots and land on the coarse step's own ascii,
-  // else that step ships unrefined — granularity can never cost correctness.
-  const methods = atomizeMethods(
-    buildEquationMethods(cls, rawSteps, quad, factored),
-    {
-      unknown: cls.unknown,
-      originalAscii: cls.ascii,
-      roots: roots.values,
-      quadratic: quad,
-    },
-  );
+  const methods = buildEquationMethods(cls, rawSteps, quad, factored);
 
   return {
     answer: rootsAnswer(cls.unknown, roots),
@@ -451,10 +578,15 @@ function quadraticFormulaMethod(
   const x = unknown;
   const { a, b, c } = q;
   const poly = `${fmt(a)}${x}^2 ${sign(b)} ${fmt(Math.abs(b))}${x} ${sign(c)} ${fmt(Math.abs(c))} = 0`;
+  // The answer line shows the surd; the method's payoff step must agree with it,
+  // not round it away.
+  const surds = quadraticSurdRoots(a, b, c);
+  const show = (v: number) =>
+    surds?.find((s) => Math.abs(s.value - v) < 1e-9)?.latex ?? trimNum(v);
   const rootsLatex =
     Math.abs(r1 - r2) < 1e-9
-      ? `${x} = ${trimNum(r1)}`
-      : `${x}_1 = ${trimNum(r1)},\\; ${x}_2 = ${trimNum(r2)}`;
+      ? `${x} = ${show(r1)}`
+      : `${x}_1 = ${show(r1)},\\; ${x}_2 = ${show(r2)}`;
   return {
     id: "quadratic_formula",
     name: "Quadratic formula",
@@ -475,6 +607,7 @@ function quadraticFormulaMethod(
         latex: `${x} = \\dfrac{${fmt(-b)} \\pm \\sqrt{${fmt(disc)}}}{${fmt(2 * a)}}`,
         operationCode: "SIMPLIFY_DISCRIMINANT",
       },
+      ...surdSteps(x, -b, disc, 2 * a),
       {
         ascii: `${x} = [${trimNum(r1)}, ${trimNum(r2)}]`,
         latex: rootsLatex,
@@ -482,6 +615,43 @@ function quadraticFormulaMethod(
       },
     ],
   };
+}
+
+/**
+ * The two moves hidden between `x = (−4 ± √12)/2` and `x = −2 ± √3`: pull the
+ * square factor out of the radical, then cancel what the whole fraction shares.
+ * Each is emitted only when it actually changes something, so a discriminant
+ * that is already square-free (or a fraction with nothing to cancel) adds no
+ * step — and rational roots (perfect-square disc) add none at all, since the
+ * plain arithmetic path already shows those.
+ */
+function surdSteps(x: string, p: number, disc: number, den: number): RawStep[] {
+  const split = squareFreeSplit(disc);
+  if (!split || split.m === 1) return [];
+  const steps: RawStep[] = [];
+  const over = (numAscii: string, numLatex: string, d: number): RawStep["latex"][] =>
+    d === 1 ? [numAscii, numLatex] : [`(${numAscii}) / ${d}`, `\\dfrac{${numLatex}}{${d}}`];
+  // `x² − 2 = 0` reaches here with p = 0, and `x = 0 ± √2` is not how anyone
+  // writes it.
+  const term = (q: number, k: number, m: number) => ({
+    ascii: `${q === 0 ? "" : `${q} `}± ${k === 1 ? "" : `${k}*`}sqrt(${m})`,
+    latex: `${q === 0 ? "" : `${q} `}\\pm ${k === 1 ? "" : k}\\sqrt{${m}}`,
+  });
+  if (split.k > 1) {
+    const t = term(p, split.k, split.m);
+    const [ascii, latex] = over(t.ascii, t.latex, den);
+    steps.push({ ascii: `${x} = ${ascii}`, latex: `${x} = ${latex}`, operationCode: "SIMPLIFY_RADICAL" });
+  }
+  const g = [Math.abs(p), split.k, Math.abs(den)].reduce((u, v) => {
+    while (v) [u, v] = [v, u % v];
+    return u;
+  });
+  if (g > 1) {
+    const t = term(p / g, split.k / g, split.m);
+    const [ascii, latex] = over(t.ascii, t.latex, den / g);
+    steps.push({ ascii: `${x} = ${ascii}`, latex: `${x} = ${latex}`, operationCode: "CANCEL_COMMON_FACTOR" });
+  }
+  return steps;
 }
 
 // --- Simplify (mathsteps / mathjs) ------------------------------------------
@@ -582,7 +752,7 @@ function solveSimplify(cls: Classification): SolveCandidate | null {
 function solveArithmetic(cls: Classification): SolveCandidate | null {
   const value = evalReal(cls.ascii);
   if (Number.isNaN(value)) return null;
-  const nice = niceNumber(value);
+  const nice = decimalAnswer(cls.ascii, value) ?? niceNumber(value);
 
   return {
     answer: nice,
@@ -631,27 +801,20 @@ function solveDerivative(cls: Classification): SolveCandidate | null {
   const opLatex = order > 1 ? `d^${order}/d${cls.unknown}^${order}` : `d/d${cls.unknown}`;
   return {
     answer: { latex: asciiToLatex(display), plain: display },
-    // `d/dx(x^3 sin x) → 3x^2 sin x + x^3 cos x` is one leap over the entire
-    // product rule. The Atomic Step Engine names the rule, differentiates each
-    // piece, and assembles it — each sub-step proved against a difference
-    // quotient before it ships, and dropped wholesale if any of it fails.
-    methods: atomizeMethods(
-      [
-        {
-          id: "differentiate",
-          name: "Differentiate",
-          examPick: true,
-          steps: [
-            {
-              ascii: `${opLatex}(${target})`,
-              operationCode: "DIFFERENTIATE",
-            },
-            { ascii: display, operationCode: "RESULT" },
-          ],
-        },
-      ],
-      { unknown: cls.unknown, originalAscii: cls.ascii, roots: [], quadratic: null },
-    ),
+    methods: [
+      {
+        id: "differentiate",
+        name: "Differentiate",
+        examPick: true,
+        steps: [
+          {
+            ascii: `${opLatex}(${target})`,
+            operationCode: "DIFFERENTIATE",
+          },
+          { ascii: display, operationCode: "RESULT" },
+        ],
+      },
+    ],
     plotExpression: variablesIn(target).length === 1 ? target : null,
     verify: () => verifyDerivative(penult, d, cls.unknown),
   };
@@ -687,6 +850,50 @@ function numLatex(s: string): string {
 }
 
 /** Present a numeric value as an integer, small fraction, or decimal. */
+/**
+ * A problem written in decimals should be answered in decimals: `0.25 + 0.5` is
+ * `0.75`, not `3/4`. Both are exact, so the golden rule is satisfied either way —
+ * this is about answering in the notation the student used.
+ *
+ * Returns null (so `niceNumber` prints the fraction) whenever the decimal form
+ * would NOT be exact — `0.1 / 0.3` recurs, and `1/3` is the only honest way to
+ * write it. Termination is decided from the exact denominator, never from the
+ * float: `0.1 + 0.2` is `0.30000000000000004` in binary, so the digits are built
+ * by integer arithmetic on n/d rather than read off `toString()`.
+ */
+function decimalAnswer(source: string, val: number): FinalAnswer | null {
+  if (!/\d\.\d/.test(source)) return null; // not written in decimals
+  if (Number.isInteger(val)) return null; // niceNumber already prints these well
+  let fr: { n: bigint; d: bigint; s: number };
+  try {
+    fr = fraction(val) as unknown as { n: bigint; d: bigint; s: number };
+  } catch {
+    return null;
+  }
+  const n = Number(fr.n);
+  const den = Number(fr.d);
+  if (!Number.isSafeInteger(n) || !Number.isSafeInteger(den)) return null;
+  let rest = den;
+  let twos = 0;
+  let fives = 0;
+  while (rest % 2 === 0) {
+    rest /= 2;
+    twos++;
+  }
+  while (rest % 5 === 0) {
+    rest /= 5;
+    fives++;
+  }
+  if (rest !== 1) return null; // recurring decimal — the fraction is the exact form
+  const places = Math.max(twos, fives);
+  if (places === 0 || places > 12) return null;
+  const scaled = Math.round((n * 10 ** places) / den);
+  if (!Number.isSafeInteger(scaled)) return null;
+  const digits = String(scaled).padStart(places + 1, "0");
+  const text = `${fr.s < 0 ? "-" : ""}${digits.slice(0, -places)}.${digits.slice(-places)}`;
+  return { latex: text, plain: text };
+}
+
 function niceNumber(val: number): FinalAnswer {
   if (Number.isInteger(val)) {
     return { latex: String(val), plain: String(val) };
