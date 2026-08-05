@@ -1069,6 +1069,18 @@ class AppLocalizationsNl extends AppLocalizations {
   String get scanEditEquation => 'Bewerk de gedetecteerde vergelijking';
 
   @override
+  String get scanAdjustCrop => 'Aanpassen';
+
+  @override
+  String get scanStageReading => 'Ik lees je opgave…';
+
+  @override
+  String get scanStageRecognizing => 'Ik herken de wiskunde…';
+
+  @override
+  String get scanStageAlmost => 'Bijna klaar…';
+
+  @override
   String get manualErrorGeneric => 'Er is iets misgegaan. Probeer het opnieuw.';
 
   @override
@@ -1124,7 +1136,31 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resultSharingSoon => 'Delen komt binnenkort.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy lost je vraagstuk op…';
+  String get resultStageWorking => 'Ik werk de stappen uit…';
+
+  @override
+  String get resultStageVerifying => 'Ik controleer het antwoord…';
+
+  @override
+  String get resultStageExplaining => 'Ik schrijf de uitleg…';
+
+  @override
+  String get problemKindLinear => 'Lineaire vergelijking · één onbekende';
+
+  @override
+  String get problemKindQuadratic => 'Kwadratische vergelijking';
+
+  @override
+  String get problemKindFraction => 'Breukrekenen';
+
+  @override
+  String get problemKindExpression => 'Rekenkundige uitdrukking';
+
+  @override
+  String get problemKindTrigonometry => 'Goniometrie';
+
+  @override
+  String get problemKindGeometry => 'Meetkunde';
 
   @override
   String get resultPracticeReady => 'Nieuwe oefening hieronder klaar 👇';

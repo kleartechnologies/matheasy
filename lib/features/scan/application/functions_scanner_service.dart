@@ -1,10 +1,10 @@
-import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../domain/detected_equation.dart';
 import '../domain/scan_anchor.dart';
 import '../domain/scan_source.dart';
+import 'scan_image_codec.dart';
 import 'scanner_service.dart';
 
 /// Real recognizer — sends a captured/cropped photo to the `recognizeEquation`
@@ -40,8 +40,13 @@ class FunctionsScannerService implements ScannerService {
       throw const BackendException('No image to recognize.', code: 'invalid-argument');
     }
 
+    // Base64 in an isolate, never on the UI thread: a ~900KB JPEG becomes a
+    // ~1.2MB string, and building that synchronously drops frames exactly while
+    // the user is watching the capture for a sign of life.
+    final imageBase64 = await compute(encodeScanBase64, imageBytes);
+
     final json = await _call('recognizeEquation', {
-      'imageBase64': base64Encode(imageBytes),
+      'imageBase64': imageBase64,
       'mimeType': 'image/jpeg',
       'source': source.name,
     });

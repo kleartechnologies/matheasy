@@ -9,9 +9,12 @@ import '../../../core/security/rate_limit_result.dart';
 import '../../../core/security/rate_limit_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
+import '../../result/application/preemptive_solve.dart';
+import '../domain/detected_equation.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
 import 'functions_scanner_service.dart';
+import 'scan_trace.dart';
 import 'scanner_service.dart';
 
 part 'scanner_controller.g.dart';
@@ -46,14 +49,28 @@ class ScannerController extends _$ScannerController {
     unawaited(analytics.logEvent(AnalyticsEvent.scanStarted(source: source.name)));
 
     state = const ScanRecognizing();
+    final trace = ref.read(scanTraceProvider);
     try {
-      final equation = await _service.recognize(
-        source,
-        imageBytes: imageBytes,
-        manualLatex: manualLatex,
-      );
+      // One span for the whole `recognizeEquation` round trip. It is not broken
+      // down further HERE on purpose: everything inside it happens on the
+      // server, which times its own three stages into the function log — this
+      // side can only honestly report "the phone waited this long", which
+      // includes upload and cold start and is the number the user feels.
+      final equation = await (trace?.measure<DetectedEquation>(
+            'recognize.roundTrip',
+            () => _service.recognize(source,
+                imageBytes: imageBytes, manualLatex: manualLatex),
+            detail: (e) => 'confidence ${e.confidencePercent}%',
+          ) ??
+          _service.recognize(source,
+              imageBytes: imageBytes, manualLatex: manualLatex));
       if (_disposed) return;
       state = ScanCaptured(equation);
+      // The problem is known and the solve depends on nothing the user is about
+      // to do, so it starts NOW rather than when they finish reading the
+      // confirmation card. See [PreemptiveSolveHolder] for why this spends
+      // nothing the scan hasn't already spent.
+      ref.read(preemptiveSolveProvider.notifier).start(equation);
       unawaited(analytics.logEvent(AnalyticsEvent.recognitionSucceeded(
         source: source.name,
         confidence: equation.confidencePercent,
@@ -91,7 +108,15 @@ class ScannerController extends _$ScannerController {
   }
 
   /// Discards the current capture / error and returns to the live preview.
-  void retake() => state = const ScanIdle();
+  void retake() {
+    // A retake abandons the scan the trace was measuring; dropping it here keeps
+    // the next attempt's waterfall from being timed against the previous
+    // shutter press.
+    ref.read(scanTraceProvider.notifier).finish();
+    // The head-start solve belonged to the capture being thrown away.
+    ref.read(preemptiveSolveProvider.notifier).clear();
+    state = const ScanIdle();
+  }
 
   /// Applies a user-corrected LaTeX (from the §3 detected-equation editor) to
   /// the current capture. The scan SOURCE is preserved, so re-solving the fixed
@@ -102,13 +127,16 @@ class ScannerController extends _$ScannerController {
     if (current is! ScanCaptured) return;
     final trimmed = latex.trim();
     if (trimmed.isEmpty) return;
-    state = ScanCaptured(
-      current.equation.copyWith(
-        latex: trimmed,
-        confidence: 1,
-        kind: FunctionsScannerService.inferKind(trimmed),
-      ),
+    final corrected = current.equation.copyWith(
+      latex: trimmed,
+      confidence: 1,
+      kind: FunctionsScannerService.inferKind(trimmed),
     );
+    state = ScanCaptured(corrected);
+    // The head start was for the misread. Start again on what the user actually
+    // wrote — `start` is keyed by equation, so the stale one is dropped rather
+    // than able to answer for the corrected problem.
+    ref.read(preemptiveSolveProvider.notifier).start(corrected);
   }
 
   /// Confirms the recognized problem and hands off to the result screen (which
@@ -124,6 +152,11 @@ class ScannerController extends _$ScannerController {
       LoggingService.warning('Scan rate-limited: ${limit.reason}');
       return;
     }
+
+    // The gap between this mark and `recognize.roundTrip` ending is how long the
+    // user sat on the confirmation card — dead time during which the solve
+    // could already have been running.
+    ref.read(scanTraceProvider)?.mark('userTappedSolve');
 
     state = ScanComplete(current.equation);
     unawaited(

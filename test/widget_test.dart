@@ -521,7 +521,10 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('Matheasy is solving your problem…'), findsOneWidget);
+      // The wait keeps the problem — and its category — on screen, and names
+      // the stage the solve is in rather than showing an unmarked spinner.
+      expect(find.text('Working through the steps…'), findsOneWidget);
+      expect(find.text('Linear equation · one unknown'), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 600)); // solve delay
       // §1 the problem, §2 the answer, §3 the single call to action.

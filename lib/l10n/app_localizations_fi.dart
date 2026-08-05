@@ -1074,6 +1074,18 @@ class AppLocalizationsFi extends AppLocalizations {
   String get scanEditEquation => 'Muokkaa tunnistettua yhtälöä';
 
   @override
+  String get scanAdjustCrop => 'Säädä';
+
+  @override
+  String get scanStageReading => 'Luen tehtävääsi…';
+
+  @override
+  String get scanStageRecognizing => 'Tunnistan matematiikkaa…';
+
+  @override
+  String get scanStageAlmost => 'Melkein valmista…';
+
+  @override
   String get manualErrorGeneric => 'Jokin meni pieleen. Yritä uudelleen.';
 
   @override
@@ -1130,7 +1142,31 @@ class AppLocalizationsFi extends AppLocalizations {
   String get resultSharingSoon => 'Jakaminen tulee pian.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy ratkaisee tehtävääsi…';
+  String get resultStageWorking => 'Käyn vaiheita läpi…';
+
+  @override
+  String get resultStageVerifying => 'Tarkistan vastausta…';
+
+  @override
+  String get resultStageExplaining => 'Kirjoitan selitystä…';
+
+  @override
+  String get problemKindLinear => 'Lineaarinen yhtälö · yksi tuntematon';
+
+  @override
+  String get problemKindQuadratic => 'Toisen asteen yhtälö';
+
+  @override
+  String get problemKindFraction => 'Murtolukulaskenta';
+
+  @override
+  String get problemKindExpression => 'Laskulauseke';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometria';
+
+  @override
+  String get problemKindGeometry => 'Geometria';
 
   @override
   String get resultPracticeReady => 'Tuoretta harjoittelua valmiina alla 👇';

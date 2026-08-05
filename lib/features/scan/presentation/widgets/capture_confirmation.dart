@@ -11,6 +11,7 @@ import '../../../../core/widgets/widgets.dart';
 // is shown to a student, so the scan sheet and the result card can't drift.
 import '../../../result/presentation/widgets/problem_statement.dart';
 import '../../domain/detected_equation.dart';
+import '../equation_kind_l10n.dart';
 import 'confidence_badge.dart';
 
 /// Bottom confirmation sheet after a capture: shows the recognized problem —
@@ -23,6 +24,7 @@ class CaptureConfirmation extends StatelessWidget {
     required this.onRetake,
     required this.onContinue,
     required this.onEdit,
+    this.onAdjust,
   });
 
   final DetectedEquation equation;
@@ -32,6 +34,11 @@ class CaptureConfirmation extends StatelessWidget {
   /// Opens the math editor pre-filled with the recognized LaTeX so the user can
   /// fix an OCR misread before solving (spec §3 — non-negotiable).
   final VoidCallback onEdit;
+
+  /// Re-opens the crop screen on the original photo, when the capture was
+  /// auto-cropped and the framing needs overruling. Null when there is no
+  /// original to go back to — a typed problem, or a re-read of a manual crop.
+  final VoidCallback? onAdjust;
 
   /// Below this recognition confidence we prompt the user to verify rather than
   /// showing a confident check.
@@ -73,15 +80,30 @@ class CaptureConfirmation extends StatelessWidget {
             onEdit: onEdit,
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            lowConfidence
-                ? context.l10n.scanConfirmLowConfidence
-                : equation.kind.label,
-            style: AppTypography.bodySmall.copyWith(
-              color: lowConfidence
-                  ? colors.onWarningContainer
-                  : colors.textSecondary,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  lowConfidence
+                      ? context.l10n.scanConfirmLowConfidence
+                      : equation.kind.labelOf(context),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: lowConfidence
+                        ? colors.onWarningContainer
+                        : colors.textSecondary,
+                  ),
+                ),
+              ),
+              // The way out of a bad automatic crop. Quiet by design: it sits
+              // beside the read rather than beneath it, because the common case
+              // is that the crop was right and the user should be looking at the
+              // maths, not at a framing control.
+              if (onAdjust != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                _AdjustButton(onTap: onAdjust!),
+              ],
+            ],
           ),
           const SizedBox(height: AppSpacing.xl),
           Row(
@@ -105,6 +127,49 @@ class CaptureConfirmation extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Adjust" — re-frame the photo when the automatic crop cut the wrong thing.
+///
+/// Takes the theme's adaptive emerald ink rather than `AppColors.primary`: the
+/// identity emerald is brand art, and as a label on this sheet it would fail
+/// contrast in light mode and disappear in dark.
+class _AdjustButton extends StatelessWidget {
+  const _AdjustButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      label: context.l10n.scanAdjustCrop,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.smRadius,
+        child: Padding(
+          // Keeps the 48px hit target the label alone wouldn't give.
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.crop_rounded, size: 16, color: colors.onPrimaryContainer),
+              const SizedBox(width: 4),
+              Text(
+                context.l10n.scanAdjustCrop,
+                style: AppTypography.label.copyWith(color: colors.onPrimaryContainer),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

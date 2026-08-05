@@ -11,6 +11,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
 import '../../scan/domain/detected_equation.dart';
+import '../../scan/presentation/equation_kind_l10n.dart';
 import '../../scan/presentation/manual_input_screen.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
@@ -44,6 +45,7 @@ import 'widgets/result_couldnt_verify.dart';
 import 'widgets/result_empty.dart';
 import 'widgets/result_scan_image.dart';
 import 'widgets/result_tutor_invite.dart';
+import 'widgets/solving_state.dart';
 import 'widgets/teaching/teaching_cards.dart';
 import 'widgets/visual/engine/engine_l10n.dart';
 import 'widgets/visual/geometry_visual_player.dart';
@@ -377,9 +379,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       // waits until the lesson is over, and practice is the reward at the end:
       // nothing may float over the learner mid-step.
       body: async.when(
-        loading: () => LoadingState(
-          message: context.l10n.resultSolvingMessage,
-          showBrand: true,
+        // The problem is already known here — it was read, shown, and checked
+        // before this screen existed. Keeping it on screen while the solve runs
+        // means the wait reads as the same task continuing, rather than as a
+        // second unexplained pause after the first one.
+        loading: () => SolvingState(
+          latex: equation.latex,
+          caption: equation.kind.labelOf(context),
         ),
         error: (error, _) => _buildSolveError(error),
         data: (data) => _buildContent(data),

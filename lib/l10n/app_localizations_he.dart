@@ -1051,6 +1051,18 @@ class AppLocalizationsHe extends AppLocalizations {
   String get scanEditEquation => 'ערוך את המשוואה שזוהתה';
 
   @override
+  String get scanAdjustCrop => 'התאמה';
+
+  @override
+  String get scanStageReading => 'קורא את התרגיל שלך…';
+
+  @override
+  String get scanStageRecognizing => 'מזהה את המתמטיקה…';
+
+  @override
+  String get scanStageAlmost => 'כמעט שם…';
+
+  @override
   String get manualErrorGeneric => 'משהו השתבש. נסה שוב.';
 
   @override
@@ -1105,7 +1117,31 @@ class AppLocalizationsHe extends AppLocalizations {
   String get resultSharingSoon => 'שיתוף יגיע בקרוב.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy פותר את התרגיל שלך…';
+  String get resultStageWorking => 'עובר על השלבים…';
+
+  @override
+  String get resultStageVerifying => 'בודק את התשובה…';
+
+  @override
+  String get resultStageExplaining => 'כותב את ההסבר…';
+
+  @override
+  String get problemKindLinear => 'משוואה לינארית · נעלם אחד';
+
+  @override
+  String get problemKindQuadratic => 'משוואה ריבועית';
+
+  @override
+  String get problemKindFraction => 'חשבון שברים';
+
+  @override
+  String get problemKindExpression => 'ביטוי חשבוני';
+
+  @override
+  String get problemKindTrigonometry => 'טריגונומטריה';
+
+  @override
+  String get problemKindGeometry => 'גאומטריה';
 
   @override
   String get resultPracticeReady => 'תרגול חדש מוכן למטה 👇';

@@ -1065,6 +1065,18 @@ class AppLocalizationsNb extends AppLocalizations {
   String get scanEditEquation => 'Rediger den oppdagede likningen';
 
   @override
+  String get scanAdjustCrop => 'Juster';
+
+  @override
+  String get scanStageReading => 'Leser oppgaven din…';
+
+  @override
+  String get scanStageRecognizing => 'Gjenkjenner matematikken…';
+
+  @override
+  String get scanStageAlmost => 'Nesten ferdig…';
+
+  @override
   String get manualErrorGeneric => 'Noe gikk galt. Prøv igjen.';
 
   @override
@@ -1119,7 +1131,31 @@ class AppLocalizationsNb extends AppLocalizations {
   String get resultSharingSoon => 'Deling kommer snart.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy løser oppgaven din…';
+  String get resultStageWorking => 'Går gjennom trinnene…';
+
+  @override
+  String get resultStageVerifying => 'Sjekker svaret…';
+
+  @override
+  String get resultStageExplaining => 'Skriver forklaringen…';
+
+  @override
+  String get problemKindLinear => 'Lineær likning · én ukjent';
+
+  @override
+  String get problemKindQuadratic => 'Andregradslikning';
+
+  @override
+  String get problemKindFraction => 'Brøkregning';
+
+  @override
+  String get problemKindExpression => 'Regneuttrykk';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometri';
+
+  @override
+  String get problemKindGeometry => 'Geometri';
 
   @override
   String get resultPracticeReady => 'Ny øving klar nedenfor 👇';

@@ -1024,6 +1024,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get scanEditEquation => '検出された式を編集';
 
   @override
+  String get scanAdjustCrop => '調整';
+
+  @override
+  String get scanStageReading => '問題を読んでいます…';
+
+  @override
+  String get scanStageRecognizing => '数式を認識しています…';
+
+  @override
+  String get scanStageAlmost => 'もう少しです…';
+
+  @override
   String get manualErrorGeneric => '問題が発生しました。もう一度お試しください。';
 
   @override
@@ -1078,7 +1090,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get resultSharingSoon => '共有機能は近日対応予定です。';
 
   @override
-  String get resultSolvingMessage => 'Matheasyが問題を解いています…';
+  String get resultStageWorking => '手順を計算しています…';
+
+  @override
+  String get resultStageVerifying => '答えを確認しています…';
+
+  @override
+  String get resultStageExplaining => '解説を書いています…';
+
+  @override
+  String get problemKindLinear => '一次方程式 · 未知数1つ';
+
+  @override
+  String get problemKindQuadratic => '二次方程式';
+
+  @override
+  String get problemKindFraction => '分数の計算';
+
+  @override
+  String get problemKindExpression => '計算式';
+
+  @override
+  String get problemKindTrigonometry => '三角比';
+
+  @override
+  String get problemKindGeometry => '図形';
 
   @override
   String get resultPracticeReady => '新しい練習が下に用意できました👇';

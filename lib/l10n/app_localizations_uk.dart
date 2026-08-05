@@ -1068,6 +1068,18 @@ class AppLocalizationsUk extends AppLocalizations {
   String get scanEditEquation => 'Редагувати розпізнане рівняння';
 
   @override
+  String get scanAdjustCrop => 'Змінити';
+
+  @override
+  String get scanStageReading => 'Читаю твою задачу…';
+
+  @override
+  String get scanStageRecognizing => 'Розпізнаю математику…';
+
+  @override
+  String get scanStageAlmost => 'Майже готово…';
+
+  @override
   String get manualErrorGeneric => 'Щось пішло не так. Спробуй ще раз.';
 
   @override
@@ -1123,7 +1135,31 @@ class AppLocalizationsUk extends AppLocalizations {
   String get resultSharingSoon => 'Функція поширення з’явиться незабаром.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy розв’язує твою задачу…';
+  String get resultStageWorking => 'Проходжу кроки розв’язання…';
+
+  @override
+  String get resultStageVerifying => 'Перевіряю відповідь…';
+
+  @override
+  String get resultStageExplaining => 'Пишу пояснення…';
+
+  @override
+  String get problemKindLinear => 'Лінійне рівняння · одне невідоме';
+
+  @override
+  String get problemKindQuadratic => 'Квадратне рівняння';
+
+  @override
+  String get problemKindFraction => 'Дії з дробами';
+
+  @override
+  String get problemKindExpression => 'Числовий вираз';
+
+  @override
+  String get problemKindTrigonometry => 'Тригонометрія';
+
+  @override
+  String get problemKindGeometry => 'Геометрія';
 
   @override
   String get resultPracticeReady => 'Нова практика готова нижче 👇';

@@ -5,6 +5,7 @@
 // logic the pipeline depends on.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -312,6 +313,36 @@ void main() {
       expect(isJpegBytes(jpeg), isTrue);
       expect(isJpegBytes(Uint8List.fromList([0x89, 0x50])), isFalse); // PNG
       expect(isJpegBytes(Uint8List.fromList([0xFF])), isFalse); // too short
+    });
+
+    test(
+        'a JPEG pick needs no pre-crop normalize — the guard that stops a '
+        'gallery scan paying for two decode/resize/encode cycles', () {
+      final jpeg = encodeScanJpeg(
+          Uint8List.fromList(img.encodePng(img.Image(width: 64, height: 64))));
+      // The gallery path skips encodeScanJpeg exactly when this is true, and the
+      // crop screen re-encodes the RESULT if it exceeds the upload cap.
+      expect(isJpegBytes(jpeg), isTrue);
+    });
+
+    test('a non-JPEG pick still needs normalizing before the crop decoder', () {
+      final gif = Uint8List.fromList(img.encodeGif(img.Image(width: 8, height: 8)));
+      expect(isJpegBytes(gif), isFalse);
+      expect(isJpegBytes(encodeScanJpeg(gif)), isTrue);
+    });
+  });
+
+  group('encodeScanBase64', () {
+    test('encodes bytes to base64 — the isolate-safe form of the upload '
+        'payload', () {
+      final bytes = Uint8List.fromList([0, 1, 2, 250, 251, 252]);
+      expect(encodeScanBase64(bytes), base64Encode(bytes));
+    });
+
+    test('round-trips a real JPEG unchanged', () {
+      final jpeg = encodeScanJpeg(
+          Uint8List.fromList(img.encodePng(img.Image(width: 16, height: 16))));
+      expect(base64Decode(encodeScanBase64(jpeg)), jpeg);
     });
   });
 }

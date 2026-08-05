@@ -1067,6 +1067,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scanEditEquation => 'Изменить распознанное уравнение';
 
   @override
+  String get scanAdjustCrop => 'Изменить';
+
+  @override
+  String get scanStageReading => 'Читаю твою задачу…';
+
+  @override
+  String get scanStageRecognizing => 'Распознаю математику…';
+
+  @override
+  String get scanStageAlmost => 'Почти готово…';
+
+  @override
   String get manualErrorGeneric => 'Что-то пошло не так. Попробуй ещё раз.';
 
   @override
@@ -1123,7 +1135,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get resultSharingSoon => 'Функция «Поделиться» скоро появится.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy решает твою задачу…';
+  String get resultStageWorking => 'Прохожу шаги решения…';
+
+  @override
+  String get resultStageVerifying => 'Проверяю ответ…';
+
+  @override
+  String get resultStageExplaining => 'Пишу объяснение…';
+
+  @override
+  String get problemKindLinear => 'Линейное уравнение · одно неизвестное';
+
+  @override
+  String get problemKindQuadratic => 'Квадратное уравнение';
+
+  @override
+  String get problemKindFraction => 'Действия с дробями';
+
+  @override
+  String get problemKindExpression => 'Числовое выражение';
+
+  @override
+  String get problemKindTrigonometry => 'Тригонометрия';
+
+  @override
+  String get problemKindGeometry => 'Геометрия';
 
   @override
   String get resultPracticeReady => 'Новая практика готова ниже 👇';

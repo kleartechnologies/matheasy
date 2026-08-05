@@ -1027,6 +1027,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scanEditEquation => '인식된 수식 편집';
 
   @override
+  String get scanAdjustCrop => '조정';
+
+  @override
+  String get scanStageReading => '문제를 읽는 중…';
+
+  @override
+  String get scanStageRecognizing => '수식을 인식하는 중…';
+
+  @override
+  String get scanStageAlmost => '거의 다 됐어요…';
+
+  @override
   String get manualErrorGeneric => '문제가 발생했어요. 다시 시도해 주세요.';
 
   @override
@@ -1081,7 +1093,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get resultSharingSoon => '공유 기능이 곧 추가돼요.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy가 문제를 풀고 있어요…';
+  String get resultStageWorking => '단계를 풀고 있어요…';
+
+  @override
+  String get resultStageVerifying => '답을 확인하고 있어요…';
+
+  @override
+  String get resultStageExplaining => '설명을 쓰고 있어요…';
+
+  @override
+  String get problemKindLinear => '일차방정식 · 미지수 1개';
+
+  @override
+  String get problemKindQuadratic => '이차방정식';
+
+  @override
+  String get problemKindFraction => '분수 계산';
+
+  @override
+  String get problemKindExpression => '계산식';
+
+  @override
+  String get problemKindTrigonometry => '삼각비';
+
+  @override
+  String get problemKindGeometry => '도형';
 
   @override
   String get resultPracticeReady => '새 연습 문제가 아래에 준비됐어요 👇';

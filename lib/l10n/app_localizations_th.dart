@@ -1056,6 +1056,18 @@ class AppLocalizationsTh extends AppLocalizations {
   String get scanEditEquation => 'แก้ไขสมการที่ตรวจพบ';
 
   @override
+  String get scanAdjustCrop => 'ปรับ';
+
+  @override
+  String get scanStageReading => 'กำลังอ่านโจทย์ของคุณ…';
+
+  @override
+  String get scanStageRecognizing => 'กำลังจดจำคณิตศาสตร์…';
+
+  @override
+  String get scanStageAlmost => 'ใกล้เสร็จแล้ว…';
+
+  @override
   String get manualErrorGeneric => 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง';
 
   @override
@@ -1110,7 +1122,31 @@ class AppLocalizationsTh extends AppLocalizations {
   String get resultSharingSoon => 'ฟีเจอร์แชร์จะมาเร็วๆ นี้';
 
   @override
-  String get resultSolvingMessage => 'Matheasy กำลังแก้โจทย์ของคุณ…';
+  String get resultStageWorking => 'กำลังทำทีละขั้นตอน…';
+
+  @override
+  String get resultStageVerifying => 'กำลังตรวจคำตอบ…';
+
+  @override
+  String get resultStageExplaining => 'กำลังเขียนคำอธิบาย…';
+
+  @override
+  String get problemKindLinear => 'สมการเชิงเส้น · ตัวแปรเดียว';
+
+  @override
+  String get problemKindQuadratic => 'สมการกำลังสอง';
+
+  @override
+  String get problemKindFraction => 'การคำนวณเศษส่วน';
+
+  @override
+  String get problemKindExpression => 'นิพจน์ทางคณิตศาสตร์';
+
+  @override
+  String get problemKindTrigonometry => 'ตรีโกณมิติ';
+
+  @override
+  String get problemKindGeometry => 'เรขาคณิต';
 
   @override
   String get resultPracticeReady => 'แบบฝึกหัดใหม่พร้อมแล้วด้านล่าง 👇';

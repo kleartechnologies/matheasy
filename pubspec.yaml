@@ -66,6 +66,17 @@ dependencies:
   camera: ^0.12.0+1
   crop_your_image: ^2.0.0
   image: ^4.9.1
+  # On-device text DETECTION for the live scanner (ML Kit, bundled model, runs
+  # offline on both iOS and Android). It finds WHERE the problem is on the page —
+  # the live bounding box and the auto-crop — and it is never used to TRANSCRIBE
+  # the maths. That boundary is deliberate and load-bearing: ML Kit is a
+  # line-text recogniser with no model of two-dimensional notation, so it reads
+  # a fraction as two lines and drops √/∫ entirely. Since the verification gate
+  # substitutes back into the problem AS TRANSCRIBED, letting it transcribe would
+  # make a misread problem verify perfectly and return a confidently wrong
+  # answer — precisely what the golden rule exists to prevent. OpenAI Vision
+  # remains the only transcriber. See docs/matheasy-scanner-performance-audit.md §6.
+  google_mlkit_text_recognition: ^0.15.0
   # Opens the OS app-settings page so a user who denied the camera can re-enable
   # it (spec §9 — no dead-end permission states). Only openAppSettings() is used.
   permission_handler: ^12.0.1

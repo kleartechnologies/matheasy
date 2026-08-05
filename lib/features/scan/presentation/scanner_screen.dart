@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +18,7 @@ import '../../../core/animations/floaty.dart';
 import '../../../core/animations/pressable.dart';
 import '../../../core/localization/l10n_extension.dart';
 import '../../../core/monitoring/logging_service.dart';
+import '../../../core/monitoring/perf_trace.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
@@ -27,16 +30,22 @@ import '../../analytics/domain/analytics_event.dart';
 import '../../progress/application/stats_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../application/camera_warmup.dart';
+import '../application/region_detector.dart';
 import '../application/scan_image_codec.dart';
+import '../application/scan_trace.dart';
 import '../application/scanner_controller.dart';
 import '../application/steadiness_detector.dart';
 import '../domain/detected_equation.dart';
+import '../domain/detected_region.dart';
+import '../domain/math_text_scorer.dart';
 import '../domain/scan_source.dart';
 import '../domain/scan_state.dart';
 import 'crop_screen.dart';
 import 'manual_input_screen.dart';
 import 'widgets/camera_viewport.dart';
 import 'widgets/capture_confirmation.dart';
+import 'widgets/detection_overlay.dart';
 import 'widgets/processing_overlay.dart';
 import 'widgets/scan_frame.dart';
 
@@ -89,6 +98,44 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// init activating the session after a pause.
   bool _appPaused = false;
 
+  /// Times the screen's own startup — mount → camera ready → first preview
+  /// frame. Separate from the per-scan trace because it happens once per screen
+  /// while a scan happens many times, and because "camera open" is its own
+  /// latency target with its own fix (see [_initCamera]).
+  final PerfTrace _openTrace = PerfTrace('scanner.open');
+  bool _loggedOpen = false;
+
+  // -- Live detection --------------------------------------------------------
+
+  /// On-device locator for the live box and the auto-crop. It only ever answers
+  /// WHERE the maths is; OpenAI Vision remains the only thing that reads it.
+  final RegionDetector _detector = createRegionDetector();
+
+  /// The most recent live reading, drawn as the viewfinder box.
+  DetectedRegion _liveRegion = DetectedRegion.none;
+
+  /// True while a detection is in flight. Frames arrive faster than ML Kit can
+  /// consume them, so this drops the ones that arrive mid-detection rather than
+  /// queueing them — a queue would make the box lag further behind the phone the
+  /// longer it was pointed at anything.
+  bool _detecting = false;
+  int _lastDetectMs = 0;
+
+  /// True while the preview frame stream is running.
+  bool _streaming = false;
+
+  /// The unmodified capture, kept so "Adjust" can re-open the crop screen on the
+  /// full photo rather than on the auto-cropped slice — cropping a crop would
+  /// make the escape hatch narrower every time it was used.
+  Uint8List? _originalBytes;
+  ScanSource? _originalSource;
+
+  /// Floor between detections. ML Kit reads a preview frame in roughly 30–80ms,
+  /// so this is not a throttle on latency — the box still updates well inside
+  /// the 100ms target — it is a floor on how much of the CPU (and battery) a
+  /// viewfinder hint is allowed to take while the user lines up a shot.
+  static const int _kDetectIntervalMs = 120;
+
   ScannerController get _controller =>
       ref.read(scannerControllerProvider.notifier);
 
@@ -103,6 +150,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
         .logEvent(AnalyticsEvent.scannerOpened()));
     unawaited(_initCamera());
     _startSteadiness();
+    // The frame the user actually sees the preview in — the honest "camera
+    // open" number. `initialize()` returning is not the same thing: the texture
+    // still has to reach the screen, and on a cold start that gap is real.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _openTrace.mark('firstFrame');
+    });
   }
 
   @override
@@ -110,6 +164,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_accelSub?.cancel());
     _camera?.dispose();
+    // The recogniser holds a native model; leaking one per scanner visit would
+    // grow the app's memory every time the screen is opened.
+    unawaited(_detector.dispose());
     super.dispose();
   }
 
@@ -180,8 +237,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   Future<void> _initCamera() async {
     if (_initializingCamera || _cameraReady) return;
     _initializingCamera = true;
+    _openTrace.begin('cameraInit');
     try {
-      final cameras = await availableCameras();
+      // Measured separately from `initialize()`: they are one stage to the user
+      // but two very different fixes — enumeration is a platform-channel round
+      // trip that could be cached or pre-warmed, initialisation is the sensor
+      // actually spinning up and cannot be.
+      final cameras = await _openTrace.measure(
+          'cameraInit.enumerate', cachedAvailableCameras);
       if (cameras.isEmpty) {
         throw CameraException('no_camera', 'No camera on this device.');
       }
@@ -196,22 +259,35 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
         // downscaled to ≤1600px before upload so the payload stays small.
         ResolutionPreset.veryHigh,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
+        // Governs the PREVIEW STREAM only — `takePicture()` still returns JPEG.
+        // These are the two formats ML Kit accepts, and it is the reason the
+        // group is no longer `jpeg`: a JPEG-framed stream would have to be
+        // decoded per frame, which is exactly the per-frame cost live detection
+        // exists to avoid.
+        imageFormatGroup:
+            Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888,
       );
-      await controller.initialize();
+      await _openTrace.measure('cameraInit.initialize', controller.initialize);
       // Bail if we unmounted or were backgrounded during init — otherwise we'd
       // activate a camera session while the app is in the background.
       if (!mounted || _appPaused) {
         await controller.dispose();
         return;
       }
-      await controller.setFlashMode(
-          _flashOn ? FlashMode.torch : FlashMode.off);
+      await _openTrace.measure('cameraInit.flashMode',
+          () => controller.setFlashMode(_flashOn ? FlashMode.torch : FlashMode.off));
       setState(() {
         _camera = controller;
         _cameraError = null;
       });
+      unawaited(_startDetection());
+      _openTrace.end('cameraInit', detail: ResolutionPreset.veryHigh.name);
+      if (!_loggedOpen) {
+        _loggedOpen = true;
+        _openTrace.log();
+      }
     } catch (error, stack) {
+      _openTrace.end('cameraInit', detail: 'failed');
       LoggingService.warning('Camera init failed: $error');
       if (error is! CameraException) {
         LoggingService.error('Camera init error',
@@ -231,8 +307,88 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     final camera = _camera;
     if (camera == null) return;
     _camera = null;
+    _streaming = false;
+    _liveRegion = DetectedRegion.none;
     unawaited(camera.dispose());
     if (mounted) setState(() {});
+  }
+
+  // -- Live detection --------------------------------------------------------
+
+  /// Starts feeding preview frames to the on-device locator.
+  ///
+  /// Failure here is deliberately quiet and terminal: live detection is an
+  /// accelerator layered over a pipeline that already worked without it, so a
+  /// device that won't stream frames simply gets the old behaviour — no box, no
+  /// auto-crop, full-frame upload — rather than a broken scanner.
+  Future<void> _startDetection() async {
+    final camera = _camera;
+    if (camera == null || !camera.value.isInitialized) return;
+    if (_streaming || _detector is NoopRegionDetector) return;
+    _streaming = true;
+    try {
+      await camera.startImageStream(_onPreviewFrame);
+    } catch (error) {
+      _streaming = false;
+      LoggingService.warning('Live detection unavailable: $error');
+    }
+  }
+
+  /// Stops the frame stream. Called before every capture: the plugin cannot
+  /// reliably run `takePicture()` while the stream is open, and a shutter that
+  /// races the stream is a shutter that sometimes does nothing.
+  Future<void> _stopDetection() async {
+    final camera = _camera;
+    if (!_streaming) return;
+    _streaming = false;
+    if (camera == null || !camera.value.isInitialized) return;
+    try {
+      await camera.stopImageStream();
+    } catch (error) {
+      LoggingService.warning('Stopping frame stream failed: $error');
+    }
+  }
+
+  void _onPreviewFrame(CameraImage image) {
+    if (!mounted || _detecting || _busy || _capturing || _picking) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastDetectMs < _kDetectIntervalMs) return;
+    _lastDetectMs = now;
+    _detecting = true;
+    unawaited(_detectInFrame(image));
+  }
+
+  Future<void> _detectInFrame(CameraImage image) async {
+    final camera = _camera;
+    try {
+      if (camera == null || !camera.value.isInitialized) return;
+      final region = await _detector.detectInFrame(
+        image,
+        sensorOrientation: camera.description.sensorOrientation,
+        deviceOrientation: camera.value.deviceOrientation,
+        isFrontCamera:
+            camera.description.lensDirection == CameraLensDirection.front,
+      );
+      if (!mounted || region == _liveRegion) return;
+      setState(() => _liveRegion = region);
+    } catch (error) {
+      LoggingService.warning('Live detection frame failed: $error');
+    } finally {
+      _detecting = false;
+    }
+  }
+
+  /// The preview frame's size as it is DISPLAYED, which is what the overlay has
+  /// to undo the cover-fit crop against. `aspectRatio` is reported in landscape
+  /// terms by the plugin, so a portrait phone shows it transposed. Only the
+  /// ratio is used, so unit-sized values are enough.
+  Size get _frameDisplaySize {
+    final camera = _camera;
+    if (camera == null || !camera.value.isInitialized) return Size.zero;
+    final ratio = camera.value.aspectRatio;
+    if (ratio <= 0) return Size.zero;
+    final portrait = MediaQuery.orientationOf(context) == Orientation.portrait;
+    return portrait ? Size(1, ratio) : Size(ratio, 1);
   }
 
   Future<void> _toggleFlash() async {
@@ -272,19 +428,36 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     }
     if (!_allowScanOrPaywall()) return;
     final captureFailed = context.l10n.scanCaptureFailed;
+    // The trace opens HERE — the shutter is the moment the user starts waiting,
+    // so it is the only honest zero for "time to answer".
+    final trace = ref.read(scanTraceProvider.notifier).start();
     setState(() => _capturing = true);
+    // The shutter's answer to the user, delivered before any work starts. It is
+    // the only part of a capture that is genuinely instant, and it is what makes
+    // the rest of the wait feel like progress rather than a stall.
+    unawaited(HapticFeedback.mediumImpact());
     Uint8List bytes;
+    XFile file;
     try {
-      final file = await camera.takePicture();
-      bytes = await file.readAsBytes();
+      await trace.measure('capture.stopStream', _stopDetection);
+      // Split deliberately: `takePicture` is the sensor + encode, `readAsBytes`
+      // is a round trip through a temp FILE on disk that exists only because the
+      // plugin's API returns a path rather than bytes.
+      file = await trace.measure('capture.takePicture', camera.takePicture);
+      bytes = await trace.measure(
+        'capture.readBytes',
+        file.readAsBytes,
+        detail: (b) => '${(b.lengthInBytes / 1024).round()}KB',
+      );
     } catch (error) {
       LoggingService.warning('Capture failed: $error');
       _toast(captureFailed);
+      unawaited(_startDetection());
       return;
     } finally {
       if (mounted) setState(() => _capturing = false);
     }
-    await _cropAndRecognize(ScanSource.camera, bytes);
+    await _autoCropAndRecognize(ScanSource.camera, bytes, path: file.path);
   }
 
   /// Pick from the gallery, then crop + recognize.
@@ -296,28 +469,55 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     // auto-capture stays disarmed while the native picker is up — otherwise it
     // fires behind the picker and the returning pick is dropped (see [_picking]).
     _picking = true;
+    final trace = ref.read(scanTraceProvider.notifier).start();
     try {
       Uint8List bytes;
+      String? path;
       try {
-        final file = await _picker.pickImage(
-          source: ImageSource.gallery,
-          maxWidth: 2000,
-          imageQuality: 90,
+        // Human time (browsing the album), not machine time — traced so the
+        // waterfall shows why a gallery scan's total dwarfs a camera scan's
+        // without that being mistaken for a slow pipeline.
+        final file = await trace.measure(
+          'gallery.pick',
+          () => _picker.pickImage(
+            source: ImageSource.gallery,
+            maxWidth: 2000,
+            imageQuality: 90,
+          ),
         );
         if (file == null) return; // cancelled
-        bytes = await file.readAsBytes();
+        path = file.path;
+        bytes = await trace.measure(
+          'gallery.readBytes',
+          file.readAsBytes,
+          detail: (b) => '${(b.lengthInBytes / 1024).round()}KB',
+        );
       } catch (error) {
         LoggingService.warning('Gallery pick failed: $error');
         _toast(galleryFailed);
         return;
       }
-      // Normalize to a decodable, downscaled JPEG before the crop step:
-      // image_picker can hand back bytes crop_your_image's decoder can't read
-      // (e.g. an un-transcoded GIF), which would hang the crop screen on an
-      // infinite spinner. encodeScanJpeg decodes + re-encodes and falls back to
-      // the raw bytes on failure, so it never throws into the flow.
-      bytes = await compute(encodeScanJpeg, bytes);
-      await _cropAndRecognize(ScanSource.gallery, bytes);
+      // Normalize to a decodable JPEG before the crop step: image_picker can
+      // hand back bytes crop_your_image's decoder can't read (e.g. an
+      // un-transcoded GIF), which would hang the crop screen on an infinite
+      // spinner. encodeScanJpeg decodes + re-encodes and falls back to the raw
+      // bytes on failure, so it never throws into the flow.
+      //
+      // Skipped when the pick is ALREADY a JPEG — the case `imageQuality: 90`
+      // produces for almost every photo in a camera roll. The decoder can read
+      // it as-is, `maxWidth: 2000` has already bounded it, and the crop screen
+      // re-encodes the RESULT anyway if it comes back over the direct-upload
+      // limit. Without this guard a gallery scan paid for two full Dart
+      // decode/resize/encode cycles: this one, and then the crop's.
+      if (!isJpegBytes(bytes)) {
+        bytes = await trace.measure(
+          'gallery.normalizeJpeg',
+          () => compute(encodeScanJpeg, bytes),
+          detail: (b) => '${(b.lengthInBytes / 1024).round()}KB',
+        );
+        path = null; // the file on disk is no longer what we hold
+      }
+      await _autoCropAndRecognize(ScanSource.gallery, bytes, path: path);
     } finally {
       _picking = false;
     }
@@ -327,16 +527,107 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   /// into the same recognize → solve pipeline as a scan (see ManualInputScreen).
   void _type() => context.push(AppRoutes.manualInput);
 
-  /// Pushes the crop screen for [bytes]; on confirm, recognizes the cropped
-  /// image. Cancelling the crop returns to the live preview.
-  Future<void> _cropAndRecognize(ScanSource source, Uint8List bytes) async {
+  /// Crops [bytes] to the maths the on-device locator can see, then recognizes
+  /// it — with no screen in between.
+  ///
+  /// This replaces a mandatory crop step that cost 3–10 seconds of human time on
+  /// the critical path between the shutter and the first byte leaving the phone
+  /// — more, on most scans, than the entire server round trip it preceded. The
+  /// crop screen still exists and is one tap away on the confirmation card
+  /// ([_adjustCrop]); it is now the correction, not the toll.
+  ///
+  /// When nothing is detected the rectangle comes back as the whole frame, so a
+  /// device with no on-device locator behaves exactly as before: full image up,
+  /// same answer, just without the saved time.
+  Future<void> _autoCropAndRecognize(
+    ScanSource source,
+    Uint8List bytes, {
+    String? path,
+  }) async {
     // `_busy` is set BEFORE the first await and spans the whole flow, so
-    // auto-capture (steadiness) can't push a second crop screen while this one is
-    // open. Cleared in `finally` on every exit — cancel, error, or recognize —
-    // so returning to the live preview re-enables capture. Set synchronously
-    // right after `takePicture()` clears `_capturing`, so no accel event can
-    // interleave in the gap.
+    // auto-capture (steadiness) can't start a second scan while this one runs.
+    // Cleared in `finally` on every exit — error or recognize — so returning to
+    // the live preview re-enables capture. Set synchronously right after
+    // `takePicture()` clears `_capturing`, so no accel event can interleave.
     if (!mounted || _busy) return;
+    _busy = true;
+    _originalBytes = bytes;
+    _originalSource = source;
+    final trace = ref.read(scanTraceProvider);
+    try {
+      final region = await trace?.measure(
+            'crop.detect',
+            () => _detectStill(bytes, path),
+            detail: (r) => r.toString(),
+          ) ??
+          await _detectStill(bytes, path);
+      final cropped = await trace?.measure(
+            'crop.execute',
+            () => compute(cropScanJpeg, ScanCropRequest(bytes, cropRectFor(region))),
+            detail: (b) => '${(b.lengthInBytes / 1024).round()}KB',
+          ) ??
+          await compute(cropScanJpeg, ScanCropRequest(bytes, cropRectFor(region)));
+      if (!mounted) return;
+      unawaited(ref
+          .read(analyticsServiceProvider)
+          .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
+      await _controller.recognize(source, imageBytes: cropped);
+    } finally {
+      _busy = false;
+    }
+  }
+
+  /// Where the maths is in a captured still.
+  ///
+  /// Detection is re-run on the full-resolution photo rather than reusing the
+  /// last live reading: the preview frame and the capture are different sizes,
+  /// taken a moment apart, and the box that decides what the server gets to see
+  /// is not a place to carry over a stale approximation. Falls back to the live
+  /// reading when there is no file to read (a re-encoded gallery pick).
+  Future<DetectedRegion> _detectStill(Uint8List bytes, String? path) async {
+    if (path == null) return _liveRegion;
+    // Started together, not one after the other. Reading the blocks is native
+    // ML Kit work and measuring the image is a decode on the codec's own
+    // threads; neither reads the other's output, and on a 12MP still each is
+    // long enough that running them in sequence doubled this step for nothing.
+    final sizeFuture = _decodedSize(bytes);
+    final blocksFuture = _detector.readBlocks(path);
+    final size = await sizeFuture;
+    final blocks = await blocksFuture;
+    if (size.isEmpty || blocks.isEmpty) return _liveRegion;
+    final region = regionFromBlocks(blocks, size);
+    return region.isNotEmpty ? region : _liveRegion;
+  }
+
+  /// The image's size as DISPLAYED — Flutter's codec applies the EXIF rotation,
+  /// which is the same space ML Kit reports boxes in and the same space
+  /// [cropScanJpeg] bakes to before cutting.
+  Future<Size> _decodedSize(Uint8List bytes) async {
+    try {
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final size =
+          Size(frame.image.width.toDouble(), frame.image.height.toDouble());
+      frame.image.dispose();
+      codec.dispose();
+      return size;
+    } catch (error) {
+      LoggingService.warning('Could not size capture: $error');
+      return Size.zero;
+    }
+  }
+
+  /// The escape hatch from the auto-crop: re-open the real crop screen on the
+  /// ORIGINAL photo and re-read whatever the user frames.
+  ///
+  /// This costs a second recognition round trip, which is why it is a button and
+  /// not the default. It exists because auto-crop is a heuristic, and a heuristic
+  /// on the critical path needs a way for the user to overrule it — otherwise a
+  /// bad crop means retaking the photo.
+  Future<void> _adjustCrop() async {
+    final bytes = _originalBytes;
+    final source = _originalSource;
+    if (bytes == null || source == null || _busy) return;
     _busy = true;
     try {
       final cropped = await Navigator.of(context).push<Uint8List>(
@@ -345,10 +636,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           builder: (_) => CropScreen(imageBytes: bytes),
         ),
       );
-      if (cropped == null || !mounted) return; // cancelled
-      unawaited(ref
-          .read(analyticsServiceProvider)
-          .logEvent(AnalyticsEvent.imageCropped(source: source.name)));
+      if (cropped == null || !mounted) return; // cancelled — keep the read
       await _controller.recognize(source, imageBytes: cropped);
     } finally {
       _busy = false;
@@ -360,6 +648,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Back to the live preview. The frame stream was stopped for the capture, so
+  /// it has to be restarted here or the viewfinder box would be dead for every
+  /// scan after the first.
+  void _retake() {
+    _controller.retake();
+    unawaited(_startDetection());
   }
 
   /// The "Solve" commit point. Re-checks the scan quota (the same gate as
@@ -414,6 +710,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               onOpenSettings: () => unawaited(openAppSettings()),
               onType: _type,
             ),
+            // Only while lining up a shot. Once a photo is taken the box would
+            // be tracking a frozen frame it no longer matches.
+            if (state is ScanIdle)
+              DetectionOverlay(
+                region: _liveRegion,
+                sourceSize: _frameDisplaySize,
+              ),
             AnimatedSwitcher(
               duration: AppDurations.medium,
               child: _content(state, controller),
@@ -444,9 +747,12 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           key: const ValueKey('captured'),
           equation: equation,
           onClose: () => context.pop(),
-          onRetake: controller.retake,
+          onRetake: _retake,
           onContinue: _onContinue,
           onEdit: () => unawaited(_editEquation(equation)),
+          onAdjust: _originalBytes == null
+              ? null
+              : () => unawaited(_adjustCrop()),
         ),
       ScanComplete() => const SizedBox.shrink(key: ValueKey('complete')),
       ScanQuotaExceeded() =>
@@ -454,7 +760,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       ScanError(:final kind) => _ErrorView(
           key: const ValueKey('error'),
           kind: kind,
-          onRetry: controller.retake,
+          onRetry: _retake,
           onTypeItIn: _type,
         ),
     };
@@ -851,6 +1157,7 @@ class _CapturedView extends StatelessWidget {
     required this.onRetake,
     required this.onContinue,
     required this.onEdit,
+    this.onAdjust,
   });
 
   final DetectedEquation equation;
@@ -858,6 +1165,7 @@ class _CapturedView extends StatelessWidget {
   final VoidCallback onRetake;
   final VoidCallback onContinue;
   final VoidCallback onEdit;
+  final VoidCallback? onAdjust;
 
   @override
   Widget build(BuildContext context) {
@@ -887,6 +1195,7 @@ class _CapturedView extends StatelessWidget {
             onRetake: onRetake,
             onContinue: onContinue,
             onEdit: onEdit,
+            onAdjust: onAdjust,
           ),
         ),
       ],

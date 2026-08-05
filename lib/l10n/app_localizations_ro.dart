@@ -1067,6 +1067,18 @@ class AppLocalizationsRo extends AppLocalizations {
   String get scanEditEquation => 'Editează ecuația detectată';
 
   @override
+  String get scanAdjustCrop => 'Ajustează';
+
+  @override
+  String get scanStageReading => 'Îți citesc problema…';
+
+  @override
+  String get scanStageRecognizing => 'Recunosc matematica…';
+
+  @override
+  String get scanStageAlmost => 'Aproape gata…';
+
+  @override
   String get manualErrorGeneric =>
       'Ceva nu a mers bine. Te rugăm să încerci din nou.';
 
@@ -1123,7 +1135,31 @@ class AppLocalizationsRo extends AppLocalizations {
   String get resultSharingSoon => 'Distribuirea va fi disponibilă în curând.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy îți rezolvă problema…';
+  String get resultStageWorking => 'Parcurg pașii…';
+
+  @override
+  String get resultStageVerifying => 'Verific răspunsul…';
+
+  @override
+  String get resultStageExplaining => 'Scriu explicația…';
+
+  @override
+  String get problemKindLinear => 'Ecuație liniară · o necunoscută';
+
+  @override
+  String get problemKindQuadratic => 'Ecuație de gradul al doilea';
+
+  @override
+  String get problemKindFraction => 'Calcul cu fracții';
+
+  @override
+  String get problemKindExpression => 'Expresie aritmetică';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometrie';
+
+  @override
+  String get problemKindGeometry => 'Geometrie';
 
   @override
   String get resultPracticeReady => 'Exerciții noi te așteaptă mai jos 👇';

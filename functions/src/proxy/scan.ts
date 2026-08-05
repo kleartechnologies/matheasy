@@ -208,52 +208,89 @@ export const recognizeEquation = onCall(
 
     const client = createOpenAI(OPENAI_API_KEY.value());
 
+    // Stage timings. `recognizeEquation` is the longest single span in the whole
+    // app — three sequential OpenAI round trips behind one client call — and
+    // until this existed the function log reported only that it finished, so
+    // there was no way to tell a slow OCR pass from a slow reasoning pass from a
+    // slow `sharp` render. Logged as one structured line at the end.
+    const t0 = Date.now();
+    const timings: Record<string, number> = {};
+    const timed = async <T>(stage: string, work: Promise<T>): Promise<T> => {
+      const started = Date.now();
+      try {
+        return await work;
+      } finally {
+        timings[stage] = Date.now() - started;
+      }
+    };
+
+    // --- Stages 1 + moderation, CONCURRENTLY ---------------------------------
+    //
+    // Moderation and preprocessing both take only the original image and neither
+    // reads the other's output, so running them one after the other put ~0.5-1.4s
+    // of pure dead time on the critical path of every scan.
+    //
+    // Starting them together does NOT weaken the COPPA gate. What the gate has to
+    // guarantee is that no flagged image reaches a PAID call, and the paid calls
+    // are the OCR and vision passes below — both of which still wait on the
+    // verdict. Preprocessing is local `sharp` CPU: it costs no money, sends
+    // nothing anywhere, and its output is discarded unread on a flag.
+    const pipeline = scanPipelineEnabled();
+    const preparing = pipeline
+      ? timed("imagePrep", prepareScanImage(imageDataUri))
+      : Promise.resolve({ original: imageDataUri, enhanced: null });
+
     // COPPA moderation gate (minors, 8–18): screen the image BEFORE the paid
     // vision call so inappropriate content is never processed. Fails CLOSED on a
     // flag (rejects), and OPEN on a moderation-service error — the isMath output
     // contract below is the backstop, so the model can still only ever return
     // math LaTeX, never arbitrary content.
-    const verdict = await moderateImage(client, imageDataUri);
+    const verdict = await timed("moderate", moderateImage(client, imageDataUri));
     if (verdict.flagged) {
       logger.warn("recognizeEquation blocked by moderation", {
         uid,
         categories: verdict.categories,
       });
+      // Settle the in-flight render before unwinding so it cannot surface as an
+      // unhandled rejection after the request is gone. `prepareScanImage`
+      // already swallows its own failures, so this is belt-and-braces.
+      void preparing.catch(() => undefined);
       throw new HttpsError(
         "invalid-argument",
         "That image can’t be scanned. Point the camera at a math problem."
       );
     }
 
-    // --- Stage 1: preprocessing ---------------------------------------------
     // Produces the contrast-enhanced second view of the page. Fails soft to
     // "original only", so a sharp/format problem costs accuracy, never a scan.
-    const pipeline = scanPipelineEnabled();
-    const prepared = pipeline
-      ? await prepareScanImage(imageDataUri)
-      : { original: imageDataUri, enhanced: null };
+    const prepared = await preparing;
     const images = visionImages(prepared.original, prepared.enhanced);
 
     // --- Stage 2: OCR -------------------------------------------------------
     // A dedicated transcription-only pass, so stage 3 has a draft to CORRECT
     // rather than having to read and interpret in one breath. Returns null on
     // any failure; stage 3 runs on the images alone in that case.
-    const reading: OcrReading | null = pipeline ? await readPage(client, images) : null;
+    const reading: OcrReading | null = pipeline
+      ? await timed("ocrPass", readPage(client, images))
+      : null;
 
     // --- Stage 3: vision reasoning ------------------------------------------
     // Interpretation, OCR correction, topic, and the structured geometry facts —
     // with both images AND the draft reading in front of it.
     let result: ScanPayload;
     try {
-      result = await chatVisionJson<ScanPayload>(
-        client,
-        "scan",
-        SYSTEM_PROMPT,
-        images,
-        "Read the ENTIRE math problem in this photo — every line, all given conditions, every sub-part, and the question(s) — and return the JSON described above." +
-          ocrContextBlock(reading),
-        // Room for a full multi-part transcription (givens + (i)/(ii)/… + questions).
-        { temperature: 0.1, maxTokens: 1200 }
+      result = await timed(
+        "visionPass",
+        chatVisionJson<ScanPayload>(
+          client,
+          "scan",
+          SYSTEM_PROMPT,
+          images,
+          "Read the ENTIRE math problem in this photo — every line, all given conditions, every sub-part, and the question(s) — and return the JSON described above." +
+            ocrContextBlock(reading),
+          // Room for a full multi-part transcription (givens + (i)/(ii)/… + questions).
+          { temperature: 0.1, maxTokens: 1200 }
+        )
       );
     } catch (err) {
       // A not-found (or any other HttpsError) must not be masked as internal.
@@ -285,6 +322,19 @@ export const recognizeEquation = onCall(
     // send endless non-math images and burn unlimited OpenAI cost while the
     // free `scans` quota stays pinned at 0.
     const quota = await incrementUsage(uid, "scans", identity);
+
+    // The stage breakdown, as one structured line so it is queryable in Cloud
+    // Logging. `total` is deliberately larger than the sum of the stages: the
+    // difference is quota/rate-limit Firestore reads and the base64 handling,
+    // and a growing gap there is itself a finding.
+    logger.info("recognizeEquation.timings", {
+      uid,
+      total: Date.now() - t0,
+      ...timings,
+      enhanced: prepared.enhanced !== null,
+      ocrOk: reading !== null,
+      base64Len: imageBase64.length,
+    });
 
     if (!isMath || !problem) {
       throw new HttpsError(

@@ -1071,6 +1071,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scanEditEquation => 'Algılanan denklemi düzenle';
 
   @override
+  String get scanAdjustCrop => 'Ayarla';
+
+  @override
+  String get scanStageReading => 'Sorunu okuyorum…';
+
+  @override
+  String get scanStageRecognizing => 'Matematiği tanıyorum…';
+
+  @override
+  String get scanStageAlmost => 'Neredeyse bitti…';
+
+  @override
   String get manualErrorGeneric =>
       'Bir şeyler yanlış gitti. Lütfen tekrar deneyin.';
 
@@ -1127,7 +1139,31 @@ class AppLocalizationsTr extends AppLocalizations {
   String get resultSharingSoon => 'Paylaşım yakında geliyor.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy sorununuzu çözüyor…';
+  String get resultStageWorking => 'Adımları çözüyorum…';
+
+  @override
+  String get resultStageVerifying => 'Cevabı kontrol ediyorum…';
+
+  @override
+  String get resultStageExplaining => 'Açıklamayı yazıyorum…';
+
+  @override
+  String get problemKindLinear => 'Birinci dereceden denklem · tek bilinmeyen';
+
+  @override
+  String get problemKindQuadratic => 'İkinci dereceden denklem';
+
+  @override
+  String get problemKindFraction => 'Kesirlerle işlem';
+
+  @override
+  String get problemKindExpression => 'Aritmetik ifade';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometri';
+
+  @override
+  String get problemKindGeometry => 'Geometri';
 
   @override
   String get resultPracticeReady => 'Yeni alıştırma aşağıda hazır 👇';

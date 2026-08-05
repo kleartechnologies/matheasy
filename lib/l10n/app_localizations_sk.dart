@@ -1063,6 +1063,18 @@ class AppLocalizationsSk extends AppLocalizations {
   String get scanEditEquation => 'Upraviť rozpoznanú rovnicu';
 
   @override
+  String get scanAdjustCrop => 'Upraviť';
+
+  @override
+  String get scanStageReading => 'Čítam tvoju úlohu…';
+
+  @override
+  String get scanStageRecognizing => 'Rozpoznávam matematiku…';
+
+  @override
+  String get scanStageAlmost => 'Už to skoro je…';
+
+  @override
   String get manualErrorGeneric => 'Niečo sa pokazilo. Skús to znova, prosím.';
 
   @override
@@ -1119,7 +1131,31 @@ class AppLocalizationsSk extends AppLocalizations {
   String get resultSharingSoon => 'Zdieľanie čoskoro príde.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy rieši tvoj príklad…';
+  String get resultStageWorking => 'Prechádzam jednotlivé kroky…';
+
+  @override
+  String get resultStageVerifying => 'Kontrolujem výsledok…';
+
+  @override
+  String get resultStageExplaining => 'Píšem vysvetlenie…';
+
+  @override
+  String get problemKindLinear => 'Lineárna rovnica · jedna neznáma';
+
+  @override
+  String get problemKindQuadratic => 'Kvadratická rovnica';
+
+  @override
+  String get problemKindFraction => 'Počítanie so zlomkami';
+
+  @override
+  String get problemKindExpression => 'Aritmetický výraz';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometria';
+
+  @override
+  String get problemKindGeometry => 'Geometria';
 
   @override
   String get resultPracticeReady => 'Nové cvičenie je pripravené nižšie 👇';

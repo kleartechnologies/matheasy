@@ -1070,6 +1070,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get scanEditEquation => 'पहचाने गए समीकरण को संपादित करें';
 
   @override
+  String get scanAdjustCrop => 'समायोजित करें';
+
+  @override
+  String get scanStageReading => 'आपका सवाल पढ़ रहा हूँ…';
+
+  @override
+  String get scanStageRecognizing => 'गणित पहचान रहा हूँ…';
+
+  @override
+  String get scanStageAlmost => 'बस हो ही गया…';
+
+  @override
   String get manualErrorGeneric => 'कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।';
 
   @override
@@ -1124,7 +1136,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get resultSharingSoon => 'शेयरिंग जल्द ही आ रही है।';
 
   @override
-  String get resultSolvingMessage => 'Matheasy आपकी समस्या हल कर रहा है…';
+  String get resultStageWorking => 'चरण दर चरण हल कर रहे हैं…';
+
+  @override
+  String get resultStageVerifying => 'उत्तर जाँच रहे हैं…';
+
+  @override
+  String get resultStageExplaining => 'व्याख्या लिख रहे हैं…';
+
+  @override
+  String get problemKindLinear => 'रैखिक समीकरण · एक अज्ञात';
+
+  @override
+  String get problemKindQuadratic => 'द्विघात समीकरण';
+
+  @override
+  String get problemKindFraction => 'भिन्न का अंकगणित';
+
+  @override
+  String get problemKindExpression => 'अंकगणितीय व्यंजक';
+
+  @override
+  String get problemKindTrigonometry => 'त्रिकोणमिति';
+
+  @override
+  String get problemKindGeometry => 'ज्यामिति';
 
   @override
   String get resultPracticeReady => 'नीचे ताज़ा अभ्यास तैयार है 👇';

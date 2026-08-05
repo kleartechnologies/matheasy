@@ -1067,6 +1067,18 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanEditEquation => 'Chỉnh sửa phương trình đã nhận diện';
 
   @override
+  String get scanAdjustCrop => 'Điều chỉnh';
+
+  @override
+  String get scanStageReading => 'Đang đọc bài của bạn…';
+
+  @override
+  String get scanStageRecognizing => 'Đang nhận diện phép toán…';
+
+  @override
+  String get scanStageAlmost => 'Sắp xong rồi…';
+
+  @override
   String get manualErrorGeneric => 'Đã có lỗi xảy ra. Vui lòng thử lại.';
 
   @override
@@ -1122,7 +1134,31 @@ class AppLocalizationsVi extends AppLocalizations {
   String get resultSharingSoon => 'Tính năng chia sẻ sắp ra mắt.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy đang giải bài toán của bạn…';
+  String get resultStageWorking => 'Đang giải từng bước…';
+
+  @override
+  String get resultStageVerifying => 'Đang kiểm tra đáp án…';
+
+  @override
+  String get resultStageExplaining => 'Đang viết lời giải thích…';
+
+  @override
+  String get problemKindLinear => 'Phương trình bậc nhất · một ẩn';
+
+  @override
+  String get problemKindQuadratic => 'Phương trình bậc hai';
+
+  @override
+  String get problemKindFraction => 'Tính toán với phân số';
+
+  @override
+  String get problemKindExpression => 'Biểu thức số học';
+
+  @override
+  String get problemKindTrigonometry => 'Lượng giác';
+
+  @override
+  String get problemKindGeometry => 'Hình học';
 
   @override
   String get resultPracticeReady => 'Bài luyện tập mới đã sẵn sàng bên dưới 👇';

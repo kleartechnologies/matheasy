@@ -1076,6 +1076,18 @@ class AppLocalizationsPl extends AppLocalizations {
   String get scanEditEquation => 'Edytuj wykryte równanie';
 
   @override
+  String get scanAdjustCrop => 'Dopasuj';
+
+  @override
+  String get scanStageReading => 'Czytam twoje zadanie…';
+
+  @override
+  String get scanStageRecognizing => 'Rozpoznaję matematykę…';
+
+  @override
+  String get scanStageAlmost => 'Już prawie…';
+
+  @override
   String get manualErrorGeneric => 'Coś poszło nie tak. Spróbuj ponownie.';
 
   @override
@@ -1132,7 +1144,31 @@ class AppLocalizationsPl extends AppLocalizations {
   String get resultSharingSoon => 'Udostępnianie pojawi się wkrótce.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy rozwiązuje Twoje zadanie…';
+  String get resultStageWorking => 'Przechodzę przez kroki…';
+
+  @override
+  String get resultStageVerifying => 'Sprawdzam wynik…';
+
+  @override
+  String get resultStageExplaining => 'Piszę wyjaśnienie…';
+
+  @override
+  String get problemKindLinear => 'Równanie liniowe · jedna niewiadoma';
+
+  @override
+  String get problemKindQuadratic => 'Równanie kwadratowe';
+
+  @override
+  String get problemKindFraction => 'Działania na ułamkach';
+
+  @override
+  String get problemKindExpression => 'Wyrażenie arytmetyczne';
+
+  @override
+  String get problemKindTrigonometry => 'Trygonometria';
+
+  @override
+  String get problemKindGeometry => 'Geometria';
 
   @override
   String get resultPracticeReady => 'Nowe ćwiczenia gotowe poniżej 👇';

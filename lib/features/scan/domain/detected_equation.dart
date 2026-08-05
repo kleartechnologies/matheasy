@@ -4,17 +4,18 @@ import 'scan_anchor.dart';
 import 'scan_source.dart';
 
 /// Coarse classification of a detected problem, used for the result caption.
+///
+/// Carries no display string. It used to hold an English one, which meant every
+/// non-English user was shown "Quadratic equation" under a problem the rest of
+/// the screen described in their own language. The label now lives in the ARBs
+/// and is read through `EquationKindL10n.labelOf` in the presentation layer.
 enum EquationKind {
-  linear('Linear equation · one unknown'),
-  quadratic('Quadratic equation'),
-  fraction('Fraction arithmetic'),
-  expression('Arithmetic expression'),
-  trigonometry('Trigonometry'),
-  geometry('Geometry');
-
-  const EquationKind(this.label);
-
-  final String label;
+  linear,
+  quadratic,
+  fraction,
+  expression,
+  trigonometry,
+  geometry,
 }
 
 /// How far the recognizer's read can be trusted, expressed as something a

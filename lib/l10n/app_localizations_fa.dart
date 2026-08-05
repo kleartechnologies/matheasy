@@ -1063,6 +1063,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get scanEditEquation => 'ویرایش معادله شناسایی‌شده';
 
   @override
+  String get scanAdjustCrop => 'تنظیم';
+
+  @override
+  String get scanStageReading => 'مسئله‌ات را می‌خوانم…';
+
+  @override
+  String get scanStageRecognizing => 'ریاضی را تشخیص می‌دهم…';
+
+  @override
+  String get scanStageAlmost => 'نزدیک است…';
+
+  @override
   String get manualErrorGeneric => 'مشکلی پیش آمد. لطفاً دوباره امتحان کنید.';
 
   @override
@@ -1117,7 +1129,31 @@ class AppLocalizationsFa extends AppLocalizations {
   String get resultSharingSoon => 'اشتراک‌گذاری به‌زودی فعال می‌شود.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy در حال حل سؤال شماست…';
+  String get resultStageWorking => 'در حال حل گام‌به‌گام…';
+
+  @override
+  String get resultStageVerifying => 'در حال بررسی پاسخ…';
+
+  @override
+  String get resultStageExplaining => 'در حال نوشتن توضیح…';
+
+  @override
+  String get problemKindLinear => 'معادله خطی · یک مجهول';
+
+  @override
+  String get problemKindQuadratic => 'معادله درجه دوم';
+
+  @override
+  String get problemKindFraction => 'محاسبه کسرها';
+
+  @override
+  String get problemKindExpression => 'عبارت حسابی';
+
+  @override
+  String get problemKindTrigonometry => 'مثلثات';
+
+  @override
+  String get problemKindGeometry => 'هندسه';
 
   @override
   String get resultPracticeReady => 'تمرین تازه در پایین آماده است 👇';

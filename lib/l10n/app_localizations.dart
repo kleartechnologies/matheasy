@@ -2150,6 +2150,30 @@ abstract class AppLocalizations {
   /// **'Edit the detected equation'**
   String get scanEditEquation;
 
+  /// Button on the capture confirmation sheet: re-open the crop screen on the original photo when the automatic crop framed the wrong part.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get scanAdjustCrop;
+
+  /// Processing message shown while the captured photo is being read.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your problem…'**
+  String get scanStageReading;
+
+  /// Processing message shown while the math is being recognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing the math…'**
+  String get scanStageRecognizing;
+
+  /// Processing message shown near the end of recognition.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there…'**
+  String get scanStageAlmost;
+
   /// No description provided for @manualErrorGeneric.
   ///
   /// In en, this message translates to:
@@ -2258,11 +2282,59 @@ abstract class AppLocalizations {
   /// **'Sharing arrives soon.'**
   String get resultSharingSoon;
 
-  /// No description provided for @resultSolvingMessage.
+  /// Solve progress stage: the deterministic solve is running.
   ///
   /// In en, this message translates to:
-  /// **'Matheasy is solving your problem…'**
-  String get resultSolvingMessage;
+  /// **'Working through the steps…'**
+  String get resultStageWorking;
+
+  /// Solve progress stage: the answer is being substituted back into the problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the answer…'**
+  String get resultStageVerifying;
+
+  /// Solve progress stage: the written explanation is being produced.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the explanation…'**
+  String get resultStageExplaining;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Linear equation · one unknown'**
+  String get problemKindLinear;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Quadratic equation'**
+  String get problemKindQuadratic;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraction arithmetic'**
+  String get problemKindFraction;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Arithmetic expression'**
+  String get problemKindExpression;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigonometry'**
+  String get problemKindTrigonometry;
+
+  /// Problem category shown under a recognized problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Geometry'**
+  String get problemKindGeometry;
 
   /// No description provided for @resultPracticeReady.
   ///

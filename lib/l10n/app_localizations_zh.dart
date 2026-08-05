@@ -1013,6 +1013,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanEditEquation => '编辑识别出的方程';
 
   @override
+  String get scanAdjustCrop => '调整';
+
+  @override
+  String get scanStageReading => '正在读取你的题目…';
+
+  @override
+  String get scanStageRecognizing => '正在识别数学式…';
+
+  @override
+  String get scanStageAlmost => '就快好了…';
+
+  @override
   String get manualErrorGeneric => '出错了，请重试。';
 
   @override
@@ -1067,7 +1079,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get resultSharingSoon => '分享功能即将上线。';
 
   @override
-  String get resultSolvingMessage => 'Matheasy 正在解答你的题目…';
+  String get resultStageWorking => '正在一步步计算…';
+
+  @override
+  String get resultStageVerifying => '正在核对答案…';
+
+  @override
+  String get resultStageExplaining => '正在写解析…';
+
+  @override
+  String get problemKindLinear => '一元一次方程';
+
+  @override
+  String get problemKindQuadratic => '一元二次方程';
+
+  @override
+  String get problemKindFraction => '分数运算';
+
+  @override
+  String get problemKindExpression => '算术表达式';
+
+  @override
+  String get problemKindTrigonometry => '三角函数';
+
+  @override
+  String get problemKindGeometry => '几何';
 
   @override
   String get resultPracticeReady => '新练习已在下方备好 👇';
@@ -3149,6 +3185,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get scanEditEquation => '编辑识别出的方程';
 
   @override
+  String get scanAdjustCrop => '调整';
+
+  @override
+  String get scanStageReading => '正在读取你的题目…';
+
+  @override
+  String get scanStageRecognizing => '正在识别数学式…';
+
+  @override
+  String get scanStageAlmost => '就快好了…';
+
+  @override
   String get manualErrorGeneric => '出错了，请重试。';
 
   @override
@@ -3203,7 +3251,31 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get resultSharingSoon => '分享功能即将上线。';
 
   @override
-  String get resultSolvingMessage => 'Matheasy 正在解答你的题目…';
+  String get resultStageWorking => '正在一步步计算…';
+
+  @override
+  String get resultStageVerifying => '正在核对答案…';
+
+  @override
+  String get resultStageExplaining => '正在写解析…';
+
+  @override
+  String get problemKindLinear => '一元一次方程';
+
+  @override
+  String get problemKindQuadratic => '一元二次方程';
+
+  @override
+  String get problemKindFraction => '分数运算';
+
+  @override
+  String get problemKindExpression => '算术表达式';
+
+  @override
+  String get problemKindTrigonometry => '三角函数';
+
+  @override
+  String get problemKindGeometry => '几何';
 
   @override
   String get resultPracticeReady => '新练习已在下方备好 👇';
@@ -5285,6 +5357,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get scanEditEquation => '編輯偵測到的方程式';
 
   @override
+  String get scanAdjustCrop => '調整';
+
+  @override
+  String get scanStageReading => '正在讀取你的題目…';
+
+  @override
+  String get scanStageRecognizing => '正在辨識數學式…';
+
+  @override
+  String get scanStageAlmost => '快好了…';
+
+  @override
   String get manualErrorGeneric => '發生錯誤，請再試一次。';
 
   @override
@@ -5339,7 +5423,31 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get resultSharingSoon => '分享功能即將推出。';
 
   @override
-  String get resultSolvingMessage => 'Matheasy 正在為你解題…';
+  String get resultStageWorking => '正在逐步計算…';
+
+  @override
+  String get resultStageVerifying => '正在核對答案…';
+
+  @override
+  String get resultStageExplaining => '正在撰寫解析…';
+
+  @override
+  String get problemKindLinear => '一元一次方程式';
+
+  @override
+  String get problemKindQuadratic => '一元二次方程式';
+
+  @override
+  String get problemKindFraction => '分數運算';
+
+  @override
+  String get problemKindExpression => '算術式';
+
+  @override
+  String get problemKindTrigonometry => '三角函數';
+
+  @override
+  String get problemKindGeometry => '幾何';
 
   @override
   String get resultPracticeReady => '新的練習已備好在下方 👇';

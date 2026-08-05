@@ -1070,6 +1070,18 @@ class AppLocalizationsHu extends AppLocalizations {
   String get scanEditEquation => 'Felismert egyenlet szerkesztése';
 
   @override
+  String get scanAdjustCrop => 'Módosítás';
+
+  @override
+  String get scanStageReading => 'Olvasom a feladatod…';
+
+  @override
+  String get scanStageRecognizing => 'Felismerem a matekot…';
+
+  @override
+  String get scanStageAlmost => 'Mindjárt kész…';
+
+  @override
   String get manualErrorGeneric => 'Valami hiba történt. Kérjük, próbáld újra.';
 
   @override
@@ -1125,7 +1137,31 @@ class AppLocalizationsHu extends AppLocalizations {
   String get resultSharingSoon => 'A megosztás hamarosan elérhető.';
 
   @override
-  String get resultSolvingMessage => 'A Matheasy éppen megoldja a feladatodat…';
+  String get resultStageWorking => 'Végigmegyek a lépéseken…';
+
+  @override
+  String get resultStageVerifying => 'Ellenőrzöm a választ…';
+
+  @override
+  String get resultStageExplaining => 'Megírom a magyarázatot…';
+
+  @override
+  String get problemKindLinear => 'Lineáris egyenlet · egy ismeretlen';
+
+  @override
+  String get problemKindQuadratic => 'Másodfokú egyenlet';
+
+  @override
+  String get problemKindFraction => 'Törtekkel való számolás';
+
+  @override
+  String get problemKindExpression => 'Számtani kifejezés';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometria';
+
+  @override
+  String get problemKindGeometry => 'Geometria';
 
   @override
   String get resultPracticeReady => 'Friss gyakorlás vár lent 👇';

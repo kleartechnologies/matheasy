@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_durations.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -14,11 +15,15 @@ import '../../../../core/widgets/indicators/matheasy_loader.dart';
 class ProcessingOverlay extends StatefulWidget {
   const ProcessingOverlay({super.key});
 
-  static const List<String> messages = [
-    'Reading your problem…',
-    'Recognizing the math…',
-    'Almost there…',
-  ];
+  /// The stages, in order, that the overlay narrates while the round trip is
+  /// out. Localized — they were English string literals until live detection
+  /// made this overlay short enough to notice, and a Spanish-speaking student
+  /// waiting on an English "Almost there…" is a bug in every language.
+  static List<String> messagesOf(BuildContext context) => [
+        context.l10n.scanStageReading,
+        context.l10n.scanStageRecognizing,
+        context.l10n.scanStageAlmost,
+      ];
 
   @override
   State<ProcessingOverlay> createState() => _ProcessingOverlayState();
@@ -35,7 +40,7 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
     // three strings reads as a spinner of words rather than reassurance.
     _timer = Timer.periodic(const Duration(milliseconds: 1600), (_) {
       if (!mounted) return;
-      setState(() => _index = (_index + 1) % ProcessingOverlay.messages.length);
+      setState(() => _index++);
     });
   }
 
@@ -47,6 +52,7 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final messages = ProcessingOverlay.messagesOf(context);
     return ColoredBox(
       color: AppColors.scannerBackground.withValues(alpha: 0.95),
       child: Center(
@@ -65,7 +71,7 @@ class _ProcessingOverlayState extends State<ProcessingOverlay> {
             AnimatedSwitcher(
               duration: AppDurations.medium,
               child: Text(
-                ProcessingOverlay.messages[_index],
+                messages[_index % messages.length],
                 key: ValueKey(_index),
                 style: AppTypography.title.copyWith(color: AppColors.white),
               ),

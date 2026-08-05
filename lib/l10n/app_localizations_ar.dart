@@ -1054,6 +1054,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scanEditEquation => 'تعديل المعادلة المكتشفة';
 
   @override
+  String get scanAdjustCrop => 'تعديل';
+
+  @override
+  String get scanStageReading => 'أقرأ مسألتك…';
+
+  @override
+  String get scanStageRecognizing => 'أتعرّف على الرياضيات…';
+
+  @override
+  String get scanStageAlmost => 'أوشكنا…';
+
+  @override
   String get manualErrorGeneric => 'حدث خطأ ما. حاول مرة أخرى من فضلك.';
 
   @override
@@ -1109,7 +1121,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resultSharingSoon => 'المشاركة ستتوفر قريبًا.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy يحل مسألتك…';
+  String get resultStageWorking => 'جارٍ العمل على الخطوات…';
+
+  @override
+  String get resultStageVerifying => 'جارٍ التحقّق من الإجابة…';
+
+  @override
+  String get resultStageExplaining => 'جارٍ كتابة الشرح…';
+
+  @override
+  String get problemKindLinear => 'معادلة خطية · مجهول واحد';
+
+  @override
+  String get problemKindQuadratic => 'معادلة تربيعية';
+
+  @override
+  String get problemKindFraction => 'حساب الكسور';
+
+  @override
+  String get problemKindExpression => 'تعبير حسابي';
+
+  @override
+  String get problemKindTrigonometry => 'حساب المثلثات';
+
+  @override
+  String get problemKindGeometry => 'الهندسة';
 
   @override
   String get resultPracticeReady => 'تمرين جديد جاهز أدناه 👇';

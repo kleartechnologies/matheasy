@@ -110,13 +110,17 @@ void main() {
 
     testWidgets('shows the scanned-problem card when bytes are present',
         (tester) async {
-      await tester.runAsync(() async {
-        await tester.pumpWidget(MaterialApp(
-          theme: AppTheme.light,
-          home: Scaffold(body: ResultScanImageSlot(imageBytes: _png)),
-        ));
-        await tester.pump();
-      });
+      // Deliberately NOT wrapped in `runAsync`. Real async lets google_fonts'
+      // loader actually run, and with runtime fetching off it throws for a
+      // font that isn't bundled — sometimes after the test has already
+      // finished, which the framework reports as a failure nothing in this
+      // file caused. Fake async never starts that load, and none of the
+      // assertions below need a decoded image: they check the widget tree.
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(body: ResultScanImageSlot(imageBytes: _png)),
+      ));
+      await tester.pump();
       expect(find.byType(ResultScanImage), findsOneWidget);
       expect(find.text('SCANNED PROBLEM'), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);

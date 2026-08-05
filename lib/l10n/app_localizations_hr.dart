@@ -1065,6 +1065,18 @@ class AppLocalizationsHr extends AppLocalizations {
   String get scanEditEquation => 'Uredi prepoznatu jednadžbu';
 
   @override
+  String get scanAdjustCrop => 'Prilagodi';
+
+  @override
+  String get scanStageReading => 'Čitam tvoj zadatak…';
+
+  @override
+  String get scanStageRecognizing => 'Prepoznajem matematiku…';
+
+  @override
+  String get scanStageAlmost => 'Skoro gotovo…';
+
+  @override
   String get manualErrorGeneric => 'Nešto je pošlo po zlu. Pokušaj ponovno.';
 
   @override
@@ -1120,7 +1132,31 @@ class AppLocalizationsHr extends AppLocalizations {
   String get resultSharingSoon => 'Dijeljenje uskoro stiže.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy rješava tvoj zadatak…';
+  String get resultStageWorking => 'Prolazim kroz korake…';
+
+  @override
+  String get resultStageVerifying => 'Provjeravam odgovor…';
+
+  @override
+  String get resultStageExplaining => 'Pišem objašnjenje…';
+
+  @override
+  String get problemKindLinear => 'Linearna jednadžba · jedna nepoznanica';
+
+  @override
+  String get problemKindQuadratic => 'Kvadratna jednadžba';
+
+  @override
+  String get problemKindFraction => 'Računanje s razlomcima';
+
+  @override
+  String get problemKindExpression => 'Aritmetički izraz';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometrija';
+
+  @override
+  String get problemKindGeometry => 'Geometrija';
 
   @override
   String get resultPracticeReady => 'Novo vježbanje spremno ispod 👇';

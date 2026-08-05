@@ -1078,6 +1078,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanEditEquation => 'Modifier l\'équation détectée';
 
   @override
+  String get scanAdjustCrop => 'Ajuster';
+
+  @override
+  String get scanStageReading => 'Je lis ton problème…';
+
+  @override
+  String get scanStageRecognizing => 'Je reconnais les maths…';
+
+  @override
+  String get scanStageAlmost => 'Presque fini…';
+
+  @override
   String get manualErrorGeneric => 'Un problème est survenu. Réessaie.';
 
   @override
@@ -1134,7 +1146,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resultSharingSoon => 'Le partage arrive bientôt.';
 
   @override
-  String get resultSolvingMessage => 'Matheasy résout ton problème…';
+  String get resultStageWorking => 'Je déroule les étapes…';
+
+  @override
+  String get resultStageVerifying => 'Je vérifie la réponse…';
+
+  @override
+  String get resultStageExplaining => 'J’écris l’explication…';
+
+  @override
+  String get problemKindLinear => 'Équation linéaire · une inconnue';
+
+  @override
+  String get problemKindQuadratic => 'Équation du second degré';
+
+  @override
+  String get problemKindFraction => 'Calcul de fractions';
+
+  @override
+  String get problemKindExpression => 'Expression arithmétique';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonométrie';
+
+  @override
+  String get problemKindGeometry => 'Géométrie';
 
   @override
   String get resultPracticeReady =>

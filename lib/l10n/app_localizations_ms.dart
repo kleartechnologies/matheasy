@@ -1075,6 +1075,18 @@ class AppLocalizationsMs extends AppLocalizations {
   String get scanEditEquation => 'Edit persamaan yang dikesan';
 
   @override
+  String get scanAdjustCrop => 'Laraskan';
+
+  @override
+  String get scanStageReading => 'Membaca soalan anda…';
+
+  @override
+  String get scanStageRecognizing => 'Mengecam matematiknya…';
+
+  @override
+  String get scanStageAlmost => 'Hampir siap…';
+
+  @override
   String get manualErrorGeneric => 'Sesuatu tidak kena. Sila cuba lagi.';
 
   @override
@@ -1130,8 +1142,31 @@ class AppLocalizationsMs extends AppLocalizations {
   String get resultSharingSoon => 'Perkongsian akan hadir tidak lama lagi.';
 
   @override
-  String get resultSolvingMessage =>
-      'Matheasy sedang menyelesaikan soalan anda…';
+  String get resultStageWorking => 'Menyelesaikan langkah demi langkah…';
+
+  @override
+  String get resultStageVerifying => 'Menyemak jawapannya…';
+
+  @override
+  String get resultStageExplaining => 'Menulis penerangannya…';
+
+  @override
+  String get problemKindLinear => 'Persamaan linear · satu anu';
+
+  @override
+  String get problemKindQuadratic => 'Persamaan kuadratik';
+
+  @override
+  String get problemKindFraction => 'Aritmetik pecahan';
+
+  @override
+  String get problemKindExpression => 'Ungkapan aritmetik';
+
+  @override
+  String get problemKindTrigonometry => 'Trigonometri';
+
+  @override
+  String get problemKindGeometry => 'Geometri';
 
   @override
   String get resultPracticeReady => 'Latihan baharu tersedia di bawah 👇';

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/l10n_extension.dart';
+import '../../../core/monitoring/perf_trace.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -16,9 +17,14 @@ import '../application/scan_image_codec.dart';
 ///
 /// Pops with the cropped [Uint8List] on confirm, or `null` if cancelled.
 class CropScreen extends StatefulWidget {
-  const CropScreen({super.key, required this.imageBytes});
+  const CropScreen({super.key, required this.imageBytes, this.trace});
 
   final Uint8List imageBytes;
+
+  /// The in-flight scan trace, so the crop's machine time (the native crop plus
+  /// the optional re-encode isolate) is separable from its human time. Null
+  /// outside a traced scan — the screen is fully usable without it.
+  final PerfTrace? trace;
 
   @override
   State<CropScreen> createState() => _CropScreenState();
@@ -33,6 +39,9 @@ class _CropScreenState extends State<CropScreen> {
   void _confirm() {
     if (_processing) return;
     setState(() => _processing = true);
+    // Everything from the tap to the pop is machine time; the rest of
+    // `crop.screen` is the user framing the shot.
+    widget.trace?.begin('crop.execute');
     // Fires _onCropped asynchronously with the cropped bytes.
     _controller.crop();
   }
@@ -43,10 +52,19 @@ class _CropScreenState extends State<CropScreen> {
         // crop_your_image already returns a compact JPEG for JPEG input; only
         // pay for a re-decode/downscale isolate when the result is large or not
         // already JPEG (guards uploads while skipping the common camera case).
-        final jpeg = isJpegBytes(croppedImage) &&
-                croppedImage.lengthInBytes <= kScanDirectUploadMaxBytes
-            ? croppedImage
-            : await compute(encodeScanJpeg, croppedImage);
+        final needsReencode = !isJpegBytes(croppedImage) ||
+            croppedImage.lengthInBytes > kScanDirectUploadMaxBytes;
+        widget.trace?.end('crop.execute',
+            detail: '${(croppedImage.lengthInBytes / 1024).round()}KB, '
+                're-encode: $needsReencode');
+        final jpeg = needsReencode
+            ? await (widget.trace?.measure(
+                  'crop.reencode',
+                  () => compute(encodeScanJpeg, croppedImage),
+                  detail: (b) => '${(b.lengthInBytes / 1024).round()}KB',
+                ) ??
+                compute(encodeScanJpeg, croppedImage))
+            : croppedImage;
         if (mounted) Navigator.of(context).pop(jpeg);
       case CropFailure():
         if (!mounted) return;

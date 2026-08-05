@@ -14,6 +14,7 @@ import 'features/analytics/application/analytics_service.dart';
 import 'features/analytics/application/composite_analytics_service.dart';
 import 'features/analytics/application/meta_analytics_service.dart';
 import 'features/auth/application/auth_service.dart';
+import 'features/scan/application/camera_warmup.dart';
 import 'features/subscription/application/revenuecat_bootstrap.dart';
 import 'features/subscription/application/subscription_service.dart';
 import 'features/sync/application/cloud_store.dart';
@@ -67,6 +68,12 @@ Future<void> bootstrap() async {
           child: const MatheasyApp(),
         ),
       );
+
+      // After the first frame, never before it: enumerating the cameras is a
+      // platform-channel round trip the scanner would otherwise pay on open,
+      // and doing it here means the answer is already waiting. Scheduled post
+      // frame so it competes with nothing the user is looking at.
+      WidgetsBinding.instance.addPostFrameCallback((_) => warmCameraList());
     },
     (error, stack) =>
         CrashReporting.instance.recordError(error, stack, fatal: true),

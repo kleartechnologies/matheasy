@@ -339,6 +339,22 @@
   "scanRetake": "Retake",
   "scanSolve": "Solve",
   "scanEditEquation": "Edit the detected equation",
+  "scanAdjustCrop": "Adjust",
+  "@scanAdjustCrop": {
+    "description": "Button on the capture confirmation sheet: re-open the crop screen on the original photo when the automatic crop framed the wrong part."
+  },
+  "scanStageReading": "Reading your problem…",
+  "@scanStageReading": {
+    "description": "Processing message shown while the captured photo is being read."
+  },
+  "scanStageRecognizing": "Recognizing the math…",
+  "@scanStageRecognizing": {
+    "description": "Processing message shown while the math is being recognized."
+  },
+  "scanStageAlmost": "Almost there…",
+  "@scanStageAlmost": {
+    "description": "Processing message shown near the end of recognition."
+  },
   "manualErrorGeneric": "Something went wrong. Please try again.",
   "manualFixProblem": "Fix the problem",
   "manualTypeProblem": "Type a problem",
@@ -357,7 +373,42 @@
   "resultTitle": "Solution",
   "resultShare": "Share",
   "resultSharingSoon": "Sharing arrives soon.",
-  "resultSolvingMessage": "Matheasy is solving your problem…",
+  "resultStageWorking": "Working through the steps…",
+  "@resultStageWorking": {
+    "description": "Solve progress stage: the deterministic solve is running."
+  },
+  "resultStageVerifying": "Checking the answer…",
+  "@resultStageVerifying": {
+    "description": "Solve progress stage: the answer is being substituted back into the problem."
+  },
+  "resultStageExplaining": "Writing the explanation…",
+  "@resultStageExplaining": {
+    "description": "Solve progress stage: the written explanation is being produced."
+  },
+  "problemKindLinear": "Linear equation · one unknown",
+  "@problemKindLinear": {
+    "description": "Problem category shown under a recognized problem."
+  },
+  "problemKindQuadratic": "Quadratic equation",
+  "@problemKindQuadratic": {
+    "description": "Problem category shown under a recognized problem."
+  },
+  "problemKindFraction": "Fraction arithmetic",
+  "@problemKindFraction": {
+    "description": "Problem category shown under a recognized problem."
+  },
+  "problemKindExpression": "Arithmetic expression",
+  "@problemKindExpression": {
+    "description": "Problem category shown under a recognized problem."
+  },
+  "problemKindTrigonometry": "Trigonometry",
+  "@problemKindTrigonometry": {
+    "description": "Problem category shown under a recognized problem."
+  },
+  "problemKindGeometry": "Geometry",
+  "@problemKindGeometry": {
+    "description": "Problem category shown under a recognized problem."
+  },
   "resultPracticeReady": "Fresh practice ready below 👇",
   "resultSavedToLibrary": "Saved to your library",
   "resultRemoved": "Removed",
@@ -1035,8 +1086,12 @@
   "@onboardingStepCounter": {
     "description": "Step counter shown in the onboarding solver illustration, e.g. 'Step 2/4'.",
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "onboardingPracticeTitle": "Practice Until You Master It",
@@ -1045,7 +1100,9 @@
   "@onboardingLevelBadge": {
     "description": "Level label inside the onboarding XP ring, e.g. 'Level 7'.",
     "placeholders": {
-      "level": { "type": "int" }
+      "level": {
+        "type": "int"
+      }
     }
   },
   "onboardingXpUnit": "XP",
@@ -1053,8 +1110,12 @@
   "@onboardingXpToNext": {
     "description": "Remaining XP to reach the next level, e.g. '760 XP to Level 8'.",
     "placeholders": {
-      "xp": { "type": "int" },
-      "level": { "type": "int" }
+      "xp": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
     }
   },
   "onboardingDayStreak": "Day streak",
@@ -1075,7 +1136,6 @@
   "onboardingChipAlgebra": "Algebra",
   "onboardingChipFractions": "Fractions",
   "onboardingChipGeometry": "Geometry",
-
   "@_v3": "V3 Solution experience — the guided journey (problem → answer → start learning → one step at a time → summary → practice → tutor). 'Learn more' holds every optional layer.",
   "resultStartLearning": "Start Learning",
   "resultStartLearningHint": "Walk through it one step at a time",
@@ -1103,8 +1163,12 @@
   "@solutionProgressSemantics": {
     "description": "Screen-reader label for the step player's progress dots.",
     "placeholders": {
-      "step": { "type": "int" },
-      "total": { "type": "int" }
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "@_spine": "The step spine — every step listed, one opened at a time.",
@@ -1112,7 +1176,6 @@
   "solutionTapStepHint": "Tap any step to see how it works",
   "solutionAnswerRow": "Solution",
   "solutionExplainHow": "Explain how",
-
   "learnMoreTitle": "Learn more",
   "learnMoreAllSteps": "All steps",
   "learnMoreGlossary": "Glossary",
@@ -1169,7 +1232,11 @@
   "legalPrivacyContactBody": "Questions about this policy, or want your data deleted? Email us at {email} and we'll help.",
   "@legalPrivacyContactBody": {
     "description": "Privacy policy contact section. {email} is the support address and must not be translated.",
-    "placeholders": { "email": { "type": "String" } }
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
   },
   "legalTermsUsingTitle": "Using Matheasy",
   "legalTermsUsingBody": "Matheasy helps you learn maths through scanning, guided solutions, an AI tutor and practice. Use it for your own learning, and be respectful of others.",

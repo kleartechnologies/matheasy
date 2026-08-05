@@ -8,9 +8,11 @@ import '../../analytics/domain/analytics_event.dart';
 import '../../history/application/history_controller.dart';
 import '../../history/application/history_repository.dart';
 import '../../history/domain/history_entry.dart';
+import '../../scan/application/scan_trace.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../domain/result_models.dart';
 import 'functions_teaching_service.dart';
+import 'preemptive_solve.dart';
 import 'solver_service.dart';
 
 part 'result_controller.g.dart';
@@ -42,11 +44,20 @@ class ResultController extends _$ResultController {
   Future<ResultData> build(DetectedEquation equation) async {
     final analytics = ref.read(analyticsServiceProvider);
 
+    // The in-flight scan's trace, closed on every exit below so the waterfall
+    // always covers shutter → answer. Finished with [PerfTrace.log] rather than
+    // through the holder because this runs inside `build`, and a provider may
+    // not mutate another provider while building; the next scan's `start()`
+    // replaces it.
+    final trace = ref.read(scanTraceProvider);
+
     // Read-through cache (spec §8). A previously solved problem re-opens from the
     // local store — no `solve()` call, no scan charge (the meter lives in the
     // scanner flow, which this bypasses), and it works offline.
     final cached = _lookupCache(equation);
     if (cached != null) {
+      trace?.mark('solve.cacheHit');
+      trace?.log();
       unawaited(analytics.logEvent(
           AnalyticsEvent.resultViewed(problemType: cached.result.type.name)));
       // Progressive teaching for a RE-OPENED problem too (the common case): the
@@ -61,14 +72,39 @@ class ResultController extends _$ResultController {
     }
 
     final solver = ref.watch(solverServiceProvider);
+    // A solve started while the user was checking the confirmation card. When
+    // there is one it is already seconds old by the time this screen builds, so
+    // awaiting it is what turns that reading time into a head start. Claiming
+    // consumes it, so a retry after a failure starts a genuinely new solve
+    // instead of re-awaiting the same broken future.
+    final headStart =
+        ref.read(preemptiveSolveProvider.notifier).claim(equation);
+    Future<ResultData> run() => headStart ?? solver.solve(equation);
+
     final ResultData data;
     try {
-      data = await solver.solve(equation);
+      // The last leg of the scan waterfall: `solveEquation`'s round trip, which
+      // on an LLM-tier problem is a second reasoning-model call plus a possible
+      // verification-gate retry. Closing the trace right after logs the full
+      // shutter → answer path as one waterfall. With a head start this span
+      // measures only what was LEFT of that round trip, which is the point.
+      data = await (trace?.measure<ResultData>(
+            'solve.roundTrip',
+            run,
+            detail: (d) => '${d.verified ? 'verified' : 'unverified'}'
+                '${headStart != null ? ', pre-emptive' : ''}',
+          ) ??
+          run());
     } on BackendException catch (e) {
+      trace?.log();
       throw ResultSolveFailure(offline: e.isOffline);
     } catch (_) {
+      trace?.log();
       throw ResultSolveFailure(offline: false);
     }
+    // The answer is on screen from here — teaching enrichment that follows is
+    // explicitly off the critical path and must not be counted in it.
+    ref.read(scanTraceProvider.notifier).finish();
     // Cache only real answers: a couldn't-verify result is never stored, so a
     // re-scan gets a fresh attempt and history stays a log of solved problems.
     if (data.verified) await _recordCache(data);
