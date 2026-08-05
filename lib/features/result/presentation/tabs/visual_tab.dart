@@ -5,6 +5,7 @@ import '../../../../core/backend/functions_client.dart';
 import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../practice_set/presentation/practice_set_card.dart';
 import '../../../scan/domain/detected_equation.dart';
 import '../../../subscription/application/subscription_controller.dart';
 import '../../application/animation/animation_script_builder.dart';
@@ -106,6 +107,9 @@ class VisualTab extends ConsumerWidget {
         return unavailable();
       },
       data: (visual) {
+        // The unchanged player dispatch, wrapped so the shared practice
+        // journey can follow whichever player renders.
+        Widget player() {
         // Geometry with a solved, structured scene gets the diagram-first,
         // step-animated player — the drawing leads, not the prose.
         final scene = visual.geometryScene;
@@ -304,6 +308,21 @@ class VisualTab extends ConsumerWidget {
           );
         }
         return unavailable();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            player(),
+            // The shared practice journey follows the animation — the same
+            // card (and stored completion state) as every other surface.
+            PracticeSetSection(
+              result: result,
+              compact: true,
+              margin: const EdgeInsets.only(top: AppSpacing.lg),
+            ),
+          ],
+        );
       },
     );
   }

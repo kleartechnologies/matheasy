@@ -2954,6 +2954,96 @@ abstract class AppLocalizations {
   /// **'Similar'**
   String get teachingRungSimilar;
 
+  /// No description provided for @practiceSetRungChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge'**
+  String get practiceSetRungChallenge;
+
+  /// No description provided for @practiceSetProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} complete'**
+  String practiceSetProgress(int done, int total);
+
+  /// No description provided for @practiceSetChallengeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish all three to unlock the challenge'**
+  String get practiceSetChallengeLocked;
+
+  /// No description provided for @practiceSetChallengeUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge unlocked — one stretch problem left.'**
+  String get practiceSetChallengeUnlocked;
+
+  /// No description provided for @practiceSetMixedReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed review'**
+  String get practiceSetMixedReview;
+
+  /// No description provided for @practiceSetMixedReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick mixed round on this topic to make it stick'**
+  String get practiceSetMixedReviewSubtitle;
+
+  /// No description provided for @practiceSetMixedReviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed review complete'**
+  String get practiceSetMixedReviewDone;
+
+  /// No description provided for @practiceSetMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic mastered!'**
+  String get practiceSetMastered;
+
+  /// No description provided for @practiceSetMasteredDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished the whole practice journey. +{xp} XP'**
+  String practiceSetMasteredDetail(int xp);
+
+  /// No description provided for @practiceSetNewSet.
+  ///
+  /// In en, this message translates to:
+  /// **'New set'**
+  String get practiceSetNewSet;
+
+  /// No description provided for @practiceSetNewSetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get a new set — check your connection and try again.'**
+  String get practiceSetNewSetFailed;
+
+  /// No description provided for @practiceSetContinueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep practicing'**
+  String get practiceSetContinueTitle;
+
+  /// No description provided for @practiceSetContinueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off'**
+  String get practiceSetContinueSubtitle;
+
+  /// No description provided for @practiceSetNextUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Next up'**
+  String get practiceSetNextUp;
+
+  /// No description provided for @practiceSetPracticeAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice again'**
+  String get practiceSetPracticeAgain;
+
   /// No description provided for @teachingAskPrompt.
   ///
   /// In en, this message translates to:

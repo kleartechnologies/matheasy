@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/animations/pressable.dart';
 import '../../../../../core/extensions/context_extensions.dart';
 import '../../../../../core/localization/l10n_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -661,140 +660,11 @@ class KeyTakeawayCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 7. Practice ladder — easier / similar / harder (Pro)
+// 7. Practice ladder — MOVED. The easier/similar/harder card grew into the
+// shared practice-set component (`PracticeSetCard` / `PracticeSetSection` in
+// features/practice_set), which every surface renders — with completion state,
+// the challenge unlock, mixed review and the mastered celebration.
 // ---------------------------------------------------------------------------
-
-class PracticeLadderCard extends StatelessWidget {
-  const PracticeLadderCard({
-    super.key,
-    required this.ladder,
-    this.onAttempt,
-  });
-
-  final PracticeLadder ladder;
-
-  /// Attempt a rung (null → the rungs render read-only).
-  final ValueChanged<PracticeItem>? onAttempt;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.fitness_center_rounded,
-                  size: 16, color: AppColors.primaryAction),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                context.l10n.teachingYourTurn,
-                style: AppTypography.label.copyWith(color: _emerald(context)),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            context.l10n.teachingPracticeLadderIntro,
-            style: AppTypography.caption.copyWith(color: colors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          for (var i = 0; i < ladder.rungs.length; i++) ...[
-            _RungRow(item: ladder.rungs[i], onTap: onAttempt),
-            if (i < ladder.rungs.length - 1)
-              const SizedBox(height: AppSpacing.sm),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RungRow extends StatelessWidget {
-  const _RungRow({required this.item, required this.onTap});
-
-  final PracticeItem item;
-  final ValueChanged<PracticeItem>? onTap;
-
-  // Theme-tuned container/on-container pairs (AA in both themes) — the raw accent
-  // as both fill and text fell below AA, notably in dark mode (review #2).
-  ({String label, Color fill, Color ink}) _rung(BuildContext context) {
-    final colors = context.colors;
-    return switch (item.rung) {
-      'easier' => (
-          label: context.l10n.teachingRungEasier,
-          fill: colors.successContainer,
-          ink: colors.onSuccessContainer
-        ),
-      'harder' => (
-          label: context.l10n.teachingRungHarder,
-          fill: colors.warningContainer,
-          ink: colors.onWarningContainer
-        ),
-      _ => (
-          label: context.l10n.teachingRungSimilar,
-          fill: colors.infoContainer,
-          ink: colors.onInfoContainer
-        ),
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final r = _rung(context);
-    final row = Container(
-      constraints: const BoxConstraints(minHeight: 44), // a11y tap target
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: colors.surfaceMuted,
-        borderRadius: AppRadius.smRadius,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: r.fill,
-              borderRadius: AppRadius.pillRadius,
-            ),
-            child: Text(
-              r.label,
-              style: AppTypography.caption.copyWith(
-                color: r.ink,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: MathText(
-              item.latex,
-              style: AppTypography.bodyMedium.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          if (onTap != null)
-            Icon(Icons.arrow_forward_rounded, size: 16, color: _emerald(context)),
-        ],
-      ),
-    );
-    if (onTap == null) return row;
-    return Semantics(
-      button: true,
-      label: context.l10n.teachingPracticeQuestionLabel(r.label),
-      excludeSemantics: true,
-      child: Pressable(
-        onTap: () => onTap!(item),
-        borderRadius: AppRadius.smRadius,
-        child: row,
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // 8. Numi invite — the tutor hand-off

@@ -6,7 +6,9 @@
 // at phone width.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matheasy/core/persistence/preferences_store.dart';
 import 'package:matheasy/core/theme/app_theme.dart';
 import 'package:matheasy/features/result/domain/result_models.dart';
 import 'package:matheasy/features/result/domain/teaching_models.dart';
@@ -16,6 +18,7 @@ import 'package:matheasy/features/result/presentation/tabs/solution_tab.dart';
 import 'package:matheasy/features/result/presentation/widgets/teaching/teaching_cards.dart';
 import 'package:matheasy/features/scan/domain/detected_equation.dart';
 import 'package:matheasy/features/scan/domain/scan_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const _eq = DetectedEquation(
   latex: 'x^2 - 5x + 6 = 0',
@@ -119,15 +122,22 @@ Future<void> _pump(WidgetTester tester, ResultData result,
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
+  // The practice section inside SolutionTab is a Consumer (it watches the
+  // shared practice-set state), so the tab needs a ProviderScope + a real
+  // prefs instance behind it.
+  SharedPreferences.setMockInitialValues(const {});
+  final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(
-    MaterialApp(
-      theme: theme ?? AppTheme.light,
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: SolutionTab(
-            result: result,
-            onAskMatheasy: () {},
-            onAttemptPractice: (_) {},
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: MaterialApp(
+        theme: theme ?? AppTheme.light,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SolutionTab(
+              result: result,
+              onAskMatheasy: () {},
+            ),
           ),
         ),
       ),

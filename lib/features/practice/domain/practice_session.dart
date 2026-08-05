@@ -16,6 +16,7 @@ class PracticeRequest {
     this.title,
     this.skillId,
     this.adaptive = false,
+    this.practiceSetSourceKey,
   });
 
   /// The daily challenge: a fixed 5-question set with a bonus on completion.
@@ -47,6 +48,11 @@ class PracticeRequest {
   /// tier always gets a basic ramp regardless of this flag.
   final bool adaptive;
 
+  /// When this session is the MIXED REVIEW of a practice set (the journey
+  /// generated from a solved problem), the set's source key — completing the
+  /// session marks the set's mixed review done. Null for ordinary sessions.
+  final String? practiceSetSourceKey;
+
   String get displayTitle => title ?? topic.label;
 
   PracticeRequest copyWith({
@@ -57,6 +63,7 @@ class PracticeRequest {
     String? title,
     String? skillId,
     bool? adaptive,
+    String? practiceSetSourceKey,
   }) {
     return PracticeRequest(
       topic: topic ?? this.topic,
@@ -66,6 +73,7 @@ class PracticeRequest {
       title: title ?? this.title,
       skillId: skillId ?? this.skillId,
       adaptive: adaptive ?? this.adaptive,
+      practiceSetSourceKey: practiceSetSourceKey ?? this.practiceSetSourceKey,
     );
   }
 
@@ -78,7 +86,8 @@ class PracticeRequest {
       other.isDailyChallenge == isDailyChallenge &&
       other.title == title &&
       other.skillId == skillId &&
-      other.adaptive == adaptive;
+      other.adaptive == adaptive &&
+      other.practiceSetSourceKey == practiceSetSourceKey;
 
   @override
   int get hashCode => Object.hash(
@@ -89,6 +98,7 @@ class PracticeRequest {
         title,
         skillId,
         adaptive,
+        practiceSetSourceKey,
       );
 }
 

@@ -9,6 +9,7 @@ import '../../../core/security/rate_limit_service.dart';
 import '../../../core/services/haptics_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
+import '../../practice_set/application/practice_set_controller.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_mistake.dart';
@@ -233,6 +234,14 @@ class PracticeController extends _$PracticeController {
       if (session.request.isDailyChallenge) {
         unawaited(
             analytics.logEvent(AnalyticsEvent.dailyChallengeCompleted()));
+      }
+      // A session launched as a practice set's MIXED REVIEW reports back to the
+      // set's journey (unlock progress toward the mastered state).
+      final sourceKey = session.request.practiceSetSourceKey;
+      if (sourceKey != null) {
+        ref
+            .read(practiceSetControllerProvider.notifier)
+            .markMixedReviewCompleted(sourceKey);
       }
       state = PracticeSessionState(
         phase: PracticePhase.complete,

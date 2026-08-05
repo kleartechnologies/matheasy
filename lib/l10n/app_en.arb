@@ -512,6 +512,38 @@
   "teachingRungEasier": "Easier",
   "teachingRungHarder": "Harder",
   "teachingRungSimilar": "Similar",
+  "practiceSetRungChallenge": "Challenge",
+  "practiceSetProgress": "{done} of {total} complete",
+  "@practiceSetProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceSetChallengeLocked": "Finish all three to unlock the challenge",
+  "practiceSetChallengeUnlocked": "Challenge unlocked — one stretch problem left.",
+  "practiceSetMixedReview": "Mixed review",
+  "practiceSetMixedReviewSubtitle": "A quick mixed round on this topic to make it stick",
+  "practiceSetMixedReviewDone": "Mixed review complete",
+  "practiceSetMastered": "Topic mastered!",
+  "practiceSetMasteredDetail": "You finished the whole practice journey. +{xp} XP",
+  "@practiceSetMasteredDetail": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceSetNewSet": "New set",
+  "practiceSetNewSetFailed": "Couldn't get a new set — check your connection and try again.",
+  "practiceSetContinueTitle": "Keep practicing",
+  "practiceSetContinueSubtitle": "Pick up where you left off",
+  "practiceSetNextUp": "Next up",
+  "practiceSetPracticeAgain": "Practice again",
   "teachingAskPrompt": "Still fuzzy on a step, or want to try the next one yourself? I can talk you through it.",
   "teachingAskNumi": "Ask Numi",
   "teachingHowToApproach": "HOW TO APPROACH IT",

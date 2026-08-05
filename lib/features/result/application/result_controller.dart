@@ -8,6 +8,7 @@ import '../../analytics/domain/analytics_event.dart';
 import '../../history/application/history_controller.dart';
 import '../../history/application/history_repository.dart';
 import '../../history/domain/history_entry.dart';
+import '../../practice_set/application/practice_set_controller.dart';
 import '../../scan/application/scan_trace.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../domain/result_models.dart';
@@ -68,6 +69,9 @@ class ResultController extends _$ResultController {
           (cached.result.verified || cached.result.routeToTutor)) {
         unawaited(_attachTeaching(cached.result));
       }
+      // A cache hit is still a solve for the practice journey: re-opening a
+      // pending practice problem from history must complete its rung too.
+      _syncPracticeSets(cached.result);
       return cached.result;
     }
 
@@ -108,6 +112,10 @@ class ResultController extends _$ResultController {
     // Cache only real answers: a couldn't-verify result is never stored, so a
     // re-scan gets a fresh attempt and history stays a log of solved problems.
     if (data.verified) await _recordCache(data);
+    // Completion detection for the practice journey: a verified solve that
+    // matches a pending practice-set item marks it complete (and pays its XP).
+    // The set itself is created later, when the teaching ladder lands.
+    _syncPracticeSets(data);
     unawaited(analytics
         .logEvent(AnalyticsEvent.resultViewed(problemType: data.type.name)));
     // Progressive teaching (spec §5): the answer is already computed — fetch the
@@ -132,9 +140,32 @@ class ResultController extends _$ResultController {
       if (merged == null || !ref.mounted) return;
       state = AsyncData(merged);
       if (merged.verified) await _recordCache(merged);
+      // The teaching layer is where the practice ladder arrives — generate the
+      // reusable practice set for this solved problem the moment it lands.
+      _syncPracticeSets(merged);
     } catch (_) {
       // Teaching is an enhancement — never surface its failure over the answer.
     }
+  }
+
+  /// Feeds a verified result into the practice-set journey: completes any
+  /// pending item matching this problem, then ensures the problem has its own
+  /// set once a ladder is present. Deferred a microtask because this runs from
+  /// `build` (incl. the synchronous cache-hit path), and a provider may not
+  /// mutate another provider while building. Best-effort — never blocks the
+  /// answer.
+  void _syncPracticeSets(ResultData data) {
+    if (!data.verified) return;
+    Future.microtask(() {
+      if (!ref.mounted) return;
+      try {
+        final sets = ref.read(practiceSetControllerProvider.notifier);
+        sets.recordSolved(data.equation.latex);
+        sets.ensureForResult(data);
+      } catch (_) {
+        // Practice sets are an enhancement over the solve — swallow failures.
+      }
+    });
   }
 
   /// Looks up the local cache, degrading to a miss if the store is unavailable

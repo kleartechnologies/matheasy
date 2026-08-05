@@ -11,12 +11,11 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../practice_set/presentation/practice_set_card.dart';
 import '../../domain/result_models.dart';
-import '../../domain/teaching_models.dart';
 import '../widgets/learn_more_sheet.dart';
 import '../widgets/lesson_summary.dart';
 import '../widgets/step_spine.dart';
-import '../widgets/teaching/teaching_cards.dart';
 
 /// Where the learner is in the guided journey.
 enum LessonPhase {
@@ -48,7 +47,6 @@ class SolutionTab extends StatefulWidget {
     required this.result,
     this.onOpenVisual,
     this.onAskMatheasy,
-    this.onAttemptPractice,
     this.onPracticeTopic,
   });
 
@@ -61,10 +59,9 @@ class SolutionTab extends StatefulWidget {
   /// Opens Numi. Only surfaced at the end ("still confused?"), never pinned.
   final VoidCallback? onAskMatheasy;
 
-  /// Attempts a practice-ladder rung (easier / similar / harder).
-  final ValueChanged<PracticeItem>? onAttemptPractice;
-
   /// Falls back to topic practice when the payload carries no ladder.
+  /// (When it does carry one, the shared [PracticeSetSection] renders the
+  /// practice-set journey and handles its own navigation.)
   final VoidCallback? onPracticeTopic;
 
   @override
@@ -279,10 +276,10 @@ class _SolutionTabState extends State<SolutionTab> {
           ),
           const SizedBox(height: AppSpacing.md),
           if (ladder != null)
-            PracticeLadderCard(
-              ladder: ladder,
-              onAttempt: widget.onAttemptPractice,
-            )
+            // The shared practice-set component: the same card (and the same
+            // stored completion state) the Final Answer strip, Visual tab,
+            // Practice tab and History show for this problem.
+            PracticeSetSection(result: widget.result)
           else
             SecondaryButton(
               label: context.l10n.solutionPracticeThisTopic,

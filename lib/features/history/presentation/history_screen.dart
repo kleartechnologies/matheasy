@@ -8,6 +8,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../practice_set/application/practice_set_controller.dart';
+import '../../practice_set/domain/practice_set.dart';
+import '../../practice_set/presentation/practice_set_card.dart';
 import '../application/history_controller.dart';
 import 'widgets/history_tile.dart';
 
@@ -59,23 +62,56 @@ class HistoryScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
                 final entry = entries[index];
+                // "Practice again" — the reusable set generated when this
+                // problem was solved, one tap from its history row.
+                final practiceSet =
+                    ref.watch(practiceSetForProvider(entry.canonicalKey));
                 return Dismissible(
                   key: ValueKey(entry.canonicalKey),
                   direction: DismissDirection.endToStart,
                   background: _DeleteBackground(),
-                  onDismissed: (_) => ref
-                      .read(historyControllerProvider.notifier)
-                      .remove(entry.canonicalKey),
+                  onDismissed: (_) {
+                    ref
+                        .read(historyControllerProvider.notifier)
+                        .remove(entry.canonicalKey);
+                    // Deleting the problem deletes its linked practice set —
+                    // the swipe is the user's on-device data control.
+                    ref
+                        .read(practiceSetControllerProvider.notifier)
+                        .removeFor(entry.canonicalKey);
+                  },
                   child: HistoryTile(
                     entry: entry,
                     onTap: () => context.push(
                       AppRoutes.scanResult,
                       extra: entry.equation,
                     ),
+                    onPractice: practiceSet == null
+                        ? null
+                        : () => _showPracticeSet(context, practiceSet),
                   ),
                 );
               },
             ),
+    );
+  }
+
+  /// The full shared practice-set card in a sheet — same component, same
+  /// stored completion state as the Solution screen.
+  void _showPracticeSet(BuildContext context, PracticeSet set) {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.screenH,
+          AppSpacing.lg,
+          AppSpacing.screenH,
+          AppSpacing.lg + MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: PracticeSetCard(set: set),
+      ),
     );
   }
 
@@ -92,6 +128,9 @@ class HistoryScreen extends ConsumerWidget {
     );
     if (confirmed == true) {
       await ref.read(historyControllerProvider.notifier).clear();
+      // The practice sets were generated FROM these problems — clearing the
+      // problems clears them too (data control removes the whole trail).
+      ref.read(practiceSetControllerProvider.notifier).clear();
     }
   }
 }

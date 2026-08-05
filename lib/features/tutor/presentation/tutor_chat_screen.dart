@@ -18,9 +18,12 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
+import '../../practice_set/application/practice_set_controller.dart';
+import '../../practice_set/domain/practice_set.dart';
 import '../../progress/application/stats_controller.dart';
 import '../../scan/application/scan_image_codec.dart';
 import '../../scan/domain/scan_source.dart';
+import '../../scan/presentation/manual_input_screen.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../application/tutor_controller.dart';
@@ -144,6 +147,18 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
   }
 
   void _sendAction(SuggestionAction action) {
+    // Context-aware practice chips: when the problem Numi is teaching has a
+    // stored practice set, its practice chips open the ACTUAL set items —
+    // verified problems that re-enter the solve pipeline and advance the
+    // learner's journey — instead of spending a tutor message on the LLM.
+    final item = _practiceSetItemFor(action);
+    if (item != null) {
+      context.push(
+        AppRoutes.manualInput,
+        extra: ManualInputArgs(initialLatex: item.latex),
+      );
+      return;
+    }
     if (!_ensureTutorQuota()) return;
     _recordTutorUse();
     unawaited(
@@ -151,6 +166,35 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
           .read(tutorChatControllerProvider.notifier)
           .sendAction(action, TutorCopy.message(context, action)),
     );
+  }
+
+  /// The stored practice-set item a practice chip maps to, or null when this
+  /// chat has no problem context / no set / the chip isn't a practice chip
+  /// (→ the ordinary LLM path).
+  PracticeSetItem? _practiceSetItemFor(SuggestionAction action) {
+    final latex = widget.launchContext?.questionLatex;
+    if (latex == null) return null;
+    final set =
+        ref.read(practiceSetControllerProvider.notifier).setForLatex(latex);
+    if (set == null) return null;
+    PracticeSetItem? byRung(PracticeSetRung rung) {
+      for (final item in set.items) {
+        if (item.rung == rung) return item;
+      }
+      return null;
+    }
+
+    return switch (action) {
+      SuggestionAction.practiceEasier => byRung(PracticeSetRung.easier),
+      SuggestionAction.practiceSimilar => byRung(PracticeSetRung.similar),
+      SuggestionAction.practiceHarder => byRung(PracticeSetRung.harder),
+      // The challenge chip respects the journey: locked until the core three
+      // are complete (the chip then falls back to Numi's own challenge).
+      SuggestionAction.practiceChallenge =>
+        set.challengeUnlocked ? set.challenge : null,
+      SuggestionAction.practiceMore => set.nextItem,
+      _ => null,
+    };
   }
 
   /// The student answered "How would you like to learn this?" — their choice
@@ -281,12 +325,18 @@ class _TutorChatScreenState extends ConsumerState<TutorChatScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Opens a practice session from a practice card Numi offered. Numi's
-  /// practice prompts are algebra-focused, so we launch an algebra session.
+  /// Opens a practice session from a practice card Numi offered — on the topic
+  /// of the problem this chat is about (falling back to algebra when the chat
+  /// opened without one).
   void _startPractice() {
+    final topicLabel = widget.launchContext?.topicLabel;
     context.push(
       AppRoutes.practiceSession,
-      extra: const PracticeRequest(topic: PracticeTopic.algebra),
+      extra: PracticeRequest(
+        topic: topicLabel == null
+            ? PracticeTopic.algebra
+            : PracticeTopic.fromLabel(topicLabel),
+      ),
     );
   }
 

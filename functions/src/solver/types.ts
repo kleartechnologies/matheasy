@@ -243,7 +243,7 @@ export interface KeyTakeaway {
 export interface PracticeItem {
   latex: string;
   plain?: string;
-  rung: "easier" | "similar" | "harder";
+  rung: "easier" | "similar" | "harder" | "challenge";
   skillHint?: string;
 }
 
@@ -251,6 +251,10 @@ export interface PracticeLadder {
   easier: PracticeItem;
   similar: PracticeItem;
   harder: PracticeItem;
+  /** The post-ladder stretch goal — the client keeps it locked until the three
+   * core rungs are completed. Additive and optional: generated + gated exactly
+   * like the rungs, but a failing challenge drops only itself, never the ladder. */
+  challenge?: PracticeItem;
 }
 
 export interface TeachingLayer {

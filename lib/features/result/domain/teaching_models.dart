@@ -367,11 +367,16 @@ class PracticeLadder {
     required this.easier,
     required this.similar,
     required this.harder,
+    this.challenge,
   });
 
   final PracticeItem easier;
   final PracticeItem similar;
   final PracticeItem harder;
+
+  /// The optional post-ladder stretch goal ("challenge" rung) — kept locked in
+  /// the UI until the three core rungs are completed.
+  final PracticeItem? challenge;
 
   List<PracticeItem> get rungs => [easier, similar, harder];
 
@@ -379,16 +384,21 @@ class PracticeLadder {
         'easier': easier.toJson(),
         'similar': similar.toJson(),
         'harder': harder.toJson(),
+        if (challenge != null) 'challenge': challenge!.toJson(),
       };
 
-  /// Null when any rung is missing (the ladder is only useful complete).
+  /// Null when any CORE rung is missing (the ladder is only useful complete);
+  /// the challenge rung is optional and simply absent when not shipped.
   static PracticeLadder? tryFromJson(Map<String, dynamic> j) {
     final e = j['easier'], s = j['similar'], h = j['harder'];
+    final c = j['challenge'];
     if (e is! Map || s is! Map || h is! Map) return null;
     return PracticeLadder(
       easier: PracticeItem.fromJson(Map<String, dynamic>.from(e)),
       similar: PracticeItem.fromJson(Map<String, dynamic>.from(s)),
       harder: PracticeItem.fromJson(Map<String, dynamic>.from(h)),
+      challenge:
+          c is Map ? PracticeItem.fromJson(Map<String, dynamic>.from(c)) : null,
     );
   }
 }

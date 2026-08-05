@@ -6,6 +6,8 @@ import '../../../core/animations/app_transitions.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../practice_set/application/practice_set_controller.dart';
+import '../../practice_set/presentation/practice_set_card.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../application/practice_dashboard_controller.dart';
@@ -50,6 +52,9 @@ class PracticeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(practiceDashboardProvider);
+    // The practice journey from the learner's last solved problem — the same
+    // shared card (and completion state) the Solution screen shows.
+    final continueSet = ref.watch(continuePracticeSetProvider);
 
     final sections = <Widget>[
       PracticeHeader(
@@ -57,6 +62,7 @@ class PracticeScreen extends ConsumerWidget {
         streakCurrent: data.streakCurrent,
         tutorMessage: data.tutorMessage,
       ),
+      if (continueSet != null) PracticeSetCard.compact(set: continueSet),
       if (data.continueRequest != null)
         PracticeContinue(
           request: data.continueRequest!,

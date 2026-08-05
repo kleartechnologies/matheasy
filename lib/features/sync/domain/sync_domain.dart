@@ -26,7 +26,11 @@ enum SyncDomain {
 
   /// Solved-problem history — the cache of past solutions (LaTeX + solution
   /// JSON, never images) that re-opens instantly, offline and free.
-  history('history');
+  history('history'),
+
+  /// Practice sets — the easier/similar/harder(/challenge) problems generated
+  /// from each solved problem, with the learner's completion state.
+  practiceSets('practiceSets');
 
   const SyncDomain(this.docId);
 

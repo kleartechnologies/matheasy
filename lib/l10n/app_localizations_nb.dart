@@ -1486,6 +1486,59 @@ class AppLocalizationsNb extends AppLocalizations {
   String get teachingRungSimilar => 'Lignende';
 
   @override
+  String get practiceSetRungChallenge => 'Challenge';
+
+  @override
+  String practiceSetProgress(int done, int total) {
+    return '$done of $total complete';
+  }
+
+  @override
+  String get practiceSetChallengeLocked =>
+      'Finish all three to unlock the challenge';
+
+  @override
+  String get practiceSetChallengeUnlocked =>
+      'Challenge unlocked — one stretch problem left.';
+
+  @override
+  String get practiceSetMixedReview => 'Mixed review';
+
+  @override
+  String get practiceSetMixedReviewSubtitle =>
+      'A quick mixed round on this topic to make it stick';
+
+  @override
+  String get practiceSetMixedReviewDone => 'Mixed review complete';
+
+  @override
+  String get practiceSetMastered => 'Topic mastered!';
+
+  @override
+  String practiceSetMasteredDetail(int xp) {
+    return 'You finished the whole practice journey. +$xp XP';
+  }
+
+  @override
+  String get practiceSetNewSet => 'New set';
+
+  @override
+  String get practiceSetNewSetFailed =>
+      'Couldn\'t get a new set — check your connection and try again.';
+
+  @override
+  String get practiceSetContinueTitle => 'Keep practicing';
+
+  @override
+  String get practiceSetContinueSubtitle => 'Pick up where you left off';
+
+  @override
+  String get practiceSetNextUp => 'Next up';
+
+  @override
+  String get practiceSetPracticeAgain => 'Practice again';
+
+  @override
   String get teachingAskPrompt =>
       'Fortsatt uklart om et steg, eller vil du prøve neste selv? Jeg kan forklare det for deg.';
 

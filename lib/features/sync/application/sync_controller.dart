@@ -9,6 +9,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/app_user.dart';
 import '../../history/application/history_controller.dart';
 import '../../practice/application/practice_progress_controller.dart';
+import '../../practice_set/application/practice_set_controller.dart';
 import '../../profile/application/profile_controller.dart';
 import '../../progress/application/achievement_controller.dart';
 import '../../progress/application/achievement_service.dart' show clockProvider;
@@ -80,6 +81,8 @@ class SyncController extends _$SyncController {
         (_, _) => _onLocalChange(SyncDomain.analytics));
     ref.listen(historyControllerProvider,
         (_, _) => _onLocalChange(SyncDomain.history));
+    ref.listen(practiceSetControllerProvider,
+        (_, _) => _onLocalChange(SyncDomain.practiceSets));
 
     final store = ref.read(syncStoreProvider);
     _seedBaseline(store);
@@ -293,6 +296,8 @@ class SyncController extends _$SyncController {
           ref.invalidate(statsControllerProvider);
         case SyncDomain.history:
           ref.invalidate(historyControllerProvider);
+        case SyncDomain.practiceSets:
+          ref.invalidate(practiceSetControllerProvider);
       }
     }
   }

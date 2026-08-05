@@ -71,7 +71,7 @@ final class SyncControllerProvider
   }
 }
 
-String _$syncControllerHash() => r'a48cbc90e6f78ed3a03e2cadd7b84c7859279ced';
+String _$syncControllerHash() => r'1381e13cb0a25a8250b0a4a9bc6c395485197653';
 
 /// The offline-first sync orchestrator.
 ///

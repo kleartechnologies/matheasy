@@ -34,6 +34,7 @@ class PreferencesStore {
   static const String _kAdConsentPrompted = 'privacy.ad_consent_prompted';
   static const String _kPracticeProgress = 'practice.progress';
   static const String _kPracticeHistory = 'practice.history';
+  static const String _kPracticeSets = 'practice.sets';
   static const String _kAchievements = 'progress.achievements';
   static const String _kProgressStats = 'progress.stats';
   static const String _kSettings = 'settings.preferences';
@@ -82,6 +83,7 @@ class PreferencesStore {
   Future<void> clearLearningData() async {
     await _prefs.remove(_kPracticeProgress);
     await _prefs.remove(_kPracticeHistory);
+    await _prefs.remove(_kPracticeSets);
     await _prefs.remove(_kAchievements);
     await _prefs.remove(_kProgressStats);
     await _prefs.remove(_kSettings);
@@ -106,6 +108,14 @@ class PreferencesStore {
 
   Future<void> setPracticeHistoryJson(String json) =>
       _prefs.setString(_kPracticeHistory, json);
+
+  /// The serialized per-solved-problem practice sets — the easier/similar/
+  /// harder(/challenge) problems generated from each solve, with completion
+  /// state (JSON).
+  String? get practiceSetsJson => _prefs.getString(_kPracticeSets);
+
+  Future<void> setPracticeSetsJson(String json) =>
+      _prefs.setString(_kPracticeSets, json);
 
   /// The serialized achievement unlocks (JSON).
   String? get achievementsJson => _prefs.getString(_kAchievements);

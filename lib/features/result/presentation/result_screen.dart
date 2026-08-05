@@ -10,6 +10,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/practice_topic.dart';
+import '../../practice_set/presentation/practice_set_card.dart';
 import '../../scan/domain/detected_equation.dart';
 import '../../scan/presentation/equation_kind_l10n.dart';
 import '../../scan/presentation/manual_input_screen.dart';
@@ -611,6 +612,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           onShare: () => _toast(context.l10n.resultSharingSoon),
           onCopied: () => _toast(context.l10n.resultCopied),
         ),
+        // §2.5 — the practice journey travels WITH the answer: the shared
+        // compact strip advertising the next practice problem for this solve.
+        PracticeSetSection(
+          result: result,
+          compact: true,
+          margin: const EdgeInsets.only(top: AppSpacing.md),
+        ),
         const SizedBox(height: AppSpacing.lg),
         SegmentedControl(
           selectedIndex: tabIndex,
@@ -670,12 +678,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           onOpenVisual: () => _selectTab(_visualTabIndex),
           onAskMatheasy: () => _askMatheasy(result),
           onPracticeTopic: () => _practice(result),
-          // A practice-ladder rung re-enters the solve pipeline as a fresh
-          // problem (it ships as a PROBLEM, never an answer) via the editor.
-          onAttemptPractice: (item) => context.push(
-            AppRoutes.manualInput,
-            extra: ManualInputArgs(initialLatex: item.latex),
-          ),
         );
     }
   }

@@ -17,6 +17,9 @@ class SyncMerge {
   /// Keep the solved-problem history bounded (mirrors the local repo's cap).
   static const int _maxHistory = 200;
 
+  /// Keep practice sets bounded (mirrors `LocalPracticeSetRepository.maxSets`).
+  static const int _maxPracticeSets = 50;
+
   static Map<String, dynamic> merge(
     SyncDomain domain, {
     required Map<String, dynamic> local,
@@ -37,6 +40,8 @@ class SyncMerge {
         return _mergeAnalytics(local, remote);
       case SyncDomain.history:
         return _mergeHistory(local, remote);
+      case SyncDomain.practiceSets:
+        return _mergePracticeSets(local, remote);
     }
   }
 
@@ -178,6 +183,93 @@ class SyncMerge {
   static List<Map<String, dynamic>> _entryList(Object? v) => v is List
       ? [for (final e in v) if (e is Map) Map<String, dynamic>.from(e)]
       : const [];
+
+  // ---- Practice sets: union by source problem; same problem → merge progress. ----
+  //
+  // Progress is additive/monotonic (a completion can't be un-earned by another
+  // device), so the SAME roll of a set OR-merges item completions keeping the
+  // earliest timestamps. Different rolls of the same problem ("new set" on one
+  // device) can't be item-merged — the freshest roll wins whole. Bounded,
+  // most-recent-first — the local repo re-caps on its next write.
+  static Map<String, dynamic> _mergePracticeSets(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final byKey = <String, Map<String, dynamic>>{};
+    for (final set in [..._entryList(a['sets']), ..._entryList(b['sets'])]) {
+      final key = set['sourceKey'];
+      if (key is! String) continue;
+      final existing = byKey[key];
+      if (existing == null) {
+        byKey[key] = set;
+      } else if (_asInt(existing['variant']) != _asInt(set['variant'])) {
+        // Different rolls — keep the newer one whole.
+        if (_asInt(set['createdAtMillis']) >
+            _asInt(existing['createdAtMillis'])) {
+          byKey[key] = set;
+        }
+      } else {
+        byKey[key] = _mergeOneSet(existing, set);
+      }
+    }
+    final merged = byKey.values.toList()
+      ..sort((x, y) =>
+          _asInt(y['createdAtMillis']).compareTo(_asInt(x['createdAtMillis'])));
+    return {
+      'sets': merged.length > _maxPracticeSets
+          ? merged.sublist(0, _maxPracticeSets)
+          : merged,
+    };
+  }
+
+  /// OR-merges completion across the same roll of one set (earliest wins where
+  /// both sides completed the same thing).
+  static Map<String, dynamic> _mergeOneSet(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final itemsA = _entryList(a['items']);
+    final itemsB = _entryList(b['items']);
+    final items = <Map<String, dynamic>>[];
+    for (var i = 0; i < itemsA.length; i++) {
+      final other = i < itemsB.length ? itemsB[i] : null;
+      items.add(_mergeItem(itemsA[i], other));
+    }
+    final challenge = a['challenge'] is Map
+        ? _mergeItem(
+            Map<String, dynamic>.from(a['challenge'] as Map),
+            b['challenge'] is Map
+                ? Map<String, dynamic>.from(b['challenge'] as Map)
+                : null,
+          )
+        : null;
+    return {
+      ...a,
+      'items': items,
+      'challenge': ?challenge,
+      ..._earliestMillis(a, b, 'mixedReviewAtMillis'),
+      ..._earliestMillis(a, b, 'masteredAtMillis'),
+    };
+  }
+
+  static Map<String, dynamic> _mergeItem(
+    Map<String, dynamic> a,
+    Map<String, dynamic>? b,
+  ) =>
+      b == null ? a : {...a, ..._earliestMillis(a, b, 'completedAtMillis')};
+
+  /// `{key: earliest-of-both}` when either side has [key], else `{}`.
+  static Map<String, dynamic> _earliestMillis(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+    String key,
+  ) {
+    final x = a[key], y = b[key];
+    if (x is int && y is int) return {key: x < y ? x : y};
+    if (x is int) return {key: x};
+    if (y is int) return {key: y};
+    return const {};
+  }
 
   // ---- Helpers ----
   static int _asInt(Object? v) => v is int ? v : 0;

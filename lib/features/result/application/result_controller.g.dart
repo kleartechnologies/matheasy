@@ -65,7 +65,7 @@ final class ResultControllerProvider
   }
 }
 
-String _$resultControllerHash() => r'b756bc6da280d1ec5eb19de68a4f8ba8d239dac7';
+String _$resultControllerHash() => r'2e6fd3baf51075b899cca7f6a1aeaeb756c580a0';
 
 /// Solves a [DetectedEquation] into [ResultData] via the [SolverService].
 ///
