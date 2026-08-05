@@ -8,7 +8,7 @@
  * candidate, so the caller can fall back to the LLM-candidate tier.
  */
 import * as mathsteps from "mathsteps";
-import { derivative, fraction, simplify } from "mathjs";
+import { derivative, fraction, rationalize, simplify } from "mathjs";
 
 import { solveCalculus } from "./calculus";
 import { solveComplex } from "./complex";
@@ -25,6 +25,13 @@ import { solveArcLength } from "./arclength";
 import { solveNumericRoot } from "./numroot";
 import { solveParamDet } from "./paramdet";
 import { solveModular } from "./modular";
+import { solveChangeOfSubject } from "./subject";
+import {
+  canonicalPolynomial,
+  factorPolynomial,
+  simplifyAlgebraic,
+  univariateRealRoots,
+} from "./polynomial";
 import {
   evalReal,
   verifyDerivative,
@@ -69,6 +76,8 @@ export function solveDeterministic(cls: Classification): SolveCandidate | null {
       return solveParamDet(cls);
     case "modular":
       return solveModular(cls);
+    case "subject":
+      return solveChangeOfSubject(cls);
     case "calculus":
       return solveCalculus(cls);
     case "complex":
@@ -87,7 +96,92 @@ function solveEquation(cls: Classification): SolveCandidate | null {
   // (`(x+1)^2 = 4(x+4)` defeats it). Fall back to the formula over the sampled
   // coefficients so such problems still solve deterministically + verified,
   // rather than depending on the LLM to return a COMPLETE root set.
-  return solveViaMathsteps(cls, parts) ?? solveQuadraticDirect(cls, parts);
+  // …and neither of those can clear a denominator that holds the unknown, so
+  // `(2x+7)/(3x-2) = x` and `3 − 5/(x+1) = 1` both dead-ended at "couldn't
+  // verify". The third tier multiplies the fractions out, which is what makes
+  // those two a quadratic and a linear equation in the first place.
+  //
+  // A tier is skipped when it DECLINES — and also when what it produced does
+  // not survive its own gate. mathsteps doesn't decline on `x − 1 = (6−3x)/2x`;
+  // it returns an answer that is simply wrong, and a plain `??` chain would
+  // stop there and never reach the tier that can do it. The last unverified
+  // candidate is still returned if every tier fails, so the honest
+  // "couldn't verify" state is unchanged.
+  let fallback: SolveCandidate | null = null;
+  for (const attempt of [solveViaMathsteps, solveQuadraticDirect, solveRationalEquation]) {
+    const candidate = attempt(cls, parts);
+    if (!candidate) continue;
+    if (candidate.verify()) return candidate;
+    fallback ??= candidate;
+  }
+  return fallback;
+}
+
+/**
+ * An equation with the unknown under a fraction bar.
+ *
+ * Setting a quotient to zero is setting its NUMERATOR to zero, so put
+ * `lhs − rhs` over a common denominator and solve the polynomial on top. That
+ * step is not reversible — clearing `x+1` from `3 − 5/(x+1) = 1` invents a
+ * solution at `x = −1`, where the printed equation says nothing at all — so
+ * every root is checked against the ORIGINAL equation and a root that makes a
+ * denominator vanish is dropped, not shipped.
+ */
+function solveRationalEquation(
+  cls: Classification,
+  parts: { lhs: string; rhs: string }[]
+): SolveCandidate | null {
+  const { lhs, rhs } = parts[0];
+  let numerator: string;
+  try {
+    const r = rationalize(`(${lhs}) - (${rhs})`, {}, true) as unknown as {
+      numerator: { toString(): string };
+      denominator: { toString(): string };
+    };
+    // Only worth doing when there IS a denominator holding the unknown — ask
+    // the common denominator itself rather than pattern-matching the source,
+    // where `2x` hides the `x` from a word boundary.
+    if (!variablesIn(r.denominator.toString()).includes(cls.unknown)) return null;
+    numerator = r.numerator.toString();
+  } catch {
+    return null;
+  }
+  const canonical = canonicalPolynomial(numerator);
+  if (!canonical) return null;
+  if (variablesIn(canonical).join(",") !== cls.unknown) return null;
+
+  const values = polynomialRoots(canonical, cls.unknown);
+  if (!values || values.length === 0) return null;
+
+  // The gate: each root must satisfy the equation AS PRINTED. A root the
+  // clearing invented is exactly the one that fails here, and gets dropped.
+  const kept = distinctSorted(
+    values.filter((v) => verifyRoots(parts, cls.unknown, [v]))
+  );
+  if (kept.length === 0) return null;
+
+  const steps: RawStep[] = [
+    { ascii: `${lhs} = ${rhs}`, operationCode: "GIVEN" },
+    { ascii: `${canonical} = 0`, operationCode: "MULTIPLY_BOTH_SIDES_BY_DENOMINATOR" },
+  ];
+  return {
+    answer: exactRootsAnswer(cls.unknown, kept),
+    methods: [
+      { id: "clear_denominators", name: "Clear the fractions", examPick: true, steps },
+    ],
+    roots: kept,
+    plotExpression: singleVarPolyPlot(parts[0], cls.unknown),
+    verify: () => verifyRoots(parts, cls.unknown, kept),
+  };
+}
+
+/** Exact real roots of a canonical univariate polynomial, of any degree that
+ * factors into linear and quadratic pieces. */
+function polynomialRoots(canonical: string, unknown: string): number[] | null {
+  const roots = univariateRealRoots(canonical);
+  if (!roots || roots.length === 0) return null;
+  if (variablesIn(canonical).join(",") !== unknown) return null;
+  return distinctSorted(roots);
 }
 
 /**
@@ -130,6 +224,11 @@ function exactRootsAnswer(unknown: string, values: number[]): FinalAnswer {
     if (Number.isInteger(n)) return { latex: String(n), plain: String(n) };
     const exact = exactForm(n);
     if (exact) return { latex: exact.latex, plain: exact.plain };
+    // A worksheet's answer is `7/3`, not `2.333333`. The root came out of the
+    // quadratic formula in full double precision, so the snap is tight — and
+    // the caller has already put the VALUE through the substitution gate.
+    const frac = rationalString(n, Math.max(1e-12, Math.abs(n) * 1e-10));
+    if (frac) return { latex: numLatex(frac), plain: frac };
     const s = trimNum(n);
     return { latex: s, plain: s };
   };
@@ -143,6 +242,59 @@ function exactRootsAnswer(unknown: string, values: number[]): FinalAnswer {
       .join(",\\; "),
     plain: values.map((v) => `${unknown} = ${fmt(v).plain}`).join(" or "),
   };
+}
+
+/**
+ * The exact small fraction a double is a rounded decimal OF, as `p/q` — or null
+ * when it isn't one. Continued fractions, so `2.333333` finds `7/3` and a
+ * genuine `0.317` finds nothing.
+ */
+function rationalString(x: number, tol: number): string | null {
+  if (!Number.isFinite(x) || Number.isInteger(x)) return null;
+  let [h0, h1, k0, k1] = [0, 1, 1, 0];
+  let v = x;
+  for (let i = 0; i < 24; i++) {
+    const a = Math.floor(v);
+    [h0, h1] = [h1, a * h1 + h0];
+    [k0, k1] = [k1, a * k1 + k0];
+    if (k1 === 0 || Math.abs(k1) > 1000) return null;
+    if (Math.abs(h1 / k1 - x) <= tol) {
+      return k1 === 1 ? String(h1) : `${h1}/${k1}`;
+    }
+    const frac = v - a;
+    if (frac === 0) return null;
+    v = 1 / frac;
+  }
+  return null;
+}
+
+/**
+ * mathsteps prints a rational root ROUNDED — `-1.333333` where the worksheet
+ * says `-4/3`. Snap each root back to the fraction it is a decimal of, but only
+ * when every snapped value still satisfies the original equation: the display
+ * and the proof have to be the same number.
+ */
+function snapRoots(
+  parts: { lhs: string; rhs: string }[],
+  unknown: string,
+  roots: Roots
+): Roots {
+  const strings: string[] = [];
+  const values: number[] = [];
+  let changed = false;
+  for (let i = 0; i < roots.values.length; i++) {
+    const text = rationalString(roots.values[i], 5e-6);
+    if (text === null) {
+      strings.push(roots.strings[i]);
+      values.push(roots.values[i]);
+      continue;
+    }
+    changed = true;
+    strings.push(text);
+    values.push(evalReal(text));
+  }
+  if (!changed) return roots;
+  return verifyRoots(parts, unknown, values) ? { strings, values } : roots;
 }
 
 /** Dedupe near-equal roots, ascending. */
@@ -168,8 +320,9 @@ function solveViaMathsteps(
 
   const finalEq = steps[steps.length - 1].newEquation;
   if (!finalEq) return null;
-  const roots = parseRoots(finalEq.ascii(), cls.unknown);
-  if (!roots) return null;
+  const rawRoots = parseRoots(finalEq.ascii(), cls.unknown);
+  if (!rawRoots) return null;
+  const roots = snapRoots(parts, cls.unknown, rawRoots);
 
   const rawSteps: RawStep[] = steps
     .filter((s) => s.newEquation)
@@ -348,6 +501,25 @@ function solveSimplify(cls: Classification): SolveCandidate | null {
   }
   if (!simplified) return null;
 
+  // mathsteps/mathjs expand a product but never re-order a commutative one, so
+  // `2x^2(4xy-5) - 8yx^3 + 9x` came back with its two cubic terms unmet and an
+  // algebraic fraction came back as the sum it started as. Canonicalize: same
+  // value, collected and reduced — and still proved by the gate below.
+  //
+  // Canonicalize BOTH the original and mathsteps' output: mathsteps sometimes
+  // hands back a worse form than it was given (`15x/(4x-8) ÷ 3x/(x-2)^2` came
+  // back as three fractions over a common denominator), and the original ascii
+  // is the faithful source. Both candidates are equal in value, so take the
+  // shorter — and never lengthen what mathsteps already had.
+  const fromMathsteps = simplified;
+  const canonical = [simplifyAlgebraic(cls.ascii), simplifyAlgebraic(fromMathsteps)]
+    .filter((s): s is string => s !== null && s.length <= fromMathsteps.length)
+    .sort((a, b) => a.length - b.length)[0];
+  if (canonical && canonical !== simplified) {
+    rawSteps.push({ ascii: canonical, operationCode: "COLLECT_LIKE_TERMS" });
+    simplified = canonical;
+  }
+
   const vars = variablesIn(cls.ascii);
   const finalAscii = simplified;
   // Exact symbolic form for DISPLAY (mathsteps/mathjs decimalize irrational
@@ -357,16 +529,39 @@ function solveSimplify(cls: Classification): SolveCandidate | null {
     ? rawSteps.map((s) => ({ ascii: resymbolize(s.ascii), operationCode: s.operationCode }))
     : [{ ascii: display, operationCode: "SIMPLIFY" }];
 
+  // The product form, when there is one. A worksheet's factorisation chapter
+  // wants `(p − 2)(p + 8)`, not the sum it started as — and even when it wasn't
+  // asked for, the factored form is worth offering as a second method.
+  const factored = factorPolynomial(finalAscii);
+  const wantFactored = Boolean(factored && cls.wantsFactor);
+  const methods: SolveCandidate["methods"] = [
+    { id: "simplify", name: "Simplify", examPick: !wantFactored, steps },
+  ];
+  if (factored) {
+    methods.push({
+      id: "factorise",
+      name: "Factorise",
+      examPick: wantFactored,
+      steps: [
+        { ascii: display, operationCode: "SIMPLIFY" },
+        { ascii: factored, operationCode: "FACTORISE" },
+      ],
+    });
+  }
+  const answerAscii = wantFactored && factored ? factored : display;
+
   return {
     answer: {
-      latex: asciiToLatex(display),
-      plain: display.replace(/\s+/g, " ").trim(),
+      latex: asciiToLatex(answerAscii),
+      plain: answerAscii.replace(/\s+/g, " ").trim(),
     },
-    methods: [
-      { id: "simplify", name: "Simplify", examPick: true, steps },
-    ],
+    methods,
     plotExpression: vars.length === 1 ? cls.ascii : null,
-    verify: () => verifyEquality(cls.ascii, finalAscii, vars),
+    // Both printed forms go through the gate — a factorisation this file got
+    // wrong must cost the answer, never be shown as one.
+    verify: () =>
+      verifyEquality(cls.ascii, finalAscii, vars) &&
+      (!factored || verifyEquality(cls.ascii, factored, vars)),
   };
 }
 

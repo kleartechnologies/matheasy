@@ -319,6 +319,8 @@ const OPERATION_LABELS: Record<string, string> = {
   SIMPLIFY_FRACTION: "Simplify the fraction",
   COLLECT_AND_COMBINE_LIKE_TERMS: "Combine like terms",
   FACTOR_SUM_PRODUCT_RULE: "Factor",
+  FACTORISE: "Factorise",
+  MULTIPLY_BOTH_SIDES_BY_DENOMINATOR: "Clear the fractions",
   BREAK_UP_TERM: "Split the middle term",
   FIND_ROOTS: "Find the roots",
   IDENTIFY_COEFFICIENTS: "Identify a, b, c",

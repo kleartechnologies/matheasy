@@ -126,7 +126,10 @@ export function cleanLatex(latex: string): string {
  * Convert delimiter-free LaTeX to an ascii-math string mathjs/mathsteps parse.
  * `\frac{a}{b}` → `((a)/(b))`, `\sqrt{a}` → `sqrt(a)`, `x^{2}` → `x^(2)`, etc.
  */
-export function latexToAscii(latex: string): string {
+export function latexToAscii(
+  latex: string,
+  opts: { splitProducts?: boolean } = {}
+): string {
   let s = cleanLatex(latex);
 
   // Drop PROSE. The OCR marks words with `\text{…}` ("Solve the equation.",
@@ -224,6 +227,16 @@ export function latexToAscii(latex: string): string {
   s = s.replace(/[{}]/g, ""); // any braces the conversions left behind
   s = s.replace(/\\\\/g, " "); // row breaks
 
+  // Split a glued run of variables into an explicit product — see
+  // `splitGluedVariables`. Must run BEFORE the variable-bracket rule below:
+  // `xy(x-1)` has to become `x*y*(x-1)`, and that rule only fires on a letter
+  // that isn't glued to another letter.
+  //
+  // `splitProducts: false` is for callers that must read the ascii as PROSE —
+  // unwrapped narrative ("John has 3 apples…") is letters too, and splitting it
+  // sprays `*` through the sentence, which reads back as standalone math.
+  if (opts.splitProducts !== false) s = splitGluedVariables(s);
+
   // Implicit multiply between a VARIABLE and a bracket: mathjs reads `x(x-1)` as
   // a call of a function named x, so `3x(x-1)=…` evaluated to NaN and its own
   // correct roots were rejected. Insert the `*`. Only for a STANDALONE letter
@@ -232,6 +245,51 @@ export function latexToAscii(latex: string): string {
   s = s.replace(/(^|[^A-Za-z])([a-eijkm-rt-z])\s*\(/g, "$1$2*(");
 
   return s.replace(/\s+/g, " ").trim();
+}
+
+/** A run of letters that is ONE symbol, never a product of variables: every
+ * function name, the spelled-out Greek letters, and mathjs's own constants. */
+const RESERVED_RUN = new Set([
+  ...FUNCTIONS,
+  "exp", "lg",
+  "pi", "theta", "phi", "alpha", "beta", "gamma", "delta", "epsilon", "zeta",
+  "eta", "iota", "kappa", "lambda", "mu", "nu", "xi", "rho", "sigma", "tau",
+  "upsilon", "chi", "psi", "omega",
+  "Inf", "NaN", "Infinity", "true", "false", "null",
+]);
+
+/**
+ * `xy + 3yx` → `x*y + 3*y*x`. Handwriting and print both write a product of
+ * variables with nothing between them, but mathjs reads a glued run of letters
+ * as ONE identifier — so `xy` and `yx` became two DIFFERENT unknowns, the
+ * simplify never combined them, and the substitution gate declined a problem
+ * the engine can do perfectly (`2x^2(4xy-5) - 8yx^3 + 9x`, `ax - ay + 2x - 2y`,
+ * every algebraic fraction with a two-variable numerator). Digit-then-letter
+ * (`2b`) already parsed; only letter-then-letter was glued.
+ *
+ * Kept whole:
+ *  - a reserved run (`sin`, `sqrt`, `theta`, `Inf`) — one symbol by name;
+ *  - anything preceded by a backslash, so an unconverted `\alpha` isn't
+ *    shredded into `a*l*p*h*a`;
+ *  - a subscripted identifier (`x_1`, `_max`) — the subscript names the symbol;
+ *  - a differential/derivative token `dx`, `dy`, `ddy` — `∫ … dx` reads the
+ *    pair as one token, and `buildResidual` encodes y′/y″ as the literal
+ *    symbols `dy`/`ddy` before converting, so splitting them hid the
+ *    derivative and every second-order ODE stopped parsing.
+ */
+function splitGluedVariables(s: string): string {
+  return s.replace(/[A-Za-z]+/g, (run, offset: number, whole: string) => {
+    if (run.length < 2) return run;
+    if (RESERVED_RUN.has(run)) return run;
+    const before = offset > 0 ? whole[offset - 1] : "";
+    if (before === "\\" || before === "_") return run;
+    if (whole[offset + run.length] === "_") return run;
+    // A differential / ODE token — but only where one can actually stand. A
+    // digit in front makes it a coefficient (`3dc^2` is 3·d·c², not a `dc`),
+    // and that is the shape every algebraic-fraction product is written in.
+    if (/^d{1,2}[A-Za-z]$/.test(run) && !/[0-9]/.test(before)) return run;
+    return run.split("").join("*");
+  });
 }
 
 /** Single-argument functions written prefix-style in LaTeX (`\sin x`). `sqrt`/
@@ -454,9 +512,9 @@ export function variablesIn(ascii: string): string[] {
  * in `flutter_math_fork`.
  */
 export function asciiToLatex(ascii: string): string {
-  let s = ascii.trim();
+  let s = fracify(ascii.trim());
   s = s.replace(/\bnthRoot\(([^,()]*),\s*([^()]*)\)/g, "\\sqrt[$2]{$1}");
-  s = s.replace(/\bsqrt\(([^()]*)\)/g, "\\sqrt{$1}");
+  s = sqrtify(s);
   // sin(...) → \sin(...) for nicer typesetting.
   for (const fn of ["sin", "cos", "tan", "cot", "sec", "csc"]) {
     s = s.replace(new RegExp(`\\b${fn}\\b`, "g"), `\\${fn} `);
@@ -465,9 +523,216 @@ export function asciiToLatex(ascii: string): string {
   // (→ \log). Do natural log first — `\blog\b` never matches inside `log10`.
   s = s.replace(/\blog\b/g, "\\ln ");
   s = s.replace(/\blog10\b/g, "\\log ");
-  s = s.replace(/\^\(([^()]*)\)/g, "^{$1}");
+  s = s.replace(/\^\s*\(([^()]*)\)/g, "^{$1}");
   s = s.replace(/\bpi\b/g, "\\pi ").replace(/\btheta\b/g, "\\theta ");
   s = s.replace(/±/g, " \\pm ").replace(/∓/g, " \\mp ");
+  // A textbook writes `5x`, not `5 · x`. Juxtapose when the right operand is a
+  // symbol, or when neither side could be read as a function applied to a
+  // bracket (`x \cdot (y+1)` must not become `x(y+1)`). Everything else — a
+  // product of two numbers above all — keeps the dot.
+  s = s.replace(/\s*\*\s*(?=[A-Za-z\\])/g, "");
+  s = s.replace(/([)\d])\s*\*\s*(?=\()/g, "$1");
   s = s.replace(/\s*\*\s*/g, " \\cdot "); // explicit multiply
   return s.replace(/\s+/g, " ").trim();
+}
+
+// --- `a/b` → \frac{a}{b} -----------------------------------------------------
+//
+// A worksheet prints a quotient stacked, and so should we: `(5x - 10)/4` should
+// reach the student as a fraction bar, not as a slash. This is a scan and not a
+// parser, because the strings arriving here are only mostly ascii-math — some
+// already carry LaTeX a caller built itself. Anything it cannot read with
+// confidence it leaves exactly as it found it, so the worst case is the slash
+// that was being shown anyway.
+//
+// Precedence is why this can't be a regex. `2*x/3` is `(2x)/3`, so the
+// numerator reaches BACK across a whole multiplication chain; `1/2*x` is
+// `(1/2)*x`, so the denominator takes ONE operand and stops.
+
+const WORD = /[A-Za-z0-9_.]/;
+const CLOSERS: Record<string, string> = { ")": "(", "}": "{", "]": "[" };
+
+/** Index of the bracket opening the one that closes at `i`, or -1. */
+function matchBackward(s: string, i: number): number {
+  const open = CLOSERS[s[i]];
+  let depth = 0;
+  for (let j = i; j >= 0; j--) {
+    if (s[j] === s[i]) depth++;
+    else if (s[j] === open && --depth === 0) return j;
+  }
+  return -1;
+}
+
+/** Index of the bracket closing the one that opens at `i`, or -1. */
+function matchForward(s: string, i: number): number {
+  const close = Object.keys(CLOSERS).find((c) => CLOSERS[c] === s[i]);
+  if (!close) return -1;
+  let depth = 0;
+  for (let j = i; j < s.length; j++) {
+    if (s[j] === s[i]) depth++;
+    else if (s[j] === close && --depth === 0) return j;
+  }
+  return -1;
+}
+
+/** Start of the single operand ending at `end` (exclusive), or -1. */
+function primaryStart(s: string, end: number): number {
+  let j = end;
+  while (j > 0 && s[j - 1] === " ") j--;
+  if (j === 0) return -1;
+  const c = s[j - 1];
+  let start: number;
+  if (c === ")" || c === "]") {
+    const open = matchBackward(s, j - 1);
+    if (open < 0) return -1;
+    start = open;
+    // A call keeps its name: `sqrt(x)`, `f(t)`.
+    while (start > 0 && WORD.test(s[start - 1])) start--;
+  } else if (c === "}") {
+    // The brace groups, then the command that owns them: `\frac{a}{b}`.
+    let k = j;
+    while (k > 0 && s[k - 1] === "}") {
+      const open = matchBackward(s, k - 1);
+      if (open < 0) return -1;
+      k = open;
+    }
+    while (k > 0 && WORD.test(s[k - 1])) k--;
+    if (k > 0 && s[k - 1] === "\\") k--;
+    start = k;
+  } else if (WORD.test(c)) {
+    start = j;
+    while (start > 0 && WORD.test(s[start - 1])) start--;
+    if (start > 0 && s[start - 1] === "\\") start--;
+  } else {
+    return -1;
+  }
+  // A power belongs to its base: the operand of `x^2/3` is `x^2`, not `2` —
+  // and mathsteps prints it spaced, `x ^ 2 / 3`. Reading the exponent alone
+  // would move the fraction INTO it and change what the step says.
+  for (;;) {
+    let k = start;
+    while (k > 0 && s[k - 1] === " ") k--;
+    if (k === 0 || s[k - 1] !== "^") return start;
+    const base = primaryStart(s, k - 1);
+    if (base < 0) return start;
+    start = base;
+  }
+}
+
+/** Start of the NUMERATOR ending at `end` — the whole multiplication chain. */
+function numeratorStart(s: string, end: number): number {
+  let j = end;
+  let start = -1;
+  for (;;) {
+    const p = primaryStart(s, j);
+    if (p < 0) return start;
+    start = p;
+    let k = p;
+    while (k > 0 && s[k - 1] === " ") k--;
+    if (k === 0) return start;
+    // `*` or bare juxtaposition (`5 r`) continues the chain; `+ - = / (` end it.
+    if (s[k - 1] === "*") j = k - 1;
+    else if (WORD.test(s[k - 1]) || s[k - 1] === ")" || s[k - 1] === "}") j = k;
+    else return start;
+  }
+}
+
+/** End (exclusive) of the single operand starting at `start`, or -1. */
+function primaryEnd(s: string, start: number): number {
+  let j = start;
+  while (j < s.length && s[j] === " ") j++;
+  if (j >= s.length) return -1;
+  const c = s[j];
+  let end: number;
+  if (c === "(" || c === "[") {
+    const close = matchForward(s, j);
+    if (close < 0) return -1;
+    end = close + 1;
+  } else if (c === "\\") {
+    let k = j + 1;
+    while (k < s.length && WORD.test(s[k])) k++;
+    while (k < s.length && s[k] === "{") {
+      const close = matchForward(s, k);
+      if (close < 0) break;
+      k = close + 1;
+    }
+    end = k;
+  } else if (WORD.test(c)) {
+    let k = j;
+    while (k < s.length && WORD.test(s[k])) k++;
+    if (k < s.length && s[k] === "(") {
+      const close = matchForward(s, k);
+      if (close >= 0) k = close + 1;
+    }
+    end = k;
+  } else {
+    return -1; // a sign or an operator — not something to put under the bar
+  }
+  for (;;) {
+    let k = end;
+    while (k < s.length && s[k] === " ") k++;
+    if (s[k] !== "^") return end;
+    const next = primaryEnd(s, k + 1);
+    if (next < 0) return end;
+    end = next;
+  }
+}
+
+/** Drop parentheses wrapping the whole operand — the bar already groups it. */
+function unwrap(text: string): string {
+  const t = text.trim();
+  if (t.startsWith("(") && matchForward(t, 0) === t.length - 1) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
+/**
+ * `sqrt(…)` → `\sqrt{…}`, matching the closing bracket rather than assuming
+ * there is nothing bracketed inside. The radicand of a rearranged formula is
+ * routinely a fraction in brackets, and a regex that stopped at the first `)`
+ * left `sqrt(` on the screen.
+ */
+function sqrtify(input: string): string {
+  let s = input;
+  for (let i = 0; (i = s.indexOf("sqrt(", i)) >= 0; ) {
+    if (i > 0 && WORD.test(s[i - 1])) {
+      i += 5; // part of a longer name
+      continue;
+    }
+    const close = matchForward(s, i + 4);
+    if (close < 0) {
+      i += 5;
+      continue;
+    }
+    const radicand = `\\sqrt{${unwrap(s.slice(i + 5, close))}}`;
+    s = s.slice(0, i) + radicand + s.slice(close + 1);
+    i += radicand.length;
+  }
+  return s;
+}
+
+function fracify(input: string): string {
+  // `\text{…}` is prose, and a slash inside prose is a slash. Park it behind a
+  // word-shaped token so the scan treats it as one opaque symbol.
+  const prose: string[] = [];
+  let s = input.replace(/\\text\{[^{}]*\}/g, (m) => {
+    prose.push(m);
+    return `PROSE${prose.length - 1}TOKEN`;
+  });
+
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] !== "/") continue;
+    const numStart = numeratorStart(s, i);
+    const denEnd = primaryEnd(s, i + 1);
+    if (numStart < 0 || denEnd < 0) continue;
+    const num = unwrap(s.slice(numStart, i));
+    const den = unwrap(s.slice(i + 1, denEnd));
+    if (!num || !den) continue;
+    const frac = `\\frac{${num}}{${den}}`;
+    s = s.slice(0, numStart) + frac + s.slice(denEnd);
+    i = numStart + frac.length - 1;
+  }
+
+  return s.replace(/PROSE(\d+)TOKEN/g, (_, n) => prose[Number(n)]);
 }

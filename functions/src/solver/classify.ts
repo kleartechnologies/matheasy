@@ -24,6 +24,7 @@ import { parseArcLength } from "./arclength";
 import { parseNumericRoot } from "./numroot";
 import { parseParamDet } from "./paramdet";
 import { parseModular } from "./modular";
+import { parseChangeOfSubject } from "./subject";
 import {
   Classification,
   Strategy,
@@ -159,6 +160,10 @@ export function classify(rawLatex: string): Classification {
     ascii,
     latex,
     verifyMode,
+    // The chapter on factorisation asks for a PRODUCT, not a shorter sum. The
+    // instruction is stripped out of `ascii` before anything is solved, so
+    // record the ask here while the prose is still intact.
+    wantsFactor: /\bfactori[sz]/i.test(proseLatex) || undefined,
     ...extra,
   });
 
@@ -388,6 +393,20 @@ export function classify(rawLatex: string): Classification {
     return base("arc_length", "arc_length", arc.variable, false, "none", { arcLength: arc });
   }
 
+  // --- Change of subject ("make x the subject of 2x − 5y = 10") -----------
+  // MUST run before the tutor-route return AND before the two-variable branch
+  // further down, which reads one equation in two unknowns as a SYSTEM and
+  // tells the student it "may have several solutions". A formula has exactly
+  // one rearrangement, and the whole family — a chapter of the worksheet — was
+  // dead-ending at `beyond_solver`. The parse needs an explicit instruction (or
+  // the worksheet's own bracketed target) and at least two variables, so a
+  // plain one-unknown equation never reaches it; the solve is gated on
+  // substituting the derived formula back into the printed one.
+  const subject = parseChangeOfSubject(proseLatex);
+  if (subject) {
+    return base("change_of_subject", "subject", subject.target, true, "none", { subject });
+  }
+
   if (tutorRoute) {
     return base(tutorRoute, "conceptual", "x", false, "none");
   }
@@ -603,7 +622,13 @@ export function classify(rawLatex: string): Classification {
   // (4x²+…)²"), which reads as narrative yet leaves a COMPLETE expression outside
   // the words. `ascii` has the prose dropped, so if a real expression survives
   // there, this is directive+math — let the normal engines solve it.
-  if (looksLikeWordProblem(rawLatex) && !hasStandaloneMath(ascii)) {
+  // The standalone-math test reads the ascii WITHOUT implicit-product splitting:
+  // a narrative is a run of letters too, and splitting it into `J*o*h*n` puts
+  // operators in every sentence — which is exactly what this test looks for.
+  if (
+    looksLikeWordProblem(rawLatex) &&
+    !hasStandaloneMath(latexToAscii(rawForAscii, { splitProducts: false }))
+  ) {
     return base("word_problem", "llm_candidate", "x", false, "word_problem");
   }
 

@@ -317,6 +317,7 @@ export type Strategy =
   | "bounded_trig" // T(x)=c on a closed interval, by enumerate-and-verify
   | "circle" // circle mensuration (area/circumference/arc/sector) — exact π-form
   | "solid" // solid-geometry "show that …" / optimisation, proven by substitution
+  | "subject" // change of subject: a formula rearranged, proven by numeric resubstitution
   | "ode_point_eval" // IVP evaluated at a point, y(b), by cross-checked numeric integration
   | "calculus" // applied differentiation (dy/dx, slope, tangent, stationary points)
   | "complex" // complex numbers, cross-checked in the real 2×2 matrix representation
@@ -412,6 +413,13 @@ export interface Classification {
   paramDet?: ParamDetQuery;
   /** A remainder question: the integer expression, its fixed values, the modulus. */
   modular?: ModularQuery;
+  /** The problem said "factorise": the answer should be the product form, not
+   * the collected sum. Both are printed either way; this picks which leads. */
+  wantsFactor?: boolean;
+  /** A change-of-subject formula: the two printed sides and the target variable
+   * to isolate. The rearrangement is proven by substituting it back in at
+   * several numeric draws of the free variables. */
+  subject?: import("./subject").SubjectQuery;
   taylorFn?: string;
   taylorCenter?: number;
   taylorCenterLatex?: string;

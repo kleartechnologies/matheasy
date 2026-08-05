@@ -82,7 +82,8 @@ describe("latexToAscii", () => {
     });
     it("quadratic-formula shape no longer mangles", () => {
       expect(latexToAscii(String.raw`\frac{-b+\sqrt{b^{2}-4ac}}{2a}`)).toBe(
-        "((-b+sqrt(b^(2)-4ac))/(2a))"
+        // `4ac` is a PRODUCT — mathjs read the glued run as one symbol `ac`.
+        "((-b+sqrt(b^(2)-4a*c))/(2a))"
       );
     });
   });
@@ -223,8 +224,35 @@ describe("variablesIn", () => {
 });
 
 describe("asciiToLatex", () => {
-  it("renders sqrt and explicit multiply", () => {
-    expect(asciiToLatex("sqrt(2) * x")).toContain("\\sqrt{2}");
-    expect(asciiToLatex("2 * x")).toContain("\\cdot");
+  it("renders sqrt, and multiplies the way a textbook does", () => {
+    expect(asciiToLatex("sqrt(2) * x")).toBe("\\sqrt{2}x");
+    expect(asciiToLatex("2 * x")).toBe("2x");
+    // A product of two NUMBERS still needs the dot, or it reads as one number.
+    expect(asciiToLatex("2 * 3")).toBe("2 \\cdot 3");
+    // `x(y + 1)` would read as a function applied to a bracket.
+    expect(asciiToLatex("x * (y + 1)")).toBe("x \\cdot (y + 1)");
+    expect(asciiToLatex("2 * (y + 1)")).toBe("2(y + 1)");
+  });
+
+  it("stacks a quotient into a fraction", () => {
+    expect(asciiToLatex("(5*x - 10)/4")).toBe("\\frac{5x - 10}{4}");
+    expect(asciiToLatex("x = 3/2")).toBe("x = \\frac{3}{2}");
+    expect(asciiToLatex("sqrt(2)/2")).toBe("\\frac{\\sqrt{2}}{2}");
+    expect(asciiToLatex("1 - 1/(x + 1)")).toBe("1 - \\frac{1}{x + 1}");
+  });
+
+  it("keeps the precedence the slash had", () => {
+    // `2*x/3` is (2x)/3 — the numerator reaches back over the product…
+    expect(asciiToLatex("2*x/3")).toBe("\\frac{2x}{3}");
+    // …but `1/2*x` is (1/2)·x, so the denominator stops at one operand.
+    expect(asciiToLatex("1/2*x")).toBe("\\frac{1}{2}x");
+    expect(asciiToLatex("x^2/3")).toBe("\\frac{x^2}{3}");
+    expect(asciiToLatex("a/b/c")).toBe("\\frac{\\frac{a}{b}}{c}");
+  });
+
+  it("leaves a slash inside prose alone", () => {
+    expect(asciiToLatex("\\text{a/b in words} + 1/2")).toBe(
+      "\\text{a/b in words} + \\frac{1}{2}"
+    );
   });
 });
