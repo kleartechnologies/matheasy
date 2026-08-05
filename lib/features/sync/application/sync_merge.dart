@@ -100,6 +100,29 @@ class SyncMerge {
         });
       }
     }
+    final skills = <String, dynamic>{};
+    for (final source in [a['skills'], b['skills']]) {
+      if (source is Map) {
+        source.forEach((skill, value) {
+          if (skill is! String || value is! Map) return;
+          final existing = skills[skill];
+          skills[skill] = {
+            'masteryPoints': _maxInt(
+                (existing is Map ? existing['masteryPoints'] : null),
+                value['masteryPoints']),
+            'attempts': _maxInt(
+                (existing is Map ? existing['attempts'] : null),
+                value['attempts']),
+            'correct': _maxInt(
+                (existing is Map ? existing['correct'] : null),
+                value['correct']),
+            'lastSeenEpochDay': _maxNullableInt(
+                (existing is Map ? existing['lastSeenEpochDay'] : null),
+                value['lastSeenEpochDay']),
+          };
+        });
+      }
+    }
     return {
       'totalXp': _maxInt(a['totalXp'], b['totalXp']),
       'streakBest': _maxInt(a['streakBest'], b['streakBest']),
@@ -112,6 +135,7 @@ class SyncMerge {
       'lastDailyChallengeEpochDay': _maxNullableInt(
           a['lastDailyChallengeEpochDay'], b['lastDailyChallengeEpochDay']),
       'topics': topics,
+      'skills': skills,
       'lastRequest': newer['lastRequest'] ?? a['lastRequest'] ?? b['lastRequest'],
     };
   }
