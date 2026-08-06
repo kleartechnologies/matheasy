@@ -13,15 +13,31 @@ import '../../practice_set/application/practice_set_controller.dart';
 import '../../progress/application/achievement_service.dart' show clockProvider;
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/usage_controller.dart';
+import '../domain/practice_difficulty.dart';
 import '../domain/practice_mistake.dart';
+import '../domain/practice_question.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
 import '../domain/xp_reward.dart';
+import 'engine/difficulty_engine.dart';
+import 'engine/session_adaptation.dart';
 import 'practice_difficulty_preference.dart';
 import 'practice_progress_controller.dart';
 import 'practice_service.dart';
 
 part 'practice_controller.g.dart';
+
+/// How a "Challenge Me" request ended.
+enum ChallengeOutcome {
+  /// A harder question was inserted and is now on screen.
+  inserted,
+
+  /// The free-tier practice allowance is exhausted — surface the upsell.
+  locked,
+
+  /// The engine couldn't build one right now — carry on, no harm done.
+  unavailable,
+}
 
 /// The lifecycle of a practice session.
 enum PracticePhase {
@@ -387,11 +403,112 @@ class PracticeController extends _$PracticeController {
         result: result,
       );
     } else {
+      final advanced = session.advance();
       state = PracticeSessionState(
         phase: PracticePhase.answering,
-        session: session.advance(),
+        session: advanced,
         attempt: _freshAttempt(),
       );
+      // Momentum-based difficulty adaptation for the slot AFTER this one —
+      // fire-and-forget, never blocks, failure keeps the original question.
+      _maybeAdaptUpcoming(advanced);
+    }
+  }
+
+  /// V5 mid-session adaptation: three first-try clean corrects in a row raise
+  /// the next upcoming question a notch; two struggled finals lower it —
+  /// always within ±1 of the learner's chosen centre and the tier ceiling.
+  void _maybeAdaptUpcoming(PracticeSession session) {
+    final upcomingIndex = session.currentIndex + 1;
+    if (upcomingIndex >= session.questions.length) return;
+    final upcoming = session.questions[upcomingIndex];
+    final centre = session.request.difficulty ??
+        ref.read(selectedPracticeDifficultyProvider) ??
+        upcoming.difficulty;
+    final shift = const SessionAdaptation().decide(
+      answers: session.answers,
+      current: upcoming.difficulty,
+      centre: centre,
+      isPro: ref.read(isProProvider),
+    );
+    if (shift == SessionShift.hold) return;
+    final target = shift == SessionShift.raise
+        ? upcoming.difficulty.harder
+        : upcoming.difficulty.easier;
+    if (target == null) return;
+    unawaited(_swapUpcoming(upcomingIndex, upcoming, target));
+  }
+
+  Future<void> _swapUpcoming(
+    int index,
+    PracticeQuestion original,
+    PracticeDifficulty target,
+  ) async {
+    try {
+      final generated = await ref.read(practiceServiceProvider).generateOne(
+            topic: original.topic,
+            difficulty: target,
+            skillId: original.skillId,
+          );
+      if (generated == null) return;
+      final session = state.session;
+      // Only swap while that slot still holds the question we planned to
+      // replace — the student may have raced ahead or left the session.
+      if (session == null ||
+          index >= session.questions.length ||
+          session.questions[index].id != original.id) {
+        return;
+      }
+      state = PracticeSessionState(
+        phase: state.phase,
+        session: session.replaceUpcoming(index, generated),
+        lastAnswer: state.lastAnswer,
+        result: state.result,
+        attempt: state.attempt,
+      );
+    } catch (_) {
+      // Keep the original question — adaptation is best-effort by design.
+    }
+  }
+
+  /// "Challenge Me" (V5): inserts one harder question on the same skill right
+  /// after the one just solved, and moves onto it. Only offered on a correct,
+  /// resolved answer.
+  Future<ChallengeOutcome> challengeMe() async {
+    final session = state.session;
+    if (session == null ||
+        state.phase != PracticePhase.revealed ||
+        !state.lastWasCorrect) {
+      return ChallengeOutcome.unavailable;
+    }
+    if (!ref.read(usageSnapshotProvider).canGeneratePractice) {
+      return ChallengeOutcome.locked;
+    }
+    final question = session.currentQuestion;
+    final target = const DifficultyEngine().clampToTier(
+      question.difficulty.harder ?? question.difficulty,
+      isPro: ref.read(isProProvider),
+    );
+    try {
+      final generated = await ref.read(practiceServiceProvider).generateOne(
+            topic: question.topic,
+            difficulty: target,
+            skillId: question.skillId,
+          );
+      if (generated == null) return ChallengeOutcome.unavailable;
+      final current = state.session;
+      if (current == null || state.phase != PracticePhase.revealed) {
+        return ChallengeOutcome.unavailable;
+      }
+      ref.read(usageControllerProvider.notifier).recordPracticeGenerated(1);
+      state = PracticeSessionState(
+        phase: PracticePhase.answering,
+        session: current.insertNext(generated).advance(),
+        attempt: _freshAttempt(),
+      );
+      return ChallengeOutcome.inserted;
+    } catch (_) {
+      return ChallengeOutcome.unavailable;
     }
   }
 

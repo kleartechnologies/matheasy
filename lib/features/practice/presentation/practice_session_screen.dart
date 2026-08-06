@@ -131,6 +131,23 @@ class _PracticeSessionScreenState
     );
   }
 
+  /// "Challenge Me": a harder question on the same skill, inserted next.
+  Future<void> _challengeMe() async {
+    final outcome =
+        await ref.read(practiceControllerProvider.notifier).challengeMe();
+    if (!mounted) return;
+    switch (outcome) {
+      case ChallengeOutcome.inserted:
+        _resetAnswer();
+      case ChallengeOutcome.locked:
+        context.push(AppRoutes.paywall, extra: PaywallTrigger.practiceLimit);
+      case ChallengeOutcome.unavailable:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.practiceChallengeUnavailable)),
+        );
+    }
+  }
+
   /// Opens Numi to reflect on a CORRECT answer (alternative methods, why the
   /// method works…).
   void _askMatheasyAboutSuccess(PracticeQuestion question) {
@@ -374,6 +391,7 @@ class _PracticeSessionScreenState
                           studentAnswer: state.lastAnswer?.submitted,
                         ),
                         onAskNumi: () => _askMatheasyAboutSuccess(question),
+                        onChallengeMe: () => unawaited(_challengeMe()),
                       ),
                     )
                   else if (state.mistake case final mistake?)

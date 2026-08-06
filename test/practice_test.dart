@@ -72,6 +72,14 @@ class _FixedPracticeService implements PracticeService {
   @override
   Future<PracticeSession> createSession(PracticeRequest request) async =>
       PracticeSession(request: request, questions: questions);
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async =>
+      null; // no extra questions in the fixed service
 }
 
 /// Records the request the controller actually handed the engine — the seam the
@@ -84,6 +92,14 @@ class _RecordingPracticeService implements PracticeService {
     seen = request;
     return PracticeSession(request: request, questions: const [_inputQ]);
   }
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async =>
+      null;
 }
 
 Future<ProviderContainer> _container({

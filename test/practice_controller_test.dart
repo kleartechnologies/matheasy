@@ -41,13 +41,24 @@ const _q2 = PracticeQuestion(
 );
 
 class _FixedPracticeService implements PracticeService {
-  const _FixedPracticeService(this.questions);
+  const _FixedPracticeService(this.questions, {this.extra});
 
   final List<PracticeQuestion> questions;
+
+  /// What [generateOne] serves (stamped at the requested difficulty), or null.
+  final PracticeQuestion? extra;
 
   @override
   Future<PracticeSession> createSession(PracticeRequest request) async =>
       PracticeSession(request: request, questions: questions);
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async =>
+      extra;
 }
 
 void main() {
@@ -57,6 +68,7 @@ void main() {
 
   Future<ProviderContainer> makeContainer({
     List<PracticeQuestion> questions = const [_q1, _q2],
+    PracticeQuestion? extra,
   }) async {
     now = DateTime(2026, 7, 8, 10);
     SharedPreferences.setMockInitialValues({});
@@ -66,7 +78,7 @@ void main() {
         sharedPreferencesProvider.overrideWithValue(prefs),
         clockProvider.overrideWithValue(() => now),
         practiceServiceProvider
-            .overrideWithValue(_FixedPracticeService(questions)),
+            .overrideWithValue(_FixedPracticeService(questions, extra: extra)),
       ],
     );
     addTearDown(container.dispose);
@@ -259,6 +271,114 @@ void main() {
         controller.requestHint();
       }
       expect(state(container).hintLevel, 4);
+    });
+  });
+
+  group('Challenge Me', () {
+    const harder = PracticeQuestion(
+      id: 'extra-1',
+      topic: PracticeTopic.algebra,
+      difficulty: PracticeDifficulty.medium,
+      type: PracticeQuestionType.input,
+      prompt: 'What is 5 + 5?',
+      acceptedAnswers: ['10'],
+      explanation: '5 + 5 = 10.',
+    );
+
+    test('inserts a harder question right after a correct answer', () async {
+      final container = await makeContainer(extra: harder);
+      final controller = await start(container);
+
+      controller.submit('4');
+      expect(state(container).phase, PracticePhase.revealed);
+
+      final outcome = await controller.challengeMe();
+      expect(outcome, ChallengeOutcome.inserted);
+      final s = state(container);
+      expect(s.phase, PracticePhase.answering);
+      expect(s.session!.currentQuestion.id, 'extra-1');
+      expect(s.session!.total, 3); // q1, extra, q2
+      expect(s.attempt!.attempts, 0); // fresh attempt for the challenge
+    });
+
+    test('reports unavailable when the engine cannot build one', () async {
+      final container = await makeContainer(); // extra: null
+      final controller = await start(container);
+      controller.submit('4');
+      expect(await controller.challengeMe(), ChallengeOutcome.unavailable);
+      // Session unchanged — the button never breaks the flow.
+      expect(state(container).session!.total, 2);
+      expect(state(container).phase, PracticePhase.revealed);
+    });
+
+    test('is refused after an incorrect final', () async {
+      final container = await makeContainer();
+      final controller = await start(container);
+      controller.submit('99');
+      controller.giveUp();
+      expect(await controller.challengeMe(), ChallengeOutcome.unavailable);
+    });
+  });
+
+  group('mid-session adaptation', () {
+    test('three first-try cleans swap the upcoming question harder', () async {
+      const q3 = PracticeQuestion(
+        id: 'q3',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.easy,
+        type: PracticeQuestionType.input,
+        prompt: 'What is 4 + 4?',
+        acceptedAnswers: ['8'],
+        explanation: '4 + 4 = 8.',
+      );
+      const q4 = PracticeQuestion(
+        id: 'q4',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.easy,
+        type: PracticeQuestionType.input,
+        prompt: 'What is 5 + 5?',
+        acceptedAnswers: ['10'],
+        explanation: '5 + 5 = 10.',
+      );
+      const swapped = PracticeQuestion(
+        id: 'swapped-1',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.medium,
+        type: PracticeQuestionType.input,
+        prompt: 'Harder one',
+        acceptedAnswers: ['1'],
+        explanation: 'because',
+      );
+
+      const q5 = PracticeQuestion(
+        id: 'q5',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.easy,
+        type: PracticeQuestionType.input,
+        prompt: 'What is 6 + 6?',
+        acceptedAnswers: ['12'],
+        explanation: '6 + 6 = 12.',
+      );
+      final container = await makeContainer(
+        questions: const [_q1, _q2, q3, q4, q5],
+        extra: swapped,
+      );
+      final controller = await start(container);
+
+      controller.submit('4');
+      controller.next(); // 1 clean — upcoming (q3) holds
+      controller.submit('6');
+      controller.next(); // 2 cleans — upcoming (q4) holds
+      controller.submit('8');
+      controller.next(); // 3 cleans — now on q4; upcoming (q5) swaps harder
+      await Future<void>.delayed(Duration.zero); // let the async swap land
+
+      final s = state(container);
+      expect(s.session!.questions[3].id, 'q4'); // earlier slots untouched
+      expect(s.session!.questions[4].id, 'swapped-1');
+      expect(s.session!.questions[4].difficulty, PracticeDifficulty.medium);
+      // The student's position never moved — only the future changed.
+      expect(s.session!.currentQuestion.id, 'q4');
     });
   });
 

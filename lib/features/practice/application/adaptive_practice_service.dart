@@ -4,11 +4,13 @@ import 'dart:math';
 import '../../../core/monitoring/logging_service.dart';
 import '../domain/adaptive_recommendation.dart';
 import '../domain/generation_tier.dart';
+import '../domain/practice_difficulty.dart';
 import '../domain/practice_history.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
 import '../domain/practice_skill.dart';
+import '../domain/practice_topic.dart';
 import '../domain/question_fingerprint.dart';
 import 'ai_practice_generator.dart';
 import 'engine/adaptive_engine.dart';
@@ -128,6 +130,77 @@ class AdaptivePracticeService implements PracticeService {
     unawaited(history.save(storedHistory.withAll(accepted)));
 
     return PracticeSession(request: request, questions: questions);
+  }
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async {
+    final isPro = _readIsPro();
+    final clamped =
+        adaptiveEngine.difficulty.clampToTier(difficulty, isPro: isPro);
+
+    // Resolve the skill: the requested one when it fits the level, else the
+    // hardest concept in the topic allowed there. No skill at all → bank.
+    final requested = PracticeSkill.byId(skillId);
+    var skill = (requested != null &&
+            requested.topic == topic &&
+            skillAllowedAt(requested, clamped) &&
+            (isPro || !requested.proOnly))
+        ? requested
+        : null;
+    if (skill == null) {
+      final candidates = PracticeSkill.forTopic(topic)
+          .where((s) =>
+              skillAllowedAt(s, clamped) &&
+              (isPro || !s.proOnly) &&
+              (isPro || s.tier != GenerationTier.ai))
+          .toList()
+        ..sort((a, b) => conceptFloor(b).index.compareTo(conceptFloor(a).index));
+      skill = candidates.isEmpty ? null : candidates.first;
+    }
+
+    // No generatable skill in this topic at this level → straight to the bank.
+    if (skill == null) {
+      final pool = PracticeQuestionBank.forTopic(topic)
+          .where((q) => q.difficulty.index <= clamped.index)
+          .toList()
+        ..sort((a, b) => b.difficulty.index.compareTo(a.difficulty.index));
+      return pool.isEmpty
+          ? null
+          : pool.first.withId('extra-${_random.nextInt(1 << 31)}');
+    }
+
+    final rec = AdaptiveRecommendation(
+      skill: skill,
+      difficulty: clamped,
+      reason: AdaptiveReason.mastery,
+    );
+
+    final rng = ParameterGenerator(_random);
+    final storedHistory = history.load();
+    final sessionValues = <String>{};
+    final sessionAnswers = <String>{};
+    final aiQuestions = skill.tier == GenerationTier.ai && isPro
+        ? await _prefetchAi([rec], isPro)
+        : const <String, List<PracticeQuestion>>{};
+
+    final generated = _generateSlot(
+      rec,
+      0,
+      1,
+      rng,
+      storedHistory,
+      sessionValues,
+      sessionAnswers,
+      aiQuestions,
+    );
+    if (generated == null) return null;
+
+    unawaited(history.save(storedHistory.withAll([generated.fingerprint])));
+    return generated.question.withId('extra-${_random.nextInt(1 << 31)}');
   }
 
   // ---- AI prefetch ---------------------------------------------------------

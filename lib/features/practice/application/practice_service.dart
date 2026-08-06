@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../subscription/application/subscription_controller.dart';
+import '../domain/practice_difficulty.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
+import '../domain/practice_topic.dart';
 import 'adaptive_practice_service.dart';
 import 'ai_practice_generator.dart';
 import 'practice_history_store.dart';
@@ -18,6 +20,15 @@ import 'practice_question_bank.dart';
 abstract interface class PracticeService {
   /// Builds a session's questions for [request].
   Future<PracticeSession> createSession(PracticeRequest request);
+
+  /// Generates ONE extra question mid-session (V5: Challenge Me, and the
+  /// difficulty-adaptation swap). Best-effort: `null` means the engine
+  /// couldn't produce one and the caller keeps what it has — never throws.
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  });
 }
 
 /// Timings for the mock experience, referenced by the UI/tests so the simulated
@@ -40,6 +51,20 @@ class MockPracticeService implements PracticeService {
       request: request,
       questions: _select(request),
     );
+  }
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async {
+    // Bank-backed: the closest hand-authored question at or below the level.
+    final pool = PracticeQuestionBank.forTopic(topic)
+        .where((q) => q.difficulty.index <= difficulty.index)
+        .toList()
+      ..sort((a, b) => b.difficulty.index.compareTo(a.difficulty.index));
+    return pool.isEmpty ? null : pool.first;
   }
 
   /// Picks questions for [request]: filtered to a fixed difficulty when one is
