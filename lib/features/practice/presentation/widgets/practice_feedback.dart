@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:matheasy/core/brand/brand.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import 'practice_chips.dart';
 
-/// The post-answer feedback: a Matheasy reaction, the explanation, and (when
-/// correct) the XP earned. Warm and encouraging on both outcomes.
+/// The post-answer feedback: a Matheasy reaction, the explanation (once the
+/// question resolves), and (when correct) the XP earned. On a wrong answer it
+/// names the mistake honestly but warmly — "Your answer / Correct answer" —
+/// never a bare "Wrong".
 class PracticeFeedback extends StatelessWidget {
   const PracticeFeedback({
     super.key,
@@ -16,37 +19,49 @@ class PracticeFeedback extends StatelessWidget {
     required this.explanation,
     required this.xpEarned,
     required this.reactionSeed,
+    this.submittedAnswer,
+    this.correctAnswer,
   });
 
   final bool correct;
+
+  /// The "why" — empty while the student can still retry (the explanation
+  /// would spoil the learning loop; it appears once the question resolves).
   final String explanation;
+
   final int xpEarned;
 
   /// Rotates the Matheasy reaction line so repeats feel fresh.
   final int reactionSeed;
 
-  static const List<String> _praise = [
-    'Great job!',
-    'Nice thinking!',
-    'You nailed it!',
-    'Brilliant work!',
-    "You're on fire! 🔥",
-  ];
+  /// On incorrect: what the student submitted, shown as "Your answer: X".
+  final String? submittedAnswer;
 
-  static const List<String> _encourage = [
-    'Almost there!',
-    "Good effort — let's learn from this one.",
-    'Not quite, but you can do this!',
-    'Close! Take a look at why.',
-  ];
+  /// On incorrect: the correct answer, shown under the student's.
+  final String? correctAnswer;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final l10n = context.l10n;
+    final praise = [
+      l10n.practicePraise1,
+      l10n.practicePraise2,
+      l10n.practicePraise3,
+      l10n.practicePraise4,
+      l10n.practicePraise5,
+    ];
+    final encourage = [
+      l10n.practiceEncourage1,
+      l10n.practiceEncourage2,
+      l10n.practiceEncourage3,
+      l10n.practiceEncourage4,
+    ];
     final headline = correct
-        ? _praise[reactionSeed % _praise.length]
-        : _encourage[reactionSeed % _encourage.length];
-    final accent = correct ? colors.onSuccessContainer : colors.onWarningContainer;
+        ? praise[reactionSeed % praise.length]
+        : encourage[reactionSeed % encourage.length];
+    final accent =
+        correct ? colors.onSuccessContainer : colors.onWarningContainer;
     final background =
         correct ? colors.successContainer : colors.warningContainer;
 
@@ -80,13 +95,35 @@ class PracticeFeedback extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  explanation,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: colors.textPrimary,
+                if (!correct && submittedAnswer != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.practiceYourAnswer(submittedAnswer!),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
+                  if (correctAnswer case final answer?) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.practiceCorrectAnswer(answer),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: colors.onSuccessContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ],
+                if (explanation.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    explanation,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

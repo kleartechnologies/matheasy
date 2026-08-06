@@ -559,5 +559,106 @@ void main() {
       expect(find.text('2 + 2 = 4.'), findsOneWidget); // explanation shown
       expect(find.text('See results'), findsOneWidget); // last question
     });
+
+    testWidgets('a wrong answer opens the retry ladder, and Try Again works',
+        (tester) async {
+      tester.view.physicalSize = const Size(1200, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final container = await _container(
+        service: const _FixedPracticeService([_inputQ]),
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const PracticeSessionScreen(
+              request: PracticeRequest(topic: PracticeTopic.algebra),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), '9');
+      await tester.pump();
+      await tester.tap(find.text('Check answer'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Retry state: honest feedback, the way forward, no explanation yet.
+      expect(find.text('Your answer: 9'), findsOneWidget);
+      expect(find.text('Correct answer: 4'), findsOneWidget);
+      expect(find.text('Try again'), findsOneWidget);
+      expect(find.text('Show solution'), findsOneWidget);
+      expect(find.text('2 + 2 = 4.'), findsNothing);
+
+      await tester.tap(find.text('Try again'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.enterText(find.byType(TextField), '4');
+      await tester.pump();
+      await tester.tap(find.text('Check answer'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Resolved: explanation appears; the retried correct earns 0.7× of 10.
+      expect(find.text('2 + 2 = 4.'), findsOneWidget);
+      final state = container.read(practiceControllerProvider);
+      expect(state.lastAnswer!.attempts, 2);
+      expect(state.lastAnswer!.xpEarned, 7);
+    });
+
+    testWidgets('the hint ladder reveals one rung per tap', (tester) async {
+      tester.view.physicalSize = const Size(1200, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const hinted = PracticeQuestion(
+        id: 'q-h',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.easy,
+        type: PracticeQuestionType.input,
+        prompt: 'What is 2 + 2?',
+        acceptedAnswers: ['4'],
+        explanation: '2 + 2 = 4.',
+        hints: ['Nudge one.', 'Method two.'],
+      );
+      final container = await _container(
+        service: const _FixedPracticeService([hinted]),
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const PracticeSessionScreen(
+              request: PracticeRequest(topic: PracticeTopic.algebra),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Nothing revealed until asked.
+      expect(find.text('Nudge one.'), findsNothing);
+      expect(find.text('Need a hint?'), findsOneWidget);
+
+      await tester.tap(find.text('Need a hint?'));
+      await tester.pump();
+      expect(find.text('Nudge one.'), findsOneWidget);
+      expect(find.text('Method two.'), findsNothing); // level 2 not yet asked
+
+      await tester.tap(find.text('Another hint'));
+      await tester.pump();
+      expect(find.text('Method two.'), findsOneWidget);
+    });
   });
 }

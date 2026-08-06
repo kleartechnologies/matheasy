@@ -806,17 +806,59 @@ abstract class AppLocalizations {
   /// **'Numi couldn\'t build a harder one right now — carry on!'**
   String get practiceChallengeUnavailable;
 
-  /// No description provided for @practiceAlmostThere.
+  /// No description provided for @practicePraise1.
   ///
   /// In en, this message translates to:
-  /// **'Almost there.'**
-  String get practiceAlmostThere;
+  /// **'Great job!'**
+  String get practicePraise1;
 
-  /// No description provided for @practiceEncourageRetry.
+  /// No description provided for @practicePraise2.
   ///
   /// In en, this message translates to:
-  /// **'Mistakes are how mathematicians learn. Want another go?'**
-  String get practiceEncourageRetry;
+  /// **'Nice thinking!'**
+  String get practicePraise2;
+
+  /// No description provided for @practicePraise3.
+  ///
+  /// In en, this message translates to:
+  /// **'You nailed it!'**
+  String get practicePraise3;
+
+  /// No description provided for @practicePraise4.
+  ///
+  /// In en, this message translates to:
+  /// **'Brilliant work!'**
+  String get practicePraise4;
+
+  /// No description provided for @practicePraise5.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on fire! 🔥'**
+  String get practicePraise5;
+
+  /// No description provided for @practiceEncourage1.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there!'**
+  String get practiceEncourage1;
+
+  /// No description provided for @practiceEncourage2.
+  ///
+  /// In en, this message translates to:
+  /// **'Good effort — let\'s learn from this one.'**
+  String get practiceEncourage2;
+
+  /// No description provided for @practiceEncourage3.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite, but you can do this!'**
+  String get practiceEncourage3;
+
+  /// No description provided for @practiceEncourage4.
+  ///
+  /// In en, this message translates to:
+  /// **'Close! Take a look at why.'**
+  String get practiceEncourage4;
 
   /// No description provided for @tutorNewConversationStarted.
   ///

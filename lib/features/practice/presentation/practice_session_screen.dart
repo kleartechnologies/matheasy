@@ -20,13 +20,16 @@ import '../domain/practice_mistake.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
 import '../domain/practice_topic.dart';
+import 'practice_solution_screen.dart';
 import 'practice_visual_screen.dart';
 import 'widgets/practice_answer_area.dart';
 import 'widgets/practice_feedback.dart';
+import 'widgets/practice_hint_card.dart';
 import 'widgets/practice_mistake_actions.dart';
 import 'widgets/practice_question_view.dart';
 import 'widgets/practice_results_view.dart';
 import 'widgets/practice_session_header.dart';
+import 'widgets/practice_success_actions.dart';
 
 /// The full-screen practice session: build → answer → feedback → next →
 /// results. Pushed over the shell with a [PracticeRequest] as the route `extra`.
@@ -93,6 +96,53 @@ class _PracticeSessionScreenState
   }
 
   void _next() => ref.read(practiceControllerProvider.notifier).next();
+
+  void _tryAgain() => ref.read(practiceControllerProvider.notifier).tryAgain();
+
+  void _requestHint() =>
+      ref.read(practiceControllerProvider.notifier).requestHint();
+
+  /// Opens the guided solution. In [PracticeSolutionMode.showSolution] the
+  /// solution screen marks the attempt solution-viewed itself.
+  void _openSolution(
+    PracticeQuestion question, {
+    required PracticeSolutionMode mode,
+    String? studentAnswer,
+  }) {
+    unawaited(context.push(
+      AppRoutes.practiceSolution,
+      extra: PracticeSolutionArgs(
+        question: question,
+        mode: mode,
+        studentAnswer: studentAnswer,
+      ),
+    ));
+  }
+
+  /// "Show solution" from the retry ladder — the give-up path: the question
+  /// finalizes as incorrect, then the full guided lesson opens.
+  void _giveUpToSolution(PracticeQuestion question, String? studentAnswer) {
+    ref.read(practiceControllerProvider.notifier).giveUp();
+    _openSolution(
+      question,
+      mode: PracticeSolutionMode.showSolution,
+      studentAnswer: studentAnswer,
+    );
+  }
+
+  /// Opens Numi to reflect on a CORRECT answer (alternative methods, why the
+  /// method works…).
+  void _askMatheasyAboutSuccess(PracticeQuestion question) {
+    context.push(
+      AppRoutes.tutorChat,
+      extra: TutorLaunchContext(
+        questionLatex: question.promptLatex ?? question.prompt,
+        answerLatex: question.correctAnswerText,
+        equationType: question.difficulty.label,
+        topicLabel: question.topic.label,
+      ),
+    );
+  }
 
   void _continue() {
     final request = widget.request;
@@ -210,6 +260,7 @@ class _PracticeSessionScreenState
   Widget _buildActive(PracticeSessionState state) {
     final session = state.session!;
     final question = session.currentQuestion;
+    final attempt = state.attempt;
 
     return Column(
       children: [
@@ -230,15 +281,66 @@ class _PracticeSessionScreenState
                 const SizedBox(height: AppSpacing.section),
                 PracticeQuestionView(question: question),
                 const SizedBox(height: AppSpacing.xl),
-                PracticeAnswerArea(
-                  question: question,
-                  revealed: state.isRevealed,
-                  selectedOption: _selectedOption,
-                  onOptionSelected: (text) =>
-                      setState(() => _selectedOption = text),
-                  textController: _textController,
-                  onSubmitInput: () => _submit(question),
+                // While in retry the controls freeze (the actions card owns
+                // the way forward) but nothing is revealed yet.
+                IgnorePointer(
+                  ignoring: state.isRetry,
+                  child: PracticeAnswerArea(
+                    question: question,
+                    revealed: state.isRevealed,
+                    selectedOption: _selectedOption,
+                    onOptionSelected: (text) =>
+                        setState(() => _selectedOption = text),
+                    textController: _textController,
+                    onSubmitInput: () => _submit(question),
+                  ),
                 ),
+                // The hint ladder lives with the open question — one rung per
+                // tap, never revealed unrequested.
+                if (state.isAnswering || state.isRetry) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  PracticeHintCard(
+                    question: question,
+                    hintLevel: state.hintLevel,
+                    onRequestHint: _requestHint,
+                    onOpenSolution: () {
+                      _requestHint(); // rung 4
+                      _openSolution(
+                        question,
+                        mode: PracticeSolutionMode.showSolution,
+                        studentAnswer: attempt?.lastSubmitted,
+                      );
+                    },
+                  ),
+                ],
+                if (state.isRetry) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  AppTransitions.slideUp(
+                    child: PracticeFeedback(
+                      correct: false,
+                      // No explanation yet — the question is still open.
+                      explanation: '',
+                      xpEarned: 0,
+                      reactionSeed:
+                          session.currentIndex + (attempt?.attempts ?? 0),
+                      submittedAnswer: attempt?.lastSubmitted,
+                      correctAnswer: question.correctAnswerText,
+                    ),
+                  ),
+                  if (state.mistake case final mistake?) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AppTransitions.slideUp(
+                      child: PracticeMistakeActions(
+                        onTryAgain: _tryAgain,
+                        onHint: _requestHint,
+                        onShowSolution: () => _giveUpToSolution(
+                            question, attempt?.lastSubmitted),
+                        onAskMatheasy: () => _askMatheasyAboutMistake(mistake),
+                        onShowVisual: () => _showVisualForMistake(mistake),
+                      ),
+                    ),
+                  ],
+                ],
                 if (state.isRevealed) ...[
                   const SizedBox(height: AppSpacing.xl),
                   AppTransitions.slideUp(
@@ -247,29 +349,44 @@ class _PracticeSessionScreenState
                       explanation: question.explanation,
                       xpEarned: state.lastAnswer?.xpEarned ?? 0,
                       reactionSeed: session.currentIndex,
+                      submittedAnswer: state.mistake?.submittedAnswer,
+                      correctAnswer: state.lastWasCorrect
+                          ? null
+                          : question.correctAnswerText,
                     ),
                   ),
-                  if (state.mistake case final mistake?) ...[
-                    const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.md),
+                  if (state.lastWasCorrect)
+                    AppTransitions.slideUp(
+                      child: PracticeSuccessActions(
+                        onReviewSolution: () => _openSolution(
+                          question,
+                          mode: PracticeSolutionMode.reviewMySolution,
+                          studentAnswer: state.lastAnswer?.submitted,
+                        ),
+                        onAskNumi: () => _askMatheasyAboutSuccess(question),
+                      ),
+                    )
+                  else if (state.mistake case final mistake?)
                     AppTransitions.slideUp(
                       child: PracticeMistakeActions(
                         onAskMatheasy: () => _askMatheasyAboutMistake(mistake),
                         onShowVisual: () => _showVisualForMistake(mistake),
                       ),
                     ),
-                  ],
                 ],
               ],
             ),
           ),
         ),
-        _ActionBar(
-          revealed: state.isRevealed,
-          isLastQuestion: session.isLastQuestion,
-          canSubmit: _answerFor(question) != null,
-          onCheck: () => _submit(question),
-          onNext: _next,
-        ),
+        if (!state.isRetry)
+          _ActionBar(
+            revealed: state.isRevealed,
+            isLastQuestion: session.isLastQuestion,
+            canSubmit: _answerFor(question) != null,
+            onCheck: () => _submit(question),
+            onNext: _next,
+          ),
       ],
     );
   }

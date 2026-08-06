@@ -342,11 +342,31 @@ class AppLocalizationsJa extends AppLocalizations {
       'Numi couldn\'t build a harder one right now — carry on!';
 
   @override
-  String get practiceAlmostThere => 'Almost there.';
+  String get practicePraise1 => 'Great job!';
 
   @override
-  String get practiceEncourageRetry =>
-      'Mistakes are how mathematicians learn. Want another go?';
+  String get practicePraise2 => 'Nice thinking!';
+
+  @override
+  String get practicePraise3 => 'You nailed it!';
+
+  @override
+  String get practicePraise4 => 'Brilliant work!';
+
+  @override
+  String get practicePraise5 => 'You\'re on fire! 🔥';
+
+  @override
+  String get practiceEncourage1 => 'Almost there!';
+
+  @override
+  String get practiceEncourage2 => 'Good effort — let\'s learn from this one.';
+
+  @override
+  String get practiceEncourage3 => 'Not quite, but you can do this!';
+
+  @override
+  String get practiceEncourage4 => 'Close! Take a look at why.';
 
   @override
   String get tutorNewConversationStarted => '新しい会話を始めました';
