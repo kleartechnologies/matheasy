@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/backend/functions_client.dart';
 import '../../../core/backend/identity_service.dart';
+import '../../../core/persistence/preferences_store.dart';
+import '../../progress/application/achievement_service.dart' show clockProvider;
 import '../domain/server_usage.dart';
 
 part 'server_usage_controller.g.dart';
@@ -30,7 +34,20 @@ class ServerUsageController extends _$ServerUsageController {
   Future<void> refresh() async {
     if (!ref.read(aiBackendReadyProvider)) return;
     final usage = await ref.read(identityServiceProvider).fetchUsageStatus();
-    if (usage != null) state = usage;
+    if (usage != null) {
+      state = usage;
+      // Remember how far this device's clock sits from the server's, for the
+      // trusted clock that keeps daily-challenge day-keys honest (see
+      // `trustedClockProvider`). Best-effort: a missed write means the clock
+      // is trusted as-is, exactly as before this signal existed.
+      final serverNowMs = usage.serverNowMs;
+      if (serverNowMs != null) {
+        final deviceNowMs = ref.read(clockProvider)().millisecondsSinceEpoch;
+        unawaited(ref
+            .read(preferencesStoreProvider)
+            .setServerClockOffsetMs(serverNowMs - deviceNowMs));
+      }
+    }
   }
 
   /// Drops the cached meter — on sign-out, so the next account is not shown the

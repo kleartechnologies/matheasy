@@ -76,19 +76,28 @@ class AdaptivePracticeService implements PracticeService {
   Future<PracticeSession> createSession(PracticeRequest request) async {
     final isPro = _readIsPro();
     final progress = _readProgress();
-    final rng = ParameterGenerator(_random);
+    // A seeded request (the daily challenge) must be REPRODUCIBLE: all
+    // randomness derives from the seed, so re-launching the same request
+    // rebuilds the identical question set.
+    final seed = request.seed;
+    final rng = ParameterGenerator(seed == null ? _random : Random(seed));
 
     final plan = adaptiveEngine.plan(
       request: request,
       progress: progress,
       isPro: isPro,
+      variation: seed,
     );
 
     // Batch AI generation up front (one network round-trip per skill+difficulty
     // group) so a five-question calculus set doesn't fan out into five calls.
     final aiQuestions = await _prefetchAi(plan, isPro);
 
-    final storedHistory = history.load();
+    // Seeded requests skip the STORED anti-repeat history: it grows with every
+    // other session, so consulting it would make today's "deterministic"
+    // challenge depend on what else was practiced since — a different set on
+    // every relaunch. Session-internal dedupe below still applies.
+    final storedHistory = seed == null ? history.load() : PracticeHistory.empty;
     final sessionValues = <String>{};
     final sessionAnswers = <String>{};
     final accepted = <QuestionFingerprint>[];
@@ -126,8 +135,11 @@ class AdaptivePracticeService implements PracticeService {
     }
 
     // Remember what we served so future sessions avoid repeats (fire-and-forget;
-    // a persistence failure must not block practice).
-    unawaited(history.save(storedHistory.withAll(accepted)));
+    // a persistence failure must not block practice). The seeded path bypassed
+    // the stored history above, so re-load it here — saving over
+    // `PracticeHistory.empty` would wipe everything already remembered.
+    final base = seed == null ? storedHistory : history.load();
+    unawaited(history.save(base.withAll(accepted)));
 
     return PracticeSession(request: request, questions: questions);
   }
@@ -443,6 +455,15 @@ class AdaptivePracticeService implements PracticeService {
       return byDifficulty != 0 ? byDifficulty : a.id.compareTo(b.id);
     });
     final count = request.questionCount.clamp(1, source.length);
+    // A seeded (daily-challenge) request rotates its starting point so the
+    // all-bank fallback still varies day to day instead of always serving the
+    // same first N questions.
+    final seed = request.seed;
+    if (seed != null && source.length > count) {
+      final offset = seed % source.length;
+      final rotated = [...source.sublist(offset), ...source.sublist(0, offset)];
+      return rotated.take(count).toList();
+    }
     return source.take(count).toList();
   }
 }

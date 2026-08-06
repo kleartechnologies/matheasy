@@ -139,6 +139,7 @@ class LocalPracticeRepository implements PracticeRepository {
         'skillId': r.skillId,
         'adaptive': r.adaptive,
         'practiceSetSourceKey': r.practiceSetSourceKey,
+        'seed': r.seed,
       };
 
   PracticeRequest? _requestFromJson(Object? raw) {
@@ -154,6 +155,7 @@ class LocalPracticeRepository implements PracticeRepository {
       skillId: raw['skillId'] as String?,
       adaptive: raw['adaptive'] == true,
       practiceSetSourceKey: raw['practiceSetSourceKey'] as String?,
+      seed: raw['seed'] is int ? raw['seed'] as int : null,
     );
   }
 

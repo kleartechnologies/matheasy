@@ -12,9 +12,10 @@ part of 'profile_controller.dart';
 /// editable fields (name + avatar) and headline stats (progress) — and owns the
 /// profile-scoped account actions (edit, sign out, delete).
 ///
-/// Reactive: rebuilds when the signed-in user or aggregated progress changes,
-/// re-reading the persisted editable profile each time (so it always reflects
-/// the latest saved override).
+/// Reactive: rebuilds when the signed-in user, aggregated progress, or the
+/// saved editable profile changes (the editable slice is WATCHED via
+/// [editableProfileControllerProvider], so every rename propagates here and
+/// to every other watcher — the Progress screen included).
 
 @ProviderFor(ProfileController)
 final profileControllerProvider = ProfileControllerProvider._();
@@ -23,18 +24,20 @@ final profileControllerProvider = ProfileControllerProvider._();
 /// editable fields (name + avatar) and headline stats (progress) — and owns the
 /// profile-scoped account actions (edit, sign out, delete).
 ///
-/// Reactive: rebuilds when the signed-in user or aggregated progress changes,
-/// re-reading the persisted editable profile each time (so it always reflects
-/// the latest saved override).
+/// Reactive: rebuilds when the signed-in user, aggregated progress, or the
+/// saved editable profile changes (the editable slice is WATCHED via
+/// [editableProfileControllerProvider], so every rename propagates here and
+/// to every other watcher — the Progress screen included).
 final class ProfileControllerProvider
     extends $NotifierProvider<ProfileController, ProfileView> {
   /// Assembles the [ProfileView] the Profile screen renders — identity (auth),
   /// editable fields (name + avatar) and headline stats (progress) — and owns the
   /// profile-scoped account actions (edit, sign out, delete).
   ///
-  /// Reactive: rebuilds when the signed-in user or aggregated progress changes,
-  /// re-reading the persisted editable profile each time (so it always reflects
-  /// the latest saved override).
+  /// Reactive: rebuilds when the signed-in user, aggregated progress, or the
+  /// saved editable profile changes (the editable slice is WATCHED via
+  /// [editableProfileControllerProvider], so every rename propagates here and
+  /// to every other watcher — the Progress screen included).
   ProfileControllerProvider._()
     : super(
         from: null,
@@ -62,15 +65,16 @@ final class ProfileControllerProvider
   }
 }
 
-String _$profileControllerHash() => r'fe030ae865cf6771c2eb4f3ad089cca77fade595';
+String _$profileControllerHash() => r'2c295127d87c259aa5e826846bb947731f369729';
 
 /// Assembles the [ProfileView] the Profile screen renders — identity (auth),
 /// editable fields (name + avatar) and headline stats (progress) — and owns the
 /// profile-scoped account actions (edit, sign out, delete).
 ///
-/// Reactive: rebuilds when the signed-in user or aggregated progress changes,
-/// re-reading the persisted editable profile each time (so it always reflects
-/// the latest saved override).
+/// Reactive: rebuilds when the signed-in user, aggregated progress, or the
+/// saved editable profile changes (the editable slice is WATCHED via
+/// [editableProfileControllerProvider], so every rename propagates here and
+/// to every other watcher — the Progress screen included).
 
 abstract class _$ProfileController extends $Notifier<ProfileView> {
   ProfileView build();

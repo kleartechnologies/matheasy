@@ -43,11 +43,14 @@ class PracticeProgressController extends _$PracticeProgressController {
       }
     }
 
-    // The daily-challenge bonus is granted at most once per calendar day, so it
-    // can't be farmed by replaying "Keep practicing".
+    // The daily-challenge bonus is granted at most once per calendar day, and
+    // MONOTONICALLY: `< today` (not `!= today`) means winding the device clock
+    // backwards after completing today's challenge can't re-arm the bonus for
+    // the days in between.
     final today = _epochDay(now);
+    final lastDaily = state.lastDailyChallengeEpochDay;
     final awardDaily = session.request.isDailyChallenge &&
-        state.lastDailyChallengeEpochDay != today;
+        (lastDaily == null || lastDaily < today);
     // Finishing a whole set earns a flat completion bonus — persistence pays
     // even on a rough set (V5 "XP for learning", spec: reward completing).
     final awardCompletion = session.isComplete;
@@ -74,9 +77,13 @@ class PracticeProgressController extends _$PracticeProgressController {
       streakCurrent: streakCurrent,
       streakBest: streakBest,
       sessionsCompleted: state.sessionsCompleted + 1,
-      dailyChallengesCompleted: state.dailyChallengesCompleted +
-          (session.request.isDailyChallenge ? 1 : 0),
-      lastPracticedEpochDay: today,
+      // Counted only when the once-per-day bonus is earned, so replaying the
+      // challenge can't inflate the achievement counter.
+      dailyChallengesCompleted:
+          state.dailyChallengesCompleted + (awardDaily ? 1 : 0),
+      // Monotonic: a rolled-back clock must not rewind the last-practiced day
+      // (that would both corrupt the streak and re-arm daily rewards).
+      lastPracticedEpochDay: math.max(today, state.lastPracticedEpochDay ?? today),
       lastDailyChallengeEpochDay:
           awardDaily ? today : state.lastDailyChallengeEpochDay,
       topics: {...state.topics, topic: afterTopic},
@@ -183,8 +190,11 @@ class PracticeProgressController extends _$PracticeProgressController {
     final int current;
     if (last == null) {
       current = 1;
-    } else if (last == today) {
-      current = math.max(state.streakCurrent, 1); // already counted today
+    } else if (last >= today) {
+      // Already counted today — or the device clock was wound backwards (last
+      // is in the "future"). Either way, keep the streak instead of resetting
+      // it; the monotonic lastPracticedEpochDay prevents any double-count.
+      current = math.max(state.streakCurrent, 1);
     } else if (last == today - 1) {
       current = state.streakCurrent + 1; // consecutive day
     } else {

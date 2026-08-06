@@ -84,7 +84,7 @@ final class ServerUsageControllerProvider
 }
 
 String _$serverUsageControllerHash() =>
-    r'6de260e7795bd26eaf74974f02b6278e091ce504';
+    r'5a66ecfb64cab7e6b5e4060a459a9b486c4ea5cf';
 
 /// Holds the server's authoritative meter, or `null` before one has been read.
 ///

@@ -17,12 +17,25 @@ class PracticeRequest {
     this.skillId,
     this.adaptive = false,
     this.practiceSetSourceKey,
+    this.seed,
   });
 
-  /// The daily challenge: a fixed 5-question set with a bonus on completion.
+  /// The daily challenge: a fixed question set with a bonus on completion.
   /// [adaptive] so the challenge scales with the learner's mastery (Pro).
-  factory PracticeRequest.dailyChallenge() => const PracticeRequest(
-        topic: PracticeTopic.algebra,
+  ///
+  /// [topic] and [seed] come from `DailyChallengeState` — the per-day plan.
+  /// The seed makes generation deterministic, so relaunching today's challenge
+  /// always rebuilds the identical questions, while tomorrow's plan (new
+  /// dayKey → new seed) produces new ones.
+  factory PracticeRequest.dailyChallenge({
+    PracticeTopic topic = PracticeTopic.algebra,
+    int? seed,
+    int questionCount = 5,
+  }) =>
+      PracticeRequest(
+        topic: topic,
+        seed: seed,
+        questionCount: questionCount,
         isDailyChallenge: true,
         title: 'Daily Challenge',
         adaptive: true,
@@ -53,6 +66,12 @@ class PracticeRequest {
   /// session marks the set's mixed review done. Null for ordinary sessions.
   final String? practiceSetSourceKey;
 
+  /// When set, question generation is DETERMINISTIC: the engine derives all
+  /// randomness from this seed, so the same request always yields the same
+  /// questions. The daily challenge uses it for one-challenge-per-day; `null`
+  /// (every other session) keeps generation fresh each time.
+  final int? seed;
+
   String get displayTitle => title ?? topic.label;
 
   /// Sentinel so [copyWith] can distinguish "not passed" from an explicit
@@ -68,6 +87,7 @@ class PracticeRequest {
     String? skillId,
     bool? adaptive,
     String? practiceSetSourceKey,
+    Object? seed = _unset,
   }) {
     return PracticeRequest(
       topic: topic ?? this.topic,
@@ -80,6 +100,7 @@ class PracticeRequest {
       skillId: skillId ?? this.skillId,
       adaptive: adaptive ?? this.adaptive,
       practiceSetSourceKey: practiceSetSourceKey ?? this.practiceSetSourceKey,
+      seed: identical(seed, _unset) ? this.seed : seed as int?,
     );
   }
 
@@ -93,7 +114,8 @@ class PracticeRequest {
       other.title == title &&
       other.skillId == skillId &&
       other.adaptive == adaptive &&
-      other.practiceSetSourceKey == practiceSetSourceKey;
+      other.practiceSetSourceKey == practiceSetSourceKey &&
+      other.seed == seed;
 
   @override
   int get hashCode => Object.hash(
@@ -105,6 +127,7 @@ class PracticeRequest {
         skillId,
         adaptive,
         practiceSetSourceKey,
+        seed,
       );
 }
 

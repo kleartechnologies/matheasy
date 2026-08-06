@@ -20,6 +20,7 @@ class ServerUsage {
     required this.counts,
     required this.quota,
     this.expiresAtMs,
+    this.serverNowMs,
   });
 
   /// Whether the SERVER resolved this account to an active Pro entitlement
@@ -32,6 +33,11 @@ class ServerUsage {
 
   /// When the current period ends, if known.
   final int? expiresAtMs;
+
+  /// The server's wall-clock time when this response was built (epoch ms), if
+  /// the backend sent one. Used to persist a device-clock offset for the
+  /// trusted clock — never displayed.
+  final int? serverNowMs;
 
   /// Effective lifetime usage — the maximum across this account and this
   /// installation, which is why signing into a fresh account does not reset it.
@@ -54,6 +60,9 @@ class ServerUsage {
           : 'none',
       expiresAtMs: json['expiresAtMs'] is num
           ? (json['expiresAtMs'] as num).toInt()
+          : null,
+      serverNowMs: json['serverNowMs'] is num
+          ? (json['serverNowMs'] as num).toInt()
           : null,
       counts: UsageCounts(
         scansUsed: _count(used['scans']),
@@ -98,10 +107,11 @@ class ServerUsage {
       other.isPro == isPro &&
       other.entitlement == entitlement &&
       other.expiresAtMs == expiresAtMs &&
+      other.serverNowMs == serverNowMs &&
       other.counts == counts &&
       other.quota == quota;
 
   @override
   int get hashCode =>
-      Object.hash(isPro, entitlement, expiresAtMs, counts, quota);
+      Object.hash(isPro, entitlement, expiresAtMs, serverNowMs, counts, quota);
 }

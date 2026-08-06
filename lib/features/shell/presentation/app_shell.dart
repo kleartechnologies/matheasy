@@ -6,6 +6,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/services/app_lifecycle.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../analytics/presentation/ad_consent_gate.dart';
+import '../../practice/application/daily_challenge_controller.dart';
 import '../../subscription/application/subscription_service.dart';
 import '../../sync/application/sync_controller.dart';
 
@@ -32,6 +33,15 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Keep the app-lifecycle observer alive for the whole session.
     ref.watch(appLifecycleProvider);
+    // Foregrounding the app past local midnight must roll the daily challenge
+    // over immediately — no refresh button, no restart needed. The listener
+    // lives here (not in the challenge controller) so the controller stays free
+    // of WidgetsBinding and unit-testable in a plain ProviderContainer.
+    ref.listen(appLifecycleProvider, (previous, next) {
+      if (next == AppLifecycleState.resumed) {
+        ref.read(dailyChallengeControllerProvider.notifier).ensureToday();
+      }
+    });
     // Keep the sync engine alive whenever the app shell is shown, so background
     // cloud sync runs for signed-in users (a no-op for guests).
     ref.watch(syncControllerProvider);

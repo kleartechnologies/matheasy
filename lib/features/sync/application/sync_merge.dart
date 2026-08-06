@@ -42,6 +42,8 @@ class SyncMerge {
         return _mergeHistory(local, remote);
       case SyncDomain.practiceSets:
         return _mergePracticeSets(local, remote);
+      case SyncDomain.dailyChallenge:
+        return _mergeDailyChallenge(local, remote);
     }
   }
 
@@ -293,6 +295,79 @@ class SyncMerge {
     if (x is int) return {key: x};
     if (y is int) return {key: y};
     return const {};
+  }
+
+  // ---- Daily challenge: the newest DAY wins whole; same day → most progress. ----
+  //
+  // The challenge is planned per calendar day, so the side holding the newer
+  // `dayKey` simply IS today's challenge and wins outright. When both sides
+  // hold the SAME day they hold the same spec (same salt → same topic/seed);
+  // completion is monotonic within the day, so the side that got further wins —
+  // a completed challenge on one device can never be demoted by an untouched
+  // copy on another. Archives union by day (highest completion rank per day).
+  static const int _maxDailyRecent = 30;
+
+  static const List<String> _dailyStatusRank = [
+    'notStarted',
+    'inProgress',
+    'completed',
+    'perfect',
+  ];
+
+  static int _dailyRank(Object? status) {
+    final index = status is String ? _dailyStatusRank.indexOf(status) : -1;
+    return index < 0 ? 0 : index;
+  }
+
+  static Map<String, dynamic> _mergeDailyChallenge(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final dayA = a['dayKey'], dayB = b['dayKey'];
+    final Map<String, dynamic> winner;
+    if (dayA is! int) {
+      winner = b;
+    } else if (dayB is! int) {
+      winner = a;
+    } else if (dayA != dayB) {
+      winner = dayA > dayB ? a : b;
+    } else {
+      final rankA = _dailyRank(a['status']);
+      final rankB = _dailyRank(b['status']);
+      if (rankA != rankB) {
+        winner = rankA > rankB ? a : b;
+      } else {
+        winner = _asInt(a['answered']) >= _asInt(b['answered']) ? a : b;
+      }
+    }
+
+    // Union the archives by day, keeping the most-finished record per day.
+    final byDay = <int, Map<String, dynamic>>{};
+    for (final record in [..._entryList(a['recent']), ..._entryList(b['recent'])]) {
+      final day = record['dayKey'];
+      if (day is! int) continue;
+      final existing = byDay[day];
+      if (existing == null ||
+          _dailyRank(record['status']) > _dailyRank(existing['status'])) {
+        byDay[day] = record;
+      }
+    }
+    final recent = byDay.values.toList()
+      ..sort((x, y) => _asInt(y['dayKey']).compareTo(_asInt(x['dayKey'])));
+
+    // Keep ONE salt for the account (the winner's, falling back to the other
+    // side's) so both devices derive the same topic/seed tomorrow.
+    final salt = _asInt(winner['salt']) != 0
+        ? winner['salt']
+        : (winner == a ? b['salt'] : a['salt']);
+
+    return {
+      ...winner,
+      'salt': salt,
+      'recent': recent.length > _maxDailyRecent
+          ? recent.sublist(0, _maxDailyRecent)
+          : recent,
+    };
   }
 
   // ---- Helpers ----

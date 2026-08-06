@@ -77,13 +77,23 @@ class AdaptiveEngine {
   }
 
   /// Builds the ordered `(skill, difficulty)` plan for a session.
+  ///
+  /// [variation] (the daily challenge's per-day seed) rotates the skill pool's
+  /// starting point, so consecutive days of the same topic lead with different
+  /// skills instead of always starting from the same one. `null` keeps the
+  /// pool's natural (weakness-first / declaration) order.
   List<AdaptiveRecommendation> plan({
     required PracticeRequest request,
     required PracticeProgress progress,
     required bool isPro,
+    int? variation,
   }) {
     final count = request.questionCount.clamp(1, 20);
-    final skills = _candidateSkills(request, progress, isPro);
+    var skills = _candidateSkills(request, progress, isPro);
+    if (variation != null && skills.length > 1) {
+      final shift = variation % skills.length;
+      skills = [...skills.sublist(shift), ...skills.sublist(0, shift)];
+    }
     final reason = _reasonFor(request, progress, isPro);
 
     return [

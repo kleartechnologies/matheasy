@@ -10,7 +10,7 @@ import '../../../core/services/haptics_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
 import '../../practice_set/application/practice_set_controller.dart';
-import '../../progress/application/achievement_service.dart' show clockProvider;
+import '../../progress/application/trusted_clock.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_difficulty.dart';
@@ -19,6 +19,7 @@ import '../domain/practice_question.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
 import '../domain/xp_reward.dart';
+import 'daily_challenge_controller.dart';
 import 'engine/difficulty_engine.dart';
 import 'engine/session_adaptation.dart';
 import 'practice_difficulty_preference.dart';
@@ -143,9 +144,16 @@ class PracticeController extends _$PracticeController {
   /// interrupted mid-session. On success, the freshly generated questions are
   /// counted against the free-tier quota.
   Future<void> start(PracticeRequest rawRequest) async {
+    // A daily-challenge launch is swapped for TODAY's canonical request,
+    // whatever the caller held: a stale persisted "Continue" card or a card
+    // rendered before midnight must never start yesterday's challenge (or a
+    // pre-seed one that would regenerate fresh questions).
+    final canonical = rawRequest.isDailyChallenge
+        ? ref.read(dailyChallengeControllerProvider.notifier).todaysRequest()
+        : rawRequest;
     // The learner's saved level is the AUTHORITY, whatever launched the session
     // (see [_atChosenDifficulty]).
-    final request = _atChosenDifficulty(rawRequest);
+    final request = _atChosenDifficulty(canonical);
     if (!ref.read(usageSnapshotProvider).canGeneratePractice) {
       state = const PracticeSessionState(phase: PracticePhase.locked);
       return;
@@ -195,6 +203,9 @@ class PracticeController extends _$PracticeController {
         unawaited(analytics.logEvent(
             AnalyticsEvent.adaptiveRecommendationUsed(topic: request.topic.name)));
       }
+      if (request.isDailyChallenge) {
+        ref.read(dailyChallengeControllerProvider.notifier).markStarted();
+      }
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: session,
@@ -205,7 +216,9 @@ class PracticeController extends _$PracticeController {
     }
   }
 
-  DateTime _now() => ref.read(clockProvider)();
+  // The trusted clock, so daily/streak bookkeeping agrees with the
+  // DailyChallengeController even under a deliberately wound device clock.
+  DateTime _now() => ref.read(trustedClockProvider)();
 
   QuestionAttempt _freshAttempt() =>
       QuestionAttempt(startedAtMillis: _now().millisecondsSinceEpoch);
@@ -292,12 +305,22 @@ class PracticeController extends _$PracticeController {
       timeSpentSeconds: _elapsedSeconds(attempt),
     );
 
+    _recordDailyAnswer(session.request, isCorrect: true);
     state = PracticeSessionState(
       phase: PracticePhase.revealed,
       session: session.recordAnswer(answer),
       lastAnswer: answer,
       attempt: attempt,
     );
+  }
+
+  /// Mirrors a finally-resolved answer into the daily-challenge state, so the
+  /// card's "N of 5" progress survives leaving the session mid-way.
+  void _recordDailyAnswer(PracticeRequest request, {required bool isCorrect}) {
+    if (!request.isDailyChallenge) return;
+    ref
+        .read(dailyChallengeControllerProvider.notifier)
+        .recordAnswer(isCorrect: isCorrect);
   }
 
   /// Back from [PracticePhase.retry] to answering — same question, same
@@ -365,6 +388,7 @@ class PracticeController extends _$PracticeController {
       viewedSolution: attempt.viewedSolution,
       timeSpentSeconds: _elapsedSeconds(attempt),
     );
+    _recordDailyAnswer(session.request, isCorrect: false);
     state = PracticeSessionState(
       phase: PracticePhase.revealed,
       session: session.recordAnswer(answer),
@@ -392,6 +416,11 @@ class PracticeController extends _$PracticeController {
         )));
       }
       if (session.request.isDailyChallenge) {
+        ref.read(dailyChallengeControllerProvider.notifier).markCompleted(
+              request: session.request,
+              correct: session.correctCount,
+              total: session.total,
+            );
         unawaited(
             analytics.logEvent(AnalyticsEvent.dailyChallengeCompleted()));
       }

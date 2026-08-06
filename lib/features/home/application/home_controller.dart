@@ -1,11 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../practice/application/daily_challenge_controller.dart';
 import '../../practice/application/practice_progress_controller.dart';
+import '../../practice/domain/daily_challenge.dart';
 import '../../practice/domain/practice_progress.dart';
 import '../../practice/domain/practice_session.dart';
 import '../../practice/domain/xp_reward.dart';
 import '../../profile/application/profile_controller.dart';
-import '../../progress/application/achievement_service.dart';
 import '../domain/home_models.dart';
 
 part 'home_controller.g.dart';
@@ -29,7 +30,7 @@ class HomeController extends _$HomeController {
   HomeData build() {
     final profile = ref.watch(profileControllerProvider);
     final progress = ref.watch(practiceProgressControllerProvider);
-    final now = ref.watch(clockProvider)();
+    final daily = ref.watch(dailyChallengeControllerProvider);
 
     return HomeData(
       userName: profile.displayName,
@@ -41,23 +42,33 @@ class HomeController extends _$HomeController {
       // No real course/lesson-count source exists → empty, so the continue card
       // is hidden (never fabricated "8 / 11 lessons").
       continueCourses: const [],
-      todayChallenge: _dailyChallenge(progress, now),
+      todayChallenge: _dailyChallenge(daily),
       weakTopics: _weakTopics(progress),
     );
   }
 
-  /// The real, launchable daily-challenge CTA — its title / size / XP come from
-  /// [PracticeRequest.dailyChallenge]. `done` is HONEST: 0, or the full target
-  /// only when today's challenge has actually been completed. No fake partial.
-  static TodayChallenge _dailyChallenge(PracticeProgress progress, DateTime now) {
-    final request = PracticeRequest.dailyChallenge();
-    final doneToday = progress.lastDailyChallengeEpochDay == _epochDay(now);
+  /// The real, launchable daily-challenge CTA, built from the persisted per-day
+  /// [DailyChallengeState]: today's actual topic, a live answered count while in
+  /// progress, and the full target once completed — honest, never a fake
+  /// partial.
+  static TodayChallenge _dailyChallenge(DailyChallengeState daily) {
+    final request = daily.request ?? PracticeRequest.dailyChallenge();
+    final target = request.questionCount;
+    final done = daily.status.isDone ? target : daily.answered.clamp(0, target);
+    final topicLabel = request.topic.label.toLowerCase();
+    final subtitle = switch (daily.status) {
+      DailyChallengeStatus.perfect =>
+        'Perfect! All $target correct — come back tomorrow',
+      DailyChallengeStatus.completed => 'Done for today — come back tomorrow',
+      DailyChallengeStatus.inProgress =>
+        'Keep going — $done of $target $topicLabel questions done',
+      DailyChallengeStatus.notStarted => 'Solve $target $topicLabel questions',
+    };
     return TodayChallenge(
       title: request.displayTitle,
-      subtitle:
-          'Solve ${request.questionCount} ${request.topic.label.toLowerCase()} questions',
-      done: doneToday ? request.questionCount : 0,
-      target: request.questionCount,
+      subtitle: subtitle,
+      done: done,
+      target: target,
       xpReward: XpReward.dailyChallengeBonus,
     );
   }
@@ -79,10 +90,4 @@ class HomeController extends _$HomeController {
         ),
     ];
   }
-
-  /// UTC-anchored epoch day, matching `PracticeProgressController`'s streak/daily
-  /// bookkeeping so the "done today?" comparison lines up exactly.
-  static int _epochDay(DateTime dt) =>
-      DateTime.utc(dt.year, dt.month, dt.day).millisecondsSinceEpoch ~/
-          Duration.millisecondsPerDay;
 }
