@@ -1737,7 +1737,80 @@ class AppLocalizationsHi extends AppLocalizations {
   String get authContinueGoogle => 'Google के साथ जारी रखें';
 
   @override
+  String get authContinueEmail => 'Continue with email';
+
+  @override
   String get authSigningIn => 'साइन इन हो रहा है…';
+
+  @override
+  String get authEmailSignInTitle => 'Welcome back';
+
+  @override
+  String get authEmailSignInSubtitle => 'Sign in with your email and password.';
+
+  @override
+  String get authEmailSignUpTitle => 'Create your account';
+
+  @override
+  String get authEmailSignUpSubtitle =>
+      'One free account for all your math learning.';
+
+  @override
+  String get authEmailTabSignIn => 'Sign in';
+
+  @override
+  String get authEmailTabSignUp => 'Sign up';
+
+  @override
+  String get authEmailNameLabel => 'Name';
+
+  @override
+  String get authEmailNameRequired => 'Please enter your name.';
+
+  @override
+  String get authEmailFieldLabel => 'Email';
+
+  @override
+  String get authEmailInvalid => 'Please enter a valid email address.';
+
+  @override
+  String get authEmailPasswordLabel => 'Password';
+
+  @override
+  String get authEmailPasswordRequired => 'Please enter your password.';
+
+  @override
+  String get authEmailPasswordTooShort =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get authEmailShowPassword => 'Show password';
+
+  @override
+  String get authEmailHidePassword => 'Hide password';
+
+  @override
+  String get authEmailForgotPassword => 'Forgot password?';
+
+  @override
+  String get authEmailSignInAction => 'Sign in';
+
+  @override
+  String get authEmailSignUpAction => 'Create account';
+
+  @override
+  String get authEmailResetSent =>
+      'If an account exists for that email, a reset link is on its way.';
+
+  @override
+  String get authReauthTitle => 'Confirm it\'s you';
+
+  @override
+  String get authReauthMessage =>
+      'For your security, re-enter your password to delete your account.';
+
+  @override
+  String get authReauthConfirm => 'Confirm';
 
   @override
   String profileAccessUntil(String date) {

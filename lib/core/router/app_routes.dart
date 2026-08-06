@@ -70,6 +70,10 @@ class AppRoutes {
   static const String auth = '/auth';
   static const String authName = 'auth';
 
+  /// Email/password sign-in + sign-up — a sub-flow pushed over `/auth`.
+  static const String authEmail = '/auth/email';
+  static const String authEmailName = 'authEmail';
+
   static const String paywall = '/paywall';
   static const String paywallName = 'paywall';
 

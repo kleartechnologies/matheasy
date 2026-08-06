@@ -51,6 +51,25 @@ class AuthRepository {
 
   Future<AppUser> signInWithApple() => _service.signInWithApple();
 
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) =>
+      _service.signInWithEmail(email: email, password: password);
+
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) =>
+      _service.signUpWithEmail(name: name, email: email, password: password);
+
+  Future<void> sendPasswordReset(String email) =>
+      _service.sendPasswordReset(email);
+
+  Future<void> reauthenticateWithPassword(String password) =>
+      _service.reauthenticateWithPassword(password);
+
   Future<void> signOut() async {
     await _service.signOut();
     await _prefs.clearSession();

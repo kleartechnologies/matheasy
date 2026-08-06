@@ -29,6 +29,8 @@ class ProfileProviderBadge extends StatelessWidget {
         ),
       AuthProviderType.apple =>
         Icon(Icons.apple, size: 15, color: colors.textPrimary),
+      AuthProviderType.email =>
+        Icon(Icons.mail_outline_rounded, size: 15, color: colors.textPrimary),
       AuthProviderType.guest =>
         Icon(Icons.person_outline_rounded, size: 15, color: colors.textSecondary),
     };

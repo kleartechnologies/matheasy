@@ -8,8 +8,10 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// The federated providers rendered as full-width sign-in buttons.
-enum AuthButtonProvider { apple, google }
+/// The sign-in entry points rendered as full-width buttons. `email` is not a
+/// federated provider — its button navigates to the email form rather than
+/// launching a provider sheet.
+enum AuthButtonProvider { apple, google, email }
 
 /// A branded, full-width "Continue with …" button.
 ///
@@ -48,6 +50,12 @@ class AuthProviderButton extends StatelessWidget {
           colors.textPrimary,
           Border.all(color: colors.border, width: 1.5),
           context.l10n.authContinueGoogle,
+        ),
+      AuthButtonProvider.email => (
+          colors.surface,
+          colors.textPrimary,
+          Border.all(color: colors.border, width: 1.5),
+          context.l10n.authContinueEmail,
         ),
     };
 
@@ -132,6 +140,8 @@ class _Glyph extends StatelessWidget {
             fontWeight: FontWeight.w800,
           ),
         ),
+      AuthButtonProvider.email =>
+        Icon(Icons.mail_outline_rounded, size: 22, color: color),
     };
   }
 }

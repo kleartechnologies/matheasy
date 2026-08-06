@@ -3398,11 +3398,149 @@ abstract class AppLocalizations {
   /// **'Continue with Google'**
   String get authContinueGoogle;
 
+  /// No description provided for @authContinueEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with email'**
+  String get authContinueEmail;
+
   /// No description provided for @authSigningIn.
   ///
   /// In en, this message translates to:
   /// **'Signing in…'**
   String get authSigningIn;
+
+  /// No description provided for @authEmailSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authEmailSignInTitle;
+
+  /// No description provided for @authEmailSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your email and password.'**
+  String get authEmailSignInSubtitle;
+
+  /// No description provided for @authEmailSignUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get authEmailSignUpTitle;
+
+  /// No description provided for @authEmailSignUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One free account for all your math learning.'**
+  String get authEmailSignUpSubtitle;
+
+  /// No description provided for @authEmailTabSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authEmailTabSignIn;
+
+  /// No description provided for @authEmailTabSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get authEmailTabSignUp;
+
+  /// No description provided for @authEmailNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get authEmailNameLabel;
+
+  /// No description provided for @authEmailNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name.'**
+  String get authEmailNameRequired;
+
+  /// No description provided for @authEmailFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailFieldLabel;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authEmailPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authEmailPasswordLabel;
+
+  /// No description provided for @authEmailPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password.'**
+  String get authEmailPasswordRequired;
+
+  /// No description provided for @authEmailPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get authEmailPasswordTooShort;
+
+  /// No description provided for @authEmailShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authEmailShowPassword;
+
+  /// No description provided for @authEmailHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authEmailHidePassword;
+
+  /// No description provided for @authEmailForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authEmailForgotPassword;
+
+  /// No description provided for @authEmailSignInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authEmailSignInAction;
+
+  /// No description provided for @authEmailSignUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authEmailSignUpAction;
+
+  /// No description provided for @authEmailResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for that email, a reset link is on its way.'**
+  String get authEmailResetSent;
+
+  /// No description provided for @authReauthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you'**
+  String get authReauthTitle;
+
+  /// No description provided for @authReauthMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, re-enter your password to delete your account.'**
+  String get authReauthMessage;
+
+  /// No description provided for @authReauthConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get authReauthConfirm;
 
   /// No description provided for @profileAccessUntil.
   ///

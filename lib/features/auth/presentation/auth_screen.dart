@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/animations/app_transitions.dart';
 import '../../../core/animations/floaty.dart';
 import '../../../core/brand/brand.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/localization/l10n_extension.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -17,9 +19,10 @@ import 'widgets/auth_benefit_row.dart';
 import 'widgets/auth_provider_button.dart';
 
 /// The premium sign-in experience: the official Matheasy logo, the value
-/// proposition, and the two ways in — Apple or Google. Sign-in is required
-/// (there is no guest mode), so the app's AI features always run for a real
-/// account rather than on canned offline data.
+/// proposition, and the three ways in — Apple, Google, or email (which opens
+/// the `/auth/email` form). Sign-in is required (there is no guest mode), so
+/// the app's AI features always run for a real account rather than on canned
+/// offline data.
 ///
 /// Navigation is handled by the router guard, not here: the moment the session
 /// becomes authenticated, the guard redirects away from `/auth`.
@@ -115,6 +118,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     pending: _pending,
                     onApple: () => _signIn(AuthButtonProvider.apple),
                     onGoogle: () => _signIn(AuthButtonProvider.google),
+                    onEmail: () => context.push(AppRoutes.authEmail),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   const _LegalFootnote(),
@@ -170,12 +174,14 @@ class _Actions extends StatelessWidget {
     required this.pending,
     required this.onApple,
     required this.onGoogle,
+    required this.onEmail,
   });
 
   final bool busy;
   final AuthButtonProvider? pending;
   final VoidCallback onApple;
   final VoidCallback onGoogle;
+  final VoidCallback onEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +197,12 @@ class _Actions extends StatelessWidget {
           provider: AuthButtonProvider.google,
           isLoading: pending == AuthButtonProvider.google,
           onPressed: busy ? null : onGoogle,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // Navigation, not a sign-in: the email form owns its own progress.
+        AuthProviderButton(
+          provider: AuthButtonProvider.email,
+          onPressed: busy ? null : onEmail,
         ),
       ],
     );

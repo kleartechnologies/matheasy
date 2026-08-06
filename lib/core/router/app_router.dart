@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/auth/presentation/email_auth_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/gallery/presentation/gallery_screen.dart';
 import '../../features/history/presentation/history_screen.dart';
@@ -91,6 +92,13 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.auth,
         name: AppRoutes.authName,
         builder: (context, state) => const AuthScreen(),
+        routes: [
+          GoRoute(
+            path: 'email',
+            name: AppRoutes.authEmailName,
+            builder: (context, state) => const EmailAuthScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.paywall,

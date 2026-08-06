@@ -92,6 +92,49 @@ void main() {
       expect(state.isAuthenticated, isTrue);
     });
 
+    test('email sign-in produces a non-guest authenticated user', () async {
+      final container = await sessionContainer(authService: FakeAuthService());
+      addTearDown(container.dispose);
+      _activate(container);
+      await _settle();
+
+      await container
+          .read(authControllerProvider.notifier)
+          .signInWithEmail(email: 'maya@example.com', password: 'secret123');
+      final state = container.read(authControllerProvider);
+      expect(state.isAuthenticated, isTrue);
+      expect(state.isGuest, isFalse);
+      expect(state.user!.provider, AuthProviderType.email);
+      expect(state.busy, isFalse);
+    });
+
+    test('email sign-up carries the display name onto the account', () async {
+      final container = await sessionContainer(authService: FakeAuthService());
+      addTearDown(container.dispose);
+      _activate(container);
+      await _settle();
+
+      await container.read(authControllerProvider.notifier).signUpWithEmail(
+          name: 'Nadia', email: 'nadia@example.com', password: 'secret123');
+      final state = container.read(authControllerProvider);
+      expect(state.isAuthenticated, isTrue);
+      expect(state.user!.provider, AuthProviderType.email);
+      expect(state.user!.displayName, 'Nadia');
+    });
+
+    test('password reset hands the address to the service', () async {
+      final fake = FakeAuthService();
+      final container = await sessionContainer(authService: fake);
+      addTearDown(container.dispose);
+      _activate(container);
+      await _settle();
+
+      await container
+          .read(authControllerProvider.notifier)
+          .sendPasswordReset('maya@example.com');
+      expect(fake.passwordResetEmails, ['maya@example.com']);
+    });
+
     test('delete session ends the account session', () async {
       final fake = FakeAuthService(initialUser: googleTestUser());
       final container = await sessionContainer(authService: fake);
@@ -136,6 +179,24 @@ void main() {
       expect(state.failure?.type, AuthFailureType.cancelled);
       expect(state.failure!.isSilent, isTrue);
       expect(state.status, AuthStatus.unauthenticated);
+    });
+
+    test('bad email credentials surface a typed, non-silent failure', () async {
+      final fake =
+          FakeAuthService(emailError: const AuthFailure.invalidCredentials());
+      final container = await sessionContainer(authService: fake);
+      addTearDown(container.dispose);
+      _activate(container);
+      await _settle();
+
+      await container
+          .read(authControllerProvider.notifier)
+          .signInWithEmail(email: 'maya@example.com', password: 'wrong');
+      final state = container.read(authControllerProvider);
+      expect(state.status, AuthStatus.unauthenticated);
+      expect(state.failure?.type, AuthFailureType.invalidCredentials);
+      expect(state.failure!.isSilent, isFalse);
+      expect(state.busy, isFalse);
     });
 
     test('clearFailure removes a surfaced error', () async {
@@ -186,6 +247,28 @@ void main() {
       final target = RouteGuard.evaluate(
         matchedLocation: AppRoutes.auth,
         uri: Uri.parse(AppRoutes.auth),
+        authStatus: AuthStatus.authenticated,
+        onboardingComplete: true,
+        isPremium: false,
+      );
+      expect(target, AppRoutes.home);
+    });
+
+    test('guard lets an unauthenticated user reach the email form', () {
+      final target = RouteGuard.evaluate(
+        matchedLocation: AppRoutes.authEmail,
+        uri: Uri.parse(AppRoutes.authEmail),
+        authStatus: AuthStatus.unauthenticated,
+        onboardingComplete: true,
+        isPremium: false,
+      );
+      expect(target, isNull);
+    });
+
+    test('guard bounces an authenticated user away from the email form', () {
+      final target = RouteGuard.evaluate(
+        matchedLocation: AppRoutes.authEmail,
+        uri: Uri.parse(AppRoutes.authEmail),
         authStatus: AuthStatus.authenticated,
         onboardingComplete: true,
         isPremium: false,

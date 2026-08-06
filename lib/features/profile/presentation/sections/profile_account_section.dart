@@ -21,6 +21,7 @@ class ProfileAccountSection extends StatelessWidget {
   IconData get _providerIcon => switch (profile.provider) {
         AuthProviderType.apple => Icons.apple,
         AuthProviderType.google => Icons.account_circle_rounded,
+        AuthProviderType.email => Icons.mail_outline_rounded,
         AuthProviderType.guest => Icons.person_outline_rounded,
       };
 

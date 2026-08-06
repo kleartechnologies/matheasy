@@ -27,6 +27,16 @@ AppUser appleTestUser() => AppUser(
       email: 'alex@example.com',
     );
 
+/// A sample email/password-backed user for tests.
+AppUser emailTestUser() => AppUser(
+      id: 'email-uid-1',
+      provider: AuthProviderType.email,
+      isGuest: false,
+      createdAt: DateTime(2024),
+      displayName: 'Maya Chen',
+      email: 'maya@example.com',
+    );
+
 /// A freshly-created account with NO profile name yet (e.g. an Apple relay that
 /// hides the name) — exercises the honest 'Learner' fallback + empty first-day
 /// dashboard.
@@ -47,17 +57,22 @@ class FakeAuthService implements AuthService {
     AppUser? initialUser,
     AppUser? googleResult,
     AppUser? appleResult,
+    AppUser? emailResult,
     this.googleError,
     this.appleError,
+    this.emailError,
   })  : _current = initialUser,
         _googleResult = googleResult,
-        _appleResult = appleResult;
+        _appleResult = appleResult,
+        _emailResult = emailResult;
 
   AppUser? _current;
   final AppUser? _googleResult;
   final AppUser? _appleResult;
+  final AppUser? _emailResult;
   final AuthFailure? googleError;
   final AuthFailure? appleError;
+  final AuthFailure? emailError;
 
   final StreamController<AppUser?> _controller =
       StreamController<AppUser?>.broadcast();
@@ -66,6 +81,16 @@ class FakeAuthService implements AuthService {
   int deleteCount = 0;
   int anonymousSessionCount = 0;
   int recentLoginCount = 0;
+  int passwordReauthCount = 0;
+
+  /// Every address handed to [sendPasswordReset], in call order.
+  final List<String> passwordResetEmails = [];
+
+  /// Set to make [sendPasswordReset] fail (e.g. `AuthFailure.network()`).
+  AuthFailure? passwordResetError;
+
+  /// Set to make [reauthenticateWithPassword] fail (wrong password, etc.).
+  AuthFailure? passwordReauthError;
 
   /// Set to model the user cancelling (or failing) the re-authentication sheet
   /// that guards account deletion. When non-null [ensureRecentLogin] throws it,
@@ -116,6 +141,48 @@ class FakeAuthService implements AuthService {
     _current = user;
     _controller.add(user);
     return user;
+  }
+
+  @override
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    if (emailError != null) throw emailError!;
+    final user = _emailResult ?? emailTestUser();
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
+    _current = user;
+    _controller.add(user);
+    return user;
+  }
+
+  @override
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    if (emailError != null) throw emailError!;
+    final user =
+        (_emailResult ?? emailTestUser()).copyWith(displayName: name);
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
+    _current = user;
+    _controller.add(user);
+    return user;
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    passwordResetEmails.add(email);
+    final error = passwordResetError;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<void> reauthenticateWithPassword(String password) async {
+    passwordReauthCount++;
+    final error = passwordReauthError;
+    if (error != null) throw error;
   }
 
   @override

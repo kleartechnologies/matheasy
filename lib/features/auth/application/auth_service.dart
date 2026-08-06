@@ -51,6 +51,32 @@ abstract interface class AuthService {
   /// Interactive Apple sign-in. Throws [AuthFailure] on cancel/failure.
   Future<AppUser> signInWithApple();
 
+  /// Email/password sign-in. Throws [AuthFailure] on failure
+  /// (`invalidCredentials`, `invalidEmail`, `tooManyAttempts`, …).
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  });
+
+  /// Email/password account creation. [name] becomes the display name so the
+  /// app can greet the learner like it does for Google/Apple accounts.
+  /// Throws [AuthFailure] on failure (`emailInUse`, `weakPassword`, …).
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  });
+
+  /// Sends a password-reset email. Deliberately succeeds for unknown addresses
+  /// (no account enumeration); throws [AuthFailure] only for invalid input or
+  /// transport problems.
+  Future<void> sendPasswordReset(String email);
+
+  /// Re-proves an email account's identity with its password. The counterpart
+  /// of the federated re-auth inside [ensureRecentLogin], which cannot mint an
+  /// email credential on its own — the UI collects the password and calls this.
+  Future<void> reauthenticateWithPassword(String password);
+
   /// Ends the cloud session (keeps the account).
   Future<void> signOut();
 
@@ -107,6 +133,28 @@ class UnconfiguredAuthService implements AuthService {
   @override
   Future<AppUser> signInWithApple() async =>
       throw const AuthFailure.notConfigured();
+
+  @override
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) async =>
+      throw const AuthFailure.notConfigured();
+
+  @override
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async =>
+      throw const AuthFailure.notConfigured();
+
+  @override
+  Future<void> sendPasswordReset(String email) async =>
+      throw const AuthFailure.notConfigured();
+
+  @override
+  Future<void> reauthenticateWithPassword(String password) async {}
 
   @override
   Future<void> signOut() async {}

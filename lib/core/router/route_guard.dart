@@ -49,7 +49,9 @@ class RouteGuard {
     if (location == AppRoutes.splash) return null;
 
     final atOnboarding = location == AppRoutes.onboarding;
-    final atAuth = location == AppRoutes.auth;
+    // Both faces of the sign-in wall: the provider chooser and the email form.
+    final atAuth =
+        location == AppRoutes.auth || location == AppRoutes.authEmail;
 
     // 2) Onboarding gate.
     if (!onboardingComplete && !atOnboarding) {
