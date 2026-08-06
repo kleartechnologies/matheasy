@@ -14,6 +14,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../../tutor/domain/tutor_context_builder.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/practice_controller.dart';
 import '../domain/practice_mistake.dart';
@@ -133,13 +134,16 @@ class _PracticeSessionScreenState
   /// Opens Numi to reflect on a CORRECT answer (alternative methods, why the
   /// method works…).
   void _askMatheasyAboutSuccess(PracticeQuestion question) {
+    final state = ref.read(practiceControllerProvider);
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
-        questionLatex: question.promptLatex ?? question.prompt,
-        answerLatex: question.correctAnswerText,
-        equationType: question.difficulty.label,
-        topicLabel: question.topic.label,
+        problem: TutorContextBuilder.fromPracticeQuestion(
+          question,
+          studentAnswer: state.lastAnswer?.submitted,
+          hintLevel: state.lastAnswer?.hintLevelUsed,
+          attempts: state.lastAnswer?.attempts,
+        ),
       ),
     );
   }
@@ -164,16 +168,21 @@ class _PracticeSessionScreenState
     );
   }
 
-  /// Opens Matheasy to explain a wrong answer, seeded with the full mistake context
-  /// (question + the learner's answer + the correct answer + topic/difficulty).
+  /// Opens Matheasy to coach a wrong answer with the full structured context
+  /// (V5): the question, what the learner submitted, how many tries, and how
+  /// far up the hint ladder the app already took them — so Numi diagnoses
+  /// THEIR mistake and coaches at the next nudge.
   void _askMatheasyAboutMistake(PracticeMistake mistake) {
+    final state = ref.read(practiceControllerProvider);
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
-        questionLatex: mistake.question.promptLatex,
-        answerLatex: mistake.correctAnswer,
-        equationType: mistake.difficulty.label,
-        topicLabel: mistake.topic.label,
+        problem: TutorContextBuilder.fromPracticeQuestion(
+          mistake.question,
+          studentAnswer: mistake.submittedAnswer,
+          hintLevel: state.hintLevel,
+          attempts: state.attempt?.attempts,
+        ),
         seedMessage: mistake.tutorSeedMessage,
       ),
     );

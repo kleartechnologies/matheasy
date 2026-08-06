@@ -160,6 +160,12 @@ class TutorRequestMapper {
         // uploaded.
         if (problem.anchors.isNotEmpty)
           'anchors': [for (final a in problem.anchors) a.toJson()],
+        // V5 practice-coach context: the student's own submission and how far
+        // up the hint ladder the app has already taken them.
+        if (problem.studentAnswer != null)
+          'studentAnswer': problem.studentAnswer,
+        if (problem.hintLevel != null) 'hintLevel': problem.hintLevel,
+        if (problem.attempts != null) 'attempts': problem.attempts,
       };
       // The photo itself rides at the TOP level, not inside `problem`: the
       // server reads it once, on the opening turn, and drops it thereafter.

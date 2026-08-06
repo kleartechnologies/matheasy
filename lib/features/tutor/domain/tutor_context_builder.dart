@@ -1,3 +1,4 @@
+import '../../practice/domain/practice_question.dart' as practice;
 import '../../result/domain/result_models.dart';
 import '../../scan/domain/scan_source.dart';
 import 'tutor_models.dart';
@@ -59,6 +60,47 @@ class TutorContextBuilder {
       // photo is what Numi reads once; the anchors are what Numi points at for
       // the rest of the conversation.
       anchors: result.equation.anchors,
+    );
+  }
+
+  /// Build the practice-coach context for one practice question (V5).
+  ///
+  /// When the question has already been through the verified pipeline (the
+  /// student opened a hint ≥3 / the solution), pass that [solved] result —
+  /// Numi then coaches with the checked steps. Otherwise the context is the
+  /// question itself, with `verified: false` so the server applies its usual
+  /// hedging discipline: the grading key travels as [PracticeQuestion]'s
+  /// correct answer but is never presented as pipeline-verified truth.
+  ///
+  /// [studentAnswer], [hintLevel] and [attempts] carry the live attempt so
+  /// Numi diagnoses THEIR mistake and coaches at the NEXT nudge — replacing
+  /// the old prose-only seed message.
+  static TutorProblemContext fromPracticeQuestion(
+    practice.PracticeQuestion question, {
+    String? studentAnswer,
+    int? hintLevel,
+    int? attempts,
+    ResultData? solved,
+  }) {
+    if (solved != null) {
+      return fromResult(solved, source: 'practice').withStudentContext(
+        studentAnswer: studentAnswer,
+        hintLevel: hintLevel,
+        attempts: attempts,
+      );
+    }
+    final answer = question.correctAnswerText;
+    return TutorProblemContext(
+      questionLatex: question.promptLatex ?? question.prompt,
+      questionText: question.prompt,
+      topic: question.topic.label,
+      problemType: question.subtopicLabel ?? question.topic.label,
+      difficulty: question.difficulty.label,
+      finalAnswer: answer.isEmpty ? null : answer,
+      source: 'practice',
+      studentAnswer: studentAnswer,
+      hintLevel: hintLevel,
+      attempts: attempts,
     );
   }
 

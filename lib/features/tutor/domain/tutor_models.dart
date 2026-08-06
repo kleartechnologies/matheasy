@@ -809,6 +809,9 @@ class TutorProblemContext {
     this.practice = const [],
     this.scanImageBytes,
     this.anchors = const [],
+    this.studentAnswer,
+    this.hintLevel,
+    this.attempts,
   });
 
   final String questionLatex;
@@ -868,6 +871,51 @@ class TutorProblemContext {
   /// photo is uploaded once per conversation, but the anchors are cheap text,
   /// so pointing keeps working for the whole session at zero vision cost.
   final List<ScanAnchor> anchors;
+
+  // ---- V5 practice-coach context (all optional; absent outside practice) ----
+
+  /// What the student actually submitted — so Numi diagnoses THEIR mistake
+  /// instead of re-teaching from zero. Previously smuggled as prose inside
+  /// the seed message; structured so the server can apply its own reveal
+  /// discipline around it.
+  final String? studentAnswer;
+
+  /// How far up the practice hint ladder (0–4) the app has already taken the
+  /// student — Numi coaches at the NEXT nudge, not from the top.
+  final int? hintLevel;
+
+  /// How many times they've tried this question.
+  final int? attempts;
+
+  /// A copy carrying the live practice-attempt state (used to overlay the
+  /// student's journey onto a context built from a solved [TutorProblemContext]).
+  TutorProblemContext withStudentContext({
+    String? studentAnswer,
+    int? hintLevel,
+    int? attempts,
+  }) =>
+      TutorProblemContext(
+        questionLatex: questionLatex,
+        questionText: questionText,
+        problemType: problemType,
+        topic: topic,
+        difficulty: difficulty,
+        finalAnswer: finalAnswer,
+        verified: verified,
+        verifyText: verifyText,
+        steps: steps,
+        commonMistakes: commonMistakes,
+        source: source,
+        ocrLatex: ocrLatex,
+        ocrConfidence: ocrConfidence,
+        ocrUncertain: ocrUncertain,
+        practice: practice,
+        scanImageBytes: scanImageBytes,
+        anchors: anchors,
+        studentAnswer: studentAnswer ?? this.studentAnswer,
+        hintLevel: hintLevel ?? this.hintLevel,
+        attempts: attempts ?? this.attempts,
+      );
 }
 
 /// The exact step the student tapped "Ask Numi about this step" on (spec Part 6).

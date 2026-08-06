@@ -17,6 +17,7 @@ import '../../result/presentation/tabs/solution_tab.dart';
 import '../../result/presentation/widgets/math_text.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
+import '../../tutor/domain/tutor_context_builder.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/practice_controller.dart';
 import '../application/practice_solve_bridge.dart';
@@ -85,14 +86,18 @@ class _PracticeSolutionScreenState
     }
   }
 
-  void _askMatheasy(PracticeQuestion question) {
+  /// Opens Numi with the full structured context — including the verified
+  /// [solved] result when the lesson came through the pipeline, so Numi
+  /// coaches with the checked steps rather than from the bare question.
+  void _askMatheasy(PracticeQuestion question, {ResultData? solved}) {
     context.push(
       AppRoutes.tutorChat,
       extra: TutorLaunchContext(
-        questionLatex: question.promptLatex ?? question.prompt,
-        answerLatex: question.correctAnswerText,
-        topicLabel: question.topic.label,
-        equationType: question.difficulty.label,
+        problem: TutorContextBuilder.fromPracticeQuestion(
+          question,
+          studentAnswer: widget.args?.studentAnswer,
+          solved: solved,
+        ),
       ),
     );
   }
@@ -177,7 +182,7 @@ class _PracticeSolutionScreenState
         ],
         SolutionTab(
           result: result,
-          onAskMatheasy: () => _askMatheasy(args.question),
+          onAskMatheasy: () => _askMatheasy(args.question, solved: result),
           onOpenVisual: () => _openVisual(args.question),
         ),
       ],
