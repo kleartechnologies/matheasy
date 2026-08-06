@@ -142,6 +142,64 @@ applied and you risk that rejection. Confirm the build succeeds after it.
 
 ---
 
+## 6b. 🖥️☁️ App Store Connect — build, upload, review credentials
+
+The exact procedure that shipped 1.0.0 builds 3–4 (2026-08-06). Auth is a team
+App Store Connect API key: key id **DS7M7SL596** (`.p8` lives at
+`~/.appstoreconnect/private_keys/AuthKey_DS7M7SL596.p8`, **never in the repo**),
+issuer id **27331eae-22d5-4170-8156-e541a9056b10**. The issuer id is an
+identifier, not a secret; the `.p8` is the secret.
+
+```bash
+# 1. Bump the BUILD number in pubspec.yaml — every upload needs a fresh +N:
+#      version: 1.0.0+5        # (the +N is what App Store Connect keys on)
+#    Commit it as its own chore(release) commit.
+
+# 2. Build the signed App Store IPA (~5 min):
+flutter build ipa --release    # → build/ios/ipa/matheasy.ipa
+
+# 3. Upload:
+xcrun altool --upload-app --type ios -f build/ios/ipa/matheasy.ipa \
+  --apiKey DS7M7SL596 --apiIssuer 27331eae-22d5-4170-8156-e541a9056b10
+# Success looks like "UPLOAD SUCCEEDED" + a Delivery UUID. Processing on
+# Apple's side takes 15–60 min; the build then appears on the version page.
+```
+
+⚠️ After processing, you still have to **select the new build** on the version
+page (General → Build) — uploading alone doesn't switch it.
+
+### Reviewer demo account (Guideline 2.1)
+
+"Sign-in required" is ticked, so the version page demands demo credentials.
+They are already set: a real email/password account exists in Firebase Auth
+(`appreview@getmatheasy.com`, uid `UvNAvHj8aXa7qlKOP9K5eT92vkw1`, display name
+"Apple Review"). The password lives **only** in App Store Connect → App Review
+Information — not in this repo. The review notes tell the reviewer to use
+**Continue with email** on the sign-in screen.
+
+⚠️ If that account is ever deleted from Firebase Auth (e.g. by a mass user
+wipe), review submissions will start failing sign-in — recreate it and update
+the ASC fields before submitting.
+
+### Scripting App Store Connect itself
+
+`tool/asc_jwt.py` mints an ASC API JWT with nothing but `openssl` + Python
+stdlib (ES256, 20-min expiry):
+
+```bash
+JWT=$(python3 tool/asc_jwt.py DS7M7SL596 27331eae-22d5-4170-8156-e541a9056b10 \
+      ~/.appstoreconnect/private_keys/AuthKey_DS7M7SL596.p8)
+# e.g. read/patch the version's review details (demo account, reviewer notes):
+curl -s "https://api.appstoreconnect.apple.com/v1/appStoreVersions/<VERSION_ID>/appStoreReviewDetail" \
+  -H "Authorization: Bearer $JWT"
+```
+
+This is how the demo credentials + reviewer notes were written for 1.0.0
+(review-detail id `b81fe1ce-e79f-4fd4-a09e-1aec839585ee`) — useful again if a
+future version needs its notes updated without clicking through the UI.
+
+---
+
 ## 7. 📱 On-device verification battery — the tests the suite CAN'T cover
 
 The 344 Dart + 109 function tests pass, but these are the things only real
@@ -250,6 +308,7 @@ real traffic.
 - [ ] Functions built + deployed (§3–4)
 - [ ] **TTL policy enabled on `solveCache`** (§5) ← the easy-to-forget one
 - [ ] `pod install` run, iOS builds (§6)
+- [x] IPA uploaded via altool + API key; demo review account set in ASC (§6b)
 - [ ] Cap holds when exceeded, server-side (§7a)
 - [ ] Rate-limit ≠ paywall (§7a)
 - [ ] Moderation rejects non-math image (§7b)
