@@ -59,6 +59,9 @@ interface PracticePayload {
     options?: Array<{ text: string; isCorrect: boolean }>;
     acceptedAnswers?: string[];
     explanation: string;
+    /** Progressive hints: [0] a nudge, [1] a method pointer. Optional; any
+     * hint that leaks the answer is dropped by `sanitizeHints`, never shown. */
+    hints?: string[];
   }>;
 }
 
@@ -79,7 +82,8 @@ Return ONLY a JSON object (no prose, no markdown) with this exact shape:
       "type": "multipleChoice|trueFalse|input|equation",
       "options": [ { "text": "an answer choice (plain text, math as unicode)", "isCorrect": true } ],
       "acceptedAnswers": ["accepted typed answer", "alternative form"],
-      "explanation": "why the correct answer is right, in warm student-friendly language"
+      "explanation": "why the correct answer is right, in warm student-friendly language",
+      "hints": ["a tiny nudge at what to look at", "which method to use, without doing any of it"]
     }
   ]
 }
@@ -90,7 +94,8 @@ Rules:
 - Make every question solvable with a single, unambiguous answer at the stated difficulty. Keep language age-appropriate.
 - MATCH THE DIFFICULTY EXACTLY. Every question must sit at the requested level and grade — never easier, never harder. Use ONLY concepts appropriate at that level; do NOT use any concept above it (e.g. no calculus in a secondary-level set).
 - STAY WITHIN THE STEP BUDGET. A question should take about the target number of solving steps and MUST NOT exceed the stated maximum. If a draft is too involved, simplify it or replace it.
-- Do NOT reference a diagram, figure, picture or "the shape shown" — there is none. Every number the student needs must be stated in the text.`;
+- Do NOT reference a diagram, figure, picture or "the shape shown" — there is none. Every number the student needs must be stated in the text.
+- "hints" must contain exactly 2 short strings: hint 1 nudges WHERE to look, hint 2 names the METHOD. Hints may quote numbers GIVEN in the question but must NEVER state the answer, any intermediate computed value, or any derived result — no arithmetic at all inside a hint.`;
 
 export const generatePracticeQuestion = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
@@ -220,7 +225,7 @@ export const generatePracticeQuestion = onCall(
           continue;
         }
 
-        collected.push(q);
+        collected.push({ ...q, hints: sanitizeHints(q) });
         if (collected.length >= requested) break;
       }
     }
@@ -333,6 +338,56 @@ function screenQuestion(
     ],
     surface: "practice",
   });
+}
+
+/**
+ * Keeps only the hints that are safe to show BEFORE the student has answered:
+ * well-formed strings (max 2) that do not contain the question's correct
+ * answer. A dropped hint costs nothing — the client falls back to per-skill
+ * generic hints — while a leaked answer would defeat the whole hint ladder,
+ * so the check errs toward dropping.
+ *
+ * Exported for tests (pure; no I/O).
+ */
+export function sanitizeHints(
+  q: PracticePayload["questions"][number]
+): string[] {
+  const raw = Array.isArray(q.hints) ? q.hints : [];
+  const answers = [
+    ...(Array.isArray(q.acceptedAnswers) ? q.acceptedAnswers : []),
+    ...(Array.isArray(q.options) ? q.options : [])
+      .filter((o) => o && o.isCorrect === true)
+      .map((o) => o.text),
+  ]
+    .filter((a): a is string => typeof a === "string")
+    .map(normalizeForLeak)
+    .filter((a) => a.length > 0);
+
+  return raw
+    .filter((h): h is string => typeof h === "string" && h.trim().length > 0)
+    .slice(0, 2)
+    .map((h) => h.trim())
+    .filter((h) => {
+      const hint = h.toLowerCase().replace(/[\s$,£€]/g, "");
+      return !answers.some((a) =>
+        // Numeric answers match on digit boundaries so an answer of "3"
+        // doesn't falsely flag a hint that mentions a given "13".
+        /^\d+$/.test(a)
+          ? new RegExp(`(^|\\D)${a}(\\D|$)`).test(hint)
+          : hint.includes(a)
+      );
+    });
+}
+
+/** Lowercase, strip spacing/currency and a leading assignment ("x=4" → "4") —
+ * mirrors the client's answer normalization so the leak check compares the
+ * same canonical form the answer matcher does. Applied to ANSWERS only; hints
+ * keep their full text (an "=" inside a hint is prose, not an assignment). */
+function normalizeForLeak(s: string): string {
+  let value = s.trim().toLowerCase().replace(/[\s$,£€]/g, "");
+  const eq = value.indexOf("=");
+  if (eq >= 0) value = value.slice(eq + 1);
+  return value;
 }
 
 /** Structural validation mirroring the client mapper — a malformed question is

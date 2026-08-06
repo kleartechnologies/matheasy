@@ -153,6 +153,10 @@ class PracticeQuestionMapper {
       promptLatex: _optional(map['promptLatex']),
       spokenPrompt: _optional(map['spokenPrompt']),
       explanation: explanation,
+      // Server-side `sanitizeHints` already dropped anything answer-leaking;
+      // cap at 2 defensively. Empty is fine — the UI falls back to the
+      // per-skill generic pair (PracticeHintFallbacks).
+      hints: _strList(map['hints']).take(2).toList(),
       skillId: skill.id,
       options: isChoice ? options : const [],
       acceptedAnswers: isChoice ? const [] : acceptedAnswers,

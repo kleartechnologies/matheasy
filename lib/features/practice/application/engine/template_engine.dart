@@ -109,6 +109,7 @@ class TemplateEngine {
     late final String latex;
     late final String explanation;
     late final String signature;
+    late final String methodHint;
 
     switch (form) {
       case 'mul':
@@ -116,18 +117,24 @@ class TemplateEngine {
         final c = a * x;
         latex = '${a}x = $c';
         explanation = 'Divide both sides by $a: x = $c ÷ $a = $x.';
+        methodHint = 'x is being multiplied by $a — undo that by dividing '
+            'both sides by $a.';
         signature = 'mul|$a|$x';
       case 'sub':
         final b = rng.between(1, maxVal);
         final c = x - b;
         latex = 'x - $b = $c';
         explanation = 'Add $b to both sides: x = $c + $b = $x.';
+        methodHint =
+            '$b is subtracted from x — undo that by adding $b to both sides.';
         signature = 'sub|$b|$x';
       case _: // add
         final b = rng.between(1, maxVal);
         final c = x + b;
         latex = 'x + $b = $c';
         explanation = 'Subtract $b from both sides: x = $c − $b = $x.';
+        methodHint = '$b is added to x — undo that by subtracting $b from '
+            'both sides.';
         signature = 'add|$b|$x';
     }
 
@@ -142,6 +149,11 @@ class TemplateEngine {
       prompt: 'Solve for x',
       promptLatex: latex,
       explanation: explanation,
+      // Hints quote GIVEN numbers only — never a derived result.
+      hints: [
+        'What is being done to x here? Think about how to undo it.',
+        methodHint,
+      ],
       skillId: skill.id,
       options: asChoice ? _intOptions(x, rng) : const [],
       acceptedAnswers: asChoice ? const [] : ['$x', 'x=$x'],
@@ -182,6 +194,13 @@ class TemplateEngine {
       prompt: 'Solve for x',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'Two things are happening to x — undo them one at a time, '
+            'starting with the constant.',
+        subtract
+            ? 'First add $b to both sides, then divide by $a.'
+            : 'First subtract $b from both sides, then divide by $a.',
+      ],
       skillId: skill.id,
       options: asChoice ? _intOptions(x, rng) : const [],
       acceptedAnswers: asChoice ? const [] : ['$x', 'x=$x'],
@@ -217,6 +236,12 @@ class TemplateEngine {
       prompt: 'Find the value of the expression when x = $x',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'Replace x with its value, then follow the order of operations.',
+        withConstant
+            ? 'Substitute x = $x: work out $a × $x first, then add $b.'
+            : 'Substitute x = $x, then multiply by $a.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$value'],
     );
@@ -255,6 +280,11 @@ class TemplateEngine {
       prompt: 'Solve for x',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'There are x terms on both sides — collect them on one side first.',
+        'Subtract ${c}x from both sides, then subtract $b, then divide by '
+            'whatever multiplies x.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$x', 'x=$x'],
     );
@@ -289,6 +319,12 @@ class TemplateEngine {
       prompt: 'Find x',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'Look at the y terms in the two equations — how could you make '
+            'them disappear?',
+        'Add the two equations together: the y terms cancel, leaving an '
+            'equation in x alone.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$x', 'x=$x'],
     );
@@ -329,6 +365,11 @@ class TemplateEngine {
       prompt: 'One solution is x = $given. What is the other solution for x?',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'A quadratic equal to zero can be split into two brackets.',
+        'Find two numbers that multiply to $product and add to the '
+            'x-coefficient — one of them is the given root $given.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$other', 'x=$other'],
     );
@@ -371,6 +412,11 @@ class TemplateEngine {
       promptLatex: latex,
       spokenPrompt: '$a over $d plus $b over $d',
       explanation: explanation,
+      hints: [
+        'Compare the denominators — what do you notice?',
+        'The denominators are the same, so keep $d underneath and add the '
+            'numerators $a and $b.',
+      ],
       skillId: skill.id,
       options: _stringOptions(answer, distractors, rng),
     );
@@ -418,6 +464,12 @@ class TemplateEngine {
       promptLatex: latex,
       spokenPrompt: '$a over $b plus $c over $d',
       explanation: explanation,
+      hints: [
+        'The denominators are different — you need a common denominator '
+            'before you can add.',
+        'Use $b × $d as a common denominator, rewrite both fractions over '
+            'it, then add the numerators.',
+      ],
       skillId: skill.id,
       options: _stringOptions(answer, distractors, rng),
     );
@@ -454,6 +506,11 @@ class TemplateEngine {
       type: PracticeQuestionType.input,
       prompt: 'Simplify $n/$den to lowest terms',
       explanation: explanation,
+      hints: [
+        'Look for a number that divides into both $n and $den exactly.',
+        'Divide the top and the bottom by their greatest common factor — '
+            'keep going until nothing divides both.',
+      ],
       skillId: skill.id,
       acceptedAnswers: [answer, answer.replaceAll('/', ' / ')],
     );
@@ -497,6 +554,13 @@ class TemplateEngine {
       prompt: 'Evaluate using the correct order of operations',
       promptLatex: latex,
       explanation: explanation,
+      hints: [
+        'Which operation comes first — multiplication, or '
+            'addition/subtraction?',
+        multFirst
+            ? 'Work out $b × $c first, then add $a.'
+            : 'Work out $a × $b first, then subtract $c.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$value'],
     );
@@ -535,6 +599,10 @@ class TemplateEngine {
       type: PracticeQuestionType.input,
       prompt: 'What is $percent% of $n?',
       explanation: explanation,
+      hints: [
+        'Turn the percentage into a fraction or a decimal first.',
+        '$percent% means $percent ÷ 100 — multiply that by $n.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$value'],
     );
@@ -572,6 +640,11 @@ class TemplateEngine {
       type: PracticeQuestionType.multipleChoice,
       prompt: 'Simplify the ratio $a : $b to its simplest form',
       explanation: explanation,
+      hints: [
+        'A ratio simplifies just like a fraction.',
+        'Divide both parts of $a : $b by the largest number that goes '
+            'into both.',
+      ],
       skillId: skill.id,
       options: _stringOptions(answer, distractors, rng),
     );
