@@ -208,17 +208,17 @@ deployed call proves the function rejects **before spending money**.
 These don't block getting it live, but the first is close to a correctness issue and
 should be fixed before you promote to real students.
 
-- ⚠️ **Symbolic-form display (`√2` → `1.414…`)** — carried since step 4. A derivative
-  or irrational root shown as a decimal instead of the exact form is **marked wrong by
-  a teacher**. For an SPM/IGCSE tutor the exact form IS the correct answer. The verify
-  gate can keep computing numerically; the *display* must preserve the symbolic form
-  (mathsteps/mathjs both retain symbolic expressions — the decimalization is in the
-  narration/mapping layer). Fix before real users.
+- ✅ **Symbolic-form display (`√2` → `1.414…`) — FIXED (AS-BUILT).** The solver now
+  carries a dedicated exact-form layer, `functions/src/solver/exact.ts`
+  (`exactForm`, `resymbolize`, `quadraticSurdRoots`, `squareFreeSplit`): irrational
+  answers display as `√2` / `π` / fractions while the verify gate keeps
+  substituting numerically. Regression-locked by `functions/test/exact.test.ts`
+  (29 tests) + `radical.test.ts`. No longer a pre-launch blocker.
 - **Caret navigation** (step 4) — character-based; crossing `}{` takes two presses. UX
   friction, minor.
-- **Explain / Practice tabs** — still empty/"coming soon" states; they're the tutor and
-  practice-generator features, separate builds. Visible in-app, so know they read as
-  unbuilt until you build them.
+- ✅ **Explain / Practice tabs — BUILT (AS-BUILT).** The tutor (Numi), the Stage-15
+  adaptive practice engine, and the V5 learning loop (hints / retry / guided
+  solution / adaptive difficulty) have all shipped since this runbook was written.
 - **`4ac`→`4*ac`→NaN** (step 4) — mathjs reads consecutive letters as one symbol; only
   affects a raw formula typed as a bare expression, not real equation inputs. Noted,
   low-priority.
@@ -255,4 +255,4 @@ real traffic.
 - [ ] Moderation rejects non-math image (§7b)
 - [ ] Offline history re-opens with no spinner (§7c)
 - [ ] Couldn't-verify reads calm + honest on device (§7d)
-- [ ] `√2` symbolic-form bug fixed (§8) ← before real students
+- [x] `√2` symbolic-form bug fixed (§8) — `solver/exact.ts`, locked by `exact.test.ts`
