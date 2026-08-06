@@ -199,6 +199,7 @@ class _PracticeSessionScreenState
               onNotNow: _exit,
             ),
           PracticePhase.answering ||
+          PracticePhase.retry ||
           PracticePhase.revealed =>
             _buildActive(state),
         },

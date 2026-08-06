@@ -10,11 +10,13 @@ import '../../../core/services/haptics_service.dart';
 import '../../analytics/application/analytics_service.dart';
 import '../../analytics/domain/analytics_event.dart';
 import '../../practice_set/application/practice_set_controller.dart';
+import '../../progress/application/achievement_service.dart' show clockProvider;
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/application/usage_controller.dart';
 import '../domain/practice_mistake.dart';
 import '../domain/practice_result.dart';
 import '../domain/practice_session.dart';
+import '../domain/xp_reward.dart';
 import 'practice_difficulty_preference.dart';
 import 'practice_progress_controller.dart';
 import 'practice_service.dart';
@@ -32,7 +34,12 @@ enum PracticePhase {
   /// Awaiting the current question's answer.
   answering,
 
-  /// The current answer has been graded — showing feedback + explanation.
+  /// The last submission was incorrect but the question is NOT final — the
+  /// student can try again, take a hint, open the solution, or ask Numi.
+  retry,
+
+  /// The current question is RESOLVED (correct, or finalized incorrect) —
+  /// showing feedback + explanation.
   revealed,
 
   /// All questions answered — showing results.
@@ -54,6 +61,7 @@ class PracticeSessionState {
     this.session,
     this.lastAnswer,
     this.result,
+    this.attempt,
   });
 
   final PracticePhase phase;
@@ -65,18 +73,36 @@ class PracticeSessionState {
   /// The final result once [complete].
   final PracticeResult? result;
 
+  /// Live progress on the CURRENT question (attempts / hint level / timing).
+  /// Non-null whenever a question is on screen; reset per question.
+  final QuestionAttempt? attempt;
+
   bool get isLoading => phase == PracticePhase.loading;
   bool get isAnswering => phase == PracticePhase.answering;
+  bool get isRetry => phase == PracticePhase.retry;
   bool get isRevealed => phase == PracticePhase.revealed;
   bool get isComplete => phase == PracticePhase.complete;
   bool get lastWasCorrect => lastAnswer?.isCorrect ?? false;
 
-  /// The mistake just revealed (for the Matheasy "why is this wrong?" and Visual
-  /// walkthrough hand-offs) — `null` unless the last answer was incorrect.
+  /// The hint level the student has requested on the current question (0–4).
+  int get hintLevel => attempt?.hintLevel ?? 0;
+
+  /// The mistake in play (for "Your answer: X", the Numi hand-off and the
+  /// Visual walkthrough) — the not-yet-final wrong submission while [retry],
+  /// or the finalized incorrect answer while [revealed].
   PracticeMistake? get mistake {
-    final answer = lastAnswer;
     final current = session;
-    if (answer == null || current == null || answer.isCorrect) return null;
+    if (current == null) return null;
+    if (phase == PracticePhase.retry) {
+      final submitted = attempt?.lastSubmitted;
+      if (submitted == null) return null;
+      return PracticeMistake(
+        question: current.currentQuestion,
+        submittedAnswer: submitted,
+      );
+    }
+    final answer = lastAnswer;
+    if (answer == null || answer.isCorrect) return null;
     return PracticeMistake(
       question: current.currentQuestion,
       submittedAnswer: answer.submitted,
@@ -156,10 +182,22 @@ class PracticeController extends _$PracticeController {
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: session,
+        attempt: _freshAttempt(),
       );
     } catch (_) {
       state = const PracticeSessionState(phase: PracticePhase.error);
     }
+  }
+
+  DateTime _now() => ref.read(clockProvider)();
+
+  QuestionAttempt _freshAttempt() =>
+      QuestionAttempt(startedAtMillis: _now().millisecondsSinceEpoch);
+
+  int _elapsedSeconds(QuestionAttempt attempt) {
+    final seconds =
+        (_now().millisecondsSinceEpoch - attempt.startedAtMillis) ~/ 1000;
+    return seconds < 0 ? 0 : seconds;
   }
 
   /// Stamps [request] with the learner's chosen practice difficulty.
@@ -182,21 +220,28 @@ class PracticeController extends _$PracticeController {
     return request.copyWith(difficulty: chosen);
   }
 
-  /// Grades a submitted answer (an option's text, or typed input) and reveals
-  /// feedback. Ignored unless a question is currently awaiting an answer.
+  /// Grades a submitted answer (an option's text, or typed input).
+  ///
+  /// Correct → the question resolves ([PracticePhase.revealed]) and the FINAL
+  /// answer is recorded with its journey metadata (attempts, hint level,
+  /// solution views, time) and journey-scaled XP. Incorrect → nothing is
+  /// recorded yet; the session moves to [PracticePhase.retry] so the student
+  /// can try again, take a hint, open the solution, or ask Numi.
   void submit(String submitted) {
     final session = state.session;
-    if (session == null || state.phase != PracticePhase.answering) return;
+    if (session == null ||
+        (state.phase != PracticePhase.answering &&
+            state.phase != PracticePhase.retry)) {
+      return;
+    }
 
     final question = session.currentQuestion;
     final isCorrect = question.evaluate(submitted);
     isCorrect ? HapticsService.success() : HapticsService.warning();
 
-    final answer = PracticeAnswer(
-      questionId: question.id,
-      submitted: submitted,
-      isCorrect: isCorrect,
-      xpEarned: isCorrect ? question.xpReward : 0,
+    final attempt = (state.attempt ?? _freshAttempt()).copyWith(
+      attempts: (state.attempt?.attempts ?? 0) + 1,
+      lastSubmitted: submitted,
     );
 
     final analytics = ref.read(analyticsServiceProvider);
@@ -206,10 +251,103 @@ class PracticeController extends _$PracticeController {
         : AnalyticsEvent.questionIncorrect(
             topic: question.topic.name, difficulty: question.difficulty.name)));
 
+    if (!isCorrect) {
+      state = PracticeSessionState(
+        phase: PracticePhase.retry,
+        session: session,
+        attempt: attempt,
+      );
+      return;
+    }
+
+    final answer = PracticeAnswer(
+      questionId: question.id,
+      submitted: submitted,
+      isCorrect: true,
+      xpEarned: XpReward.forOutcome(
+        question.difficulty,
+        attempts: attempt.attempts,
+        hintLevelUsed: attempt.hintLevel,
+        viewedSolution: attempt.viewedSolution,
+      ),
+      attempts: attempt.attempts,
+      hintLevelUsed: attempt.hintLevel,
+      viewedSolution: attempt.viewedSolution,
+      timeSpentSeconds: _elapsedSeconds(attempt),
+    );
+
     state = PracticeSessionState(
       phase: PracticePhase.revealed,
       session: session.recordAnswer(answer),
       lastAnswer: answer,
+      attempt: attempt,
+    );
+  }
+
+  /// Back from [PracticePhase.retry] to answering — same question, same
+  /// attempt state (the retry itself already counted on the next submit).
+  void tryAgain() {
+    if (state.phase != PracticePhase.retry) return;
+    state = PracticeSessionState(
+      phase: PracticePhase.answering,
+      session: state.session,
+      attempt: state.attempt,
+    );
+  }
+
+  /// Escalates the hint ladder one level (1 nudge → 2 method → 3 first step →
+  /// 4 guided solution), capped at 4. Allowed while the question is open.
+  void requestHint() {
+    if (state.phase != PracticePhase.answering &&
+        state.phase != PracticePhase.retry) {
+      return;
+    }
+    final attempt = state.attempt ?? _freshAttempt();
+    if (attempt.hintLevel >= 4) return;
+    state = PracticeSessionState(
+      phase: state.phase,
+      session: state.session,
+      attempt: attempt.copyWith(hintLevel: attempt.hintLevel + 1),
+    );
+  }
+
+  /// Marks that the student opened the full solution while the question was
+  /// still open — a later correct answer then earns at the 0.5× tier.
+  void markSolutionViewed() {
+    final attempt = state.attempt;
+    if (attempt == null || attempt.viewedSolution) return;
+    if (state.phase != PracticePhase.answering &&
+        state.phase != PracticePhase.retry) {
+      return;
+    }
+    state = PracticeSessionState(
+      phase: state.phase,
+      session: state.session,
+      attempt: attempt.copyWith(viewedSolution: true),
+    );
+  }
+
+  /// Finalizes the current question as INCORRECT and reveals it — the
+  /// "show me the solution and move on" path out of [PracticePhase.retry].
+  void giveUp() {
+    final session = state.session;
+    if (session == null || state.phase != PracticePhase.retry) return;
+    final attempt = state.attempt ?? _freshAttempt();
+    final answer = PracticeAnswer(
+      questionId: session.currentQuestion.id,
+      submitted: attempt.lastSubmitted ?? '',
+      isCorrect: false,
+      xpEarned: 0,
+      attempts: attempt.attempts,
+      hintLevelUsed: attempt.hintLevel,
+      viewedSolution: attempt.viewedSolution,
+      timeSpentSeconds: _elapsedSeconds(attempt),
+    );
+    state = PracticeSessionState(
+      phase: PracticePhase.revealed,
+      session: session.recordAnswer(answer),
+      lastAnswer: answer,
+      attempt: attempt,
     );
   }
 
@@ -221,7 +359,7 @@ class PracticeController extends _$PracticeController {
     if (session.isLastQuestion) {
       final result = ref
           .read(practiceProgressControllerProvider.notifier)
-          .recordSession(session, now: DateTime.now());
+          .recordSession(session, now: _now());
       final analytics = ref.read(analyticsServiceProvider);
       unawaited(analytics.logEvent(AnalyticsEvent.practiceCompleted(
           correct: result.correct, total: result.total)));
@@ -252,6 +390,7 @@ class PracticeController extends _$PracticeController {
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: session.advance(),
+        attempt: _freshAttempt(),
       );
     }
   }

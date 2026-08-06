@@ -23,6 +23,7 @@ import 'package:matheasy/features/practice/domain/practice_session.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
 import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
+import 'package:matheasy/features/practice/domain/xp_reward.dart';
 import 'package:matheasy/features/practice/presentation/practice_screen.dart';
 import 'package:matheasy/features/practice/presentation/practice_session_screen.dart';
 import 'package:matheasy/features/settings/application/settings_controller.dart';
@@ -221,8 +222,14 @@ void main() {
         'q-mc',
       );
 
-      controller.submit('1'); // wrong
+      controller.submit('1'); // wrong → retry (V5: nothing recorded yet)
       state = container.read(practiceControllerProvider);
+      expect(state.isRetry, isTrue);
+      expect(state.lastAnswer, isNull);
+
+      controller.giveUp(); // finalize as incorrect and move on
+      state = container.read(practiceControllerProvider);
+      expect(state.isRevealed, isTrue);
       expect(state.lastWasCorrect, isFalse);
       expect(state.lastAnswer!.xpEarned, 0);
 
@@ -231,7 +238,8 @@ void main() {
       expect(state.isComplete, isTrue);
       expect(state.result!.total, 2);
       expect(state.result!.correct, 1);
-      expect(state.result!.xpEarned, 10); // only the correct easy answer
+      // The correct easy answer + the V5 set-completion bonus.
+      expect(state.result!.xpEarned, 10 + XpReward.setCompletionBonus);
     });
 
     test('the chosen difficulty applies however the session was launched',
@@ -301,10 +309,11 @@ void main() {
       );
       final result = progress.recordSession(session, now: DateTime(2026));
 
-      expect(result.xpEarned, 50);
+      // Answer XP + the V5 set-completion bonus (the session is complete).
+      expect(result.xpEarned, 50 + XpReward.setCompletionBonus);
       expect(result.correct, 2);
       final state = container.read(practiceProgressControllerProvider);
-      expect(state.totalXp, 50);
+      expect(state.totalXp, 50 + XpReward.setCompletionBonus);
       expect(state.topic(PracticeTopic.algebra).masteryPoints, 7);
       expect(state.topic(PracticeTopic.algebra).answered, 2);
       expect(state.lastRequest!.topic, PracticeTopic.algebra);
@@ -359,11 +368,12 @@ void main() {
         answers: [_answer(_inputQ, correct: true)],
       );
       final first = progress.recordSession(session, now: DateTime(2026));
-      expect(first.xpEarned, 10 + 100);
+      expect(first.xpEarned, 10 + 100 + XpReward.setCompletionBonus);
 
-      // Replaying the daily challenge the same day does NOT re-award the bonus.
+      // Replaying the daily challenge the same day does NOT re-award the
+      // daily bonus (the completion bonus still applies — it's per set).
       final second = progress.recordSession(session, now: DateTime(2026));
-      expect(second.xpEarned, 10);
+      expect(second.xpEarned, 10 + XpReward.setCompletionBonus);
     });
 
     test('mastery levels up as points accumulate', () async {

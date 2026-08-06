@@ -165,8 +165,9 @@ void main() {
           AchievementId.solved10,
         ]),
       );
-      // 100 session XP + (25 + 15 + 30) achievement bonuses.
-      expect(container.read(practiceProgressControllerProvider).totalXp, 170);
+      // 100 session XP + 25 set-completion bonus (V5) + (25 + 15 + 30)
+      // achievement bonuses.
+      expect(container.read(practiceProgressControllerProvider).totalXp, 195);
     });
 
     test('daily challenge + 3 topics unlock their achievements', () async {

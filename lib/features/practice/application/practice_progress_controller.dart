@@ -46,8 +46,12 @@ class PracticeProgressController extends _$PracticeProgressController {
     final today = _epochDay(now);
     final awardDaily = session.request.isDailyChallenge &&
         state.lastDailyChallengeEpochDay != today;
-    final sessionXp =
-        session.xpSoFar + (awardDaily ? XpReward.dailyChallengeBonus : 0);
+    // Finishing a whole set earns a flat completion bonus — persistence pays
+    // even on a rough set (V5 "XP for learning", spec: reward completing).
+    final awardCompletion = session.isComplete;
+    final sessionXp = session.xpSoFar +
+        (awardDaily ? XpReward.dailyChallengeBonus : 0) +
+        (awardCompletion ? XpReward.setCompletionBonus : 0);
 
     final afterTopic = before.copyWith(
       masteryPoints: (before.masteryPoints + masteryGain).clamp(0, 100),
