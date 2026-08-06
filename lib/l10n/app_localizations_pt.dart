@@ -285,6 +285,73 @@ class AppLocalizationsPt extends AppLocalizations {
   String get practiceStatXpEarned => 'XP ganho';
 
   @override
+  String get practiceSolutionTitle => 'Guided solution';
+
+  @override
+  String get practiceReviewSolutionTitle => 'Review my solution';
+
+  @override
+  String get practiceSolutionLoading => 'Numi is working through it…';
+
+  @override
+  String get practiceSolutionKeyIdea => 'The key idea';
+
+  @override
+  String practiceYourAnswer(String answer) {
+    return 'Your answer: $answer';
+  }
+
+  @override
+  String get practiceMatheasyAnswer => 'Matheasy\'s answer';
+
+  @override
+  String get practiceNeedHint => 'Need a hint?';
+
+  @override
+  String practiceHintCounter(int level) {
+    return 'Hint $level of 4';
+  }
+
+  @override
+  String get practiceHintAnother => 'Another hint';
+
+  @override
+  String get practiceHintFirstStepTitle => 'The first step';
+
+  @override
+  String get practiceHintSeeSolution => 'See the guided solution';
+
+  @override
+  String get practiceHintFirstStepUnavailable =>
+      'Numi can\'t break this one into steps — the guided solution has the full idea instead.';
+
+  @override
+  String get practiceTryAgain => 'Try again';
+
+  @override
+  String get practiceShowSolution => 'Show solution';
+
+  @override
+  String get practiceAskNumi => 'Ask Numi';
+
+  @override
+  String get practiceReviewMySolution => 'Review my solution';
+
+  @override
+  String get practiceChallengeMe => 'Challenge me';
+
+  @override
+  String get practiceChallengeUnavailable =>
+      'Numi couldn\'t build a harder one right now — carry on!';
+
+  @override
+  String get practiceAlmostThere => 'Almost there.';
+
+  @override
+  String get practiceEncourageRetry =>
+      'Mistakes are how mathematicians learn. Want another go?';
+
+  @override
   String get tutorNewConversationStarted => 'Nova conversa iniciada';
 
   @override

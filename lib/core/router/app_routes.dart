@@ -36,6 +36,9 @@ class AppRoutes {
   static const String practiceVisualSegment = 'visual';
   static const String practiceVisual = '/practice/visual';
   static const String practiceVisualName = 'practiceVisual';
+  static const String practiceSolutionSegment = 'solution';
+  static const String practiceSolution = '/practice/solution';
+  static const String practiceSolutionName = 'practiceSolution';
 
   static const String tutorChatSegment = 'chat';
   static const String tutorChat = '/tutor/chat';

@@ -90,6 +90,36 @@
   "practiceStatCorrect": "Correct",
   "practiceStatAccuracy": "Accuracy",
   "practiceStatXpEarned": "XP earned",
+  "practiceSolutionTitle": "Guided solution",
+  "practiceReviewSolutionTitle": "Review my solution",
+  "practiceSolutionLoading": "Numi is working through it…",
+  "practiceSolutionKeyIdea": "The key idea",
+  "practiceYourAnswer": "Your answer: {answer}",
+  "@practiceYourAnswer": {
+    "placeholders": {
+      "answer": {"type": "String"}
+    }
+  },
+  "practiceMatheasyAnswer": "Matheasy's answer",
+  "practiceNeedHint": "Need a hint?",
+  "practiceHintCounter": "Hint {level} of 4",
+  "@practiceHintCounter": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "practiceHintAnother": "Another hint",
+  "practiceHintFirstStepTitle": "The first step",
+  "practiceHintSeeSolution": "See the guided solution",
+  "practiceHintFirstStepUnavailable": "Numi can't break this one into steps — the guided solution has the full idea instead.",
+  "practiceTryAgain": "Try again",
+  "practiceShowSolution": "Show solution",
+  "practiceAskNumi": "Ask Numi",
+  "practiceReviewMySolution": "Review my solution",
+  "practiceChallengeMe": "Challenge me",
+  "practiceChallengeUnavailable": "Numi couldn't build a harder one right now — carry on!",
+  "practiceAlmostThere": "Almost there.",
+  "practiceEncourageRetry": "Mistakes are how mathematicians learn. Want another go?",
   "tutorNewConversationStarted": "Started a new conversation",
   "tutorBack": "Back",
   "tutorNewConversation": "New conversation",

@@ -698,6 +698,126 @@ abstract class AppLocalizations {
   /// **'XP earned'**
   String get practiceStatXpEarned;
 
+  /// No description provided for @practiceSolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guided solution'**
+  String get practiceSolutionTitle;
+
+  /// No description provided for @practiceReviewSolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review my solution'**
+  String get practiceReviewSolutionTitle;
+
+  /// No description provided for @practiceSolutionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi is working through it…'**
+  String get practiceSolutionLoading;
+
+  /// No description provided for @practiceSolutionKeyIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'The key idea'**
+  String get practiceSolutionKeyIdea;
+
+  /// No description provided for @practiceYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer: {answer}'**
+  String practiceYourAnswer(String answer);
+
+  /// No description provided for @practiceMatheasyAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy\'s answer'**
+  String get practiceMatheasyAnswer;
+
+  /// No description provided for @practiceNeedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a hint?'**
+  String get practiceNeedHint;
+
+  /// No description provided for @practiceHintCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint {level} of 4'**
+  String practiceHintCounter(int level);
+
+  /// No description provided for @practiceHintAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Another hint'**
+  String get practiceHintAnother;
+
+  /// No description provided for @practiceHintFirstStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The first step'**
+  String get practiceHintFirstStepTitle;
+
+  /// No description provided for @practiceHintSeeSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'See the guided solution'**
+  String get practiceHintSeeSolution;
+
+  /// No description provided for @practiceHintFirstStepUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi can\'t break this one into steps — the guided solution has the full idea instead.'**
+  String get practiceHintFirstStepUnavailable;
+
+  /// No description provided for @practiceTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get practiceTryAgain;
+
+  /// No description provided for @practiceShowSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Show solution'**
+  String get practiceShowSolution;
+
+  /// No description provided for @practiceAskNumi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Numi'**
+  String get practiceAskNumi;
+
+  /// No description provided for @practiceReviewMySolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Review my solution'**
+  String get practiceReviewMySolution;
+
+  /// No description provided for @practiceChallengeMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge me'**
+  String get practiceChallengeMe;
+
+  /// No description provided for @practiceChallengeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi couldn\'t build a harder one right now — carry on!'**
+  String get practiceChallengeUnavailable;
+
+  /// No description provided for @practiceAlmostThere.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there.'**
+  String get practiceAlmostThere;
+
+  /// No description provided for @practiceEncourageRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistakes are how mathematicians learn. Want another go?'**
+  String get practiceEncourageRetry;
+
   /// No description provided for @tutorNewConversationStarted.
   ///
   /// In en, this message translates to:

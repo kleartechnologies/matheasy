@@ -125,6 +125,9 @@ class TutorContextBuilder {
     return fromSteps.length > 5 ? fromSteps.sublist(0, 5) : fromSteps;
   }
 
-  static String _source(ResultData result) =>
-      result.equation.source == ScanSource.manual ? 'typed' : 'scan';
+  static String _source(ResultData result) => switch (result.equation.source) {
+        ScanSource.manual => 'typed',
+        ScanSource.practice => 'practice',
+        ScanSource.camera || ScanSource.gallery => 'scan',
+      };
 }
