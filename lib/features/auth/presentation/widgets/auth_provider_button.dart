@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/indicators/google_g_mark.dart';
 
 /// The sign-in entry points rendered as full-width buttons. `email` is not a
 /// federated provider — its button navigates to the email form rather than
@@ -115,12 +116,10 @@ class AuthProviderButton extends StatelessWidget {
   }
 }
 
-/// The leading provider glyph. Apple uses the built-in logo; Google currently
-/// uses a placeholder single-colour "G".
-///
-// TODO(release-blocker): Replace the placeholder Google "G" below with the
-// official multi-colour Google logo asset before App Store / Play submission —
-// Google Sign-In branding guidelines require the official mark on the button.
+/// The leading provider glyph. Apple uses the built-in logo; Google uses the
+/// official multi-colour "G" mark, per Google's Sign-In branding guidelines
+/// (on the dark theme's dark button surface it sits on a white plate, matching
+/// Google's own dark-button spec).
 class _Glyph extends StatelessWidget {
   const _Glyph({required this.provider, required this.color});
 
@@ -131,15 +130,9 @@ class _Glyph extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (provider) {
       AuthButtonProvider.apple => Icon(Icons.apple, size: 22, color: color),
-      // Google Blue — a third-party brand mark reproduced verbatim per Google's
-      // Sign-In branding guidelines. Deliberately not a token: it is not ours.
-      AuthButtonProvider.google => Text(
-          'G',
-          style: AppTypography.headingSmall.copyWith(
-            color: const Color(0xFF4285F4),
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+      AuthButtonProvider.google => context.isDark
+          ? GoogleGMark.plated()
+          : const GoogleGMark(size: 20),
       AuthButtonProvider.email =>
         Icon(Icons.mail_outline_rounded, size: 22, color: color),
     };
