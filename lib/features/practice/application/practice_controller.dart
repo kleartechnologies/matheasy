@@ -304,6 +304,8 @@ class PracticeController extends _$PracticeController {
   /// attempt state (the retry itself already counted on the next submit).
   void tryAgain() {
     if (state.phase != PracticePhase.retry) return;
+    unawaited(
+        ref.read(analyticsServiceProvider).logEvent(AnalyticsEvent.practiceRetry()));
     state = PracticeSessionState(
       phase: PracticePhase.answering,
       session: state.session,
@@ -320,10 +322,14 @@ class PracticeController extends _$PracticeController {
     }
     final attempt = state.attempt ?? _freshAttempt();
     if (attempt.hintLevel >= 4) return;
+    final level = attempt.hintLevel + 1;
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.practiceHintRequested(level: level)));
     state = PracticeSessionState(
       phase: state.phase,
       session: state.session,
-      attempt: attempt.copyWith(hintLevel: attempt.hintLevel + 1),
+      attempt: attempt.copyWith(hintLevel: level),
     );
   }
 
@@ -459,6 +465,11 @@ class PracticeController extends _$PracticeController {
           session.questions[index].id != original.id) {
         return;
       }
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.practiceDifficultyAdapted(
+              direction: target.index > original.difficulty.index
+                  ? 'raise'
+                  : 'lower')));
       state = PracticeSessionState(
         phase: state.phase,
         session: session.replaceUpcoming(index, generated),
@@ -501,6 +512,9 @@ class PracticeController extends _$PracticeController {
         return ChallengeOutcome.unavailable;
       }
       ref.read(usageControllerProvider.notifier).recordPracticeGenerated(1);
+      unawaited(ref.read(analyticsServiceProvider).logEvent(
+          AnalyticsEvent.practiceChallengeAccepted(
+              topic: question.topic.name)));
       state = PracticeSessionState(
         phase: PracticePhase.answering,
         session: current.insertNext(generated).advance(),

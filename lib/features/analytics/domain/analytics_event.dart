@@ -136,6 +136,24 @@ class AnalyticsEvent {
   factory AnalyticsEvent.adaptiveRecommendationUsed({required String topic}) =>
       AnalyticsEvent('adaptive_recommendation_used', {'topic': topic});
 
+  // ---- V5 learning loop ----
+  factory AnalyticsEvent.practiceHintRequested({required int level}) =>
+      AnalyticsEvent('practice_hint_requested', {'level': '$level'});
+
+  factory AnalyticsEvent.practiceRetry() =>
+      const AnalyticsEvent('practice_retry');
+
+  factory AnalyticsEvent.practiceSolutionViewed({required String mode}) =>
+      AnalyticsEvent('practice_solution_viewed', {'mode': mode});
+
+  factory AnalyticsEvent.practiceChallengeAccepted({required String topic}) =>
+      AnalyticsEvent('practice_challenge_accepted', {'topic': topic});
+
+  factory AnalyticsEvent.practiceDifficultyAdapted({
+    required String direction,
+  }) =>
+      AnalyticsEvent('practice_difficulty_adapted', {'direction': direction});
+
   factory AnalyticsEvent.dailyChallengeCompleted() =>
       const AnalyticsEvent('daily_challenge_completed');
 

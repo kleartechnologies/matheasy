@@ -12,6 +12,8 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../analytics/application/analytics_service.dart';
+import '../../analytics/domain/analytics_event.dart';
 import '../../subscription/application/subscription_controller.dart';
 import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_context_builder.dart';
@@ -111,6 +113,9 @@ class _PracticeSessionScreenState
     required PracticeSolutionMode mode,
     String? studentAnswer,
   }) {
+    unawaited(ref
+        .read(analyticsServiceProvider)
+        .logEvent(AnalyticsEvent.practiceSolutionViewed(mode: mode.name)));
     unawaited(context.push(
       AppRoutes.practiceSolution,
       extra: PracticeSolutionArgs(

@@ -1,6 +1,12 @@
 /**
  * Checking a student's own handwritten working — deterministically (spec Part 12).
  *
+ * FUTURE SEAM (V5 "Compare My Work"): practice will let students type their
+ * working step by step; those lines arrive via `PracticeAnswer.workSteps` +
+ * `PracticeSolutionArgs.studentAnswer` on the client and get checked by THIS
+ * module's line-by-line verdict machinery before any model narrates the
+ * diagnosis. Nothing to build here until then — the checker is input-agnostic.
+ *
  * A student photographs their working and asks "where did I go wrong?". The
  * tempting implementation is to hand the photo to the model and let it judge.
  * That breaks the app's golden rule twice over: the model would be inventing

@@ -139,6 +139,21 @@ app needs to draw the right screen:
 Which layer said no, what the risk score was, and where the internal thresholds
 sit stay in the logs. Nothing in a response teaches somebody what to avoid.
 
+### The practice solve lane (AS-BUILT, V5)
+
+Practice's "Show Solution" / deep-hint path re-enters the real `solveEquation`
+pipeline with `countAsScan: false` (client sends `ScanSource.practice`, so
+only `manual` entry meters as a scan). This is a **deliberate decision**: the
+question was already paid for at generation by the `practiceQuestions` quota,
+and charging a second scan for its solution would tax exactly the students who
+need help most. The lane is not uncapped — `assertWithinRateLimit(uid,
+"solve")` still applies per user, the global verified-solve cache absorbs
+repeats (identical practice questions resolve without an OpenAI call), and
+solves are lazy (only when a student asks for hint level 3+, Show Solution or
+Review My Solution — never preemptively). What it does mean: a scripted client
+could run un-metered solves at the rate limit; that sits in §7's "costs real
+effort, bounded by rate limits" category, same as re-solves from history.
+
 ---
 
 ## 4. Firestore schema
