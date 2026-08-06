@@ -24,7 +24,15 @@ interface ProgressEvent {
 }
 
 export const aggregateProgress = onDocumentCreated(
-  "users/{uid}/progressEvents/{eventId}",
+  {
+    document: "users/{uid}/progressEvents/{eventId}",
+    // Collocated with the Firestore database (asia-southeast1). Without this
+    // the function defaults to us-central1 and every trigger delivery makes a
+    // cross-region hop — deploys warned about it on every run. A background
+    // trigger has no client-facing region contract (the callables stay in
+    // us-central1, where the app's FirebaseFunctions instance points).
+    region: "asia-southeast1",
+  },
   async (event) => {
     const uid = event.params.uid;
     const data = (event.data?.data() ?? {}) as ProgressEvent;
