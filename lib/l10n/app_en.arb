@@ -102,6 +102,8 @@
   },
   "practiceMatheasyAnswer": "Matheasy's answer",
   "practiceNeedHint": "Need a hint?",
+  "practiceHintShort": "Hint",
+  "practiceSolutionShort": "Solution",
   "practiceHintCounter": "Hint {level} of 4",
   "@practiceHintCounter": {
     "placeholders": {

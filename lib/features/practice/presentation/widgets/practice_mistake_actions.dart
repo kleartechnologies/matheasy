@@ -49,12 +49,14 @@ class PracticeMistakeActions extends StatelessWidget {
             onPressed: tryAgain,
           ),
           const SizedBox(height: AppSpacing.md),
+          // Three-across, so the labels are the SHORT forms — the full
+          // phrases ellipsize into unreadable stubs at a third of the width.
           Row(
             children: [
               if (onHint case final hint?) ...[
                 Expanded(
                   child: SecondaryButton(
-                    label: l10n.practiceNeedHint,
+                    label: l10n.practiceHintShort,
                     icon: Icons.lightbulb_outline_rounded,
                     size: AppButtonSize.medium,
                     onPressed: hint,
@@ -65,7 +67,7 @@ class PracticeMistakeActions extends StatelessWidget {
               if (onShowSolution case final showSolution?) ...[
                 Expanded(
                   child: SecondaryButton(
-                    label: l10n.practiceShowSolution,
+                    label: l10n.practiceSolutionShort,
                     icon: Icons.school_rounded,
                     size: AppButtonSize.medium,
                     onPressed: showSolution,

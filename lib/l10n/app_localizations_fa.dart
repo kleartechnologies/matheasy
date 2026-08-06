@@ -307,6 +307,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get practiceNeedHint => 'Need a hint?';
 
   @override
+  String get practiceHintShort => 'Hint';
+
+  @override
+  String get practiceSolutionShort => 'Solution';
+
+  @override
   String practiceHintCounter(int level) {
     return 'Hint $level of 4';
   }

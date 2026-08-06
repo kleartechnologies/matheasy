@@ -740,6 +740,18 @@ abstract class AppLocalizations {
   /// **'Need a hint?'**
   String get practiceNeedHint;
 
+  /// No description provided for @practiceHintShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint'**
+  String get practiceHintShort;
+
+  /// No description provided for @practiceSolutionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Solution'**
+  String get practiceSolutionShort;
+
   /// No description provided for @practiceHintCounter.
   ///
   /// In en, this message translates to:

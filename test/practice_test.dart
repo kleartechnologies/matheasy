@@ -669,7 +669,7 @@ void main() {
       expect(find.text('Your answer: 9'), findsOneWidget);
       expect(find.text('Correct answer: 4'), findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);
-      expect(find.text('Show solution'), findsOneWidget);
+      expect(find.text('Solution'), findsOneWidget);
       expect(find.text('2 + 2 = 4.'), findsNothing);
 
       await tester.tap(find.text('Try again'));
