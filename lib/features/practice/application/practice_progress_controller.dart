@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../subscription/application/subscription_controller.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_result.dart';
@@ -10,6 +11,7 @@ import '../domain/practice_session.dart';
 import '../domain/skill_mastery.dart';
 import '../domain/xp_level.dart';
 import '../domain/xp_reward.dart';
+import 'engine/adaptive_engine.dart';
 import 'practice_repository.dart';
 
 part 'practice_progress_controller.g.dart';
@@ -85,6 +87,7 @@ class PracticeProgressController extends _$PracticeProgressController {
     state = updated;
     unawaited(ref.read(practiceRepositoryProvider).save(updated));
 
+    final (strong, weak) = _sessionSkillSplit(session, questionsById);
     return PracticeResult(
       request: session.request,
       total: session.total,
@@ -93,7 +96,47 @@ class PracticeProgressController extends _$PracticeProgressController {
       masteryBefore: beforeLevel,
       masteryAfter: afterTopic.level,
       masteryPointsAfter: afterTopic.masteryPoints,
+      timeSpentSeconds:
+          session.answers.fold(0, (sum, a) => sum + a.timeSpentSeconds),
+      hintsUsedTotal:
+          session.answers.fold(0, (sum, a) => sum + a.hintLevelUsed),
+      strongSkills: strong,
+      weakSkills: weak,
+      // "Practice this next", computed against the UPDATED skills so the
+      // session that just ended counts (Pro; null without signal).
+      recommendedNext: const AdaptiveEngine().nextRecommendation(
+        updated,
+        isPro: ref.read(isProProvider),
+      ),
     );
+  }
+
+  /// Splits the session's skill-tagged work into nailed (accuracy ≥ 0.8) and
+  /// needs-review (< 0.5) labels, by THIS session's answers only.
+  (List<String>, List<String>) _sessionSkillSplit(
+    PracticeSession session,
+    Map<String, PracticeQuestion> questionsById,
+  ) {
+    final attempts = <String, int>{};
+    final corrects = <String, int>{};
+    for (final answer in session.answers) {
+      final question = questionsById[answer.questionId];
+      final label = question?.subtopicLabel;
+      if (question == null || label == null) continue;
+      attempts[label] = (attempts[label] ?? 0) + 1;
+      if (answer.isCorrect) corrects[label] = (corrects[label] ?? 0) + 1;
+    }
+    final strong = <String>[];
+    final weak = <String>[];
+    for (final entry in attempts.entries) {
+      final accuracy = (corrects[entry.key] ?? 0) / entry.value;
+      if (accuracy >= 0.8) {
+        strong.add(entry.key);
+      } else if (accuracy < 0.5) {
+        weak.add(entry.key);
+      }
+    }
+    return (strong..sort(), weak..sort());
   }
 
   /// Folds a session's skill-tagged answers into per-skill mastery. Returns a

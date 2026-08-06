@@ -806,6 +806,36 @@ abstract class AppLocalizations {
   /// **'Numi couldn\'t build a harder one right now — carry on!'**
   String get practiceChallengeUnavailable;
 
+  /// No description provided for @practiceStatTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get practiceStatTime;
+
+  /// No description provided for @practiceStatHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Hints used'**
+  String get practiceStatHints;
+
+  /// No description provided for @practiceStrongThisSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong this session'**
+  String get practiceStrongThisSession;
+
+  /// No description provided for @practiceConceptsToReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Concepts to review'**
+  String get practiceConceptsToReview;
+
+  /// No description provided for @practiceRecommendedNextCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice {skill} next'**
+  String practiceRecommendedNextCta(String skill);
+
   /// No description provided for @practicePraise1.
   ///
   /// In en, this message translates to:

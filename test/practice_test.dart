@@ -20,6 +20,7 @@ import 'package:matheasy/features/practice/domain/practice_difficulty.dart';
 import 'package:matheasy/features/practice/domain/practice_progress.dart';
 import 'package:matheasy/features/practice/domain/practice_question.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
+import 'package:matheasy/features/practice/domain/practice_skill.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
 import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
@@ -371,6 +372,64 @@ void main() {
         container.read(practiceProgressControllerProvider).skills.length,
         beforeCount,
       );
+    });
+
+    test('the summary carries time, hints and the skill split (V5)', () async {
+      final container = await _container();
+      _activate(container);
+      final progress =
+          container.read(practiceProgressControllerProvider.notifier);
+
+      const session = PracticeSession(
+        request: PracticeRequest(topic: PracticeTopic.algebra),
+        questions: [_skillQ, _inputQ],
+        currentIndex: 1,
+        answers: [
+          PracticeAnswer(
+            questionId: 'q-skill',
+            submitted: '5',
+            isCorrect: true,
+            xpEarned: 20,
+            timeSpentSeconds: 30,
+            hintLevelUsed: 1,
+          ),
+          PracticeAnswer(
+            questionId: 'q-in',
+            submitted: '9',
+            isCorrect: false,
+            xpEarned: 0,
+            timeSpentSeconds: 45,
+            hintLevelUsed: 3,
+            attempts: 2,
+          ),
+        ],
+      );
+      final result = progress.recordSession(session, now: DateTime(2026));
+
+      expect(result.timeSpentSeconds, 75);
+      expect(result.hintsUsedTotal, 4);
+      // The skill-tagged question was nailed; the untagged bank question has
+      // no skill label so it never appears in either list.
+      expect(result.strongSkills, [PracticeSkill.linearOneStep.label]);
+      expect(result.weakSkills, isEmpty);
+      // Free tier → no adaptive recommendation.
+      expect(result.recommendedNext, isNull);
+    });
+
+    test('a struggled skill lands in concepts-to-review', () async {
+      final container = await _container();
+      _activate(container);
+      final progress =
+          container.read(practiceProgressControllerProvider.notifier);
+
+      final session = PracticeSession(
+        request: const PracticeRequest(topic: PracticeTopic.algebra),
+        questions: const [_skillQ],
+        answers: [_answer(_skillQ, correct: false)],
+      );
+      final result = progress.recordSession(session, now: DateTime(2026));
+      expect(result.weakSkills, [PracticeSkill.linearOneStep.label]);
+      expect(result.strongSkills, isEmpty);
     });
 
     test('daily challenge adds the +100 bonus once per day', () async {

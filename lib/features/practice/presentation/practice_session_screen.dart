@@ -17,6 +17,7 @@ import '../../subscription/domain/paywall_trigger.dart';
 import '../../tutor/domain/tutor_context_builder.dart';
 import '../../tutor/domain/tutor_models.dart';
 import '../application/practice_controller.dart';
+import '../domain/adaptive_recommendation.dart';
 import '../domain/practice_mistake.dart';
 import '../domain/practice_question.dart';
 import '../domain/practice_session.dart';
@@ -172,6 +173,19 @@ class _PracticeSessionScreenState
     unawaited(ref.read(practiceControllerProvider.notifier).start(request));
   }
 
+  /// Starts a session pinned to the engine's "practice this next" skill.
+  void _practiceRecommended(AdaptiveRecommendation rec) {
+    _resetAnswer();
+    unawaited(ref.read(practiceControllerProvider.notifier).start(
+          PracticeRequest(
+            topic: rec.skill.topic,
+            skillId: rec.skill.id,
+            adaptive: true,
+            title: rec.skill.label,
+          ),
+        ));
+  }
+
   void _exit() {
     ref.read(practiceControllerProvider.notifier).reset();
     Navigator.of(context).maybePop();
@@ -269,6 +283,9 @@ class _PracticeSessionScreenState
               result: state.result!,
               onContinue: _continue,
               onDone: _exit,
+              onPracticeRecommended: state.result!.recommendedNext == null
+                  ? null
+                  : () => _practiceRecommended(state.result!.recommendedNext!),
             ),
           PracticePhase.locked => _PracticeLockedView(
               onSeePlans: _openPaywall,

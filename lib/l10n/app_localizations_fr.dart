@@ -344,6 +344,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Numi couldn\'t build a harder one right now — carry on!';
 
   @override
+  String get practiceStatTime => 'Time';
+
+  @override
+  String get practiceStatHints => 'Hints used';
+
+  @override
+  String get practiceStrongThisSession => 'Strong this session';
+
+  @override
+  String get practiceConceptsToReview => 'Concepts to review';
+
+  @override
+  String practiceRecommendedNextCta(String skill) {
+    return 'Practice $skill next';
+  }
+
+  @override
   String get practicePraise1 => 'Great job!';
 
   @override

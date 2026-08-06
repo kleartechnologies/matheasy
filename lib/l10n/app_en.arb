@@ -118,6 +118,16 @@
   "practiceReviewMySolution": "Review my solution",
   "practiceChallengeMe": "Challenge me",
   "practiceChallengeUnavailable": "Numi couldn't build a harder one right now — carry on!",
+  "practiceStatTime": "Time",
+  "practiceStatHints": "Hints used",
+  "practiceStrongThisSession": "Strong this session",
+  "practiceConceptsToReview": "Concepts to review",
+  "practiceRecommendedNextCta": "Practice {skill} next",
+  "@practiceRecommendedNextCta": {
+    "placeholders": {
+      "skill": {"type": "String"}
+    }
+  },
   "practicePraise1": "Great job!",
   "practicePraise2": "Nice thinking!",
   "practicePraise3": "You nailed it!",
