@@ -207,8 +207,27 @@ the FB SDK's implicit purchase detection can't double-count.
   first post-auth content screen) via `AdConsentGate`'s post-frame callback, so
   the app is foreground/active — Apple silently no-ops an ATT prompt shown before
   the app is active. It runs **only after the COPPA age gate confirms a 13+
-  user** (the neutral birth-year prompt shows first). Release-only + a no-op
-  until Meta is configured, so debug builds and a fresh checkout never prompt.
+  user** (the neutral birth-year prompt shows first).
+- **Ordering (guideline 2.1):** the ATT request is the **first** thing
+  `requestIfNeeded()` does. `activateApp()` posts an install/session event to
+  `graph.facebook.com`, so it — and everything else — waits for the answer.
+  `[was: activateApp() ran *before* the ATT request.]`
+- **Reachability:** the prompt must not depend on a runtime SDK handle. The age
+  gate is keyed on `MetaConfig.isConfigured` (a compile-time constant) and the
+  ATT request is **not** gated on `MetaSdk.isReady`, so a debug/profile build or
+  a failed Facebook-SDK init no longer silently skips the whole consent chain.
+  `[was: both hung off MetaSdk.isReady, i.e. release-only + init-success-only.]`
+- **Self-healing:** `requestIfNeeded()` runs on **every** launch, not just the
+  first. iOS presents the system dialog only while the status is
+  `notDetermined` and replays the decision afterwards, so an interrupted first
+  launch is re-asked rather than stranded. The birth-year dialog is
+  **non-dismissible** and an unanswered prompt is not recorded as answered.
+  `[was: a stray tap outside the dialog marked it answered forever, permanently
+  blocking the ATT request behind it.]`
+- **User-reachable entry point:** Settings → **Privacy → Ad tracking**
+  (`TrackingSettingsSection`) shows the current ATT status and either presents
+  the prompt (while `notDetermined`) or deep-links to iOS Settings. This is the
+  path to demonstrate in an App Review screen recording.
 - **Consequences wired:** on the result it sets Meta
   `setAdvertiserIdCollectionEnabled(authorized)`. **A denial is honoured** —
   `attachAdAttribution` (FB anon id + device identifiers to RevenueCat) runs
@@ -235,9 +254,10 @@ opt-in booster.
    implausible years → `unknown`), and sets `trackingAllowed` to true **only** for
    a confirmed `teenOrAdult`.
 3. **`AdConsentGate`** (wraps the shell) shows a **neutral birth-year picker**
-   once — no mention of ads, no stated eligible age (COPPA-safe, non-leading) —
-   then runs the ATT/attribution flow only if the gate opened. A dismissed prompt
-   leaves the user untracked and isn't re-nagged.
+   — no mention of ads, no stated eligible age (COPPA-safe, non-leading) — then
+   runs the ATT/attribution flow only if the gate opened. The picker is
+   **non-dismissible**; only a recorded answer closes it, so a user can't end up
+   permanently unable to reach the ATT request.
 4. Result: under-13 **and** unknown-age users produce **zero** Meta activity;
    `activateApp` (install) is delayed until a 13+ user is confirmed, so even the
    install ping is never sent for a child.
@@ -372,7 +392,7 @@ double-count warnings** on `Subscribe`/`Purchase`.
 | Check | Result |
 |---|---|
 | No secrets committed | ✅ App ID + Client Token are **placeholders**; the **App Secret is never referenced anywhere** (client token is public and safe to ship, like the RevenueCat SDK key). |
-| No debug event leakage | ✅ The **entire Meta layer is release-only**: `initializeMetaAnalytics()` returns null in debug/profile, so the SDK is never installed, ATT never prompts, and no identifiers are collected. Native `FacebookAutoLogAppEventsEnabled=false` too. |
+| No debug event leakage | ✅ The **Meta SDK layer is release-only**: `initializeMetaAnalytics()` returns null in debug/profile, so the SDK is never installed and no identifiers are collected. Native `FacebookAutoLogAppEventsEnabled=false` too. The age gate + ATT prompt *do* run in debug (they touch no SDK) — deliberately, so the consent flow is verifiable without a TestFlight build. |
 | No duplicate initialization | ✅ `initializeMetaAnalytics()` runs once in bootstrap; `MetaSdk` is a single installed handle. |
 | No test app IDs / no unconfigured SDK activity | ✅ `MetaConfig.isConfigured` gate ⇒ placeholder checkout never touches the SDK, never prompts ATT, never sends events. |
 | Advertiser id (IDFA/GAID) privacy | ✅ Collection stays OFF (native default + runtime) until ATT authorizes; a **denial is honoured** (no identifiers handed to RevenueCat/Meta). Android `AD_ID` permission stripped by default. |

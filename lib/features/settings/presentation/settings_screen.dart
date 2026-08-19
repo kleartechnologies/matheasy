@@ -5,6 +5,7 @@ import '../../../core/animations/app_transitions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../analytics/presentation/tracking_settings_tile.dart';
 import '../../sync/presentation/sync_settings_section.dart';
 import '../application/settings_controller.dart';
 import '../domain/appearance_settings.dart';
@@ -74,6 +75,8 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
       const SyncSettingsSection(),
+      // Renders nothing off-iOS / when Meta isn't configured.
+      const TrackingSettingsSection(),
       SettingsSection(
         title: 'About',
         children: [

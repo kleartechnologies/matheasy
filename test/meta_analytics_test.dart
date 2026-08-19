@@ -290,19 +290,30 @@ void main() {
       expect(MetaSdk.trackingAllowed, isFalse);
     });
 
-    test(
-      'unknown age fails closed and does not prompt while Meta is off',
-      () async {
-        final container = await containerWith({});
-        expect(container.read(ageGateControllerProvider), AgeAssurance.unknown);
-        expect(MetaSdk.trackingAllowed, isFalse);
-        // Meta isn't configured in tests (MetaSdk.isReady == false) → never prompt.
-        expect(
-          container.read(ageGateControllerProvider.notifier).shouldPrompt,
-          isFalse,
-        );
-      },
-    );
+    test('unknown age fails closed but still asks', () async {
+      final container = await containerWith({});
+      expect(container.read(ageGateControllerProvider), AgeAssurance.unknown);
+      expect(MetaSdk.trackingAllowed, isFalse);
+      // The prompt is gated on MetaConfig.isConfigured (a compile-time
+      // constant), NOT on the runtime MetaSdk.isReady handle — otherwise a
+      // debug build or a failed Facebook-SDK init silently skips the whole
+      // consent chain and the ATT request never appears (App Review 2.1).
+      expect(
+        container.read(ageGateControllerProvider.notifier).shouldPrompt,
+        MetaConfig.isConfigured,
+      );
+    });
+
+    test('an answered prompt is not re-asked', () async {
+      final container = await containerWith({});
+      await container
+          .read(ageGateControllerProvider.notifier)
+          .recordBirthYear(DateTime.now().year - 25);
+      expect(
+        container.read(ageGateControllerProvider.notifier).shouldPrompt,
+        isFalse,
+      );
+    });
 
     test('recording an adult birth year flips the gate on', () async {
       final container = await containerWith({});
