@@ -698,6 +698,210 @@ abstract class AppLocalizations {
   /// **'XP earned'**
   String get practiceStatXpEarned;
 
+  /// No description provided for @practiceSolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guided solution'**
+  String get practiceSolutionTitle;
+
+  /// No description provided for @practiceReviewSolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review my solution'**
+  String get practiceReviewSolutionTitle;
+
+  /// No description provided for @practiceSolutionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi is working through it…'**
+  String get practiceSolutionLoading;
+
+  /// No description provided for @practiceSolutionKeyIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'The key idea'**
+  String get practiceSolutionKeyIdea;
+
+  /// No description provided for @practiceYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer: {answer}'**
+  String practiceYourAnswer(String answer);
+
+  /// No description provided for @practiceMatheasyAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Matheasy\'s answer'**
+  String get practiceMatheasyAnswer;
+
+  /// No description provided for @practiceNeedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a hint?'**
+  String get practiceNeedHint;
+
+  /// No description provided for @practiceHintShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint'**
+  String get practiceHintShort;
+
+  /// No description provided for @practiceSolutionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Solution'**
+  String get practiceSolutionShort;
+
+  /// No description provided for @practiceHintCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint {level} of 4'**
+  String practiceHintCounter(int level);
+
+  /// No description provided for @practiceHintAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Another hint'**
+  String get practiceHintAnother;
+
+  /// No description provided for @practiceHintFirstStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The first step'**
+  String get practiceHintFirstStepTitle;
+
+  /// No description provided for @practiceHintSeeSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'See the guided solution'**
+  String get practiceHintSeeSolution;
+
+  /// No description provided for @practiceHintFirstStepUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi can\'t break this one into steps — the guided solution has the full idea instead.'**
+  String get practiceHintFirstStepUnavailable;
+
+  /// No description provided for @practiceTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get practiceTryAgain;
+
+  /// No description provided for @practiceShowSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Show solution'**
+  String get practiceShowSolution;
+
+  /// No description provided for @practiceAskNumi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Numi'**
+  String get practiceAskNumi;
+
+  /// No description provided for @practiceReviewMySolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Review my solution'**
+  String get practiceReviewMySolution;
+
+  /// No description provided for @practiceChallengeMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge me'**
+  String get practiceChallengeMe;
+
+  /// No description provided for @practiceChallengeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Numi couldn\'t build a harder one right now — carry on!'**
+  String get practiceChallengeUnavailable;
+
+  /// No description provided for @practiceStatTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get practiceStatTime;
+
+  /// No description provided for @practiceStatHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Hints used'**
+  String get practiceStatHints;
+
+  /// No description provided for @practiceStrongThisSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong this session'**
+  String get practiceStrongThisSession;
+
+  /// No description provided for @practiceConceptsToReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Concepts to review'**
+  String get practiceConceptsToReview;
+
+  /// No description provided for @practiceRecommendedNextCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice {skill} next'**
+  String practiceRecommendedNextCta(String skill);
+
+  /// No description provided for @practicePraise1.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job!'**
+  String get practicePraise1;
+
+  /// No description provided for @practicePraise2.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice thinking!'**
+  String get practicePraise2;
+
+  /// No description provided for @practicePraise3.
+  ///
+  /// In en, this message translates to:
+  /// **'You nailed it!'**
+  String get practicePraise3;
+
+  /// No description provided for @practicePraise4.
+  ///
+  /// In en, this message translates to:
+  /// **'Brilliant work!'**
+  String get practicePraise4;
+
+  /// No description provided for @practicePraise5.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on fire! 🔥'**
+  String get practicePraise5;
+
+  /// No description provided for @practiceEncourage1.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there!'**
+  String get practiceEncourage1;
+
+  /// No description provided for @practiceEncourage2.
+  ///
+  /// In en, this message translates to:
+  /// **'Good effort — let\'s learn from this one.'**
+  String get practiceEncourage2;
+
+  /// No description provided for @practiceEncourage3.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite, but you can do this!'**
+  String get practiceEncourage3;
+
+  /// No description provided for @practiceEncourage4.
+  ///
+  /// In en, this message translates to:
+  /// **'Close! Take a look at why.'**
+  String get practiceEncourage4;
+
   /// No description provided for @tutorNewConversationStarted.
   ///
   /// In en, this message translates to:
@@ -1970,41 +2174,11 @@ abstract class AppLocalizations {
   /// **'Couldn\'t open your photos.'**
   String get scanGalleryFailed;
 
-  /// No description provided for @scanHintHoldSteady.
-  ///
-  /// In en, this message translates to:
-  /// **'Hold steady on the question — I’ll capture it'**
-  String get scanHintHoldSteady;
-
   /// No description provided for @scanHintLineUp.
   ///
   /// In en, this message translates to:
   /// **'Line up the whole question, then tap to capture'**
   String get scanHintLineUp;
-
-  /// No description provided for @scanAutoCaptureOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto capture on'**
-  String get scanAutoCaptureOn;
-
-  /// No description provided for @scanAutoCaptureOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto capture off'**
-  String get scanAutoCaptureOff;
-
-  /// No description provided for @scanAutoOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto on'**
-  String get scanAutoOn;
-
-  /// No description provided for @scanAutoOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto off'**
-  String get scanAutoOff;
 
   /// No description provided for @scanCloseScanner.
   ///
@@ -2234,11 +2408,11 @@ abstract class AppLocalizations {
   /// **'Preparing…'**
   String get cropPreparing;
 
-  /// No description provided for @cropUsePhoto.
+  /// No description provided for @cropRotate.
   ///
   /// In en, this message translates to:
-  /// **'Use photo'**
-  String get cropUsePhoto;
+  /// **'Rotate'**
+  String get cropRotate;
 
   /// No description provided for @keyboardMoveLeft.
   ///
@@ -2984,6 +3158,96 @@ abstract class AppLocalizations {
   /// **'Similar'**
   String get teachingRungSimilar;
 
+  /// No description provided for @practiceSetRungChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge'**
+  String get practiceSetRungChallenge;
+
+  /// No description provided for @practiceSetProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} complete'**
+  String practiceSetProgress(int done, int total);
+
+  /// No description provided for @practiceSetChallengeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish all three to unlock the challenge'**
+  String get practiceSetChallengeLocked;
+
+  /// No description provided for @practiceSetChallengeUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge unlocked — one stretch problem left.'**
+  String get practiceSetChallengeUnlocked;
+
+  /// No description provided for @practiceSetMixedReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed review'**
+  String get practiceSetMixedReview;
+
+  /// No description provided for @practiceSetMixedReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick mixed round on this topic to make it stick'**
+  String get practiceSetMixedReviewSubtitle;
+
+  /// No description provided for @practiceSetMixedReviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed review complete'**
+  String get practiceSetMixedReviewDone;
+
+  /// No description provided for @practiceSetMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic mastered!'**
+  String get practiceSetMastered;
+
+  /// No description provided for @practiceSetMasteredDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished the whole practice journey. +{xp} XP'**
+  String practiceSetMasteredDetail(int xp);
+
+  /// No description provided for @practiceSetNewSet.
+  ///
+  /// In en, this message translates to:
+  /// **'New set'**
+  String get practiceSetNewSet;
+
+  /// No description provided for @practiceSetNewSetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get a new set — check your connection and try again.'**
+  String get practiceSetNewSetFailed;
+
+  /// No description provided for @practiceSetContinueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep practicing'**
+  String get practiceSetContinueTitle;
+
+  /// No description provided for @practiceSetContinueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off'**
+  String get practiceSetContinueSubtitle;
+
+  /// No description provided for @practiceSetNextUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Next up'**
+  String get practiceSetNextUp;
+
+  /// No description provided for @practiceSetPracticeAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice again'**
+  String get practiceSetPracticeAgain;
+
   /// No description provided for @teachingAskPrompt.
   ///
   /// In en, this message translates to:
@@ -3134,11 +3398,149 @@ abstract class AppLocalizations {
   /// **'Continue with Google'**
   String get authContinueGoogle;
 
+  /// No description provided for @authContinueEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with email'**
+  String get authContinueEmail;
+
   /// No description provided for @authSigningIn.
   ///
   /// In en, this message translates to:
   /// **'Signing in…'**
   String get authSigningIn;
+
+  /// No description provided for @authEmailSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authEmailSignInTitle;
+
+  /// No description provided for @authEmailSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your email and password.'**
+  String get authEmailSignInSubtitle;
+
+  /// No description provided for @authEmailSignUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get authEmailSignUpTitle;
+
+  /// No description provided for @authEmailSignUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One free account for all your math learning.'**
+  String get authEmailSignUpSubtitle;
+
+  /// No description provided for @authEmailTabSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authEmailTabSignIn;
+
+  /// No description provided for @authEmailTabSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get authEmailTabSignUp;
+
+  /// No description provided for @authEmailNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get authEmailNameLabel;
+
+  /// No description provided for @authEmailNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name.'**
+  String get authEmailNameRequired;
+
+  /// No description provided for @authEmailFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailFieldLabel;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authEmailPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authEmailPasswordLabel;
+
+  /// No description provided for @authEmailPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password.'**
+  String get authEmailPasswordRequired;
+
+  /// No description provided for @authEmailPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get authEmailPasswordTooShort;
+
+  /// No description provided for @authEmailShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authEmailShowPassword;
+
+  /// No description provided for @authEmailHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authEmailHidePassword;
+
+  /// No description provided for @authEmailForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authEmailForgotPassword;
+
+  /// No description provided for @authEmailSignInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authEmailSignInAction;
+
+  /// No description provided for @authEmailSignUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authEmailSignUpAction;
+
+  /// No description provided for @authEmailResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for that email, a reset link is on its way.'**
+  String get authEmailResetSent;
+
+  /// No description provided for @authReauthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you'**
+  String get authReauthTitle;
+
+  /// No description provided for @authReauthMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, re-enter your password to delete your account.'**
+  String get authReauthMessage;
+
+  /// No description provided for @authReauthConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get authReauthConfirm;
 
   /// No description provided for @profileAccessUntil.
   ///

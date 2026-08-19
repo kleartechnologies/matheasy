@@ -132,6 +132,18 @@ interface TutorProblem {
    * older client still gets the right behaviour.
    */
   verification?: unknown;
+  /**
+   * V5 practice-coach context. What the student actually submitted on a
+   * practice question — so Numi diagnoses THEIR mistake instead of
+   * re-teaching from zero. Rendered inside the same `withAnswer` discipline
+   * as everything else: naming what the student wrote never reveals what the
+   * right answer is.
+   */
+  studentAnswer?: string;
+  /** How far up the app's hint ladder (0–4) the student already is. */
+  hintLevel?: number;
+  /** How many times they've tried this question. */
+  attempts?: number;
 }
 
 /** The exact step the student tapped "Ask Numi about this" on (spec Part 6). */
@@ -401,6 +413,33 @@ export function buildProblemContext(problem: TutorProblem, withAnswer: boolean):
   const mistakes = list(problem.commonMistakes, 5, 200);
   if (mistakes.length > 0) {
     lines.push(`Common mistakes on this kind of problem: ${mistakes.join("; ")}`);
+  }
+
+  // V5 PRACTICE COACHING. The student's own submission is context in every
+  // mode — naming what THEY wrote reveals nothing about what is right — and
+  // is exactly what turns "let me teach this topic" into "let me find where
+  // your thinking went sideways".
+  const studentAnswer = text(problem.studentAnswer, 200);
+  if (studentAnswer) {
+    lines.push(
+      `The student answered: ${studentAnswer} — diagnose the likely mistake behind THIS answer. Never mock it, never just restate the question.`
+    );
+  }
+  const attempts =
+    typeof problem.attempts === "number" && Number.isFinite(problem.attempts)
+      ? Math.max(0, Math.min(20, Math.round(problem.attempts)))
+      : null;
+  if (attempts !== null && attempts > 1) {
+    lines.push(`They have tried this question ${attempts} times — be extra warm.`);
+  }
+  const hintLevel =
+    typeof problem.hintLevel === "number" && Number.isFinite(problem.hintLevel)
+      ? Math.max(0, Math.min(4, Math.round(problem.hintLevel)))
+      : null;
+  if (hintLevel !== null && hintLevel > 0) {
+    lines.push(
+      `The app has already shown hints up to level ${hintLevel} of 4 (1 = nudge, 2 = method, 3 = first step, 4 = full solution). Coach at the NEXT nudge — do not repeat lower rungs, and reveal nothing beyond what your current mode allows.`
+    );
   }
 
   // HOW IT WAS READ. Included in every mode, answer-withheld ones too: this is

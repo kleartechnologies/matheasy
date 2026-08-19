@@ -12,6 +12,7 @@ import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/domain/auth_failure.dart';
+import '../../auth/presentation/widgets/password_reauth_dialog.dart';
 import '../../settings/presentation/widgets/settings_section.dart';
 import '../../settings/presentation/widgets/settings_tile.dart';
 import '../../sync/presentation/profile_sync_tile.dart';
@@ -95,18 +96,41 @@ class ProfileScreen extends ConsumerWidget {
       await ref.read(profileControllerProvider.notifier).deleteAccount();
     } on AuthFailure catch (failure) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              failure.isSilent
-                  ? context.l10n.profileDeleteCancelled
-                  : context.l10n.profileDeleteVerifyFailed,
-            ),
-          ),
-        );
+      // An email account can't re-prove itself silently — collect the password,
+      // then retry the whole delete behind the now-fresh session. Nothing has
+      // been destroyed yet at this point.
+      if (failure.type == AuthFailureType.passwordReauthRequired) {
+        final reauthed = await PasswordReauthDialog.show(context);
+        if (!context.mounted) return;
+        if (reauthed ?? false) {
+          try {
+            await ref.read(profileControllerProvider.notifier).deleteAccount();
+            return;
+          } on AuthFailure catch (retryFailure) {
+            if (!context.mounted) return;
+            _showDeleteFailure(context, retryFailure);
+            return;
+          }
+        }
+        _showDeleteFailure(context, const AuthFailure.cancelled());
+        return;
+      }
+      _showDeleteFailure(context, failure);
     }
+  }
+
+  void _showDeleteFailure(BuildContext context, AuthFailure failure) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            failure.isSilent
+                ? context.l10n.profileDeleteCancelled
+                : context.l10n.profileDeleteVerifyFailed,
+          ),
+        ),
+      );
   }
 
   @override

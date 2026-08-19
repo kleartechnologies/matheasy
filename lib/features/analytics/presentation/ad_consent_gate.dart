@@ -35,15 +35,19 @@ class _AdConsentGateState extends ConsumerState<AdConsentGate> {
     if (ageGate.shouldPrompt) {
       final year = await _askBirthYear();
       if (!mounted) return;
-      if (year != null) {
-        await ageGate.recordBirthYear(year);
-      } else {
-        await ageGate.markPromptedWithoutAnswer();
-      }
+      // Only a real answer closes the gate. An unanswered prompt (the dialog is
+      // not dismissible, so this means its route was torn down) is deliberately
+      // NOT recorded: the user is asked again next launch instead of being
+      // stranded on a device that can never reach the ATT request.
+      if (year == null) return;
+      await ageGate.recordBirthYear(year);
       if (!mounted) return;
     }
 
     // Proceeds to ATT + attribution only if the age gate set trackingAllowed.
+    // Runs on every launch, not just the first: ATT is idempotent (iOS replays
+    // an existing decision without re-prompting) so a first launch that never
+    // got to the prompt self-heals on the next one.
     await ref
         .read(trackingConsentControllerProvider.notifier)
         .requestIfNeeded();
@@ -54,6 +58,9 @@ class _AdConsentGateState extends ConsumerState<AdConsentGate> {
     final years = [for (var y = currentYear; y >= currentYear - 100; y--) y];
     return showDialog<int>(
       context: context,
+      // Not dismissible: a stray tap outside the dialog used to mark the prompt
+      // "answered" forever, permanently blocking the ATT request behind it.
+      barrierDismissible: false,
       builder: (_) => _BirthYearDialog(years: years),
     );
   }
@@ -78,34 +85,37 @@ class _BirthYearDialogState extends State<_BirthYearDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Before you start'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Please select the year you were born.'),
-          const SizedBox(height: 16),
-          DropdownButton<int>(
-            isExpanded: true,
-            value: _selected,
-            hint: const Text('Year of birth'),
-            items: [
-              for (final year in widget.years)
-                DropdownMenuItem<int>(value: year, child: Text('$year')),
-            ],
-            onChanged: (year) => setState(() => _selected = year),
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        title: const Text('Before you start'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Please select the year you were born.'),
+            const SizedBox(height: 16),
+            DropdownButton<int>(
+              isExpanded: true,
+              value: _selected,
+              hint: const Text('Year of birth'),
+              items: [
+                for (final year in widget.years)
+                  DropdownMenuItem<int>(value: year, child: Text('$year')),
+              ],
+              onChanged: (year) => setState(() => _selected = year),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: _selected == null
+                ? null
+                : () => Navigator.of(context).pop(_selected),
+            child: const Text('Continue'),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _selected == null
-              ? null
-              : () => Navigator.of(context).pop(_selected),
-          child: const Text('Continue'),
-        ),
-      ],
     );
   }
 }

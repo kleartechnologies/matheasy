@@ -9,33 +9,43 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// A sample Google-backed user for tests.
 AppUser googleTestUser() => AppUser(
-      id: 'google-uid-1',
-      provider: AuthProviderType.google,
-      isGuest: false,
-      createdAt: DateTime(2024),
-      displayName: 'Sarah Lee',
-      email: 'sarah@example.com',
-    );
+  id: 'google-uid-1',
+  provider: AuthProviderType.google,
+  isGuest: false,
+  createdAt: DateTime(2024),
+  displayName: 'Sarah Lee',
+  email: 'sarah@example.com',
+);
 
 /// A sample Apple-backed user for tests.
 AppUser appleTestUser() => AppUser(
-      id: 'apple-uid-1',
-      provider: AuthProviderType.apple,
-      isGuest: false,
-      createdAt: DateTime(2024),
-      displayName: 'Alex Kim',
-      email: 'alex@example.com',
-    );
+  id: 'apple-uid-1',
+  provider: AuthProviderType.apple,
+  isGuest: false,
+  createdAt: DateTime(2024),
+  displayName: 'Alex Kim',
+  email: 'alex@example.com',
+);
+
+/// A sample email/password-backed user for tests.
+AppUser emailTestUser() => AppUser(
+  id: 'email-uid-1',
+  provider: AuthProviderType.email,
+  isGuest: false,
+  createdAt: DateTime(2024),
+  displayName: 'Maya Chen',
+  email: 'maya@example.com',
+);
 
 /// A freshly-created account with NO profile name yet (e.g. an Apple relay that
 /// hides the name) — exercises the honest 'Learner' fallback + empty first-day
 /// dashboard.
 AppUser newAccountUser() => AppUser(
-      id: 'new-uid-1',
-      provider: AuthProviderType.apple,
-      isGuest: false,
-      createdAt: DateTime(2024),
-    );
+  id: 'new-uid-1',
+  provider: AuthProviderType.apple,
+  isGuest: false,
+  createdAt: DateTime(2024),
+);
 
 /// An in-memory [AuthService] double — no Firebase, fully deterministic.
 ///
@@ -47,17 +57,22 @@ class FakeAuthService implements AuthService {
     AppUser? initialUser,
     AppUser? googleResult,
     AppUser? appleResult,
+    AppUser? emailResult,
     this.googleError,
     this.appleError,
-  })  : _current = initialUser,
-        _googleResult = googleResult,
-        _appleResult = appleResult;
+    this.emailError,
+  }) : _current = initialUser,
+       _googleResult = googleResult,
+       _appleResult = appleResult,
+       _emailResult = emailResult;
 
   AppUser? _current;
   final AppUser? _googleResult;
   final AppUser? _appleResult;
+  final AppUser? _emailResult;
   final AuthFailure? googleError;
   final AuthFailure? appleError;
+  final AuthFailure? emailError;
 
   final StreamController<AppUser?> _controller =
       StreamController<AppUser?>.broadcast();
@@ -66,6 +81,16 @@ class FakeAuthService implements AuthService {
   int deleteCount = 0;
   int anonymousSessionCount = 0;
   int recentLoginCount = 0;
+  int passwordReauthCount = 0;
+
+  /// Every address handed to [sendPasswordReset], in call order.
+  final List<String> passwordResetEmails = [];
+
+  /// Set to make [sendPasswordReset] fail (e.g. `AuthFailure.network()`).
+  AuthFailure? passwordResetError;
+
+  /// Set to make [reauthenticateWithPassword] fail (wrong password, etc.).
+  AuthFailure? passwordReauthError;
 
   /// Set to model the user cancelling (or failing) the re-authentication sheet
   /// that guards account deletion. When non-null [ensureRecentLogin] throws it,
@@ -119,6 +144,47 @@ class FakeAuthService implements AuthService {
   }
 
   @override
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    if (emailError != null) throw emailError!;
+    final user = _emailResult ?? emailTestUser();
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
+    _current = user;
+    _controller.add(user);
+    return user;
+  }
+
+  @override
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    if (emailError != null) throw emailError!;
+    final user = (_emailResult ?? emailTestUser()).copyWith(displayName: name);
+    _lastAnonymousUid = _current == null ? anonymousUid : null;
+    _current = user;
+    _controller.add(user);
+    return user;
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    passwordResetEmails.add(email);
+    final error = passwordResetError;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<void> reauthenticateWithPassword(String password) async {
+    passwordReauthCount++;
+    final error = passwordReauthError;
+    if (error != null) throw error;
+  }
+
+  @override
   Future<void> signOut() async {
     signOutCount++;
     _current = null;
@@ -145,15 +211,25 @@ class FakeAuthService implements AuthService {
 /// Builds a [ProviderContainer] a full-session test needs: seeded local
 /// preferences plus a fake auth backend. Callers own disposal
 /// (`addTearDown(container.dispose)`).
+///
+/// [ageConfirmed] seeds an adult birth year so `AdConsentGate` treats the test
+/// user as someone who already answered the COPPA age prompt. Without it the
+/// gate puts its (deliberately non-dismissible) dialog over the shell and every
+/// navigation assertion below it fails. Pass `false` to exercise the gate.
 Future<ProviderContainer> sessionContainer({
   bool onboarded = false,
   bool guest = false,
+  bool ageConfirmed = true,
   AuthService? authService,
   AppUser? signedInUser,
 }) async {
   SharedPreferences.setMockInitialValues({
     if (onboarded) 'session.onboarding_complete': true,
     if (guest) 'session.guest_mode': true,
+    if (ageConfirmed) ...{
+      'privacy.birth_year': DateTime.now().year - 25,
+      'privacy.ad_consent_prompted': true,
+    },
   });
   final prefs = await SharedPreferences.getInstance();
   return ProviderContainer(

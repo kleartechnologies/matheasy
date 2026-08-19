@@ -18,7 +18,7 @@ import '../../sync/application/sync_service.dart';
 import '../domain/editable_profile.dart';
 import '../domain/profile_avatar.dart';
 import '../domain/profile_view.dart';
-import 'profile_service.dart';
+import 'editable_profile_controller.dart';
 
 part 'profile_controller.g.dart';
 
@@ -26,16 +26,17 @@ part 'profile_controller.g.dart';
 /// editable fields (name + avatar) and headline stats (progress) — and owns the
 /// profile-scoped account actions (edit, sign out, delete).
 ///
-/// Reactive: rebuilds when the signed-in user or aggregated progress changes,
-/// re-reading the persisted editable profile each time (so it always reflects
-/// the latest saved override).
+/// Reactive: rebuilds when the signed-in user, aggregated progress, or the
+/// saved editable profile changes (the editable slice is WATCHED via
+/// [editableProfileControllerProvider], so every rename propagates here and
+/// to every other watcher — the Progress screen included).
 @Riverpod(keepAlive: true)
 class ProfileController extends _$ProfileController {
   @override
   ProfileView build() {
     final user = ref.watch(currentUserProvider);
     final overview = ref.watch(progressControllerProvider);
-    final editable = ref.read(profileServiceProvider).load();
+    final editable = ref.watch(editableProfileControllerProvider);
     return ProfileView.assemble(
       user: user,
       overview: overview,
@@ -44,8 +45,9 @@ class ProfileController extends _$ProfileController {
   }
 
   void _updateEditable(EditableProfile next) {
-    state = state.copyWith(editable: next);
-    unawaited(ref.read(profileServiceProvider).save(next));
+    // The shared controller persists and notifies; our `watch` rebuilds this
+    // snapshot (and the Progress overview) from it.
+    ref.read(editableProfileControllerProvider.notifier).save(next);
     unawaited(ref
         .read(analyticsServiceProvider)
         .logEvent(AnalyticsEvent.profileEdited()));
@@ -100,6 +102,9 @@ class ProfileController extends _$ProfileController {
       // real RevenueCat entitlement simply re-syncs from the store).
       ..invalidate(subscriptionServiceProvider)
       ..invalidate(subscriptionControllerProvider)
+      // The editable profile lives in its own shared controller now — rebuild
+      // it from the wiped store so the next user never sees this name.
+      ..invalidate(editableProfileControllerProvider)
       ..invalidateSelf();
   }
 }

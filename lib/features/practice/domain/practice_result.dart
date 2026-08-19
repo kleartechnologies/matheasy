@@ -1,10 +1,15 @@
 import 'package:flutter/foundation.dart';
 
+import 'adaptive_recommendation.dart';
 import 'mastery.dart';
 import 'practice_session.dart';
 import 'practice_topic.dart';
 
 /// The outcome shown on the session-complete screen.
+///
+/// EPHEMERAL by design: rendered once at session end, never serialized or
+/// synced (the durable aggregates live in `PracticeProgress`). A synced
+/// session-history domain is a documented follow-up, not part of V5.
 @immutable
 class PracticeResult {
   const PracticeResult({
@@ -15,6 +20,11 @@ class PracticeResult {
     required this.masteryBefore,
     required this.masteryAfter,
     required this.masteryPointsAfter,
+    this.timeSpentSeconds = 0,
+    this.hintsUsedTotal = 0,
+    this.strongSkills = const [],
+    this.weakSkills = const [],
+    this.recommendedNext,
   });
 
   final PracticeRequest request;
@@ -29,6 +39,21 @@ class PracticeResult {
 
   /// The topic's 0–100 mastery score after this session.
   final int masteryPointsAfter;
+
+  /// Wall-clock seconds spent answering, summed across the session's answers.
+  final int timeSpentSeconds;
+
+  /// Hint rungs taken across the whole session (a level-3 answer counts 3).
+  final int hintsUsedTotal;
+
+  /// Skill labels the student nailed this session (accuracy ≥ 0.8).
+  final List<String> strongSkills;
+
+  /// Skill labels to review (accuracy < 0.5) — the "concepts to review" list.
+  final List<String> weakSkills;
+
+  /// The engine's "practice this next" (Pro; null without signal).
+  final AdaptiveRecommendation? recommendedNext;
 
   PracticeTopic get topic => request.topic;
 

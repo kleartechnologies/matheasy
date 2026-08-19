@@ -4,6 +4,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/indicators/google_g_mark.dart';
 import '../../../auth/domain/app_user.dart';
 
 /// A compact pill showing how the learner is signed in (Google / Apple / Guest).
@@ -16,19 +17,14 @@ class ProfileProviderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final leading = switch (provider) {
-      // Google Blue, deliberately hardcoded and deliberately not a token: this
-      // is Google's brand mark, not ours, and their guidelines fix the colour.
-      // A brand mark is exempt from our contrast floor (WCAG 1.4.11) — the
+      // Google's own multi-colour mark, reproduced verbatim: a third-party
+      // brand mark is exempt from our contrast floor (WCAG 1.4.11) — the
       // adjacent label carries the meaning.
-      AuthProviderType.google => Text(
-          'G',
-          style: AppTypography.caption.copyWith(
-            color: const Color(0xFF4285F4),
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+      AuthProviderType.google => const GoogleGMark(size: 13),
       AuthProviderType.apple =>
         Icon(Icons.apple, size: 15, color: colors.textPrimary),
+      AuthProviderType.email =>
+        Icon(Icons.mail_outline_rounded, size: 15, color: colors.textPrimary),
       AuthProviderType.guest =>
         Icon(Icons.person_outline_rounded, size: 15, color: colors.textSecondary),
     };

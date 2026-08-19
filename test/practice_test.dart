@@ -20,9 +20,11 @@ import 'package:matheasy/features/practice/domain/practice_difficulty.dart';
 import 'package:matheasy/features/practice/domain/practice_progress.dart';
 import 'package:matheasy/features/practice/domain/practice_question.dart';
 import 'package:matheasy/features/practice/domain/practice_session.dart';
+import 'package:matheasy/features/practice/domain/practice_skill.dart';
 import 'package:matheasy/features/practice/domain/practice_topic.dart';
 import 'package:matheasy/features/practice/domain/skill_mastery.dart';
 import 'package:matheasy/features/practice/domain/xp_level.dart';
+import 'package:matheasy/features/practice/domain/xp_reward.dart';
 import 'package:matheasy/features/practice/presentation/practice_screen.dart';
 import 'package:matheasy/features/practice/presentation/practice_session_screen.dart';
 import 'package:matheasy/features/settings/application/settings_controller.dart';
@@ -71,6 +73,14 @@ class _FixedPracticeService implements PracticeService {
   @override
   Future<PracticeSession> createSession(PracticeRequest request) async =>
       PracticeSession(request: request, questions: questions);
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async =>
+      null; // no extra questions in the fixed service
 }
 
 /// Records the request the controller actually handed the engine — the seam the
@@ -83,6 +93,14 @@ class _RecordingPracticeService implements PracticeService {
     seen = request;
     return PracticeSession(request: request, questions: const [_inputQ]);
   }
+
+  @override
+  Future<PracticeQuestion?> generateOne({
+    required PracticeTopic topic,
+    required PracticeDifficulty difficulty,
+    String? skillId,
+  }) async =>
+      null;
 }
 
 Future<ProviderContainer> _container({
@@ -158,6 +176,19 @@ void main() {
     });
   });
 
+  group('PracticeRequest.copyWith', () {
+    test('can explicitly null the difficulty (adaptive reset)', () {
+      const fixed = PracticeRequest(
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.hard,
+      );
+      expect(fixed.copyWith(difficulty: null).difficulty, isNull);
+      // Omitting the parameter still preserves it.
+      expect(fixed.copyWith(questionCount: 3).difficulty,
+          PracticeDifficulty.hard);
+    });
+  });
+
   group('XP + mastery math', () {
     test('difficulty carries the spec XP values', () {
       expect(PracticeDifficulty.easy.baseXp, 10);
@@ -208,8 +239,14 @@ void main() {
         'q-mc',
       );
 
-      controller.submit('1'); // wrong
+      controller.submit('1'); // wrong → retry (V5: nothing recorded yet)
       state = container.read(practiceControllerProvider);
+      expect(state.isRetry, isTrue);
+      expect(state.lastAnswer, isNull);
+
+      controller.giveUp(); // finalize as incorrect and move on
+      state = container.read(practiceControllerProvider);
+      expect(state.isRevealed, isTrue);
       expect(state.lastWasCorrect, isFalse);
       expect(state.lastAnswer!.xpEarned, 0);
 
@@ -218,7 +255,8 @@ void main() {
       expect(state.isComplete, isTrue);
       expect(state.result!.total, 2);
       expect(state.result!.correct, 1);
-      expect(state.result!.xpEarned, 10); // only the correct easy answer
+      // The correct easy answer + the V5 set-completion bonus.
+      expect(state.result!.xpEarned, 10 + XpReward.setCompletionBonus);
     });
 
     test('the chosen difficulty applies however the session was launched',
@@ -288,10 +326,11 @@ void main() {
       );
       final result = progress.recordSession(session, now: DateTime(2026));
 
-      expect(result.xpEarned, 50);
+      // Answer XP + the V5 set-completion bonus (the session is complete).
+      expect(result.xpEarned, 50 + XpReward.setCompletionBonus);
       expect(result.correct, 2);
       final state = container.read(practiceProgressControllerProvider);
-      expect(state.totalXp, 50);
+      expect(state.totalXp, 50 + XpReward.setCompletionBonus);
       expect(state.topic(PracticeTopic.algebra).masteryPoints, 7);
       expect(state.topic(PracticeTopic.algebra).answered, 2);
       expect(state.lastRequest!.topic, PracticeTopic.algebra);
@@ -335,6 +374,64 @@ void main() {
       );
     });
 
+    test('the summary carries time, hints and the skill split (V5)', () async {
+      final container = await _container();
+      _activate(container);
+      final progress =
+          container.read(practiceProgressControllerProvider.notifier);
+
+      const session = PracticeSession(
+        request: PracticeRequest(topic: PracticeTopic.algebra),
+        questions: [_skillQ, _inputQ],
+        currentIndex: 1,
+        answers: [
+          PracticeAnswer(
+            questionId: 'q-skill',
+            submitted: '5',
+            isCorrect: true,
+            xpEarned: 20,
+            timeSpentSeconds: 30,
+            hintLevelUsed: 1,
+          ),
+          PracticeAnswer(
+            questionId: 'q-in',
+            submitted: '9',
+            isCorrect: false,
+            xpEarned: 0,
+            timeSpentSeconds: 45,
+            hintLevelUsed: 3,
+            attempts: 2,
+          ),
+        ],
+      );
+      final result = progress.recordSession(session, now: DateTime(2026));
+
+      expect(result.timeSpentSeconds, 75);
+      expect(result.hintsUsedTotal, 4);
+      // The skill-tagged question was nailed; the untagged bank question has
+      // no skill label so it never appears in either list.
+      expect(result.strongSkills, [PracticeSkill.linearOneStep.label]);
+      expect(result.weakSkills, isEmpty);
+      // Free tier → no adaptive recommendation.
+      expect(result.recommendedNext, isNull);
+    });
+
+    test('a struggled skill lands in concepts-to-review', () async {
+      final container = await _container();
+      _activate(container);
+      final progress =
+          container.read(practiceProgressControllerProvider.notifier);
+
+      final session = PracticeSession(
+        request: const PracticeRequest(topic: PracticeTopic.algebra),
+        questions: const [_skillQ],
+        answers: [_answer(_skillQ, correct: false)],
+      );
+      final result = progress.recordSession(session, now: DateTime(2026));
+      expect(result.weakSkills, [PracticeSkill.linearOneStep.label]);
+      expect(result.strongSkills, isEmpty);
+    });
+
     test('daily challenge adds the +100 bonus once per day', () async {
       final container = await _container();
       _activate(container);
@@ -346,11 +443,12 @@ void main() {
         answers: [_answer(_inputQ, correct: true)],
       );
       final first = progress.recordSession(session, now: DateTime(2026));
-      expect(first.xpEarned, 10 + 100);
+      expect(first.xpEarned, 10 + 100 + XpReward.setCompletionBonus);
 
-      // Replaying the daily challenge the same day does NOT re-award the bonus.
+      // Replaying the daily challenge the same day does NOT re-award the
+      // daily bonus (the completion bonus still applies — it's per set).
       final second = progress.recordSession(session, now: DateTime(2026));
-      expect(second.xpEarned, 10);
+      expect(second.xpEarned, 10 + XpReward.setCompletionBonus);
     });
 
     test('mastery levels up as points accumulate', () async {
@@ -535,6 +633,107 @@ void main() {
 
       expect(find.text('2 + 2 = 4.'), findsOneWidget); // explanation shown
       expect(find.text('See results'), findsOneWidget); // last question
+    });
+
+    testWidgets('a wrong answer opens the retry ladder, and Try Again works',
+        (tester) async {
+      tester.view.physicalSize = const Size(1200, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final container = await _container(
+        service: const _FixedPracticeService([_inputQ]),
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const PracticeSessionScreen(
+              request: PracticeRequest(topic: PracticeTopic.algebra),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), '9');
+      await tester.pump();
+      await tester.tap(find.text('Check answer'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Retry state: honest feedback, the way forward, no explanation yet.
+      expect(find.text('Your answer: 9'), findsOneWidget);
+      expect(find.text('Correct answer: 4'), findsOneWidget);
+      expect(find.text('Try again'), findsOneWidget);
+      expect(find.text('Solution'), findsOneWidget);
+      expect(find.text('2 + 2 = 4.'), findsNothing);
+
+      await tester.tap(find.text('Try again'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.enterText(find.byType(TextField), '4');
+      await tester.pump();
+      await tester.tap(find.text('Check answer'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Resolved: explanation appears; the retried correct earns 0.7× of 10.
+      expect(find.text('2 + 2 = 4.'), findsOneWidget);
+      final state = container.read(practiceControllerProvider);
+      expect(state.lastAnswer!.attempts, 2);
+      expect(state.lastAnswer!.xpEarned, 7);
+    });
+
+    testWidgets('the hint ladder reveals one rung per tap', (tester) async {
+      tester.view.physicalSize = const Size(1200, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const hinted = PracticeQuestion(
+        id: 'q-h',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.easy,
+        type: PracticeQuestionType.input,
+        prompt: 'What is 2 + 2?',
+        acceptedAnswers: ['4'],
+        explanation: '2 + 2 = 4.',
+        hints: ['Nudge one.', 'Method two.'],
+      );
+      final container = await _container(
+        service: const _FixedPracticeService([hinted]),
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const PracticeSessionScreen(
+              request: PracticeRequest(topic: PracticeTopic.algebra),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Nothing revealed until asked.
+      expect(find.text('Nudge one.'), findsNothing);
+      expect(find.text('Need a hint?'), findsOneWidget);
+
+      await tester.tap(find.text('Need a hint?'));
+      await tester.pump();
+      expect(find.text('Nudge one.'), findsOneWidget);
+      expect(find.text('Method two.'), findsNothing); // level 2 not yet asked
+
+      await tester.tap(find.text('Another hint'));
+      await tester.pump();
+      expect(find.text('Method two.'), findsOneWidget);
     });
   });
 }

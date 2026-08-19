@@ -152,6 +152,79 @@ void main() {
       expect(algebra['correct'], 22);
     });
 
+    test('progress unions skills, maxing each counter', () {
+      final merged = SyncMerge.merge(
+        SyncDomain.progress,
+        local: {
+          'totalXp': 300,
+          'skills': {
+            'linear_one_step': {
+              'masteryPoints': 40,
+              'attempts': 10,
+              'correct': 8,
+              'lastSeenEpochDay': 20500,
+            },
+            'fractions_add': {
+              'masteryPoints': 15,
+              'attempts': 4,
+              'correct': 2,
+              'lastSeenEpochDay': 20490,
+            },
+          },
+        },
+        remote: {
+          'totalXp': 250,
+          'skills': {
+            'linear_one_step': {
+              'masteryPoints': 30,
+              'attempts': 14,
+              'correct': 7,
+              'lastSeenEpochDay': 20510,
+            },
+            'percent_of': {
+              'masteryPoints': 50,
+              'attempts': 6,
+              'correct': 6,
+              'lastSeenEpochDay': 20505,
+            },
+          },
+        },
+        remoteNewer: true,
+      );
+      final skills = merged['skills'] as Map;
+      expect(skills.length, 3); // union of both sides
+      final linear = skills['linear_one_step'] as Map;
+      expect(linear['masteryPoints'], 40);
+      expect(linear['attempts'], 14);
+      expect(linear['correct'], 8);
+      expect(linear['lastSeenEpochDay'], 20510);
+      expect((skills['fractions_add'] as Map)['masteryPoints'], 15);
+      expect((skills['percent_of'] as Map)['correct'], 6);
+    });
+
+    test('progress keeps skills when one side has none', () {
+      final merged = SyncMerge.merge(
+        SyncDomain.progress,
+        local: {'totalXp': 100},
+        remote: {
+          'totalXp': 90,
+          'skills': {
+            'linear_one_step': {
+              'masteryPoints': 25,
+              'attempts': 5,
+              'correct': 4,
+              'lastSeenEpochDay': null,
+            },
+          },
+        },
+        remoteNewer: false,
+      );
+      final skills = merged['skills'] as Map;
+      final linear = skills['linear_one_step'] as Map;
+      expect(linear['masteryPoints'], 25);
+      expect(linear['lastSeenEpochDay'], isNull);
+    });
+
     test('analytics maxes counts, unions days, dedupes activity', () {
       final merged = SyncMerge.merge(
         SyncDomain.analytics,

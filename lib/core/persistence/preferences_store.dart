@@ -34,6 +34,9 @@ class PreferencesStore {
   static const String _kAdConsentPrompted = 'privacy.ad_consent_prompted';
   static const String _kPracticeProgress = 'practice.progress';
   static const String _kPracticeHistory = 'practice.history';
+  static const String _kPracticeSets = 'practice.sets';
+  static const String _kDailyChallenge = 'practice.daily_challenge';
+  static const String _kServerClockOffset = 'time.server_offset_ms';
   static const String _kAchievements = 'progress.achievements';
   static const String _kProgressStats = 'progress.stats';
   static const String _kSettings = 'settings.preferences';
@@ -82,6 +85,8 @@ class PreferencesStore {
   Future<void> clearLearningData() async {
     await _prefs.remove(_kPracticeProgress);
     await _prefs.remove(_kPracticeHistory);
+    await _prefs.remove(_kPracticeSets);
+    await _prefs.remove(_kDailyChallenge);
     await _prefs.remove(_kAchievements);
     await _prefs.remove(_kProgressStats);
     await _prefs.remove(_kSettings);
@@ -106,6 +111,31 @@ class PreferencesStore {
 
   Future<void> setPracticeHistoryJson(String json) =>
       _prefs.setString(_kPracticeHistory, json);
+
+  /// The serialized per-solved-problem practice sets — the easier/similar/
+  /// harder(/challenge) problems generated from each solve, with completion
+  /// state (JSON).
+  String? get practiceSetsJson => _prefs.getString(_kPracticeSets);
+
+  Future<void> setPracticeSetsJson(String json) =>
+      _prefs.setString(_kPracticeSets, json);
+
+  /// The serialized daily-challenge state — today's `(dayKey, topic, seed)`
+  /// plan, its completion status and the recent-day archive (JSON).
+  String? get dailyChallengeJson => _prefs.getString(_kDailyChallenge);
+
+  Future<void> setDailyChallengeJson(String json) =>
+      _prefs.setString(_kDailyChallenge, json);
+
+  /// Persisted `serverNowMs - deviceNowMs` from the last `usageStatus` call, or
+  /// `null` if the server clock has never been observed. Lets the trusted clock
+  /// correct a device clock that has been wound far off (see
+  /// `trustedClockProvider`). Deliberately NOT wiped with learning data — it
+  /// describes the device, not the account.
+  int? get serverClockOffsetMs => _prefs.getInt(_kServerClockOffset);
+
+  Future<void> setServerClockOffsetMs(int offsetMs) =>
+      _prefs.setInt(_kServerClockOffset, offsetMs);
 
   /// The serialized achievement unlocks (JSON).
   String? get achievementsJson => _prefs.getString(_kAchievements);

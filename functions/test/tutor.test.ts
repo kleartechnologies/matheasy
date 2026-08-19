@@ -128,6 +128,43 @@ describe("problem context — the answer firewall", () => {
     expect(ctx).toContain("Step 13");
     expect(ctx).not.toContain("Step 14");
   });
+
+  // ---- V5 practice coaching ----
+
+  it("names the student's own answer for diagnosis, in every mode", () => {
+    const withStudent = { ...problem, studentAnswer: "x = 9", attempts: 3 };
+    const open = buildProblemContext(withStudent, true);
+    expect(open).toMatch(/The student answered: x = 9/);
+    expect(open).toMatch(/diagnose the likely mistake/i);
+    expect(open).toMatch(/tried this question 3 times/);
+
+    // Their OWN answer is not the withheld answer — the firewall keeps the
+    // verified answer out while the diagnosis context stays.
+    const withheld = buildProblemContext(withStudent, false);
+    expect(withheld).toMatch(/The student answered: x = 9/);
+    expect(withheld).not.toContain("x = 4");
+  });
+
+  it("tells Numi which hint rung to coach at, without repeating lower ones", () => {
+    const ctx = buildProblemContext({ ...problem, hintLevel: 2 }, false);
+    expect(ctx).toMatch(/hints up to level 2 of 4/);
+    expect(ctx).toMatch(/Coach at the NEXT nudge/i);
+  });
+
+  it("ignores malformed practice-coach fields", () => {
+    const ctx = buildProblemContext(
+      {
+        ...problem,
+        studentAnswer: "",
+        hintLevel: Number.NaN,
+        attempts: -2,
+      },
+      true
+    );
+    expect(ctx).not.toMatch(/The student answered/);
+    expect(ctx).not.toMatch(/hints up to level/);
+    expect(ctx).not.toMatch(/tried this question/);
+  });
 });
 
 describe("student memory", () => {

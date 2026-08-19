@@ -16,12 +16,26 @@ class PracticeRequest {
     this.title,
     this.skillId,
     this.adaptive = false,
+    this.practiceSetSourceKey,
+    this.seed,
   });
 
-  /// The daily challenge: a fixed 5-question set with a bonus on completion.
+  /// The daily challenge: a fixed question set with a bonus on completion.
   /// [adaptive] so the challenge scales with the learner's mastery (Pro).
-  factory PracticeRequest.dailyChallenge() => const PracticeRequest(
-        topic: PracticeTopic.algebra,
+  ///
+  /// [topic] and [seed] come from `DailyChallengeState` — the per-day plan.
+  /// The seed makes generation deterministic, so relaunching today's challenge
+  /// always rebuilds the identical questions, while tomorrow's plan (new
+  /// dayKey → new seed) produces new ones.
+  factory PracticeRequest.dailyChallenge({
+    PracticeTopic topic = PracticeTopic.algebra,
+    int? seed,
+    int questionCount = 5,
+  }) =>
+      PracticeRequest(
+        topic: topic,
+        seed: seed,
+        questionCount: questionCount,
         isDailyChallenge: true,
         title: 'Daily Challenge',
         adaptive: true,
@@ -47,25 +61,46 @@ class PracticeRequest {
   /// tier always gets a basic ramp regardless of this flag.
   final bool adaptive;
 
+  /// When this session is the MIXED REVIEW of a practice set (the journey
+  /// generated from a solved problem), the set's source key — completing the
+  /// session marks the set's mixed review done. Null for ordinary sessions.
+  final String? practiceSetSourceKey;
+
+  /// When set, question generation is DETERMINISTIC: the engine derives all
+  /// randomness from this seed, so the same request always yields the same
+  /// questions. The daily challenge uses it for one-challenge-per-day; `null`
+  /// (every other session) keeps generation fresh each time.
+  final int? seed;
+
   String get displayTitle => title ?? topic.label;
+
+  /// Sentinel so [copyWith] can distinguish "not passed" from an explicit
+  /// `difficulty: null` (which restores adaptive/mixed selection).
+  static const Object _unset = Object();
 
   PracticeRequest copyWith({
     PracticeTopic? topic,
-    PracticeDifficulty? difficulty,
+    Object? difficulty = _unset,
     int? questionCount,
     bool? isDailyChallenge,
     String? title,
     String? skillId,
     bool? adaptive,
+    String? practiceSetSourceKey,
+    Object? seed = _unset,
   }) {
     return PracticeRequest(
       topic: topic ?? this.topic,
-      difficulty: difficulty ?? this.difficulty,
+      difficulty: identical(difficulty, _unset)
+          ? this.difficulty
+          : difficulty as PracticeDifficulty?,
       questionCount: questionCount ?? this.questionCount,
       isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
       title: title ?? this.title,
       skillId: skillId ?? this.skillId,
       adaptive: adaptive ?? this.adaptive,
+      practiceSetSourceKey: practiceSetSourceKey ?? this.practiceSetSourceKey,
+      seed: identical(seed, _unset) ? this.seed : seed as int?,
     );
   }
 
@@ -78,7 +113,9 @@ class PracticeRequest {
       other.isDailyChallenge == isDailyChallenge &&
       other.title == title &&
       other.skillId == skillId &&
-      other.adaptive == adaptive;
+      other.adaptive == adaptive &&
+      other.practiceSetSourceKey == practiceSetSourceKey &&
+      other.seed == seed;
 
   @override
   int get hashCode => Object.hash(
@@ -89,10 +126,13 @@ class PracticeRequest {
         title,
         skillId,
         adaptive,
+        practiceSetSourceKey,
+        seed,
       );
 }
 
-/// A recorded answer to one question.
+/// A recorded answer to one question — the FINAL outcome after any retries,
+/// hints or solution views. Session-ephemeral: never serialized or synced.
 @immutable
 class PracticeAnswer {
   const PracticeAnswer({
@@ -100,6 +140,11 @@ class PracticeAnswer {
     required this.submitted,
     required this.isCorrect,
     required this.xpEarned,
+    this.attempts = 1,
+    this.hintLevelUsed = 0,
+    this.viewedSolution = false,
+    this.timeSpentSeconds = 0,
+    this.workSteps,
   });
 
   final String questionId;
@@ -108,6 +153,72 @@ class PracticeAnswer {
 
   /// XP earned for this answer (0 if incorrect).
   final int xpEarned;
+
+  /// Total submissions on this question (1 = correct/wrong first try).
+  final int attempts;
+
+  /// Highest hint level the student requested (0–4; 3+ came from the verified
+  /// solve pipeline, 4 means the full guided solution was opened as a hint).
+  final int hintLevelUsed;
+
+  /// Whether the student opened the full solution before this answer was final.
+  final bool viewedSolution;
+
+  /// Wall-clock seconds from question shown to final answer.
+  final int timeSpentSeconds;
+
+  /// RESERVED — Compare My Work seam. A future feature will let the student
+  /// type/upload their working; the steps land here and are checked
+  /// deterministically server-side (functions/src/proxy/tutorWork.ts pattern)
+  /// before any model sees them. Never populated today.
+  final List<String>? workSteps;
+
+  /// Whether any assistance (hint / retry / solution) preceded the answer —
+  /// a first-try clean solve is the mastery signal.
+  bool get isFirstTryClean =>
+      attempts == 1 && hintLevelUsed == 0 && !viewedSolution;
+}
+
+/// The live progress on the CURRENT question before it resolves — attempts,
+/// hint level, timing. Reset every time a new question is shown; folded into
+/// the final [PracticeAnswer] on resolution.
+@immutable
+class QuestionAttempt {
+  const QuestionAttempt({
+    required this.startedAtMillis,
+    this.attempts = 0,
+    this.hintLevel = 0,
+    this.viewedSolution = false,
+    this.lastSubmitted,
+  });
+
+  /// When the question was shown (injected clock, not wall-clock reads inline).
+  final int startedAtMillis;
+
+  /// Submissions so far (incorrect ones included).
+  final int attempts;
+
+  /// Hint level requested so far (0 = none … 4 = full guided solution).
+  final int hintLevel;
+
+  final bool viewedSolution;
+
+  /// The most recent incorrect submission (drives "Your answer: X" feedback).
+  final String? lastSubmitted;
+
+  QuestionAttempt copyWith({
+    int? attempts,
+    int? hintLevel,
+    bool? viewedSolution,
+    String? lastSubmitted,
+  }) =>
+      QuestionAttempt(
+        startedAtMillis: startedAtMillis,
+        attempts: attempts ?? this.attempts,
+        hintLevel: hintLevel ?? this.hintLevel,
+        viewedSolution: viewedSolution ?? this.viewedSolution,
+        lastSubmitted: lastSubmitted ?? this.lastSubmitted,
+      );
 }
 
 /// The live state of a practice session — the questions and answers so far.
@@ -148,13 +259,28 @@ class PracticeSession {
 
   PracticeSession advance() => copyWith(currentIndex: currentIndex + 1);
 
+  /// Swaps a not-yet-reached question (mid-session difficulty adaptation).
+  /// No-op when [index] is the current question or already answered.
+  PracticeSession replaceUpcoming(int index, PracticeQuestion question) {
+    if (index <= currentIndex || index >= questions.length) return this;
+    final updated = [...questions]..[index] = question;
+    return copyWith(questions: updated);
+  }
+
+  /// Inserts a question right after the current one ("Challenge Me").
+  PracticeSession insertNext(PracticeQuestion question) {
+    final updated = [...questions]..insert(currentIndex + 1, question);
+    return copyWith(questions: updated);
+  }
+
   PracticeSession copyWith({
     int? currentIndex,
     List<PracticeAnswer>? answers,
+    List<PracticeQuestion>? questions,
   }) {
     return PracticeSession(
       request: request,
-      questions: questions,
+      questions: questions ?? this.questions,
       currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
     );

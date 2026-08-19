@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/backend/functions_client.dart';
 import '../../settings/application/language_provider.dart';
 import '../domain/result_models.dart';
+import '../domain/teaching_models.dart';
 import 'functions_solver_service.dart';
 
 /// Fetches the v2 teaching layer for an already-solved problem — a SEPARATE call
@@ -13,6 +14,11 @@ abstract interface class TeachingService {
   /// Returns [base] enriched with its teaching layer, or null when there is no
   /// teaching to add (offline, feature-off, or an honest/unverified problem).
   Future<ResultData?> enrich(ResultData base);
+
+  /// Re-rolls the deterministic practice ladder for an already-solved [latex]
+  /// ("give me a new practice set"). Server-gated exactly like the ladder inside
+  /// the teaching layer (Pro-only, engine-verified rungs); null when unavailable.
+  Future<PracticeLadder?> fetchLadder(String latex, {int variant = 0});
 }
 
 /// No teaching (guests / unconfigured backend): the solution shows unchanged.
@@ -21,6 +27,10 @@ class NoTeachingService implements TeachingService {
 
   @override
   Future<ResultData?> enrich(ResultData base) async => null;
+
+  @override
+  Future<PracticeLadder?> fetchLadder(String latex, {int variant = 0}) async =>
+      null;
 }
 
 /// Real teaching — calls the `enrichTeaching` Cloud Function (OpenAI + firewall
@@ -41,6 +51,18 @@ class FunctionsTeachingService implements TeachingService {
       if (base.routeToTutor) 'honest': true,
     });
     return SolveResponseMapper.mergeTeaching(base, json);
+  }
+
+  @override
+  Future<PracticeLadder?> fetchLadder(String latex, {int variant = 0}) async {
+    final json = await _call('enrichTeaching', {
+      'latex': latex,
+      'ladderOnly': true,
+      if (variant > 0) 'ladderVariant': variant,
+    });
+    final ladder = json['practiceLadder'];
+    if (ladder is! Map) return null;
+    return PracticeLadder.tryFromJson(Map<String, dynamic>.from(ladder));
   }
 }
 

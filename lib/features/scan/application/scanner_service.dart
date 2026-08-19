@@ -58,7 +58,7 @@ class MockScannerService implements ScannerService {
     final index = switch (source) {
       ScanSource.camera => 0,
       ScanSource.gallery => 1,
-      ScanSource.manual => 2,
+      ScanSource.manual || ScanSource.practice => 2,
     };
     final (latex, confidence, kind) = _samples[index % _samples.length];
     return DetectedEquation(

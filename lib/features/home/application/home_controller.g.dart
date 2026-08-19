@@ -80,7 +80,7 @@ final class HomeControllerProvider
   }
 }
 
-String _$homeControllerHash() => r'c54d19ab296ed33b95297c6becec90fa8e1f9043';
+String _$homeControllerHash() => r'1eea83dc0b6eb04405235494f2200efcf33db5bf';
 
 /// Supplies Home's data — derived entirely from REAL per-user state, never a
 /// mock.

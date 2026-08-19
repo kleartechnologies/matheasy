@@ -109,6 +109,71 @@ class FirebaseAuthService implements AuthService {
   }
 
   @override
+  Future<AppUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    _rememberAnonymousUid();
+    try {
+      final result = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return _requireUser(result, AuthProviderType.email);
+    } catch (error, stack) {
+      throw _mapError(error, stack, AuthProviderType.email);
+    }
+  }
+
+  @override
+  Future<AppUser> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    _rememberAnonymousUid();
+    try {
+      final result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = await _applyDisplayName(result.user, name);
+      return _requireUser(result, AuthProviderType.email, override: user);
+    } catch (error, stack) {
+      throw _mapError(error, stack, AuthProviderType.email);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (error, stack) {
+      // Unknown address reads as success on purpose: the reset dialog must not
+      // become an account-enumeration oracle (mirrors Firebase's own
+      // email-enumeration protection, which reports success for these too).
+      if (error.code == 'user-not-found') return;
+      throw _mapError(error, stack, AuthProviderType.email);
+    } catch (error, stack) {
+      throw _mapError(error, stack, AuthProviderType.email);
+    }
+  }
+
+  @override
+  Future<void> reauthenticateWithPassword(String password) async {
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null) throw const AuthFailure.expired();
+    try {
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+    } catch (error, stack) {
+      throw _mapError(error, stack, AuthProviderType.email);
+    }
+  }
+
+  @override
   Future<void> ensureRecentLogin() async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -130,6 +195,12 @@ class FirebaseAuthService implements AuthService {
   /// caller can abort cleanly rather than guess.
   Future<void> _reauthenticate(User user) async {
     final provider = _providerOf(user);
+    // An email account can't re-prove itself silently — only the user knows
+    // the password. Surface a typed, non-displayed failure the caller catches
+    // to collect it and call [reauthenticateWithPassword] instead.
+    if (provider == AuthProviderType.email) {
+      throw const AuthFailure.passwordReauthRequired();
+    }
     try {
       final credential = switch (provider) {
         AuthProviderType.apple => (await _appleCredential()).$1,
@@ -274,6 +345,8 @@ class FirebaseAuthService implements AuthService {
           return AuthProviderType.google;
         case 'apple.com':
           return AuthProviderType.apple;
+        case 'password':
+          return AuthProviderType.email;
       }
     }
     return AuthProviderType.google;
@@ -306,6 +379,23 @@ class FirebaseAuthService implements AuthService {
     await user.updateDisplayName(appleName);
     await user.reload();
     return _auth.currentUser ?? user;
+  }
+
+  /// Email sign-up collects the learner's name in the form — persist it to the
+  /// Firebase profile so [AppUser.greetingName] works like it does for
+  /// Google/Apple accounts. Best-effort: a profile-write hiccup must not fail
+  /// an account that was already created.
+  Future<User?> _applyDisplayName(User? user, String name) async {
+    final trimmed = name.trim();
+    if (user == null || trimmed.isEmpty) return user;
+    try {
+      await user.updateDisplayName(trimmed);
+      await user.reload();
+      return _auth.currentUser ?? user;
+    } catch (error) {
+      AppLogger.info('Display name not applied at sign-up (ignored): $error');
+      return user;
+    }
   }
 
   AuthFailure _mapError(
@@ -341,13 +431,33 @@ class FirebaseAuthService implements AuthService {
         case 'canceled':
         case 'web-context-canceled':
           return const AuthFailure.cancelled();
+        // Email/password. Wrong-password and unknown-user collapse into one
+        // failure on purpose (no account enumeration) — matching Firebase's own
+        // invalid-credential behaviour when enumeration protection is on.
+        case 'invalid-credential':
+        case 'INVALID_LOGIN_CREDENTIALS':
+        case 'wrong-password':
+        case 'user-not-found':
+        case 'user-mismatch':
+          return const AuthFailure.invalidCredentials();
+        case 'invalid-email':
+          return const AuthFailure.invalidEmail();
+        case 'email-already-in-use':
+          return const AuthFailure.emailInUse();
+        case 'weak-password':
+        case 'password-does-not-meet-requirements':
+          return const AuthFailure.weakPassword();
+        case 'too-many-requests':
+          return const AuthFailure.tooManyAttempts();
       }
     }
 
     AppLogger.error('Auth failed ($provider)', error: error, stackTrace: stack);
-    return provider == AuthProviderType.apple
-        ? const AuthFailure.apple()
-        : const AuthFailure.google();
+    return switch (provider) {
+      AuthProviderType.apple => const AuthFailure.apple(),
+      AuthProviderType.email => const AuthFailure.email(),
+      _ => const AuthFailure.google(),
+    };
   }
 
   static const String _nonceCharset =

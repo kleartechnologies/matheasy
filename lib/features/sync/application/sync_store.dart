@@ -27,6 +27,8 @@ class SyncStore {
         SyncDomain.usage => _prefs.usageCountsJson,
         SyncDomain.analytics => _prefs.progressStatsJson,
         SyncDomain.history => _prefs.historyJson,
+        SyncDomain.practiceSets => _prefs.practiceSetsJson,
+        SyncDomain.dailyChallenge => _prefs.dailyChallengeJson,
       };
 
   /// The decoded payload for [domain], or `null` when absent/corrupt.
@@ -53,6 +55,8 @@ class SyncStore {
       SyncDomain.usage => _prefs.setUsageCountsJson(raw),
       SyncDomain.analytics => _prefs.setProgressStatsJson(raw),
       SyncDomain.history => _prefs.setHistoryJson(raw),
+      SyncDomain.practiceSets => _prefs.setPracticeSetsJson(raw),
+      SyncDomain.dailyChallenge => _prefs.setDailyChallengeJson(raw),
     };
   }
 

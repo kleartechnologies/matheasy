@@ -25,7 +25,8 @@
   fallback"]` — Mathpix was removed (Scanner V2); recognize() is OpenAI-only. No
   Mathpix account or keys.
 - Moderation: OpenAI `omni-moderation-latest` (free) before the paid vision call
-- Sensors: `sensors_plus` (auto-capture steadiness)
+- Sensors: none `[was: "sensors_plus (auto-capture steadiness)"]` — auto-capture
+  was removed with the calm-scanner redesign; the shutter is manual only
 - Permissions: `permission_handler` (only `openAppSettings()` used; all other
   handlers compiled out in the iOS Podfile for App Store review)
 
@@ -37,7 +38,8 @@
 LLM narrates only. As-built pipeline:
 
 ```
-Camera frame → on-device framing/steadiness (expo… no: camera plugin + sensors_plus)
+Camera preview (plain 60fps feed, static white guides — no live OCR/detection)
+   → manual capture → crop-confirm (ML Kit SUGGESTED crop, user-editable, rotate)
    → capture (inline base64, NEVER stored to Storage)
    → Cloud Function recognize():
         moderateImage (free, fail-closed on flag / fail-open on outage)
@@ -112,10 +114,24 @@ the surface area."* Parsed by `parseSolid` in `classify()` (alongside `parseCirc
 
 ## 2. Scanner (as-built)
 
-Camera-first (Scanner V2). Full-screen preview, framing reticle in **AppColors.primary
-(emerald)** `[was: "primary accent" — implemented as emerald; corners were white
-pre-step-2]`. Manual shutter + gallery (`image_picker`) + **crop-confirm**
-`[crop was a V2 addition not in the original spec — kept; it aids OCR]`.
+Camera-first (Scanner V2, calm-scanner redesign). The live preview is a **plain
+60fps camera feed** under **static white corner guides** (`ScanFrame`: white at
+90%, ~3.5px stroke, ~44px arms, rounded elbows, soft dark under-stroke so they
+read on white paper). The guides never move, resize, or animate `[was: emerald
+reticle + sweeping scan line + live ML Kit detection box (`DetectionOverlay`) —
+all removed; nothing on the preview chases what the camera sees, and no
+per-frame work runs during preview]`. Emerald is reserved for actions: the
+shutter, Continue, progress/loading, success.
+
+Manual shutter + gallery (`image_picker`) + "Type it" + flash + close — that is
+the whole idle chrome. On capture the image freezes and the **crop-confirm**
+screen opens immediately; ML Kit reads the still in the background and lands as
+a **suggested** crop (`CropController.area`) the student can freely drag,
+resize, or ignore — applied only while they haven't touched the rect. Rotate
+(quarter-turn, header) re-encodes off the UI isolate. **Recognition — the first
+paid step — runs only after Continue** `[was: auto-crop straight into
+recognize() with the crop screen as an escape hatch; the crop-confirm step is
+back on the path, now pre-framed so it costs a glance, not 3–10s of framing]`.
 
 Hint + processing overlay use **`MatheasyBrandAvatar`** `[was: "NumiMascot, thinking
 expression"]` — NumiMascot is the dead pre-rebrand mascot; the brand avatar is the
@@ -126,11 +142,12 @@ to the existing paywall **before** capture, from `_shutter`/`_gallery`/`_onConti
 This is UX only — the **server** `assertWithinQuota` in the Cloud Function is the
 authoritative cap (see §10).
 
-**Auto-capture (step 9):** `SteadinessDetector` (accelerometer, `sensors_plus`) fires
-the existing `_shutter()` flow after ~0.8s steady — so it routes through the same gate
-and server cap. Fires once, re-arms on a movement spike. "Auto on/off" toggle (default
-on; safe because crop-confirm precedes the paid recognize). Guarded like the camera —
-sensorless device just doesn't auto-capture; manual shutter untouched.
+**Auto-capture: removed** `[was: SteadinessDetector (accelerometer,
+`sensors_plus`) firing the shutter after ~0.8s steady, with an "Auto on/off"
+toggle]`. The student always presses the shutter; `sensors_plus` is out of the
+dependency tree. Rationale: a capture that fires itself fights the calm-scanner
+goal, and its safety argument ("crop-confirm precedes the paid recognize") is
+now delivered by the crop-confirm step itself for every capture.
 
 ---
 
@@ -324,7 +341,8 @@ build:
 - `firebase deploy --only functions`, `OPENAI_API_KEY` secret confirmed
 - **one-time `solveCache` TTL policy** (`gcloud firestore fields ttls update`)
 - `pod install` on a Mac (applies the Podfile permission-compile-out)
-- on-device verification of caps/moderation/offline/auto-capture
+- on-device verification of caps/moderation/offline/suggested-crop (auto-capture
+  no longer exists to verify)
 
 **Carried build debt (not blocking, fix before real users):**
 - **`√2`→`1.414…` symbolic-form display** (since step 4) — exact form IS the correct

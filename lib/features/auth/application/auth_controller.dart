@@ -47,6 +47,36 @@ class AuthController extends _$AuthController {
   Future<void> signInWithApple() =>
       _runSignIn(() => ref.read(authRepositoryProvider).signInWithApple());
 
+  /// Email/password sign-in. Same pipeline as the federated providers, so the
+  /// anonymous-usage merge and the account-created analytics fire identically.
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) =>
+      _runSignIn(() => ref
+          .read(authRepositoryProvider)
+          .signInWithEmail(email: email, password: password));
+
+  /// Email/password account creation (with the learner's display name).
+  Future<void> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) =>
+      _runSignIn(() => ref
+          .read(authRepositoryProvider)
+          .signUpWithEmail(name: name, email: email, password: password));
+
+  /// Sends a password-reset email. Not a sign-in: no busy/failure state churn
+  /// here — the caller owns its own progress UI and error surface.
+  Future<void> sendPasswordReset(String email) =>
+      ref.read(authRepositoryProvider).sendPasswordReset(email);
+
+  /// Re-proves an email account's identity before a destructive action; the
+  /// password-prompt counterpart of [ensureRecentLogin].
+  Future<void> reauthenticateWithPassword(String password) =>
+      ref.read(authRepositoryProvider).reauthenticateWithPassword(password);
+
   /// Ends the session (keeps any cloud account).
   Future<void> signOut() => ref.read(authRepositoryProvider).signOut();
 

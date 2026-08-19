@@ -189,5 +189,9 @@ export const usageStatus = onCall(async (request) => {
     used: status.used,
     limits: status.limits,
     remaining: status.remaining,
+    // Authoritative wall-clock time. The client persists the offset from its
+    // own clock and uses it to keep daily-challenge / streak day-keys honest
+    // when a device clock has been wound far off (reward farming).
+    serverNowMs: Date.now(),
   };
 });

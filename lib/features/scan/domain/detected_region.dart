@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -76,31 +75,4 @@ class DetectedRegion {
   @override
   String toString() => 'DetectedRegion($bounds, blocks: $blockCount, '
       'math: ${mathScore.toStringAsFixed(2)})';
-}
-
-/// Where a normalised region lands on screen when a [source] frame is drawn
-/// cover-fit into a [target] box.
-///
-/// The preview fills the screen rather than letterboxing, which means part of
-/// every camera frame is off-screen. A box drawn as a plain percentage of the
-/// screen would therefore drift away from the paper it is supposed to be
-/// tracking — by the whole cropped margin, which on a tall phone is a third of
-/// the frame. This applies the same scale-and-centre the preview itself uses, so
-/// the box sits on the maths instead of near it.
-///
-/// The result can extend outside [target]; that is correct — it means the maths
-/// runs off the edge of what the camera is showing, and clipping it would hide
-/// that from the user.
-Rect projectCover(Rect normalized, Size source, Size target) {
-  if (source.isEmpty || target.isEmpty) return Rect.zero;
-  final scale = math.max(target.width / source.width, target.height / source.height);
-  final displayed = Size(source.width * scale, source.height * scale);
-  final dx = (target.width - displayed.width) / 2;
-  final dy = (target.height - displayed.height) / 2;
-  return Rect.fromLTRB(
-    dx + normalized.left * displayed.width,
-    dy + normalized.top * displayed.height,
-    dx + normalized.right * displayed.width,
-    dy + normalized.bottom * displayed.height,
-  );
 }

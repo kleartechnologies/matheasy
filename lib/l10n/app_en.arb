@@ -90,6 +90,55 @@
   "practiceStatCorrect": "Correct",
   "practiceStatAccuracy": "Accuracy",
   "practiceStatXpEarned": "XP earned",
+  "practiceSolutionTitle": "Guided solution",
+  "practiceReviewSolutionTitle": "Review my solution",
+  "practiceSolutionLoading": "Numi is working through it…",
+  "practiceSolutionKeyIdea": "The key idea",
+  "practiceYourAnswer": "Your answer: {answer}",
+  "@practiceYourAnswer": {
+    "placeholders": {
+      "answer": {"type": "String"}
+    }
+  },
+  "practiceMatheasyAnswer": "Matheasy's answer",
+  "practiceNeedHint": "Need a hint?",
+  "practiceHintShort": "Hint",
+  "practiceSolutionShort": "Solution",
+  "practiceHintCounter": "Hint {level} of 4",
+  "@practiceHintCounter": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "practiceHintAnother": "Another hint",
+  "practiceHintFirstStepTitle": "The first step",
+  "practiceHintSeeSolution": "See the guided solution",
+  "practiceHintFirstStepUnavailable": "Numi can't break this one into steps — the guided solution has the full idea instead.",
+  "practiceTryAgain": "Try again",
+  "practiceShowSolution": "Show solution",
+  "practiceAskNumi": "Ask Numi",
+  "practiceReviewMySolution": "Review my solution",
+  "practiceChallengeMe": "Challenge me",
+  "practiceChallengeUnavailable": "Numi couldn't build a harder one right now — carry on!",
+  "practiceStatTime": "Time",
+  "practiceStatHints": "Hints used",
+  "practiceStrongThisSession": "Strong this session",
+  "practiceConceptsToReview": "Concepts to review",
+  "practiceRecommendedNextCta": "Practice {skill} next",
+  "@practiceRecommendedNextCta": {
+    "placeholders": {
+      "skill": {"type": "String"}
+    }
+  },
+  "practicePraise1": "Great job!",
+  "practicePraise2": "Nice thinking!",
+  "practicePraise3": "You nailed it!",
+  "practicePraise4": "Brilliant work!",
+  "practicePraise5": "You're on fire! 🔥",
+  "practiceEncourage1": "Almost there!",
+  "practiceEncourage2": "Good effort — let's learn from this one.",
+  "practiceEncourage3": "Not quite, but you can do this!",
+  "practiceEncourage4": "Close! Take a look at why.",
   "tutorNewConversationStarted": "Started a new conversation",
   "tutorBack": "Back",
   "tutorNewConversation": "New conversation",
@@ -309,12 +358,7 @@
   "progressAwesome": "Awesome!",
   "scanCaptureFailed": "Couldn't take the photo. Try again.",
   "scanGalleryFailed": "Couldn't open your photos.",
-  "scanHintHoldSteady": "Hold steady on the question — I’ll capture it",
   "scanHintLineUp": "Line up the whole question, then tap to capture",
-  "scanAutoCaptureOn": "Auto capture on",
-  "scanAutoCaptureOff": "Auto capture off",
-  "scanAutoOn": "Auto on",
-  "scanAutoOff": "Auto off",
   "scanCloseScanner": "Close scanner",
   "scanTitle": "Scan a problem",
   "scanFlashOff": "Turn flash off",
@@ -365,7 +409,7 @@
   "cropTitle": "Crop the problem",
   "cropInstruction": "Drag the corners around just the problem.",
   "cropPreparing": "Preparing…",
-  "cropUsePhoto": "Use photo",
+  "cropRotate": "Rotate",
   "keyboardMoveLeft": "Move left",
   "keyboardMoveRight": "Move right",
   "keyboardDelete": "Delete",
@@ -517,6 +561,38 @@
   "teachingRungEasier": "Easier",
   "teachingRungHarder": "Harder",
   "teachingRungSimilar": "Similar",
+  "practiceSetRungChallenge": "Challenge",
+  "practiceSetProgress": "{done} of {total} complete",
+  "@practiceSetProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceSetChallengeLocked": "Finish all three to unlock the challenge",
+  "practiceSetChallengeUnlocked": "Challenge unlocked — one stretch problem left.",
+  "practiceSetMixedReview": "Mixed review",
+  "practiceSetMixedReviewSubtitle": "A quick mixed round on this topic to make it stick",
+  "practiceSetMixedReviewDone": "Mixed review complete",
+  "practiceSetMastered": "Topic mastered!",
+  "practiceSetMasteredDetail": "You finished the whole practice journey. +{xp} XP",
+  "@practiceSetMasteredDetail": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceSetNewSet": "New set",
+  "practiceSetNewSetFailed": "Couldn't get a new set — check your connection and try again.",
+  "practiceSetContinueTitle": "Keep practicing",
+  "practiceSetContinueSubtitle": "Pick up where you left off",
+  "practiceSetNextUp": "Next up",
+  "practiceSetPracticeAgain": "Practice again",
   "teachingAskPrompt": "Still fuzzy on a step, or want to try the next one yourself? I can talk you through it.",
   "teachingAskNumi": "Ask Numi",
   "teachingHowToApproach": "HOW TO APPROACH IT",
@@ -542,7 +618,30 @@
   "authLegalPrivacy": "Privacy Policy",
   "authContinueApple": "Continue with Apple",
   "authContinueGoogle": "Continue with Google",
+  "authContinueEmail": "Continue with email",
   "authSigningIn": "Signing in…",
+  "authEmailSignInTitle": "Welcome back",
+  "authEmailSignInSubtitle": "Sign in with your email and password.",
+  "authEmailSignUpTitle": "Create your account",
+  "authEmailSignUpSubtitle": "One free account for all your math learning.",
+  "authEmailTabSignIn": "Sign in",
+  "authEmailTabSignUp": "Sign up",
+  "authEmailNameLabel": "Name",
+  "authEmailNameRequired": "Please enter your name.",
+  "authEmailFieldLabel": "Email",
+  "authEmailInvalid": "Please enter a valid email address.",
+  "authEmailPasswordLabel": "Password",
+  "authEmailPasswordRequired": "Please enter your password.",
+  "authEmailPasswordTooShort": "Password must be at least 6 characters.",
+  "authEmailShowPassword": "Show password",
+  "authEmailHidePassword": "Hide password",
+  "authEmailForgotPassword": "Forgot password?",
+  "authEmailSignInAction": "Sign in",
+  "authEmailSignUpAction": "Create account",
+  "authEmailResetSent": "If an account exists for that email, a reset link is on its way.",
+  "authReauthTitle": "Confirm it's you",
+  "authReauthMessage": "For your security, re-enter your password to delete your account.",
+  "authReauthConfirm": "Confirm",
   "@profileAvatarLabel": {
     "placeholders": {
       "label": {

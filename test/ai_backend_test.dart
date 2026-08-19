@@ -8,6 +8,10 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matheasy/core/backend/functions_client.dart';
 import 'package:matheasy/core/theme/math_semantics.dart';
+import 'package:matheasy/features/practice/domain/practice_difficulty.dart';
+import 'package:matheasy/features/practice/domain/practice_question.dart'
+    as practice;
+import 'package:matheasy/features/practice/domain/practice_topic.dart';
 import 'package:matheasy/features/result/application/functions_solver_service.dart';
 import 'package:matheasy/features/result/domain/animation_schema.dart';
 import 'package:matheasy/features/result/domain/result_models.dart';
@@ -731,6 +735,62 @@ void main() {
       expect(sent.last.containsKey('imageBase64'), isFalse);
       // The cheap text context is still sent on every turn.
       expect((sent.last['problem'] as Map<String, dynamic>)['ocr'], isNotNull);
+    });
+  });
+
+  group('what Numi is handed about a practice attempt (V5)', () {
+    const question = practice.PracticeQuestion(
+      id: 'q1',
+      topic: PracticeTopic.algebra,
+      difficulty: PracticeDifficulty.medium,
+      type: practice.PracticeQuestionType.equation,
+      prompt: 'Solve for x',
+      promptLatex: '2x + 5 = 13',
+      acceptedAnswers: ['4', 'x=4'],
+      explanation: 'Subtract 5, divide by 2.',
+    );
+
+    test('the builder carries the attempt without claiming verification', () {
+      final problem = TutorContextBuilder.fromPracticeQuestion(
+        question,
+        studentAnswer: 'x = 9',
+        hintLevel: 2,
+        attempts: 3,
+      );
+      expect(problem.questionLatex, '2x + 5 = 13');
+      expect(problem.source, 'practice');
+      expect(problem.studentAnswer, 'x = 9');
+      expect(problem.hintLevel, 2);
+      expect(problem.attempts, 3);
+      // The grading key travels, but never as pipeline-verified truth.
+      expect(problem.finalAnswer, '4');
+      expect(problem.verified, isFalse);
+    });
+
+    test('the mapper emits the coach fields, and omits them when absent', () {
+      final withCoach = TutorRequestMapper.context(
+        TutorLaunchContext(
+          problem: TutorContextBuilder.fromPracticeQuestion(
+            question,
+            studentAnswer: 'x = 9',
+            hintLevel: 1,
+            attempts: 2,
+          ),
+        ),
+      )['problem'] as Map<String, dynamic>;
+      expect(withCoach['studentAnswer'], 'x = 9');
+      expect(withCoach['hintLevel'], 1);
+      expect(withCoach['attempts'], 2);
+      expect(withCoach['source'], 'practice');
+
+      final bare = TutorRequestMapper.context(
+        TutorLaunchContext(
+          problem: TutorContextBuilder.fromPracticeQuestion(question),
+        ),
+      )['problem'] as Map<String, dynamic>;
+      expect(bare.containsKey('studentAnswer'), isFalse);
+      expect(bare.containsKey('hintLevel'), isFalse);
+      expect(bare.containsKey('attempts'), isFalse);
     });
   });
 

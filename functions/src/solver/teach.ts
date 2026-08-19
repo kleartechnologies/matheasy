@@ -505,30 +505,45 @@ function parseAlternatives(v: unknown): MethodAlternative[] {
  * predicate, and re-verifies on tap. Until then it returns undefined.
  */
 export function buildPracticeLadder(
-  payload: SolvePayload
+  payload: SolvePayload,
+  variant = 0
 ): PracticeLadder | undefined {
   const generate = LADDER_GENERATORS[payload.problemType];
   if (!generate) return undefined; // no generator for this type → no ladder
 
   // Deterministic seed from the problem so the same problem always yields the
   // same ladder, but different problems vary (no Math.random → testable).
-  const seed = ladderSeed(payload.problemLatex);
+  // `variant` shifts the seed for "give me a NEW set" — same determinism, a
+  // different (still engine-gated) roll per variant.
+  const seed = (ladderSeed(payload.problemLatex) + variant * 7919) & 0x7fffffff;
   const ladder = generate(seed);
 
   // GATE every rung against the engine — the ladder must never ship a problem the
   // solver can't verify, one in a different family, one that isn't actually
   // harder/easier, or the SAME problem the student just solved (review F1). A
-  // single failing rung drops the whole ladder (spec §4.5).
+  // single failing CORE rung drops the whole ladder (spec §4.5).
   const normProblem = payload.problemLatex.replace(/\s+/g, "");
-  for (const item of [ladder.easier, ladder.similar, ladder.harder]) {
-    if (item.latex.replace(/\s+/g, "") === normProblem) return undefined; // not the same problem
+  const passesGate = (item: PracticeItem): boolean => {
+    if (item.latex.replace(/\s+/g, "") === normProblem) return false; // not the same problem
     const c2 = classify(item.latex);
-    if (c2.problemType !== payload.problemType) return undefined; // same family
+    if (c2.problemType !== payload.problemType) return false; // same family
     const solved = solveDeterministic(c2);
-    if (!solved || !solved.verify()) return undefined; // solves + verifies
+    return Boolean(solved && solved.verify()); // solves + verifies
+  };
+  for (const item of [ladder.easier, ladder.similar, ladder.harder]) {
+    if (!passesGate(item)) return undefined;
   }
   if (!matchesDifficulty(ladder)) return undefined;
-  return ladder;
+  // The challenge rung is ADDITIVE: gated identically, but a failure drops only
+  // the challenge — the three core rungs still ship.
+  const challenge = ladder.challenge;
+  const keepChallenge =
+    challenge != null &&
+    passesGate(challenge) &&
+    leadingCoeff(challenge.latex) >= leadingCoeff(ladder.harder.latex);
+  return keepChallenge
+    ? ladder
+    : { easier: ladder.easier, similar: ladder.similar, harder: ladder.harder };
 }
 
 /** A stable non-negative seed from the problem text (a simple char-rolling hash). */
@@ -540,17 +555,25 @@ function ladderSeed(latex: string): number {
   return h;
 }
 
+/** The leading coefficient of a `...x` / `...x^2` latex problem (1 when implicit).
+ * Shared by the difficulty predicate and the challenge-rung guard. */
+function leadingCoeff(latex: string): number {
+  const m = latex.match(/^\s*(\d+)\s*x/);
+  return m ? Number(m[1]) : 1;
+}
+
 /** The difficulty predicate: easier is a single-step (coeff 1) problem, harder
  * genuinely raises the sub-skill (a leading coefficient / bigger coefficients).
  * The generators below already build to this; the check is a belt-and-suspenders
- * guard so a future generator edit can't silently ship a mis-laddered rung. */
+ * guard so a future generator edit can't silently ship a mis-laddered rung.
+ * (The optional challenge rung has its own guard in `buildPracticeLadder` —
+ * failing it drops only the challenge.) */
 function matchesDifficulty(l: PracticeLadder): boolean {
-  const coeff = (latex: string): number => {
-    const m = latex.match(/^\s*(\d+)\s*x/);
-    return m ? Number(m[1]) : 1;
-  };
   // easier's leading coefficient must be 1; harder's must be >= easier's.
-  return coeff(l.easier.latex) === 1 && coeff(l.harder.latex) >= coeff(l.easier.latex);
+  return (
+    leadingCoeff(l.easier.latex) === 1 &&
+    leadingCoeff(l.harder.latex) >= leadingCoeff(l.easier.latex)
+  );
 }
 
 type LadderGenerator = (seed: number) => PracticeLadder;
@@ -571,7 +594,8 @@ function rung(latex: string, r: PracticeItem["rung"], skillHint: string): Practi
 
 /** Linear ladder: equations with KNOWN integer roots (so the gate always
  * verifies). easier = one step (x + b = c); similar = two steps (mx + b = c);
- * harder = two steps with a negative constant + bigger coefficient. */
+ * harder = two steps with a negative constant + bigger coefficient; challenge =
+ * a bigger coefficient still, with a NEGATIVE root (the classic sign trap). */
 function linearLadder(seed: number): PracticeLadder {
   const b1 = pick(seed, 1, 2, 6);
   const root1 = pick(seed, 2, 2, 8);
@@ -581,6 +605,11 @@ function linearLadder(seed: number): PracticeLadder {
   const m3 = pick(seed, 6, 3, 5);
   const b3 = pick(seed, 7, 3, 8);
   const root3 = pick(seed, 8, 2, 6);
+  // Challenge: coefficient at least harder's (the guard requires it), and a
+  // negative root so the RHS goes negative — built FROM the root, so it verifies.
+  const m4 = m3 + pick(seed, 9, 1, 3);
+  const b4 = pick(seed, 10, 4, 9);
+  const root4 = -pick(seed, 11, 2, 6);
   return {
     easier: rung(`x + ${b1} = ${b1 + root1}`, "easier", "linear_one_step"),
     similar: rung(
@@ -593,12 +622,18 @@ function linearLadder(seed: number): PracticeLadder {
       "harder",
       "linear_two_step_signs"
     ),
+    challenge: rung(
+      `${m4}x + ${b4} = ${m4 * root4 + b4}`,
+      "challenge",
+      "linear_negative_root"
+    ),
   };
 }
 
 /** Quadratic ladder from integer roots (so the gate verifies). easier/similar =
  * monic factorable x^2 - (r1+r2)x + r1 r2; harder raises the sub-skill to a
- * LEADING coefficient with a fractional root: (2x - p)(x - q). */
+ * LEADING coefficient with a fractional root: (2x - p)(x - q); challenge goes
+ * one further — (3x + p)(x - q): leading coeff 3, one root NEGATIVE fractional. */
 function quadraticLadder(seed: number): PracticeLadder {
   const monic = (r1: number, r2: number): string =>
     `x^2 - ${r1 + r2}x + ${r1 * r2} = 0`;
@@ -608,6 +643,11 @@ function quadraticLadder(seed: number): PracticeLadder {
   const b2 = b1 + pick(seed, 4, 1, 3);
   const p = 2 * pick(seed, 5, 1, 2) - 1; // odd → fractional root p/2
   const q = pick(seed, 6, 2, 5);
+  // Challenge: (3x + cp)(x - cq) = 3x^2 - (3cq - cp)x - cp*cq. cp avoids
+  // multiples of 3 so the root -cp/3 stays genuinely fractional; 3cq - cp >= 1.
+  const cp = [1, 2, 4, 5][pick(seed, 7, 0, 3)];
+  const cq = pick(seed, 8, 2, 5);
+  const cLinear = 3 * cq - cp; // always >= 1 for these ranges
   return {
     easier: rung(monic(a1, a2), "easier", "quadratic_factoring"),
     similar: rung(monic(b1, b2), "similar", "quadratic_factoring"),
@@ -615,6 +655,11 @@ function quadraticLadder(seed: number): PracticeLadder {
       `2x^2 - ${2 * q + p}x + ${p * q} = 0`,
       "harder",
       "quadratic_leading_coeff"
+    ),
+    challenge: rung(
+      `3x^2 - ${cLinear === 1 ? "" : cLinear}x - ${cp * cq} = 0`,
+      "challenge",
+      "quadratic_negative_fraction_root"
     ),
   };
 }

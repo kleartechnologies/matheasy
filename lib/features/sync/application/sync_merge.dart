@@ -17,6 +17,9 @@ class SyncMerge {
   /// Keep the solved-problem history bounded (mirrors the local repo's cap).
   static const int _maxHistory = 200;
 
+  /// Keep practice sets bounded (mirrors `LocalPracticeSetRepository.maxSets`).
+  static const int _maxPracticeSets = 50;
+
   static Map<String, dynamic> merge(
     SyncDomain domain, {
     required Map<String, dynamic> local,
@@ -37,6 +40,10 @@ class SyncMerge {
         return _mergeAnalytics(local, remote);
       case SyncDomain.history:
         return _mergeHistory(local, remote);
+      case SyncDomain.practiceSets:
+        return _mergePracticeSets(local, remote);
+      case SyncDomain.dailyChallenge:
+        return _mergeDailyChallenge(local, remote);
     }
   }
 
@@ -95,6 +102,29 @@ class SyncMerge {
         });
       }
     }
+    final skills = <String, dynamic>{};
+    for (final source in [a['skills'], b['skills']]) {
+      if (source is Map) {
+        source.forEach((skill, value) {
+          if (skill is! String || value is! Map) return;
+          final existing = skills[skill];
+          skills[skill] = {
+            'masteryPoints': _maxInt(
+                (existing is Map ? existing['masteryPoints'] : null),
+                value['masteryPoints']),
+            'attempts': _maxInt(
+                (existing is Map ? existing['attempts'] : null),
+                value['attempts']),
+            'correct': _maxInt(
+                (existing is Map ? existing['correct'] : null),
+                value['correct']),
+            'lastSeenEpochDay': _maxNullableInt(
+                (existing is Map ? existing['lastSeenEpochDay'] : null),
+                value['lastSeenEpochDay']),
+          };
+        });
+      }
+    }
     return {
       'totalXp': _maxInt(a['totalXp'], b['totalXp']),
       'streakBest': _maxInt(a['streakBest'], b['streakBest']),
@@ -107,6 +137,7 @@ class SyncMerge {
       'lastDailyChallengeEpochDay': _maxNullableInt(
           a['lastDailyChallengeEpochDay'], b['lastDailyChallengeEpochDay']),
       'topics': topics,
+      'skills': skills,
       'lastRequest': newer['lastRequest'] ?? a['lastRequest'] ?? b['lastRequest'],
     };
   }
@@ -178,6 +209,166 @@ class SyncMerge {
   static List<Map<String, dynamic>> _entryList(Object? v) => v is List
       ? [for (final e in v) if (e is Map) Map<String, dynamic>.from(e)]
       : const [];
+
+  // ---- Practice sets: union by source problem; same problem → merge progress. ----
+  //
+  // Progress is additive/monotonic (a completion can't be un-earned by another
+  // device), so the SAME roll of a set OR-merges item completions keeping the
+  // earliest timestamps. Different rolls of the same problem ("new set" on one
+  // device) can't be item-merged — the freshest roll wins whole. Bounded,
+  // most-recent-first — the local repo re-caps on its next write.
+  static Map<String, dynamic> _mergePracticeSets(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final byKey = <String, Map<String, dynamic>>{};
+    for (final set in [..._entryList(a['sets']), ..._entryList(b['sets'])]) {
+      final key = set['sourceKey'];
+      if (key is! String) continue;
+      final existing = byKey[key];
+      if (existing == null) {
+        byKey[key] = set;
+      } else if (_asInt(existing['variant']) != _asInt(set['variant'])) {
+        // Different rolls — keep the newer one whole.
+        if (_asInt(set['createdAtMillis']) >
+            _asInt(existing['createdAtMillis'])) {
+          byKey[key] = set;
+        }
+      } else {
+        byKey[key] = _mergeOneSet(existing, set);
+      }
+    }
+    final merged = byKey.values.toList()
+      ..sort((x, y) =>
+          _asInt(y['createdAtMillis']).compareTo(_asInt(x['createdAtMillis'])));
+    return {
+      'sets': merged.length > _maxPracticeSets
+          ? merged.sublist(0, _maxPracticeSets)
+          : merged,
+    };
+  }
+
+  /// OR-merges completion across the same roll of one set (earliest wins where
+  /// both sides completed the same thing).
+  static Map<String, dynamic> _mergeOneSet(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final itemsA = _entryList(a['items']);
+    final itemsB = _entryList(b['items']);
+    final items = <Map<String, dynamic>>[];
+    for (var i = 0; i < itemsA.length; i++) {
+      final other = i < itemsB.length ? itemsB[i] : null;
+      items.add(_mergeItem(itemsA[i], other));
+    }
+    final challenge = a['challenge'] is Map
+        ? _mergeItem(
+            Map<String, dynamic>.from(a['challenge'] as Map),
+            b['challenge'] is Map
+                ? Map<String, dynamic>.from(b['challenge'] as Map)
+                : null,
+          )
+        : null;
+    return {
+      ...a,
+      'items': items,
+      'challenge': ?challenge,
+      ..._earliestMillis(a, b, 'mixedReviewAtMillis'),
+      ..._earliestMillis(a, b, 'masteredAtMillis'),
+    };
+  }
+
+  static Map<String, dynamic> _mergeItem(
+    Map<String, dynamic> a,
+    Map<String, dynamic>? b,
+  ) =>
+      b == null ? a : {...a, ..._earliestMillis(a, b, 'completedAtMillis')};
+
+  /// `{key: earliest-of-both}` when either side has [key], else `{}`.
+  static Map<String, dynamic> _earliestMillis(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+    String key,
+  ) {
+    final x = a[key], y = b[key];
+    if (x is int && y is int) return {key: x < y ? x : y};
+    if (x is int) return {key: x};
+    if (y is int) return {key: y};
+    return const {};
+  }
+
+  // ---- Daily challenge: the newest DAY wins whole; same day → most progress. ----
+  //
+  // The challenge is planned per calendar day, so the side holding the newer
+  // `dayKey` simply IS today's challenge and wins outright. When both sides
+  // hold the SAME day they hold the same spec (same salt → same topic/seed);
+  // completion is monotonic within the day, so the side that got further wins —
+  // a completed challenge on one device can never be demoted by an untouched
+  // copy on another. Archives union by day (highest completion rank per day).
+  static const int _maxDailyRecent = 30;
+
+  static const List<String> _dailyStatusRank = [
+    'notStarted',
+    'inProgress',
+    'completed',
+    'perfect',
+  ];
+
+  static int _dailyRank(Object? status) {
+    final index = status is String ? _dailyStatusRank.indexOf(status) : -1;
+    return index < 0 ? 0 : index;
+  }
+
+  static Map<String, dynamic> _mergeDailyChallenge(
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
+  ) {
+    final dayA = a['dayKey'], dayB = b['dayKey'];
+    final Map<String, dynamic> winner;
+    if (dayA is! int) {
+      winner = b;
+    } else if (dayB is! int) {
+      winner = a;
+    } else if (dayA != dayB) {
+      winner = dayA > dayB ? a : b;
+    } else {
+      final rankA = _dailyRank(a['status']);
+      final rankB = _dailyRank(b['status']);
+      if (rankA != rankB) {
+        winner = rankA > rankB ? a : b;
+      } else {
+        winner = _asInt(a['answered']) >= _asInt(b['answered']) ? a : b;
+      }
+    }
+
+    // Union the archives by day, keeping the most-finished record per day.
+    final byDay = <int, Map<String, dynamic>>{};
+    for (final record in [..._entryList(a['recent']), ..._entryList(b['recent'])]) {
+      final day = record['dayKey'];
+      if (day is! int) continue;
+      final existing = byDay[day];
+      if (existing == null ||
+          _dailyRank(record['status']) > _dailyRank(existing['status'])) {
+        byDay[day] = record;
+      }
+    }
+    final recent = byDay.values.toList()
+      ..sort((x, y) => _asInt(y['dayKey']).compareTo(_asInt(x['dayKey'])));
+
+    // Keep ONE salt for the account (the winner's, falling back to the other
+    // side's) so both devices derive the same topic/seed tomorrow.
+    final salt = _asInt(winner['salt']) != 0
+        ? winner['salt']
+        : (winner == a ? b['salt'] : a['salt']);
+
+    return {
+      ...winner,
+      'salt': salt,
+      'recent': recent.length > _maxDailyRecent
+          ? recent.sublist(0, _maxDailyRecent)
+          : recent,
+    };
+  }
 
   // ---- Helpers ----
   static int _asInt(Object? v) => v is int ? v : 0;

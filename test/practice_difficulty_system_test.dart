@@ -122,6 +122,21 @@ void main() {
       expect(restamped.subtopic, 'Quadratics');
       expect(restamped.gradeLevel, 'A-Level');
     });
+
+    test('hints survive withId() — same silent-drop trap', () {
+      const q = PracticeQuestion(
+        id: 'q1',
+        topic: PracticeTopic.algebra,
+        difficulty: PracticeDifficulty.medium,
+        type: PracticeQuestionType.input,
+        prompt: 'Solve',
+        explanation: 'because',
+        acceptedAnswers: ['3'],
+        hints: ['Look at the x term.', 'Divide both sides.'],
+      );
+      final restamped = q.withId('slot-3');
+      expect(restamped.hints, ['Look at the x term.', 'Divide both sides.']);
+    });
   });
 
   group('DifficultyValidator + concept floor', () {

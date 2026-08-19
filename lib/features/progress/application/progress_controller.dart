@@ -6,6 +6,7 @@ import '../../practice/domain/mastery.dart';
 import '../../practice/domain/practice_dashboard.dart' show CategoryView;
 import '../../practice/domain/practice_progress.dart';
 import '../../practice/domain/practice_topic.dart';
+import '../../profile/application/editable_profile_controller.dart';
 import '../domain/progress_overview.dart';
 import '../domain/progress_stats.dart';
 import 'achievement_controller.dart';
@@ -41,10 +42,19 @@ class ProgressController extends _$ProgressController {
         ),
     ];
 
-    final name = user == null
-        ? 'Learner'
-        : (user.displayName ??
-            (user.isGuest ? 'Guest' : (user.email?.split('@').first ?? 'Learner')));
+    // The learner's own in-app name override wins over the auth account's
+    // name — same precedence as ProfileView.displayName, and watched so a
+    // rename on the Profile screen shows here immediately.
+    final override =
+        ref.watch(editableProfileControllerProvider).displayName?.trim();
+    final name = (override != null && override.isNotEmpty)
+        ? override
+        : user == null
+            ? 'Learner'
+            : (user.displayName ??
+                (user.isGuest
+                    ? 'Guest'
+                    : (user.email?.split('@').first ?? 'Learner')));
 
     return ProgressOverview(
       userName: name,

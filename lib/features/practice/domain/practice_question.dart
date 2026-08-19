@@ -47,6 +47,7 @@ class PracticeQuestion {
     this.spokenPrompt,
     this.options = const [],
     this.acceptedAnswers = const [],
+    this.hints = const [],
     this.skillId,
     this.figure,
     this.subtopic,
@@ -85,6 +86,14 @@ class PracticeQuestion {
 
   /// Shown after the student answers — the "why".
   final String explanation;
+
+  /// Progressive hints, weakest first: index 0 is the level-1 nudge (what to
+  /// look at), index 1 the level-2 method pointer (what to do). Golden rule:
+  /// hints may quote the question's GIVEN numbers but never a derived result —
+  /// deeper help (first step, full solution) comes only from the verified solve
+  /// pipeline, never from these strings. Empty for questions whose generator
+  /// predates hints; the UI falls back to per-skill generic hints.
+  final List<String> hints;
 
   /// Optional geometry figure rendered above the prompt (Stage 3+). Built by a
   /// rule template from its own verified numbers, so it's correct by
@@ -137,6 +146,9 @@ class PracticeQuestion {
         spokenPrompt: spokenPrompt,
         options: options,
         acceptedAnswers: acceptedAnswers,
+        // TRAP: withId() hand-copies every field. Omitting `hints` here would
+        // silently strip hints at slot-restamp (survives-restamp test covers it).
+        hints: hints,
         skillId: skillId,
         // TRAP: withId() hand-copies every field. Omitting `figure` here would
         // SILENTLY drop the figure at slot-restamp (adaptive_practice_service

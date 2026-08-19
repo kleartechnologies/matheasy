@@ -88,6 +88,12 @@ class RuleBasedGenerator {
       prompt: 'A triangle has angles of $a° and $b°. '
           'What is the third angle, in degrees?',
       explanation: explanation,
+      // Hints quote GIVEN numbers only — never a derived result.
+      hints: [
+        'What do the three angles of any triangle add up to?',
+        'The angles sum to 180° — subtract the two given angles, '
+            '$a° and $b°, from 180°.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$third', '$third°', '$third degrees'],
       figure: _triangleAngleFigure(a, b),
@@ -141,6 +147,15 @@ class RuleBasedGenerator {
           ? 'What is the area of a rectangle $l by $w?'
           : 'What is the perimeter of a rectangle $l by $w?',
       explanation: explanation,
+      hints: [
+        askArea
+            ? 'Area measures the space inside — which formula uses length '
+                'and width?'
+            : 'Perimeter is the distance all the way around the shape.',
+        askArea
+            ? 'Area of a rectangle = length × width: multiply $l by $w.'
+            : 'Add all four sides: two sides of $l and two sides of $w.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$value'],
       figure: _rectangleFigure(l, w),
@@ -187,6 +202,12 @@ class RuleBasedGenerator {
       prompt: 'A right triangle has legs $a and $b. '
           'What is the length of the hypotenuse?',
       explanation: explanation,
+      hints: [
+        'Both legs of a right triangle are known — which theorem links '
+            'them to the hypotenuse?',
+        'Pythagoras: square $a, square $b, add them, then take the '
+            'square root.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$c'],
       figure: _pythagorasFigure(a, b),
@@ -228,6 +249,10 @@ class RuleBasedGenerator {
           'What is the other angle, in degrees?',
       explanation:
           'Angles on a straight line sum to 180°: 180 − $given = $unknown°.',
+      hints: [
+        'What do angles on a straight line add up to?',
+        'They sum to 180° — subtract the given $given° from 180°.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$unknown', '$unknown°', '$unknown degrees'],
       figure: _straightLineFigure(given),
@@ -277,6 +302,11 @@ class RuleBasedGenerator {
           'What is the fourth angle, in degrees?',
       explanation:
           'Angles in a quadrilateral sum to 360°: 360 − $a − $b − $c = $fourth°.',
+      hints: [
+        'What do the four angles of any quadrilateral add up to?',
+        'They sum to 360° — subtract the three given angles '
+            '($a°, $b° and $c°) from 360°.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$fourth', '$fourth°', '$fourth degrees'],
     );
@@ -302,6 +332,12 @@ class RuleBasedGenerator {
           'What is each base angle, in degrees?',
       explanation:
           'The two base angles are equal: (180 − $apex) ÷ 2 = $base°.',
+      hints: [
+        'What is special about the two base angles of an isosceles '
+            'triangle?',
+        'The base angles are equal: take the apex $apex° away from 180°, '
+            'then share the remainder equally between them.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$base', '$base°', '$base degrees'],
       figure: _isoscelesFigure(apex),
@@ -344,6 +380,11 @@ class RuleBasedGenerator {
       type: PracticeQuestionType.input,
       prompt: 'A circle has a radius of $r. What is its diameter?',
       explanation: 'The diameter is twice the radius: 2 × $r = $diameter.',
+      hints: [
+        'How does the diameter relate to the radius?',
+        'The diameter crosses the whole circle — it is twice the radius, '
+            'so double $r.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$diameter'],
       figure: PracticeFigure(
@@ -374,6 +415,10 @@ class RuleBasedGenerator {
       prompt: 'A triangle has a base of $base and a height of $height. '
           'What is its area?',
       explanation: 'Area = ½ × base × height = ½ × $base × $height = $area.',
+      hints: [
+        'Which formula gives the area of a triangle?',
+        'Area = ½ × base × height — use base $base and height $height.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$area'],
       figure: _baseHeightFigure(base, height),
@@ -444,6 +489,14 @@ class RuleBasedGenerator {
       prompt: 'A right triangle has opposite = $opposite, adjacent = '
           '$adjacent, hypotenuse = $hyp. What is $ratio of the angle?',
       explanation: explanation,
+      hints: [
+        'Remember SOH-CAH-TOA — which two sides does $ratio use?',
+        switch (ratio) {
+          'cos' => 'cos = adjacent ÷ hypotenuse — pick those two sides.',
+          'tan' => 'tan = opposite ÷ adjacent — pick those two sides.',
+          _ => 'sin = opposite ÷ hypotenuse — pick those two sides.',
+        },
+      ],
       skillId: skill.id,
       options: [
         for (final o in rng.shuffled(options))
@@ -486,6 +539,11 @@ class RuleBasedGenerator {
       type: PracticeQuestionType.input,
       prompt: 'What is the mean of ${list.join(', ')}?',
       explanation: explanation,
+      hints: [
+        'How is the mean of a list of numbers worked out?',
+        'Add all the values together, then divide by how many there '
+            'are ($count).',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$mean'],
     );
@@ -519,6 +577,12 @@ class RuleBasedGenerator {
         type: PracticeQuestionType.input,
         prompt: 'What is the median of ${values.join(', ')}?',
         explanation: explanation,
+        hints: [
+          'The median is a position in the list, not a calculation — '
+              'what must you do to the list first?',
+          'Sort the values from smallest to largest, then take the '
+              'middle one.',
+        ],
         skillId: skill.id,
         acceptedAnswers: ['$median'],
       );
@@ -541,6 +605,11 @@ class RuleBasedGenerator {
       type: PracticeQuestionType.input,
       prompt: 'What is the mode of ${values.join(', ')}?',
       explanation: explanation,
+      hints: [
+        'The mode is about how often values appear.',
+        'Count how many times each value appears — the mode is the most '
+            'frequent one.',
+      ],
       skillId: skill.id,
       acceptedAnswers: ['$mode'],
     );
@@ -578,6 +647,11 @@ class RuleBasedGenerator {
       prompt: 'A bag has $red red and $blue blue marbles. '
           'What is the probability of drawing a red marble?',
       explanation: explanation,
+      hints: [
+        'Probability = favourable outcomes over total outcomes.',
+        'Count the red marbles ($red), and divide by the total number of '
+            'marbles in the bag.',
+      ],
       skillId: skill.id,
       options: [
         for (final o in rng.shuffled(options))

@@ -108,7 +108,7 @@ final class IdentityControllerProvider
 }
 
 String _$identityControllerHash() =>
-    r'06180e6e02a291a697541680b4a6fddb2890ab32';
+    r'160c6f216a298408e4a4f72c4e4efab9af86f97e';
 
 /// Establishes and maintains this device's server identity — the client end of
 /// the anti-abuse chain described in `docs/matheasy-anti-abuse-security.md`.

@@ -38,6 +38,7 @@ export 'feedback/error_state.dart';
 export 'feedback/loading_state.dart';
 
 // Indicators
+export 'indicators/google_g_mark.dart';
 export 'indicators/progress_ring.dart';
 export 'indicators/xp_count_up.dart';
 export 'indicators/xp_progress_bar.dart';

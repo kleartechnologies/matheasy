@@ -284,6 +284,116 @@ class AppLocalizationsAr extends AppLocalizations {
   String get practiceStatXpEarned => 'نقاط الخبرة المكتسبة';
 
   @override
+  String get practiceSolutionTitle => 'Guided solution';
+
+  @override
+  String get practiceReviewSolutionTitle => 'Review my solution';
+
+  @override
+  String get practiceSolutionLoading => 'Numi is working through it…';
+
+  @override
+  String get practiceSolutionKeyIdea => 'The key idea';
+
+  @override
+  String practiceYourAnswer(String answer) {
+    return 'Your answer: $answer';
+  }
+
+  @override
+  String get practiceMatheasyAnswer => 'Matheasy\'s answer';
+
+  @override
+  String get practiceNeedHint => 'Need a hint?';
+
+  @override
+  String get practiceHintShort => 'Hint';
+
+  @override
+  String get practiceSolutionShort => 'Solution';
+
+  @override
+  String practiceHintCounter(int level) {
+    return 'Hint $level of 4';
+  }
+
+  @override
+  String get practiceHintAnother => 'Another hint';
+
+  @override
+  String get practiceHintFirstStepTitle => 'The first step';
+
+  @override
+  String get practiceHintSeeSolution => 'See the guided solution';
+
+  @override
+  String get practiceHintFirstStepUnavailable =>
+      'Numi can\'t break this one into steps — the guided solution has the full idea instead.';
+
+  @override
+  String get practiceTryAgain => 'Try again';
+
+  @override
+  String get practiceShowSolution => 'Show solution';
+
+  @override
+  String get practiceAskNumi => 'Ask Numi';
+
+  @override
+  String get practiceReviewMySolution => 'Review my solution';
+
+  @override
+  String get practiceChallengeMe => 'Challenge me';
+
+  @override
+  String get practiceChallengeUnavailable =>
+      'Numi couldn\'t build a harder one right now — carry on!';
+
+  @override
+  String get practiceStatTime => 'Time';
+
+  @override
+  String get practiceStatHints => 'Hints used';
+
+  @override
+  String get practiceStrongThisSession => 'Strong this session';
+
+  @override
+  String get practiceConceptsToReview => 'Concepts to review';
+
+  @override
+  String practiceRecommendedNextCta(String skill) {
+    return 'Practice $skill next';
+  }
+
+  @override
+  String get practicePraise1 => 'Great job!';
+
+  @override
+  String get practicePraise2 => 'Nice thinking!';
+
+  @override
+  String get practicePraise3 => 'You nailed it!';
+
+  @override
+  String get practicePraise4 => 'Brilliant work!';
+
+  @override
+  String get practicePraise5 => 'You\'re on fire! 🔥';
+
+  @override
+  String get practiceEncourage1 => 'Almost there!';
+
+  @override
+  String get practiceEncourage2 => 'Good effort — let\'s learn from this one.';
+
+  @override
+  String get practiceEncourage3 => 'Not quite, but you can do this!';
+
+  @override
+  String get practiceEncourage4 => 'Close! Take a look at why.';
+
+  @override
   String get tutorNewConversationStarted => 'بدأت محادثة جديدة';
 
   @override
@@ -957,22 +1067,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scanGalleryFailed => 'تعذّر فتح صورك.';
 
   @override
-  String get scanHintHoldSteady => 'ثبّت الكاميرا على السؤال — سألتقطه';
-
-  @override
   String get scanHintLineUp => 'ضع السؤال كاملًا داخل الإطار، ثم اضغط للالتقاط';
-
-  @override
-  String get scanAutoCaptureOn => 'الالتقاط التلقائي مفعّل';
-
-  @override
-  String get scanAutoCaptureOff => 'الالتقاط التلقائي معطّل';
-
-  @override
-  String get scanAutoOn => 'تلقائي: مفعّل';
-
-  @override
-  String get scanAutoOff => 'تلقائي: معطّل';
 
   @override
   String get scanCloseScanner => 'إغلاق الماسح';
@@ -1097,7 +1192,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cropPreparing => 'جارٍ التحضير…';
 
   @override
-  String get cropUsePhoto => 'استخدام الصورة';
+  String get cropRotate => 'تدوير';
 
   @override
   String get keyboardMoveLeft => 'تحريك لليسار';
@@ -1489,6 +1584,59 @@ class AppLocalizationsAr extends AppLocalizations {
   String get teachingRungSimilar => 'مشابهة';
 
   @override
+  String get practiceSetRungChallenge => 'Challenge';
+
+  @override
+  String practiceSetProgress(int done, int total) {
+    return '$done of $total complete';
+  }
+
+  @override
+  String get practiceSetChallengeLocked =>
+      'Finish all three to unlock the challenge';
+
+  @override
+  String get practiceSetChallengeUnlocked =>
+      'Challenge unlocked — one stretch problem left.';
+
+  @override
+  String get practiceSetMixedReview => 'Mixed review';
+
+  @override
+  String get practiceSetMixedReviewSubtitle =>
+      'A quick mixed round on this topic to make it stick';
+
+  @override
+  String get practiceSetMixedReviewDone => 'Mixed review complete';
+
+  @override
+  String get practiceSetMastered => 'Topic mastered!';
+
+  @override
+  String practiceSetMasteredDetail(int xp) {
+    return 'You finished the whole practice journey. +$xp XP';
+  }
+
+  @override
+  String get practiceSetNewSet => 'New set';
+
+  @override
+  String get practiceSetNewSetFailed =>
+      'Couldn\'t get a new set — check your connection and try again.';
+
+  @override
+  String get practiceSetContinueTitle => 'Keep practicing';
+
+  @override
+  String get practiceSetContinueSubtitle => 'Pick up where you left off';
+
+  @override
+  String get practiceSetNextUp => 'Next up';
+
+  @override
+  String get practiceSetPracticeAgain => 'Practice again';
+
+  @override
   String get teachingAskPrompt =>
       'ما زلت غير متأكد من خطوة، أو تريد تجربة التالية بنفسك؟ يمكنني أن أشرحها لك.';
 
@@ -1569,7 +1717,80 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authContinueGoogle => 'المتابعة باستخدام Google';
 
   @override
+  String get authContinueEmail => 'Continue with email';
+
+  @override
   String get authSigningIn => 'جارٍ تسجيل الدخول…';
+
+  @override
+  String get authEmailSignInTitle => 'Welcome back';
+
+  @override
+  String get authEmailSignInSubtitle => 'Sign in with your email and password.';
+
+  @override
+  String get authEmailSignUpTitle => 'Create your account';
+
+  @override
+  String get authEmailSignUpSubtitle =>
+      'One free account for all your math learning.';
+
+  @override
+  String get authEmailTabSignIn => 'Sign in';
+
+  @override
+  String get authEmailTabSignUp => 'Sign up';
+
+  @override
+  String get authEmailNameLabel => 'Name';
+
+  @override
+  String get authEmailNameRequired => 'Please enter your name.';
+
+  @override
+  String get authEmailFieldLabel => 'Email';
+
+  @override
+  String get authEmailInvalid => 'Please enter a valid email address.';
+
+  @override
+  String get authEmailPasswordLabel => 'Password';
+
+  @override
+  String get authEmailPasswordRequired => 'Please enter your password.';
+
+  @override
+  String get authEmailPasswordTooShort =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get authEmailShowPassword => 'Show password';
+
+  @override
+  String get authEmailHidePassword => 'Hide password';
+
+  @override
+  String get authEmailForgotPassword => 'Forgot password?';
+
+  @override
+  String get authEmailSignInAction => 'Sign in';
+
+  @override
+  String get authEmailSignUpAction => 'Create account';
+
+  @override
+  String get authEmailResetSent =>
+      'If an account exists for that email, a reset link is on its way.';
+
+  @override
+  String get authReauthTitle => 'Confirm it\'s you';
+
+  @override
+  String get authReauthMessage =>
+      'For your security, re-enter your password to delete your account.';
+
+  @override
+  String get authReauthConfirm => 'Confirm';
 
   @override
   String profileAccessUntil(String date) {

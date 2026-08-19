@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/auth/presentation/email_auth_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/gallery/presentation/gallery_screen.dart';
 import '../../features/history/presentation/history_screen.dart';
@@ -13,6 +14,7 @@ import '../../features/paywall/presentation/paywall_screen.dart';
 import '../../features/practice/domain/practice_session.dart';
 import '../../features/practice/presentation/practice_screen.dart';
 import '../../features/practice/presentation/practice_session_screen.dart';
+import '../../features/practice/presentation/practice_solution_screen.dart';
 import '../../features/practice/presentation/practice_visual_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -90,6 +92,13 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.auth,
         name: AppRoutes.authName,
         builder: (context, state) => const AuthScreen(),
+        routes: [
+          GoRoute(
+            path: 'email',
+            name: AppRoutes.authEmailName,
+            builder: (context, state) => const EmailAuthScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.paywall,
@@ -194,6 +203,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => PracticeVisualScreen(
                       args: state.extra as PracticeVisualArgs?,
+                    ),
+                  ),
+                  GoRoute(
+                    path: AppRoutes.practiceSolutionSegment,
+                    name: AppRoutes.practiceSolutionName,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) => PracticeSolutionScreen(
+                      args: state.extra as PracticeSolutionArgs?,
                     ),
                   ),
                 ],

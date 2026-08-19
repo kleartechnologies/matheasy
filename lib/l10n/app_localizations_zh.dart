@@ -279,6 +279,116 @@ class AppLocalizationsZh extends AppLocalizations {
   String get practiceStatXpEarned => '获得 XP';
 
   @override
+  String get practiceSolutionTitle => 'Guided solution';
+
+  @override
+  String get practiceReviewSolutionTitle => 'Review my solution';
+
+  @override
+  String get practiceSolutionLoading => 'Numi is working through it…';
+
+  @override
+  String get practiceSolutionKeyIdea => 'The key idea';
+
+  @override
+  String practiceYourAnswer(String answer) {
+    return 'Your answer: $answer';
+  }
+
+  @override
+  String get practiceMatheasyAnswer => 'Matheasy\'s answer';
+
+  @override
+  String get practiceNeedHint => 'Need a hint?';
+
+  @override
+  String get practiceHintShort => 'Hint';
+
+  @override
+  String get practiceSolutionShort => 'Solution';
+
+  @override
+  String practiceHintCounter(int level) {
+    return 'Hint $level of 4';
+  }
+
+  @override
+  String get practiceHintAnother => 'Another hint';
+
+  @override
+  String get practiceHintFirstStepTitle => 'The first step';
+
+  @override
+  String get practiceHintSeeSolution => 'See the guided solution';
+
+  @override
+  String get practiceHintFirstStepUnavailable =>
+      'Numi can\'t break this one into steps — the guided solution has the full idea instead.';
+
+  @override
+  String get practiceTryAgain => 'Try again';
+
+  @override
+  String get practiceShowSolution => 'Show solution';
+
+  @override
+  String get practiceAskNumi => 'Ask Numi';
+
+  @override
+  String get practiceReviewMySolution => 'Review my solution';
+
+  @override
+  String get practiceChallengeMe => 'Challenge me';
+
+  @override
+  String get practiceChallengeUnavailable =>
+      'Numi couldn\'t build a harder one right now — carry on!';
+
+  @override
+  String get practiceStatTime => 'Time';
+
+  @override
+  String get practiceStatHints => 'Hints used';
+
+  @override
+  String get practiceStrongThisSession => 'Strong this session';
+
+  @override
+  String get practiceConceptsToReview => 'Concepts to review';
+
+  @override
+  String practiceRecommendedNextCta(String skill) {
+    return 'Practice $skill next';
+  }
+
+  @override
+  String get practicePraise1 => 'Great job!';
+
+  @override
+  String get practicePraise2 => 'Nice thinking!';
+
+  @override
+  String get practicePraise3 => 'You nailed it!';
+
+  @override
+  String get practicePraise4 => 'Brilliant work!';
+
+  @override
+  String get practicePraise5 => 'You\'re on fire! 🔥';
+
+  @override
+  String get practiceEncourage1 => 'Almost there!';
+
+  @override
+  String get practiceEncourage2 => 'Good effort — let\'s learn from this one.';
+
+  @override
+  String get practiceEncourage3 => 'Not quite, but you can do this!';
+
+  @override
+  String get practiceEncourage4 => 'Close! Take a look at why.';
+
+  @override
   String get tutorNewConversationStarted => '已开始新对话';
 
   @override
@@ -923,22 +1033,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanGalleryFailed => '无法打开你的照片。';
 
   @override
-  String get scanHintHoldSteady => '对准题目稳住——我来帮你拍下';
-
-  @override
   String get scanHintLineUp => '对齐整道题目，然后点击拍摄';
-
-  @override
-  String get scanAutoCaptureOn => '自动拍摄已开启';
-
-  @override
-  String get scanAutoCaptureOff => '自动拍摄已关闭';
-
-  @override
-  String get scanAutoOn => '自动开';
-
-  @override
-  String get scanAutoOff => '自动关';
 
   @override
   String get scanCloseScanner => '关闭扫描器';
@@ -1055,7 +1150,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cropPreparing => '准备中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋转';
 
   @override
   String get keyboardMoveLeft => '左移';
@@ -1435,6 +1530,59 @@ class AppLocalizationsZh extends AppLocalizations {
   String get teachingRungSimilar => '同类';
 
   @override
+  String get practiceSetRungChallenge => 'Challenge';
+
+  @override
+  String practiceSetProgress(int done, int total) {
+    return '$done of $total complete';
+  }
+
+  @override
+  String get practiceSetChallengeLocked =>
+      'Finish all three to unlock the challenge';
+
+  @override
+  String get practiceSetChallengeUnlocked =>
+      'Challenge unlocked — one stretch problem left.';
+
+  @override
+  String get practiceSetMixedReview => 'Mixed review';
+
+  @override
+  String get practiceSetMixedReviewSubtitle =>
+      'A quick mixed round on this topic to make it stick';
+
+  @override
+  String get practiceSetMixedReviewDone => 'Mixed review complete';
+
+  @override
+  String get practiceSetMastered => 'Topic mastered!';
+
+  @override
+  String practiceSetMasteredDetail(int xp) {
+    return 'You finished the whole practice journey. +$xp XP';
+  }
+
+  @override
+  String get practiceSetNewSet => 'New set';
+
+  @override
+  String get practiceSetNewSetFailed =>
+      'Couldn\'t get a new set — check your connection and try again.';
+
+  @override
+  String get practiceSetContinueTitle => 'Keep practicing';
+
+  @override
+  String get practiceSetContinueSubtitle => 'Pick up where you left off';
+
+  @override
+  String get practiceSetNextUp => 'Next up';
+
+  @override
+  String get practiceSetPracticeAgain => 'Practice again';
+
+  @override
   String get teachingAskPrompt => '还有哪一步没弄清，或想自己试试下一步？我可以带你过一遍。';
 
   @override
@@ -1510,7 +1658,80 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authContinueGoogle => '使用 Google 继续';
 
   @override
+  String get authContinueEmail => 'Continue with email';
+
+  @override
   String get authSigningIn => '正在登录…';
+
+  @override
+  String get authEmailSignInTitle => 'Welcome back';
+
+  @override
+  String get authEmailSignInSubtitle => 'Sign in with your email and password.';
+
+  @override
+  String get authEmailSignUpTitle => 'Create your account';
+
+  @override
+  String get authEmailSignUpSubtitle =>
+      'One free account for all your math learning.';
+
+  @override
+  String get authEmailTabSignIn => 'Sign in';
+
+  @override
+  String get authEmailTabSignUp => 'Sign up';
+
+  @override
+  String get authEmailNameLabel => 'Name';
+
+  @override
+  String get authEmailNameRequired => 'Please enter your name.';
+
+  @override
+  String get authEmailFieldLabel => 'Email';
+
+  @override
+  String get authEmailInvalid => 'Please enter a valid email address.';
+
+  @override
+  String get authEmailPasswordLabel => 'Password';
+
+  @override
+  String get authEmailPasswordRequired => 'Please enter your password.';
+
+  @override
+  String get authEmailPasswordTooShort =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get authEmailShowPassword => 'Show password';
+
+  @override
+  String get authEmailHidePassword => 'Hide password';
+
+  @override
+  String get authEmailForgotPassword => 'Forgot password?';
+
+  @override
+  String get authEmailSignInAction => 'Sign in';
+
+  @override
+  String get authEmailSignUpAction => 'Create account';
+
+  @override
+  String get authEmailResetSent =>
+      'If an account exists for that email, a reset link is on its way.';
+
+  @override
+  String get authReauthTitle => 'Confirm it\'s you';
+
+  @override
+  String get authReauthMessage =>
+      'For your security, re-enter your password to delete your account.';
+
+  @override
+  String get authReauthConfirm => 'Confirm';
 
   @override
   String profileAccessUntil(String date) {
@@ -3095,22 +3316,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get scanGalleryFailed => '无法打开你的照片。';
 
   @override
-  String get scanHintHoldSteady => '对准题目稳住——我来帮你拍下';
-
-  @override
   String get scanHintLineUp => '对齐整道题目，然后点击拍摄';
-
-  @override
-  String get scanAutoCaptureOn => '自动拍摄已开启';
-
-  @override
-  String get scanAutoCaptureOff => '自动拍摄已关闭';
-
-  @override
-  String get scanAutoOn => '自动开';
-
-  @override
-  String get scanAutoOff => '自动关';
 
   @override
   String get scanCloseScanner => '关闭扫描器';
@@ -3227,7 +3433,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get cropPreparing => '准备中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋转';
 
   @override
   String get keyboardMoveLeft => '左移';
@@ -5267,22 +5473,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get scanGalleryFailed => '無法開啟你的照片。';
 
   @override
-  String get scanHintHoldSteady => '把鏡頭穩定對準題目——我來幫你拍下';
-
-  @override
   String get scanHintLineUp => '把整道題目對齊，然後點按拍攝';
-
-  @override
-  String get scanAutoCaptureOn => '自動拍攝開啟';
-
-  @override
-  String get scanAutoCaptureOff => '自動拍攝關閉';
-
-  @override
-  String get scanAutoOn => '自動開';
-
-  @override
-  String get scanAutoOff => '自動關';
 
   @override
   String get scanCloseScanner => '關閉掃描器';
@@ -5399,7 +5590,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get cropPreparing => '準備中…';
 
   @override
-  String get cropUsePhoto => '使用照片';
+  String get cropRotate => '旋轉';
 
   @override
   String get keyboardMoveLeft => '向左移';

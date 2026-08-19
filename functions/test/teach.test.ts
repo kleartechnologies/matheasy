@@ -928,7 +928,9 @@ describe("buildPracticeLadder — deterministic, gated (Pro)", () => {
   // Every rung the ladder ships MUST classify to the same family AND deterministic-
   // ally solve+verify — the whole point of the gate.
   function assertGated(ladder: PracticeLadder, problemType: string) {
-    for (const item of [ladder.easier, ladder.similar, ladder.harder]) {
+    const items = [ladder.easier, ladder.similar, ladder.harder];
+    if (ladder.challenge) items.push(ladder.challenge); // gated exactly like a rung
+    for (const item of items) {
       const c = classify(item.latex);
       expect(c.problemType).toBe(problemType);
       const solved = solveDeterministic(c);
@@ -970,6 +972,32 @@ describe("buildPracticeLadder — deterministic, gated (Pro)", () => {
     const b = buildPracticeLadder(payload("quadratic_equation", "x^2 - 9x + 20 = 0"));
     // Same shape, but the concrete rungs differ (seeded by the problem text).
     expect(a).not.toEqual(b);
+  });
+
+  it("ships a gated challenge rung above the harder rung (linear + quadratic)", () => {
+    const lin = buildPracticeLadder(payload("linear_equation", "2x + 5 = 13"));
+    expect(lin?.challenge).toBeDefined();
+    expect(lin!.challenge!.rung).toBe("challenge");
+    const quad = buildPracticeLadder(
+      payload("quadratic_equation", "x^2 - 5x + 6 = 0"),
+    );
+    expect(quad?.challenge).toBeDefined();
+    expect(quad!.challenge!.latex).toContain("3x^2"); // above harder's 2x^2
+    assertGated(lin!, "linear_equation");
+    assertGated(quad!, "quadratic_equation");
+  });
+
+  it("re-rolls a DIFFERENT (still gated) ladder per variant — the 'new set' path", () => {
+    const base = buildPracticeLadder(payload("linear_equation", "2x + 5 = 13"));
+    const rolled = buildPracticeLadder(payload("linear_equation", "2x + 5 = 13"), 1);
+    expect(base).toBeDefined();
+    expect(rolled).toBeDefined();
+    expect(rolled).not.toEqual(base); // a new set, not the same one back
+    // And deterministic per variant: the same variant always re-rolls the same set.
+    expect(
+      buildPracticeLadder(payload("linear_equation", "2x + 5 = 13"), 1),
+    ).toEqual(rolled);
+    assertGated(rolled!, "linear_equation");
   });
 
   it("never offers the exact problem just solved (dedup, F1)", () => {

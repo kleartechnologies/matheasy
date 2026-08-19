@@ -37,6 +37,7 @@ import { gateExplanation } from "../quality/gate";
 import { classify } from "../solver/classify";
 import { JsonCompleter } from "../solver/narrate";
 import {
+  buildPracticeLadder,
   generateHonestTeaching,
   generateTeaching,
   methodsAlign,
@@ -71,13 +72,19 @@ interface EnrichRequest {
   honest?: boolean;
   /** BCP-47 language the teaching prose must be written in (math stays universal). */
   language?: string;
+  /** Return ONLY a freshly-rolled practice ladder for an already-solved problem
+   * (no LLM call, no teaching layer) — powers "give me a new practice set". */
+  ladderOnly?: boolean;
+  /** Shifts the deterministic ladder seed; each variant is a different roll. */
+  ladderVariant?: number;
 }
 
 export const enrichTeaching = onCall(
   { secrets: [OPENAI_API_KEY], memory: "512MiB", timeoutSeconds: 120 },
   async (request) => {
     const uid = requireUid(request);
-    const { latex, honest, language } = (request.data ?? {}) as EnrichRequest;
+    const { latex, honest, language, ladderOnly, ladderVariant } =
+      (request.data ?? {}) as EnrichRequest;
     if (!latex || typeof latex !== "string") {
       throw new HttpsError(
         "invalid-argument",
@@ -89,6 +96,41 @@ export const enrichTeaching = onCall(
 
     // Feature-flagged; a client that calls this while it's off just gets no layer.
     if (!teachingEnabled()) return { teaching: null };
+
+    // LADDER-ONLY path: re-roll the deterministic practice ladder for an
+    // already-solved problem ("new practice set"). No LLM, no teaching layer —
+    // but it dry-runs the solver per rung, so it stays rate-limited, and the
+    // ladder is Pro-only exactly like the one inside the teaching layer.
+    if (ladderOnly === true) {
+      const ladderLang = contentLanguage(language);
+      const core = await getCachedSolve(latex, ladderLang);
+      if (!core || core.verified !== true || core.routeToTutor === true) {
+        return { teaching: null, practiceLadder: null };
+      }
+      if ((await getEntitlement(uid)) !== PRO_ENTITLEMENT_ID) {
+        return { teaching: null, practiceLadder: null };
+      }
+      try {
+        await assertWithinRateLimit(uid, "teach");
+        const variant =
+          typeof ladderVariant === "number" &&
+          Number.isInteger(ladderVariant) &&
+          ladderVariant > 0
+            ? Math.min(ladderVariant, 1000)
+            : 0;
+        const ladder = buildPracticeLadder(
+          { ...core, problemLatex: latex },
+          variant
+        );
+        return { teaching: null, practiceLadder: ladder ?? null };
+      } catch (err) {
+        logger.warn("enrichTeaching ladderOnly failed — no ladder", {
+          uid,
+          err: String(err),
+        });
+        return { teaching: null, practiceLadder: null };
+      }
+    }
 
     const client = createOpenAI(OPENAI_API_KEY.value());
 

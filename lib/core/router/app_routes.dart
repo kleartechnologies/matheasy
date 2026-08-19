@@ -36,6 +36,9 @@ class AppRoutes {
   static const String practiceVisualSegment = 'visual';
   static const String practiceVisual = '/practice/visual';
   static const String practiceVisualName = 'practiceVisual';
+  static const String practiceSolutionSegment = 'solution';
+  static const String practiceSolution = '/practice/solution';
+  static const String practiceSolutionName = 'practiceSolution';
 
   static const String tutorChatSegment = 'chat';
   static const String tutorChat = '/tutor/chat';
@@ -66,6 +69,10 @@ class AppRoutes {
 
   static const String auth = '/auth';
   static const String authName = 'auth';
+
+  /// Email/password sign-in + sign-up — a sub-flow pushed over `/auth`.
+  static const String authEmail = '/auth/email';
+  static const String authEmailName = 'authEmail';
 
   static const String paywall = '/paywall';
   static const String paywallName = 'paywall';

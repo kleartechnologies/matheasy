@@ -3,12 +3,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../history/application/history_controller.dart';
 import '../../history/domain/history_entry.dart';
 import '../../onboarding/application/onboarding_controller.dart';
-import '../../progress/application/achievement_service.dart' show clockProvider;
+import '../domain/daily_challenge.dart';
 import '../domain/practice_dashboard.dart';
 import '../domain/practice_progress.dart';
 import '../domain/practice_session.dart';
 import '../domain/practice_topic.dart';
 import '../domain/xp_reward.dart';
+import 'daily_challenge_controller.dart';
 import 'practice_progress_controller.dart';
 
 part 'practice_dashboard_controller.g.dart';
@@ -21,7 +22,7 @@ PracticeDashboardData practiceDashboard(Ref ref) {
   final progress = ref.watch(practiceProgressControllerProvider);
   final onboarding = ref.watch(onboardingFlowControllerProvider);
   final history = ref.watch(historyControllerProvider);
-  final today = PracticeProgress.epochDay(ref.watch(clockProvider)());
+  final daily = ref.watch(dailyChallengeControllerProvider);
 
   final recommended = onboarding.topics.isEmpty
       ? const [
@@ -48,31 +49,33 @@ PracticeDashboardData practiceDashboard(Ref ref) {
     continueRequest: progress.lastRequest,
     recommendedTopics: recommended,
     weakTopics: _weakTopics(history),
-    dailyChallenge: _dailyChallenge(progress, today),
+    dailyChallenge: _dailyChallenge(daily),
     categories: categories,
     tutorMessage: _tutorMessage(progress),
   );
 }
 
-/// Today's challenge, reported from real persisted state rather than a
-/// placeholder.
-///
-/// The engine only records the challenge as a whole (`lastDailyChallengeEpochDay`
-/// is stamped when the bonus is awarded), so `done` is genuinely binary: the
-/// challenge is either untouched today or finished. It is NOT a per-question
-/// counter, and must not be rendered as one — [done] previously hardcoded `0`,
-/// so a learner who had finished today's challenge was still shown "0 of 5".
-DailyChallengeView _dailyChallenge(PracticeProgress progress, int today) {
-  final request = PracticeRequest.dailyChallenge();
-  final completedToday = progress.lastDailyChallengeEpochDay == today;
+/// Today's challenge, reported from the persisted per-day [DailyChallengeState]:
+/// real topic-of-the-day, live answered count while in progress, and a sticky
+/// completed/perfect state that survives until the next local midnight.
+DailyChallengeView _dailyChallenge(DailyChallengeState daily) {
+  final request = daily.request ?? PracticeRequest.dailyChallenge();
+  final target = request.questionCount;
+  final done = daily.status.isDone ? target : daily.answered.clamp(0, target);
+  final topicLabel = request.topic.label.toLowerCase();
+  final subtitle = switch (daily.status) {
+    DailyChallengeStatus.perfect =>
+      'Perfect! All $target correct — come back tomorrow',
+    DailyChallengeStatus.completed => 'Done for today — come back tomorrow',
+    DailyChallengeStatus.inProgress =>
+      'Keep going — $done of $target $topicLabel questions done',
+    DailyChallengeStatus.notStarted => 'Solve $target $topicLabel questions',
+  };
   return DailyChallengeView(
     title: 'Daily Challenge',
-    subtitle: completedToday
-        ? 'Done for today — come back tomorrow'
-        : 'Solve ${request.questionCount} '
-            '${request.topic.label.toLowerCase()} questions',
-    done: completedToday ? request.questionCount : 0,
-    target: request.questionCount,
+    subtitle: subtitle,
+    done: done,
+    target: target,
     bonusXp: XpReward.dailyChallengeBonus,
     request: request,
   );

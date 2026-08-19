@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/localization/l10n_extension.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -8,13 +10,22 @@ import '../../../result/presentation/widgets/math_text.dart';
 import '../../domain/history_entry.dart';
 
 /// A single history row — the rendered problem with when it was solved. Purely
-/// presentational: the caller wires [onTap] (re-open) so the tile is reusable on
-/// Home and the full History screen.
+/// presentational: the caller wires [onTap] (re-open) and optionally
+/// [onPractice] ("practice again" — this problem has a practice set), so the
+/// tile is reusable on Home and the full History screen.
 class HistoryTile extends StatelessWidget {
-  const HistoryTile({super.key, required this.entry, this.onTap});
+  const HistoryTile({
+    super.key,
+    required this.entry,
+    this.onTap,
+    this.onPractice,
+  });
 
   final HistoryEntry entry;
   final VoidCallback? onTap;
+
+  /// Opens this problem's practice set (null → no practice affordance).
+  final VoidCallback? onPractice;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +59,15 @@ class HistoryTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
+          if (onPractice != null)
+            IconButton(
+              icon: const Icon(Icons.fitness_center_rounded, size: 20),
+              color: context.isDark
+                  ? AppColors.primaryLight
+                  : AppColors.primaryDark,
+              tooltip: context.l10n.practiceSetPracticeAgain,
+              onPressed: onPractice,
+            ),
           Icon(Icons.chevron_right_rounded, color: colors.textMuted),
         ],
       ),

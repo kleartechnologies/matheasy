@@ -8,7 +8,10 @@ import '../../analytics/domain/analytics_event.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/app_user.dart';
 import '../../history/application/history_controller.dart';
+import '../../practice/application/daily_challenge_controller.dart';
 import '../../practice/application/practice_progress_controller.dart';
+import '../../practice_set/application/practice_set_controller.dart';
+import '../../profile/application/editable_profile_controller.dart';
 import '../../profile/application/profile_controller.dart';
 import '../../progress/application/achievement_controller.dart';
 import '../../progress/application/achievement_service.dart' show clockProvider;
@@ -80,6 +83,10 @@ class SyncController extends _$SyncController {
         (_, _) => _onLocalChange(SyncDomain.analytics));
     ref.listen(historyControllerProvider,
         (_, _) => _onLocalChange(SyncDomain.history));
+    ref.listen(practiceSetControllerProvider,
+        (_, _) => _onLocalChange(SyncDomain.practiceSets));
+    ref.listen(dailyChallengeControllerProvider,
+        (_, _) => _onLocalChange(SyncDomain.dailyChallenge));
 
     final store = ref.read(syncStoreProvider);
     _seedBaseline(store);
@@ -280,6 +287,10 @@ class SyncController extends _$SyncController {
     for (final domain in domains) {
       switch (domain) {
         case SyncDomain.profile:
+          // The editable slice (name override + avatar) has its own shared
+          // controller — rebuild it from the freshly-downloaded store, which
+          // in turn rebuilds ProfileController and the Progress overview.
+          ref.invalidate(editableProfileControllerProvider);
           ref.invalidate(profileControllerProvider);
         case SyncDomain.settings:
           ref.invalidate(settingsControllerProvider);
@@ -293,6 +304,11 @@ class SyncController extends _$SyncController {
           ref.invalidate(statsControllerProvider);
         case SyncDomain.history:
           ref.invalidate(historyControllerProvider);
+        case SyncDomain.practiceSets:
+          ref.invalidate(practiceSetControllerProvider);
+        case SyncDomain.dailyChallenge:
+          // Rebuild re-loads the merged copy AND re-ensures it is today's.
+          ref.invalidate(dailyChallengeControllerProvider);
       }
     }
   }

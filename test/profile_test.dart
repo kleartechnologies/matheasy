@@ -22,6 +22,7 @@ import 'package:matheasy/features/profile/domain/editable_profile.dart';
 import 'package:matheasy/features/profile/domain/profile_avatar.dart';
 import 'package:matheasy/features/profile/presentation/profile_screen.dart';
 import 'package:matheasy/features/progress/application/achievement_service.dart';
+import 'package:matheasy/features/progress/application/progress_controller.dart';
 import 'package:matheasy/features/settings/application/settings_controller.dart';
 import 'package:matheasy/features/settings/domain/profile_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -123,6 +124,32 @@ void main() {
 
       final store = container.read(preferencesStoreProvider);
       expect(LocalProfileService(store).load().displayName, 'Math Whiz');
+    });
+
+    test('a rename shows on the Progress overview too (V5 regression)',
+        () async {
+      // The Progress screen used to read only the auth account name, so an
+      // in-app rename updated Profile but left Progress stale.
+      final container = await _container(signedIn: googleTestUser());
+      _activate(container);
+      await _settle();
+
+      expect(container.read(progressControllerProvider).userName, 'Sarah Lee');
+
+      container.read(profileControllerProvider.notifier).saveProfile(
+            displayName: 'Math Whiz',
+            avatar: ProfileAvatar.meadow,
+          );
+      await _settle();
+      expect(container.read(progressControllerProvider).userName, 'Math Whiz');
+
+      // Clearing the override falls back to the account name everywhere.
+      container.read(profileControllerProvider.notifier).saveProfile(
+            displayName: '',
+            avatar: ProfileAvatar.meadow,
+          );
+      await _settle();
+      expect(container.read(progressControllerProvider).userName, 'Sarah Lee');
     });
 
     test('a blank name clears the override and falls back to the account name',

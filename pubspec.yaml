@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+5
 
 environment:
   sdk: ^3.11.5
@@ -80,9 +80,6 @@ dependencies:
   # Opens the OS app-settings page so a user who denied the camera can re-enable
   # it (spec §9 — no dead-end permission states). Only openAppSettings() is used.
   permission_handler: ^12.0.1
-  # Accelerometer stream for auto-capture steadiness (spec §10) — "hold still"
-  # detection that triggers the existing capped shutter flow. No permissions.
-  sensors_plus: ^6.1.1
   # Meta Ads attribution — the Facebook SDK App Events binding, used ONLY for
   # install/session + engagement events and to hand RevenueCat the FB anonymous
   # id for server-side (Conversions API) revenue attribution. Quarantined behind

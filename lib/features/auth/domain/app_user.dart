@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 
 /// How a user authenticated. `guest` is a purely local session (no cloud
-/// account); `google`/`apple` are backed by Firebase Auth.
+/// account); `google`/`apple`/`email` are backed by Firebase Auth.
 enum AuthProviderType {
   google('Google'),
   apple('Apple'),
+  email('Email'),
   guest('Guest');
 
   const AuthProviderType(this.label);
